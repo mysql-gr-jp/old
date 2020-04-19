@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14164.html">[��]</a><a href="14166.html">[��]</a><a href="../list/14101-14200.html">[�ֹ�����]</a><a href="../thread/14101-14200.html">[����åɰ���]</a></p>
+<p class="button"><a href="14164.html">[前]</a><a href="14166.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14165
 </p>
@@ -13,91 +13,91 @@ mysql:14165
 <p>
 From: Tetsuro IKEDA &lt;Tetsuro IKEDA &lt;te.ikeda@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 09 Aug 2007 09:58:30 +0900<br>
-Subject: [mysql 14165] Re: delete���Ƥ�ǥ����������̤�����ʤ�<br>
+Subject: [mysql 14165] Re: deleteしてもディスク使用量が減らない<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����ˤ��ϡ����ĤǤ���
+こんにちは。池田です。
 
-InnoDB�ʤ������줿����ΰ�ϥե������٥�Ǥϲ������줺(�ե������
-�������̾��ϵ����餺�ˡ�free���ΰ�Ȥ��Ƹ塹�Τ����α�ݤ���ޤ���
+InnoDBなら削除された後の領域はファイルレベルでは解放されず(ファイルの
+サイズ縮小は起こらず）、freeな領域として後々のために留保されます。
 
-SHOW TABLE STATUS���ޥ�ɤ�¹Ԥ��ơ�Comment�����򸫤Ƥߤޤ��礦��
-InnoDB�����ߤɤ줯�餤��free���ΰ����äƤ���Τ���Ĵ�٤뤳�Ȥ��Ǥ��ޤ���
+SHOW TABLE STATUSコマンドを実行して、Commentカラムを見てみましょう。
+InnoDBが現在どれくらいのfreeな領域を持っているのかを調べることができます。
 
-�ơ��֥��DROP�����̤�DELETE��Ԥ��ȡ��ե����륵�������̾�����������
-free���ΰ褬���ä��Ƥ��뤳�Ȥ��ǧ�Ǥ���Ȼפ��ޤ���
+テーブルのDROPや大量のDELETEを行うと、ファイルサイズが縮小される代わりに
+freeな領域が増加していることを確認できると思います。
 
-���θ塢INSERT�����꿷���ʥơ��֥���äƥǡ����򥤥�ݡ��Ȥ�����硢
-�����ˤϥե����륵��������������free���ΰ褫����˻��Ѥ���ޤ���
+その後、INSERTしたり新たなテーブルを作ってデータをインポートした場合、
+すぐにはファイルサイズは増えず、freeな領域から先に使用されます。
 
-���äơ�du�ǥ������̾�����ǧ����ʤ����ȼ��Τϡ�
-���������ʤ��Ǥ���
+従って、duでサイズ縮小が確認されないこと自体は、
+何の問題もないです。
 
-�ڻ��͡�
+【参考】
 <a href="http://dev.mysql.com/doc/refman/5.1/ja/innodb-file-space.html">http://dev.mysql.com/doc/refman/5.1/ja/innodb-file-space.html</a>
 
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ��˺��Ƥ��ߤޤ���</span>
-<span class="quote1">&gt; InnoDB�Υơ��֥�Ǥ���</span>
+<span class="quote1">&gt; 書き忘れてすみません。</span>
+<span class="quote1">&gt; InnoDBのテーブルです。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; Optimize Table ���̺�������ơ��֥�̾</span>
-<span class="quote1">&gt; �ǥ��ޥ�ɤ�¹Ԥ��Ƥߤޤ�����</span>
-<span class="quote1">&gt; du�η�̤��Ѳ��Ϥʤ��褦�Ǥ�����</span>
+<span class="quote1">&gt; Optimize Table 大量削除したテーブル名</span>
+<span class="quote1">&gt; でコマンドを実行してみましたが</span>
+<span class="quote1">&gt; duの結果に変化はないようでした。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �⤦����Ĵ�٤Ƥߤޤ���</span>
+<span class="quote1">&gt; もう少し調べてみます。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; On Wed, 08 Aug 2007 23:36:05 +0900</span>
-<span class="quote1">&gt; �鸤 KEN�� &lt;ken_ken_1962@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt; 忠犬 KEN公 &lt;ken_ken_1962@xxxxxxxxxx&gt; wrote:</span>
 <span class="quote1">&gt; </span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; MyISAM�Υơ��֥�Ǥ��礦����</span>
+<span class="quote2">&gt; &gt; MyISAMのテーブルでしょうか？</span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; Optimize Table�μ¹Ԥ���ɬ�פʤΤ��Ȼפ��ޤ���</span>
+<span class="quote2">&gt; &gt; Optimize Tableの実行が、必要なのだと思います。</span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; MySQL 4.1�ޥ˥奢��</span>
+<span class="quote2">&gt; &gt; MySQL 4.1マニュアル</span>
 <span class="quote2">&gt; &gt; <a href="http://dev.mysql.com/doc/refman/4.1/ja/optimize-table.html">http://dev.mysql.com/doc/refman/4.1/ja/optimize-table.html</a></span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; MySQL 5.1�ޥ˥奢��</span>
+<span class="quote2">&gt; &gt; MySQL 5.1マニュアル</span>
 <span class="quote2">&gt; &gt; <a href="http://dev.mysql.com/doc/refman/5.1/ja/optimize-table.html">http://dev.mysql.com/doc/refman/5.1/ja/optimize-table.html</a></span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; ¿����RDBMS�Ǥϡ�insert�طʤǳ��ݤ����ΰ�β����ϡ�</span>
-<span class="quote2">&gt; &gt; ưŪ�˹Ԥʤ��ȥ����Хإåɤˤʤ�Τǡ��ǥե饰�������̤�</span>
-<span class="quote2">&gt; &gt; ��ǽ���طʤǹԤäƤ����ǧ�����Ƥ��ޤ���</span>
+<span class="quote2">&gt; &gt; 多くのRDBMSでは、insert背景で確保した領域の解放は、</span>
+<span class="quote2">&gt; &gt; 動的に行なうとオーバヘッドになるので、デフラグ等の特別な</span>
+<span class="quote2">&gt; &gt; 機能の背景で行っていると認識しています。</span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote3">&gt; &gt; &gt;�Ϥ���ޤ��ơ������ȿ����ޤ���</span>
+<span class="quote3">&gt; &gt; &gt;はじめまして、今橋と申します。</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt;���̥ǡ����������ƥ��Ȥǣ�����MB�ۤɤΥǡ�����insert���ޤ�����</span>
-<span class="quote3">&gt; &gt; &gt;���˰�ödelete�ǥǡ������������ΤǤ�����</span>
-<span class="quote3">&gt; &gt; &gt;du���ޥ�ɤǤߤ�ȥǥ����������̤��Ѥ�äƤ��ޤ���Ǥ�����</span>
+<span class="quote3">&gt; &gt; &gt;大量データの投入テストで１００MBほどのデータをinsertしました。</span>
+<span class="quote3">&gt; &gt; &gt;次に一旦deleteでデータを削除したのですが、</span>
+<span class="quote3">&gt; &gt; &gt;duコマンドでみるとディスク使用量が変わっていませんでした。</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt;PostgreSQL�Ǥ���vaccume���ޥ�ɤ�Ȥ�ʤ����ΰ褬�����ѤǤ��ʤ��ä��Ȼ�</span>
-<span class="quote3">&gt; &gt; &gt;���ΤǤ�����MySQL�Ǥ⤽�Τ褦���н褬ɬ�פʤΤǤ��礦����</span>
+<span class="quote3">&gt; &gt; &gt;PostgreSQLですとvaccumeコマンドを使わないと領域が再利用できなかったと思</span>
+<span class="quote3">&gt; &gt; &gt;うのですが、MySQLでもそのような対処が必要なのでしょうか？</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt;����Ū�ʼ��䤫�⤷��ޤ��󤬡�</span>
-<span class="quote3">&gt; &gt; &gt;�ɤʤ��������������������ͭ�񤤤Ǥ���</span>
+<span class="quote3">&gt; &gt; &gt;初歩的な質問かもしれませんが、</span>
+<span class="quote3">&gt; &gt; &gt;どなたかご回答いただければ有難いです。</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt;�Ķ���</span>
-<span class="quote3">&gt; &gt; &gt;��Solaris������Sparc</span>
-<span class="quote3">&gt; &gt; &gt;��MySQL5.0.37</span>
+<span class="quote3">&gt; &gt; &gt;環境：</span>
+<span class="quote3">&gt; &gt; &gt;　Solaris１０　Sparc</span>
+<span class="quote3">&gt; &gt; &gt;　MySQL5.0.37</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt;����������ꤤ�������ޤ���</span>
+<span class="quote3">&gt; &gt; &gt;よろしくお願いいたします。</span>
 <span class="quote3">&gt; &gt; &gt;</span>
 <span class="quote3">&gt; &gt; &gt;</span>
 <span class="quote2">&gt; &gt; </span>
 <span class="quote2">&gt; &gt; _________________________________________________________________</span>
-<span class="quote2">&gt; &gt; Hotmail��˥塼���뵭ǰ���ץ��硼�Υ˥塼��ǥ�֥ץ��硼 207 Cielo�פ�����</span>
-<span class="quote2">&gt; &gt; �� <a href="http://clk.atdmt.com/GBL/go/msnjpqjl0060000010gbl/direct/01/">http://clk.atdmt.com/GBL/go/msnjpqjl0060000010gbl/direct/01/</a> </span>
+<span class="quote2">&gt; &gt; Hotmailリニューアル記念！プジョーのニューモデル「プジョー 207 Cielo」が当た</span>
+<span class="quote2">&gt; &gt; る <a href="http://clk.atdmt.com/GBL/go/msnjpqjl0060000010gbl/direct/01/">http://clk.atdmt.com/GBL/go/msnjpqjl0060000010gbl/direct/01/</a> </span>
 <span class="quote2">&gt; &gt; </span>
 <span class="quote2">&gt; &gt; </span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; -- </span>
-<span class="quote1">&gt; ����ե��������󥹳������</span>
-<span class="quote1">&gt; �ץ������Ȼ�����</span>
-<span class="quote1">&gt; ����������IMAHASHI Hiroshi</span>
+<span class="quote1">&gt; インフォサイエンス株式会社</span>
+<span class="quote1">&gt; プロダクト事業部</span>
+<span class="quote1">&gt; 今橋　寛　IMAHASHI Hiroshi</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
@@ -111,13 +111,13 @@ Sumisho Computer Systems, Corp.
 
 </pre>
 </div>
-<p class="button"><a href="14164.html">[��]</a><a href="14166.html">[��]</a><a href="../list/14101-14200.html">[�ֹ�����]</a><a href="../thread/14101-14200.html">[����åɰ���]</a></p>
+<p class="button"><a href="14164.html">[前]</a><a href="14166.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14162.html">  14162 2007-08-08 22:18 [&quot;��������&quot; &lt;imahashi] delete���Ƥ�ǥ����������̤�����ʤ�    </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14163.html">  14163 2007-08-08 23:36 ��[�鸤 KEN�� &lt;ken_ken_]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14164.html">  14164 2007-08-09 09:38 ����[&quot;��������&quot; &lt;imahashi]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="14165.html">  14165 2007-08-09 09:58 ������[Tetsuro IKEDA &lt;te.ik]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14166.html">  14166 2007-08-09 10:06 ��������[&quot;��������&quot; &lt;imahashi]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14162.html">  14162 2007-08-08 22:18 [&quot;今橋　寛&quot; &lt;imahashi] deleteしてもディスク使用量が減らない    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14163.html">  14163 2007-08-08 23:36 ┗[忠犬 KEN公 &lt;ken_ken_]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14164.html">  14164 2007-08-09 09:38 　┗[&quot;今橋　寛&quot; &lt;imahashi]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="14165.html">  14165 2007-08-09 09:58 　　┗[Tetsuro IKEDA &lt;te.ik]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14166.html">  14166 2007-08-09 10:06 　　　┗[&quot;今橋　寛&quot; &lt;imahashi]                                 </a></span>
 </pre>
 </body>
 </html>

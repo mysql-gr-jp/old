@@ -5,26 +5,26 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="1275.html">[��]</a><a href="1277.html">[��]</a><a href="../list/1201-1300.html">[�ֹ�����]</a><a href="../thread/1201-1300.html">[����åɰ���]</a></p>
+<p class="button"><a href="1275.html">[前]</a><a href="1277.html">[次]</a><a href="../list/1201-1300.html">[番号順一覧]</a><a href="../thread/1201-1300.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:1276
 </p>
 <div class="header">
 <p>
-From: (��ƣ����͵) &lt;&lt;endo@xxxxxxxxxx&gt;&gt;<br>
+From: (遠藤　俊裕) &lt;&lt;endo@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 12 Oct 1999 17:13:38 +0900<br>
-Subject: [mysql 01276] ���η��Ҽڡʤ��ޤ� SQL �ν�����<br>
+Subject: [mysql 01276] お知恵拝借（うまい SQL の書き方）<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��ƣ�ȿ����ޤ���
+遠藤と申します。
 
-����ϻ��̵���ηäǤϤʤ��ʤ�������ˡ���פ��Ĥ��������ͤΤ�
-�ηä��Ҽڤ������᡼�뤤�����ޤ�����
+今回は私の無い知恵ではなかなかいい方法が思いつかず、皆様のお
+知恵を拝借したくメールいたしました。
 
-���߰ʲ��Τ褦�ʥơ��֥뤬¸�ߤ��ޤ���
+現在以下のようなテーブルが存在します。
 
 CREATE TABLE WorkSchedule (
   SerialNumber  INT NOT NULL,
@@ -35,70 +35,70 @@ CREATE TABLE WorkSchedule (
   Note          CHAR ( 255 )
 );
 
-������ˤϡָĿ;���פطҤ��� SerialCode �Ȥ��θĿͤ��Ф���
-����(CurrentDate)�Ⱥ��(CurrentWork)�����äƤ��ޤ���
-�Ȥꤢ����������¾�ξ����̵�뤷�ޤ���
-#�ָĿ;���פ� SerialCode �� Name �����äƤ���ơ��֥�Ǥ���
+この中には「個人情報」へ繋がる SerialCode とその個人に対する
+日付(CurrentDate)と作業(CurrentWork)が入っています。
+とりあえず、その他の情報は無視します。
+#「個人情報」は SerialCode と Name が入っているテーブルです。
 
-������ SerialNumber �Ϥ��Υ쥳���ɤ��դ˷��� Index ���ܤǤ���
-# ����Ϥ��Ƥ��ޤ��󤬡����ˤ��ʤ��ǲ�������
+ここで SerialNumber はこのレコードを一意に決める Index 項目です。
+# 宣言はしていませんが、気にしないで下さい。
 
-�ǡ���̤Ȥ��ưʲ��Τ褦��Ģɼ��Ф������ȹͤ��Ƥ��ޤ���
+で、結果として以下のような帳票を出したいと考えています。
 
 +---------------+-----------+-----------+-----------+-----------+
-<span class="quote1">|     ̾����    |    ����   |    ����   |    ����   |    ����   | ��</span>
+<span class="quote1">|     名　前    |    ４月   |    ５月   |    ６月   |    ７月   | …</span>
 +---------------+---+---+---+---+---+---+---+---+---+---+---+---+
-<span class="quote1">|  ��ƣ����͵   |  5| 10| 14|  6| 11| 15|  8| 12|   |  4| 16|   | ��</span>
+<span class="quote1">|  遠藤　俊裕   |  5| 10| 14|  6| 11| 15|  8| 12|   |  4| 16|   | …</span>
 <span class="quote2">|               | 15| 20| 26|   |   |   |   |   |   |   |   |   |</span>
 +---------------+---+---+---+---+---+---+---+---+---+---+---+---+
-<span class="quote1">|̵̾���Τ���� |  4|  9| 18| 11| 18| 25|  7| 17|   |  7|   |   | ��</span>
+<span class="quote1">|名無しのごんべ |  4|  9| 18| 11| 18| 25|  7| 17|   |  7|   |   | …</span>
 <span class="quote5">|               |   |   |   |   |   |   |   |   |   |   |   |   |</span>
 +---------------+---+---+---+---+---+---+---+---+---+---+---+---+
 <span class="quote5">|               |   |   |   |   |   |   |   |   |   |   |   |   |</span>
 
-���ˤ�������ξ���CurrentWork ����������λ��˿����ˡ����դ���
-���ȻפäƤ���ޤ���
+更にある特定の条件（CurrentWork がある特定の時）数字に○を付けた
+いと思っております。
 
-��о��ϡָĿ;���פˤ�����ȡ�WorkSchedule �ˤ�������(CurrentDate)
-��ǯ����Ǥ��뤳�ȡ�����ȡ����(CurrentWork)��ɬ�פʾ���˥ޥå�
-���Ƥ��뤳�ȤǤ���
+抽出条件は「個人情報」にある条件と、WorkSchedule にある日付(CurrentDate)
+が年度内であること、それと、作業(CurrentWork)が必要な情報にマッチ
+していることです。
 
-����ʻ��ɤ�� SQL ��񤭡��ǡ�����ɤ��������ɤ��ΤǤ��礦����
+こんな時どんな SQL を書き、データをどう扱えば良いのでしょうか？
 
-���ʤߤˡ����� Access ���Ȥ�Ǥ���ΤǤ������ʲ��μ��Ǻ�������
-���ޤ���
+ちなみに、今は Access で組んでいるのですが、以下の手順で作成して
+います。
 
-����ǯ�ȷ�򤯤äĤ����ǡ�����(ex. 199904)������󤷤��ǡ�����12
-�����奼�����ץ쥹̵���ˤ�������롣
+１．年と月をくっつけたデータと(ex. 199904)日を列挙したデータ（12
+　　桁ゼロサプレス無し）を作成する。
     ex. 199904, 050000000000
-������Υǡ�����Ʊ��������դ�������ɲä���褦�ʴؿ����� select
-�������롣
-����ex. 199904, 050000000000
+２．上のデータに同じ月の日付があると追加するような関数を作り select
+　　する。
+　　ex. 199904, 050000000000
         199904, 051000000000
-����Ʊ�������դ˲�碌�ơ����դ���٤����˥ӥåȤ�Ω�Ƥ�ǡ���
-��������
-����ex. 199904, 050000000000, 000000
+３．同時に日付に会わせて○を付けるべき場所にビットを立てるデータ
+　　も作る
+　　ex. 199904, 050000000000, 000000
         199904, 051000000000, 010000
-������Υǡ�����ǯ�����դ򤯤äĤ����ǡ����ǥ��롼�ԥ󥰤������Ҥ�
-����Last �ͤ��롣
-����Ģɼ�쥤�����Ȥλ������դ�ʬ��ȡ��ӥåȤγ�ǧ�򤷤ʤ���ǡ�
-��������ɽ���ȡ���񤯡�
+４．上のデータを年と日付をくっつけたデータでグルーピングし、前述の
+　　Last 値を取る。
+５．帳票レイアウトの時、日付の分解と、ビットの確認をしながらデー
+　　タの表示と○を書く。
 
-�ʾ��ԤäƤ��ޤ������嵭���ޤǤκ�Ȥ��ȤäƤ�Ť��������֤���
-����ޤ�����������ɽ�����Υǡ��������ޤǤ� Server �ˤ�餻��٤�
-���ȹͤ��ޤ��Τǡ��ʤ�Ȥ����ơ��ڤ� SQL ��񤭤����ȻפäƤ��ޤ���
+以上を行っていますが、上記４までの作業がとっても重たく、時間がか
+かります。しかし、表示前のデータ生成までは Server にやらせるべき
+だと考えますので、なんとかして、軽い SQL を書きたいと思っています。
 
-�ɤ�����и��� SQL ��������Ǥ��礦����
+どうすれば賢く SQL がかけるでしょうか？
 
-����������������ꤤ�������ޤ���m(_ _)m
+ご教授よろしくお願いいたします。m(_ _)m
 
 </pre>
 </div>
-<p class="button"><a href="1275.html">[��]</a><a href="1277.html">[��]</a><a href="../list/1201-1300.html">[�ֹ�����]</a><a href="../thread/1201-1300.html">[����åɰ���]</a></p>
+<p class="button"><a href="1275.html">[前]</a><a href="1277.html">[次]</a><a href="../list/1201-1300.html">[番号順一覧]</a><a href="../thread/1201-1300.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="1276.html">   1276 1999-10-12 17:13 [&lt;endo@xxxxxxxxxx&gt;   ] ���η��Ҽڡʤ��ޤ� SQL �ν�����       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1278.html">   1278 1999-10-13 00:59 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1279.html">   1279 1999-10-13 12:41 ����[&lt;endo@xxxxxxxxxx&gt;   ]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="1276.html">   1276 1999-10-12 17:13 [&lt;endo@xxxxxxxxxx&gt;   ] お知恵拝借（うまい SQL の書き方）       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1278.html">   1278 1999-10-13 00:59 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1279.html">   1279 1999-10-13 12:41 　┗[&lt;endo@xxxxxxxxxx&gt;   ]                                     </a></span>
 </pre>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="10757.html">[��]</a><a href="10759.html">[��]</a><a href="../list/10701-10800.html">[�ֹ�����]</a><a href="../thread/10701-10800.html">[����åɰ���]</a></p>
+<p class="button"><a href="10757.html">[前]</a><a href="10759.html">[次]</a><a href="../list/10701-10800.html">[番号順一覧]</a><a href="../thread/10701-10800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:10758
 </p>
@@ -13,7 +13,7 @@ mysql:10758
 <p>
 From: &quot;zen kishimoto&quot; &lt;&quot;zen kishimoto&quot; &lt;zen@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 7 Jan 2005 18:56:13 -0800<br>
-Subject: [mysql 10758] ����å��夫��Υꥫ�Х�<br>
+Subject: [mysql 10758] クラッシュからのリカバリ<br>
 
 </p>
 </div>
@@ -23,36 +23,36 @@ Subject: [mysql 10758] ����å��夫��Υꥫ�Х�<br>
 
 <a href="http://dev.mysql.com/tech-resources/articles/recovering-from-crashes.html">http://dev.mysql.com/tech-resources/articles/recovering-from-crashes.html</a>
 
-Guilhem Bichot��
+Guilhem Bichot著
 
-�����Ǥϰʲ�����ͳ�ǥ���å��夷�����Υꥫ�Х꡼
-����ˡ�ˤĤ��ƽҤ٤ޤ���
+ここでは以下の理由でクラッシュした場合のリカバリー
+の方法について述べます。
 
-   1. OS�Υ���å���
-   2. �Ÿ����
-   3. �ե����륷���ƥ�Υ���å���
-   4. �ϡ��ɤ�����(�ϡ��ɥɥ饤�֤Ȥ��ޥ����ܡ��ɤʤ�).
+   1. OSのクラッシュ
+   2. 電源落ち
+   3. ファイルシステムのクラッシュ
+   4. ハードの問題(ハードドライブとかマザーボードなど).
 
-�����ǻȤ��Τ�MySQL 4.1.8�ǤǤ���InnoDB ���ȥ�å����󥸥�
-�˥ǡ�������Ǽ����Ƥ���Ȥ��ޤ��礦�����Υ��󥸥�ˤ�
-�ȥ�󥺥��������ȼ�ư����å���ꥫ�Х꡼������ޤ������줫��
-�ε����Ǥ�MySQL�Ͼ�˥���å�����ˤ���٤������ä�
-����Ȥ��ޤ�����٤ʤ��Ǥϥꥫ�С�������ͳ������ޤ���
+ここで使うのはMySQL 4.1.8版です。InnoDB ストレッジエンジン
+にデータが格納されているとしましょう。このエンジンには
+トランズアクションと自動クラッシュリカバリーがあります。これから
+の議論ではMySQLは常にクラッシュ時には負荷がかかって
+いるとします。負荷なしではリカバーする理由がありません。
 
-������ 1) �� 2)
+ケース 1) と 2)
 
-���Υ������ξ��ꥹ�����Ȥθ��MySQL�Υǥ������Υǡ�����
-����������ǽ�Ȥ��ޤ����ꥹ�����Ȥκ�InnoDB�Υǡ����ե������
-�ϥ���å���κݤ˼�����Ӥ��Ƥ���ǡ��������äƤ���櫓�Ǥ�
-����ޤ��󡣤�������InnoDB�ϼ�ʬ�Υ������ɤߡ����ߥåȤ��줿
-������Ƥ��ʤ��ʥǡ����ե�����˥ե�å��夵��Ƥ��ʤ���
-�ڥ�ǥ��󥰤Υȥ�󥺥��������ꥹ�Ȥ򸫤Ĥ��ơ����ߥåȤ����
-���ʤ���Τ˴ؤ��Ƥϼ�ưŪ�˥�����Хå����ơ����ߥåȤ����
-�����ΤˤĤ��Ƥϥǡ����ե�����˥ե�å��夷�ޤ���
-�ꥫ�Х꡼�ץ������ξ����MySQL�Υ��顼������Ȥäƥ桼����
-�������ޤ���
+このケースの場合リスタートの後でMySQLのディスクのデータに
+アクセス可能とします。リスタートの際InnoDBのデータファイルに
+はクラッシュの際に首尾一貫しているデータが入っているわけでは
+ありません。しかし、InnoDBは自分のログを読み、コミットされた
+かされていない（データファイルにフラッシュされていない）
+ペンディングのトランズアクションリストを見つけて、コミットされて
+いないものに関しては自動的にロールバックして、コミットされて
+いるものについてはデータファイルにフラッシュします。
+リカバリープロセスの情報はMySQLのエラーログを使ってユーザに
+伝えられます。
 
-���ΰ���:
+その一部:
 
 InnoDB: Database was not shut down normally.
 InnoDB: Starting recovery from log files...
@@ -76,45 +76,45 @@ InnoDB: Apply batch completed
 InnoDB: Started
 mysqld: ready for connections
 
-������ 3) �� 4)
+ケース 3) と 4)
 
-���Υ������Ǥϥꥹ�����Ȥθ�MySQL�ǥ������Υǡ������ɤ�ʤ���
-���ꤷ�ޤ����ǥ������Υǡ����Τ�����ʬ���ɤ�ʤ��ʤä��Ȥ��ޤ���
-���ξ��MySQL���������������ȤǤ��ʤ��ʤ�ޤ������ξ��ǥ�����
-��ե����ޥåȤ��ʤ�������������Τ�Ƴ�����ޤ������Ƥ�����
-�Хå����åפ���ǡ��������ᤷ�ޤ��������Ǥ�����˥Хå����åפ�
-ɬ�פ�����ޤ���������Ǥϻ��֤��ᤷ�ƥХå����åפˤĤ��ƽҤ٤ޤ��礦��
+このケースではリスタートの後MySQLディスクのデータが読めないと
+仮定します。ディスクのデータのある部分が読めなくなったとします。
+この場合MySQLは正しくスタートできなくなります。この場合ディスク
+をフォーマットしなおすか新しいものを導入します。さてここで
+バックアップからデータを取り戻します。そうです、先にバックアップの
+必要がありました。それでは時間を戻してバックアップについて述べましょう。
 
-�Хå����åפΥݥꥷ��
+バックアップのポリシー
 
-�Хå����å������Ū�˹Ԥ��ʤ���Фʤ�ޤ��󡣥ե�Хå����å�
-��MySQL��Ȥäƴ��Ĥ�����ˡ�ǹԤ����Ȥ��Ǥ��ޤ���InnoDB �ۥåȥХå����å�
-�ϥ���饤��ʥ֥��å����ʤ���ʪ��Ū�� (�ǡ����ե�����Υ��ԡ�)
-�Хå����åפ��󶡤��ޤ���mysqldump �ϥ���饤��Υ��������
-�Хå����åפ��󶡤��ޤ������줫��ε����ǤϤ���ˤĤ���
-�ä��򤷤ޤ���
+バックアックは定期的に行われなければなりません。フルバックアップ
+はMySQLを使って幾つかの方法で行うことができます。InnoDB ホットバックアップ
+はオンライン（ブロックしない）物理的な (データファイルのコピー)
+バックアップを提供します。mysqldump はオンラインのロジカルな
+バックアップを提供します。これからの議論ではこれについて
+話しをします。
 
-��:
+例:
 
 mysqldump --single-transaction --all-databases &gt; backup_sunday_1_PM.sql
 
-���Υ��ޥ�ɤ����ƤΥǡ����١�����InnoDB �ơ��֥��꡼�ɤ�
-�饤�Ȥ��𤹤��Ȥʤ����ƥХå����åפ��ޤ���.sql�ե���������
-��¿����SQL INSERT���ơ��ȥ��ȤǤ����ʤ������٤ξ��ʤ�
-���ˤθ�壱�����Ȥ��ޤ�����
+このコマンドは全てのデータベースのInnoDB テーブルをリードや
+ライトを乱すことなく全てバックアップします。.sqlファイルの中身
+は多くのSQL INSERTステートメントです。（これは負荷の少ない
+日曜の午後１時だとします。）
 
-�ե�Хå����åפ�ɬ�פǤ����������������Ǥ���Ȥ������ȤϤ���ޤ���
-�礭�ʥХå����åץե����뤬����ơ�����˻��֤�ݤ���ޤ���
-���������ΥХå����åפ����ѹ�����Ƥ��ʤ���ʬ��Хå����åפ��Ƥ��ޤ��ޤ���
-��ʬ�ΤߤΥХå����åפϤ�äȸ�Ψ���褤�Ǥ���
+フルバックアップは必要ですが、何時も便利であるということはありません。
+大きなバックアップファイルが出来て、それに時間も掛かります。
+しかも前のバックアップから変更されていない部分もバックアップしてしまいます。
+増分のみのバックアップはもっと効率がよいです。
 
-��ʬ�ΤߤΥХå����åפ򤹤�ˤϡ���ʬ������ޤ���MySQL�����С���
-�ǡ������򥢥åץǡ��Ȥ���Ȥ�����ʬ��ե�����˳�Ǽ���뤿��ˤϡ�
-�����С��Ͼ�˥������Ȼ��� --log-bin���ץ�����ɬ�פȤ��ޤ���
-�ǡ����򥢥åץǡ��Ȥ��뤽�줾���SQL�Υ��ơ��ȥ��Ȥϥե������
-�񤭹��ޤ�ޤ�(������MySQL�Х��ʥ꡼�����פȸƤӤޤ�). ������
-�¹Ԥ�³����MySQL�����С���--log-bin�Υ��ץ����ǡˤΥǡ����ǥ��쥯�ȥ�
-�򸫤Ƥߤޤ��礦��
+増分のみのバックアップをするには、増分がいります。MySQLサーバーが
+データーをアップデートするときに増分をファイルに格納するためには、
+サーバーは常にスタート時に --log-binオプションを必要とします。
+データをアップデートするそれぞれのSQLのステートメントはファイルに
+書き込まれます(これを「MySQLバイナリーログ」と呼びます). 何日か
+実行し続けたMySQLサーバー（--log-binのオプションで）のデータディレクトリ
+を見てみましょう。
 
 -rw-rw----    1 guilhem  guilhem   1277324 Nov 10 23:59 gbichot2-bin.001
 -rw-rw----    1 guilhem  guilhem         4 Nov 10 23:59 gbichot2-bin.002
@@ -124,91 +124,91 @@ mysqldump --single-transaction --all-databases &gt; backup_sunday_1_PM.sql
 -rw-rw----    1 guilhem  guilhem    998412 Nov 14 10:08 gbichot2-bin.006
 -rw-rw----    1 guilhem  guilhem       361 Nov 14 10:07 gbichot2-bin.index
 
-�����С����ꥹ�����Ȥ���Ȥ��ϲ����Ǥ⡢���ߤΥХ��ʥ꡼�����˽񤭹���
-�Τ�ߤ�ơ�������������Ϥ�ޤ����������Τ����ߤΥ����Ȥʤ�ޤ���
-���Τ褦�ʥ����å���FLUSH LOGS SQL���ޥ�ɤǤ⶯��Ū�˽���ޤ���
-.index �ե�����ϥǥ��쥯�ȥ꡼�����Ƥ�MySQL�Х��ʥ꡼�����Υꥹ��
-��ޤߤޤ����ʤ���ϥ�ץꥱ�������˻Ȥ��ޤ�����
+サーバーがリスタートするときは何時でも、現在のバイナリーログに書き込む
+のを止めて、新しいログを始めます。新しいのが現在のログとなります。
+このようなスイッチはFLUSH LOGS SQLコマンドでも強制的に出来ます。
+.index ファイルはディレクトリーの全てのMySQLバイナリーログのリスト
+を含みます。（これはリプリケーションに使います。）
 
-MySQL�Х��ʥ꡼��������ʬ�Ǥ�������Ǥ�mysqldump�μ¹Ԥ򾯤�
-�Ѥ��ƥե�Хå����åפκݤ�MySQL�Х��ʥ�����Υ����å�
-��������褦�ˤ��ޤ��礦�����ξ�˿��������ߤΥХ��ʥ꡼����
-��̾����ʹ���褦�ˤ��ޤ��礦��
+MySQLバイナリーログは増分です。それではmysqldumpの実行を少し
+変えてフルバックアップの際にMySQLバイナリログのスイッチ
+が起こるようにしましょう。その上に新しい現在のバイナリーログ
+の名前を聞くようにしましょう。
 
 mysqldump --single-transaction --flush-logs --master-data=2
 --all-databases &gt; backup_sunday_1_PM.sql
 
-����ǥǥ��쥯�ȥ꡼����ˤ�gbichot2-bin.007�Ȥ����ե����뤬
-�Ǥ��ޤ���.sql�ե��������ˤϼ��Υ饤�󤬤���ޤ���
+これでディレクトリーの中にはgbichot2-bin.007というファイルが
+できます。.sqlファイルの中には次のラインがあります。
 
--- ��ץꥱ��������Ϥ��ݥ�����󤫥ꥫ�Х꡼��Ԥ�����
+-- リプリケーションを始めるポジションかリカバリーを行う時点
 -- CHANGE MASTER TO MASTER_LOG_FILE='gbichot2-bin.007',MASTER_LOG_POS=4;
 
-���줬��̣���뤳�Ȥ�gbichot2-bin.007����Ť�MySQL �Х��ʥ꡼
-�����˵�Ͽ����Ƥ������ƤΥǡ����ѹ���.sql�ե������
-¸�ߤ��ޤ���������gbichot2-bin.007�˵�Ͽ���줿�ǡ����ѹ��ޤ���
-������⿷�����ǡ������ѹ���.sql�ե�����ˤϤ���ޤ���
-���ˤ�1PM����ʬ�Хå����åפ򤹤뤿��ˡ�mysqladmin
---flush-logs ���Ǥ����ߤޤ��������bichot2-bin.008�Ȥ���
-�ե�������������ޤ������ˤ�1pm�Υե�Хå����åפȷ��ˤ�
-1pm�δ֤��ѹ��Ϥ�gbichot2-bin.007�ե�����Ǥ������ν��פ�
-�ե����������ʥХå����åפξ��ʥơ��ס�;�äƤ���
-�ޥ���DVD-RW�ʤɡˤˤ��ޤ����ߤޤ���
+これが意味することはgbichot2-bin.007よりも古いMySQL バイナリー
+ログに記録されている全てのデータ変更は.sqlファイルに
+存在します、しかしgbichot2-bin.007に記録されたデータ変更または
+それよりも新しいデータの変更は.sqlファイルにはありません。
+月曜の1PMに増分バックアップをするために、mysqladmin
+--flush-logs と打ち込みます。これはbichot2-bin.008という
+ファイルを生成します。日曜の1pmのフルバックアップと月曜の
+1pmの間の変更はとgbichot2-bin.007ファイルです。この重要な
+ファイルを安全なバックアップの場所（テープ、余っている
+マシン、DVD-RWなど）にしまいこみます。
 
-���ˤ�1 PM�˺Ƥ�mysqladmin --flush-logs��¹Ԥ��ޤ���
-���ˤ�1pm�Ȳ��ˤ�1pm�δ֤��ѹ���gbichot2-bin.008�ե�����
-�Ǥ������������ʤȤ����˥Хå����åפ��ޤ��ޤ���
+火曜の1 PMに再びmysqladmin --flush-logsを実行します。
+月曜の1pmと火曜の1pmの間の変更はgbichot2-bin.008ファイル
+です。これも安全なところにバックアップしまいます。
 
-MySQL�Х��ʥ꡼�����ϥǥ��������ڡ�����ɬ�פȤ��ޤ������Τ����
-�������ڡ�������ݤ���ɬ�פ�����ޤ��������ɤ��ΤϤ⤦
-ɬ�פ��ʤ��ʤä�������õ�뤳�ȤǤ����Ĥޤ�ե�Хå����å�
-�򤹤���ˡ�
+MySQLバイナリーログはディスクスペースを必要とします。そのために
+時々スペースを確保する必要があります。一番良いのはもう
+必要がなくなったログを消去することです。つまりフルバックアップ
+をする時に。
 
 mysqldump --single-transaction --flush-logs
           --delete-master-logs --master-data=2
-          --all-databases�� &gt; backup_sunday_1_PM.sql
+          --all-databases　 &gt; backup_sunday_1_PM.sql
 
-�Хå����åפ���Υꥫ�Х꡼
+バックアップからのリカバリー
 
-���ˤ�8am�˥���å��夬���ä��Ȥ��ޤ��礦���ե�Хå����å�
-����ꥹ�ȥ����򤷤ޤ�����������ˤ�1pm�Τ�ΤǤ���������ץ�
-��SQL�Υ��ơ��ȥ��ȤΥ��åȤʤΤǥꥹ�ȥ����ϴ�ñ�Ǥ���
+水曜の8amにクラッシュがあったとしましょう。フルバックアップ
+からリストアーをします。これは日曜の1pmのものです。スクリプト
+はSQLのステートメントのセットなのでリストアーは簡単です。
 
 mysql &lt; backup_sunday_1_PM.sql
 
-���Υ��ơ��ȥ��Ȥθ�����ˤ�1pm���ʳ������ޤ������������ʬ
-���ɲä���ˤϡ������ʾ��ˤ��ä���ʬ����Ф��Ƽ���
-�褦�ˤ��ޤ���
+このステートメントの後で日曜の1pmの段階に戻りました。これに増分
+を追加するには、安全な場所にあった増分を取り出して次の
+ようにします。
 
 mysqlbinlog gbichot2-bin.007 | mysql
 mysqlbinlog gbichot2-bin.008 | mysql
 
-����ǲ��ˤ�1pm�ޤ����ޤ������ޤ����λ������饯��å���ε����ä�
-�����ޤǤ���ʬ��ȴ���Ƥ��ޤ��������ƨ���ʤ��褦����ˤϡ�MySQL
-�����С��ϥХ��ʥ꡼����������ʾ���RAID��SAN)�˳�Ǽ����
-����ɬ�פ�����ޤ������ξ��ϥǡ����ե����뤬��Ǽ����Ƥ���
-���Ȥϰ�ä����ǡ�����ϥ������˲�����ʤ�����Ǥ�����������
-�����С�gbichot2-bin.009�����ꡢ����򥢥ץ饤�Ǥ�����å���
-�λ����ޤ�Ω���֤뤳�Ȥ��Ǥ��ޤ����ʥǡ����ϼ����ޤ����
-������б����뤳�Ȥ�Ǥ��ޤ�������å���ǤϤʤ������꤬
-�ְ�ä�DROP DATABASE���ä��Ȥ��ޤ���gbichot2-bin.009��
-���ץ饤���뤳�ȤǤ��礦�ɸ��ä�DROP DATABASE�λ����ޤ�
-��뤳�Ȥ��Ǥ��ޤ����㤨�С����ä����ơ��ȥ��Ȥ�
-7:30am�����˼¹Ԥ��줿�狼�äƤ���Ȥ��ޤ�������ʤ��
-�ǡ�����7am�λ������᤹���Ȥ��Ǥ��ޤ�����30ʬ��;͵�򸫤ơ�
+これで火曜の1pmまで戻りました。まだこの時点からクラッシュの起こった
+時期までの増分が抜けています。これを逃さないようためには、MySQL
+サーバーはバイナリーログを安全な場所（RAIDやSAN)に格納して
+おく必要があります。その場所はデータファイルが格納されている
+場所とは違った場所で、それはログが破壊されないためです。こうして
+おけば、gbichot2-bin.009があり、それをアプライできクラッシュ
+の時点まで立ち返ることができます。（データは失われません）
+柔軟に対応することもできます。クラッシュではなくて問題が
+間違ったDROP DATABASEだったとします。gbichot2-bin.009を
+アプライすることでちょうど誤ったDROP DATABASEの時点まで
+戻ることができます。例えば、誤ったステートメントが
+7:30amころに実行されたわかっているとします。それならば
+データを7amの時点に戻すことができます。（30分の余裕を見て）
 
 mysqlbinlog --stop-datetime=2004-11-17\ 07:00:00 gbichot2-bin.009 | mysql
 
-����Ϥ���ä����ΤǤϤ���ޤ��� (��30ʬ�Ф�����ѹ��򼺤ä�
-���Ȥˤʤ�ޤ��ˤ��������ξ��Ͻ�ʬ�Ǥ��礦��¾�ξ��Ǥ�
-�����⤤���ʤ������Τ�ޤ��󡣤��ξ��Ϥ��礦��DROP DATABASE
-�����ޤ�mysqlbinlog ��¹Ԥ��ޤ�������ˤϴ�ñ�ʴ��Ĥ���
-��ˡ������ޤ������Σ��Ĥ�
+これはちょっと正確ではありません (約30分ばかりの変更を失った
+ことになります）しかしこの場合は十分でしょう。他の場合では
+そうもいかないかも知れません。その場合はちょうどDROP DATABASE
+の前までmysqlbinlog を実行します。それには簡単な幾つかの
+方法があります。その１つは
 
 mysqlbinlog gbichot2-bin.009 &gt; a_temp_file.sql.
 
-a_temp_file.sql�򤪹��ߤΥ��ǥ������ǽ������ޤ����ƥ����Ȥθ���
-��ǽ��Ȥäơ�DROP DATABASE�פ�õ���ޤ���
+a_temp_file.sqlをお好みのエディターで処理します。テキストの検索
+機能を使って「DROP DATABASE」を探します。
 
 # at 79
 #041117 07:26:08 server id 1  log_pos 79        Query   thread_id=1
@@ -224,26 +224,26 @@ DROP DATABASE our_cherished_database;
 exec_time=0     error_code=0
 DELETE FROM `test`.`hea3`;
 
-DROP DATABASE����Ϥޤ����ƤιԤ����ơ�a_temp_file.sql��
-�����֤��ơ�mysql &lt; a_temp_file.sql��¹Ԥ��ޤ�������Ǥ����ޤ��Ǥ���
+DROP DATABASEから始まる全ての行を除去して、a_temp_file.sqlを
+セーブして、mysql &lt; a_temp_file.sqlを実行します。これでおしまいです。
 
-�ޤȤ�
+まとめ
 
-   1. OS����å��夫�Ÿ�������ξ�硢InnoDB���н�
-   2. MySQL�����С��˾�˥��ץ�����Ϳ���ޤ���--log-bin��
---log-bin=�ʤ�餫�Υǡ����ǥ������ʳ��ΰ����ʥ�ǥ������Ǽ¹�
-�������뤳�Ȥǥǥ����������ʬ���˵������ʤ�������ǽ������
-   3. ���ҤκǸ�mysqldump���ޥ�ɡʥ���饤��ǥ֥��å��򤷤ʤ�
-�Хå����åפǤ�����
-   4. mysqladmin����Ѥ������Ū����ʬ�Хå����åפ򤷤ޤ��礦��
+   1. OSクラッシュか電源の問題の場合、InnoDBが対処
+   2. MySQLサーバーに常にオプションを与えます、--log-binか
+--log-bin=なんらかのデータディスク以外の安全なメディア　で実行
+こうすることでディスクの負荷分散に宜しい（そして性能改善）
+   3. 前述の最後mysqldumpコマンド（オンラインでブロックをしない
+バックアップです。）
+   4. mysqladminを使用して定期的に増分バックアップをしましょう。
 
-�Ρ���1: �ºݤ���Ǥ� --user �� --password ���ץ�����
-mysqldump��mysqloptions �˻��ꤹ��ɬ�פ�����ޤ���
+ノート1: 実際の例では --user と --password オプションを
+mysqldumpとmysqloptions に指定する必要があります。
 
-�Ρ���2: �����С�����ץ쥤��������󡦥ޥ������������С��Ǥ����
-�Х��ʥ꡼������mysqldump --delete-master-logs�Ǿõ��Τϴ����Ǥ���
-�ޥ˥奢��Υ�ץꥱ�������ξϤˤϥ�����õ�����˳�ǧ���ʤ����
-�ʤ�ʤ����Ȥ򤢤��Ƥ��ޤ���
+ノート2: サーバーがリプレイケーション・マスター・サーバーであれば
+バイナリーログをmysqldump --delete-master-logsで消去するのは危険です。
+マニュアルのリプリケーションの章にはログを消去する前に確認しなければ
+ならないことをあげています。
 ---------------------
 Zen Kishimoto                        zen@xxxxxxxxxx
 IP Devices, Inc.                       (408) 567-9391
@@ -254,6 +254,6 @@ Santa Clara, CA 95050
 
 </pre>
 </div>
-<p class="button"><a href="10757.html">[��]</a><a href="10759.html">[��]</a><a href="../list/10701-10800.html">[�ֹ�����]</a><a href="../thread/10701-10800.html">[����åɰ���]</a></p>
+<p class="button"><a href="10757.html">[前]</a><a href="10759.html">[次]</a><a href="../list/10701-10800.html">[番号順一覧]</a><a href="../thread/10701-10800.html">[スレッド一覧]</a></p>
 </body>
 </html>

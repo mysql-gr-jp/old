@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="9925.html">[��]</a><a href="9927.html">[��]</a><a href="../list/9901-10000.html">[�ֹ�����]</a><a href="../thread/9901-10000.html">[����åɰ���]</a></p>
+<p class="button"><a href="9925.html">[前]</a><a href="9927.html">[次]</a><a href="../list/9901-10000.html">[番号順一覧]</a><a href="../thread/9901-10000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:9926
 </p>
@@ -13,63 +13,63 @@ mysql:9926
 <p>
 From: &quot;Mamiya Masataka&quot; &lt;&quot;Mamiya Masataka&quot; &lt;xc8m-mmy@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 29 Jul 2004 13:44:15 +0900<br>
-Subject: [mysql 09926] Re: perl �ˤ�븡�������Ǥ����ܸ��갷��(Win32,S-JIS)<br>
+Subject: [mysql 09926] Re: perl による検索処理での日本語取り扱い(Win32,S-JIS)<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-ë�����󡢾���򤢤꤬�Ȥ��������ޤ���
+谷口さん、情報をありがとうございます。
 
-qq{} �ζ��ڤ�ʸ�� {} �� Shift-JIS ʸ�������ɤ������ȯ�����Ƥ���ΤǤ��͡�
-���꤬�Ȥ��������ޤ���
+qq{} の区切り文字 {} の Shift-JIS 文字コードの問題で発生しているのですね。
+ありがとうございます。
 
-���θ塢google �Ǹ����ʤɤ򤷤ơ�
+その後、google で検索などをして、
 s/\\/\\\\/ig
-�ȥ��������פ��Ƥ��Ф��ޤ��Ԥ����Ȥ�狼��ޤ�����
+とエスケープしてやればうまく行くこともわかりました。
 
-Windows �� Shift-JIS ʸ�������ɤ����Ѥ����硢
-�פ�̤Ȥ����ǥȥ�֥뤬�����ƾǤ�ޤ���
+Windows で Shift-JIS 文字コードを利用する場合、
+思わぬところでトラブルが起きて焦ります。
 
-ë�����󡢺Ǹ��
+谷口さん、最後の
 
-<span class="quote1">&gt; print qq{��\x8B{};</span>
+<span class="quote1">&gt; print qq{間\x8B{};</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �������ǡ����̤��б����礤�ޤ���DBI ��Ȥ���Ȥ�������</span>
-<span class="quote1">&gt; ����С��ץ졼���ۥ����Ȥ�줿�ۤ����ɤ����Ȼפ��ޤ���</span>
+<span class="quote1">&gt; と等価で、中括弧の対応が合いません。DBI を使われるという事で</span>
+<span class="quote1">&gt; あれば、プレースホルダを使われたほうが良いかと思います。</span>
 <span class="quote1">&gt; </span>
 
-�ϡ����礦�ɵ���˻פäƤ������˥��Х�ξ���Ǥ�����
-�����ˤ��꤬�Ȥ��������ޤ���
+は、ちょうど疑問に思っていた点にズバリの情報でした。
+本当にありがとうございます。
 
-ʣ���ξ�����Ф������ȹͤ��Ƥ����ΤǤ�����
-��郎���ִֵܡפޤ��ϡ������פȸ����褦�ʾ�硢
+複数の条件で抽出したいと考えていたのですが、
+条件が　「間宮」または「正孝」と言うような場合、
  $sth = $dbh-&gt;prepare (qq{ 
-  SELECT Field1 FROM mamiya00 WHERE  Field5 like '%�ֵ�%' or Field5 like '%����%'
+  SELECT Field1 FROM mamiya00 WHERE  Field5 like '%間宮%' or Field5 like '%正孝%'
   });
-����ľ����ղä��뤷���ʤ��Τ��ʡ���
-�Ǥ⤳��Ǥϸ���Ū�ǡ���ͳ�˾����ɲä����긺�餷�������ʤ��Ȥ�������
+と二つ条件を付加するしかないのかなー。
+でもこれでは固定的で、自由に条件を追加したり減らしたり出来ないという事で
 foreach (@fukusuu_jyouken) {
  $sth = $dbh-&gt;prepare (qq{ 
   SELECT Field1 FROM mamiya00 WHERE  Field5 like '%$_%'
   });
  $sth -&gt; execute () 
-  or &amp;error ('MySQL ���ޥ�ɤ�¹Խ���ޤ���');
+  or &amp;error ('MySQL コマンドを実行出来ません。');
 }
-�Ȥ�����ˡ�����ذƤȤ��ƹͤ��Ƥ��ޤ�����
-�Ǥ⡢����ǤϤ��ޤ�˸�Ψ�������Τǡ������ɤ���ˡ���ʤ���Τ��ȶ�θ���Ƥ��ޤ�����
-�᡼��󥰥ꥹ�Ȥ˼��μ���Ȥ��ƥ᡼�뤷�Ƥߤ褦�ȹͤ��Ƥ����Ȥ����Ǥ����Τǡ�
-�����ˤ��꤬�Ȥ��������ޤ�����
+という方法を代替案として考えていました。
+でも、これではあまりに効率が悪いので、何か良い方法がないものかと苦慮していました。
+メーリングリストに次の質問としてメールしてみようと考えていたところでしたので、
+本当にありがとうございました。
 
 --
 Mamiya masataka from IBARAKI JAPAN
 *************************************
 mailto:mamiya@xxxxxxxxxx
-[�ֵ���¢�������ؤ褦����]
+[間宮林蔵の世界へようこそ]
 <a href="http://www.asahi-net.or.jp/~XC8M-MMY/">http://www.asahi-net.or.jp/~XC8M-MMY/</a>
-[��󤾡����᡼�� �ϰ�Υ˥塼��]
+[りんぞー．メール 地域のニュース]
 <a href="http://www.rinzo2.jp">http://www.rinzo2.jp</a>
-[���ӥ᡼��Ϣ����]
+[携帯メール連絡網]
 <a href="http://www.rinzo.jp/mail/">http://www.rinzo.jp/mail/</a>
 *************************************
 
@@ -77,11 +77,11 @@ mailto:mamiya@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="9925.html">[��]</a><a href="9927.html">[��]</a><a href="../list/9901-10000.html">[�ֹ�����]</a><a href="../thread/9901-10000.html">[����åɰ���]</a></p>
+<p class="button"><a href="9925.html">[前]</a><a href="9927.html">[次]</a><a href="../list/9901-10000.html">[番号順一覧]</a><a href="../thread/9901-10000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="9922.html">   9922 2004-07-29 10:13 [&quot;Mamiya Masataka&quot; &lt;x] perl �ˤ�븡�������Ǥ����ܸ��갷��(Win32,S-JIS)</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9924.html">   9924 2004-07-29 11:26 ��[Koichi Taniguchi &lt;ta]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="9926.html">   9926 2004-07-29 13:44 ����[&quot;Mamiya Masataka&quot; &lt;x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9922.html">   9922 2004-07-29 10:13 [&quot;Mamiya Masataka&quot; &lt;x] perl による検索処理での日本語取り扱い(Win32,S-JIS)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9924.html">   9924 2004-07-29 11:26 ┗[Koichi Taniguchi &lt;ta]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="9926.html">   9926 2004-07-29 13:44 　┗[&quot;Mamiya Masataka&quot; &lt;x]                                     </a></span>
 </pre>
 </body>
 </html>

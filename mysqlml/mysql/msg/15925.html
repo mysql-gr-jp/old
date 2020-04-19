@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15924.html">[��]</a><a href="15926.html">[��]</a><a href="../list/15901-16000.html">[�ֹ�����]</a><a href="../thread/15901-16000.html">[����åɰ���]</a></p>
+<p class="button"><a href="15924.html">[前]</a><a href="15926.html">[次]</a><a href="../list/15901-16000.html">[番号順一覧]</a><a href="../thread/15901-16000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15925
 </p>
@@ -13,83 +13,83 @@ mysql:15925
 <p>
 From: &quot;ochiai&quot; &lt;&quot;ochiai&quot; &lt;s.ochiai@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 13 Feb 2013 16:39:08 +0900<br>
-Subject: [mysql 15925] ��ץꥱ��������ۤˤĤ��ơ�Ĺʸ�Ǥ��ˡʼ����<br>
+Subject: [mysql 15925] レプリケーション構築について（長文です）（質問）<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��¸�ǡ���������Υ����С�A�ȿ�����MySQL�򥤥󥹥ȡ��뤷�������С�B�Ȥǡ�
-������Υ����С�A��ޥ������ˡ������Υ����С�B�򥹥졼�֤ˤ�����ץꥱ��������Ԥ����Ȥ��Ƥ��ޤ��������ޤ��Ǥ��ޤ���
-�ɤʤ����������Ƥ���������
+既存データを運用中のサーバーAと新規にMySQLをインストールしたサーバーBとで、
+運用中のサーバーAをマスターに、新規のサーバーBをスレーブにしたレプリケーションを行おうとしていますが、うまくできません。
+どなたか、教えてください。
 
-���졼�־�ǥޥ�����������Ͽ����CHANGE MASTER TO���ޥ�ɤ�¹Ԥ���ȡ�
+スレーブ上でマスター情報登録するCHANGE MASTER TOコマンドを実行すると、
 
 ERROR 1201 (HY000): Could not initialize master info structures; more error messages can be found in the MySQL error log
 
-�Ȥʤäơ���ץꥱ�������ͭ���ˤʤ�ޤ���
+となって、レプリケーションが有効になりません。
 
-�ʤ��������С�A�ϥޥ������Ȥ���ư���Ƥ���褦�Ǥ���
+なお、サーバーAはマスターとして動いているようです。
 
 
-���ߤδĶ��ȼ¹Ԥ�����̤ϰʲ����̤�Ǥ�����Ĺʸ�Ǥ���
+現在の環境と実行した結果は以下の通りです。（長文です）
 
-���ȴĶ���
-���������С�A���ޥ������δĶ�
-����OS��Windows 7 Professional SP1(32bit)
-����PC��DELL Vostro(Intel Core 2 Duo,CPU E7500 2.93GHz) RAM 2.00GB
+＜作業環境＞
+１．サーバーA：マスターの環境
+　　OS：Windows 7 Professional SP1(32bit)
+　　PC：DELL Vostro(Intel Core 2 Duo,CPU E7500 2.93GHz) RAM 2.00GB
 
-����MySQL�����С��С������5.5.25
-������mysql-5.5.25-win32.msi��
-����Workbench���С������5.2.39CE Revision 8757
-������mysql-workbench-gpl-5.2.39-win32.msi��
+　　MySQLサーバ：バージョン5.5.25
+　　（mysql-5.5.25-win32.msi）
+　　Workbench：バージョン5.2.39CE Revision 8757
+　　（mysql-workbench-gpl-5.2.39-win32.msi）
 
-    ����ե����졼�����
-����Configuration File: C:\Program Files\MySQL\MySQL Server 5.5\my.ini
-    ��ini�ե���������ơ�
+    コンフィグレーション
+　　Configuration File: C:\Program Files\MySQL\MySQL Server 5.5\my.ini
+    ＜iniファイルの内容＞
     basedir=&quot;C:/Program Files/MySQL/MySQL Server 5.5/&quot;
     datadir=&quot;C:/ProgramData/MySQL/MySQL Server 5.5/Data/&quot;
 
-���������С�B�����졼�֤δĶ�
-���������Хޥ����Ʊ��������PC
+２．サーバーB：スレーブの環境
+　　サーバマシンと同じ構成のPC
 
-    ����ե����졼�����
-����Configuration File: C:\ProgramData\MySQL\MySQL Server 5.5\data\my.ini
-    ��ini�ե���������ơ�
+    コンフィグレーション
+　　Configuration File: C:\ProgramData\MySQL\MySQL Server 5.5\data\my.ini
+    ＜iniファイルの内容＞
     basedir=&quot;C:/Program Files/MySQL/MySQL Server 5.5/&quot;
     datadir=&quot;C:/ProgramData/MySQL/MySQL Server 5.5/Data/&quot;
 
 
-��Ԥä�����
+＜行った手順＞
 
-�����ʥޥ������ˡʥ��졼�֡ˡ�MySQL��ư
+０．（マスター）（スレーブ）　MySQL起動
 
-�����ʥޥ������˥�ץꥱ����������ѥ桼������Ͽ
+１．（マスター）レプリケーション専用ユーザの登録
 
-��-1���ޥ��������MySQL�ˡ����졼�֤��饢�����������ץꥱ��������ѥ桼������repli�ˤ���Ͽ��
+１-1．マスター上のMySQLに、スレーブからアクセスするレプリケーション用ユーザー（repli）を登録。
 
 Workbench/Admin/Users and Privileges/
-����Server Access Management/Administrative Roles���֤ǡ�ReplicationAdmin���¤�����
-    Schema Privileges/ �Ǥ��٤ƤΥ������ޤ��Ф��Ƥ��٤Ƥθ��¤�����
+　　Server Access Management/Administrative Rolesタブで　ReplicationAdmin権限を設定
+    Schema Privileges/ ですべてのスキーマに対してすべての権限を設定
 
-��-2���ʥ��졼�֡˥��졼�֤���1-1.�Ǻ���������������Ȥǥޥ������ؤ���³��ǧ
-Workbench/New Connection��
-����Hostname = �ޥ�������IP���ɥ쥹
+１-2．（スレーブ）スレーブから1-1.で作成したアカウントでマスターへの接続確認
+Workbench/New Connectionで
+　　Hostname = マスターのIPアドレス
     Port     = 3306
     Username = repli
-    Password = ��-1����repli���Ф������ꤷ���ѥ����
-    Default Schema = Null�Τޤ�
-�Ȥ��ơ�Test Connection�ץܥ���򲡤����Ȥ�����
-������Connection parameters are correct.��
-�Ȥʤ���³������
+    Password = １-1．でrepliに対して設定したパスワード
+    Default Schema = Nullのまま
+として「Test Connection」ボタンを押したところ、
+　　「Connection parameters are correct.」
+となり接続成功。
 
 
-�����ʥޥ������˥���ե�����졼���������
+２．（マスター）コンフィギュレーション設定
 
-��-1���ޥ��������MySQL�����
-�ޥ������Υ�ץꥱ������������Ԥ�����˥ޥ��������MySQL�����
+２-1．マスター上のMySQLを停止
+マスターのレプリケーション設定を行うためにマスター上のMySQLを停止
 
-��-2���ޥ�������my.ini�ե������Խ���WorkBench���ѡ�
+２-2．マスターのmy.iniファイル編集（WorkBench使用）
 [mysqld]
     log-bin = mysql-bin
     binlog-format = MIXED
@@ -103,14 +103,14 @@ Workbench/New Connection��
     sync_binlog = 1
     log-bin-index = 
 
-ini�ե����뤬����ɤ��깹������Ƥ��뤫��ǧ������
+iniファイルが設定どおり更新されているか確認した。
 
-�����ʥ��졼�֡˥���ե�����졼���������
+３．（スレーブ）コンフィギュレーション設定
 
-��-1�����졼�־��MySQL�����
-���졼�֤������Ԥ�����˥��졼�־��MySQL�����
+３-1．スレーブ上のMySQLを停止
+スレーブの設定を行うためにスレーブ上のMySQLを停止
 
-��-2�����졼�֤�my.ini�ե������Խ���WorkBench���ѡ�
+３-2．スレーブのmy.iniファイル編集（WorkBench使用）
 
 [mysqld]
     sync_binlog = 1
@@ -121,34 +121,34 @@ ini�ե����뤬����ɤ��깹������Ƥ��뤫��ǧ������
     report-port = 3306
     skip-slave-start
 
-General slave����������
-skip-slave-start��������å��������졼�֥����Ф�ư�����Ȥ�����ư�ǥ��졼�֤���ư���ʤ��褦�ˤ�����
+General slaveセクションで
+skip-slave-start　をチェックし、スレーブサーバを起動したとき、自動でスレーブが起動しないようにした。
 
-�ʤ��������Υޥ������ξ����Workbench�����ꤹ���꤬�ʤ��Τǡ�my.ini�ե������[mysqld]�����������ɲä�����
+なお、下記のマスターの情報はWorkbenchで設定する場所がないので、my.iniファイルの[mysqld]セクションに追加した。
 
-master-host='123.456.789.101'�ʥޥ�������IP���ɥ쥹��
-master-user='repli'�ʥޥ���������Ͽ������ץꥱ��������ѥ桼����̾��
-master-password='password'�ʥޥ���������Ͽ������ץꥱ��������ѥ桼�����Υѥ���ɡ�
+master-host='123.456.789.101'（マスターのIPアドレス）
+master-user='repli'（マスターに登録したレプリケーション用ユーザー名）
+master-password='password'（マスターに登録したレプリケーション用ユーザーのパスワード）
 master-port=3306
 
 
-�����ʥޥ������˥�ץꥱ����������μ���
-�ޥ������ǡ��ʲ��ν�����Ԥ����ޥ�������MySQL�������
+４．（マスター）レプリケーション情報の取得
+マスターで、以下の処理を行う。マスターのMySQLは停止中
 
-��-1���ޥ�������MySQL��ư
-������MySQL��ư��
+４-1．マスターのMySQLを起動
+停止中のMySQLを起動。
 
-��-2���ǡ����Υե�å���
+４-2．データのフラッシュ
 mysql&gt; FLUSH TABLES WITH READ LOCK;
 
-��-2.�ޥ�������ץꥱ����������μ���
+４-2.マスターレプリケーション情報の取得
 mysql&gt; SHOW MASTER STATUS;
 File:     mysql-bin.000004
 Position: 597
 
-�����ʥޥ������˥ޥ�������Υǡ����򥢡�������
+５．（マスター）マスター上のデータをアーカイブ
 
-���ޥ�ɥץ���ץȤ�mysqldump��¹�
+コマンドプロンプトでmysqldumpを実行
 
 C:\......&gt;mysqldump --host=&quot;localhost&quot;
     --user=&quot;root&quot; 
@@ -156,55 +156,55 @@ C:\......&gt;mysqldump --host=&quot;localhost&quot;
     --all-database --lock-all-tables 
     &gt; dbdump.db
 
-���������֤���λ�����顢���å��������롣
+アーカイブが完了したら、ロックを解除する。
 mysql&gt; UNLOCK TABLES;
 
 
 
-�����ʥ��졼�֡˥��졼�֤˥ޥ������Υǡ����򥤥�ݡ���
+６．（スレーブ）スレーブにマスターのデータをインポート
 
-��-1.���졼�֥����С���MySQL��ư
---skip-slave���ץ�������Ѥ��ƥ�ץꥱ�������򥹥��åפ������졼�֤�Ω���夲�롣
-��my.ini�ե������skip-slave-start���ץ���������Ѥߡ�
+６-1.スレーブサーバーのMySQLを起動
+--skip-slaveオプションを使用してレプリケーションをスキップし、スレーブを立ち上げる。
+（my.iniファイルにskip-slave-startオプションを設定済み）
 
-��-2.����ݡ���
-mysqldump�Ǻ��������ޥ������Υ���ץե�����򥳥ޥ�ɥץ���ץȤǥ���ݡ��Ȥ��롣
+６-2.インポート
+mysqldumpで作成したマスターのダンプファイルをコマンドプロンプトでインポートする。
 
 C:\......&gt;mysql --user=&quot;root&quot; --password=&quot;???&quot; &lt; dbdump.db
 
 
-�����ʥ��졼�֡˥ޥ�����������Ͽ
+７．（スレーブ）マスター情報登録
 
 mysql&gt; STOP SLAVE;
 
 mysql&gt; CHANGE MASTER TO
-    MASTER_HOST = '123.456.789.101',���ʥޥ�������IP���ɥ쥹��
+    MASTER_HOST = '123.456.789.101',　（マスターのIPアドレス）
     MASTER_PORT=3306,
-    MASTER_USER = 'repli',���ʥޥ���������Ͽ������ץꥱ��������ѥ桼����̾��
-    MASTER_PASSWORD = 'password'�ʥޥ���������Ͽ�����桼��repli�Υѥ���ɡ�,
+    MASTER_USER = 'repli',　（マスターに登録したレプリケーション用ユーザー名）
+    MASTER_PASSWORD = 'password'（マスターに登録したユーザrepliのパスワード）,
     MASTER_LOG_FILE = 'mysql-bin.000004',
     MASTER_LOG_POS = 107;
 
-�����ǡ������Υ��顼��ȯ����
+ここで、下記のエラーが発生。
 ERROR 1201 (HY000): Could not initialize master info structures; more error messages can be found in the MySQL error log
 
-�����ʥ��졼�֡˥��졼�ֵ�ư
+８．（スレーブ）スレーブ起動
 
 mysql&gt; START SLAVE;
 
-7�������ޤ����äƤ��ʤ��Τǡ������Ǥ�ERROR 1201 (HY000)���Ǥơ����졼�֤ϵ�ư���ޤ���
+7．がうまくいっていないので、ここでもERROR 1201 (HY000)がでて、スレーブは起動しません。
 
-�����ʥޥ������˥ޥ������γ�ǧ
+９．（マスター）マスターの確認
 
-mysql&gt; show master status\G�������顼�ʤ���1�ԥ꥿����
+mysql&gt; show master status\G　　エラーなし　1行リターン
             File: mysql-bin.000004
         Position: 597
     Binlog_Do_DB: 
 Binlog_Ignore_DB: 
 
-10���ʥ��졼�֡˥��졼�֤γ�ǧ
+10．（スレーブ）スレーブの確認
 
-���졼�֤ξ��֤��ǧ�����Ȥ����������Τ褦�ˤʤäƤ��ơ�ư���Ƥ��ʤ��褦�Ǥ���
+スレーブの状態を確認したところ、下記のようになっていて、動いていないようです。
 
 mysql&gt; show slave status\G
 *************************** 1. row ***************************
@@ -243,36 +243,36 @@ Master_SSL_Verify_Server_Cert: No
 1 row in set (0.00 sec)
 
 
-�ʤ���CHANGE MASTER TO�ǤΥ��顼��å������ˤ����MySQL error log�ɤ򸫤���ˡ�ⶵ���Ƥ��������ޤ����顢�����Ǥ���
-����Ĺʸ�Ȥʤ�ޤ����������Ҳ����ˡ�򶵤��Ƥ���������
+なお、CHANGE MASTER TOでのエラーメッセージにある”MySQL error log”を見る方法も教えていただけましたら、幸いです。
+大変長文となりましたが、ぜひ解決方法を教えてください。
 
 
 </pre>
 </div>
 <div class="attach">
-<h3 class="attachtitle">ź�եե�����</h3>
+<h3 class="attachtitle">添付ファイル</h3>
 <ul>
 <li><a href="15925/0/index.html"> [text/html]</a>
 </ul>
 </div>
-<p class="button"><a href="15924.html">[��]</a><a href="15926.html">[��]</a><a href="../list/15901-16000.html">[�ֹ�����]</a><a href="../thread/15901-16000.html">[����åɰ���]</a></p>
+<p class="button"><a href="15924.html">[前]</a><a href="15926.html">[次]</a><a href="../list/15901-16000.html">[番号順一覧]</a><a href="../thread/15901-16000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="15925.html">@ 15925 2013-02-13 16:39 [&quot;ochiai&quot; &lt;s.ochiai@x] ��ץꥱ��������ۤˤĤ��ơ�Ĺʸ�Ǥ��ˡʼ����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15926.html">@ 15926 2013-02-14 09:14 ��[Watanabe Tomoyuki &lt;W]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15928.html">@ 15928 2013-02-15 10:50 ����[&quot;ochiai&quot; &lt;s.ochiai@x]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15929.html">@ 15929 2013-02-15 14:54 ������[Watanabe Tomoyuki &lt;W]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15930.html">  15930 2013-02-15 15:02 ��������[&quot;yoku ts.&quot; &lt;yoku0825]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15932.html">@ 15932 2013-02-15 16:48 ����������[&quot;ochiai&quot; &lt;s.ochiai@x]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15933.html">  15933 2013-02-15 18:47 ������������[&quot;yoku ts.&quot; &lt;yoku0825]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15936.html">@ 15936 2013-02-20 11:31 ��������������[&quot;ochiai&quot; &lt;s.ochiai@x]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15937.html">  15937 2013-02-20 15:24 ����������������[&quot;yoku ts.&quot; &lt;yoku0825]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15941.html">  15941 2013-02-27 12:28 ������������������[Watanabe Tomoyuki &lt;W]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15942.html">  15942 2013-02-27 13:03 ��������������������[&quot;yoku ts.&quot; &lt;yoku0825]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15952.html">  15952 2013-03-13 15:17 ����������������������[ochiai &lt;s.ochiai@xxx] Re: ��ץꥱ��������ۤˤĤ��ơ�Ĺʸ�Ǥ��ˡʼ����_���ޤȤ�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15953.html">  15953 2013-03-13 15:38 ������������������������[&quot;yoku ts.&quot; &lt;yoku0825]                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15954.html">  15954 2013-03-13 16:49 ��������������������������[ochiai &lt;s.ochiai@xxx]               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15931.html">@ 15931 2013-02-15 16:35 ��������[&quot;ochiai&quot; &lt;s.ochiai@x] RE:[mysql 15929] Re: ��ץꥱ��������ۤˤĤ��ơ�Ĺʸ�Ǥ��ˡʼ����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15934.html">@ 15934 2013-02-15 19:06 ����������[Watanabe Tomoyuki &lt;W] RE: [mysql 15931] RE:[mysql 15929] Re: ��ץꥱ��������ۤˤĤ��ơ�Ĺʸ�Ǥ��ˡʼ����</a></span>
+<span class="current">-&gt;&nbsp;<a href="15925.html">@ 15925 2013-02-13 16:39 [&quot;ochiai&quot; &lt;s.ochiai@x] レプリケーション構築について（長文です）（質問）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15926.html">@ 15926 2013-02-14 09:14 ┗[Watanabe Tomoyuki &lt;W]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15928.html">@ 15928 2013-02-15 10:50 　┗[&quot;ochiai&quot; &lt;s.ochiai@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15929.html">@ 15929 2013-02-15 14:54 　　┗[Watanabe Tomoyuki &lt;W]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15930.html">  15930 2013-02-15 15:02 　　　┣[&quot;yoku ts.&quot; &lt;yoku0825]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15932.html">@ 15932 2013-02-15 16:48 　　　┃┗[&quot;ochiai&quot; &lt;s.ochiai@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15933.html">  15933 2013-02-15 18:47 　　　┃　┗[&quot;yoku ts.&quot; &lt;yoku0825]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15936.html">@ 15936 2013-02-20 11:31 　　　┃　　┗[&quot;ochiai&quot; &lt;s.ochiai@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15937.html">  15937 2013-02-20 15:24 　　　┃　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15941.html">  15941 2013-02-27 12:28 　　　┃　　　　┗[Watanabe Tomoyuki &lt;W]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15942.html">  15942 2013-02-27 13:03 　　　┃　　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15952.html">  15952 2013-03-13 15:17 　　　┃　　　　　　┗[ochiai &lt;s.ochiai@xxx] Re: レプリケーション構築について（長文です）（質問）_解決まとめ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15953.html">  15953 2013-03-13 15:38 　　　┃　　　　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15954.html">  15954 2013-03-13 16:49 　　　┃　　　　　　　　┗[ochiai &lt;s.ochiai@xxx]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15931.html">@ 15931 2013-02-15 16:35 　　　┗[&quot;ochiai&quot; &lt;s.ochiai@x] RE:[mysql 15929] Re: レプリケーション構築について（長文です）（質問）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15934.html">@ 15934 2013-02-15 19:06 　　　　┗[Watanabe Tomoyuki &lt;W] RE: [mysql 15931] RE:[mysql 15929] Re: レプリケーション構築について（長文です）（質問）</a></span>
 </pre>
 </body>
 </html>

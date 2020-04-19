@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="6714.html">[��]</a><a href="6716.html">[��]</a><a href="../list/6701-6800.html">[�ֹ�����]</a><a href="../thread/6701-6800.html">[����åɰ���]</a></p>
+<p class="button"><a href="6714.html">[前]</a><a href="6716.html">[次]</a><a href="../list/6701-6800.html">[番号順一覧]</a><a href="../thread/6701-6800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:6715
 </p>
@@ -13,46 +13,46 @@ mysql:6715
 <p>
 From: &quot;E-Mail&quot; &lt;&quot;E-Mail&quot; &lt;tyunn@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 14 Dec 2002 11:59:48 +0900<br>
-Subject: [mysql 06715] Re: : ��¾����<br>
+Subject: [mysql 06715] Re: : 排他処理<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����ˤ��ϡ����ФǤ���
+こんにちは。白石です。
 
-<span class="quote2">&gt; &gt; MyISAM���Υơ��֥���Ф��ơ�����������update,delete��insert�ˤ�</span>
-<span class="quote2">&gt; &gt; �ԤäƤ����¾�Υ桼����Ʊ�ơ��֥�򻲾ȤΤߤǤ���褦�ˤ���</span>
-<span class="quote2">&gt; &gt; �Ȥ��ä����Ȥ�Ԥ����ȤϤǤ���Ǥ��礦����</span>
+<span class="quote2">&gt; &gt; MyISAM型のテーブルに対して、更新処理（update,delete、insert）を</span>
+<span class="quote2">&gt; &gt; 行っている間他のユーザが同テーブルを参照のみできるようにする</span>
+<span class="quote2">&gt; &gt; といったことを行うことはできるでしょうか？</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ñ��ι��������Ǥ���С��ä˥��å�����ɬ�פϤʤ��Ǥ��礦���顢��ꤿ��</span>
-<span class="quote1">&gt; ���Ȥϡ���ʣ���ι���������Ԥʤ��֡�¾�Υ���åɤ��鹹�������򤵤�����</span>
-<span class="quote1">&gt; �ʤ��פȤ������ȤǤ��礦����</span>
+<span class="quote1">&gt; 単一の更新処理であれば、特にロックする必要はないでしょうから、やりたい</span>
+<span class="quote1">&gt; ことは、「複数の更新処理を行なう間、他のスレッドから更新処理をさせたく</span>
+<span class="quote1">&gt; ない」ということでしょうか。</span>
 
-����ñ��β�ǽ���Ϲ⤤����ʣ���ι��������׵᤬Ʊ���ˤ������
-���������ȤϤ����ʤ��Τǡ�������褦�ʽ��������ꤷ�Ƥ��ޤ���
+　　単一の可能性は高いが、複数の更新処理要求が同時にある場合は
+　　ゼロとはいえないので、言われるような処理を想定しています。
 
 
 
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; WRITE LOCK �ϡ�¾�Υ���åɤ���θ���������Ǥ��ʤ��ʤä��㤦���顢��</span>
-<span class="quote1">&gt; ��Ǥ���͡�</span>
-<span class="quote1">&gt;��ά</span>
-<span class="quote1">&gt; ���������� INSERT �����Ǥ���С�����Ǥ��ɤ����⤷��ʤ��Ǥ��͡�DELETE</span>
-<span class="quote1">&gt; �� UPDATE ��������ϡ�</span>
+<span class="quote1">&gt; WRITE LOCK は、他のスレッドからの検索処理もできなくなっちゃうから、ダ</span>
+<span class="quote1">&gt; メですよね。</span>
+<span class="quote1">&gt;　略</span>
+<span class="quote1">&gt; 更新処理が INSERT だけであれば、これでも良いかもしれないですね。DELETE</span>
+<span class="quote1">&gt; や UPDATE がある場合は、</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; SELECT GET_LOCK(&quot;lock&quot;, 10000);</span>
 <span class="quote1">&gt; CREATE TEMPORARY TABLE insert_table SELECT * FROM real_table;</span>
-<span class="quote1">&gt; ...��������...</span>
+<span class="quote1">&gt; ...更新処理...</span>
 <span class="quote1">&gt; RENAME TABLE real_table TO backup_table, insert_table TO real_table;</span>
 <span class="quote1">&gt; DROP TABLE insert_table;</span>
 <span class="quote1">&gt; SELECT_RELEASE_LOCK(&quot;lock&quot;);</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Ȥ����ΤϤɤ��Ǥ��礦������Ƥޤ��󤬡� (^^;</span>
+<span class="quote1">&gt; というのはどうでしょうか。試してませんが… (^^;</span>
 
-���ν�������GET_LOCK�幹���������ˤ˿�����GET_LOCK�׵��GET_LOCK�¹ԡ�
-�����ä��Ȥ��ϡ��ǽ��LOCK�ϳ��������Τǡ��ǽ�Τ��ι��������ϤɤΤ褦��
-�ʤ�ΤǤ��礦�����ʤ���äȿ��ۤ���������
+この処理時（GET_LOCK後更新処理時）に新しいGET_LOCK要求（GET_LOCK実行）
+があったときは、最初のLOCKは開放されるので、最初のこの更新処理はどのように
+なるのでしょうか？（ちょっと心配しすぎ？）
 
 
 
@@ -60,18 +60,18 @@ Subject: [mysql 06715] Re: : ��¾����<br>
 
 </pre>
 </div>
-<p class="button"><a href="6714.html">[��]</a><a href="6716.html">[��]</a><a href="../list/6701-6800.html">[�ֹ�����]</a><a href="../thread/6701-6800.html">[����åɰ���]</a></p>
+<p class="button"><a href="6714.html">[前]</a><a href="6716.html">[次]</a><a href="../list/6701-6800.html">[番号順一覧]</a><a href="../thread/6701-6800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="6678.html">   6678 2002-12-10 02:33 [&quot;E-Mail&quot; &lt;tyunn@xxxx] ��¾����                                </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6679.html">   6679 2002-12-10 03:11 ��[Sumito_Oda &lt;oda@xxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6680.html">   6680 2002-12-10 10:52 ����[&quot;E-Mail&quot; &lt;tyunn@xxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6681.html">   6681 2002-12-10 11:35 ������[SUGAWARA Hajime &lt;sug]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6682.html">   6682 2002-12-10 12:01 ��������[&quot;E-Mail&quot; &lt;tyunn@xxxx]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6683.html">   6683 2002-12-10 13:15 ����������[SUGAWARA Hajime &lt;sug]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6692.html">   6692 2002-12-11 09:06 ������������[&quot;E-Mail&quot; &lt;tyunn@xxxx]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6694.html">   6694 2002-12-11 12:03 ��������������[SUGAWARA Hajime &lt;sug]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6701.html">   6701 2002-12-12 07:10 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="6715.html">   6715 2002-12-14 11:59 ����[&quot;E-Mail&quot; &lt;tyunn@xxxx] Re: : ��¾����                      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6678.html">   6678 2002-12-10 02:33 [&quot;E-Mail&quot; &lt;tyunn@xxxx] 排他処理                                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6679.html">   6679 2002-12-10 03:11 ┣[Sumito_Oda &lt;oda@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6680.html">   6680 2002-12-10 10:52 ┃┗[&quot;E-Mail&quot; &lt;tyunn@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6681.html">   6681 2002-12-10 11:35 ┃　┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6682.html">   6682 2002-12-10 12:01 ┃　　┗[&quot;E-Mail&quot; &lt;tyunn@xxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6683.html">   6683 2002-12-10 13:15 ┃　　　┗[SUGAWARA Hajime &lt;sug]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6692.html">   6692 2002-12-11 09:06 ┃　　　　┗[&quot;E-Mail&quot; &lt;tyunn@xxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6694.html">   6694 2002-12-11 12:03 ┃　　　　　┗[SUGAWARA Hajime &lt;sug]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6701.html">   6701 2002-12-12 07:10 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="6715.html">   6715 2002-12-14 11:59 　┗[&quot;E-Mail&quot; &lt;tyunn@xxxx] Re: : 排他処理                      </a></span>
 </pre>
 </body>
 </html>

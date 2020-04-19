@@ -5,67 +5,67 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14603.html">[��]</a><a href="14605.html">[��]</a><a href="../list/14601-14700.html">[�ֹ�����]</a><a href="../thread/14601-14700.html">[����åɰ���]</a></p>
+<p class="button"><a href="14603.html">[前]</a><a href="14605.html">[次]</a><a href="../list/14601-14700.html">[番号順一覧]</a><a href="../thread/14601-14700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14604
 </p>
 <div class="header">
 <p>
-From: ��������� &lt;��������� &lt;matsuo@xxxxxxxxxx&gt;&gt;<br>
+From: 松尾　健司 &lt;松尾　健司 &lt;matsuo@xxxxxxxxxx&gt;&gt;<br>
 Date: Mon, 23 Jun 2008 14:14:40 +0900<br>
-Subject: [mysql 14604] transaction�ν����ˤĤ��Ƽ��䤵���Ƥ���������<br>
+Subject: [mysql 14604] transactionの処理について質問させてください。<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�Ϥ���ޤ��ơ�
-�����Ȥ����ޤ���
+はじめまして。
+松尾といいます。
 
-replication��ԤäƤ���ʤ���slave¦��transaction�ν�����ROLLBACK��
-�Ԥ��ʤ������֤ȤʤäƤ���ޤ�����
-��λפ��㤤�ʤΤ��⤷��ޤ��󤬡�
+replicationを行っているなかでslave側のtransactionの処理でROLLBACKが
+行われない？状態となっておりました。
+私の思い違いなのかもしれませんが。
 
-�С�������MySQL 4.0.25��
-���ȥ졼�����󥸥��innodb�Ǥ���
-(�������ȥ�󥶥������ơ��֥�ι����������äƤ���Ȥ������Ϥ���ޤ�
-��Ǥ�����)
+バージョンはMySQL 4.0.25。
+ストレージエンジンはinnodbです。
+(途中に非トランザクションテーブルの更新がかかっているという事はありませ
+んでした。)
 
-���ΰ٥�ץꥱ�������¦�ǲ����Τ褦�ʥ��顼��ȯ���������ޤ�����
+その為レプリケーション側で下記のようなエラーが発生いたしました。
 ERROR: 1062  Duplicate entry '9841620' for key
-Duplicate entry�ˤʤäƤ���Ȥ������ϡ�slave¦�Ǥ�master¦��ROLLBACK����
-���������¹Ԥ���ƤƤ��ޤä��ΤǤϤʤ����ȻפäƤޤ���
+Duplicate entryになっているという事は、slave側ではmaster側でROLLBACKされ
+た処理が実行されててしまったのではないかと思ってます。
 
-master¦��bin-log�򸫤�¤�Ǥϡ������Τ褦�ˤʤäƤ���ޤ�����
-(�Ŀ;����ޤि�������ά�����Ƥ��������ޤ���)
-����������BEGIN;
+master側のbin-logを見る限りでは、下記のようになっておりました。
+(個人情報を含むため一部省略させていただきます。)
+■■■■■BEGIN;
 # at 562347345
 #080621 12:06:45 server id 1  log_pos 562309839         Query   thread_id=136278939     exec_time=0     error_code=0
 SET TIMESTAMP=1214017605;
 
-��ά
+中略
 
 # at 562353083
 #080621 12:06:47 server id 1  log_pos 562353083         Query   thread_id=136278939     exec_time=0     error_code=0
 SET TIMESTAMP=1214017607;
-����������ROLLBACK;
-�������֤�slave��relay-bin-log�Ϥʤ����֤Ǥ���
+▲▲▲▲▲ROLLBACK;
+該当時間のslaveのrelay-bin-logはない状態です。
 
-innodb_flush_log_at_trx_commit��master�Ǥ�1�ˤʤäƤ��ޤ�����
-slave�Ǥ�innodb_flush_log_at_trx_commit=0�ˤ��Ƥ���ޤ���
+innodb_flush_log_at_trx_commitがmasterでは1になっていますが、
+slaveではinnodb_flush_log_at_trx_commit=0にしております。
 
-��Υ��᡼���Ȥ��Ƥϡ�master¦��ROLLBACK���줿�����ˤĤ��Ƥϡ�slave¦��
-��ȥ�󥶥������������Ԥ�쥨�顼�ˤʤä�SQL�ˤĤ��Ƥϡ�DB�˽񤭹���
-��ʤ��ʤΤǤʤ����ȻפäƤ���ޤ���
+私のイメージとしては、master側でROLLBACKされた処理については、slave側で
+もトランザクション処理が行われエラーになったSQLについては、DBに書き込ま
+れないなのでないかと思っております。
 
-slave¦�Ǥ��Τ褦�ʸ��ݤˤʤ뤳�ȤˤĤ��Ƥʤˤ���¸������������ä��㤤
-�ޤ����餴��������������ФȻפ��ޤ���
+slave側でこのような現象になることについてなにか御存じの方がいらっしゃい
+ましたらご教授いただければと思います。
 
-����������ꤤ���ޤ���
+よろしくお願いします。
 
 
 </pre>
 </div>
-<p class="button"><a href="14603.html">[��]</a><a href="14605.html">[��]</a><a href="../list/14601-14700.html">[�ֹ�����]</a><a href="../thread/14601-14700.html">[����åɰ���]</a></p>
+<p class="button"><a href="14603.html">[前]</a><a href="14605.html">[次]</a><a href="../list/14601-14700.html">[番号順一覧]</a><a href="../thread/14601-14700.html">[スレッド一覧]</a></p>
 </body>
 </html>

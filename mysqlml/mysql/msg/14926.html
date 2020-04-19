@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14925.html">[��]</a><a href="14927.html">[��]</a><a href="../list/14901-15000.html">[�ֹ�����]</a><a href="../thread/14901-15000.html">[����åɰ���]</a></p>
+<p class="button"><a href="14925.html">[前]</a><a href="14927.html">[次]</a><a href="../list/14901-15000.html">[番号順一覧]</a><a href="../thread/14901-15000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14926
 </p>
@@ -13,112 +13,112 @@ mysql:14926
 <p>
 From: Mikiya Okuno &lt;Mikiya Okuno &lt;Mikiya.Okuno@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 18 Jun 2009 16:13:18 +0900<br>
-Subject: [mysql 14926] Re: MySQL5�Ϥǥ������ȱۤ�����³���٤���ˤĤ���<br>
+Subject: [mysql 14926] Re: MySQL5系でセグメント越えの接続が遅い件について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��ʤ��󡢤Ϥ���ޤ��ơ�
+舞永さん、はじめまして。
 
-skip-name-resolved���ץ�������ꤷ�Ƥ��褷�ʤ��ä��Ȥ������ȤǤ��͡�
-�ޤ����Υ��ץ������Ƥʤ��褦�Ǥ���������Ƹ��Ʋ�������
+skip-name-resolvedオプションを指定しても解決しなかったということですね？
+まだこのオプションを試してないようでしたら一応試して見て下さい。
 
-<span class="quote1">&gt; MySQL5����ǤϽ�����ͥ��������˲������äƤ���ΤǤϡ��ȿ�¬���ޤ���</span>
+<span class="quote1">&gt; MySQL5系列では初期コネクション時に何かをやっているのでは？と推測します。</span>
 
-4.1�Ϥ�5.x�Ǥ��ä˥ץ��ȥ����ΰ㤤�Ϥ���ޤ���
+4.1系と5.xでは特にプロトコル上の違いはありません。
 
-<span class="quote1">&gt; �������������ʹ������Ȥ߹�碌�Ƹ��ڤ����Ȥ��������ƤΥ�������NG�ʤΤǤ�����</span>
-<span class="quote1">&gt; MySQL4.1�δĶ��Ǥϥ��å�����³�Ǥ��ޤ���</span>
+<span class="quote1">&gt; 下記いろいろな構成を組み合わせて検証したところ、全てのケースでNGなのですが、</span>
+<span class="quote1">&gt; MySQL4.1の環境ではサックリ接続できます。</span>
 
-4.1�Υ��饤����Ȥ���5.x�ؤ���³���ޤ��Ϥ��εդǤϤɤ��ʤ�ޤ�����
+4.1のクライアントから5.xへの接続、またはその逆ではどうなりますか？
 
-4.1��5.x������ե�����򸫤���ĺ���ޤ��Ǥ��礦����
+4.1と5.xの設定ファイルを見せて頂けますでしょうか。
 
-<span class="quote1">&gt; ����Ū�ˤϣ̣����ͳ���ƥ롼�ƥ��󥰤���Ф���ۤɡ����ͥ������˻��֤�</span>
-<span class="quote1">&gt; ������ޤ���</span>
-<span class="quote1">&gt; �ե����̣�(ʣ��������ʤ�)�Τߡ�����</span>
-<span class="quote1">&gt; �𴴣̣��ܥե����̣����󣱣���</span>
-<span class="quote1">&gt; �ե����̣����𴴣̣����ե����̣����󣱣���</span>
-<span class="quote1">&gt; �ʤɤǤ�����ö���ͥ��Ȥ��Ƥ��ޤ��ȥ������ȯ�Ԥ���������˹�®��������</span>
-<span class="quote1">&gt; ��ʤ��Ǥ���</span>
+<span class="quote1">&gt; 具体的にはＬ３を経由してルーティングすればするほど、コネクションに時間が</span>
+<span class="quote1">&gt; かかります。</span>
+<span class="quote1">&gt; フロアＬ３(複雑な設定なし)のみ：約３秒</span>
+<span class="quote1">&gt; 基幹Ｌ３＋フロアＬ３：約１５秒</span>
+<span class="quote1">&gt; フロアＬ３→基幹Ｌ３→フロアＬ３：約１８秒</span>
+<span class="quote1">&gt; などです。一旦コネクトしてしまうとクエリの発行や応答は非常に高速で全く問</span>
+<span class="quote1">&gt; 題なしです。</span>
 
 
-�ɾ����餹��ȡ��ͥåȥ���Υ롼�ƥ��󥰤����꤬�����ǽ����ͤ����ޤ���
-tracert���ޥ�ɤʤɤǥ롼�ƥ��󥰤γ�ǧ�Ϥ���ޤ�������
-�ޤ���ping��¾�Υץ��ȥ���ˤ����³�Ǥ��ɹ��ʱ���®�٤�������ΤǤ��礦����
+症状からすると、ネットワークのルーティングに問題がある可能性も考えられます。
+tracertコマンドなどでルーティングの確認はされましたか？
+また、pingや他のプロトコルによる接続では良好な応答速度を得られるのでしょうか？
 
 --
 Mikiya Okuno, MySQL Support Engineer
 Sun Microsystems KK, Tokyo, Japan
 <a href="http://www-jp.mysql.com/">http://www-jp.mysql.com/</a>
 
-On 18/06/2009, at 3:46 PM, ��ʡ�͵�� wrote:
+On 18/06/2009, at 3:46 PM, 舞永　裕樹 wrote:
 
-<span class="quote1">&gt; ���ޤ�����ʤȿ����ޤ���</span>
+<span class="quote1">&gt; 初めまして舞永と申します。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ����η�ˤĤ��ޤ��Ƽ�ʬ�Υ�����Ǥ������Ԥ������ᡢ���ͤΤ��ηä��Ҽڤ�</span>
-<span class="quote1">&gt; ������Ƥ������ޤ�����</span>
-<span class="quote1">&gt; �����͡��ʴĶ��Ǹ��ڤ�����̡��̣��ˤ��롼�ƥ��󥰤�ȯ������Ķ��ǥ���</span>
-<span class="quote1">&gt; �������˻��֤�������Ȥ���������ã���Ƥ���ޤ���</span>
-<span class="quote1">&gt; �ޤ�MySQL�С������˰�¸���뤳�Ȥ��顢��������ˤ����Ǥ���ΤǤϤ�</span>
-<span class="quote1">&gt; �פäƤ���ޤ���</span>
+<span class="quote1">&gt; 掲題の件につきまして自分のスキルでは万策尽きたため、皆様のお知恵を拝借し</span>
+<span class="quote1">&gt; たく投稿いたしました。</span>
+<span class="quote1">&gt; 当方様々な環境で検証した結果、Ｌ３によるルーティングが発生する環境でコネ</span>
+<span class="quote1">&gt; クションに時間がかかるという結論に達しております。</span>
+<span class="quote1">&gt; またMySQLバージョンに依存することから、何か設定により解決できるのではと</span>
+<span class="quote1">&gt; 思っております。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ����Ū�ˤϣ̣����ͳ���ƥ롼�ƥ��󥰤���Ф���ۤɡ����ͥ������˻��֤�</span>
-<span class="quote1">&gt; ������ޤ���</span>
-<span class="quote1">&gt; �ե����̣�(ʣ��������ʤ�)�Τߡ�����</span>
-<span class="quote1">&gt; �𴴣̣��ܥե����̣����󣱣���</span>
-<span class="quote1">&gt; �ե����̣����𴴣̣����ե����̣����󣱣���</span>
-<span class="quote1">&gt; �ʤɤǤ�����ö���ͥ��Ȥ��Ƥ��ޤ��ȥ������ȯ�Ԥ���������˹�®��������</span>
-<span class="quote1">&gt; ��ʤ��Ǥ���</span>
+<span class="quote1">&gt; 具体的にはＬ３を経由してルーティングすればするほど、コネクションに時間が</span>
+<span class="quote1">&gt; かかります。</span>
+<span class="quote1">&gt; フロアＬ３(複雑な設定なし)のみ：約３秒</span>
+<span class="quote1">&gt; 基幹Ｌ３＋フロアＬ３：約１５秒</span>
+<span class="quote1">&gt; フロアＬ３→基幹Ｌ３→フロアＬ３：約１８秒</span>
+<span class="quote1">&gt; などです。一旦コネクトしてしまうとクエリの発行や応答は非常に高速で全く問</span>
+<span class="quote1">&gt; 題なしです。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �������������ʹ������Ȥ߹�碌�Ƹ��ڤ����Ȥ��������ƤΥ�������NG�ʤΤǤ�����</span>
-<span class="quote1">&gt; MySQL4.1�δĶ��Ǥϥ��å�����³�Ǥ��ޤ���</span>
-<span class="quote1">&gt; ���ʤߤ�IP��DNS������������Ʊ���Ǥ���</span>
+<span class="quote1">&gt; 下記いろいろな構成を組み合わせて検証したところ、全てのケースでNGなのですが、</span>
+<span class="quote1">&gt; MySQL4.1の環境ではサックリ接続できます。</span>
+<span class="quote1">&gt; ちなみにIP、DNSアクセス共に同じです。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ��MySQL���󥹥ȡ���Ķ���</span>
-<span class="quote1">&gt; WindowsServer2008��MySQL5.1</span>
-<span class="quote1">&gt; WindowsServer2003��MySQL5.1��MySQL5.0</span>
+<span class="quote1">&gt; ＜MySQLインストール環境＞</span>
+<span class="quote1">&gt; WindowsServer2008＆MySQL5.1</span>
+<span class="quote1">&gt; WindowsServer2003＆MySQL5.1とMySQL5.0</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ����³���饤����ȡ�</span>
-<span class="quote1">&gt; WindowsXP��Vista����</span>
+<span class="quote1">&gt; ＜接続クライアント＞</span>
+<span class="quote1">&gt; WindowsXP、Vista、７</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ����³��ˡ��</span>
+<span class="quote1">&gt; ＜接続方法＞</span>
 <span class="quote1">&gt; ADO</span>
 <span class="quote1">&gt; ODBC</span>
-<span class="quote1">&gt; Navicat(����ȤäƤ��뤫�Τ�ޤ���)</span>
+<span class="quote1">&gt; Navicat(何を使っているか知りません)</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ��L3�ε����</span>
-<span class="quote1">&gt; ��������Catalyst4948-10GE</span>
-<span class="quote1">&gt; ��������Catalyst3750G-24TS</span>
-<span class="quote1">&gt; �ٻ��̡�SH5124T</span>
+<span class="quote1">&gt; ＜L3の機種＞</span>
+<span class="quote1">&gt; シスコ：Catalyst4948-10GE</span>
+<span class="quote1">&gt; シスコ：Catalyst3750G-24TS</span>
+<span class="quote1">&gt; 富士通：SH5124T</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; Ʊ�쥻�����ȤǤΥ��������Ǥϡ�MySQL�����ӥ���ư��Σ�������³������</span>
-<span class="quote1">&gt; �������Ԥ�����뤳�Ȥ��顢</span>
-<span class="quote1">&gt; MySQL5����ǤϽ�����ͥ��������˲������äƤ���ΤǤϡ��ȿ�¬���ޤ���</span>
+<span class="quote1">&gt; 同一セグメントでのアクセスでは、MySQLサービス起動後の１回目接続だけ約</span>
+<span class="quote1">&gt; １３秒待たされることから、</span>
+<span class="quote1">&gt; MySQL5系列では初期コネクション時に何かをやっているのでは？と推測します。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ������Υ����ˤ���</span>
-<span class="quote1">&gt; 14631��MySQL5����⡼�Ȥ������³���٤��פ�����Ǥ��Ѳ��ʤ���</span>
-<span class="quote1">&gt; 12754�֥��ͥ��������Υ쥹�ݥ󥹤ˤĤ��ơפλ��ݤ����餯Ʊ����ΤȻפ�</span>
-<span class="quote1">&gt; ��ޤ��������ˡ�ε��ܤ�̵�����֤Ǥ���</span>
+<span class="quote1">&gt; こちらのログにある</span>
+<span class="quote1">&gt; 14631「MySQL5，リモートからの接続が遅い」の設定では変化なし。</span>
+<span class="quote1">&gt; 12754「コネクション時のレスポンスについて」の事象が恐らく同じものと思わ</span>
+<span class="quote1">&gt; れますが解決方法の記載が無い状態です。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ɤʤ���Ʊ�ͤξɾ��ǲ�褷���ʤɤ���ޤ����顢���󤴶�������������</span>
-<span class="quote1">&gt; ����������ꤤ�������ޤ���</span>
+<span class="quote1">&gt; どなたか同様の症状で解決したなどありましたら、是非ご教示ください。</span>
+<span class="quote1">&gt; よろしくお願いいたします。</span>
 <span class="quote1">&gt;</span>
 
 
 </pre>
 </div>
-<p class="button"><a href="14925.html">[��]</a><a href="14927.html">[��]</a><a href="../list/14901-15000.html">[�ֹ�����]</a><a href="../thread/14901-15000.html">[����åɰ���]</a></p>
+<p class="button"><a href="14925.html">[前]</a><a href="14927.html">[次]</a><a href="../list/14901-15000.html">[番号順一覧]</a><a href="../thread/14901-15000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14925.html">  14925 2009-06-18 15:46 [��ʡ�͵�� &lt;mysql@xx] MySQL5�Ϥǥ������ȱۤ�����³���٤���ˤĤ���</a></span>
-<span class="current">-&gt;&nbsp;<a href="14926.html">  14926 2009-06-18 16:13 ��[Mikiya Okuno &lt;Mikiya]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14927.html">  14927 2009-06-18 16:45 ����[��ʡ�͵�� &lt;mysql@xx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14928.html">  14928 2009-06-18 16:51 ������[��ʡ�͵�� &lt;mysql@xx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14929.html">  14929 2009-06-18 17:50 ��������[��ʡ�͵�� &lt;mysql@xx]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14930.html">  14930 2009-06-18 17:56 ����������[Mikiya Okuno &lt;Mikiya]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14931.html">  14931 2009-06-19 10:33 ������������[Tetsuro IKEDA &lt;te.ik]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14932.html">  14932 2009-06-19 20:01 ��������������[��ʡ�͵�� &lt;mysql@xx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14925.html">  14925 2009-06-18 15:46 [舞永　裕樹 &lt;mysql@xx] MySQL5系でセグメント越えの接続が遅い件について</a></span>
+<span class="current">-&gt;&nbsp;<a href="14926.html">  14926 2009-06-18 16:13 ┗[Mikiya Okuno &lt;Mikiya]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14927.html">  14927 2009-06-18 16:45 　┗[舞永　裕樹 &lt;mysql@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14928.html">  14928 2009-06-18 16:51 　　┗[舞永　裕樹 &lt;mysql@xx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14929.html">  14929 2009-06-18 17:50 　　　┗[舞永　裕樹 &lt;mysql@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14930.html">  14930 2009-06-18 17:56 　　　　┗[Mikiya Okuno &lt;Mikiya]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14931.html">  14931 2009-06-19 10:33 　　　　　┗[Tetsuro IKEDA &lt;te.ik]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14932.html">  14932 2009-06-19 20:01 　　　　　　┗[舞永　裕樹 &lt;mysql@xx]                           </a></span>
 </pre>
 </body>
 </html>

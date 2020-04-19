@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="6684.html">[��]</a><a href="6686.html">[��]</a><a href="../list/6601-6700.html">[�ֹ�����]</a><a href="../thread/6601-6700.html">[����åɰ���]</a></p>
+<p class="button"><a href="6684.html">[前]</a><a href="6686.html">[次]</a><a href="../list/6601-6700.html">[番号順一覧]</a><a href="../thread/6601-6700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:6685
 </p>
@@ -13,24 +13,24 @@ mysql:6685
 <p>
 From: &quot;matsuda&quot; &lt;&quot;matsuda&quot; &lt;matsuda@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 10 Dec 2002 20:54:52 +0900<br>
-Subject: [mysql 06685] ��������ޤ�����ͤα黻�ˤĤ���<br>
+Subject: [mysql 06685] 小数点を含んだ数値の演算について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����ˤ��
-���Ĥ⤪���äˤʤäƤ���ޤ���
+こんにちわ。
+いつもお世話になっております。
 
-�Ķ���Windows2000��SP1
-MySQL��4.0.4-beta-max
-��������ǥƥ��Ȥ��Ƥ��ޤ���
+環境：Windows2000　SP1
+MySQL：4.0.4-beta-max
+ローカルでテストしています。
 
-����a,b��軻������̤�TRUNCATE�ؿ��ˤ�꾮�����ʲ���
-�ڤ�ΤƤ��ͤˤ������ΤǤ�����a,b��������ͤΤȤ���
-��̤˸����������Ƥ��ޤ��ޤ���
+数値a,bを乗算した結果をTRUNCATE関数により小数点以下を
+切り捨てた値にしたいのですが、a,bがある数値のときに
+結果に誤差が生じてしまいます。
 
-��MySQL�¹����ơ�
+＜MySQL実行内容＞
 -------------------------------------------------
 mysql&gt; create table test2
     -&gt; ( suryo numeric(14,4) null,
@@ -55,9 +55,9 @@ mysql&gt; select * from test2;
 
 -------------------------------------------------
 
-���衢2.34*13000=30420�Ȥʤ�Ϥ��ʤΤǤ�����������
-�ե�����ɤη������꤬����Τ��Ȼפ���
-ľ�ܰʲ��Τ褦�ʥ��ޥ�ɤ����Ϥ��ƥ����å����Ƥߤޤ�����
+本来、2.34*13000=30420となるはずなのですが・・・。
+フィールドの型に問題があるのかと思い、
+直接以下のようなコマンドを入力してチェックしてみました。
 
 -------------------------------------------------
 mysql&gt; select truncate(2.34*13000,0);
@@ -77,47 +77,47 @@ mysql&gt; select 2.34*13000;
 1 row in set (0.00 sec)
 -------------------------------------------------
 
-�ȡ��嵭�Τ褦�ʷ�̤ˤʤäƤ��ޤ��ޤ���
+と、上記のような結果になってしまいます。
 
-����ơ��֥�[table_A]�ˡ��嵭�Υơ��֥�[test2]��Ʊ����¤��
-�ե������&quot;suryo&quot;��&quot;tanka&quot;��&quot;kingaku&quot;�����ꡢ
-&quot;suryo&quot;��&quot;tanka&quot;�ˤϳơ�ʣ���쥳���ɤ����äƤ��ޤ���
-SQLʸ��
+あるテーブル[table_A]に、上記のテーブル[test2]と同じ構造の
+フィールド&quot;suryo&quot;、&quot;tanka&quot;、&quot;kingaku&quot;があり、
+&quot;suryo&quot;、&quot;tanka&quot;には各々複数レコードが入っています。
+SQL文で
 
 update table_A set kingaku=truncate(suryo*tanka,0);
 
-�ȼ¹Ԥ�����ˡ�&quot;kingaku&quot;�ե�����ɤι��(sum)�򻻽Ф��Ƥߤ�ȡ�
-ͽ�ۤ��ͤȰ�äƤ�������ˡ����쥳���ɤ��ĥ����å����Ƥߤ��Ȥ�����
-�嵭�Τ褦�ʿ��ͤ��Ȥ߹�碌�λ��˸����������Ƥ��뤳�Ȥ�ʬ����ޤ�����
-¾�ˤ�
+と実行した後に、&quot;kingaku&quot;フィールドの合計(sum)を算出してみると、
+予想の値と違っていたために、１レコードずつチェックしてみたところ、
+上記のような数値の組み合わせの時に誤差が生じていることが分かりました。
+他にも
 
 truncate(1.17*13500,0) ---&gt; 15794
 1.17*13500             ---&gt; 15795
 
-�Ȥ����黻��̤�����ޤ�����
+という演算結果がありました。
 
-�ޥ˥奢���
+マニュアルに
 ==============================================================
-����ԥ塼���ǤϾ������������Τʿ��ͤȤ��Ƥϳ�Ǽ���줺��double��
-�Ȥ��Ƴ�Ǽ����ޤ���
-���η�̤ˤ�äƤ��ޤ����Ǥ��礦
-TRUNCATE(10.28*100,0) �� 1027
-�嵭��10.28�ϼºݤˤϡ�10.279999999999999�Τ褦�ʤ�ΤȤ���
-��Ǽ����뤿���ȯ�����ޤ���
+コンピュータでは小数点数は正確な数値としては格納されず、double値
+として格納されます。
+次の結果によってだまされるでしょう
+TRUNCATE(10.28*100,0) → 1027
+上記は10.28は実際には、10.279999999999999のようなものとして
+格納されるために発生します。
 ==============================================================
-�ȵ��Ҥ���Ƥ���Τǡ�TRUNCATE�ؿ����Ѥ��뤳�Ȥˤ�äƾ������ʲ���
-�ڤ�ΤƤ��Ƥ��ޤäƤ���Ȼפ���ΤǤ�����������������
-���Τʷ�̤��������Ȥ��ˤϡ��ɤ���äƲ��򤷤����ɤ��ΤǤ��礦����
+と記述されているので、TRUNCATE関数を用いることによって小数点以下が
+切り捨てられてしまっていると思われるのですが、こういう場合に
+正確な結果を得たいときには、どうやって回避したら良いのでしょうか？
 
-���ޤ��ޤ��Τ褦�ʿ��ͤ��Ȥ߹�碌������줿��̤��Ȼפ��ΤǤ�����
-�軻�ʳ��䡢�嵭���Ͱʳ��ˤ⤳�����ä����ݤ������ꤦ��ȹͤ����
-�黻����Ѥ���Ȥ��ˤ�ɬ�����դ�������������
-�Ȥ������Ȥˤʤ�ΤǤ��礦����
+たまたまこのような数値の組み合わせで得られた結果だと思うのですが、
+乗算以外や、上記数値以外にもこういった現象が起こりうると考えると
+演算を使用するときには必ず注意した方がいい、
+ということになるのでしょうか？
 
-�ʾ塢����������ꤤ�������ޤ���
+以上、よろしくお願いいたします。
 
 *************
-���ޤĤ�
+　まつだ
 
 
 
@@ -129,13 +129,13 @@ TRUNCATE(10.28*100,0) �� 1027
 
 </pre>
 </div>
-<p class="button"><a href="6684.html">[��]</a><a href="6686.html">[��]</a><a href="../list/6601-6700.html">[�ֹ�����]</a><a href="../thread/6601-6700.html">[����åɰ���]</a></p>
+<p class="button"><a href="6684.html">[前]</a><a href="6686.html">[次]</a><a href="../list/6601-6700.html">[番号順一覧]</a><a href="../thread/6601-6700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="6685.html">   6685 2002-12-10 20:54 [&quot;matsuda&quot; &lt;matsuda@x] ��������ޤ�����ͤα黻�ˤĤ���        </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6687.html">   6687 2002-12-10 22:19 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6695.html">   6695 2002-12-11 12:08 ����[SUGAWARA Hajime &lt;sug]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6697.html">   6697 2002-12-11 13:15 ������[SUGAWARA Hajime &lt;sug]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6693.html">   6693 2002-12-11 12:02 ��[madara &lt;madara@xxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="6685.html">   6685 2002-12-10 20:54 [&quot;matsuda&quot; &lt;matsuda@x] 小数点を含んだ数値の演算について        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6687.html">   6687 2002-12-10 22:19 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6695.html">   6695 2002-12-11 12:08 ┃┗[SUGAWARA Hajime &lt;sug]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6697.html">   6697 2002-12-11 13:15 ┃　┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6693.html">   6693 2002-12-11 12:02 ┗[madara &lt;madara@xxxxx]                                       </a></span>
 </pre>
 </body>
 </html>

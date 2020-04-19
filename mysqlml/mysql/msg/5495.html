@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="5494.html">[��]</a><a href="5496.html">[��]</a><a href="../list/5401-5500.html">[�ֹ�����]</a><a href="../thread/5401-5500.html">[����åɰ���]</a></p>
+<p class="button"><a href="5494.html">[前]</a><a href="5496.html">[次]</a><a href="../list/5401-5500.html">[番号順一覧]</a><a href="../thread/5401-5500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:5495
 </p>
@@ -13,28 +13,28 @@ mysql:5495
 <p>
 From: &quot;Takeo Shibata&quot; &lt;&quot;Takeo Shibata&quot; &lt;shibata@xxxxxxxxxx&gt;&gt;<br>
 Date: Mon, 13 May 2002 17:03:53 -0700<br>
-Subject: [mysql 05495] LOCK TABLE �λ��Ѥ���Ӥ��Τ� SQL �μ¹��ݾڤˤ��󤷤�<br>
+Subject: [mysql 05495] LOCK TABLE の使用およびそのた SQL の実行保証にかんして<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���Ĥ⤪���äˤʤäƤޤ�
-��Ϣ���룲�ĤΥơ��֥��Ʊ���˹����򤫤�
-�ɤΤ褦�ʾ��֤ˤ����Ƥ�
-���ʤ餺���ĤΥơ��֥뤬Ʊ���˥��åפ����ɬ�פ�����ޤ�
-���Ĥ����餫����ͳ�ˤ�꼺�Ԥ���Ф⤦���Ĥι����⥭��󥻥�
-���ʤ���Фʤ�ޤ���
+いつもお世話になってます
+関連する２つのテーブルを同時に更新をかけ
+どのような状態においても
+かならず２つのテーブルが同時にアップされる必要があります
+１つが何らかの理由により失敗すればもういつの更新もキャンセル
+しなければなりません
 
-����<a href="../../../index.html">http://www.mysql.gr.jp/</a>
-��1.4.6 COMMIT/ROLLBACK �ʤ��Ǥ��ޤ������ˡ
-��
-���ޤ������������ߤ�
-LOCK TABLE�Ȥ������Ҥ�
-1��Υ��ڥ졼�������ǥ쥳���ɤ򹹿�����ؿ�
-�Ȥ������Ҥ�����ޤ���
+この<a href="../../../index.html">http://www.mysql.gr.jp/</a>
+の1.4.6 COMMIT/ROLLBACK なしでうまくやる方法
+で
+いまいろいろ資料みて
+LOCK TABLEという記述と
+1回のオペレーション中でレコードを更新する関数
+という記述がありました
 
-�ºݤ�
+実際は
 connect_db
 SQL1 = insert into customer(id, passwd, user, ....) values(xx,yy,zz)
 SQL2 = insert into login(id, passwd, host) values(xx,yy,$REMOTE_HOST)
@@ -43,40 +43,40 @@ execute(SQL1),
 execute(SQL2)
 UNLOCK TABLES
 
-�Ȥ�ꤿ���ΤǤ���
-�ޤ��Ѥ�
+とやりたいのですが
+まあ用は
 execute(SQL1)
-�Ǥ����Ǽ��Ԥ���Ф��٤ƤΥ�����������ä��Ф����ΤǤ���
-execute(SQL1)����������
-execute(SQL2)�����Ԥ�����硢���ٻ�Ԥ��뤫��
-SQL1�򥭥�󥻥뤷�����ΤǤ���
+でここで失敗すればすべてのアクションを取り消せばいいのですが
+execute(SQL1)が成功して
+execute(SQL2)が失敗した場合、再度試行するか、
+SQL1をキャンセルしたいのですが
 
-�̾�SQL1,SQL��ξ�������������ǰ��Ǥ�
-ξ���¹Ԥ��Ƥ��ʤ����֤�Ǥ�������ݾڤ������ΤǤ���
-�ʤˤ�SQL�ǥ��ޡ��Ȥʤ�꤫������ޤ��Ǥ��礦����
+通常SQL1,SQL２両方成功させ、最悪でも
+両方実行していない状態をできるだけ保証したいのですが
+なにかSQLでスマートなやりかたありますでしょうか？
 
-���İʾ�ι������ɲ�SQL
-�����꡼��¹Ԥ���Ȥ��Ǻǽ�Υ����꡼��������������
-���Υ����꡼�����Ԥ����顢�ǽ�Υ����꡼�¹Ԥ򥭥�󥻥뤷��
-����ǻ�Ԥ���ʤꥨ�顼ɽ������褦�ˤ������ΤǤ�������
+２つ以上の更新、追加SQL
+クエリーを実行するときで最初のクエリーが成功し、その
+次のクエリーが失敗したら、最初のクエリー実行をキャンセルして
+から最試行するなりエラー表示するようにしたいのですが。。
 
-�ʤˤ�DB�˴ؤ��Ƥϴ���Ū�ʤ��Ȥ���
-����ޤ���ɤ�������������ꤤ�������ޤ�
-���������Ȥ���ROLLBACK
-�󤢤ƤΤ���Ѥ���٤��ʤ�Ǥ��礦����
-�ʤˤ�������ˡ������ˡ�˴ؤ������Ū����SQL�����륵����
-��¸�ΤǤ�����ɤ�����������������
-����������ꤤ�������ޤ�
+なにかDBに関しては基本的なことかも
+しれませんどうかよろしくお願いいたします
+こういうときはROLLBACK
+んあてのを使用するべきなんでしょうか？
+なにかいい方法や解決方法に関する具体的な例SQLがあるサイト
+ご存知でしたらどうかご教授ください
+よろしくお願いいたします
 
 
 
 
 </pre>
 </div>
-<p class="button"><a href="5494.html">[��]</a><a href="5496.html">[��]</a><a href="../list/5401-5500.html">[�ֹ�����]</a><a href="../thread/5401-5500.html">[����åɰ���]</a></p>
+<p class="button"><a href="5494.html">[前]</a><a href="5496.html">[次]</a><a href="../list/5401-5500.html">[番号順一覧]</a><a href="../thread/5401-5500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="5495.html">   5495 2002-05-14 09:03 [&quot;Takeo Shibata&quot; &lt;shi] LOCK TABLE �λ��Ѥ���Ӥ��Τ� SQL �μ¹��ݾڤˤ��󤷤�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="5501.html">   5501 2002-05-14 23:07 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="5495.html">   5495 2002-05-14 09:03 [&quot;Takeo Shibata&quot; &lt;shi] LOCK TABLE の使用およびそのた SQL の実行保証にかんして</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5501.html">   5501 2002-05-14 23:07 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
 </pre>
 </body>
 </html>

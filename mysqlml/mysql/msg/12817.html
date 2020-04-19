@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="12816.html">[��]</a><a href="12818.html">[��]</a><a href="../list/12801-12900.html">[�ֹ�����]</a><a href="../thread/12801-12900.html">[����åɰ���]</a></p>
+<p class="button"><a href="12816.html">[前]</a><a href="12818.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:12817
 </p>
@@ -13,17 +13,17 @@ mysql:12817
 <p>
 From: shuetsu &lt;shuetsu &lt;shuetsu@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 28 Feb 2006 10:55:26 +0900<br>
-Subject: [mysql 12817] Re: SELECT�������®�٤����ꤷ�ʤ�<br>
+Subject: [mysql 12817] Re: SELECTクエリの速度が安定しない<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��ƣ�Ǥ���
+伊藤です。
 
-���ߤޤ���
-�٤��Ȥ��Ͽ��äȤ����Τ��礲���Ǥ�����
-�ʲ��Τ褦�ʸ��ݤǤ���
+すみません。
+遅いときは数秒というのは大げさでした。
+以下のような現象です。
 
 mysql&gt; select count(*) from hoge where foo &gt; 100;
 1 row in set (0.59 sec)
@@ -34,38 +34,38 @@ mysql&gt; select count(*) from fuga where bar &gt; 100;
 mysql&gt; select count(*) from fuga where bar &gt; 100;
 1 row in set (0.08 sec)
 
-�֤���̤�hoge��fuga����40000�Ǥ���
+返す結果はhogeもfugaも約40000です。
 
-<span class="quote1">&gt; �����Ф餯������������ʤ��ȥǥ����������꡼�ץ⡼�ɤ����뤿��ˡ�</span>
-<span class="quote1">&gt;   �����ܤΥ����������˻��֤�������</span>
+<span class="quote1">&gt; ・しばらくアクセスされないとディスクがスリープモードに入るために、</span>
+<span class="quote1">&gt;   １回目のアクセス時に時間がかかる</span>
 
-�ơ��֥�hoge�ؤΥ������®���Τˡ�fuga�ؤΥ�������٤���
-�ʤ�Ƥ��Ȥ������Ƥ���Τǡ��ǥ������ϸ����ǤϤʤ��ȻפäƤ��ޤ���
-ʣ���Υǥ�������ʬ�����ƥǡ��������֤��Ƥ���Ȥ������Ȥ⤢��ޤ��󤷡�����
+テーブルhogeへのクエリは速いのに、fugaへのクエリは遅い、
+なんてことが起きているので、ディスクは原因ではないと思っています。
+複数のディスクに分散してデータを配置しているということもありませんし、、、
 
-�֥ơ��֥���פˡ����Ф餯���äƤ����Ȱ��٤����٤��ʤ�Ȥ��������Ǥ���
+「テーブル毎」に、しばらく放っておくと一度だけ遅くなるという感じです。
 
-ǰ�Τ��ᡢ���θ夹����
+念のため、この後すぐに
 
 reset query cache;
 flush tables;
 
-��¹Ԥ��Ƥ���Ƥӥ������ȯ�Ԥ��Ƥߤ��ΤǤ�����
-�٤��ʤ�Ȥ������ȤϤ���ޤ���Ǥ�����
-�ֻ��֤��֤��װʳ��˸��ݤ�Ƹ�������ˡ�����Ĥ���ޤ���
+を実行してから再びクエリを発行してみたのですが、
+遅くなるということはありませんでした。
+「時間を置く」以外に現象を再現する方法が見つかりません。
 
-�ޤ�����ȯ��Ȥ�
+また、開発作業を
 
-��ȯ�ѥ����� Linux
-�����ѥ����� FreeBSD
+開発用サーバ Linux
+本番用サーバ FreeBSD
 
-��2��ǹԤäƤ���ΤǤ������ɤ���Υ����ФǤ�Ʊ���褦�ʸ��ݤ�ȯ�����ޤ���
+の2台で行っているのですが、どちらのサーバでも同じような現象が発生します。
 
-<span class="quote1">&gt; �������ܰʹߤ�OS�Υ���å���˥ǡ�������äƤ��ޤ��ΤǱ�����</span>
-<span class="quote1">&gt;   �Ϥ䤤</span>
+<span class="quote1">&gt; ・２回目以降はOSのキャッシュにデータが乗ってしまうので応答が</span>
+<span class="quote1">&gt;   はやい</span>
 
-���줬�����Ǥ���ۤɥѥե����ޥ󥹤˺����ФƤ��ޤ��Ȥ������Ȥ�
-���ꤦ��ΤǤ��礦����
+これが原因でこれほどパフォーマンスに差が出てしまうということは
+ありうるのでしょうか？
 
 --
 shuetsu ito &lt;shuetsu@xxxxxxxxxx&gt;
@@ -74,23 +74,23 @@ shuetsu ito &lt;shuetsu@xxxxxxxxxx&gt;
 
 </pre>
 </div>
-<p class="button"><a href="12816.html">[��]</a><a href="12818.html">[��]</a><a href="../list/12801-12900.html">[�ֹ�����]</a><a href="../thread/12801-12900.html">[����åɰ���]</a></p>
+<p class="button"><a href="12816.html">[前]</a><a href="12818.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="12810.html">  12810 2006-02-27 17:46 [shuetsu &lt;shuetsu@xxx] SELECT�������®�٤����ꤷ�ʤ�          </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12811.html">  12811 2006-02-27 18:07 ��[��ƣ ��͵ &lt;endo@xxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12812.html">  12812 2006-02-27 19:11 ����[shuetsu &lt;shuetsu@xxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12815.html">  12815 2006-02-27 20:09 ������[��ƣ ��͵ &lt;endo@xxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12816.html">  12816 2006-02-28 08:33 ��������[shuetsu &lt;shuetsu@xxx]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12813.html">  12813 2006-02-27 19:43 ��[Shuji Yamakawa &lt;hzv0]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12814.html">  12814 2006-02-27 19:45 ��[SAKAI Kei &lt;sak@xxxxx]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="12817.html">  12817 2006-02-28 10:55 ����[shuetsu &lt;shuetsu@xxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12818.html">  12818 2006-02-28 11:29 ������[tatematsu &lt;tatemax@x]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12819.html">  12819 2006-02-28 11:50 ��������[tatematsu &lt;tatemax@x]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12820.html">  12820 2006-02-28 13:56 ����������[shuetsu &lt;shuetsu@xxx]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12821.html">  12821 2006-02-28 14:18 ������������[tatematsu &lt;tatemax@x]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12822.html">  12822 2006-02-28 14:37 ��������������[shuetsu &lt;shuetsu@xxx]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12823.html">  12823 2006-02-28 14:49 ������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12824.html">  12824 2006-02-28 17:13 ��������[shuetsu &lt;shuetsu@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12810.html">  12810 2006-02-27 17:46 [shuetsu &lt;shuetsu@xxx] SELECTクエリの速度が安定しない          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12811.html">  12811 2006-02-27 18:07 ┣[遠藤 俊裕 &lt;endo@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12812.html">  12812 2006-02-27 19:11 ┃┗[shuetsu &lt;shuetsu@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12815.html">  12815 2006-02-27 20:09 ┃　┗[遠藤 俊裕 &lt;endo@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12816.html">  12816 2006-02-28 08:33 ┃　　┗[shuetsu &lt;shuetsu@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12813.html">  12813 2006-02-27 19:43 ┣[Shuji Yamakawa &lt;hzv0]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12814.html">  12814 2006-02-27 19:45 ┗[SAKAI Kei &lt;sak@xxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="12817.html">  12817 2006-02-28 10:55 　┗[shuetsu &lt;shuetsu@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12818.html">  12818 2006-02-28 11:29 　　┣[tatematsu &lt;tatemax@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12819.html">  12819 2006-02-28 11:50 　　┃┗[tatematsu &lt;tatemax@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12820.html">  12820 2006-02-28 13:56 　　┃　┗[shuetsu &lt;shuetsu@xxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12821.html">  12821 2006-02-28 14:18 　　┃　　┗[tatematsu &lt;tatemax@x]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12822.html">  12822 2006-02-28 14:37 　　┃　　　┗[shuetsu &lt;shuetsu@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12823.html">  12823 2006-02-28 14:49 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12824.html">  12824 2006-02-28 17:13 　　　┗[shuetsu &lt;shuetsu@xxx]                                 </a></span>
 </pre>
 </body>
 </html>

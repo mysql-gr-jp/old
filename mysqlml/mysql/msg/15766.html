@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15765.html">[��]</a><a href="15767.html">[��]</a><a href="../list/15701-15800.html">[�ֹ�����]</a><a href="../thread/15701-15800.html">[����åɰ���]</a></p>
+<p class="button"><a href="15765.html">[前]</a><a href="15767.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15766
 </p>
@@ -13,34 +13,34 @@ mysql:15766
 <p>
 From: ram &lt;ram &lt;ram@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 26 Apr 2012 15:46:29 +0900<br>
-Subject: [mysql 15766] Re: index �ҥ�Ȥν���<br>
+Subject: [mysql 15766] Re: index ヒントの書き方<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�����͡�������ͭ�񤦤������ޤ���
+中川様　コメント有難うございます。
 
-���ͤ���������饢�ɥХ�����ĺ���ޤ��ƶ��̤Ǥ���
+何人もの方々からアドバイスを頂きまして恐縮です。
 
 where npdt &gt;= #from_ymd# and npdt &lt; #to_ymd# and sycd = #sycd#
 where npdate &gt;= '20111001' and npdate &lt; '20111031' and sycd = '06081'
-�Ȥ����褦������ϼ¹Ԥ��Ƥ��ޤ�������
+というように当初は実行していましたが、
 
-���ߤϡ����դΤ�����yyyymmdd��ʬ�䤷���̤���ˤ���
-����ǥå����򤽤�����դ��ؤ��ơ�
+現在は、日付のうち、yyyymmddを分割して別の列にし、
+インデックスをその列に付け替えて、
 where sycd = '06081' and npdate_ym &gt;= '201110'
-�Τ褦��Ϳ���Ƥ��ޤ���
+のように与えています。
 
-���ξ��֤ǡ�USE INDEX (idx1)���դ���EXPLAIN�ȼ¹Ԥ����Ȥ�����
+この状態で、USE INDEX (idx1)と付けてEXPLAINと実行したところ、
 id    select_type    table    type    possible_keys    key    key_len    ref    rows    Extra
 1    SIMPLE    t@nippod    ref    idx1    idx1    29    const,const    118    Using where
-�ȽФޤ�����
+と出ました。
 
-const�Ȥ���ʸ�����ФƤ��ޤ��Τǡ�����ǹ�®������Ƥ���Ȥ������ȤʤΤǤ��礦����
+constという文字が出ていますので、これで高速化されているということなのでしょうか？
 
-�ơ��֥�ϡ���̾�������ά���Ƥ��ޤ�������
-�¥ơ��֥�ϰʲ��Τ褦�ˤʤäƤ��ޤ���
+テーブルは　列名を一部省略していましたが、
+実テーブルは以下のようになっています。
 
 Table    Create Table
 t@nippod    
@@ -72,59 +72,59 @@ CREATE TABLE `t@nippod` (\n
   KEY `idx1` (`sycd`,`npdate_ym`,`tknm`)\n
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
-�������ʤ����Ȥˡ�Ʊ���¹Ԥ��ؤ��Ƥ���Τǡ����̤��ڤ�ʬ����Ƚ��ʤ��ʤäƤ��ޤ��ޤ�������
-�¥ơ��֥�Υ���ǥå����ɲä����ɲäϤޤ��ԤäƤ��ʤ��Τǡ�
-�¥ǡ����Ǥθ��̤Ϥޤ�¬��Ǥ��Ƥ��ޤ���
+申し訳ないことに、同時並行で替えているので、効果の切り分けが判らなくなってしまいましたが、
+実テーブルのインデックス追加や列追加はまだ行っていないので、
+実データでの効果はまだ測定できていません。
 
-Where���Group��Υ����˽и�������򥤥�ǥå����˴ޤ�뤳�ȡ�
-���Ѥ��륤��ǥå������������뤳�ȡ�
-Where��򸺤餹���ȡ�
-�����ʤȤ��Ƹ��̤�����Ȥ������ȤǤ��͡�
+Where句とGroup句のキーに出現する列をインデックスに含めること、
+使用するインデックスを明記すること、
+Where句を減らすこと、
+が手段として効果があるということですね。
 
-�������֤��¬�������COLDFUSION�Ȥ������ץꥱ������󥵡��С��ΥǥХå��⡼�ɤ�SQL�¹Ի��֤�ɽ�������Τ�
-������ܰ¤ˤ��Ƥ���ΤǤ������Τ��ˡ����Ȥ�����ζĤ��̤ꡢ�����С���Υ��󥽡���ǡ�SQL��¹Ԥ���ȡ�
-�ֻ��˽���������ꡢ���ȥ쥹�򴶤���®�٤Ǥ�̵���Ǥ���
+処理時間を計測する時、COLDFUSIONというアプリケーションサーバーのデバッグモードでSQL実行時間が表示されるので
+それを目安にしているのですが、確かに　かとうさんの仰る通り、サーバー上のコンソールで、SQLを実行すると、
+瞬時に処理が終わり、ストレスを感じる速度では無いです。
 
-����ϡ�Mysql�����ꡢ�Ȥ������⡢COLDFUSION�ʤ�����JDBC�����ꡢ�Ȥ������Ȥ��Ȥ����顢���ˤ��������ʼ����
-�����ޤΤ�����Ѥ碌�Ƥ��ޤ�������������ޤ���
+これは、Mysqlの問題、というよりも、COLDFUSIONないし、JDBCの問題、ということだとしたら、誠にお騒がせな質問で
+皆さまのお手を煩わせてしまい、申し訳ありません。
 
 -------------------------------------------------------
-���桡��Ϻ
+初穂　太郎
 
-(2012/04/26 11:56), ���� �� wrote:
+(2012/04/26 11:56), 中川 貴 wrote:
 
 <span class="quote2">&gt;&gt; where npdt &gt;= #from_ymd# and npdt &lt; #to_ymd# and sycd = #sycd#</span>
-<span class="quote1">&gt; �����Ρ�#from_ymd#�ס�#to_ymd#�ס�#sycd#�פ����ˤʤäƤ���ΤǤ���������Ū�ˤϤɤ���ͤ��Ϥ��Ƥ���ΤǤ��礦����</span>
-<span class="quote1">&gt; ���ȡ�nippo�ơ��֥�Ρ�show create table�פη�̤ⶵ���Ƥ��������ޤ��󤫡�</span>
+<span class="quote1">&gt; ここの「#from_ymd#」「#to_ymd#」「#sycd#」が気になっているのですが、具体的にはどんな値を渡しているのでしょうか。</span>
+<span class="quote1">&gt; あと、nippoテーブルの「show create table」の結果も教えていただけませんか。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; ****************************************</span>
-<span class="quote1">&gt; �����׾��󥷥��ƥ�������</span>
-<span class="quote1">&gt; ���ѻ�����</span>
-<span class="quote1">&gt; �����ץץ饶�����ӥ��ǥ������롼��</span>
-<span class="quote1">&gt; �����</span>
+<span class="quote1">&gt; コープ情報システム株式会社</span>
+<span class="quote1">&gt; 運用事業部</span>
+<span class="quote1">&gt; コーププラザサービスデスクグループ</span>
+<span class="quote1">&gt; 中川　貴</span>
 <span class="quote1">&gt; 175-0094</span>
-<span class="quote1">&gt; ����Խ�ë���ë3-29-8 �����ץץ饶5F</span>
+<span class="quote1">&gt; 東京都渋谷区渋谷3-29-8 コーププラザ5F</span>
 <span class="quote1">&gt; TEL 03-5778-8010</span>
 <span class="quote1">&gt; E-MAIL takashi.nakagawa@xxxxxxxxxx</span>
 <span class="quote1">&gt; ****************************************</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; (2012/04/25 23:27), nora1962@xxxxxxxxxx wrote:</span>
-<span class="quote2">&gt;&gt; ����Ǥ������𤫤�Ǥ���</span>
-<span class="quote2">&gt;&gt; INDEX�ҥ�Ȥν����ְ㤨�Ƥ��ޤ�����</span>
-<span class="quote2">&gt;&gt; FROM nippo USE INDEX ( ����ǥå���̾ )</span>
-<span class="quote2">&gt;&gt; �Ǥ�����</span>
+<span class="quote2">&gt;&gt; 中川です。自宅からです。</span>
+<span class="quote2">&gt;&gt; INDEXヒントの書き方間違えていました。</span>
+<span class="quote2">&gt;&gt; FROM nippo USE INDEX ( インデックス名 )</span>
+<span class="quote2">&gt;&gt; でした。</span>
 <span class="quote2">&gt;&gt;</span>
 
 
 
 </pre>
 </div>
-<p class="button"><a href="15765.html">[��]</a><a href="15767.html">[��]</a><a href="../list/15701-15800.html">[�ֹ�����]</a><a href="../thread/15701-15800.html">[����åɰ���]</a></p>
+<p class="button"><a href="15765.html">[前]</a><a href="15767.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="15763.html">  15763 2012-04-25 23:27 [&lt;nora1962@xxxxxxxxxx] index �ҥ�Ȥν���                    </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15764.html">  15764 2012-04-26 11:56 ��[���� �� &lt;takashi.nak]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="15766.html">  15766 2012-04-26 15:46 ����[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15767.html">  15767 2012-04-26 20:40 ������[&lt;nora1962@xxxxxxxxxx] Re: _[mysql_15766]_Re:_index_�ҥ�Ȥν���</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15763.html">  15763 2012-04-25 23:27 [&lt;nora1962@xxxxxxxxxx] index ヒントの書き方                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15764.html">  15764 2012-04-26 11:56 ┗[中川 貴 &lt;takashi.nak]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="15766.html">  15766 2012-04-26 15:46 　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15767.html">  15767 2012-04-26 20:40 　　┗[&lt;nora1962@xxxxxxxxxx] Re: _[mysql_15766]_Re:_index_ヒントの書き方</a></span>
 </pre>
 </body>
 </html>

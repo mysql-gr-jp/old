@@ -5,122 +5,122 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="12262.html">[��]</a><a href="12264.html">[��]</a><a href="../list/12201-12300.html">[�ֹ�����]</a><a href="../thread/12201-12300.html">[����åɰ���]</a></p>
+<p class="button"><a href="12262.html">[前]</a><a href="12264.html">[次]</a><a href="../list/12201-12300.html">[番号順一覧]</a><a href="../thread/12201-12300.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:12263
 </p>
 <div class="header">
 <p>
-From: ����ζͺ &lt;����ζͺ &lt;kusano@xxxxxxxxxx&gt;&gt;<br>
+From: 草野龍雄 &lt;草野龍雄 &lt;kusano@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 22 Oct 2005 16:32:44 +0900<br>
-Subject: [mysql 12263] Re: ���󲰤λ���(Re: �ǥ奢�륳���ǣ��ãУ�)<br>
+Subject: [mysql 12263] Re: 並列屋の視点(Re: デュアルコアで２ＣＰＵ)<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����Ǥ���
+草野です。
 
-�������ˤĤ��Ƥ�DBƳ���κݤˤ���ʤ��Ĵ�٤Ƥߤޤ�����
+この点についてはDB導入の際にそれなりに調べてみました。
 
-Linux��2.6�����ͥ����Ѥ���ȶ�礬�褤�褦�Ǥ���
+Linuxの2.6カーネルを使用すると具合がよいようです。
 <a href="http://www.atmarkit.co.jp/flinux/special/kernel26/kernel26_01a.html">http://www.atmarkit.co.jp/flinux/special/kernel26/kernel26_01a.html</a>
 <a href="http://www.atmarkit.co.jp/flinux/special/kernel26/kernel26_01c.html">http://www.atmarkit.co.jp/flinux/special/kernel26/kernel26_01c.html</a>
 
-oracle����٤ƥ��ץƥ��ޥ󥶤ν������ڤ��ʤ����ø����ˤ�MySQL�ϼ¹Ի���
-�ˤ�����ǡ���ž���γ�礬¿���ΤǤϤʤ����Ȥ��������Ω�Ƥ���ǡ�
+oracleと比べてオプティマンザの処理が軽い（いい加減？）なMySQLは実行時間
+におけるデータ転送の割合が多いのではないかという仮説を立てた上で、
 
-��DB�ǡ�����OS�ΥХåե��ʥ���å���ˤ�����褦��
-��CPU�ϥ���ž���ι�®�ʤ��
-��IO�������ٱ��ʤ�������˥饤�ȥХå������
+○DBデータがOSのバッファ（キャッシュ）に入るように
+○CPUはメモリ転送の高速なもの
+○IO処理の遅延をなくすためにライトバックを使用
 
-����ˤ��Ƹ�Ƥ�򳫻Ϥ��ޤ�����
+を柱にして検討を開始しました。
 
-MySQL�������������Τ�
-��OS �� Linux Kernel 2.6�ʾ�
-��CPU�� AMD Opteron
-��CPU���� 4-8way
-��RAID�˥饤�ȥХå�ɬ��
+MySQLと相性がいいのは
+○OS は Linux Kernel 2.6以上
+○CPUは AMD Opteron
+○CPU数は 4-8way
+○RAIDにライトバック必須
 
-�Ȥ��������˻��ޤ��������ξ�� 4way �� Opteron �ˤ����Ȥ���
-�����ͥ��single-CPU�Ǥ������Ȥ���SMP�ȤǤ�3.7�����٤θ��̤����ä�
-�Ȥ������ȤǤ���
+という結論に至りました。その上で 4way の Opteron にしたところ
+カーネルをsingle-CPUであげたときとSMPとでは3.7倍程度の効果があった
+ということです。
 
-��������˴ؤ��ƤϤ���äȰ㤦�����Ǥ�����DB�ν����ȵ��ݥ���ߥ졼�����
-�ϻ��Ƥ뤫�ʤȻפ����绨�Ĥ��������ˤ�����򻲹ͤˤ����Ƥ��������ޤ�����
+並列処理に関してはちょっと違う議論ですが、DBの処理と気象シュミレーション
+は似てるかなと思い（大雑把すぎ・・）こちらを参考にさせていただきました。
 <a href="http://www.ne.jp/asahi/comp/tarusan/">http://www.ne.jp/asahi/comp/tarusan/</a>
 
-���η�̥����ž���Ӱ��DB�������פȷ����Ť��Ƹ�Ƥ�򤷤��Ȥ����櫓�Ǥ���
+その結果メモリの転送帯域はDB処理の要と結論づけて検討をしたというわけです。
 
-�ʤ���MySQL�Υ�ץꥱ�������˴ؤ��ơ��ޥ���¦�ǥ��ߥåȤ��Ƥ⥹�졼��
-¦�Ǥ�¨����ȿ�Ǥ��Ƥ��ʤ��Τ����դ�ɬ�פǤ����ޥ�������٤������ä��ꥹ
-�졼�֤���ǽ��������Ʊ�����줬�礭���ʤäơ��������google���󥹡פΤ�
-���ʤ��Ȥ�������ޤ������դ�ɬ�פǤ��͡�
+なお、MySQLのレプリケーションに関して、マスタ側でコミットしてもスレーブ
+側では即時に反映していないので注意が必要です。マスタに負荷がかかったりス
+レーブの性能が悪いと同期ずれが大きくなって、いわゆる「googleダンス」のよ
+うなことが起こります。注意が必要ですね。
 
 
 On Fri, 21 Oct 2005 23:14:11 +0900
 murayama &lt;locutus@xxxxxxxxxx&gt; wrote:
 
-<span class="quote1">&gt; ���󲰤Ǥ⤢��¼���Ǥ���</span>
+<span class="quote1">&gt; 並列屋でもある村山です．</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���٤�ޤ�������</span>
-<span class="quote2">&gt; &gt; ��ɡ��ǥ奢�륳���ǣ��ãУդΥ����Фˤ��뤳�ȤϤ��ޤ�����</span>
-<span class="quote2">&gt; &gt; �������ꡢ��ץꥱ���������Ȥ�ǡ������Фο����Τ�</span>
-<span class="quote2">&gt; &gt; ���䤷�Ƥ������Ȥˤ��ޤ�����</span>
+<span class="quote1">&gt; 出遅れましたが，</span>
+<span class="quote2">&gt; &gt; 結局、デュアルコアで２ＣＰＵのサーバにすることはやめました。</span>
+<span class="quote2">&gt; &gt; その代わり、レプリケーションを組んで、サーバの数自体を</span>
+<span class="quote2">&gt; &gt; 増やしていくことにしました。</span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; �����礭����ͳ�ϡ�CPU���ܥȥ�ͥå��ˤʤäƤ���Ȥ������Ȥ�</span>
-<span class="quote2">&gt; &gt; �ο��Ǥ��ʤ��ʤ�С�CPU����ǽ��夲�Ƥ����ΤΥѥե����ޥ󥹤�</span>
-<span class="quote2">&gt; &gt; �Ѥ��ʤ���ǽ�����⤤�Ȥ������ȤǤ���</span>
+<span class="quote2">&gt; &gt; 一番大きな理由は、CPUがボトルネックになっているということが</span>
+<span class="quote2">&gt; &gt; 確信できないならば、CPUの性能を上げても全体のパフォーマンスは</span>
+<span class="quote2">&gt; &gt; 変わらない可能性が高いということです。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ����������ݤ��Ȥ����ϡ���CPU�Υޥ����Ʊ����ǽ�Σ�CPU�ˤ��������</span>
-<span class="quote1">&gt; ���äơ��᤯�ʤ�Ȥϸ¤�ʤ����Ǥ����󤤾��ˤϤ����ä��٤��ʤ�</span>
-<span class="quote1">&gt; ���Ȥ�������ޤ���</span>
+<span class="quote1">&gt; 並列処理の怖いところは，１CPUのマシンを同じ性能の２CPUにしたからと</span>
+<span class="quote1">&gt; 言って，早くなるとは限らない点です．酷い場合にはかえって遅くなる</span>
+<span class="quote1">&gt; ことさえあります．</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �������Ȥ��ơ������٤��㤤��Ʊ����¿ȯ��������Ǥ���������ˤ��</span>
-<span class="quote1">&gt; ��®��������ʬ��ȸ����ޤ�����������ʬ��ǤϺǰ��Ǥ�Ʊ���Υ����С�</span>
-<span class="quote1">&gt; �إåɤ����󲽤ˤ���®������ꡤ��������ˤ��������٤��ʤ����</span>
-<span class="quote1">&gt; ����ޤ���</span>
+<span class="quote1">&gt; 一般論として，並列度の低い，同期の多発する処理では並列処理による</span>
+<span class="quote1">&gt; 高速化がし難い分野と言えます．そういう分野では最悪では同期のオーバー</span>
+<span class="quote1">&gt; ヘッドが並列化による高速化を上回り，並列処理にした方が遅くなる場合も</span>
+<span class="quote1">&gt; あります．</span>
 <span class="quote1">&gt; <a href="http://www.netgene.co.jp/java/concurrentTips.html">http://www.netgene.co.jp/java/concurrentTips.html</a></span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����RDBMS�Ȥ����Τϡ��ܼ�Ū�ˤ������������Ǥ���͡�</span>
-<span class="quote1">&gt; ACID���������Ȥ����ۤ�¿ʬ����Ǥ���������ޥ��������</span>
-<span class="quote1">&gt; ����®�����Ǥ⤷��ʬ��ΰ�Ĥ��Ȼפ��ޤ���</span>
-<span class="quote1">&gt; ��DB�٥���������Ѥ�����</span>
+<span class="quote1">&gt; それでRDBMSというのは，本質的にそういう処理ですよね？</span>
+<span class="quote1">&gt; ACID特性云々という奴が多分それです．だからマルチコアに</span>
+<span class="quote1">&gt; よる高速化が最もし難い分野の一つだと思います．</span>
+<span class="quote1">&gt; ＃DBベンダーは大変だー．</span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt; &gt; ������⡢ʣ��������ʬ�������ۤ����ѥե����ޥ󥹤�</span>
-<span class="quote2">&gt; &gt; �夬���������Ƚ�Ǥ��ޤ�����</span>
-<span class="quote1">&gt; ������ˤĤ��Ƥϲ��Ȥ⡥�ɤ����ܥȥ�ͥå��ˤʤ뤫��</span>
-<span class="quote1">&gt; �����ˤ��Τ⡤��äȤ��񤷤����ΰ�ĤǤ���͡�</span>
+<span class="quote2">&gt; &gt; それよりも、複数台で負荷分散したほうがパフォーマンスが</span>
+<span class="quote2">&gt; &gt; 上がるだろうと判断しました。</span>
+<span class="quote1">&gt; ＃これについては何とも．どこがボトルネックになるかを</span>
+<span class="quote1">&gt; ＃見極めるのも，もっとも難しい点の一つですよね？</span>
 
 -- 
-����ζͺ &lt;kusano@xxxxxxxxxx&gt;
+草野龍雄 &lt;kusano@xxxxxxxxxx&gt;
 
 
 
 </pre>
 </div>
-<p class="button"><a href="12262.html">[��]</a><a href="12264.html">[��]</a><a href="../list/12201-12300.html">[�ֹ�����]</a><a href="../thread/12201-12300.html">[����åɰ���]</a></p>
+<p class="button"><a href="12262.html">[前]</a><a href="12264.html">[次]</a><a href="../list/12201-12300.html">[番号順一覧]</a><a href="../thread/12201-12300.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="12242.html">  12242 2005-10-18 23:58 [Kenta Hashimoto &lt;kem] �ǥ奢�륳���ǣ��ãУ�                  </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12243.html">  12243 2005-10-19 09:24 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12245.html">  12245 2005-10-19 09:52 ����[Kenta Hashimoto &lt;kem]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12247.html">  12247 2005-10-19 10:03 ������[Hideki SUNADA &lt;hidek]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12249.html">  12249 2005-10-19 10:35 ��������[Hideki SUNADA &lt;hidek]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12250.html">  12250 2005-10-19 10:37 ��������[IGARASHI Kouichi &lt;ig]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12251.html">  12251 2005-10-19 11:00 ����������[Kenta Hashimoto &lt;kem]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12252.html">  12252 2005-10-19 12:00 ������������[Hideki SUNADA &lt;hidek]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12257.html">  12257 2005-10-21 10:15 ��������������[����ζͺ &lt;kusano@xxx]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12258.html">  12258 2005-10-21 10:23 ����������������[����ζͺ &lt;kusano@xxx]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12259.html">  12259 2005-10-21 14:00 ����������������[Kenta Hashimoto &lt;kem]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12261.html">  12261 2005-10-21 23:14 ������������������[murayama &lt;locutus@xx] ���󲰤λ���(Re: �ǥ奢�륳���ǣ��ãУ�)</a></span>
-<span class="current">-&gt;&nbsp;<a href="12263.html">  12263 2005-10-22 16:32 ��������������������[����ζͺ &lt;kusano@xxx]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12657.html">  12657 2006-01-20 22:26 ������������������[Kenta Hashimoto &lt;kem] ��졼��������������  </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12658.html">  12658 2006-01-20 23:09 ��������������������[SATOH Fumiyasu &lt;fumi]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12659.html">  12659 2006-01-20 23:19 ����������������������[Kenta Hashimoto &lt;kem]                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12660.html">  12660 2006-01-21 00:04 ������������������������[Kenta Hashimoto &lt;kem]                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12271.html">  12271 2005-10-24 00:06 ����������������[Hiro Yoshioka &lt;hyosh]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12272.html">  12272 2005-10-24 02:03 ������������������[����ζͺ &lt;kusano@xxx]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12248.html">  12248 2005-10-19 10:29 ������[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12242.html">  12242 2005-10-18 23:58 [Kenta Hashimoto &lt;kem] デュアルコアで２ＣＰＵ                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12243.html">  12243 2005-10-19 09:24 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12245.html">  12245 2005-10-19 09:52 　┗[Kenta Hashimoto &lt;kem]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12247.html">  12247 2005-10-19 10:03 　　┣[Hideki SUNADA &lt;hidek]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12249.html">  12249 2005-10-19 10:35 　　┃┣[Hideki SUNADA &lt;hidek]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12250.html">  12250 2005-10-19 10:37 　　┃┗[IGARASHI Kouichi &lt;ig]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12251.html">  12251 2005-10-19 11:00 　　┃　┗[Kenta Hashimoto &lt;kem]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12252.html">  12252 2005-10-19 12:00 　　┃　　┗[Hideki SUNADA &lt;hidek]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12257.html">  12257 2005-10-21 10:15 　　┃　　　┗[草野龍雄 &lt;kusano@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12258.html">  12258 2005-10-21 10:23 　　┃　　　　┣[草野龍雄 &lt;kusano@xxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12259.html">  12259 2005-10-21 14:00 　　┃　　　　┣[Kenta Hashimoto &lt;kem]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12261.html">  12261 2005-10-21 23:14 　　┃　　　　┃┣[murayama &lt;locutus@xx] 並列屋の視点(Re: デュアルコアで２ＣＰＵ)</a></span>
+<span class="current">-&gt;&nbsp;<a href="12263.html">  12263 2005-10-22 16:32 　　┃　　　　┃┃┗[草野龍雄 &lt;kusano@xxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12657.html">  12657 2006-01-20 22:26 　　┃　　　　┃┗[Kenta Hashimoto &lt;kem] リレーログがおかしい  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12658.html">  12658 2006-01-20 23:09 　　┃　　　　┃　┗[SATOH Fumiyasu &lt;fumi]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12659.html">  12659 2006-01-20 23:19 　　┃　　　　┃　　┗[Kenta Hashimoto &lt;kem]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12660.html">  12660 2006-01-21 00:04 　　┃　　　　┃　　　┗[Kenta Hashimoto &lt;kem]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12271.html">  12271 2005-10-24 00:06 　　┃　　　　┗[Hiro Yoshioka &lt;hyosh]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12272.html">  12272 2005-10-24 02:03 　　┃　　　　　┗[草野龍雄 &lt;kusano@xxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12248.html">  12248 2005-10-19 10:29 　　┗[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                   </a></span>
 </pre>
 </body>
 </html>

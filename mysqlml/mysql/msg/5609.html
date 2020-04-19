@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="5608.html">[��]</a><a href="5610.html">[��]</a><a href="../list/5601-5700.html">[�ֹ�����]</a><a href="../thread/5601-5700.html">[����åɰ���]</a></p>
+<p class="button"><a href="5608.html">[前]</a><a href="5610.html">[次]</a><a href="../list/5601-5700.html">[番号順一覧]</a><a href="../thread/5601-5700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:5609
 </p>
@@ -13,79 +13,79 @@ mysql:5609
 <p>
 From: &quot;Takayuki Matsukawa&quot; &lt;&quot;Takayuki Matsukawa&quot; &lt;matukawa@xxxxxxxxxx&gt;&gt;<br>
 Date: Mon, 10 Jun 2002 19:41:20 +0900<br>
-Subject: [mysql 05609] �ʼ���˥���ǥå����ե����륵�����ˤĤ���<br>
+Subject: [mysql 05609] （質問）インデックスファイルサイズについて<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
 
-����ȿ����ޤ���
+松川と申します。
 
-���ߡ������ǡ����١�����MySQL�Ǽ¸����뤿���ɾ����ԤʤäƤ��ޤ���
-�����ǡ����򷫤��֤���񤭵�Ͽ����褦�ʱ��Ѥ����ꤷ�Ƥ��ơ�����˹�碌��
-�᥿�ǡ����⹹�����Ƥ����ޤ���
-���ΤȤ����᥿�ǡ����ι������Ф���MySQL�Υơ��֥�ե����뤬�ɤΤ褦���Ѳ�
-���뤫�򸫤뤿��˰ʲ��Τ褦�ʥƥ��Ȥ򤷤ޤ�����
+現在、映像データベースをMySQLで実現するために評価を行なっています。
+映像データを繰り返し上書き記録するような運用を想定していて、これに合わせて
+メタデータも更新していきます。
+このとき、メタデータの更新に対してMySQLのテーブルファイルがどのように変化
+するかを見るために以下のようなテストをしました。
 
-�ƥ��ȡ�
-����ǥå�����Ȥä�Ŭ���ʥơ��֥���ꡢ������Ф��ƥơ��֥륵����
-(�쥳���ɿ�)�������ݤä��ޤޡ��ǡ����򹹿�(UPDATE)���롣
-���ơ��֥뷿������MyISAM����MySQL�С�����󡦡���3.23.41
+テスト：
+インデックスを使った適当なテーブルを作り、これに対してテーブルサイズ
+(レコード数)を一定に保ったまま、データを更新(UPDATE)する。
+　テーブル型・・・MyISAM、　MySQLバージョン・・・3.23.41
 
-��̡�����ǥå����ե�����(.MYI)�Υ����������ä��ĤŤ��ޤ����������륵����
-��˰�¤�������ʾ�������ʤ��褦�Ǥ���
+結果、インデックスファイル(.MYI)のサイズは増加しつづけましたが、あるサイズ
+で飽和し、それ以上は増えないようです。
 
-���䡧
-(1) MyISAM�Ǥϡ��ơ��֥륵�����������ݤä����֤Ƿ����֤��ǡ�����������ȡ�
-��������ǥå����ե�����Υ�������̵�¤����ä����ΤʤΤǤ��礦����
-��������Ȥ⡢MAX�ͤ�����ΤǤ��礦����
+質問：
+(1) MyISAMでは、テーブルサイズを一定に保った状態で繰り返しデータ更新すると、
+　　インデックスファイルのサイズは無限に増加するものなのでしょうか？
+　　それとも、MAX値があるのでしょうか？
 
-(2) MAX�ͤ�����Ȥ���ȡ�����򻻽Ф���׻���������ΤǤ��礦����
-������(�쥳���ɿ�������ǥå��������Υǡ�������������ѥ�᥿�Ȥ���)
+(2) MAX値があるとすると、これを算出する計算式があるのでしょうか？
+　　　(レコード数、インデックスキーのデータサイズ等をパラメタとして)
 
-�ʾ塢����������ꤤ���ޤ���
+以上、よろしくお願いします。
 
 
-�ƥ��Ȥξܺ٤�ʲ��˵����ޤ���
+テストの詳細を以下に記します。
 
--------------��������-------------
+-------------ここから-------------
 
-���Ķ�
-OS��RedHat7.2
+●環境
+OS：RedHat7.2
 MySQL:3.23.41
 
-������
-�ʲ��Τ褦�ʥơ��֥��test�פ��������
+●内容
+以下のようなテーブル「test」を作成し、
    create table test (
     id int not null primary key,
     dat int,
     index(dat)
    );
-1����Υǡ������������ޤ�����
-��������id �� 1��10,000�ޤǾ�����¤�Ǥ��ޤ���
+1万件のデータを挿入しました。
+ただし、id は 1～10,000まで昇順に並んでいます。
 
-���λ����Ǥγƥե�����Υ������ϰʲ��ΤȤ���Ǥ���
--rw-rw----    1 mysql    mysql       90000  6��  6 15:07 test.MYD
--rw-rw----    1 mysql    mysql      177152  6��  6 15:07 test.MYI
--rw-rw----    1 mysql    mysql        8572  6��  6 15:07 test.frm
+この時点での各ファイルのサイズは以下のとおりです。
+-rw-rw----    1 mysql    mysql       90000  6月  6 15:07 test.MYD
+-rw-rw----    1 mysql    mysql      177152  6月  6 15:07 test.MYI
+-rw-rw----    1 mysql    mysql        8572  6月  6 15:07 test.frm
 
-����1����Υǡ������Ф��ơ��ʲ���SQLʸ��5,000,000��ǡ���������Ԥʤ���
-������
+この1万件のデータに対して、以下のSQL文で5,000,000回データ更新を行ないま
+した。
    update test set dat=:dat where id=:id;
-�����������������ǡ�:id �� 1��10,000�δ֤��ͤ�Ȥ�����Ǥ��롣
-��������������������:dat �� Ŭ���ʿ��͡�
+　　　　　　ここで、:id は 1～10,000の間で値をとる乱数である。
+　　　　　　　　　　:dat は 適当な数値。
 
-�ƥե�����Υ������ϰʲ��Τ褦�ˤʤ�ޤ�����
--rw-rw----    1 mysql    mysql       90000  6��  6 17:35 test.MYD
--rw-rw----    1 mysql    mysql      257024  6��  6 17:35 test.MYI
--rw-rw----    1 mysql    mysql        8572  6��  6 15:07 test.frm
+各ファイルのサイズは以下のようになりました。
+-rw-rw----    1 mysql    mysql       90000  6月  6 17:35 test.MYD
+-rw-rw----    1 mysql    mysql      257024  6月  6 17:35 test.MYI
+-rw-rw----    1 mysql    mysql        8572  6月  6 15:07 test.frm
 
-����ˡ�5,000,000��ǡ���������ԤʤäƤ�ե����륵�������Ѥ��ޤ���Ǥ�
-�����������äơ�����ǥå����ե����� test.MYI �� 257024Byte��˰�¤��Ƥ���
-�ȿ�¬���Ƥ��ޤ���
+さらに、5,000,000回データ更新を行なってもファイルサイズは変わりませんでし
+た。したがって、インデックスファイル test.MYI は 257024Byteで飽和している
+と推測しています。
 
--------------�����ޤ�-------------
+-------------ここまで-------------
 
 
 
@@ -93,6 +93,6 @@ MySQL:3.23.41
 
 </pre>
 </div>
-<p class="button"><a href="5608.html">[��]</a><a href="5610.html">[��]</a><a href="../list/5601-5700.html">[�ֹ�����]</a><a href="../thread/5601-5700.html">[����åɰ���]</a></p>
+<p class="button"><a href="5608.html">[前]</a><a href="5610.html">[次]</a><a href="../list/5601-5700.html">[番号順一覧]</a><a href="../thread/5601-5700.html">[スレッド一覧]</a></p>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="6018.html">[��]</a><a href="6020.html">[��]</a><a href="../list/6001-6100.html">[�ֹ�����]</a><a href="../thread/6001-6100.html">[����åɰ���]</a></p>
+<p class="button"><a href="6018.html">[前]</a><a href="6020.html">[次]</a><a href="../list/6001-6100.html">[番号順一覧]</a><a href="../thread/6001-6100.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:6019
 </p>
@@ -13,51 +13,51 @@ mysql:6019
 <p>
 From: &quot;MIYATSU Kazunari&quot; &lt;&quot;MIYATSU Kazunari&quot; &lt;mid@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 29 Aug 2002 12:32:20 +0900<br>
-Subject: [mysql 06019] Re: �ե��������¸�ʤ��Σ���<br>
+Subject: [mysql 06019] Re: ファイルの保存（その２）<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-FS�Ǥδ������ڤȤ����Τ���Ĥ���Ȥ���ˤʤä����Ȥ�����ޤ���
+FSでの管理が楽というのが一つの落とし穴になったことがあります。
 
-�����Ȥμ���LAN������ɸ��ʸ����������ƥ�Ȥ���Ǽ�ʤ��ޤ���������ǯ������
-�Ƥʥǥ��������ڡ�����­��������ޤ�����
+さる企業の社内LAN向けに標準文書管理システムとして納品しましたが、数年後不明
+瞭なディスクスペース不足が起こりました。
 
-���Υ�����ץȤǤϳ��ز�������¸�ǥ��쥯�ȥ�ȥե�����ؤΥѥ���MySQL�˼�Ͽ
-�����ƤӽФ����ˤϥ�����ץȤ��������쥯�Ȥ��빽¤��ȤäƤ����ΤǤ�������
-�����ɤäƤ椯�ȥ�����ץȤ���������Ǥ��ʤ�����°���Υե�����ȥե������
-¿�̤����Ѥ���Ƥ��ޤ�����
+そのスクリプトでは階層化した保存ディレクトリとファイルへのパスをMySQLに収録
+し、呼び出し時にはスクリプトからリダイレクトする構造をとっていたのですが、原
+因を追ってゆくとスクリプトが書込み操作できない権限属性のファイルとフォルダが
+多量に蓄積されていました。
 
-�褯�褯ʹ���Ƥߤ�ȡ����̤˥ե��������Ͽ����ݡ���Ͽ������ץȤ�𤵤���¸
-�ե������ľ�ܥ��ԡ��������MySQL�ˤ��������������Ȥ������Ѥ�ԤäƤ���
-�褦�Ǥ���
+よくよく聞いてみると、大量にファイルを登録する際、登録スクリプトを介さず保存
+フォルダに直接コピーし、後でMySQLにそれを一括挿入するという運用を行っていた
+ようです。
 
-�ե����뤬���פˤʤꥹ����ץ�¦����õ�����ԤäƤ⸢����­�Ȥ��ư���졢
-�¥ե�����ϻĤꡢDB����Ͼõ�줿���֤Ȥʤꡢ���פʥǥåȥե�����ǥǥ���
-������ޤäƤ��ޤä����Ǥ���
+ファイルが不要になりスクリプト側から消去操作を行っても権限不足として扱われ、
+実ファイルは残り、DBからは消去された状態となり、不要なデットファイルでディス
+クが埋まってしまった訳です。
 
-���θ�Ϥ��α��Ѥϥ��쥮��顼�Ǥ���ݤ����������ե�����õ���ʳ�����λ
-���ʤ���Х��顼�Ȥ��ƴ����Ԥ���𤹤�ȥ�åפ��ߤ����桼�������롼�פθ���
-��ľ����ʣ�������Ͽ�Υ��ץ������ߤ���ʤɤ��б���Ԥ��ޤ�����
+その後はこの運用はイレギュラーである旨を説明し、ファイル消去の段階で操作完了
+しなければエラーとして管理者に報告するトラップを設け、ユーザ・グループの権限
+を見直し、複数一括登録のオプションを新設するなどの対応を行いました。
 
-�ޤ�����¸������ץȤ��̲᤹��ݤ˸��ե�����̾��DB�˼�Ͽ������ˡ����ʿ�����
-�ղä����ե�����̾�˥�͡��ष����¸�����ƤӽФ����ˤϥ�����ץȷ�ͳ�Ǹ��ե�
-����̾��ź�դ�����Ф��褦�ˤ��ޤ�����PDF�ʤɤ����ݡ��Ȥ���Partialcontent��
-������ǽ�ˤʤ�ޤ������ġ�
+また、保存スクリプトを通過する際に元ファイル名をDBに収録し、ユニークな数字を
+付加したファイル名にリネームして保存し、呼び出し時にはスクリプト経由で元ファ
+イル名を添付し送り出すようにしました。PDFなどがサポートするPartialcontentは
+使用不能になりましたが…。
 
-�פ�����������������­���ä����Ǥ�����
+要は利便性と説明の不足だった訳ですが。
 
 
 </pre>
 </div>
-<p class="button"><a href="6018.html">[��]</a><a href="6020.html">[��]</a><a href="../list/6001-6100.html">[�ֹ�����]</a><a href="../thread/6001-6100.html">[����åɰ���]</a></p>
+<p class="button"><a href="6018.html">[前]</a><a href="6020.html">[次]</a><a href="../list/6001-6100.html">[番号順一覧]</a><a href="../thread/6001-6100.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="6011.html">   6011 2002-08-28 14:02 [&lt;m-kanata@xxxxxxxxxx] �ե��������¸�ʤ��Σ���                </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6015.html">   6015 2002-08-28 18:48 ��[&quot;Hiroaki,Sakuma&quot; &lt;sa]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="6019.html">   6019 2002-08-29 12:32 ����[&quot;MIYATSU Kazunari&quot; &lt;]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6020.html">   6020 2002-08-29 13:10 ������[&quot;Hiroaki,Sakuma&quot; &lt;sa]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6021.html">   6021 2002-08-29 14:01 ��������[&quot;MIYATSU Kazunari&quot; &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6011.html">   6011 2002-08-28 14:02 [&lt;m-kanata@xxxxxxxxxx] ファイルの保存（その２）                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6015.html">   6015 2002-08-28 18:48 ┗[&quot;Hiroaki,Sakuma&quot; &lt;sa]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="6019.html">   6019 2002-08-29 12:32 　┗[&quot;MIYATSU Kazunari&quot; &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6020.html">   6020 2002-08-29 13:10 　　┗[&quot;Hiroaki,Sakuma&quot; &lt;sa]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6021.html">   6021 2002-08-29 14:01 　　　┗[&quot;MIYATSU Kazunari&quot; &lt;]                                 </a></span>
 </pre>
 </body>
 </html>

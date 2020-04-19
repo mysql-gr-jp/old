@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="60.html">[��]</a><a href="62.html">[��]</a><a href="../list/1-100.html">[�ֹ�����]</a><a href="../thread/1-100.html">[����åɰ���]</a></p>
+<p class="button"><a href="60.html">[前]</a><a href="62.html">[次]</a><a href="../list/1-100.html">[番号順一覧]</a><a href="../thread/1-100.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:61
 </p>
@@ -20,61 +20,61 @@ Subject: [mysql 61] Re: join and jp (Re: MySQL 3.21.24 released)<br>
 <div class="body">
 <pre>
 
-From: ̱�� &lt;tommy@xxxxxxxxxx&gt;
+From: 民斗 &lt;tommy@xxxxxxxxxx&gt;
 Subject: <a href="60.html">[mysql 60]</a> Re: join and jp (Re: MySQL 3.21.24 released)
 Date: Tue, 24 Feb 1998 11:40:46 +0900
 Message-ID: &lt;199802240239.LAA05690@xxxxxxxxxx&gt;
 
 tommy&gt; [Subject: <a href="59.html">[mysql 59]</a> Re: join and jp (Re: MySQL 3.21.24 released)]
-tommy&gt; [Date: Tue, 24 Feb 1998 10:10:35 +0900  From:̱��]
+tommy&gt; [Date: Tue, 24 Feb 1998 10:10:35 +0900  From:民斗]
 tommy&gt; 
-tommy&gt; &gt; &gt; 1.�� mysys/,client/ ������� �������Ѵ��ͤù���ʤ����ʤȻפäƤ��ޤ�
+tommy&gt; &gt; &gt; 1.は mysys/,client/ あたりに コード変換突っ込めないかなと思っています
 tommy&gt; 
-tommy&gt; &gt; �ɤ��դ���������餤���Τ��Ϥ狼��ޤ��󤬡��������Ѵ������ˤ���ȡ�
-tommy&gt; &gt; UNIX �� Win ��ξ���Υ��饤����Ȥ���Ʊ���ǡ����١����������Ȥ���
-tommy&gt; &gt; ���åȤ�����ޤ��͡�
+tommy&gt; &gt; どの辺に埋め込んだらいいのかはわかりませんが、コード変換方式にすると、
+tommy&gt; &gt; UNIX と Win の両方のクライアントから同じデータベースが見れるという
+tommy&gt; &gt; メリットがありますね。
 
-��������äƤ��ޤ���
-�ޤ���libmysqlclient.{a,so} �� client/ �Υ������������������Τǡ�
-���饤�����¦�ˤ� lib ���Ѥ�뤳�Ȥˤ������Ѵ����Ȥ߹��ޤ��Ȥ����Τ�
-���äƤޤ���
+それを狙っています。
+また、libmysqlclient.{a,so} が client/ のソースから生成されるので、
+クライアント側にも lib が変わることにより漢字変換が組み込まれるというのも
+狙ってます。
 
-�¸���ǽ���ɤ���������Ƨ�߹���Ƥ��ޤ���
-���ιͤ����ɤ�����̵�������뤫����������
+実現可能かどうかが今一踏み込めていません。
+この考えが良いか、無理があるか、、、、。
 
 
-tommy&gt; �դȻפä���Ǥ������⤷�������� SET OPTION CHARACTER SET ̿���
-tommy&gt; �����ΤϤ���������Ū�Τ���ˤ���󤸤�ʤ��Ǥ��礦����
+tommy&gt; ふと思ったんですが、もしかしたら SET OPTION CHARACTER SET 命令と
+tommy&gt; いうのはこういう目的のためにあるんじゃないでしょうか。
 tommy&gt; 
-tommy&gt; ���줬�Ȥ���ʤ顢�����Ϥ��ȳڤ��⤷��ޤ���sql/convert.cc ��
-tommy&gt; �ѹ���������Ǥ���Τǡ�
+tommy&gt; これが使えるなら、実装はわりと楽かもしれません。sql/convert.cc を
+tommy&gt; 変更するだけですむので。
 tommy&gt; 
 
-���꤬�Ȥ��������ޤ���
+ありがとうございます。
 
-sql/convert.cc �������Ƥߤޤ�����
-����ʸ���ʤΤ��狼��ʤ��Ǥ������Ȥˤ����Ѵ��ơ��֥���Ѱդ���
-��ӤȤ��� �б������Ƥ���Τ��ʡ�����ͽ�ۤ��ޤ�����
-�Ȥʤ�С�sjis&lt;-&gt;euc �Υ����ɤ򤤤�ơ��ե饰���б�������ȡ�
-������ jeuc �Ƿ��Ƥ����ơ�����������Ϥ��Ф��� jeuc �Ѵ��򤫤��롣
-(������������convert.cc ����Ѥ����硢���������ɤϤɤ��ʤäƤ���ΤǤ��礦��)
+sql/convert.cc を覗いてみました。
+何の文字なのかわからないですが、とにかく変換テーブルを用意して
+比較とかに 対応させているのかなー、と予想しました。
+となれば、sjis&lt;-&gt;euc のコードをいれて、フラグで対応させると。
+内部は jeuc で決めておいて、外からの入力に対して jeuc 変換をかける。
+(ここが不明。convert.cc を使用する場合、内部コードはどうなっているのでしょう？)
 
-���Υե饰�ϡ��⤷�����ơ�&lt;MYSQLDIR&gt;/share/&lt;language type&gt;/
-�˴ط�����ĤΤǤ���С�����ޤ���å������ޤ� ja_JP.{EUC,SJIS} ��
-���쵤�ˤǤ���Τ��ʡ����ȡ�Ϣ�ۤ��ޤ�����
+そのフラグは、もしかして、&lt;MYSQLDIR&gt;/share/&lt;language type&gt;/
+に関係を持つのであれば、これまたメッセージまで ja_JP.{EUC,SJIS} 化
+が一気にできるのかな？？と、連想しました。
 
-���äƤޤ��������ιͤ���
+あってますか？この考え？
 
 =========================================
-        ¼�� ��  takeshi@xxxxxxxxxx
+        村上 毅  takeshi@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="60.html">[��]</a><a href="62.html">[��]</a><a href="../list/1-100.html">[�ֹ�����]</a><a href="../thread/1-100.html">[����åɰ���]</a></p>
+<p class="button"><a href="60.html">[前]</a><a href="62.html">[次]</a><a href="../list/1-100.html">[番号順一覧]</a><a href="../thread/1-100.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="59.html">     59 1998-02-24 10:10 [̱�� &lt;tommy@xxxxxxxx] Re: join and jp (Re: MySQL 3.21.24 released)</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="60.html">     60 1998-02-24 11:40 ��[̱�� &lt;tommy@xxxxxxxx]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="61.html">     61 1998-02-24 12:25 ����[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="59.html">     59 1998-02-24 10:10 [民斗 &lt;tommy@xxxxxxxx] Re: join and jp (Re: MySQL 3.21.24 released)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="60.html">     60 1998-02-24 11:40 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="61.html">     61 1998-02-24 12:25 　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
 </pre>
 </body>
 </html>

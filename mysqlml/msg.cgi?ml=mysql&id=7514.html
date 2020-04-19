@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="mysql/msg/7513.html">[��]</a><a href="mysql/msg/7515.html">[��]</a><a href="mysql/list/7501-7600.html">[�ֹ�����]</a><a href="mysql/thread/7501-7600.html">[����åɰ���]</a></p>
+<p class="button"><a href="mysql/msg/7513.html">[前]</a><a href="mysql/msg/7515.html">[次]</a><a href="mysql/list/7501-7600.html">[番号順一覧]</a><a href="mysql/thread/7501-7600.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:7514
 </p>
@@ -13,66 +13,66 @@ mysql:7514
 <p>
 From: Masahiro Fukuda &lt;Masahiro Fukuda &lt;masahif-ml@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 17 Apr 2003 00:56:15 +0900<br>
-Subject: [mysql 07514] ���ܸ�ʸ����ΰ����� group by �������ε�ư�ˤĤ���<br>
+Subject: [mysql 07514] 日本語文字列の一部で group by した場合の挙動について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����ˤ��ϡ�Ynot��ʡ�ĤǤ���
+こんにちは。Ynotの福田です。
 
-���ܸ��ʸ����ΰ���ʬ���ڤ�Ф��ơ�group by ��������
-������ư��ʤ��Ȥ��������������Ƥ��ޤ���
+日本語の文字列の一部分を切り出して、group by した場合に
+正しく動作しないという状況が起きています。
 
-����Ū�ˤϡ������Τ褦�ʾ����Ǥ���
+具体的には、下記のような状況です。
 --------------------------------------------------------
 CREATE TABLE mojilist (
   moji varchar(10)
 );
 
-insert into mojilist values('����');
-insert into mojilist values('����');
+insert into mojilist values('あお');
+insert into mojilist values('あか');
 
-�ǡ��ơ��֥����....
+で、テーブルを作り....
 
 mysql&gt; select left(moji, 1) as moji1 from mojilist;
 +-------+
 <span class="quote1">| moji1 |</span>
 +-------+
-<span class="quote1">| ��    |</span>
-<span class="quote1">| ��    |</span>
+<span class="quote1">| あ    |</span>
+<span class="quote1">| あ    |</span>
 +-------+
 2 rows in set (0.00 sec)
-���� ʸ�����1ʸ���ܤ��������������Ф��Ƥ���
+　→ 文字列の1文字目だけが正しく取り出せている
 
 mysql&gt; select left(moji, 1) as moji1 from mojilist group by moji1;
 +-------+
 <span class="quote1">| moji1 |</span>
 +-------+
-<span class="quote1">| ��    |</span>
+<span class="quote1">| ・    |</span>
 +-------+
 1 row in set (0.01 sec)
-���� �ɤ����1�Х����ܤ��������Ф���Ƥ��롩
+　→ どうやら1バイト目だけが取り出されている？
 
 
 mysql&gt; select left(moji, 2) as moji1 from mojilist group by moji1;
 +-------+
 <span class="quote1">| moji1 |</span>
 +-------+
-<span class="quote1">| ��    |</span>
+<span class="quote1">| あ    |</span>
 +-------+
 1 row in set (0.00 sec)
-  �� �ɤ����2ʸ���Ǥʤ���2�Х��ȼ��Ф���Ƥ��롩
+  → どうやら2文字でなく、2バイト取り出されている？
 --------------------------------------------------------
 
-�Ȥ��ä����ǡ����ܸ�ʸ����ΰ�������Ф�����̤� group by ����ȡ�
-��������ư��Ƥ��ʤ��褦�˴�����ΤǤ���
+といった形で、日本語文字列の一部を取り出した結果を group by すると、
+正しく、動作していないように感じるのです。
 
-�ƥ��Ȥ����Ķ���...
+テストした環境は...
  OS: RedHat7.3
- MySQL: 3.23.56(www.mysql.com������������ɤ����Х��ʥ�)
+ MySQL: 3.23.56(www.mysql.comよりダウンロードしたバイナリ)
 
- /etc/my.cnf �����
+ /etc/my.cnf の中身
  -------------------------------------
  [mysql]
  default-character-set=sjis
@@ -86,12 +86,12 @@ mysql&gt; select left(moji, 2) as moji1 from mojilist group by moji1;
  set-variable = max_connections=8192
  -------------------------------------
 
-�Ǥ���
+です。
 
-�⤷��Ʊ�ͤ�����β����ˡ��¸������������ä��㤤�ޤ����顢
-�����Ƥ��������ʤ��Ǥ��礦����
+もし、同様の問題の解決方法をご存じの方がいらっしゃいましたら、
+教えていただけないでしょうか？
 
-����������ꤤ���ޤ���
+よろしくお願いします。
 
 
 -- 
@@ -100,6 +100,6 @@ Masahiro Fukuda mailto:masahif-ml@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="mysql/msg/7513.html">[��]</a><a href="mysql/msg/7515.html">[��]</a><a href="mysql/list/7501-7600.html">[�ֹ�����]</a><a href="mysql/thread/7501-7600.html">[����åɰ���]</a></p>
+<p class="button"><a href="mysql/msg/7513.html">[前]</a><a href="mysql/msg/7515.html">[次]</a><a href="mysql/list/7501-7600.html">[番号順一覧]</a><a href="mysql/thread/7501-7600.html">[スレッド一覧]</a></p>
 </body>
 </html>

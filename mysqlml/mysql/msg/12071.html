@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="12070.html">[��]</a><a href="12072.html">[��]</a><a href="../list/12001-12100.html">[�ֹ�����]</a><a href="../thread/12001-12100.html">[����åɰ���]</a></p>
+<p class="button"><a href="12070.html">[前]</a><a href="12072.html">[次]</a><a href="../list/12001-12100.html">[番号順一覧]</a><a href="../thread/12001-12100.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:12071
 </p>
@@ -13,45 +13,45 @@ mysql:12071
 <p>
 From: zen kishimoto &lt;zen kishimoto &lt;zen@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 03 Sep 2005 09:24:15 -0700<br>
-Subject: [mysql 12071] ���ز����줿�ǡ�����MySQL�ǰ�������Managing Hierarchical Data in  MySQL�ˡ�<br>
+Subject: [mysql 12071] 階層化されたデータをMySQLで扱う　（Managing Hierarchical Data in  MySQL）　<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
 <a href="http://dev.mysql.com/tech-resources/articles/hierarchical-data.html">http://dev.mysql.com/tech-resources/articles/hierarchical-data.html</a>
-�ʿޤϤ��Υ����Ȥ򻲾ȤΤ��ȡ�
+（図はこのサイトを参照のこと）
 
-Mike Hillyer��
+Mike Hillyer著
 
-����
+初めに
 
-¿���Υ桼�����ϰ�󤯤餤��SQL�ǡ����١�����ǡ����ز������ǡ�����
-���ä����Ȥ�����Ȼפ��ޤ������ΤȤ��ϥ�졼����ʥ�
-�ǡ����١����ϳ��ز������ǡ����Ѥ˳�ȯ����ʤ��ä��ȹͤ����Ȼפ��ޤ���
-��졼����ʥ�ǡ����١����Υơ��֥�ϳ��ز�����Ƥ��餺��XML��
-�褦�ˡ�ñ��ʿ�����ꥹ�ȤǤ������ز����줿�ǡ����ϿƤȻҶ���
-�ط�����äƤ��ꡢ��졼����ʥ롡�ǡ����١���
-�Υơ��֥�Ǥϼ�����ɽ�����Ȥ��Ǥ��ޤ���
+多くのユーザーは一回くらいはSQLデータベース内で、階層化したデータを
+扱ったことがあると思います。そのときはリレーショナル
+データベースは階層化したデータ用に開発されなかったと考えたと思います。
+リレーショナルデータベースのテーブルは階層化されておらず（XMLの
+ように）単に平たいリストです。階層化されたデータは親と子供の
+関係を持っており、リレーショナル　データベース
+のテーブルでは自然に表すことができません。
 
-�����Ǥϡ����ز����줿�ǡ����ȤϤ��줾�줬���Ĥ�
-�Ƥ���������������ʾ�λҶ�����ĥǡ�����
-���ޤ�򤵤��ޤ���(�㳰�ϥ롼�ȤǿƤ�����ޤ��󡣡�
-���ز����줿�ǡ����ϼ��Υǡ����١����Υ��ץ��
-�������뤳�Ȥ��Ǥ��ޤ����㤨�С��ե�������
-�᡼��ꥹ�ȤΥ���åɡ��ȿ�ɽ������ƥ�Ĵ����Υ��ƥ��ꡢ
-�����ʥ��ƥ���ʤɤǤ��������Ǥϡ����ۤ��ŵ�����Ź
-��������ʳ��ؤ���Ѥ��ޤ���
+ここでは、階層化されたデータとはそれぞれが１つの
+親をを持ちゼロかそれ以上の子供を持つデータの
+集まりをさします。(例外はルートで親がありません。）
+階層化されたデータは種種のデータベースのアプリで
+見かけることができます。例えば、フォーラムや
+メールリストのスレッド、組織表、コンテンツ管理のカテゴリ、
+や製品カテゴリなどです。ここでは、仮想の電機機器店
+からの製品階層を使用します。
 
-�������ä����ƥ����¾����ǰ�����Ƥ���Τ�
-Ʊ�ͤʳ��ؤ�������ޤ������ε����Ǥ�MySQL�ǰ���
-���ز����줿�ǡ����Σ��ĤΥ�ǥ�򸡾ڤ��ޤ����ޤŤ�
-�����餢��adjacency list��ǥ뤫��Ϥ�ޤ���
+こういったカテゴリは他の例で引かれているのと
+同様な階層を形成します。この記事ではMySQLで扱う
+階層化されたデータの２つのモデルを検証します。まづは
+前からあるadjacency listモデルから始めます。
 
-Adjacency List ��ǥ�
+Adjacency List モデル
 
-��Ǥ���Υ��ƥ���ϰʲ��Υơ��֥�˳�Ǽ����ޤ��� (�ե��������פ�
-�褦��CREATE��INSERT�δ����ʥ��ơ��ȥ��Ȥ�񤭽Ф��ޤ�����
+上での例のカテゴリは以下のテーブルに格納されます。 (フォローし易い
+ようにCREATEとINSERTの完全なステートメントを書き出します。）
 
 CREATE TABLE category(
 category_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -83,21 +83,21 @@ SELECT * FROM category ORDER BY category_id;
 +-------------+----------------------+--------+
 10 rows in set (0.00 sec)
 
-adjacency list ��ǥ�Ǥϥơ��֥뤽�줾��Υ����ƥ�
-�ϿƤؤΥݥ��󥿡�����äƤ��ޤ������־�����ǤΥݥ��󥿡�
-�ϲ��⤵���Ƥ��ޤ���adjacency list ��ǥ�������ϴ�ñ��
-���ȤǤ���FLASH ��mp3 players�λҶ��Ǥ��뤳�Ȥϰ���
-�����Ǥ��������Ƥ���ˡ�mp3 players��portable
-electronics�λҶ��ǡ����줬electronics�λҶ��Ǥ��뤳�Ȥ⡣
-adjacency list ��ǥ�ϥ��饤�����¦�Υ����ɤ�
-�ưפ˰������Ȥ��Ǥ��ޤ�����������������SQL�ǰ���
-�ˤ�����ˤʤ�ޤ���
+adjacency list モデルではテーブルそれぞれのアイテム
+は親へのポインターを持っています。一番上の要素のポインター
+は何もさしていません。adjacency list モデルの利点は簡単な
+ことです。FLASH がmp3 playersの子供であることは一目
+瞭然です。そしてさらに、mp3 playersがportable
+electronicsの子供で、それがelectronicsの子供であることも。
+adjacency list モデルはクライアント側のコードで
+容易に扱うことができます。しかし、完全なSQLで扱う
+には問題になります。
 
-�����ʥĥ꡼����Ф�
+完全なツリーを取り出す
 
-�ǽ�˰����ɤ����뤳�Ȥ����ΤΥĥ꡼���������
-���뤳�Ȥ�ɽ�����뤳�ȤǤ��������ɤ��Ȥ���ˡ��
-������SQL��self-join����Ѥ��ƹԤ����ȤǤ���
+最初に一番良くすることは全体のツリーを字下げを
+することで表示することです。一番良く使う方法は
+完全なSQLでself-joinを使用して行うことです。
 
 SELECT t1.name AS lev1, t2.name as lev2, t3.name as lev3,
 t4.name as lev4
@@ -119,10 +119,10 @@ WHERE t1.name = 'ELECTRONICS';
 +-------------+----------------------+--------------+-------+
 6 rows in set (0.00 sec)
 
-���ƤΥ꡼�եΡ��ɤ�ȯ������
+全てのリーフノードを発見する
 
-���ƤΥ꡼�եΡ��ɤ�LEFT JOIN �������
-�Ȥä����Ƹ��Ĥ��뤳�Ȥ��Ǥ��ޤ���
+全てのリーフノードをLEFT JOIN クエリを
+使って全て見つけることができます。
 
 SELECT t1.name FROM
 category AS t1 LEFT JOIN category as t2
@@ -141,9 +141,9 @@ WHERE t2.category_id IS NULL;
 <span class="quote1">| 2 WAY RADIOS |</span>
 +--------------+
 
-���󥰥롦�ѥ��򸫤Ĥ���
+シングル・パスを見つける
 
-self-join��Ȥ��г��ؤ��鴰���ʥѥ��򸫤Ĥ����ޤ�
+self-joinを使えば階層から完全なパスを見つけられます
 
 SELECT t1.name AS lev1, t2.name as lev2, t3.name as lev3, t4.name as lev4
 FROM category AS t1
@@ -159,36 +159,36 @@ WHERE t1.name = 'ELECTRONICS' AND t4.name = 'FLASH';
 +-------------+----------------------+-------------+-------+
 1 row in set (0.01 sec)
 
-���Υ��ץ������κ�����������ϳ��ؤ����ƤΥ�٥�˴ؤ���
-���Ĥ�self-join�����뤳�ȤǤ������Τ��ᡢ���줾��Υ�٥�
-��join��ʣ���ˤʤ�ˤĤ����ǽ������Ƥ��ޤ���
+このアプローチの最大の問題点は階層の全てのレベルに関して
+１つのself-joinがいることです。そのため、それぞれのレベル
+でjoinが複雑になるにつれて性能が落ちてきます。
 
-Adjacency List��ǥ�θ³�
+Adjacency Listモデルの限界
 
-������SQL��adjacency list ��ǥ����Ѥ���ΤϤ��ʤ꺤��Ǥ���
-���ƥ��꡼�δ����ʥѥ��򸫤Ĥ��������ˡ����줬�ɤΰ��֤�
-����Τ��Τ�ɬ�פ�����ޤ������ˡ��Ρ��ɤ�����ݤ�
-�Ϻٿ������դ�ʧ��ɬ�פ�����ޤ��������Ǥʤ��ȡ����֥ĥ꡼
-���ڤ�Υ����Ƥ��ޤ��ޤ���(portable electronics ���ƥ��꡼��
-�����Ȥ��λҶ��������ڤ�Υ����Ƥ��ޤ��ޤ�����
-���Τ褦������ϴ�ʬ�ϥ��饤�����¦�Υ����ɤ�stored procedure
-�ǽ����Ǥ��ޤ����ץ��������㡼����ʤ�С��ĥ꡼�ΰ��ֲ�����
-�Ϥ�ƾ�˸����äƿʤߤʤ��鴰���ʥĥ꡼�ޤ��ϥ��󥰥�
-�ѥ���ɽ���Ǥ��ޤ����ץ�������������Ȥäơ�
-�Ĥ�ΥΡ��ɤ��������Ƥ�ؤ����Ȥǡ����֥ĥ꡼��
-�ڤ�Υ�����˥Ρ��ɤ����Ǥ��ޤ���
+完全なSQLでadjacency list モデルを使用するのはかなり困難です。
+カテゴリーの完全なパスを見つけられる前に、それがどの位置に
+あるのか知る必要があります。更に、ノードを除去する際に
+は細心の注意を払う必要があります。そうでないと、サブツリー
+が切り離されてしまいます。(portable electronics カテゴリーを
+除去するとその子供は全て切り離されてしまいます。）
+このような問題は幾分はクライアント側のコードやstored procedure
+で処理できます。プロシージャー言語ならば、ツリーの一番下から
+始めて上に向かって進みながら完全なツリーまたはシングル
+パスを表示できます。プロシージャ言語を使って、
+残りのノードが新しい親を指すことで、サブツリーを
+切り離さずにノードを除去できます。
 
-�ͥ��Ȥ������åȡ���ǥ�
+ネストしたセット・モデル
 
-���ε����Ǿ��������Ƥ����Τϰۤʤä����ץ������ǡ��ͥ��Ȥ������åȡ���ǥ�
-�ȸƤФ���ΤǤ����ͥ��Ȥ������åȡ���ǥ�Ǥϳ��ؤ�
-��������������ߤޤ�������ϥΡ��ɤȤ����
-������ȸ����ˡ��ͥ��Ȥ�������ơ��ʡ��ȸ��ޤ���
-�����򤳤��ȤäƤߤƸ��ޤ��礦��
+この記事で焦点を当てたいのは異なったアプローチで、ネストしたセット・モデル
+と呼ばれるものです。ネストしたセット・モデルでは階層を
+新しい方向からみます。これはノードとそれを
+結ぶ線と見ずに、ネストしたコンテーナーと見ます。
+上の例をこれを使ってみて見ましょう。
 
-�ɤ���äƳ��ؤ��ݻ�����Ƥ��뤫�ߤޤ��礦���ƤΥ��ƥ��꡼��
-�Ҷ�����߹���Ǥ��ޤ������η����γ��ؤ򺸤ȱ���
-�ͤǥΡ��ɤΥͥ��ƥ��󥰤�ɽ���Ƥߤޤ��礦��
+どうやって階層が維持されているかみましょう。親のカテゴリーが
+子供を包み込んでいます。この形式の階層を左と右の
+値でノードのネスティングを表してみましょう。
 
 CREATE TABLE nested_category (
 category_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -223,23 +223,23 @@ SELECT * FROM nested_category ORDER BY category_id;
 <span class="quote1">| 10 | 2 WAY RADIOS | 17 | 18 |</span>
 +-------------+----------------------+-----+-----+
 
-left��right��MySQL�Ǥϥ�����ɤʤΤǡ�lft��rgt������˻Ȥ��ޤ���
-���ȡ�<a href="http://dev.mysql.com/doc/mysql/en/reserved-words.html">http://dev.mysql.com/doc/mysql/en/reserved-words.html</a>
+leftとrightはMySQLではキーワードなので、lftとrgtを代わりに使います。
+参照：<a href="http://dev.mysql.com/doc/mysql/en/reserved-words.html">http://dev.mysql.com/doc/mysql/en/reserved-words.html</a>
 
-�ǤϤɤ���äơ����ȱ����ͤ����ΤǤ��礦����
-��¦�ΥΡ��ɤΰ��ֺ���¦����Ϥ�Ʊ��ؿʤߤޤ���
-ŵ��Ū�ʥĥ꡼��Ŭ�Ѥ��Ƥߤޤ��礦��
+ではどうやって、左と右の値を決めるのでしょうか。
+外側のノードの一番左の側から始めて右へ進みます。
+典型的なツリーに適用してみましょう。
 
-�ĥ꡼�˱��Ѥ���ݤϡ������鱦�ؤ�ư�������Ĥ��ؤ���
-��Ŭ�Ѥ�����¦���ֹ�����ƤϤ�����ˡ����줾��ΥΡ��ɤλҶ���
-�ߤ�Ƥ����ޤ������줫�鱦�ؿʤߤޤ������Υ��ץ�����
-���ѷ��ץꥪ�������ĥ꡼���ǥ��르�ꥺ��ȸƤФ�ޤ���
+ツリーに応用する際は、左から右へと動き、１つの層ごと
+に適用し、右側に番号を当てはめる前に、それぞれのノードの子供へ
+降りていきます。それから右へ進みます。このアプローチ
+は変形プリオーダーツリー横断アルゴリズムと呼ばれます。
 
-�����ʥĥ꡼�μ��Ф�
+完全なツリーの取り出し
 
-�����ʥĥ꡼��self-join��Ȥ����Ȥˤ�äƼ��Ф����Ȥ�����ޤ���
-����ϿƤȥΡ��ɤ򼡤Τ褦�ˤ��ƥ�󥯤��ޤ����Ρ��ɤ�
-lft���ͤ���˿Ƥ�lft��rgt���ͤδ֤����褦�ˤ��ޤ���
+完全なツリーをself-joinを使うことによって取り出すことが出来ます。
+これは親とノードを次のようにしてリンクします。ノードの
+lftの値が常に親のlftとrgtの値の間に来るようにします。
 
 SELECT node.name
 FROM nested_category AS node,
@@ -264,18 +264,18 @@ ORDER BY node.lft;
 <span class="quote1">| 2 WAY RADIOS |</span>
 +----------------------+
 
-���Ф�adjacency list��ǥ����Ȥϰۤʤꡢ������ϥĥ꡼��
-�����˸¤餺�ɤ�ư��ޤ���BETWEEN���������ǤϥΡ���
-��rgt���ͤˤϹ���ޤ��󡣤Ȥ����Τϡ�rgt���ͤϾ��Ʊ���Ƥ�
-lft���ͤδ֤ˤ��뤫��Ǥ���
+前出のadjacency listモデルの例とは異なり、クエリはツリーの
+深さに限らず良く動作します。BETWEENクローズではノード
+のrgtの値には拘りません。というのは、rgtの値は常に同じ親の
+lftの値の間にあるからです。
 
-���ƤΥ꡼�եΡ��ɤ�õ��
+全てのリーフノードを探す
 
-�ͥ��ȥ��åȥ�ǥ�ǡ����ƤΥ꡼�եΡ��ɤ�õ���Τ� adjacency list��ǥ�
-�ǻȤ�줿LEFT JOIN �᥽�åɤ����ñ�Ǥ���nested_category�ơ��֥��
-����ȡ��꡼�եΡ��ɤ�lft��rgt���ͤ�³���ֹ�Ǥ���
-�꡼�եΡ��ɤ�ȯ������ˤϡ�rgt = lft + 1�δط��Τ���
-�Ρ��ɤ򸫤Ĥ�����ɤ��ΤǤ���
+ネストセットモデルで、全てのリーフノードを探すのは adjacency listモデル
+で使われたLEFT JOIN メソッドよりも簡単です。nested_categoryテーブルを
+見ると、リーフノードのlftとrgtの値は続き番号です。
+リーフノードを発見するには、rgt = lft + 1の関係のある
+ノードを見つければ良いのです。
 
 SELECT name
 FROM nested_category
@@ -293,10 +293,10 @@ WHERE rgt = lft + 1;
 <span class="quote1">| 2 WAY RADIOS |</span>
 +--------------+
 
-���󥰥롦�ѥ���ɽ��
+シングル・パスの表示
 
-�ͥ��ȥ��åȥ�ǥ�Ǥ�ʣ����self-join�ʤ���
-���󥰥�ѥ�����Ф����Ȥ��Ǥ��ޤ���
+ネストセットモデルでは複数のself-joinなしで
+シングルパスを取り出すことができます。
 
 SELECT parent.name
 FROM nested_category AS node,
@@ -314,14 +314,14 @@ ORDER BY node.lft;
 <span class="quote1">| FLASH |</span>
 +----------------------+
 
-�Ρ��ɤο�����¬��
+ノードの深さを測る
 
-�ĥ꡼���Τ���Ф���ˡ�򸫤Ƥ��ޤ��������������ĥ꡼
-�Τ��줾��ΥΡ��ɤο����⼨�������Ȥ�����ɤ����ޤ��礦����
-����ϳ��ؤΤʤ��ǡ��Ρ��ɤ�����˰��֤��Ƥ��뤫��
-õ�뤿��Ǥ�������ˤ� ���ΤΥĥ꡼�򼨤�
-�������COUNT function��GROUP BY clause
-���ɲä��ޤ���
+ツリー全体を取り出す方法を見てきました。しかし、ツリー
+のそれぞれのノードの深さも示したいとしたらどうしましょうか。
+それは階層のなかで、ノードが何処に位置しているかを
+探るためです。これには 全体のツリーを示す
+クエリにCOUNT functionとGROUP BY clause
+を追加します。
 
 SELECT node.name, (COUNT(parent.name) - 1) AS depth
 FROM nested_category AS node,
@@ -345,8 +345,8 @@ ORDER BY node.lft;
 <span class="quote1">| 2 WAY RADIOS | 2 |</span>
 +----------------------+-------+
 
-CONCAT and REPEAT string�ؿ���Ȥ���������
-�ͤ˱����ƥ��ƥ����̾���򥤥�ǥ�Ȥ��ޤ���
+CONCAT and REPEAT string関数を使い、深さの
+値に応じてカテゴリの名前をインデントします。
 
 SELECT CONCAT( REPEAT(' ', COUNT(parent.name) - 1), node.name) AS name
 FROM nested_category AS node,
@@ -370,18 +370,18 @@ ORDER BY node.lft;
 <span class="quote1">| 2 WAY RADIOS |</span>
 +-----------------------+
 
-������󡢥��饤�����¦�Υ��ץ�Ǥϳ��ؤο�����ľ��
-�󼨤���Ǥ��礦���������֤γ�ȯ�Ԥϥĥ꡼��롼�פ��ʤ��顢
-&lt;li&gt;&lt;/li&gt; �� &lt;ul&gt;&lt;/ul&gt; �Υ����򿼤����������ꡢ���ä��ꤹ��
-��ˡ��ɲä��ޤ���
+もちろん、クライアント側のアプリでは階層の深さを直接
+提示するでしょうが。ウエブの開発者はツリーをループしながら、
+&lt;li&gt;&lt;/li&gt; と &lt;ul&gt;&lt;/ul&gt; のタグを深さが増えたり、減ったりする
+毎に、追加します。
 
-���֥ĥ꡼�ο���
+サブツリーの深さ
 
-���֥ĥ꡼�ο����ξ���ɬ�פȤʤ�ȡ�self-join�����
-�Ρ��ɤȿƥơ��֥�˸¤뤳�Ȥ��Ǥ��ʤ��ʤ�ޤ����Ȥ����Τ�
-��������ȷ�̤�����ץȤ���뤫��Ǥ�������ˣ�����
-�� self-join���ɲä��ޤ���Ʊ���˥��֥������ä��ơ����֥ĥ꡼
-�ο������������ȤΥݥ���Ȥ���ο�������ꤷ�ޤ���
+サブツリーの深さの情報が必要となると、self-joinの中で
+ノードと親テーブルに限ることができなくなります。というのも
+そうすると結果がコラプトされるからです。代わりに３番目
+の self-joinを追加します、同時にサブクエリも加えて、サブツリー
+の新しいスタートのポイントからの深さを決定します。
 
 SELECT node.name, (COUNT(parent.name) - (sub_tree.depth + 1)) AS depth
 FROM nested_category AS node,
@@ -413,22 +413,22 @@ ORDER BY node.lft;
 <span class="quote1">| 2 WAY RADIOS | 1 |</span>
 +----------------------+-------+
 
-���δؿ��Ϥɤ�ʥΡ��ɤ�̾���ȤǤ�ʥ롼�ȥΡ��ɤ�ޤ�˻��ѤǤ��ޤ���
-�������ͤ�Ϳ���餿�Ρ��ɤ�����ͤǤ���
+この関数はどんなノードの名前とでも（ルートノードを含む）使用できます。
+深さの値は与えらたノードからの値です。
 
-�Ρ��ɤ�ľ���ˤ���Ρ��ɤ򸡺�
+ノードの直下にあるノードを検索
 
-�����֤��ŵ����ʤΥ��ƥ��꡼�򸫤��Ƥ���Ȥ��ޤ��礦��
-�桼�������ƥ��꡼�򥯥�å�����ȡ����Υ��ƥ�������ʤ�
-ɽ���������Ǥ��礦���ޤ�����ľ���Υ��֥��ƥ��꡼��ɽ��
-�����Ǥ��礦�������β��Υ��֥��ƥ��꡼�����Ƥ�
-ɽ���������ʤ��Ǥ��礦�����Τ���ˤϡ��Ρ��ɤ�
-����ľ���ΥΡ��ɤ�ɽ������ɬ�פ�����ޤ���������ʲ�
-��ɬ�פ���ޤ����㤨�С�PORTABLE ELECTRONICS���ƥ��꡼
-�򼨤��Ȥ���MP3 PLAYERS, CD PLAYERS��2 WAY RADIOS
-�ϼ���������FLASH��ɽ�����ʤ���
+ウエブで電機製品のカテゴリーを見せているとしましょう。
+ユーザがカテゴリーをクリックすると、そのカテゴリの製品を
+表示したいでしょう。またその直下のサブカテゴリーも表示
+したでしょうが、その下のサブカテゴリーを全ては
+表示したくないでしょう。そのためには、ノードと
+その直下のノードを表示する必要がありますが、それ以下
+は必要ありません。例えば、PORTABLE ELECTRONICSカテゴリー
+を示すとき、MP3 PLAYERS, CD PLAYERSと2 WAY RADIOS
+は示したいがFLASHは表示しない。
 
-��������Υ������HAVING clause ���ɲä���д�ñ�ˤǤ��ޤ���
+これは前のクエリにHAVING clause を追加すれば簡単にできます。
 
 
 SELECT node.name, (COUNT(parent.name) - (sub_tree.depth + 1)) AS depth
@@ -460,12 +460,12 @@ ORDER BY node.lft;
 <span class="quote1">| 2 WAY RADIOS | 1 |</span>
 +----------------------+-------+
 
-�ƤΥΡ��ɤ�ɽ���������ʤ���С�HAVING depth &lt;= 1 ��HAVING depth = 1
-�ˤ���е�������
+親のノードを表示したくなければ、HAVING depth &lt;= 1 をHAVING depth = 1
+にすれば宜しい。
 
-�ͥ��ȥ��åȤ����Aggregate Function
+ネストセットの中のAggregate Function
 
-aggregate function��ǥ�Ǥ������ʤΥơ��֥���ɲä��ޤ���
+aggregate functionをデモできる製品のテーブルを追加します。
 
 CREATE TABLE product(
 product_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -496,8 +496,8 @@ SELECT * FROM product;
 <span class="quote1">| 10 | Family Talk 360 | 10 |</span>
 +------------+-------------------+-------------+
 
-���ƥ��꡼�ĥ꡼����Ф��������������ޤ��礦���ޤ�
-���줾��Υ��ƥ�������ʤο��⼨���ޤ���
+カテゴリーツリーを取り出すクエリを作成しましょう。また
+それぞれのカテゴリの製品の数も示します。
 
 SELECT parent.name, COUNT(product.name)
 FROM nested_category AS node ,
@@ -524,26 +524,26 @@ ORDER BY node.lft;
 <span class="quote1">| 2 WAY RADIOS | 1 |</span>
 +----------------------+---------------------+
 
-�����COUNT�� GROUP BY��ä��Ƥ�ŵ��Ū�������Υĥ꡼��
-�Υ�����Ǥ�����������ʥơ��֥��WHERE clause�ǤΥΡ��ɤ�
-���ʥơ��֥��join�ؤΥ�ե���󥹤�ȼ���ޤ������줫��
-ʬ����褦�ˡ����줾��Υ��ƥ���˴ؤ��ƿ�������ޤ���
-���֥��ƥ��꡼�ο��ϿƤΥ��ƥ��꡼��ȿ�Ǥ���Ƥ��ޤ���
+これはCOUNTと GROUP BYを加えての典型的な全部のツリー用
+のクエリです。これは製品テーブルとWHERE clauseでのノードと
+製品テーブルのjoinへのレファレンスを伴います。これから
+分かるように、それぞれのカテゴリに関して数があります。
+サブカテゴリーの数は親のカテゴリーに反映されています。
 
-�Ρ��ɤ��ɲ�
+ノードの追加
 
-�ĥ꡼�Υ��������ˡ��ؤ֤���ˡ������ʥΡ��ɤ��ɲ�
-���뤳�Ȥǥĥ꡼�򥢥åץǡ��Ȥ�����ˡ��ߤƤߤޤ��礦��
-�ͥ��ȥ��åȤΥ�����������ߤޤ��礦��
+ツリーのクエリの方法を学ぶために、新たなノードを追加
+することでツリーをアップデートする方法をみてみましょう。
+ネストセットのダイアグラムをみましょう。
 
-TELEVISIONS�� PORTABLE ELECTRONICS�Ρ��ɤδ֤˿�����
-�Ρ��ɤ��ɲä������Ȥ��ޤ��ȡ��������Ρ��ɤ�lft
-��rgt ���ͤ�10 ��11�Ǥ������α�¦�ˤ���Ρ��ɤ�
-���ƤϤ���lft ��rgt���ͤ򣲤����ä��ޤ������줫��
-������lft��rgt���ͤǿ������Ρ��ɤ��ɲä��ޤ��������MySQL 5�Ǥ�
-stored procedure��ȤäƤǤ��ޤ�����¿ʬ��ʬ��
-�桼���Ϥޤ�4.1��ȤäƤ���Ȼפ��ޤ��������LOCK TABLES ���ơ��ȥ���
-�ǥ������ȯ���ޤ���
+TELEVISIONSと PORTABLE ELECTRONICSノードの間に新しい
+ノードを追加したいとしますと、新しいノードはlft
+とrgt の値は10 と11です。その右側にあるノードの
+全てはそのlft とrgtの値を２つ増加します。それから
+正しいlftとrgtの値で新しいノードを追加します。これはMySQL 5では
+stored procedureを使ってできますが、多分大分の
+ユーザはまだ4.1を使っていると思います。それでLOCK TABLES ステートメント
+でクエリを発します。
 
 LOCK TABLE nested_category WRITE;
 
@@ -558,7 +558,7 @@ INSERT INTO nested_category(name, lft, rgt) VALUES('GAME CONSOLES',
 
 UNLOCK TABLES;
 
-�ĥ꡼��������ǥͥ��ƥ��󥰤�����å��Ǥ��ޤ���
+ツリー・クエリでネスティングをチェックできます。
 
 SELECT CONCAT( REPEAT( ' ', (COUNT(parent.name) - 1) ), node.name) AS name
 FROM nested_category AS node,
@@ -584,9 +584,9 @@ ORDER BY node.lft;
 <span class="quote1">| 2 WAY RADIOS |</span>
 +-----------------------+
 
-�Ҷ��Τʤ��Ρ��ɤλҶ��Ȥ��ƥΡ��ɤ��ɲä�����ϴ�ʬ�ץ����������
-�ѹ�����ɬ�פ�����ޤ���2 WAY RADIOS�Ρ��ɤβ��˿�����FRS �Ρ��ɤ�
-�ɲä��ޤ��礦��
+子供のないノードの子供としてノードを追加する場合は幾分プロシージャを
+変更する必要があります。2 WAY RADIOSノードの下に新しいFRS ノードを
+追加しましょう。
 
 LOCK TABLE nested_category WRITE;
 
@@ -602,9 +602,9 @@ INSERT INTO nested_category(name, lft, rgt) VALUES('FRS', @myLeft + 1,
 
 UNLOCK TABLES;
 
-������ǤϿ������Ρ��ɤκ�¦���ֹ�α���
-���Ƥ��ĥ���ޤ������줫�顢��¦���ͤα��˥Ρ��ɤ��֤��ޤ���
-�����̤ꡢ�������Ρ��ɤϤ����ȥͥ��Ȥ��Ƥ��ޤ���
+この例では新しいノードの左側の番号の右の
+全てを拡張します。それから、左側の値の右にノードを置きます。
+見た通り、新しいノードはちゃんとネストしています。
 
 SELECT CONCAT( REPEAT( ' ', (COUNT(parent.name) - 1) ), node.name) AS name
 FROM nested_category AS node,
@@ -631,16 +631,16 @@ ORDER BY node.lft;
 <span class="quote1">| FRS |</span>
 +-----------------------+
 
-�Ρ��ɤν���
+ノードの除去
 
-�Ǹ�δ���Ū�ʥ������ϥΡ��ɤν���Ǥ����Ρ��ɤ�����
-�ݤ�ɬ�פʤ��Ȥϳ�����ΥΡ��ɤΰ��֤ˤ��ޤ���
-�꡼�եΡ��ɤ����뤳�ȤϻҶ�������Ρ��ɤ��������
-��ñ�Ǥ����������ξ����ڤ�Υ����Ƥ��ޤä��Ρ���
-�ν�����ɬ�פǤ����顣
+最後の基本的なタスクはノードの除去です。ノードを除去する
+際に必要なことは階層内のノードの位置によります。
+リーフノードを除去することは子供がいるノードを除去するよりも
+簡単です。当然その場合は切り離されてしまったノード
+の処理が必要ですから。
 
-�꡼�եΡ��ɤ�����ݤ��ɲä�ȿ�Фǡ��Ρ��ɤ����ơ�
-���ΥΡ��ɤα��ˤ���Ρ��ɤ�����ʬ�������餷�ޤ���
+リーフノードを除去する際は追加の反対で、ノードを除去して、
+そのノードの右にあるノードから幅分だけ減らします。
 
 LOCK TABLE nested_category WRITE;
 
@@ -658,8 +658,8 @@ UPDATE nested_category SET lft = lft - @myWidth WHERE lft &gt; @myRight;
 
 UNLOCK TABLES;
 
-�⤦���١��տޤ����ĥ꡼���������¹Ԥ���
-���ؤ��𤵤ʤ��ǥΡ��ɤ������˽���줿�����ǧ���ޤ���
+もう一度、意図したツリー・クエリを実行して
+階層を乱さないでノードが本当に除去されたかを確認します。
 
 SELECT CONCAT( REPEAT( ' ', (COUNT(parent.name) - 1) ), node.name) AS name
 FROM nested_category AS node,
@@ -685,8 +685,8 @@ ORDER BY node.lft;
 <span class="quote1">| FRS |</span>
 +-----------------------+
 
-������ˡ�ϥΡ��ɤ����ơ����λҶ�����
-������Τ�ͭ���Ǥ���
+この方法はノードを除去して、その子供全て
+を除去するのに有効です。
 
 LOCK TABLE nested_category WRITE;
 
@@ -704,7 +704,7 @@ UPDATE nested_category SET lft = lft - @myWidth WHERE lft &gt; @myRight;
 
 UNLOCK TABLES;
 
-�⤦���١����ƤΥ��֥ĥ꡼������Ǥ�������Τ���ޤ���
+もう一度、全てのサブツリーが除去できたかを確かめます。
 
 SELECT CONCAT( REPEAT( ' ', (COUNT(parent.name) - 1) ), node.name) AS name
 FROM nested_category AS node,
@@ -728,12 +728,12 @@ ORDER BY node.lft;
 <span class="quote1">| FRS |</span>
 +-----------------------+
 
-�⤦�����Υ��ʥꥪ�ǤϻҶ��ǤϤʤ��ƤΥΡ���
-���������Ǥ���������ˤ����꤬����ޤǡ�
-�ץ졼���ե����������̾�����Ѥ�������ˤ��뤫���Τ�ޤ���
-������㤨�С������ѡ��Х���������ˤʤä��褦�ʤȤ��Ǥ���¾��
-�������ƤλҶ���Ƥ����ä��������ޤǲ����夲��ɬ��
-������ޤ���
+もう一方のシナリオでは子供ではなく親のノード
+を除去した場合です。ある場合には代わりがくるまで、
+プレースフォールダーの名前を変えるだけにするかも知れません。
+これは例えば、スーパーバイザーが首になったようなときです。他の
+場合は全ての子供を親があったレヴェルまで押し上げる必要
+があります。
 
 LOCK TABLE nested_category WRITE;
 
@@ -753,11 +753,11 @@ UPDATE nested_category SET lft = lft - 2 WHERE lft &gt; @myRight;
 
 UNLOCK TABLES;
 
-���ξ�硢�Ρ��ɤα��ˤ��륨����Ȥ����Ƥ��飲������ޤ���
-(�Ҷ����ʤ�������ϣ�������Ǥ���)�ޤ����λҶ��ΥΡ��ɤ���
-��������ޤ���(����ϿƤκ����ͤ��ʤ��ʤä����Ȥˤ��
-����åפ��Ĥ��뤿��Ǥ���). �⤦���١�������Ȥ�
-�ʾ夲���줿���Ȥ��ǧ���ޤ���
+この場合、ノードの右にあるエレメントの全てから２を引きます。
+(子供がなければ幅は２だからです。)またその子供のノードから
+１を引きます。(これは親の左の値がなくなったことによる
+ギャップを閉じるためです。). もう一度、エレメントが
+格上げされたことを確認します。
 
 SELECT CONCAT( REPEAT( ' ', (COUNT(parent.name) - 1) ), node.name) AS name
 FROM nested_category AS node,
@@ -780,31 +780,31 @@ ORDER BY node.lft;
 <span class="quote1">| FRS |</span>
 +---------------+
 
-¾�Υ��ʥꥪ�ǤϽ�����Ρ��ɤλҶ��Σ��Ĥ����οƤ�
-���֤ˤ�äƤ��ơ����λҶ������οƤη���β��ΰ��֤ˤ�ä�
-���ޤ��������������̤��Թ�Ǥ���Ϥ����ǤϽҤ٤ޤ���
+他のシナリオでは除去したノードの子供の１つを前の親の
+位置にもってきて、その子供を前の親の兄弟の下の位置にもって
+きます。しかし、紙面の都合でそれはここでは述べません。
 
-�Ǹ��
+最後に
 
-���ξ�����Ω�Ĥ�ΤǤ��ä����Ȥ��˾���ޤ�����SQL�ǤΥͥ���
-���åȤΥ��󥻥ץȤϤ⤦����ǯ����¸�ߤ��ޤ���������
-�ܤ䥤�󥿡��ͥåȤǤ�������ξ���¸�ߤ��ޤ������
-�ͤ��ǤϤ���ʬ��ǰ��֤褯�񤱤Ƥ���Τϡ�Joe Celko��
-�Ρ�Trees and Hierarchies in SQL for Smarties�פ�Joe Celko��
-SQL������ȤǤ��� Joe Celko�ϥͥ��ȡ���ǥ�˴ؤ���
-���ҤǤ��������Ƥ�äȤ⡢¿���������Ĥ��Ƥ������ԤǤ���Celko���ܤϽ��פ�
-�������ǡ��������ޤ����ܤϤ��ε����ǥ��С����ʤ��ä����٤ʥȥԥå�
-�򥫥С����ޤ����ޤ�Adjacency List��Nested Set��ǥ�ʳ���
-��ˡ�ˤ���ڤ��ޤ���
+この情報が役立つものであったことを希望しますが、SQLでのネスト
+セットのコンセプトはもう１０年程度存在します、そして
+本やインターネットでたくさんの情報が存在します。私の
+考えではこの分野で一番よく書けているのは、Joe Celko著
+の「Trees and Hierarchies in SQL for Smarties」でJoe Celkoは
+SQLの専門家です。 Joe Celkoはネスト・モデルに関する
+権威です。そしてもっとも、多くの著書を残している著者です。Celkoの本は重要な
+ソースで、推薦します。本はこの記事でカバーしなかった高度なトピック
+をカバーします。またAdjacency ListとNested Setモデル以外の
+方法にも言及します。
 
-��ե���󥹡����������ǥ����֤Υ�ե���󥹤�ꥹ�ȥ��å�
-���ޤ��������ز����줿�ǡ����δ����Υꥵ������Ω�Ĥ�פ��ޤ���
-������ˤ�MySQL�Τʤ��ǥͥ��Ȥ��줿���åȤ��������PHP��
-�饤�֥�꡼�ʤɤ�ޤߤޤ�������adjacency list��ǥ�����
-���Ƥ��뤬���ͥ��ȥ��åȥ�ǥ�������ͤϡ����Σ��Ĥ�
-��ǥ�֤Ǥ��Ѵ������ɤΥ���ץ�ϡ�Storing Hierarchical Data in a
-Database��
-�Υ��������ˤ���ޤ���
+レファレンス・セクションでウエブのレファレンスをリストアップ
+しました。階層化されたデータの管理のリサーチ役立つを思います。
+この中にはMySQLのなかでネストされたセットを処理するPHPの
+ライブラリーなども含みます。現在adjacency listモデルを使用
+しているが、ネストセットモデルを試したい人は、この２つの
+モデル間での変換コードのサンプルは「Storing Hierarchical Data in a
+Database」
+のセクションにあります。
 
 -- 
 Zen Kishimoto                      www.ipdevices.com
@@ -816,6 +816,6 @@ Santa Clara, CA 95050              (801) 720-8847 (FAX)
 
 </pre>
 </div>
-<p class="button"><a href="12070.html">[��]</a><a href="12072.html">[��]</a><a href="../list/12001-12100.html">[�ֹ�����]</a><a href="../thread/12001-12100.html">[����åɰ���]</a></p>
+<p class="button"><a href="12070.html">[前]</a><a href="12072.html">[次]</a><a href="../list/12001-12100.html">[番号順一覧]</a><a href="../thread/12001-12100.html">[スレッド一覧]</a></p>
 </body>
 </html>

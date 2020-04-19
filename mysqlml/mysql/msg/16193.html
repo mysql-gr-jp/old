@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="16192.html">[��]</a><a href="16194.html">[��]</a><a href="../list/16101-16200.html">[�ֹ�����]</a><a href="../thread/16101-16200.html">[����åɰ���]</a></p>
+<p class="button"><a href="16192.html">[前]</a><a href="16194.html">[次]</a><a href="../list/16101-16200.html">[番号順一覧]</a><a href="../thread/16101-16200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:16193
 </p>
@@ -13,91 +13,91 @@ mysql:16193
 <p>
 From: &quot;koichi.s&quot; &lt;&quot;koichi.s&quot; &lt;asp91462@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 17 Dec 2014 11:38:58 +0900 (JST)<br>
-Subject: [mysql 16193] Re: [mysql 16192] Re: [mysql 16190] MySQL5.6.20�򥤥󥹥ȡ����root�ǥ����������ʤ�<br>
+Subject: [mysql 16193] Re: [mysql 16192] Re: [mysql 16190] MySQL5.6.20をインストール後rootでログイン出来ない<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-yoku0825���ޡ��ߤʤ���
+yoku0825さま、みなさま
 
 
-�����ڤǤ������ޤ���
+佐々木でございます。
 
-��®�Τ�������ĺ�������꤬�Ȥ��������ޤ�����
-�䤬����Ǻ��Ǥ��������Ū�Τʤ������򤯤����ꡢ���դ��Ƥ���ޤ���
-
-
-������¦�ȥ��饤�����¦��ξ����secure-auth��OFF�ˤ��뤳�Ȥ�
-root�ǤΥ�������ϲ�ǽ�Ȥʤ�ޤ�����
-
-�����Ǥ�����
-
-��&gt;�ޤ��� root�Υѥ���ɤ����ꤷ������ͭ���ˤʤäƤ��ޤ���Ǥ�������
+早速のご返答を頂き、ありがとうございました。
+私が数日悩んでいた問題に的確なご回答をくださり、感謝しております。
 
 
-����Ū�ˤ�����Ǥ���Ȼפ��ޤ���
-(���Ѥ��������äǤ������ѥ����å��ѴĶ��Ǥ��ä����ᡢ���ۥ�����ή��Ƥ��ޤäƤ���ޤ���)
+サーバ側とクライアント側の両方のsecure-authをOFFにすることで
+rootでのログインは可能となりました。
 
-�ޤ��ɲäǤ�����ĺ�������ΤǤ�����
+原因ですが、
 
-<span class="quote1">&gt; old_passwords�������ä��ƺǽ餫�饻�åȥ��åפ���Τ��ɤ��Ȥϻפ��ޤ���</span>
+　&gt;または rootのパスワードを設定した時に有効になっていませんでしたか？
 
-������ˤĤ��Ƥϰʲ��κ�Ȥ�»ܤ��Ƥߤ��ΤǤ�������꤯�Ԥ��ޤ���Ǥ�����
-��yum remove�ˤưʲ��Υѥå������򥢥󥤥󥹥ȡ���
+
+状況的にこちらであると思われます。
+(お恥ずかしい話ですが、パイロット用環境であったため、構築ログが流れてしまっておりました)
+
+また追加でご教示頂きたいのですが、
+
+<span class="quote1">&gt; old_passwordsの設定を消して最初からセットアップするのが良いとは思います。</span>
+
+こちらについては以下の作業を実施してみたのですが、上手く行きませんでした。
+・yum removeにて以下のパッケージをアンインストール
  MySQL-client MySQL-devel
  MySQL-server
  MySQL-test
-��MySQL-shared-compat�ϡ���¸�ط����Թ��crontab�ʤɤ�ä��뤿�Ἣ��
-��MySQL�Υǡ����ե������Ǽ�ե����(default�ΤޤޤΤ���/var/lib/mysql)
-�۲���Хå����åפ���������
-��yum localinstall�ˤưʲ���ƥ��󥹥ȡ���
+※MySQL-shared-compatは、依存関係の都合でcrontabなども消えるため自重
+・MySQLのデータファイル格納フォルダ(defaultのままのため/var/lib/mysql)
+配下をバックアップを取得し削除
+・yum localinstallにて以下を再インストール
  MySQL-client MySQL-devel
  MySQL-server
  MySQL-test
-��my.cnf��old_passwords�����̵꤬�����Ȥ��ǧ����mysql��ư
-������root����³���ߤ뢫�����Ǻ��ޤǤ�Ʊ�����������
+・my.cnfにold_passwordsの設定が無いことを確認してmysqlを起動
+・再度rootで接続を試みる←ここで今までと同じ問題に遭遇
 
-�ǽ餫��Υ��åȥ��åפȸƤ֤���ˤϡ�MySQL-shared-compat�ޤ�
-���줤�˥��󥤥󥹥ȡ�������󥹥ȡ��뤹��ɬ�פ�����Τ���
+最初からのセットアップと呼ぶためには、MySQL-shared-compatまで
+きれいにアンインストール＆インストールする必要があるのか、
 
-����Ȥ⡢�����Τ�����Ȥϰۤʤ벿�餫�μ�礬����Τ�Ƚ���դ��ޤ���Ǥ�����
-MySQL-shared-compat�Υ��󥤥󥹥ȡ�������󥹥ȡ���ޤ�
-�Ԥ��в�ä���Ϥ��Ǥ��礦����
+それとも、当方のやり方とは異なる何らかの手順があるのか判断付きませんでした。
+MySQL-shared-compatのアンインストール＆インストールまで
+行えば解消するはずでしょうか？
 
-��ʣ���ͤǴĶ����ۤ��Ƥ��ꡢcrontab�ʤɤ������ƥ��Ȥ��ʤ��
-�����뤿�ᡢ��ñ��MySQL-shared-compat�Υ��󥤥󥹥ȡ��뤬����ʤ�
-�������ˤʤäƤ���ޤ���
+※複数人で環境を構築しており、crontabなどの設定やテストが進んで
+　いるため、簡単にMySQL-shared-compatのアンインストールが出来ない
+　状況になっております。
 
-����������ꤤ�������ޤ���
+よろしくお願いいたします。
 
-�ʾ�
+以上
 
 
 
 ----- Original Message -----
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;����ˤ��ϡ�yoku0825�Ȥ����ޤ���</span>
+<span class="quote1">&gt;こんにちは、yoku0825といいます。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;rpm���ͤù���ȡ�~/.mysql_secret ��root�ν���ѥ���ɤ��ͤù��ޤ�ơ�</span>
-<span class="quote1">&gt;SET PASSWORD���ѹ����ʤ���ͭ���ˤʤ�ʤ���ĤǤϤʤ��褦�˸����ޤ��Τǡ�</span>
-<span class="quote1">&gt;�����ϥ��ꥢ����Ƥ�Ȼפäƿʤ�ޤ��ȡ�</span>
+<span class="quote1">&gt;rpmで突っ込むと、~/.mysql_secret にrootの初期パスワードが突っ込まれて、</span>
+<span class="quote1">&gt;SET PASSWORDで変更しないと有効にならない件…ではないように見えますので、</span>
+<span class="quote1">&gt;そこはクリアされてると思って進めますと、</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;my.cnf��old_passwords�����ꤵ��Ƥ���,</span>
-<span class="quote1">&gt;�ޤ��� root�Υѥ���ɤ����ꤷ������ͭ���ˤʤäƤ��ޤ���Ǥ�������</span>
+<span class="quote1">&gt;my.cnfにold_passwordsが設定されている,</span>
+<span class="quote1">&gt;または rootのパスワードを設定した時に有効になっていませんでしたか？</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;����ˤ��root�Υѥ���ɤ�16��ϥå���Ǻ�������Ƥ��ޤä��ΤǤϤʤ����Ȼפ��ޤ���</span>
-<span class="quote1">&gt;secure-auth�� *�����С���* *���饤����Ȥ�* ���줾��OFF�ˤ����(skip-secure-auth�ޤ���secure-auth=0)ɬ�פ�����Τǡ�</span>
-<span class="quote1">&gt;my.cnf��[mysqld]����������skip-secure-auth���ɲä��Ƥ�����в�ǽ���Ȼפ��ޤ���</span>
+<span class="quote1">&gt;これによりrootのパスワードが16桁ハッシュで作成されてしまったのではないかと思います。</span>
+<span class="quote1">&gt;secure-authは *サーバーと* *クライアントで* それぞれOFFにされる(skip-secure-authまたはsecure-auth=0)必要があるので、</span>
+<span class="quote1">&gt;my.cnfの[mysqld]セクションにskip-secure-authを追加してあげれば可能だと思います。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;���С���������äȰ㤤�ޤ������Ƹ������Ƥߤޤ�����</span>
+<span class="quote1">&gt;↓バージョンちょっと違いますが、再現させてみました。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;bash-4.1# cat /root/.mysql_secret</span>
@@ -111,7 +111,7 @@ MySQL-shared-compat�Υ��󥤥󥹥ȡ�������󥹥ȡ���ޤ�
 <span class="quote1">&gt;Query OK, 0 rows affected, 1 warning (0.00 sec)</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;-- ��˥󥰤��Фޤ���Ǥ������� --</span>
+<span class="quote1">&gt;-- ワーニングが出ませんでしたか？ --</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;mysql&gt; SHOW WARNINGS;</span>
@@ -143,7 +143,7 @@ MySQL-shared-compat�Υ��󥤥󥹥ȡ�������󥹥ȡ���ޤ�
 <span class="quote1">&gt;1 row in set (0.00 sec)</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;-- 16��ϥå������¸����Ƥ��ޤ� --</span>
+<span class="quote1">&gt;-- 16桁ハッシュで保存されています --</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;bash-4.1# mysql -uroot -phoge</span>
@@ -151,7 +151,7 @@ MySQL-shared-compat�Υ��󥤥󥹥ȡ�������󥹥ȡ���ޤ�
 <span class="quote1">&gt;ERROR 2049 (HY000): Connection using old (pre-4.1.1) authentication protocol refused (client option 'secure_auth' enabled)</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;-- ���饤����Ȥ�16��ϥå���Ǥ�ǧ�ڤ���ݤ���Τǡ�Error 2049(2000����ϥ��饤����ȤΥ��顼�����ɤǤ�)���Фޤ� --</span>
+<span class="quote1">&gt;-- クライアントが16桁ハッシュでの認証を拒否するので、Error 2049(2000番台はクライアントのエラーコードです)が出ます --</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;bash-4.1# mysql -uroot -phoge --skip-secure-auth</span>
@@ -159,7 +159,7 @@ MySQL-shared-compat�Υ��󥤥󥹥ȡ�������󥹥ȡ���ޤ�
 <span class="quote1">&gt;ERROR 1275 (HY000): Server is running in --secure-auth mode, but 'root'@'localhost' has a password in the old format; please change the password to the new format</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;-- ���饤����Ȥ�16��ϥå������Ĥ����Ƥ⡢�����С���16��ϥå������ݤ���Τ�Error 1275(1000����ϥ����С��Υ��顼������)�ˤʤ�ޤ��� --</span>
+<span class="quote1">&gt;-- クライアントに16桁ハッシュを許可させても、サーバーが16桁ハッシュを拒否するのでError 1275(1000番台はサーバーのエラーコード)になりました --</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;# vim /usr/my.cnf</span>
@@ -176,7 +176,7 @@ MySQL-shared-compat�Υ��󥤥󥹥ȡ�������󥹥ȡ���ޤ�
 <span class="quote1">&gt;Starting MySQL. SUCCESS!</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;-- �����С�¦�Ǥ�skip-secure-auth�ˤ��ƺƵ�ư���ޤ� --</span>
+<span class="quote1">&gt;-- サーバー側でもskip-secure-authにして再起動します --</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;bash-4.1# mysql -uroot -phoge</span>
@@ -184,7 +184,7 @@ MySQL-shared-compat�Υ��󥤥󥹥ȡ�������󥹥ȡ���ޤ�
 <span class="quote1">&gt;ERROR 2049 (HY000): Connection using old (pre-4.1.1) authentication protocol refused (client option 'secure_auth' enabled)</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;-- �����С�¦��skip-���Ƥ⡢���饤�����¦�ǵ��ݤ���Τǥ��饤����Ȥ���skip-secure-auth�򳰤���2049�ˤʤ�ޤ� --</span>
+<span class="quote1">&gt;-- サーバー側でskip-しても、クライアント側で拒否するのでクライアントからskip-secure-authを外すと2049になります --</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;bash-4.1# mysql -uroot -phoge --skip-secure-auth</span>
@@ -208,30 +208,30 @@ MySQL-shared-compat�Υ��󥤥󥹥ȡ�������󥹥ȡ���ޤ�
 <span class="quote1">&gt;mysql&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;-- ξ����secure-auth��OFF�ˤʤ뤳�Ȥǽ���16��ϥå����ǧ�ڤǤ��ޤ��� --</span>
+<span class="quote1">&gt;-- 両方のsecure-authがOFFになることで初めて16桁ハッシュで認証できました --</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;��괺����5.6.21�ǤϤ���Ǥ��Τ��뤫���Τ�ޤ��󤬡�</span>
-<span class="quote1">&gt;5.7�Ǥ�skip-secure-auth�ϴ����˲�ᤵ��ʤ��ʤäƤ���Τ�</span>
-<span class="quote1">&gt;(5.6�ˤ⤤�ĥХå��ݡ��Ȥ���뤫����ʤ����狼��ޤ���)</span>
-<span class="quote1">&gt;old_passwords�������ä��ƺǽ餫�饻�åȥ��åפ���Τ��ɤ��Ȥϻפ��ޤ���</span>
+<span class="quote1">&gt;取り敢えず5.6.21ではこれでしのげるかも知れませんが、</span>
+<span class="quote1">&gt;5.7ではskip-secure-authは完全に解釈されなくなっているので</span>
+<span class="quote1">&gt;(5.6にもいつバックポートされるかされないかわかりませんし)</span>
+<span class="quote1">&gt;old_passwordsの設定を消して最初からセットアップするのが良いとは思います。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;;�̤Ǥ�����</span>
-<span class="quote2">&gt;&gt; �ѥ���ɥϥå���δ�����</span>
-<span class="quote2">&gt;&gt;  �ѹ������ä����ȡ������MySQL5.6���鿷��������������ɸ��Ȥʤä�����</span>
-<span class="quote2">&gt;&gt;  �ˤ��ȯ�����Ƥ�����������򤷤�</span>
+<span class="quote1">&gt;余談ですが、</span>
+<span class="quote2">&gt;&gt; パスワードハッシュの管理に</span>
+<span class="quote2">&gt;&gt;  変更が入ったこと、およびMySQL5.6から新しい管理方式が標準となったこと</span>
+<span class="quote2">&gt;&gt;  により発生している問題と理解した</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;�ѥ���ɥϥå��夬�Ѥ�ä��Τ⡢����������ɸ��ˤʤä��Τ�10ǯ�ʾ����Ǥ� :-P</span>
+<span class="quote1">&gt;パスワードハッシュが変わったのも、新しい方が標準になったのも10年以上前です :-P</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;��褷�ޤ��褦�ˡ�</span>
+<span class="quote1">&gt;解決しますように。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
@@ -239,55 +239,55 @@ MySQL-shared-compat�Υ��󥤥󥹥ȡ�������󥹥ȡ���ޤ�
 <span class="quote1">&gt;yoku0825,</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;2014ǯ12��16�� 15:07 koichi.s &lt;asp91462@xxxxxxxxxx&gt;:</span>
-<span class="quote1">&gt;�᡼��󥰥ꥹ�Ȥγ�����</span>
+<span class="quote1">&gt;2014年12月16日 15:07 koichi.s &lt;asp91462@xxxxxxxxxx&gt;:</span>
+<span class="quote1">&gt;メーリングリストの皆さま</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;�Ϥ���ޤ���</span>
-<span class="quote2">&gt;&gt;WEB�����ƥ๽�ۤ�ᥤ��Ȥ��Ƥ��뵻�ѼԤκ����ڹ���ȿ����ޤ���</span>
-<span class="quote2">&gt;&gt;���Ĥ��JAVA+Oracle����Ѥ��Ƥγ�ȯ��¿��MySQL�鿴�ԤǤ���</span>
+<span class="quote2">&gt;&gt;はじめまして</span>
+<span class="quote2">&gt;&gt;WEBシステム構築をメインとしている技術者の佐々木浩一と申します。</span>
+<span class="quote2">&gt;&gt;いつもはJAVA+Oracleを使用しての開発が多いMySQL初心者です。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;MySQL�Ͻ��ƤǤ�����Oracle�ʳ���PostgreSQL�ʤɤϴĶ����ۤηи�����Ǥ���</span>
+<span class="quote2">&gt;&gt;MySQLは初めてですが、Oracle以外にPostgreSQLなどは環境構築の経験ありです。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;���󡢰��긵����˾�ˤ�ꥷ���ƥ�ΰ�����RHEL+MySQL+Perl(CGI)�ˤ�</span>
-<span class="quote2">&gt;&gt;���ۤ�����ˤʤꡢ�Ķ����ۤ�ԤäƤ���ΤǤ�����ɽ��ΤȤ���root�ˤ�</span>
-<span class="quote2">&gt;&gt;�����������ʤ������˴٤äƤ��ޤ��ޤ������������ʤɤ��Ҹ������ΤǤ���</span>
-<span class="quote2">&gt;&gt;�ԥ��������ˤ��ɤ��失�ޤ���Ǥ����Τǡ���¸�Τ���������ä�����</span>
-<span class="quote2">&gt;&gt;����ʤ��ꤤ�Ƕ��̤Ǥ�����������ĺ���ޤ���Ǥ��礦����</span>
+<span class="quote2">&gt;&gt;今回、依頼元の要望によりシステムの一部をRHEL+MySQL+Perl(CGI)にて</span>
+<span class="quote2">&gt;&gt;構築する事になり、環境構築を行っているのですが、表題のとおりrootにて</span>
+<span class="quote2">&gt;&gt;ログイン出来ない状況に陥ってしまいました。過去ログなどを拝見したのですが</span>
+<span class="quote2">&gt;&gt;ピンと来る情報にたどり着けませんでしたので、ご存知の方がいらっしゃれば</span>
+<span class="quote2">&gt;&gt;勝手なお願いで恐縮ですが、ご教示頂けませんでしょうか？</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;�ھ�����</span>
-<span class="quote2">&gt;&gt;�����긵�����OS(RHEL6.2)�Υ������।�󥹥ȡ�����OS(MySQL��mysql-libs</span>
-<span class="quote2">&gt;&gt; 5.1.52-1.el6_0.1�Τߥ��󥹥ȡ����)�Υޥ����MySQL5.6.20-1.el6��</span>
-<span class="quote2">&gt;&gt; �Х�ɥ��ǥ��������֥ե����뤫��yum�ǥ��󥹥ȡ���</span>
-<span class="quote2">&gt;&gt;��MySQL��shared���󥹥ȡ������mysql-libs 5.1.52-1.el6_0.1�����礷�����ᡢ</span>
-<span class="quote2">&gt;&gt; �����MySQL-shared-compat-5.6.20-1.el6�ˤ�mysql-libs�Υ��åץǡ���</span>
-<span class="quote2">&gt;&gt;�����󥹥ȡ��뤷���ѥå������ϰʲ�(����5.6.20-1.el6)</span>
+<span class="quote2">&gt;&gt;【状況】</span>
+<span class="quote2">&gt;&gt;・依頼元指定のOS(RHEL6.2)のカスタムインストール版OS(MySQLはmysql-libs</span>
+<span class="quote2">&gt;&gt; 5.1.52-1.el6_0.1のみインストール済)のマシンにMySQL5.6.20-1.el6を</span>
+<span class="quote2">&gt;&gt; バンドル版アーカイブファイルからyumでインストール</span>
+<span class="quote2">&gt;&gt;・MySQLのsharedインストール時、mysql-libs 5.1.52-1.el6_0.1が競合したため、</span>
+<span class="quote2">&gt;&gt; 代わりにMySQL-shared-compat-5.6.20-1.el6にてmysql-libsのアップデート</span>
+<span class="quote2">&gt;&gt;・インストールしたパッケージは以下(全て5.6.20-1.el6)</span>
 <span class="quote2">&gt;&gt; MySQL-client</span>
 <span class="quote2">&gt;&gt; MySQL-devel</span>
 <span class="quote2">&gt;&gt; MySQL-server</span>
 <span class="quote2">&gt;&gt; MySQL-shared-compat</span>
 <span class="quote2">&gt;&gt; MySQL-test</span>
-<span class="quote2">&gt;&gt;�����󥹥ȡ��봰λ���OS��root��MySQL��ư������ư��˰ʲ��Υ��ޥ�ɤ�¹�</span>
+<span class="quote2">&gt;&gt;・インストール完了後にOSのrootでMySQLを起動し、起動後に以下のコマンドを実行</span>
 <span class="quote2">&gt;&gt; msql -uroot -p</span>
-<span class="quote2">&gt;&gt; ����ȡ��ʲ��Υ�å�������ɽ�����줿</span>
+<span class="quote2">&gt;&gt; すると、以下のメッセージが表示された</span>
 <span class="quote2">&gt;&gt; Connection using old(pre-4.1.1)authentication protocol refused(client option 'secure_auth' enavled)</span>
-<span class="quote2">&gt;&gt;����������¾������blog�ʤɤ��Ҹ�������̡��ѥ���ɥϥå���δ�����</span>
-<span class="quote2">&gt;&gt; �ѹ������ä����ȡ������MySQL5.6���鿷��������������ɸ��Ȥʤä�����</span>
-<span class="quote2">&gt;&gt; �ˤ��ȯ�����Ƥ�����������򤷤�</span>
-<span class="quote2">&gt;&gt;��msql -uroot -p�Υ��ޥ�ɤ��ɲåѥ�᡼���Ȥ���--skip-secure-auth���ɲ�</span>
-<span class="quote2">&gt;&gt; ���η�̡��������������(root�˥ѥ���ɤ����ꤷ�ƥ���������)</span>
-<span class="quote2">&gt;&gt;��mysql��ư���֤ǥ�����Ѿ������ǧ�����Ȥ�����2Gbyte�ʾ����Ѥ��Ƥ������ᡢ</span>
-<span class="quote2">&gt;&gt; my.cnf�˽������ʤɤ������ͤ����ꤷmysql��Ƶ�ư</span>
-<span class="quote2">&gt;&gt;������root�ǥ������󤷤褦�Ȥ����Ȥ������ʲ��Υ��顼��ȯ�������٥���������褺</span>
+<span class="quote2">&gt;&gt;・過去ログや他の方のblogなどを拝見した結果、パスワードハッシュの管理に</span>
+<span class="quote2">&gt;&gt; 変更が入ったこと、およびMySQL5.6から新しい管理方式が標準となったこと</span>
+<span class="quote2">&gt;&gt; により発生している問題と理解した</span>
+<span class="quote2">&gt;&gt;・msql -uroot -pのコマンドに追加パラメータとして--skip-secure-authを追加</span>
+<span class="quote2">&gt;&gt; その結果、ログインに成功(rootにパスワードを設定してログアウト)</span>
+<span class="quote2">&gt;&gt;・mysql起動状態でメモリ使用状況を確認したところ、2Gbyte以上を使用していたため、</span>
+<span class="quote2">&gt;&gt; my.cnfに初期メモリなどの設定値を設定しmysqlを再起動</span>
+<span class="quote2">&gt;&gt;・再度rootでログインしようとしたところ、以下のエラーが発生し再度ログイン出来ず</span>
 <span class="quote2">&gt;&gt; Server is running in --secure-auth mode, but 'root@localhost' has a password in the old format; please change the password to the new format</span>
-<span class="quote2">&gt;&gt;����ʹߡ������äƤ�嵭���顼�ǥ���������褺</span>
+<span class="quote2">&gt;&gt;それ以降、何をやっても上記エラーでログイン出来ず</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;�Ȥ��ä������Ǥ���</span>
-<span class="quote2">&gt;&gt;�������俧�������ε������Ҹ�����ȡ����⤽��5.1����5.6�ؤι����Ͽ侩����Ƥ��ʤ�</span>
-<span class="quote2">&gt;&gt;�ʤɤ�����Ū�ʾ���ϸ��Ĥ����ΤΡ����Ĥ��Ф�������Ū�ʾ�����Ƥ������ޤ���Ǥ�����</span>
+<span class="quote2">&gt;&gt;といった状況です。</span>
+<span class="quote2">&gt;&gt;過去ログや色々な方の記事を拝見すると、そもそも5.1から5.6への更新は推奨されていない</span>
+<span class="quote2">&gt;&gt;などの断片的な情報は見つかるものの、見つけ出した断片的な情報を試しても解決出来ませんでした。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;root�ǥ����������ʤ��Ȥɤ����������褺�����äƤ���ޤ���</span>
+<span class="quote2">&gt;&gt;rootでログイン出来ないとどうする事も出来ず、困っております。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;����������ꤤ�������ޤ���</span>
+<span class="quote2">&gt;&gt;よろしくお願いいたします。</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;</span>
@@ -297,12 +297,12 @@ MySQL-shared-compat�Υ��󥤥󥹥ȡ�������󥹥ȡ���ޤ�
 
 </pre>
 </div>
-<p class="button"><a href="16192.html">[��]</a><a href="16194.html">[��]</a><a href="../list/16101-16200.html">[�ֹ�����]</a><a href="../thread/16101-16200.html">[����åɰ���]</a></p>
+<p class="button"><a href="16192.html">[前]</a><a href="16194.html">[次]</a><a href="../list/16101-16200.html">[番号順一覧]</a><a href="../thread/16101-16200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="16190.html">  16190 2014-12-16 15:07 [&quot;koichi.s&quot; &lt;asp91462] MySQL5.6.20�򥤥󥹥ȡ����root�ǥ����������ʤ�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16192.html">@ 16192 2014-12-16 15:46 ��[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16190] MySQL5.6.20�򥤥󥹥ȡ����root�ǥ����������ʤ�</a></span>
-<span class="current">-&gt;&nbsp;<a href="16193.html">  16193 2014-12-17 11:38 ����[&quot;koichi.s&quot; &lt;asp91462] Re: [mysql 16192] Re: [mysql 16190] MySQL5.6.20�򥤥󥹥ȡ����root�ǥ����������ʤ�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16194.html">@ 16194 2014-12-17 12:46 ������[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16193] Re: [mysql 16192] Re: [mysql 16190] MySQL5.6.20�򥤥󥹥ȡ����root�ǥ����������ʤ�</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16190.html">  16190 2014-12-16 15:07 [&quot;koichi.s&quot; &lt;asp91462] MySQL5.6.20をインストール後rootでログイン出来ない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16192.html">@ 16192 2014-12-16 15:46 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16190] MySQL5.6.20をインストール後rootでログイン出来ない</a></span>
+<span class="current">-&gt;&nbsp;<a href="16193.html">  16193 2014-12-17 11:38 　┗[&quot;koichi.s&quot; &lt;asp91462] Re: [mysql 16192] Re: [mysql 16190] MySQL5.6.20をインストール後rootでログイン出来ない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16194.html">@ 16194 2014-12-17 12:46 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16193] Re: [mysql 16192] Re: [mysql 16190] MySQL5.6.20をインストール後rootでログイン出来ない</a></span>
 </pre>
 </body>
 </html>

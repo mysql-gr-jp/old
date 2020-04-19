@@ -5,73 +5,73 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="7493.html">[��]</a><a href="7495.html">[��]</a><a href="../list/7401-7500.html">[�ֹ�����]</a><a href="../thread/7401-7500.html">[����åɰ���]</a></p>
+<p class="button"><a href="7493.html">[前]</a><a href="7495.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:7494
 </p>
 <div class="header">
 <p>
-From: ���� ������ &lt;���� ������ &lt;kuro_taro_aki@xxxxxxxxxx&gt;&gt;<br>
+From: くろ たろう &lt;くろ たろう &lt;kuro_taro_aki@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 15 Apr 2003 17:43:17 +0900 (JST)<br>
-Subject: [mysql 07494] JAVA �ץ������� insert ������˹Ԥ��ޤ��� <br>
+Subject: [mysql 07494] JAVA プログラムで insert が正常に行われません <br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����ˤ��ϡ������������Ǥ�������������Ƥߤ���Ǥ�����
-�ɤ����Ƥ�ľ��ʤ��Τǡ�����������ꤤ���ޤ���
-�������ۤɡ��ְ㤨���᡼���������äƤ��ޤ��ޤ���������
-������ޤ���
+こんにちは。くろたろうです。いろいろ試してみたんですが、
+どうしても直らないので、よろしくお願いします。
+※さきほど、間違えたメールを一通送ってしまいました。申し
+訳ありません。
 
-�ʴĶ���
-���ʣģˡ�J2SDK1.4.1
-���ͣ٣ӣѣ̡�mysql-4.0.1.2
-��JDBC�ɥ饤�С�gweMysqlJDBC_extra4
+（環境）
+・ＪＤＫ：J2SDK1.4.1
+・ＭＹＳＱＬ：mysql-4.0.1.2
+・JDBCドライバ：gweMysqlJDBC_extra4
 
-(������Ȥ��Ƥ��뤳�ȡ�
-java.sql.ResultSet�ι����ϥ᥽�åɤ��Ѥ��ƥǡ�����insert
-��Ԥ�����
+(やろうとしていること）
+java.sql.ResultSetの更新系メソッドを用いてデータのinsert
+を行いたい
 
-����������
-�ǡ�����insert������ޤä��ԤǤ����Ԥ��ޤ������١���
-�٤�insert��Ԥ��١�java.sql.ResultSet.moveToInsertRow()
-�᥽�åɤ���Ѥ��������Ԥ���ꤷ�Ƥ���ΤǤ������ץ�����
-���Ω���夲������¸�ߤ���ơ��֥�Ρ��ǽ��Ԥ��˹�����
-�Ƥ��ޤ��ޤ���
-��executeQuery()����Ѥ��ơ�ľ��insertʸ���ꤲ�Ƥ�Ʊ����
-�̤ˤʤäƤ��ޤ��ޤ�����
-��setFetchDirection(ResultSet.FETCH_FORWARD)����Ѥ��Ƥ�
-�ޤ���������̤�Ʊ���Ǥ�����
+（問題点）
+データのinsertが、決まった行でしか行われません。二度、三
+度とinsertを行う度、java.sql.ResultSet.moveToInsertRow()
+メソッドを使用して挿入行を指定しているのですが、プログラ
+ムを立ち上げる前に存在するテーブルの、最終行を常に更新し
+てしまいます。
+※executeQuery()を使用して、直接insert文を投げても同じ結
+果になってしまいました。
+※setFetchDirection(ResultSet.FETCH_FORWARD)も使用してみ
+ましたが、結果は同じでした。
 
-�ʲ��ˡ��¹Է�̤ȥ�������Ǻܤ��ޤ���
+以下に、実行結果とソースを掲載します。
 
-�ʥ�������
+（ソース）
 
 //InsertData.java
 import java.sql.*;
 import java.util.*;
 
 public class InsertData{
-��//Field
-��Vector rows;
-��//Constructor
-��public InsertData(Vector rows){
-����this.rows = rows;
-����try{
-������//DB�ؤ���³
-������DBAccessor dbAccessor = new DBAccessor();
-������//ResultSet�μ���
-������ResultSet rs = dbAccessor.getResultSet();
-������//��¸�ιԿ�������ʥǡ����ֹ���꿶�뤿���
-������rs.last();
-������int lastRow = rs.getRow();
-������//�ǡ���������
-������for(int i = rows.size();i &gt; 0;i--){
-	doInsert(�ǡ�����Ϳ���Ƥ��ޤ�);
-������}
-������//DB��³�ν�λ
-������dbAccessor.closeResultSet(); 
+　//Field
+　Vector rows;
+　//Constructor
+　public InsertData(Vector rows){
+　　this.rows = rows;
+　　try{
+　　　//DBへの接続
+　　　DBAccessor dbAccessor = new DBAccessor();
+　　　//ResultSetの取得
+　　　ResultSet rs = dbAccessor.getResultSet();
+　　　//既存の行数を取得（データ番号を割り振るため）
+　　　rs.last();
+　　　int lastRow = rs.getRow();
+　　　//データの挿入
+　　　for(int i = rows.size();i &gt; 0;i--){
+	doInsert(データを与えています);
+　　　}
+　　　//DB接続の終了
+　　　dbAccessor.closeResultSet(); 
       dbAccessor.closeStatement();
       dbAccessor.closeConnection();
       dbAccessor2 = null;
@@ -83,22 +83,22 @@ public class InsertData{
 doInsert(ResultSetrs,intlastRow,java.sql.Date date,
 int raceSeq,int firstPrise,float odds) throws
 SQLException{
-  //���������insert�Ԥ˰�ư
+  //カーソルをinsert行に移動
   rs.moveToInsertRow();
-  //������ͤι���
+  //カラム値の更新
   rs.updateInt(1,lastRow);
   rs.updateDate(2,date);
   rs.updateInt(3,raceSeq);
   rs.updateInt(4,firstPrise);
   rs.updateFloat(5,odds);
-  //insert�μ¹�
+  //insertの実行
   rs.insertRow();
   }
 }
 
-�ʼ¹Է�̡�
-�ʣ���insert�¹����Υǡ����Ǥ���SEQ����ֹ�����󤷤Ƥ�
-�ޤ����ʤ��Υǡ����ϼ�ư�Ǻ������ޤ�������
+（実行結果）
+（１）insert実行前のデータです。SEQ列の番号は整列してい
+ます。（このデータは手動で作成しました。）
 mysql&gt; select * from master;
 +-----+------------+---------+------------+------+
 <span class="quote1">| SEQ | DAY        | RaceSEQ | FirstPrise | ODDS |</span>
@@ -111,8 +111,8 @@ mysql&gt; select * from master;
 <span class="quote1">|   6 | 2002-09-09 |       2 |          3 |  3.3 |</span>
 +-----+------------+---------+------------+------+
 6 rows in set (0.00 sec)
-�ʣ��˰����ܤ�insert�¹Ը�Ǥ���SEQ��Ρ֣��פȤ����ǡ�
-����ҤȤĤ����������ޤ���������Ǥ���
+（２）一度目のinsert実行後です。SEQ列の「７」というデー
+タをひとつだけ挿入しました。正常です。
 
 mysql&gt; select * from master;
 +-----+------------+---------+------------+------+
@@ -128,10 +128,10 @@ mysql&gt; select * from master;
 +-----+------------+---------+------------+------+
 7 rows in set (0.00 sec)
 
-�ʣ��������ܤ�insert�Ǥ���SEQ��Ρ֣��פȤ������ǡ�����insert
-���ޤ�����������������ؤ�äƤ��ޤ������θ塢���٥ǡ���
-������Ƥ⡢�ץ���������ֽ��˵�ư�����Ȥ��Υǡ�����
-�����֤ˡ��������ǡ�������������Ƥ��ޤ��ޤ���
+（３）二度目のinsertです。SEQ列の「８」とういうデータをinsert
+しましたが、順序が入れ替わっています。この後、何度データ
+を入れても、プログラムを一番初めに起動したときのデータ挿
+入位置に、新しいデータが挿入されてしまいます。
 
 mysql&gt; select * from master;
 +-----+------------+---------+------------+------+
@@ -156,11 +156,11 @@ Yahoo! BB is Broadband by Yahoo!
 
 </pre>
 </div>
-<p class="button"><a href="7493.html">[��]</a><a href="7495.html">[��]</a><a href="../list/7401-7500.html">[�ֹ�����]</a><a href="../thread/7401-7500.html">[����åɰ���]</a></p>
+<p class="button"><a href="7493.html">[前]</a><a href="7495.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="7494.html">   7494 2003-04-15 17:43 [���� ������ &lt;kuro_ta] JAVA �ץ������� insert ������˹Ԥ��ޤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7495.html">   7495 2003-04-15 18:06 ��[Kengo Jinno &lt;kengo@x]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7496.html">   7496 2003-04-15 18:08 ��[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="7494.html">   7494 2003-04-15 17:43 [くろ たろう &lt;kuro_ta] JAVA プログラムで insert が正常に行われません</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7495.html">   7495 2003-04-15 18:06 ┣[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7496.html">   7496 2003-04-15 18:08 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
 </pre>
 </body>
 </html>

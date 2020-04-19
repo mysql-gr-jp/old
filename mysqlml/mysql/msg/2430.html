@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="2429.html">[��]</a><a href="2431.html">[��]</a><a href="../list/2401-2500.html">[�ֹ�����]</a><a href="../thread/2401-2500.html">[����åɰ���]</a></p>
+<p class="button"><a href="2429.html">[前]</a><a href="2431.html">[次]</a><a href="../list/2401-2500.html">[番号順一覧]</a><a href="../thread/2401-2500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:2430
 </p>
@@ -13,27 +13,27 @@ mysql:2430
 <p>
 From: (moeru) &lt;&lt;moeru@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 30 Aug 2000 21:53:20 +0900<br>
-Subject: [mysql 02430] Re: GROUP BY �������Υ쥳���ɤ�ɽ����������ˡ<br>
+Subject: [mysql 02430] Re: GROUP BY で全部のレコードを表示させる方法<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
 
-2000/08/29 23:40:17 +0900�ˤȤߤ��ޤ��Ҥ� &lt;tommy@xxxxxxxxxx&gt;�����ĺ����
-��<a href="02428.html">[mysql 02428]</a> Re: GROUP BY �������Υ쥳���ɤ�ɽ����������ˡ�פؤ��ֻ��Ǥ���
+2000/08/29 23:40:17 +0900にとみたまさひろ &lt;tommy@xxxxxxxxxx&gt;さんに頂いた
+「<a href="02428.html">[mysql 02428]</a> Re: GROUP BY で全部のレコードを表示させる方法」への返事です。
 
-�⥨��Ǥ���
+モエルです。
 
-<span class="quote1">&gt;�������䡢create table ���� temporary �Ȼ��ꤹ��Ф��������Ǥ���</span>
-<span class="quote1">&gt;��³���ڤ�м�ưŪ�˾õ��ޤ�������ʳ������̤Υơ��֥��</span>
-<span class="quote1">&gt;Ʊ���Ǥ���</span>
+<span class="quote1">&gt;あ、いや、create table 時に temporary と指定すればいいだけです。</span>
+<span class="quote1">&gt;接続を切れば自動的に消去されます。それ以外は普通のテーブルと</span>
+<span class="quote1">&gt;同じです。</span>
 
-����ơ��֥���뤳�Ȥ��Ǥ��ޤ���(^^)
+一時テーブルを作ることができました(^^)
 
-�������ޤ�����ơ��֥�����������Ū���յ��ߤ����ʤ�Τ�����Ǥ��Ƥ��ޤ���
+ただ、まだ一時テーブルを作成する目的・意義みたいなものが理解できていません。
 
-����ơ��֥�äơ����ʷ��Ȥɤ��㤦�ΤǤ��礦����
+一時テーブルって、自己結合とどう違うのでしょうか？
 
 
 <span class="quote1">&gt;    create temporary table hoge (_rowid int not null, </span>
@@ -43,70 +43,70 @@ Subject: [mysql 02430] Re: GROUP BY �������Υ쥳���ɤ�ɽ����������ˡ<br>
 <span class="quote1">&gt;    select userid, hoge.price, quantity from hoge left join </span>
 <span class="quote1">&gt;	item using(price) order by hoge.price desc;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;# _rowid �� price �η���Ŭ�����ѹ����Ƥ���������</span>
+<span class="quote1">&gt;# _rowid や price の型は適当に変更してください。</span>
 
-����ʤΤǤ���
-_rowid�ϡ��ޥ˥奢���ܤˤ��ȡ������ƥ��ѿ��äƽ񤤤Ƥ���ޤ�����
-temporary�ơ��֥����Ȥ��ˤϥ����ƥ��ѿ���Ȥ�ɬ�פ�����ΤǤ��礦����
+質問なのですが
+_rowidは、マニュアル本によると、システム変数って書いてありましたが
+temporaryテーブルを作るときにはシステム変数を使う必要があるのでしょうか？
 
 
-���줫�顢������������Τ�¹Ԥ��Ƥߤޤ�����
+それから、いただいたものを実行してみました。
 
 <span class="quote1">&gt;    insert into hoge select _rowid, max(price) from item </span>
 <span class="quote1">&gt;	where itemid = '$itemid' group by userid;</span>
 
-�����ǡ�userid���Ȥ�max(price)��Ф����Ȥ��Ǥ��Ƥ��ޤ���
+ここで、useridごとのmax(price)を出すことができていますが
 
-���θ��
+その後の
 <span class="quote1">&gt;    select userid, hoge.price, quantity from hoge left join </span>
 <span class="quote1">&gt;	item using(price) order by hoge.price desc;</span>
 
-�ǡ�userid���Ȥ�max(price)�η�̤���ʤ���
-userid�������Ĥ�ФƤ����̤ˤʤ�ޤ���
+で、useridごとのmax(price)の結果じゃなくて
+useridがいくつも出てくる結果になります。
 
 
-�������Τ�����ʤ��ΤǤ���(^^;
-�ʲ��Υ����꡼��3.22.32�Ǥϡ���Ūã�����Ƥ����褦�˻פ��ޤ���
+記憶が確かじゃないのですが(^^;
+以下のクエリーで3.22.32では、目的達成していたように思いますが
 
 SELECT userid,MAX(price),quantity FROM item WHERE itemid = '$itemid'
 GROUP BY userid ORDER BY price DESC;
 
-3.23.21-beta���˥���������󥢥åפ��Ƥ�������˵����Ĥ����褦�˻פ��ޤ�����
+3.23.21-beta　にヴァージョンアップしてから問題に気がついたように思います。。
 
-���ˤʤä��Τ�_rowid�ο��ͤǤ���
-����ϡ�item�ơ��֥��index�ˤʤäƤ�ɣĤ��äƤ��Ƥ�ΤǤ��礦����
-�������Ȥ���ȡ������㤦��ΣɣĤ��äƤ��Ƥޤ�����
-
-
-��ꤿ�����Ȥϡ�userid���Ȥκ�����ʤȤ��β��ʤκ߸�(quantity)��
-�Ф������Ǥ���
-
-�Х����ä��ꤹ��Ǥ��礦����
-
-���ɥХ���������������򤷤��Ǥ���
-
-�ɤ������������ꤤ���ޤ�m(__)m
+気になったのは_rowidの数値です。
+これは、itemテーブルのindexになってるＩＤを取ってきてるのでしょうか？
+そうだとすると、全然違う列のＩＤを取ってきてます。。
 
 
+やりたいことは、useridごとの最大価格とその価格の在庫(quantity)を
+出したいです。
 
-�⥨��
+バグだったりするでしょうか？
+
+アドバイスいただけたら嬉しいです。
+
+どうぞ宜しくお願いしますm(__)m
+
+
+
+モエル
 
 </pre>
 </div>
-<p class="button"><a href="2429.html">[��]</a><a href="2431.html">[��]</a><a href="../list/2401-2500.html">[�ֹ�����]</a><a href="../thread/2401-2500.html">[����åɰ���]</a></p>
+<p class="button"><a href="2429.html">[前]</a><a href="2431.html">[次]</a><a href="../list/2401-2500.html">[番号順一覧]</a><a href="../thread/2401-2500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="2425.html">   2425 2000-08-29 20:56 [&lt;moeru@xxxxxxxxxx&gt;  ] GROUP BY �������Υ쥳���ɤ�ɽ����������ˡ</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2426.html">   2426 2000-08-29 21:16 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2427.html">   2427 2000-08-29 22:21 ����[&lt;moeru@xxxxxxxxxx&gt;  ]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2428.html">   2428 2000-08-29 23:40 ������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2429.html">   2429 2000-08-30 00:17 ��������[&lt;moeru@xxxxxxxxxx&gt;  ]                                 </a></span>
-<span class="current">-&gt;&nbsp;<a href="2430.html">   2430 2000-08-30 21:53 ��������[&lt;moeru@xxxxxxxxxx&gt;  ]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2431.html">   2431 2000-08-31 07:23 ����������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2432.html">   2432 2000-08-31 18:19 ������������[Natsu Tanaka &lt;natsug] �Ϥ���ޤ���                </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2434.html">   2434 2000-08-31 23:33 ��������������[&lt;moeru@xxxxxxxxxx&gt;  ]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2435.html">   2435 2000-09-01 00:06 ��������������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2443.html">   2443 2000-09-04 11:33 ����������������[Natsu Tanaka &lt;natsug] �ߤʤ����              </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2436.html">   2436 2000-09-01 00:13 ������������[&lt;moeru@xxxxxxxxxx&gt;  ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2425.html">   2425 2000-08-29 20:56 [&lt;moeru@xxxxxxxxxx&gt;  ] GROUP BY で全部のレコードを表示させる方法</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2426.html">   2426 2000-08-29 21:16 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2427.html">   2427 2000-08-29 22:21 　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2428.html">   2428 2000-08-29 23:40 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2429.html">   2429 2000-08-30 00:17 　　　┣[&lt;moeru@xxxxxxxxxx&gt;  ]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="2430.html">   2430 2000-08-30 21:53 　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2431.html">   2431 2000-08-31 07:23 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2432.html">   2432 2000-08-31 18:19 　　　　　┣[Natsu Tanaka &lt;natsug] はじめまして                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2434.html">   2434 2000-08-31 23:33 　　　　　┃┣[&lt;moeru@xxxxxxxxxx&gt;  ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2435.html">   2435 2000-09-01 00:06 　　　　　┃┗[とみたまさひろ &lt;tomm]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2443.html">   2443 2000-09-04 11:33 　　　　　┃　┗[Natsu Tanaka &lt;natsug] みなさんへ              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2436.html">   2436 2000-09-01 00:13 　　　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                             </a></span>
 </pre>
 </body>
 </html>

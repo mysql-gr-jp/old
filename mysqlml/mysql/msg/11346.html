@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="11345.html">[��]</a><a href="11347.html">[��]</a><a href="../list/11301-11400.html">[�ֹ�����]</a><a href="../thread/11301-11400.html">[����åɰ���]</a></p>
+<p class="button"><a href="11345.html">[前]</a><a href="11347.html">[次]</a><a href="../list/11301-11400.html">[番号順一覧]</a><a href="../thread/11301-11400.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:11346
 </p>
@@ -13,7 +13,7 @@ mysql:11346
 <p>
 From: &quot;pocari&quot; &lt;&quot;pocari&quot; &lt;pocari@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 23 Apr 2005 09:16:48 +0900<br>
-Subject: [mysql 11346] contains()�ˤĤ���<br>
+Subject: [mysql 11346] contains()について<br>
 
 </p>
 </div>
@@ -21,21 +21,21 @@ Subject: [mysql 11346] contains()�ˤĤ���<br>
 <pre>
 
 
-��Υץ�����ߥ󥰷и���PHP��MySQL�ǷǼ��Ĥʤɤδ�ñ��WEB���ץꥱ��������
-��ä������������٤Ǥ���
-���ߡ�MySQL��GIS��Ϣ�ε�ǽ����ƻȤ����Ȼ�ߤƤ������ʤΤǤ������������
-�ʤ���ư�����ä��Τǲ���ְ㤨�Ƥ���Τ������Ƥ���������
-contains(g1,g2)�ϥ�ե���󥹤ˤ���g1��g2�������˴ޤޤ�Ƥ��뤫������å�
-�����Τ餷���Ǥ�����
-�㤨�аʲ�����Ǵ��Ԥ����ΤȤϰ㤦��̤��֤��ޤ�����contains()�ʳ�����ʬ��
-�ߥ������뤫�⤷��ʤ��Τ���SQLʸ��ܤ��ޤ�����
+私のプログラミング経験はPHP・MySQLで掲示板などの簡単なWEBアプリケーションを
+作った事がある程度です。
+現在、MySQLのGIS関連の機能を初めて使おうと試みている最中なのですが、理解出来
+ない挙動があったので何を間違えているのか教えてください。
+contains(g1,g2)はリファレンスによるとg1にg2が完全に含まれているかをチェック
+するものらしいですが、
+例えば以下の例で期待するものとは違う結果を返します。（contains()以外の部分に
+ミスがあるかもしれないので全SQL文を載せます。）
 
 //mysql5 windowsXP
 create table geotest(
 no int primary key auto_increment,
 geo multipoint not null,
 spatial index (geo))type=myisam;
-insert into geotest (geo) values (mpointfromtext('�ʲ��Σ��Ĥ��ͤ���Σ���
+insert into geotest (geo) values (mpointfromtext('以下の３つの値の内の１つ
 '));
 
 (1)MULTIPOINT(4 5,1 52,5 36,8 32,5 76,7 81,3 43,7 4,9 51,3 19,2 49,5 46,1
@@ -49,23 +49,23 @@ insert into geotest (geo) values (mpointfromtext('�ʲ��Σ��Ĥ��ͤ���Σ���
 8,1 66,9 15,3 63,3 42,9 42,8 10,11 30,3 64,13 15,7 7,12 16,0 36,7 72,2 24,2
 4,6 41,1 5,13 81,13 34,5 62,8 12,0 76,10 5,7 71,2 1,13 70,12 4,3 42)
 
-�������Ƥ��Σ��ĤΥǡ��������Ϥ�����ˡ�
+こうしてこの３つのデータを入力した後に、
 select no,astext(geo) from geotest where
 contains(geo,mpointfromtext('multipoint(1 1,2 2,3 3)'));
-��¹Ԥ����3�����Ƥ��������ޤ���
-1���ܤΥǡ����ˤ�1 1�Ϥ���ޤ���2 2��3 3�Ϥ���ޤ���
-2,3���ܤΥǡ����ˤ�1 1��2 2��3 3�⤢��ޤ���
-����3�Ĥκ�ɸ��ޤޤʤ��Τ˳������Ƥ��ޤ��ΤǤ���
+を実行すると3件全てが該当します。
+1件目のデータには1 1はありますが2 2と3 3はありません。
+2,3件目のデータには1 1も2 2も3 3もありません。
+この3つの座標を含まないのに該当してしまうのです。
 
-��Ϥ���SQLʸ��1�쥳���ɤ�ʣ���κ�ɸ�����Ǽ�������ꤷ�����Ƥκ�ɸ����ޤ�
-�쥳���ɤ򸡺�������տޤǽ񤭤ޤ�����
-���������Ԥ����̤������ޤ���Ǥ�����
-��ե���󥹤��ɤ���ΤǤ�����GIS��Ϣ��ǽ�ˤĤ��Ƥ����򤬤��⤽��ְ�äƤ�
-��ΤǤ��礦����
+私はこのSQL文を、1レコードに複数の座標点を格納し、指定した全ての座標点を含む
+レコードを検索させる意図で書きました。
+しかし期待する結果は得られませんでした。
+リファレンスは読んだのですが、GIS関連機能についての理解がそもそも間違ってい
+るのでしょうか？
 
 
 </pre>
 </div>
-<p class="button"><a href="11345.html">[��]</a><a href="11347.html">[��]</a><a href="../list/11301-11400.html">[�ֹ�����]</a><a href="../thread/11301-11400.html">[����åɰ���]</a></p>
+<p class="button"><a href="11345.html">[前]</a><a href="11347.html">[次]</a><a href="../list/11301-11400.html">[番号順一覧]</a><a href="../thread/11301-11400.html">[スレッド一覧]</a></p>
 </body>
 </html>

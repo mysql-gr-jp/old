@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="176.html">[��]</a><a href="178.html">[��]</a><a href="../list/101-200.html">[�ֹ�����]</a><a href="../thread/101-200.html">[����åɰ���]</a></p>
+<p class="button"><a href="176.html">[前]</a><a href="178.html">[次]</a><a href="../list/101-200.html">[番号順一覧]</a><a href="../thread/101-200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:177
 </p>
@@ -20,23 +20,23 @@ Subject: [mysql 177] MB char in identifier which starts with digit char<br>
 <div class="body">
 <pre>
 
-����Ǥ���
-��Subject�ϥǥ����Ǥ�(^_^;
+神野です。
+＃Subjectはデタラメです(^_^;
 
-MySQL��MultiByte�Ķ��ǻȤäƤ���������Τ褦�ʥե������̾����ĥơ��֥뤬
-�����Ǥ��ޤ���Ǥ�����
+MySQLをMultiByte環境で使っている時、次のようなフィールド名を持つテーブルが
+作成できませんでした。
 
-create table �ۤ��ۤ� (
-  1�󤢤��� integer
+create table ほげほげ (
+  1回あたり integer
 )
 
-��1�פ�֣��פȤ����Ѥ������褹���Ǥ������ֿ����䥢��ե��٥åȤ�
-ASCII��Ȥ��פȤ����롼��Ǥ�äƤ���Τǡ������⤤���ޤ���
-������(sql/sql_lex.cc)�򸫤�ȡ���������Ϥޤ뼱�̻Ҥξ�硢�����θ��
-�Ȥ��륭��饯���Ȥ��Ƥϡ�����ե��٥åȤ���������С�����ǧ��Ƥ��ʤ�
-�褦�Ǥ�����
+「1」を「１」とかに変えたら解決するんですが、「数字やアルファベットは
+ASCIIを使う」というルールでやっているので、そうもいきません。
+ソース(sql/sql_lex.cc)を見ると、数字から始まる識別子の場合、数字の後に
+使えるキャラクタとしては、アルファベットかアンダーバーしか認めていない
+ようでした。
 
-�����Ǽ��Τ褦�ʥѥå��򤢤Ƥ��н褷�ޤ�����(mysql-3.21.30�Ǥ�)
+そこで次のようなパッチをあてて対処しました。(mysql-3.21.30です)
 
 
 diff -p old/sql_lex.cc new/sql_lex.cc
@@ -58,8 +58,8 @@ diff -p old/sql_lex.cc new/sql_lex.cc
   	break;
 
 
-����Ǥ��ޤ��ԤäƤ�ʷ�ϵ��ʤ�Ǥ������̤����꤬Ƚ�����ޤ�����
-�������MBʸ���Ǥʤ��Ƥ�ȯ�����ޤ���
+これでうまく行ってる雰囲気なんですが、別の問題が判明しました。
+こちらはMB文字でなくても発生します。
 
 create table foo (
  1st integer not null,
@@ -67,31 +67,31 @@ create table foo (
  primary key foo_i1 (1st)
 )
 go
--&gt; ����ʤ�
+-&gt; 問題なし
 
 select 1st,2nd from foo
 go
--&gt; ����ʤ�
+-&gt; 問題なし
 
 select bar.1st,bar.2nd from foo bar
 go
 -&gt; ERROR 1064: parse error near '.1st,bar.2nd from foo bar' at line 1
 
-Ʊ������sql/sql_lex.cc��yylex()������������Ȼפ��ΤǤ������ط���������
-�ս꤬¿���Τ������Ѥ������ΤǼ꤬�Ф��Ƥޤ���(^_^;
+同じく、sql/sql_lex.ccのyylex()あたりだろうと思うのですが、関係しそうな
+箇所が多いのと副作用が恐いので手が出せてません(^_^;
 
 -----------------------------
-������ &lt;kengo@xxxxxxxxxx&gt;
+神野健吾 &lt;kengo@xxxxxxxxxx&gt;
 
 
 </pre>
 </div>
-<p class="button"><a href="176.html">[��]</a><a href="178.html">[��]</a><a href="../list/101-200.html">[�ֹ�����]</a><a href="../thread/101-200.html">[����åɰ���]</a></p>
+<p class="button"><a href="176.html">[前]</a><a href="178.html">[次]</a><a href="../list/101-200.html">[番号順一覧]</a><a href="../thread/101-200.html">[スレッド一覧]</a></p>
 <pre class="list">
 <span class="current">-&gt;&nbsp;<a href="177.html">    177 1998-06-08 19:37 [Kengo Jinno &lt;kengo@x] MB char in identifier which starts with digit char</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="178.html">    178 1998-06-11 17:40 ��[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1246.html">   1246 1999-09-20 16:25 ��[ī����̿�����������] �ѥå������Υǡ��������ɤˤĤ���      </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1247.html">   1247 1999-09-20 22:53 ����[Satoshi Koiwa &lt;koiwa]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="178.html">    178 1998-06-11 17:40 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1246.html">   1246 1999-09-20 16:25 ┗[朝日生命主計部数理課] パック形式のデータロードについて      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1247.html">   1247 1999-09-20 22:53 　┗[Satoshi Koiwa &lt;koiwa]                                     </a></span>
 </pre>
 </body>
 </html>

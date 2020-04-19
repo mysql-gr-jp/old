@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="9644.html">[��]</a><a href="9646.html">[��]</a><a href="../list/9601-9700.html">[�ֹ�����]</a><a href="../thread/9601-9700.html">[����åɰ���]</a></p>
+<p class="button"><a href="9644.html">[前]</a><a href="9646.html">[次]</a><a href="../list/9601-9700.html">[番号順一覧]</a><a href="../thread/9601-9700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:9645
 </p>
@@ -13,29 +13,29 @@ mysql:9645
 <p>
 From: Murayama Toshikiyo &lt;Murayama Toshikiyo &lt;murayama@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 15 Jun 2004 10:24:54 +0900<br>
-Subject: [mysql 09645] Re: Insert �����³�����Ǥ򷫤��֤���������ʾ��ǥ��顼��ȯ�����롣<br>
+Subject: [mysql 09645] Re: Insert 毎に接続・切断を繰り返すと不特定な場所でエラーが発生する。<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-¼����NETGENE�Ǥ���
+村山＠NETGENEです．
 
-<span class="quote1">&gt; ���ޤꥨ�顼���Ƥȴط����ʤ����⤷��ʤ��ΤǤ���������ˤʤä��Τ�</span>
+<span class="quote1">&gt; あまりエラー内容と関係がないかもしれないのですが一応気になったのは</span>
 
-��ά
+中略
 
-<span class="quote1">&gt; Java�ˤ����ƥ롼������ѿ���������Ƥ��ޤ��ȡ����Τ��Ӥ˿����ʥ����ΰ褬��</span>
-<span class="quote1">&gt; �ݤ���Ƥ��ޤ��Ϥ��Τǡ����ξ��Ǥ��Ȥ���StringBuffer�Ǥ��ʤ���꤬�����</span>
-<span class="quote1">&gt; �Ƥ���󤸤�ʤ����Ȼפ��ޤ���</span>
-�������ˤ��β�ǽ���Ϥ���ޤ���
+<span class="quote1">&gt; Javaにおいてループ内で変数を宣言してしまうと、そのたびに新たなメモリ領域が確</span>
+<span class="quote1">&gt; 保されてしまうはずので、この場合ですとこのStringBufferでかなりメモリが食われ</span>
+<span class="quote1">&gt; ているんじゃないかと思います。</span>
+たしかにその可能性はあります．
 
-<span class="quote1">&gt; ������֥��å�����ȴ����м��Υ����٥����쥯�������оݤˤϤʤ�ޤ���������</span>
-<span class="quote1">&gt; Ū��GC�򤷤ʤ��¤ꤤ�ĥ��꤫�鳫������뤫��JVMǤ���ˤʤäƤ��ޤ��ޤ���</span>
-���ξ�������Ū��System.gc()��ƤӽФ��Τϸ���Ǥ���
+<span class="quote1">&gt; 一応、ブロックから抜ければ次のガーベジコレクションの対象にはなりますが、明示</span>
+<span class="quote1">&gt; 的にGCをしない限りいつメモリから開放されるかはJVM任せになってしまいます。</span>
+この場合に明示的にSystem.gc()を呼び出すのは誤りです．
 <a href="http://www.netgene.co.jp/java/technicalTerms.html#GCSystemGc">http://www.netgene.co.jp/java/technicalTerms.html#GCSystemGc</a>
 
-<span class="quote1">&gt; �ʤΤǻ���ä��餳����</span>
+<span class="quote1">&gt; なので私だったらここは</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt;     StringBuffer buf = null;</span>
 <span class="quote1">&gt;     String ip = null;</span>
@@ -55,35 +55,35 @@ Subject: [mysql 09645] Re: Insert �����³�����Ǥ򷫤��֤���������ʾ��ǥ��顼
 <span class="quote1">&gt;       }</span>
 <span class="quote1">&gt;     }</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ȥ������˼�������ۤ��������ΤǤϤʤ����ʡ����ȡ�</span>
+<span class="quote1">&gt; という風に実装するほうがいいのではないかなー、と。</span>
 
-Java������ˤʤ�Ȥ����
+Javaで問題になるとすれば
 
 <span class="quote1">&gt;     StringBuffer buf = null;</span>
 
-�����ǤϤʤ����ष��
+の方ではなく，むしろ
 
 <span class="quote1">&gt;             buf = new StringBuffer();</span>
 
-�����Ǥ����롼�פ���Ф��Ȥ���Ф����������Ф��٤��Ǥ���
+の方です．ループから出すとすればこちらの方を出すべきです．
 
-���Ԥϥ��������ѿ��ΰ�䥪�ڥ��ɥ����å��˰��ɳ��ݤ�������ǡ�
-�����Ѥ��ưפǤ���(���⤽��GC�ǲ�������櫓�Ǥ�ʤ���)
+前者はローカル変数領域やオペランドスタックに一ワード確保するだけで，
+再利用も容易です．(そもそもGCで回収されるわけでもない．)
 <a href="http://www.netgene.co.jp/java/docs/javaPressVol15.html#2_2">http://www.netgene.co.jp/java/docs/javaPressVol15.html#2_2</a>
 
-��Ԥ�StringBuffer���󥹥��󥹤�ҡ����ΰ�˳��ݤ��ޤ���������̾�GC��
-�Ȥ��ޤ���
+後者はStringBufferインスタンスをヒープ領域に確保します．回収は通常GCが
+使われます．
 <a href="http://www.netgene.co.jp/java/docs/javaPressVol17.html#2">http://www.netgene.co.jp/java/docs/javaPressVol17.html#2</a>
 
-��������Ԥξ��Ǥ�������GC�μ㤤�����GC�ǲ�������Τǡ���Ψ�Ϥ��ʤ�
-�����Ϥ��Ǥ����ޤ��¹Ի���Ŭ���ˤ�ꡤ����Ψ���ɤ������ɤ���������Ƥ���
-��ǽ���⤢��ޤ����̾�Ϥ��ޤ굤�ˤ���ɬ�פϤʤ��Ǥ��礦��
-�������Java�κ�Ŭ���˴ؤ�����ʸ��Ǥ������θ��դ����᤯����С�
-���ۤȤ�ɤξ������ꤢ��ޤ���(^^;
+ただし後者の場合でも世代別GCの若い世代のGCで回収されるので，効率はかなり
+いいはずです．また実行時最適化により，より効率の良いコードが生成されている
+可能性もあります．通常はあまり気にする必要はないでしょう．
+＃これはJavaの最適化に関する決り文句です．この言葉で締めくくれば，
+＃ほとんどの場合は問題ありません．(^^;
 
 -- 
-¼������ ������ҥͥåȥ����� ��164-0001 
-��������������3-33-3 ���������ӥ� 5F
+村山敏清 株式会社ネットジーン 〒164-0001 
+東京都中野区中野3-33-3 インツ中野ビル 5F
 E-mail:murayama@xxxxxxxxxx 
 TEL:(03)5328-3670 FAX:(03)5328-3673
 <a href="http://www.netgene.co.jp/">http://www.netgene.co.jp/</a>
@@ -92,19 +92,19 @@ TEL:(03)5328-3670 FAX:(03)5328-3673
 
 </pre>
 </div>
-<p class="button"><a href="9644.html">[��]</a><a href="9646.html">[��]</a><a href="../list/9601-9700.html">[�ֹ�����]</a><a href="../thread/9601-9700.html">[����åɰ���]</a></p>
+<p class="button"><a href="9644.html">[前]</a><a href="9646.html">[次]</a><a href="../list/9601-9700.html">[番号順一覧]</a><a href="../thread/9601-9700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="9640.html">   9640 2004-06-14 20:23 [&quot;Kageyama Takahiro&quot; ] Insert �����³�����Ǥ򷫤��֤���������ʾ��ǥ��顼��ȯ�����롣</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9641.html">   9641 2004-06-14 20:59 ��[ML account &lt;ml@xxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9642.html">   9642 2004-06-14 21:31 ��[&quot;Haruki Nakayama&quot; &lt;h]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="9645.html">   9645 2004-06-15 10:24 ����[Murayama Toshikiyo &lt;]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9643.html">   9643 2004-06-14 23:42 ��[&lt;oouchi@xxxxxxxxxx&gt; ]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9644.html">   9644 2004-06-15 00:01 ����[&lt;oouchi@xxxxxxxxxx&gt; ]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9651.html">   9651 2004-06-15 18:21 ��[&lt;yasuyuki@xxxxxxxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9652.html">   9652 2004-06-15 19:00 ����[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9654.html">   9654 2004-06-15 19:29 ������[ML account &lt;ml@xxxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9658.html">   9658 2004-06-16 01:47 ��������[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9655.html">   9655 2004-06-15 19:42 ����[seiji takegata &lt;take]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9640.html">   9640 2004-06-14 20:23 [&quot;Kageyama Takahiro&quot; ] Insert 毎に接続・切断を繰り返すと不特定な場所でエラーが発生する。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9641.html">   9641 2004-06-14 20:59 ┣[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9642.html">   9642 2004-06-14 21:31 ┣[&quot;Haruki Nakayama&quot; &lt;h]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="9645.html">   9645 2004-06-15 10:24 ┃┗[Murayama Toshikiyo &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9643.html">   9643 2004-06-14 23:42 ┣[&lt;oouchi@xxxxxxxxxx&gt; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9644.html">   9644 2004-06-15 00:01 ┃┗[&lt;oouchi@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9651.html">   9651 2004-06-15 18:21 ┗[&lt;yasuyuki@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9652.html">   9652 2004-06-15 19:00 　┣[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9654.html">   9654 2004-06-15 19:29 　┃┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9658.html">   9658 2004-06-16 01:47 　┃　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9655.html">   9655 2004-06-15 19:42 　┗[seiji takegata &lt;take]                                     </a></span>
 </pre>
 </body>
 </html>

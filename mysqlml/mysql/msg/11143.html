@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="11142.html">[��]</a><a href="11144.html">[��]</a><a href="../list/11101-11200.html">[�ֹ�����]</a><a href="../thread/11101-11200.html">[����åɰ���]</a></p>
+<p class="button"><a href="11142.html">[前]</a><a href="11144.html">[次]</a><a href="../list/11101-11200.html">[番号順一覧]</a><a href="../thread/11101-11200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:11143
 </p>
@@ -13,22 +13,22 @@ mysql:11143
 <p>
 From: SATOH Fumiyasu &lt;SATOH Fumiyasu &lt;fumiya@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 10 Mar 2005 03:47:58 +0900<br>
-Subject: [mysql 11143] ��ץꥱ��������ѥѥ���ɤ�Ĺ������� master.info �������<br>
+Subject: [mysql 11143] レプリケーション用パスワードが長すぎると master.info が壊れる<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���Ȥ��դߤ䤹 �Ǥ���
+さとうふみやす です。
 
-MySQL 4.0.23 �ǥ�ץꥱ�����������Ѥ��Ƥ���ΤǤ�����
-��ץꥱ��������ѥ桼�����Υѥ���ɤ� 16 �Х���(?)��
-�ۤ���ȥ��졼�֤� master.info �ե����뤬����Ƥ��ޤ�
-���Ȥ�����ޤ���
+MySQL 4.0.23 でレプリケーションを利用しているのですが、
+レプリケーション用ユーザーのパスワードが 16 バイト(?)を
+越えるとスレーブの master.info ファイルが壊れてしまう
+ことがあります。
 
-�����ˤ��ȡ���ץꥱ�����������ꤷ��ľ��Ϥ�����
-ư���Ƥ��ơ�master.info �ե��������Ȥϰʲ��Τ褦��
-�ʤäƤ��ޤ�����
+記憶によると、レプリケーションを設定した直後はちゃんと
+動いていて、master.info ファイルの中身は以下のように
+なっていました。
 
 mysql-bin.178
 88415
@@ -38,9 +38,9 @@ PasswordForRepl@slave!!
 3306
 60
 
-�Ȥ��������Ƶ�ư (��ߡ���ư) �����������ε����
-��ץꥱ������󤬤���ʤ��ʤä��Τ�Ĵ�٤Ƥߤ�ȡ�
-���졼�֤� master.info ����Ȥ��ʲ��Τ褦�ˤʤäƤ��ޤ�����
+ところが、再起動 (停止、起動) したか何かの機会に
+レプリケーションがされなくなったので調べてみると、
+スレーブの master.info の中身が以下のようになっていました。
 
 mysql-bin.178
 88415
@@ -53,19 +53,19 @@ slave!!
 3306
 60
 
-����Ǥ������ޥ���������³�Ǥ��ʤ� (���졼�֤�
-I/O ����åɤ���Connecting to master�פ���ʤޤʤ�) ���֤�
-�ʤäƤ��ޤ�����ץꥱ������󤬤���ʤ��ʤäƤ��ޤ��ޤ���
-���졼�� �� MySQL ����ߤ��ơ�master.info ���Խ����Ƹ����ᤷ��
-�Ƶ�ư����ȡ��ޤ�����Ƥ��ޤ����ᡢ��ɥޥ���������³
-�Ǥ��ޤ���
+これでは当然マスターに接続できない (スレーブで
+I/O スレッドが「Connecting to master」から進まない) 状態に
+なってしまい、レプリケーションがされなくなってしまいます。
+スレーブ の MySQL を停止して、master.info を編集して元に戻し、
+再起動すると、また壊れてしまうため、結局マスターに接続
+できません。
 
-�Ȥꤢ�����ѥ���ɤ� 16 �Х��Ȥˤ���master.info ��
-ľ�����н褷�ޤ�����
+とりあえずパスワードを 16 バイトにし、master.info を
+直して対処しました。
 
-�ˤ��Ǥ����� <a href="http://bugs.mysql.com/">http://bugs.mysql.com/</a> ����𤹤�Ĥ��
-�Ǥ������ɤʤ�����ǧ����� and/or �������Ƥ�������Ƚ�����ޤ���
-# ���Τ���˻�����ƻ��֤��ʤ��Τˡ������ʥХ����������Ƥ��ޤ���
+暇ができたら <a href="http://bugs.mysql.com/">http://bugs.mysql.com/</a> に報告するつもり
+ですが、どなたか確認、報告 and/or 修正してくださると助かります。
+# このごろ忙しくて時間がないのに、色々なバグに遭遇してしまう…
 
 -- 
 -- Name: SATOH Fumiyasu  -- Home: <a href="http://www.sfo.jp">http://www.sfo.jp</a> (in Japanese only)
@@ -73,10 +73,10 @@ I/O ����åɤ���Connecting to master�פ���ʤޤʤ�) ���֤�
 
 </pre>
 </div>
-<p class="button"><a href="11142.html">[��]</a><a href="11144.html">[��]</a><a href="../list/11101-11200.html">[�ֹ�����]</a><a href="../thread/11101-11200.html">[����åɰ���]</a></p>
+<p class="button"><a href="11142.html">[前]</a><a href="11144.html">[次]</a><a href="../list/11101-11200.html">[番号順一覧]</a><a href="../thread/11101-11200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="11143.html">  11143 2005-03-10 03:47 [SATOH Fumiyasu &lt;fumi] ��ץꥱ��������ѥѥ���ɤ�Ĺ������� master.info �������</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11145.html">  11145 2005-03-10 14:57 ��[Ryuji Matsushita &lt;ma]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="11143.html">  11143 2005-03-10 03:47 [SATOH Fumiyasu &lt;fumi] レプリケーション用パスワードが長すぎると master.info が壊れる</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11145.html">  11145 2005-03-10 14:57 ┗[Ryuji Matsushita &lt;ma]                                       </a></span>
 </pre>
 </body>
 </html>

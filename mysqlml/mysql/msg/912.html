@@ -5,65 +5,65 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="911.html">[��]</a><a href="913.html">[��]</a><a href="../list/901-1000.html">[�ֹ�����]</a><a href="../thread/901-1000.html">[����åɰ���]</a></p>
+<p class="button"><a href="911.html">[前]</a><a href="913.html">[次]</a><a href="../list/901-1000.html">[番号順一覧]</a><a href="../thread/901-1000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:912
 </p>
 <div class="header">
 <p>
-From: ̱�� &lt;̱�� &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+From: 民斗 &lt;民斗 &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 21 May 1999 09:43:29 +0900<br>
-Subject: [mysql 00912] Re: ���ܸ�ƥ��Ȥ���ˡ<br>
+Subject: [mysql 00912] Re: 日本語テストの方法<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-̱�ͤǤ���
+民斗です。
 
-[Subject: <a href="00909.html">[mysql 00909]</a> ���ܸ�ƥ��Ȥ���ˡ]
+[Subject: <a href="00909.html">[mysql 00909]</a> 日本語テストの方法]
 [Date: Fri, 21 May 1999 02:45:09 +0900  From:Hiroshi Marui]
 
-<span class="quote1">&gt; ������ϡ�����ѥ���Ѥߤ����ܸ��б��Ǥ�MySQL�����ܸ�</span>
-<span class="quote1">&gt; �ƥ��ȤäƤɤ���äƤ��ޤ��Ǥ��礦����</span>
+<span class="quote1">&gt; 皆さんは、コンパイル済みの日本語対応版のMySQLの日本語</span>
+<span class="quote1">&gt; テストってどうやっていますでしょうか？</span>
 
-���ܸ��б��Ȥϲ����䡩 �Ȥ������Ȥ����ܸ�ʸ�������ɤ��ü�����ͤ���ȡ�
+日本語対応とは何ぞや？ ということで日本語文字コードの特殊性を考えると、
 
- 1. ��ʸ����ʣ���Х��ȤǤ��롣
- 2. ʸ���ι����Х������ '\' �����ü�ʸ���������SJIS �ξ��ˡ�
- 3. ʸ���ι����Х������ 0x80 �ʾ�Υ����ɡʺǾ�̥ӥåȤ�1�Υ����ɡˤ�
-    ���롣
+ 1. １文字が複数バイトである。
+ 2. 文字の構成バイト中に '\' 等の特殊文字がある（SJIS の場合）。
+ 3. 文字の構成バイト中に 0x80 以上のコード（最上位ビットが1のコード）が
+    ある。
 
-���餤�Ǥ��礦����MySQL �ξ��Ǥ����ξ���ͤ���ȡ�
+くらいでしょうか。MySQL の場合でこれらの条件を考えると、
 
- 1 ������ˤʤ�Τϸ����� LIKE �黻�Ҥ� '%' ����Ѥ�������
- 2 ������ˤʤ�ΤϤ�������������(SJIS �ǤΡ�ɽ�פȤ�)����Ѥ�������
- 3 �� MySQL �ǤϺǽ餫�饯�ꥢ����Ƥ��롣
+ 1 が問題になるのは検索に LIKE 演算子の '%' を使用した時。
+ 2 が問題になるのはそういうコード(SJIS での「表」とか)を使用した時。
+ 3 は MySQL では最初からクリアされている。
 
-�Ȥ������Ȥǡ���� 1 �� 2 �˹ʤäƴ�ñ�˥ƥ��Ȥ��Ƥߤơ�����ʤ���Ф���
-�� OK �äƤ��Ȥˤ��Ƥ��ޤäƤ��ޤ���
+ということで、私は 1 と 2 に絞って簡単にテストしてみて、問題なければそれ
+で OK ってことにしてしまっています。
 
-# ���� 3 �˴ؤ��� gcc �ΥХ���ȯ�Ф������ɡġ�
+# 今回 3 に関して gcc のバグが発覚したけど…。
 
-���������������Τ�ʤ��ͤ����뤫���Τ�ʤ��Τǰ���񤤤Ƥ����ޤ�����
---with-charset �� ujis �� sjis ����ꤷ�Ƥ� MySQL �����Ƥε�ǽ����������
-�ܸ��б��ˤʤ�櫓�ǤϤʤ��Ǥ���
+あ、そうそう、知らない人がいるかも知れないので一応書いておきますが、
+--with-charset で ujis や sjis を指定しても MySQL の全ての機能が完全に日
+本語対応になるわけではないです。
 
-�㤨�С�regexp �黻�Ҥ����ܸ��б����Ƥ��ʤ��Τǡ�'.' �ϣ�ʸ������ʤ��ơ�
-����1�Х��Ȥ�Ŭ�礷�Ƥ��ޤ��ޤ�����char(5) ���ܤ� &quot;������&quot; �Ȥ���ʸ��
-����ͤù���� &quot;����&quot;+0xa4��&quot;��&quot;��1�Х����ܡˤ���Ǽ����Ƥ��ޤ��ޤ���
+例えば、regexp 演算子は日本語対応していないので、'.' は１文字じゃなくて、
+純粋に1バイトに適合してしまいますし、char(5) 項目に &quot;いろは&quot; という文字
+列を突っ込むと &quot;いろ&quot;+0xa4（&quot;は&quot;の1バイト目）が格納されてしまいます。
 
-# ��äѤꡢ�ɤä��˽񤤤Ȥ��������������ʡ�(^^;
+# やっぱり、どっかに書いといた方がいいかな…(^^;
 
 --
-̱�� &lt;tommy@xxxxxxxxxx&gt;
+民斗 &lt;tommy@xxxxxxxxxx&gt;
 
 </pre>
 </div>
-<p class="button"><a href="911.html">[��]</a><a href="913.html">[��]</a><a href="../list/901-1000.html">[�ֹ�����]</a><a href="../thread/901-1000.html">[����åɰ���]</a></p>
+<p class="button"><a href="911.html">[前]</a><a href="913.html">[次]</a><a href="../list/901-1000.html">[番号順一覧]</a><a href="../thread/901-1000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="909.html">    909 1999-05-21 02:45 [Hiroshi Marui &lt;bant@] ���ܸ�ƥ��Ȥ���ˡ                      </a></span>
-<span class="current">-&gt;&nbsp;<a href="912.html">    912 1999-05-21 09:43 ��[̱�� &lt;tommy@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="909.html">    909 1999-05-21 02:45 [Hiroshi Marui &lt;bant@] 日本語テストの方法                      </a></span>
+<span class="current">-&gt;&nbsp;<a href="912.html">    912 1999-05-21 09:43 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
 </pre>
 </body>
 </html>

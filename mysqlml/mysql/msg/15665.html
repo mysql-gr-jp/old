@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15664.html">[��]</a><a href="15666.html">[��]</a><a href="../list/15601-15700.html">[�ֹ�����]</a><a href="../thread/15601-15700.html">[����åɰ���]</a></p>
+<p class="button"><a href="15664.html">[前]</a><a href="15666.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15665
 </p>
@@ -13,29 +13,29 @@ mysql:15665
 <p>
 From: &lt;nwakamatsu@xxxxxxxxxx&gt;<br>
 Date: Tue, 14 Feb 2012 11:27:53 +0900<br>
-Subject: [mysql 15665] MySQL 5.5��Connector/J 5.1��ͳ����³����ȡ����顼��å�������ʸ���������롣<br>
+Subject: [mysql 15665] MySQL 5.5にConnector/J 5.1経由で接続すると、エラーメッセージが文字化けする。<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-������Ƥ����Ƥ������ޤ����㾾�ȿ����ޤ���
-����������ꤤ�פ��ޤ���
+初めて投稿させていただます。若松と申します。
+よろしくお願い致します。
  
  
-Java Application����Connector/J��ͳ��MySQL server���Ф��ƥ������ȯ�Ԥ���
-���Υ����꤬���Ԥ����ݤˡ����顼��å�������ʸ���������ޤ���
+Java ApplicationからConnector/J経由でMySQL serverに対してクエリを発行し、
+そのクエリが失敗した際に、エラーメッセージが文字化けします。
  
 
-�ƥ��եȥ������ΥС������ϲ������̤�Ǥ���
+各ソフトウェアのバージョンは下記の通りです。
 JDK 1.7.0_02-b13
 MySQL server 5.5.20
 Connector/J 5.1.18
  
-JDK 1.6�ڤӡ�MySQL server 5.5.17��5.5.20�ڤӡ�Connector/J 5.1.5��5.1.18��ƥ��ȺѤߤǤ���
+JDK 1.6及び、MySQL server 5.5.17～5.5.20及び、Connector/J 5.1.5～5.1.18をテスト済みです。
  
 
-�ޤ���MySQL server�θ�������ϲ������̤�Ǥ���
+また、MySQL serverの言語設定は下記の通りです。
 mysql&gt; SHOW VARIABLES LIKE 'character%';
 +--------------------------+----------------------------------+
 <span class="quote1">| Variable_name            | Value                            |</span>
@@ -62,20 +62,20 @@ mysql&gt; SHOW VARIABLES LIKE 'lc_messages%';
  
  
  
-�㤨�С�Java Application���鲼���Υ������ȯ�Ԥ��ޤ���
-SELECT * FROM `test`.`�ۤ��ۤ�`;
+例えば、Java Applicationから下記のクエリを発行します。
+SELECT * FROM `test`.`ほげほげ`;
  
  
  
-��������`�ۤ��ۤ�`�Ȥ����ơ��֥��¸�ߤ��ʤ��١�������ϼ��Ԥ������顼��å��������֤ä���ޤ���
-���κݡ��ơ��֥�̾��ʸ����������ɽ������Ƥ��ޤ��ޤ���
-jp.co.afy_systems.framework.database.exception.DatabaseException: AFY_DATABASE:0021E:SQL�¹Ի����㳰��ȯ�����ޤ������ʥ��顼�����ɡ�1146��
+しかし、`ほげほげ`というテーブルは存在しない為、クエリは失敗し、エラーメッセージが返って来ます。
+その際、テーブル名が文字化けして表示されてしまいます。
+jp.co.afy_systems.framework.database.exception.DatabaseException: AFY_DATABASE:0021E:SQL実行時に例外が発生しました。（エラーコード：1146）
     at jp.co.afy_systems.framework.database.dao.AbstractDao.executeQuery(AbstractDao.java:172)
     at jp.co.afy_systems.framework.database.dao.direct.SelectDirectDao.execute(SelectDirectDao.java:56)
     at jp.co.afy_systems.sql_executor.service.impl.ExecuteSQLService.select(ExecuteSQLService.java:117)
     at jp.co.afy_systems.sql_executor.service.impl.ExecuteSQLService.execute(ExecuteSQLService.java:82)
     at jp.co.afy_systems.framework.service.manager.XmlServiceManager$1.run(XmlServiceManager.java:287)
-Caused by: com.mysql.jdbc.exceptions.MySQLSyntaxErrorException: Table 'test.??��??��??��??��' doesn't exist
+Caused by: com.mysql.jdbc.exceptions.MySQLSyntaxErrorException: Table 'test.??≫??’??≫??’' doesn't exist
     at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1049)
     at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3609)
     at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3541)
@@ -89,56 +89,56 @@ Caused by: com.mysql.jdbc.exceptions.MySQLSyntaxErrorException: Table 'test.??��
     ... 4 more
  
 
-Ʊ���������mysql command����¹Ԥ���ȡ��ơ��֥�̾��������֤äƤ��ޤ���
-mysql&gt; SELECT * FROM `test`.`�ۤ��ۤ�`;
-ERROR 1146 (42S02): Table 'test.�ۤ��ۤ�' doesn't exist
+同じクエリを、mysql commandから実行すると、テーブル名は正常に返ってきます。
+mysql&gt; SELECT * FROM `test`.`ほげほげ`;
+ERROR 1146 (42S02): Table 'test.ほげほげ' doesn't exist
  
  
  
-����ʸ�������򵯤�������������Ĥ������ʬ���äƤ��ޤ���
+この文字化けを起こす原因が、二つある事が分かっています。
  
-��Ĥϡ�Connector/J�����顼��å������򥨥󥳡��ɤ���ݤˡ�SHOW VARIABLES LIKE 'language'�ˤƸ�����������
-�֤äƤ������줫���б�����ʸ�������ɤ�������Ƥ���٤Ǥ���
-��com.mysql.jdbc.ConnectionImpl 3843���� �� com.mysql.jdbc.CharsetMapping 1017���ܡ�
-�Ķ��ѿ�'language'��MySQL server 5.5�Ǥ��ѻߤ��졢lc_messages��lc_messages_dir���֤��������Ƥ��ޤ���
-Connector/J��'language'����������ʤ��١��ǥե���Ȥ�Cp1252�ǥ��顼��å������򥨥󥳡��ɤ��ޤ���
+一つは、Connector/Jがエラーメッセージをエンコードする際に、SHOW VARIABLES LIKE 'language'にて言語を取得し、
+返ってきた言語から対応する文字コードを取得している為です。
+（com.mysql.jdbc.ConnectionImpl 3843行目 と com.mysql.jdbc.CharsetMapping 1017行目）
+環境変数'language'はMySQL server 5.5では廃止され、lc_messagesとlc_messages_dirに置き換えられています。
+Connector/Jは'language'が取得出来ない為、デフォルトのCp1252でエラーメッセージをエンコードします。
  
-����ܤϡ�Connector/J�����顼��å������򡢥��顼��å��������Τ�Τȡ��ơ��֥�̾�䥫���̾��
-����Ʊ��ʸ�������ɤǥ��󥳡��ɤ��Ƥ���٤Ǥ���
-�ơ��֥�̾�䥫���̾��ʸ�������ɤ�MySQL server������˰�¸���ޤ�����
-���顼��å�������ʸ�������ɤϡ�com.mysql.jdbc.CharsetMapping ��ľ�ܽ񤫤�Ƥ��ޤ���
+二つ目は、Connector/Jがエラーメッセージを、エラーメッセージそのものと、テーブル名やカラム名を、
+全て同じ文字コードでエンコードしている為です。
+テーブル名やカラム名の文字コードはMySQL serverの設定に依存しますが、
+エラーメッセージの文字コードは、com.mysql.jdbc.CharsetMapping に直接書かれています。
  
-���ΰ١�UTF-8���֤äƤ����ơ��֥�̾�䥫���̾������˥��󥳡��ɤ��줺��ʸ�������򵯤����ޤ���
- 
-
-���ߡ����ܸ�Υơ��֥�̾�������̾�ˤƳ�ȯ��ԤäƤ���١�
-���顼��ȯ�������ݤ˥��顼ȯ���Ľ꤬ʬ���餺����ȯ�˱ƶ����ФƤ��ޤ���
+その為、UTF-8で返ってきたテーブル名やカラム名が正常にエンコードされず、文字化けを起こします。
  
 
-MySQL bugs�����ˤ�����פ��ޤ����������������ͽ��Ϥʤ������Ǥ���
+現在、日本語のテーブル名、カラム名にて開発を行っている為、
+エラーが発生した際にエラー発生個所が分からず、開発に影響が出ています。
+ 
+
+MySQL bugsの方にも報告致しましたが、改善される予定はなさそうです。
 <a href="http://bugs.mysql.com/bug.php?id=64205">http://bugs.mysql.com/bug.php?id=64205</a>
  
 
-���ܥ桼����������顢��������ΥХ����򤷤�ĺ���ʤ��Ǥ��礦����
+日本ユーザ会の方から、この問題のバグ報告をして頂けないでしょうか。
  
-�ʾ塢����������ꤤ���ޤ���
+以上、よろしくお願いします。
 
 
 
 </pre>
 </div>
 <div class="attach">
-<h3 class="attachtitle">ź�եե�����</h3>
+<h3 class="attachtitle">添付ファイル</h3>
 <ul>
 <li><a href="15665/0/index.html"> [text/html]</a>
 </ul>
 </div>
-<p class="button"><a href="15664.html">[��]</a><a href="15666.html">[��]</a><a href="../list/15601-15700.html">[�ֹ�����]</a><a href="../thread/15601-15700.html">[����åɰ���]</a></p>
+<p class="button"><a href="15664.html">[前]</a><a href="15666.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="15665.html">@ 15665 2012-02-14 11:27 [&lt;nwakamatsu@xxxxxxxx] MySQL 5.5��Connector/J 5.1��ͳ����³����ȡ����顼��å�������ʸ���������롣</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15681.html">  15681 2012-02-23 16:35 ��[&lt;nwakamatsu@xxxxxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15682.html">  15682 2012-02-23 16:55 ����[HIRATSUKA Sadao &lt;hir]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15685.html">  15685 2012-02-24 13:47 ������[&lt;nwakamatsu@xxxxxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="15665.html">@ 15665 2012-02-14 11:27 [&lt;nwakamatsu@xxxxxxxx] MySQL 5.5にConnector/J 5.1経由で接続すると、エラーメッセージが文字化けする。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15681.html">  15681 2012-02-23 16:35 ┗[&lt;nwakamatsu@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15682.html">  15682 2012-02-23 16:55 　┗[HIRATSUKA Sadao &lt;hir]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15685.html">  15685 2012-02-24 13:47 　　┗[&lt;nwakamatsu@xxxxxxxx]                                   </a></span>
 </pre>
 </body>
 </html>

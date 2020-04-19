@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14829.html">[��]</a><a href="14831.html">[��]</a><a href="../list/14801-14900.html">[�ֹ�����]</a><a href="../thread/14801-14900.html">[����åɰ���]</a></p>
+<p class="button"><a href="14829.html">[前]</a><a href="14831.html">[次]</a><a href="../list/14801-14900.html">[番号順一覧]</a><a href="../thread/14801-14900.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14830
 </p>
@@ -13,22 +13,22 @@ mysql:14830
 <p>
 From: &quot;Kaname Kuji\(Y7\)&quot; &lt;&quot;Kaname Kuji\(Y7\)&quot; &lt;kkuji@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 7 May 2009 11:07:54 +0900<br>
-Subject: [mysql 14830] Re: SQLʸ�����ηä��Ҽڤ����Ƥ�������<br>
+Subject: [mysql 14830] Re: SQL文、お知恵を拝借させてください<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-KK@IB �Ǥ���
+KK@IB です。
 
-������­�äݤ��ΤǤ���������
-���Ǥʤ��Ƥ⥵�֥�����ϻȤ��ޤ���
+これも蛇足っぽいのですが．．．
+５でなくてもサブクエリは使えます。
 
-����Ū�ˤϡ�̾���ȥե롼��̾��ݤ���碌����ʣ���ʤ����٤Ƥ��Ȥ߹�碌
-���顢�ǽ�����ꤵ�줿�ǡ��������������Τ����Ǥ����顥����
+基本的には、名前とフルーツ名を掛け合わせた重複しないすべての組み合わせ
+から、最初に設定されたデータを取り除いたものが答ですから．．．
 
-ɽ������� 0 - 2 (3 ���, ������μ¹Ի��� 0.0021 ��)
-�¹Ԥ��� SQL:
+表示中の列 0 - 2 (3 合計, クエリの実行時間 0.0021 秒)
+実行した SQL:
 SELECT yname, fname
 FROM `names` , f2
 WHERE concat( yname, fname )
@@ -62,9 +62,9 @@ version()
 
 -------------------------------
 
-����������ǰ�ʤ��顢���Ǥ��󼨤��줿SQLʸ�Τۤ�����Ψ���ɤ��褦�Ǥ���
+しかし、残念ながら、すでに提示されたSQL文のほうが効率が良いようです。
 
-�¹Ԥ��� SQL:
+実行した SQL:
 EXPLAIN SELECT DISTINCT t1.nm, t2.fruitname
 FROM (
 Q2 t1, Q2 t2
@@ -80,7 +80,7 @@ id  select_type  table  type  possible_keys  key  key_len  ref  rows  Extra
 
 --------------------------------------------------------------------------------
 
-�¹Ԥ��� SQL:
+実行した SQL:
 EXPLAIN SELECT yname, fname
 FROM `names` , f2
 WHERE concat( yname, fname )
@@ -111,31 +111,31 @@ index; Distinct
 
 
 
-<span class="quote2">&gt;&gt; 4.0���ȥ��֥����꤬�Ȥ��ޤ����͡�</span>
+<span class="quote2">&gt;&gt; 4.0だとサブクエリが使えませんよね？</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; SELECT</span>
 <span class="quote2">&gt;&gt;   DISTINCT food</span>
 <span class="quote2">&gt;&gt; FROM</span>
 <span class="quote2">&gt;&gt;   table1</span>
 <span class="quote2">&gt;&gt; WHERE</span>
-<span class="quote2">&gt;&gt;   food not in ( select food from table1 where name = '���' )</span>
+<span class="quote2">&gt;&gt;   food not in ( select food from table1 where name = '井上' )</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ���֥����꤬���ѤǤ���Ф���ʴ����Ǥ��礦��</span>
+<span class="quote2">&gt;&gt; サブクエリが利用できればこんな感じでしょうか</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Ϥ�������˶ᤤ��Τϲ��٤��Ƥ����ΤǤ��������顼���ФƤ��ޤ�����</span>
-<span class="quote1">&gt; Ver.4�ǥ��֥����꤬�Ȥ��ʤ��Τ��������ä��ΤǤ��͡�̵�ΤǤ�����</span>
+<span class="quote1">&gt; はい。これに近いものは何度も試していたのですが、エラーが出ていました。</span>
+<span class="quote1">&gt; Ver.4でサブクエリが使えないのが原因だったのですね。無知でした。</span>
 <span class="quote1">&gt;</span>
 <span class="quote2">&gt;&gt; SELECT</span>
-<span class="quote2">&gt;&gt;   food, sum(IF(name='���',1,0)) as ct</span>
+<span class="quote2">&gt;&gt;   food, sum(IF(name='井上',1,0)) as ct</span>
 <span class="quote2">&gt;&gt; FROM</span>
 <span class="quote2">&gt;&gt;   table1</span>
 <span class="quote2">&gt;&gt; GROUP BY</span>
 <span class="quote2">&gt;&gt;   food</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote1">&gt; �����ư���ǧ�����Ƥ��������ޤ�����</span>
-<span class="quote1">&gt; ���������Ǥ���</span>
+<span class="quote1">&gt; これの動作、確認させていただきました。</span>
+<span class="quote1">&gt; いい感じです。</span>
 <span class="quote1">&gt;</span>
-<span class="quote2">&gt;&gt; ��Ժ������������Τ褦�ˤ����餽��äݤ��ꥹ�Ȥ�ȴ���Ф��ޤ�����</span>
+<span class="quote2">&gt;&gt; 試行錯誤の末、次のようにしたらそれっぽいリストが抜け出せました。</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; mysql&gt; select distinct t1.name,t2.food from (table1 t1, table1 t2) left </span>
 <span class="quote2">&gt;&gt; join table1 t3 on t1.name=t3.name and t2.food=t3.food where t3.name is </span>
@@ -143,35 +143,35 @@ index; Distinct
 <span class="quote2">&gt;&gt; +------+--------+</span>
 <span class="quote3">&gt;&gt; | name | food   |</span>
 <span class="quote2">&gt;&gt; +------+--------+</span>
-<span class="quote3">&gt;&gt; | ��� | ��� |</span>
-<span class="quote3">&gt;&gt; | ���� | �ߤ��� |</span>
-<span class="quote3">&gt;&gt; | ��� | �֤ɤ� |</span>
+<span class="quote3">&gt;&gt; | 井上 | りんご |</span>
+<span class="quote3">&gt;&gt; | 青木 | みかん |</span>
+<span class="quote3">&gt;&gt; | 井上 | ぶどう |</span>
 <span class="quote2">&gt;&gt; +------+--------+</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; MySQL 4.0 ������Ǥ��ʤ��ä��Τǡ�5.1.31 �Ǥη�̤Ǥ����ɡ�</span>
+<span class="quote2">&gt;&gt; MySQL 4.0 が入手できなかったので、5.1.31 での結果ですけど。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote1">&gt; ������ΤȤߤ��ͤ��󼨤�����������Τ⡢��ǧ�Ǥ��ޤ�����Ver.4�Ǥ�Ʊ��������ޤ�����</span>
-<span class="quote1">&gt; ����ϫĺ�����꤬�Ȥ��������ޤ������Ȥꤢ������������Τ�Τ�Ȥ碌�Ƥ������������Ȼפ��ޤ���</span>
+<span class="quote1">&gt; こちらのとみた様の提示いただいたものも、確認できました。Ver.4でも同結果得られました。</span>
+<span class="quote1">&gt; ご苦労頂きありがとうございました。とりあえず、こちらのものを使わせていただきたいと思います。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Ȥϸ�����ΤΡ����֥����꤬�Ȥ���Ȳ��������������Ǥ��Τǡ�����򸫤�Ver.5���ѹ����Ƥ�</span>
-<span class="quote1">&gt; �褦�Ȼפ��ޤ���</span>
+<span class="quote1">&gt; とは言うものの、サブクエリが使えると何かと便利そうですので、機会を見てVer.5へ変更してみ</span>
+<span class="quote1">&gt; ようと思います。</span>
 
 
 </pre>
 </div>
-<p class="button"><a href="14829.html">[��]</a><a href="14831.html">[��]</a><a href="../list/14801-14900.html">[�ֹ�����]</a><a href="../thread/14801-14900.html">[����åɰ���]</a></p>
+<p class="button"><a href="14829.html">[前]</a><a href="14831.html">[次]</a><a href="../list/14801-14900.html">[番号順一覧]</a><a href="../thread/14801-14900.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14819.html">  14819 2009-05-06 13:16 [naya &lt;SNA02388@xxxxx] �ڽ���Ū����� �ơ��֥���礹��SQLʸ  </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14820.html">  14820 2009-05-06 13:59 ��[SAKAI Kei &lt;sak2@xxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14823.html">  14823 2009-05-06 14:59 ����[SAKAI Kei &lt;sak2@xxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14824.html">  14824 2009-05-06 20:26 ������[naya &lt;SNA02388@xxxxx] �ڸ���� Re: �ڽ���Ū����� �ơ��֥���礹��SQLʸ</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14826.html">  14826 2009-05-07 01:18 ��������[&quot;Kaname Kuji\(Y7\)&quot; ] �ڼ�­��Re:  �ڸ���� Re:  �ڽ���Ū����� �ơ��֥���礹��SQLʸ</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14825.html">  14825 2009-05-07 00:55 ��[&quot;F.Yamazaki&quot; &lt;fumihi] SQLʸ�����ηä��Ҽڤ����Ƥ�������     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14827.html">  14827 2009-05-07 02:07 ����[������ &lt;akirainfoml@]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14829.html">  14829 2009-05-07 02:48 ������[&quot;F.Yamazaki&quot; &lt;fumihi]                                   </a></span>
-<span class="current">-&gt;&nbsp;<a href="14830.html">  14830 2009-05-07 11:07 ��������[&quot;Kaname Kuji\(Y7\)&quot; ]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14834.html">  14834 2009-05-07 20:09 ����������[������ &lt;akirainfoml@]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14828.html">  14828 2009-05-07 02:12 ����[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14819.html">  14819 2009-05-06 13:16 [naya &lt;SNA02388@xxxxx] 【初歩的質問】 テーブルを結合するSQL文  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14820.html">  14820 2009-05-06 13:59 ┣[SAKAI Kei &lt;sak2@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14823.html">  14823 2009-05-06 14:59 ┃┗[SAKAI Kei &lt;sak2@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14824.html">  14824 2009-05-06 20:26 ┃　┗[naya &lt;SNA02388@xxxxx] 【御礼】 Re: 【初歩的質問】 テーブルを結合するSQL文</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14826.html">  14826 2009-05-07 01:18 ┃　　┗[&quot;Kaname Kuji\(Y7\)&quot; ] 【蛇足】Re:  【御礼】 Re:  【初歩的質問】 テーブルを結合するSQL文</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14825.html">  14825 2009-05-07 00:55 ┗[&quot;F.Yamazaki&quot; &lt;fumihi] SQL文、お知恵を拝借させてください     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14827.html">  14827 2009-05-07 02:07 　┣[あきら &lt;akirainfoml@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14829.html">  14829 2009-05-07 02:48 　┃┗[&quot;F.Yamazaki&quot; &lt;fumihi]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="14830.html">  14830 2009-05-07 11:07 　┃　┗[&quot;Kaname Kuji\(Y7\)&quot; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14834.html">  14834 2009-05-07 20:09 　┃　　┗[あきら &lt;akirainfoml@]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14828.html">  14828 2009-05-07 02:12 　┗[とみたまさひろ &lt;tomm]                                     </a></span>
 </pre>
 </body>
 </html>

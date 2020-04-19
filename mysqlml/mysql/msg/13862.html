@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13861.html">[��]</a><a href="13863.html">[��]</a><a href="../list/13801-13900.html">[�ֹ�����]</a><a href="../thread/13801-13900.html">[����åɰ���]</a></p>
+<p class="button"><a href="13861.html">[前]</a><a href="13863.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13862
 </p>
@@ -13,18 +13,18 @@ mysql:13862
 <p>
 From: &lt;ml@xxxxxxxxxx&gt;<br>
 Date: Fri, 13 Apr 2007 09:26:06 +0900<br>
-Subject: [mysql 13862] �ޥȥ�å����ơ��֥�κ�����ˡ<br>
+Subject: [mysql 13862] マトリックステーブルの作成方法<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ĤǤ���
+上田です。
 
-5.0.37-max MySQL Community Edition ����Ѥ��Ƥ��ޤ���
-����ơ��֥�Ʊ�ΤΥޥȥ�å����ơ��֥�κ�����ˡ��õ���Ƥ��ޤ���
+5.0.37-max MySQL Community Edition を使用しています。
+あるテーブル同士のマトリックステーブルの作成方法を探しています。
 
-�ʲ��Υơ��֥뤬����ޤ���
+以下のテーブルがあります。
 CREATE TABLE user (
 genre INT NOT NULL,
 number INT NOT NULL,
@@ -59,7 +59,7 @@ sum_value INT NOT NULL,
 PRIMARY KEY(genre_1,genre_2,genre_3,seq)
 );
 
-�ǡ����ϰʲ��Τ褦�ˤʤ�ޤ���
+データは以下のようになります。
 user
 1,1,100
 1,2,200
@@ -77,44 +77,44 @@ user_skill
 2,1,1,1,-1
 3,2,1,2,10
 
-user��genre��number�Ǽ��̤��졢0�İʾ��user_skill������ޤ���
-genre��1-3���ͤ�����ޤ���
-user_skill��line�Ǽ��̡�value���ͤ�����ޤ���
+userはgenreとnumberで識別され、0個以上のuser_skillを持ちます。
+genreは1-3の値を持ちます。
+user_skillはlineで種別、valueで値を持ちます。
 
-�����Υǡ����Υޥȥ�å�����matrix�����matrix_skill�ơ��֥��Ƴ������
-���פ��ޤ���
+これらのデータのマトリックスをmatrixおよびmatrix_skillテーブルに導入した
+く思います。
 
-�ޥȥ�å�������롼���
-user��genre�ǹʹ���genre��1-3�Τ��줾��μ����user�����Ȥ߹�碌�롣
-matrix��genre1-genre3�ˤ�user��number������
-matrix��sum_unit�ˤ�genre1-genre3��user��unit��sum������
-matrix_skill��genre1-genre3��user��user_skill��ޤȤ�������
-matrix_skill��line��user_skill��line��sum_value��user_skill��value��sum
-������
-�Ȥʤ�ޤ���
+マトリックスを作るルールは
+userのgenreで絞込みgenreが1-3のそれぞれの種類のuserを全組み合わせる。
+matrixのgenre1-genre3にはuserのnumberが入る
+matrixのsum_unitにはgenre1-genre3のuserのunitのsumが入る
+matrix_skillはgenre1-genre3のuserのuser_skillをまとめて入れる
+matrix_skillのlineはuser_skillのline、sum_valueはuser_skillのvalueのsum
+が入る
+となります。
 
-ñ���userƱ�ΤΥޥȥ�å����ʤ��userƱ�Τ�join����INSET -- SELECT ��
-SQL��ȯ�Ǻ�줽���ʤΤǤ�����user_skill������Τ�Ƭ��Ǻ�ޤ��Ƥ��ޤ���
+単純にuser同士のマトリックスならばuser同士をjoinしてINSET -- SELECT で
+SQL一発で作れそうなのですが、user_skillがあるので頭を悩ませています。
 
-�ºݤΥơ��֥�ǤϤ⤦����ʣ���ʾ����Ȥ߹�碌��ɬ�פ����ꡢ���Ȥ߹��
-����2���̤�ۤɤˤʤ븫�Ѥ��ˤʤäƤ��ޤ���
-��˥�����ץȤ��Ȥ߹�碌���������ư�����Ƥߤ�ȡ���λ�ޤǤ��ä�3ǯ
-���餤�����ꤽ���ˤʤä��Τ��᡹�˻ߤ�ޤ�����
-���ΤȤ���CPU����Ψ���ǧ����ȥ�����ץ�70%��mysqld30%�ȤʤäƤ��ޤ���
-�Τǡ�MySQL�ǥ����꡼�����ǺѤޤ���Ф⤦�������᤯�ʤ�ΤǤϤʤ�������
-���������Ǥ���
+実際のテーブルではもう少し複雑な条件で組み合わせる必要があり、全組み合わ
+せが2兆通りほどになる見積もりになっています。
+試しにスクリプトで組み合わせを作成して動かしてみると、終了までざっと3年
+ぐらいかかりそうになったので早々に止めました。
+そのときのCPU使用率を確認するとスクリプト70%、mysqld30%となっていました
+ので、MySQLでクエリーだけで済ませればもう少しは早くなるのではないかと目
+論んだ次第です。
 
-�����餯�ץ������������ɬ�פ�����ΤǤϤȻפ��ޤ������������Ǥ⤴��
-������������
+おそらくプロシージャを作る必要があるのではと思われますが、形だけでもご教
+授ください。
 
 
 </pre>
 </div>
-<p class="button"><a href="13861.html">[��]</a><a href="13863.html">[��]</a><a href="../list/13801-13900.html">[�ֹ�����]</a><a href="../thread/13801-13900.html">[����åɰ���]</a></p>
+<p class="button"><a href="13861.html">[前]</a><a href="13863.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="13862.html">  13862 2007-04-13 09:26 [&lt;ml@xxxxxxxxxx&gt;     ] �ޥȥ�å����ơ��֥�κ�����ˡ          </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13863.html">  13863 2007-04-13 13:33 ��[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13949.html">  13949 2007-05-09 08:05 ����[&lt;ml@xxxxxxxxxx&gt;     ]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="13862.html">  13862 2007-04-13 09:26 [&lt;ml@xxxxxxxxxx&gt;     ] マトリックステーブルの作成方法          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13863.html">  13863 2007-04-13 13:33 ┗[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13949.html">  13949 2007-05-09 08:05 　┗[&lt;ml@xxxxxxxxxx&gt;     ]                                     </a></span>
 </pre>
 </body>
 </html>

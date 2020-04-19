@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="16280.html">[��]</a><a href="16282.html">[��]</a><a href="../list/16201-16300.html">[�ֹ�����]</a><a href="../thread/16201-16300.html">[����åɰ���]</a></p>
+<p class="button"><a href="16280.html">[前]</a><a href="16282.html">[次]</a><a href="../list/16201-16300.html">[番号順一覧]</a><a href="../thread/16201-16300.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:16281
 </p>
@@ -13,70 +13,70 @@ mysql:16281
 <p>
 From: kubo &lt;kubo &lt;dbflute@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 30 Oct 2015 23:20:36 +0900<br>
-Subject: [mysql 16281] JDBC�ɥ饤�Ф� rewriteBatchedStatements �����Ѥ���Ƥ��ޤ�����<br>
+Subject: [mysql 16281] JDBCドライバの rewriteBatchedStatements を利用されていますか？<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����(jflute)�ȿ����ޤ���
+久保(jflute)と申します。
 
-ͦ����Ф��� ML ���ꤲ�Ƥߤޤ�����
-(�Ǥ���� READ COMMITTED �η���ꤲ�����Ȥ���ޤ�)
+勇気を出して ML に投げてみました。
+(でも以前 READ COMMITTED の件で投げたことあります)
 
-Java�����äˤʤäƤ��ޤ��ޤ�����
-MySQL��JDBC�ɥ饤�Ф��ȥХå���Ͽ(executeBatch())����
-�¼������Υ롼�פǤ�insert�ˤʤ��ǧ�����Ƥ��ޤ���
+Java寄りの話になってしまいますが…
+MySQLのJDBCドライバだとバッチ登録(executeBatch())が、
+実質ただのループでのinsertになると認識しています。
 
-MySQL �� PreparedStatement#executeBatch()
-(java.sql �ǤϤʤ� com.mysql.jdbc ������������̾��...)
-�򸫤�ȡ�executeBatchSerially() ����ã���ơ�
-forʸ����� executeUpdate() ��Ƥ�Ǥ��ޤ�(���뤰���!?)��
-JavaDoc ���ɤ�Ǥ⡢
+MySQL の PreparedStatement#executeBatch()
+(java.sql ではなく com.mysql.jdbc の方、強気な名前...)
+を見ると、executeBatchSerially() に到達して、
+for文の中で executeUpdate() を呼んでいます(ぐるぐる系!?)。
+JavaDoc を読んでも、
 &quot;... by executing them one-by-one&quot;
-�Ȥ��ä��褯�֤��Ƥ��Ƥ櫓��ʤ�Ǽ���������Ǥ�����
+とかっこよく綴られていてわけもなく納得しそうでした。
 
-�Ǥ�����MySQL �� JDBC �ɥ饤�Ф�����ǡ�
-rewriteBatchedStatements �� true �ˤ���С�
-Serially �ǤϤʤ���executeBatchedInserts() ���ƤФ졢
-insertʸ�� multi insert �����˥�饤�Ȥ���ơ�
-®���ʤ�Ȥ����ä�����ޤ���
-�ºݡ���ñ�ʸ��ڤ򤷤Ƥߤ��®���ʤ�ޤ�
+ですが、MySQL の JDBC ドライバの設定で、
+rewriteBatchedStatements を true にすれば、
+Serially ではなく、executeBatchedInserts() が呼ばれ、
+insert文が multi insert 方式にリライトされて、
+速くなるという話があります。
+実際、簡単な検証をしてみると速くなります
 
-�֤��á����㤢���줤�������®���ʤ뤸���
-���äĤ� true �ˤ��Ƥ�Ф����󤸤�ʤ���!?��
+「おっ、じゃあこれいいじゃん！速くなるじゃん、
+いっつも true にしてればいいんじゃないの!?」
 
-��ñ��˻פ��櫓�Ǥ�����������ʬ�μ���θ�����ȡ�
-�ƥ��ȥǡ�������Ͽ�Ȥ��ǤϤ��Υ��ץ����ϻȤ��ޤ�����
-�ºݤ����֥����ӥ��ǤϻȤäƤ��ʤ��Ȥ����ä�¿��ʹ���ޤ���
-�������ä�ʹ���Ƥߤ�ȡ��פϡ�
-�ֻȤäƤ�äƤΤ����ʹ�������Ȥʤ�����
-�ǥե���Ȥε�ư�ǤϤʤ��Τǡ��ʤ�Ȥʤ��԰¡�
-��...
+と単純に思うわけですが、ただ自分の周りの現場だと、
+テストデータの登録とかではそのオプションは使いますが、
+実際の本番サービスでは使っていないという話を多く聞きます。
+色々と話を聞いてみると、要は、
+「使ってるってのあんま聞いたことないし、
+デフォルトの挙動ではないので、なんとなく不安」
+と...
 
-�Ȥ������Ȥǡ�
-�ºݤ����ֱ��ѤΥ��ץ��JDBC����ǡ�
-�֤��äĤ� rewriteBatchedStatements �� true �ˤ��Ƥ���
-�ä����äƤ���ä��㤤�ޤ��Ǥ��礦����
-�դ˻Ȥ�ʤ���ͳ�����äơ������äƤȤ��ʳ��ϻȤ�ʤ����á��Ȥ���
+ということで、
+実際に本番運用のアプリのJDBC設定で、
+「いっつも rewriteBatchedStatements は true にしてるよ」
+って方っていらっしゃいますでしょうか？
+逆に使わない理由があって、いざってとき以外は使わないぜっ、とか。
 
-�ޤ�������ä�Java����ʤ�¾�θ���Ǥ�Ʊ���äʤΤǤ��礦����...
-(�Хå������ʤ���JDBC�����Ȥ����ä������äȥ���å�)
+また、これってJavaじゃなく他の言語でも同じ話なのでしょうかね...
+(バッチ効かないのJDBCだけとかだったらちょっとショック)
 
-�äƤʤȤ����������פ��դ����Ȥ���С�
-�����ڤ˥�����ĺ����ȴ򤷤��Ǥ���
+ってなところ、何か思い付くことあれば、
+お気軽にコメント頂けると嬉しいです。
 
 
-# ������󡢤⤷�֤衼�����Ȥ����פäƤʤäƤ⡢
-# ���ä��꼫ʬ�����Ǹ��ڤ�����Ǥ��ޤ����(^^
+# もちろん、もし「よーし、使うぞ」ってなっても、
+# しっかり自分たちで検証した上でやりますんで(^^
 
 </pre>
 </div>
-<p class="button"><a href="16280.html">[��]</a><a href="16282.html">[��]</a><a href="../list/16201-16300.html">[�ֹ�����]</a><a href="../thread/16201-16300.html">[����åɰ���]</a></p>
+<p class="button"><a href="16280.html">[前]</a><a href="16282.html">[次]</a><a href="../list/16201-16300.html">[番号順一覧]</a><a href="../thread/16201-16300.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="16281.html">  16281 2015-10-30 23:20 [kubo &lt;dbflute@xxxxxx] JDBC�ɥ饤�Ф� rewriteBatchedStatements �����Ѥ���Ƥ��ޤ�����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16284.html">  16284 2015-11-09 12:42 ��[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16281] JDBC�ɥ饤�Ф� rewriteBatchedStatements �����Ѥ���Ƥ��ޤ�����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16285.html">  16285 2015-11-10 13:59 ����[kubo &lt;dbflute@xxxxxx] Re: [mysql 16284] Re: [mysql 16281] JDBC�ɥ饤�Ф� rewriteBatchedStatements �����Ѥ���Ƥ��ޤ�����</a></span>
+<span class="current">-&gt;&nbsp;<a href="16281.html">  16281 2015-10-30 23:20 [kubo &lt;dbflute@xxxxxx] JDBCドライバの rewriteBatchedStatements を利用されていますか？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16284.html">  16284 2015-11-09 12:42 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16281] JDBCドライバの rewriteBatchedStatements を利用されていますか？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16285.html">  16285 2015-11-10 13:59 　┗[kubo &lt;dbflute@xxxxxx] Re: [mysql 16284] Re: [mysql 16281] JDBCドライバの rewriteBatchedStatements を利用されていますか？</a></span>
 </pre>
 </body>
 </html>

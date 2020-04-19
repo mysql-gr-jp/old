@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="1429.html">[��]</a><a href="1431.html">[��]</a><a href="../list/1401-1500.html">[�ֹ�����]</a><a href="../thread/1401-1500.html">[����åɰ���]</a></p>
+<p class="button"><a href="1429.html">[前]</a><a href="1431.html">[次]</a><a href="../list/1401-1500.html">[番号順一覧]</a><a href="../thread/1401-1500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:1430
 </p>
@@ -13,31 +13,31 @@ mysql:1430
 <p>
 From: Takanori Tobe &lt;Takanori Tobe &lt;database@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 25 Dec 1999 15:14:21 +0900<br>
-Subject: [mysql 01430] Re: ���������  2 �ĤΥơ��֥뤫�黲�Ȥ�ɽ��������ˡ<br>
+Subject: [mysql 01430] Re: 該当件数を  2 つのテーブルから参照し表示する方法<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�Ȥ١�MySQL�ؽ��� �Ǥ���
+とべ％MySQL学習中 です。
 
 On Sat, 25 Dec 1999 09:44:24 +0900
 &quot;Isamu Narimatsu&quot; &lt;isamu@xxxxxxxxxx&gt; wrote:
 
-<span class="quote1">&gt;�����Ǥ���Win98��MySQL����Ѥ��Ƥ��ޤ���</span>
-<span class="quote1">&gt;�����֥����Ȥ˥Хʡ���ɽ�������١������ơ��Хʡ��򥯥�å������٤�MySQL�ˤ�</span>
-<span class="quote1">&gt;�β�ҥ�����������ʤ�쥳���ɤ��ɲä��褦�Ȼפ��ޤ���</span>
-<span class="quote1">&gt;�����ơ��Хʡ���PV(ɽ�����)����ӡ�����å����򥯥��꡼��Ĵ�٤褦�Ȼפ���</span>
-<span class="quote1">&gt;����</span>
+<span class="quote1">&gt;成松です。Win98でMySQLを使用しています。</span>
+<span class="quote1">&gt;ウェブサイトにバナーを表示する度、そして、バナーをクリックする度にMySQLにそ</span>
+<span class="quote1">&gt;の会社コード等からなるレコードを追加しようと思います。</span>
+<span class="quote1">&gt;そして、バナーのPV(表示回数)および、クリック数をクエリーで調べようと思いま</span>
+<span class="quote1">&gt;す。</span>
 
-�ޤ���ǧ���Ƥ��������ΤǤ��������줾��Υ����ΰ�̣��
-   id : ��ˡ����������뤿��ǽ�����ΰ�̣�Ϥʤ���
-   comid : ɽ��/����å����줿��ҥ�����
-   ������å� or ɽ�����Ȥ˿������Ԥ�Insert
-�Ǥ褤�ΤǤ���͡�
+まず確認しておきたいのですが、それぞれのカラムの意味は
+   id : ユニークキーを作るためで処理上の意味はない。
+   comid : 表示/クリックされた会社コード
+   １クリック or 表示ごとに新しく行をInsert
+でよいのですよね。
 
-������������Ȥ��Υơ��֥�ι�������MySQL�Ǥ��񤷤��ΤǤϤʤ��Ǥ��礦����
-�ʤ����Ȥ����ȡ����Ȥ��аʲ��Τ褦�ʥ쥳���ɤ����ä��Ȥ��ޤ���
+結論から言うとこのテーブルの構成だとMySQLでは難しいのではないでしょうか。
+なぜかというと、たとえば以下のようなレコードがあったとします。
 
  bpvlog             bclicklog
    +-------------+    +-------------+
@@ -50,7 +50,7 @@ On Sat, 25 Dec 1999 09:44:24 +0900
    | 5   | 300   |
    +-----+-------+
 
-���Σ��ĤΥơ��֥��ñ���Join�����
+この２つのテーブルを単純にJoinすると
 
    +------+-------+------+-------+
    |bpvlog        | bclicklog    |
@@ -73,33 +73,33 @@ On Sat, 25 Dec 1999 09:44:24 +0900
    |    5 |   300 |    3 |   100 |
    +------+-------+------+-------+
 
-�Ȥʤ�ޤ���
+となります。
 
-<span class="quote1">&gt;�����ǡ��ʲ��Τ褦��SQLʸ��������ޤ�����</span>
+<span class="quote1">&gt;ここで、以下のようにSQL文を作成しました。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;select count(bpvlog.comid),count(bclicklog.comid) from bpvlog,bclicklog</span>
 <span class="quote1">&gt;</span>
-�����Ǥ���SQLʸ��ȯ�Ԥ��Ƥ���ɽ��bpvlog.comid��bclicklog.comid�Ȥ��
-�ͤ����äƤ���Կ����������ʤäƤ��ޤ������Τ����̤ιԿ���������
-�ʤäƤ��ޤ��ޤ���
+ここでこのSQL文を発行しても上の表のbpvlog.comidとbclicklog.comidともに
+値の入っている行数は等しくなっています。そのため結果の行数が等しく
+なってしまいます。
 
-<span class="quote1">&gt;where ʸ�� bpvlog.comid=bclicklog.comid �Ȥ��Ƥⱦ���ͤ⺸���ͤ�Ʊ���ˤʤä�</span>
-<span class="quote1">&gt;���ޤ��ޤ���</span>
+<span class="quote1">&gt;where 文で bpvlog.comid=bclicklog.comid としても右の値も左の値も同じになって</span>
+<span class="quote1">&gt;しまいます。</span>
 
-where��ˤ��ξ����ɲä��Ƥ���ɽ��&quot;#&quot;��Ĥ����쥳���ɤ�������Ф����
-�ΤǷ��Ū��ξ�����ͤ��������ʤ�ޤ���
+where句にこの条件を追加しても上の表で&quot;#&quot;をつけたレコードだけが抽出される
+ので結果的に両方の値は等しくなります。
 
-<span class="quote1">&gt;�����Ȥ��ƤϤɤΤ褦�ʡ���ˡ���ͤ�����ΤǤ��礦����</span>
+<span class="quote1">&gt;解決策としてはどのような、方法が考えられるのでしょうか？</span>
 <span class="quote1">&gt;</span>
 
-Oracle�Ȥ���subselect���Ȥ���DBMS���ä��顢��ҥޥ�����&quot;M&quot;�Ȥ���
+Oracleとかのsubselectが使えるDBMSだったら、会社マスタを&quot;M&quot;として
   select (select count(*) from bpvlog where comid = M.comid),
          (select count(*) from bclicklog where comid = M.comid)
     from M
-�Ȥ��ä������ǤǤ���Ȼפ��ΤǤ���mySQL�ǤϤޤ�̤�б����ʡ�
-3.23����subselect���б�����褦�ʵ��Ҥ����ä����ɤɤ��ʤΤǤ��礦��
+といった感じでできると思うのですがmySQLではまだ未対応かな？
+3.23からsubselectに対応するような記述があったけどどうなのでしょう。
 
-MySQL�Ǥ��Ȥ�������֤˽��ץơ��֥���Ѱդ���
+MySQLでやるとしたら中間に集計テーブルを用意して
 
  bpvcount
 +----------+------------------+------+-----+---------+----------------+
@@ -125,18 +125,18 @@ INSERT INTO bpvcount
 INSERT INTO bclickcount 
   SELECT comid, count(*) FROM bpvlog GROUP BY comid;
 
-�Ȥ������Ȥ�
+としたあとで
  SELECT bpvcount.comid, bpvcount.cnt, bclickcount.cnt
    FROM bpvcount LEFT OUTER JOIN bclickcount 
            ON bpvcount.comid = bclickcount.comid;
 
-��comid���Ȥ�ɽ�����ȥ���å��������פǤ���Ȥ��⤤�ޤ���
-����������ʸ�Ǥϰ��٤�ɽ�����줺�˥���å��������줿comid���ʤ����Ȥ�
-����Ȥ��Ƥ��ޤ���
+でcomidごとの表示数とクリック数が集計できるとおもいます。
+ただしこの文では一度も表示されずにクリックだけされたcomidがないことを
+前提としています。
 
-���Ȥϥơ��֥뼫�Τι������Ѥ���
+あとはテーブル自体の構成を変えて
 
-blog(��Ͽ�ơ��֥�)
+blog(記録テーブル)
 +----------+------------------+------+-----+---------+----------------+
 <span class="quote1">| Field    | Type             | Null | Key | Default | Extra          |</span>
 +----------+------------------+------+-----+---------+----------------+
@@ -145,29 +145,29 @@ blog(��Ͽ�ơ��֥�)
 <span class="quote1">| pv       | int              | YES  |     | NULL    |                |</span>
 <span class="quote1">| click    | int              | YES  |     | NULL    |                |</span>
 +----------+------------------+------+-----+---------+----------------+
-�Ȥ����褦�ʥơ��֥�ˤ���
- ɽ�����ä��� (pv,click)��(1,Null)
- ����å����ä��� (pv,click)��(Null,1)
-�Ȥ����褦�ˤ����
+というようなテーブルにして
+ 表示だったら (pv,click)を(1,Null)
+ クリックだったら (pv,click)を(Null,1)
+というようにすると
 
 SELECT id, count(pv), count(click)
   FROM blog
   GROUP BY id;
 
-�Ȥ��ä�������ɽ���Ǥ���Ȼפ��ޤ���
+といった感じで表示できると思います。
 
 -----
-  ���� ���� &lt;takanori@xxxxxxxxxx&gt;
+  戸部 貴紀 &lt;takanori@xxxxxxxxxx&gt;
 
 <span class="quote1">&gt;</span>
 
 
 </pre>
 </div>
-<p class="button"><a href="1429.html">[��]</a><a href="1431.html">[��]</a><a href="../list/1401-1500.html">[�ֹ�����]</a><a href="../thread/1401-1500.html">[����åɰ���]</a></p>
+<p class="button"><a href="1429.html">[前]</a><a href="1431.html">[次]</a><a href="../list/1401-1500.html">[番号順一覧]</a><a href="../thread/1401-1500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="1428.html">   1428 1999-12-25 09:44 [&quot;Isamu Narimatsu&quot; &lt;i] ��������� 2 �ĤΥơ��֥뤫�黲�Ȥ�ɽ��������ˡ</a></span>
-<span class="current">-&gt;&nbsp;<a href="1430.html">   1430 1999-12-25 15:14 ��[Takanori Tobe &lt;datab]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1428.html">   1428 1999-12-25 09:44 [&quot;Isamu Narimatsu&quot; &lt;i] 該当件数を 2 つのテーブルから参照し表示する方法</a></span>
+<span class="current">-&gt;&nbsp;<a href="1430.html">   1430 1999-12-25 15:14 ┗[Takanori Tobe &lt;datab]                                       </a></span>
 </pre>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14088.html">[��]</a><a href="14090.html">[��]</a><a href="../list/14001-14100.html">[�ֹ�����]</a><a href="../thread/14001-14100.html">[����åɰ���]</a></p>
+<p class="button"><a href="14088.html">[前]</a><a href="14090.html">[次]</a><a href="../list/14001-14100.html">[番号順一覧]</a><a href="../thread/14001-14100.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14089
 </p>
@@ -13,44 +13,44 @@ mysql:14089
 <p>
 From: &quot;Yoshinori Matsunobu&quot; &lt;&quot;Yoshinori Matsunobu&quot; &lt;ymatsunobu@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 4 Jul 2007 00:45:43 +0900<br>
-Subject: [mysql 14089] Re: ��ץꥱ������󤬰�֤����٤��<br>
+Subject: [mysql 14089] Re: レプリケーションが一瞬だけ遅れる<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�����Ǥ���
+松信です。
 
-<span class="quote2">&gt; &gt; �Ȥ����ǡ�MySQL�Υ���饤��Υޥ˥奢��Ǥϡ�</span>
-<span class="quote2">&gt; &gt; �֥ޥ����ȥ��졼�֤�Ʊ��λ��פ���Ѥ��Ƥ��ʤ��Ƥ�����ʤ�����</span>
-<span class="quote2">&gt; &gt; �Ȥ���ΤǤ�����</span>
+<span class="quote2">&gt; &gt; ところで、MySQLのオンラインのマニュアルでは、</span>
+<span class="quote2">&gt; &gt; 「マスタとスレーブで同一の時計を使用していなくても問題ない。」</span>
+<span class="quote2">&gt; &gt; とあるのですが、</span>
 <span class="quote2">&gt; &gt; <a href="http://dev.mysql.com/doc/refman/4.1/ja/show-slave-status.html">http://dev.mysql.com/doc/refman/4.1/ja/show-slave-status.html</a></span>
-<span class="quote2">&gt; &gt; ����ϡ�����Τ褦�ʾ��ˤ����ƤϤޤ�ʤ��ΤǤ����͡�</span>
+<span class="quote2">&gt; &gt; これは、今回のような場合には当てはまらないのですかね？</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; 5.0.41�Υ�������Seconds_Behind_Master�򻻽Ф�����ʬ�ϰʲ��Τ褦�ˤʤäƤ�</span>
-�ޤ���
-<span class="quote1">&gt; sql/slave.cc 2520����</span>
+<span class="quote1">&gt; 5.0.41のソースでSeconds_Behind_Masterを算出する部分は以下のようになってい</span>
+ます。
+<span class="quote1">&gt; sql/slave.cc 2520行目</span>
 <span class="quote1">&gt; ---</span>
 <span class="quote1">&gt; long time_diff= ((long)((time_t)time((time_t*) 0)</span>
 <span class="quote1">&gt;                               - mi-&gt;rli.last_master_timestamp)</span>
 <span class="quote1">&gt;                        - mi-&gt;clock_diff_with_master);</span>
 <span class="quote1">&gt; ---</span>
-<span class="quote1">&gt; �礶�äФ˸����ȡ�</span>
-<span class="quote1">&gt; (���졼�֤θ��߻���)-(���ߥ��졼�֤�SQL����åɤǼ¹����SQL���ޥ�����ȯ��</span>
-���줿����)-(�ޥ����ȥ��졼�֤λ��ﺹ)
-<span class="quote1">&gt; �Ȥ������Ǥ���</span>
-<span class="quote1">&gt; �ʤΤǡ��ޥ����ȥ��졼�֤λ��ﺹ�Ϲ�θ����Ƥ���Ϥ��ʤΤǤ����ġ�</span>
+<span class="quote1">&gt; 大ざっばに言うと、</span>
+<span class="quote1">&gt; (スレーブの現在時刻)-(現在スレーブのSQLスレッドで実行中のSQLがマスタで発行</span>
+された時刻)-(マスタとスレーブの時刻差)
+<span class="quote1">&gt; という式です。</span>
+<span class="quote1">&gt; なので、マスタとスレーブの時刻差は考慮されているはずなのですが…。</span>
 
-(�ޥ����ȥ��졼�֤λ��ﺹ)�ϡ���ץꥱ�������γ��ϻ����Ǥλ��ﺹ�ˤʤ��
-�ǡ�
-���ϻ����ǤΥޥ������ȥ��졼�֤λ����Ʊ�������Ƥ��ơ�
-���Ѹ��Ĺ���в�Τ����˻��֤��礭�������С�
-����Τ褦�ʸ��ݤϤ������ޤ���
+(マスタとスレーブの時刻差)は、レプリケーションの開始時点での時刻差になるの
+で、
+開始時点でのマスターとスレーブの時刻の同期が取れていて、
+運用後の長期経過のうちに時間が大きくずれれば、
+今回のような現象はあり得ます。
 
-��̣������С�slave.cc�Ρ�
+興味があれば、slave.ccの、
 pthread_handler_t handle_slave_io(void *arg)
-�����get_master_version_and_clock(mysql, mi)�䡢
-���Τ������whileʸ�򸫤ƤߤƤ���������
+の中のget_master_version_and_clock(mysql, mi)や、
+そのすぐ後のwhile文を見てみてください。
 
 ----
 Yoshinori Matsunobu
@@ -63,16 +63,16 @@ MySQL Consulting Services:
 
 </pre>
 </div>
-<p class="button"><a href="14088.html">[��]</a><a href="14090.html">[��]</a><a href="../list/14001-14100.html">[�ֹ�����]</a><a href="../thread/14001-14100.html">[����åɰ���]</a></p>
+<p class="button"><a href="14088.html">[前]</a><a href="14090.html">[次]</a><a href="../list/14001-14100.html">[番号順一覧]</a><a href="../thread/14001-14100.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14084.html">  14084 2007-07-02 21:15 [&quot;���ܷ���&quot; &lt;kem@xxxx] ��ץꥱ������󤬰�֤����٤��        </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14085.html">  14085 2007-07-03 16:46 ��[&quot;Katsuyuki Sakai&quot; &lt;s]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14086.html">  14086 2007-07-03 21:08 ����[&quot;���ܷ���&quot; &lt;kem@xxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14087.html">  14087 2007-07-03 22:07 ������[&quot;Katsuyuki Sakai&quot; &lt;s]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14088.html">  14088 2007-07-03 22:45 ��������[&lt;kenrouse@xxxxxxxxxx]                                 </a></span>
-<span class="current">-&gt;&nbsp;<a href="14089.html">  14089 2007-07-04 00:45 ��������[&quot;Yoshinori Matsunobu]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14090.html">  14090 2007-07-04 01:51 ����������[&quot;Katsuyuki Sakai&quot; &lt;s]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14096.html">  14096 2007-07-05 00:45 ������������[&quot;���ܷ���&quot; &lt;kem@xxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14084.html">  14084 2007-07-02 21:15 [&quot;橋本健太&quot; &lt;kem@xxxx] レプリケーションが一瞬だけ遅れる        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14085.html">  14085 2007-07-03 16:46 ┗[&quot;Katsuyuki Sakai&quot; &lt;s]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14086.html">  14086 2007-07-03 21:08 　┗[&quot;橋本健太&quot; &lt;kem@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14087.html">  14087 2007-07-03 22:07 　　┗[&quot;Katsuyuki Sakai&quot; &lt;s]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14088.html">  14088 2007-07-03 22:45 　　　┣[&lt;kenrouse@xxxxxxxxxx]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="14089.html">  14089 2007-07-04 00:45 　　　┗[&quot;Yoshinori Matsunobu]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14090.html">  14090 2007-07-04 01:51 　　　　┗[&quot;Katsuyuki Sakai&quot; &lt;s]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14096.html">  14096 2007-07-05 00:45 　　　　　┗[&quot;橋本健太&quot; &lt;kem@xxxx]                             </a></span>
 </pre>
 </body>
 </html>

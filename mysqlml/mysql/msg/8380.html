@@ -5,63 +5,63 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="8379.html">[��]</a><a href="8381.html">[��]</a><a href="../list/8301-8400.html">[�ֹ�����]</a><a href="../thread/8301-8400.html">[����åɰ���]</a></p>
+<p class="button"><a href="8379.html">[前]</a><a href="8381.html">[次]</a><a href="../list/8301-8400.html">[番号順一覧]</a><a href="../thread/8301-8400.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:8380
 </p>
 <div class="header">
 <p>
-From: �Ȥߤ��ޤ��Ҥ� &lt;�Ȥߤ��ޤ��Ҥ� &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+From: とみたまさひろ &lt;とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 7 Nov 2003 00:05:55 +0900<br>
-Subject: [mysql 08380] Re: ��ץꥱ�������������������å�<br>
+Subject: [mysql 08380] Re: レプリケーションの整合性チェック<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�Ȥߤ��Ǥ���
+とみたです。
 
 On Thu, 06 Nov 2003 02:05:56 +0900
 &quot;HIROSE, Masaaki&quot; &lt;hirose31@xxxxxxxxxx&gt; wrote:
 
-<span class="quote3">&gt; &gt; &gt;���Τ褦�ʥ����å��Υ�����ץȤ�񤤤����Ȥ�����ޤ���</span>
-<span class="quote3">&gt; &gt; &gt;1. log_file �� log_pos ���ͤ��ޥ����ȥ��졼�֤ǰ��פ��Ƥ���� �ϣ�</span>
-<span class="quote3">&gt; &gt; &gt;2. �Ǥʤ���С������Ԥä� log_pos ����������Ƥ���� �ϣ�</span>
-<span class="quote3">&gt; &gt; &gt;3. �Ǥʤ���С��Σ�</span>
+<span class="quote3">&gt; &gt; &gt;次のようなロジックのスクリプトを書いたことがあります。</span>
+<span class="quote3">&gt; &gt; &gt;1. log_file と log_pos の値がマスタとスレーブで一致していれば ＯＫ</span>
+<span class="quote3">&gt; &gt; &gt;2. でなければ、数秒待って log_pos が更新されていれば ＯＫ</span>
+<span class="quote3">&gt; &gt; &gt;3. でなければ、ＮＧ</span>
 
-<span class="quote2">&gt; &gt; ����ϡ��ޥ��������ФΥХ��ʥ�����Ǥ�����㤨�С�server-bin.001</span>
-<span class="quote2">&gt; &gt; �ե�����ΥХ��ȿ��� log_pos �������ͤ����פ��Ƥ���С���</span>
-<span class="quote2">&gt; &gt; �������ȤǤ��͡��Ȥꤢ���������Τ褦�ʥ����å����Ȥळ�Ȥ�</span>
-<span class="quote2">&gt; &gt; ���ޤ�����</span>
+<span class="quote2">&gt; &gt; これは、マスタサーバのバイナリログである（例えば）server-bin.001</span>
+<span class="quote2">&gt; &gt; ファイルのバイト数と log_pos カラムの値が一致していれば、と</span>
+<span class="quote2">&gt; &gt; いうことですね。とりあえず、次のようなロジックを組むことに</span>
+<span class="quote2">&gt; &gt; しました。</span>
 
-<span class="quote1">&gt; �ޥ������Ǥ� show master status �� ��File�פ�</span>
-<span class="quote1">&gt; ���졼�֤Ǥ� show slavestatus �Ρ�Master_Log_File�פ��ͤ���������</span>
-<span class="quote1">&gt; ���ġ�</span>
-<span class="quote1">&gt; �ޥ������Ǥ� show master status �� ��Position�פ�</span>
-<span class="quote1">&gt; ���졼�֤Ǥ� show slavestatus �Ρ�Exec_master_log_pos�פ��ͤ�������</span>
-<span class="quote1">&gt; �Ȥ������ȤʤΤǤϤʤ��Ǥ��礦��?</span>
+<span class="quote1">&gt; マスターでの show master status の 「File」と</span>
+<span class="quote1">&gt; スレーブでの show slavestatus の「Master_Log_File」の値が等しく、</span>
+<span class="quote1">&gt; かつ、</span>
+<span class="quote1">&gt; マスターでの show master status の 「Position」と</span>
+<span class="quote1">&gt; スレーブでの show slavestatus の「Exec_master_log_pos」の値が等しい</span>
+<span class="quote1">&gt; ということなのではないでしょうか?</span>
 
-�����Ǥ���
+そうです。
 
-�ޥ����� Position �ȥ��졼�֤� Exec_master_log_pos �����פ��ʤ�����
-�⡢�ֿ����Ԥä� log_pos �������פ���Ƥ������ϡ����ˤ˹��������ä�
-�ޥ����ȥ��졼�ִ֤��ͤ�����Ƥ����������������ϣˤȹͤ��ޤ�����
+マスタの Position とスレーブの Exec_master_log_pos が一致しない場合で
+も、「数秒待って log_pos が更新」されていた場合は、頻繁に更新があって
+マスタとスレーブ間の値がずれているだけだろうからＯＫと考えました。
 
 -- 
-�Ȥߤ��ޤ��Ҥ� &lt;tommy@xxxxxxxxxx&gt;
-����MySQL�桼���� <a href="../../../index.html">http://www.mysql.gr.jp</a>
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;
+日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a>
 
 </pre>
 </div>
-<p class="button"><a href="8379.html">[��]</a><a href="8381.html">[��]</a><a href="../list/8301-8400.html">[�ֹ�����]</a><a href="../thread/8301-8400.html">[����åɰ���]</a></p>
+<p class="button"><a href="8379.html">[前]</a><a href="8381.html">[次]</a><a href="../list/8301-8400.html">[番号順一覧]</a><a href="../thread/8301-8400.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="8341.html">   8341 2003-10-30 16:42 [Okamoto RYO &lt;ryo@xxx] ��ץꥱ�������������������å�        </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8359.html">   8359 2003-11-03 18:08 ��[&quot;HIROSE, Masaaki&quot; &lt;h]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8360.html">   8360 2003-11-03 18:37 ����[Okamoto RYO &lt;ryo@xxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8361.html">   8361 2003-11-03 21:52 ����[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8375.html">   8375 2003-11-05 01:18 ������[Okamoto RYO &lt;ryo@xxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8379.html">   8379 2003-11-06 02:05 ��������[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
-<span class="current">-&gt;&nbsp;<a href="8380.html">   8380 2003-11-07 00:05 ����������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8341.html">   8341 2003-10-30 16:42 [Okamoto RYO &lt;ryo@xxx] レプリケーションの整合性チェック        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8359.html">   8359 2003-11-03 18:08 ┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8360.html">   8360 2003-11-03 18:37 　┣[Okamoto RYO &lt;ryo@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8361.html">   8361 2003-11-03 21:52 　┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8375.html">   8375 2003-11-05 01:18 　　┗[Okamoto RYO &lt;ryo@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8379.html">   8379 2003-11-06 02:05 　　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="8380.html">   8380 2003-11-07 00:05 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
 </pre>
 </body>
 </html>

@@ -1,11 +1,11 @@
-<div dir="ltr">yoku����<div><br></div><div>�����Ǥ���</div><div>��˻�����桢����Ŧ������URL�ʤ������ˤ��꤬�Ȥ��������ޤ���</div><div><br></div><div><span style="font-family:arial,sans-serif;font-size:13.63636302947998px">mysql&gt; SHOW ENGINE INNODB STATUS\G</span><br>
-</div><div><span style="font-family:arial,sans-serif;font-size:13.63636302947998px">��load data��˼¹Ԥ��ơ��ߤƤߤ�Ȥ������ȤǤ���͡�</span></div><div><font face="arial, sans-serif">��äƤߤޤ���<br><br>O_DIRECT�⸫ƨ���Ƥ��ޤ�����</font></div><div><font face="arial, sans-serif">������äƤߤޤ���O_DIRECT�ˤĤ��ƻ������ɤ���Ȥ��������Ⱦʬ��bufferpool��</font></div>
-<div><font face="arial, sans-serif">������ƤƤ���Τ�ͭ���ʤ��󤸤����ޤ���<br><br>�ִ��Υ���ԥ塼��ƻ�פϤ��礯���礯�ɤ�Ǥ��ޤ�����</font></div><div><font face="arial, sans-serif">���Υڡ����ϸ��Ƥ��ʤ��ơ��ɤ���Ȥ�����ƨ���Ƥ������������Ĥ�����ޤ���</font></div><div><font face="arial, sans-serif"><br>
-�ܺ����ʤ��ʤäƤ����Ȥ����ʤΤ����Ѥ��꤬�����Ǥ���</font></div><div><font face="arial, sans-serif">���꤬�Ȥ��������ޤ���</font></div></div><div class="gmail_extra"><br><br><div class="gmail_quote">2013ǯ7��31�� 20:18 yoku ts. <span dir="ltr">&lt;<a href="mailto:yoku0825@gmail.com" target="_blank">yoku0825@gmail.com</a>&gt;</span>:<br>
-<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">�������󡢤���Ф�ϡ�<br>
+<div dir="ltr">yokuさん<div><br></div><div>広江です。</div><div>お忙しい中、ご指摘、参考URLなど本当にありがとうございます。</div><div><br></div><div><span style="font-family:arial,sans-serif;font-size:13.63636302947998px">mysql&gt; SHOW ENGINE INNODB STATUS\G</span><br>
+</div><div><span style="font-family:arial,sans-serif;font-size:13.63636302947998px">はload data中に実行して、みてみるということですよね？</span></div><div><font face="arial, sans-serif">やってみます。<br><br>O_DIRECTも見逃していました。</font></div><div><font face="arial, sans-serif">これもやってみます。O_DIRECTについて資料を読んだところメモリの半分はbufferpoolに</font></div>
+<div><font face="arial, sans-serif">割り当てているので有効なかんじがします。<br><br>「漢のコンピュータ道」はちょくちょく読んでいましたが</font></div><div><font face="arial, sans-serif">このページは見ていなくて、読んだところ見逃していた点がいくつかあります。</font></div><div><font face="arial, sans-serif"><br>
+施策がなくなっていたところなので大変ありがたいです。</font></div><div><font face="arial, sans-serif">ありがとうございます。</font></div></div><div class="gmail_extra"><br><br><div class="gmail_quote">2013年7月31日 20:18 yoku ts. <span dir="ltr">&lt;<a href="mailto:yoku0825@gmail.com" target="_blank">yoku0825@gmail.com</a>&gt;</span>:<br>
+<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">広江さん、こんばんは。<br>
 <br>
-�빽���������Ƥ���ΤǤ��͡���<br>
-InnoDB�����ϰ�����������Ƥ��ޤ��󤫡�<br>
+結構食いきられているのですね。。<br>
+InnoDBログは引き剥がされていませんか？<br>
 <br>
 mysql&gt; SHOW ENGINE INNODB STATUS\G<br>
 ..<br>
@@ -17,54 +17,54 @@ Log flushed up to &nbsp; 10965497616<br>
 Last checkpoint at &nbsp;10965497616<br>
 ..<br>
 <br>
-(Log sequence number) - (Last checkpoint at)��3GiB�˶��դ��Ƥ���褦���ȡ�<br>
-�����å��ݥ���Ȥ��������ߤޤäƤ��뤫���Τ�ޤ���<br>
-(���ߤι������������Ǥϡ������ͤ�3GiB����ã����ȹ���ư����ƥ֥��å�����ޤ�)<br>
+(Log sequence number) - (Last checkpoint at)が3GiBに近付いているようだと、<br>
+チェックポイントで世界が止まっているかも知れません<br>
+(現在の広江さんの設定では、この値が3GiBに到達すると更新動作が全てブロックされます)<br>
 <br>
-�ä���innodb_flush_method= O_DIRECT�Ȥ���ȡ��ե����륷���ƥ�ǥ��֥륭��å��夵��ʤ��ʤ���꤬ͭ���˻Ȥ��뤫���Τ�ޤ���<br>
+加えてinnodb_flush_method= O_DIRECTとすると、ファイルシステムでダブルキャッシュされなくなりメモリが有効に使えるかも知れません。<br>
 <br>
-¾�ˤ�����ɻ��֤�û�̤��뤿��Υ��ץ��������󤬾ܤ������⤵��Ƥ��ޤ��Τǡ������ͤޤǤˡ�<br>
+他にもロード時間を短縮するためのオプションを奥野さんが詳しく解説されていますので、ご参考までに。<br>
 <a href="http://nippondanji.blogspot.jp/2010/03/innodb.html" target="_blank">http://nippondanji.blogspot.jp/2010/03/innodb.html</a><br>
 <br>
 <br>
 yoku ts.<br>
 <br>
-2013ǯ7��31�� 16:52 ayako hiroe &lt;<a href="mailto:roeaya03@gmail.com">roeaya03@gmail.com</a>&gt;:<br>
-<div class="HOEnZb"><div class="h5">&gt; yoku�����������<br>
-&gt; ���ֿ����꤬�Ȥ��������ޤ���<br>
-&gt; �����Ǥ���<br>
+2013年7月31日 16:52 ayako hiroe &lt;<a href="mailto:roeaya03@gmail.com">roeaya03@gmail.com</a>&gt;:<br>
+<div class="HOEnZb"><div class="h5">&gt; yokuさん　大垣さん<br>
+&gt; ご返信ありがとうございます。<br>
+&gt; 広江です。<br>
 &gt;<br>
-&gt; �����32GB�Ѥ�Ǥ��ơ��Хå�ư�������ϻ��ѥ��꤬18GB���餤�ʤΤ�<br>
-&gt; �Хå��¹Ը売���֤ۤɤ�32GB�ե�ܥ���å�100MB�ۤɻȤäƤ���褦�Ǥ���<br>
+&gt; メモリは32GB積んでいて、バッチ動かす前は使用メモリが18GBぐらいなのが<br>
+&gt; バッチ実行後２時間ほどで32GBフル＋スワップ100MBほど使っているようです。<br>
 &gt;<br>
-&gt; Linux�ξ�硢����å�ȯ���������ȻפäƤ��ޤ�����ǧ�����ְ�äƤ���ΤǤ��礦����<br>
-&gt; ����innotop�򥤥󥹥ȡ��뤷�ƾ���򽸤�褦�ȡ�������Ĵ�٤Ƥ���Ȥ����Ǥ���<br>
+&gt; Linuxの場合、スワップ発生は当然と思っていましたが認識が間違っているのでしょうか。<br>
+&gt; 現在innotopをインストールして情報を集めようと、見方を調べているところです。<br>
 &gt;<br>
-&gt; yoku����<br>
-&gt; �ʤ�ۤɤǤ���<br>
-&gt; innodb_buffer_pool_size ��19G-&gt;16G�˲���<br>
-&gt; innodb_log_buffer_size ��8M-&gt;64M�ˤ����Ƥ�äƤߤ褦�Ȼפ��ޤ���<br>
-&gt;<br>
-&gt;<br>
-&gt; �������<br>
-&gt; ��mysql��ǥХå��ӥ�ɡפȤ����ΤϤ⤷��C������μ���ɬ�פǤ��礦����<br>
-&gt; �ٶ���­�Ǥ��Ϥ��������¤�Ǥ�����<br>
-&gt; �ץ�������ps -ef�Ǥߤ��<br>
-&gt; mysqld &lt;defunct&gt;�ˤʤäƤ���kill���Ƥ⥹�롼���쥾��ӤǤ�����<br>
+&gt; yokuさん<br>
+&gt; なるほどです、<br>
+&gt; innodb_buffer_pool_size は19G-&gt;16Gに下げ<br>
+&gt; innodb_log_buffer_size を8M-&gt;64Mにあげてやってみようと思います。<br>
 &gt;<br>
 &gt;<br>
+&gt; 大垣さん<br>
+&gt; 「mysqlをデバッグビルド」というのはもしやC言語の知識が必要でしょうか？<br>
+&gt; 勉強不足でおはずかしい限りですが。<br>
+&gt; プロセスをps -efでみると<br>
+&gt; mysqld &lt;defunct&gt;になっていてkillしてもスルーされゾンビでした。<br>
 &gt;<br>
 &gt;<br>
 &gt;<br>
 &gt;<br>
 &gt;<br>
-&gt; 2013ǯ7��31�� 15:45 Yasuo Ohgaki &lt;<a href="mailto:yohgaki@ohgaki.net">yohgaki@ohgaki.net</a>&gt;:<br>
 &gt;<br>
-&gt;&gt; ����Ǥ���<br>
+&gt;<br>
+&gt; 2013年7月31日 15:45 Yasuo Ohgaki &lt;<a href="mailto:yohgaki@ohgaki.net">yohgaki@ohgaki.net</a>&gt;:<br>
+&gt;<br>
+&gt;&gt; 大垣です。<br>
 &gt;&gt;<br>
-&gt;&gt; ¾��������Ŧ����Ƥ���褦�˥��꤬­��ʤ��Τ����Τ�ޤ��󤬡�<br>
-&gt;&gt; �����˥ϥ󥰤��Ƥ���ʤ�mysql��ǥХå��ӥ�ɤ���gdb�ǥ����å�<br>
-&gt;&gt; ����Ĵ�٤�ȸ�����ʬ����Ȼפ��ޤ���<br>
+&gt;&gt; 他の方が指摘されているようにメモリが足りないのかも知れませんが、<br>
+&gt;&gt; 本当にハングしているならmysqlをデバッグビルドしてgdbでアタッチ<br>
+&gt;&gt; して調べると原因が分かると思います。<br>
 &gt;&gt;<br>
 &gt;&gt; --<br>
 &gt;&gt; Yasuo Ohgaki<br>
@@ -73,40 +73,40 @@ yoku ts.<br>
 &gt;&gt;<br>
 &gt;&gt; 2013/7/30 ayako hiroe &lt;<a href="mailto:roeaya03@gmail.com">roeaya03@gmail.com</a>&gt;<br>
 &gt;&gt;&gt;<br>
-&gt;&gt;&gt; �����äˤʤ�ޤ���<br>
-&gt;&gt;&gt; �����̻Ҥȿ����ޤ���<br>
+&gt;&gt;&gt; お世話になります。<br>
+&gt;&gt;&gt; 広江彩子と申します。<br>
 &gt;&gt;&gt;<br>
-&gt;&gt;&gt; �����С��ܹԤΤ��������Υ쥹�ȥ��ƥ��Ȥ򤷤Ƥ���ޤ���<br>
-&gt;&gt;&gt; ���������鷺�Ĥ�tab���ڤ�ץ쥤��ƥ����ȤΥ���פ�<br>
-&gt;&gt;&gt; �Хå��ǲ��٤�load infe�򷫤꤫�����Ƥ��뤦��mysqld�������ϥ󥰤��ޤ���<br>
+&gt;&gt;&gt; サーバー移行のため数億件のレストアテストをしております。<br>
+&gt;&gt;&gt; ３００万件ずつのtab区切りプレインテキストのダンプを<br>
+&gt;&gt;&gt; バッチで何度もload infeを繰りかえしているうちmysqldが突然ハングします。<br>
 &gt;&gt;&gt;<br>
-&gt;&gt;&gt; �ϥ󥰤ζ���Ū�ʸ��ݤ�<br>
-&gt;&gt;&gt; ��load���CPU����Ψ���餹����������줬������<br>
-&gt;&gt;&gt; ��mysql��Ϣ�Υ��ޥ�ɤ����٤ƥϥ󥰡�kill���뤷���ʤ���<br>
-&gt;&gt;&gt; ��mysqladmin shutdown��ϥ�<br>
-&gt;&gt;&gt; ��mysqld�Υ�����ץȤ�¹Ԥ��Ƥ�ϥ�<br>
+&gt;&gt;&gt; ハングの具体的な現象は<br>
+&gt;&gt;&gt; ・load中のCPU使用率からすると突然それが下がる<br>
+&gt;&gt;&gt; ・mysql関連のコマンドがすべてハング（killするしかない）<br>
+&gt;&gt;&gt; ・mysqladmin shutdownもハング<br>
+&gt;&gt;&gt; ・mysqldのスクリプトを実行してもハング<br>
 &gt;&gt;&gt;<br>
-&gt;&gt;&gt; �嵭�Τ褦�ʾ��֤ˤʤ�ȷ��killall�ʤɤ��뤷������ޤ���<br>
-&gt;&gt;&gt; ���顼�����ϥϥ󥰤λ����Ǥϲ����Ǥ��Ƥ��ޤ���<br>
-&gt;&gt;&gt; killall��mysqld�Υץ���������ߤ���Τǡ������ƥ���֡��Ȥ���mysqld start����Ȥ���<br>
-&gt;&gt;&gt; �ꥫ�Хꡦ������Хå��ץ����������󤬤�����Τ򥨥顼�������Ǥ��Ƥ���褦�ˤʤ�ޤ���<br>
+&gt;&gt;&gt; 上記のような状態になると結局killallなどするしかありません。<br>
+&gt;&gt;&gt; エラーログはハングの時点では何も吐いていません。<br>
+&gt;&gt;&gt; killallでmysqldのプロセスを停止するので、システムをリブートしてmysqld startするときに<br>
+&gt;&gt;&gt; リカバリ・ロールバックプロセスががんがん走るのをエラーログが吐いているようになります。<br>
 &gt;&gt;&gt;<br>
-&gt;&gt;&gt; �Хå���ޤ路�Ϥ��Ȥ��������ѥ��꤬���������Ф餯����ȥ���åפ�ȯ�����ޤ���<br>
-&gt;&gt;&gt; ���줬��������狼��ޤ���<br>
-&gt;&gt;&gt; innodb���ѤǤ���<br>
+&gt;&gt;&gt; バッチをまわし始めるとだんだん使用メモリが増え、しばらくするとスワップが発生します。<br>
+&gt;&gt;&gt; それが原因かもわかりません。<br>
+&gt;&gt;&gt; innodb使用です。<br>
 &gt;&gt;&gt;<br>
-&gt;&gt;&gt; ���������Ť������������ޤ�����<br>
-&gt;&gt;&gt; ���������������ޤ��ȹ����Ǥ���<br>
+&gt;&gt;&gt; 何かお気づきの方がおられましたら<br>
+&gt;&gt;&gt; ご教授いただけますと幸いです。<br>
 &gt;&gt;&gt;<br>
 &gt;&gt;&gt;<br>
 &gt;&gt;&gt;<br>
 &gt;&gt;&gt; OS:<br>
 &gt;&gt;&gt; Linux CentOS release6.4<br>
 &gt;&gt;&gt;<br>
-&gt;&gt;&gt; MySQL��<br>
+&gt;&gt;&gt; MySQL：<br>
 &gt;&gt;&gt; MySQL 5.5.32 Remi<br>
 &gt;&gt;&gt;<br>
-&gt;&gt;&gt; �������롧<br>
+&gt;&gt;&gt; ロケール：<br>
 &gt;&gt;&gt; utf8<br>
 &gt;&gt;&gt;<br>
 &gt;&gt;&gt; my.cnf<br>

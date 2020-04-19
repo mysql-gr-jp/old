@@ -35,12 +35,12 @@ normal case.
 
 </P>
 <P>
-�С������ 3.23.15 ���顢<STRONG>MySQL</STRONG> �ϥ�󥦥�������ץꥱ��������
-���ݡ��Ȥ��ޤ����� 
-1�ĤΥ����С����ޥ����������ĤȤᡤ�⤦�����ϡ����졼�֤����ĤȤ�ޤ���
-1�ĤΥ����С��ϥޥ������Ȥ���ư�����Ȥ⡢¾���Ф��륹�졼�֤Ȥ���ư��뤳�Ȥ��ǽ�Ǥ���
-�ޥ����������С��� update �ΥХ��ʥ�������ݻ����Ƥ��ޤ�( ��<A HREF="manual.ja_Log_files.html#Binary_log">23.4  The Binary Log</A>���Ỳ��.)��
-�ޤ�������ǥå����ե�����ϡ��Х��ʥ�����Υ����ơ��������ڤ�Ф���Ͽ��Ĥ�������ݻ�����ޤ���
+バージョン 3.23.15 から、<STRONG>MySQL</STRONG> はワンウェイ・レプリケーションを
+サポートしました。 
+1つのサーバーがマスターの役をつとめ，もう一方は、スレーブの役をつとめます。
+1つのサーバーはマスターとして動くことも、他に対するスレーブとして動作することも可能です。
+マスターサーバーは update のバイナリログを保持しています( 「<A HREF="manual.ja_Log_files.html#Binary_log">23.4  The Binary Log</A>」節参照.)。
+また、インデックスファイルは、バイナリログのローテーションの切り出し記録を残すために保持されます。
 The slave, upon connecting, informs the master where it
 left off since the last successfully propagated update, catches up on
 the updates, and then blocks and waits for the master to notify it of
@@ -48,19 +48,19 @@ the new updates.
 
 </P>
 <P>
-�⤷�ǡ����١�����ʣ����Ԥʤ��ʤ顢���Υǡ����١������Ф������Ƥι�����
-�ޥ�������ǹԤʤ�ʤ��ƤϤʤ�ʤ����Ȥ����ա�
+もしデータベースの複製を行なうなら、このデータベースに対する全ての更新は
+マスター上で行なわなくてはならないことに注意！
 
 </P>
 <P>
-�Ť��С������Ǥϡ�ñ���ʣ���� ���������ե��������Ѥ��ޤ���
- ��<A HREF="manual.ja_Common_problems.html#Log_Replication">22.1  ������������Ѥ����ǡ����١�����ʣ��</A>���Ỳ��.
+古いバージョンでは、単純な複製に 更新ログファイルを使用します。
+ 「<A HREF="manual.ja_Common_problems.html#Log_Replication">22.1  更新ログを使用したデータベースの複製</A>」節参照.
 
 </P>
 <P>
 Another benefit of using replication is that one can get live backups of
 the system by doing a backup on a slave instead of doing it on the
-master.  ��<A HREF="manual.ja_Common_problems.html#Backup">22.2  �ǡ����١����ΥХå����å�</A>���Ỳ��.
+master.  「<A HREF="manual.ja_Common_problems.html#Backup">22.2  データベースのバックアップ</A>」節参照.
 
 </P>
 <P>
@@ -70,37 +70,37 @@ master.  ��<A HREF="manual.ja_Common_problems.html#Backup">22.2  �ǡ����١����Υ
 <H2><A NAME="Replication_Implementation" HREF="manual.ja_toc.html#Replication_Implementation">11.2  Replication Implementation Overview</A></H2>
 
 <P>
-<STRONG>MySQL</STRONG> �Υ�ץꥱ�������ϡ��ǡ����١��������Ƥ��ѹ�(update, delete, etc)��
-�����С��ǤΥХ��ʥ�������ݻ��������졼�֥����С��ϥޥ����������С���
-�Х��ʥ����������¸����Ƥ��륯������ɤߤ������ǡ����Υ��ԡ��Τ����
-Ʊ���������¹Ԥ��ޤ���
+<STRONG>MySQL</STRONG> のレプリケーションは、データベースの全ての変更(update, delete, etc)を
+サーバーでのバイナリログに保持し、スレーブサーバーはマスターサーバーの
+バイナリログから保存されているクエリを読みだし、データのコピーのために
+同じクエリを実行します。
 
 </P>
 <P>
 It is <STRONG>very important</STRONG> to realize that the binary log is simply a
 record starting from a fixed point in time (the moment you enable binary
 logging).
-�ޥ�������ǥХ��ʥ������ͭ���ˤ������λ��ˡ�
-�����ʤ륹�졼�֥����С���ޥ�������������ƤΥǡ����Υ��ԡ���ɬ�פǤ���
-���졼�֤Υǡ������ޥ�������¸�ߤ���ǡ����Ȱ㤦���֤ǥ��졼�֤�ư�����ʤ�С�
-<STRONG>�Х��ʥ���������Ϥ��줿�Ȥ���</STRONG>�����졼�֤ϼ��Ԥ���Ǥ��礦��
+マスター上でバイナリログを有効にしたその時に、
+いかなるスレーブサーバーもマスターからの全てのデータのコピーが必要です。
+スレーブのデータがマスターに存在するデータと違う状態でスレーブを起動したならば、
+<STRONG>バイナリログが開始されたときに</STRONG>、スレーブは失敗するでしょう。
 
 </P>
 <P>
-<STRONG>MySQL</STRONG> �ξ���ΥС������(4.0)�Ǥϡ����������졼�֥����С��Τ���ˡ�
-(�Ǥ���¤ꡢ)�ǡ����Υ��ʥåץ���åȤ����פˤ���Ĥ��Ǥ��ޤ���
-���å��򤷤ʤ��Ƥ� live backyup ���̤��ƥ��졼�֤򥻥åȥ��åפǤ���褦�ˡ�
-�������������Ǥϡ����ʥåץ���åȤ���֤ϡ��ޥ�������
-read lock ��Ȥä����Ƥν񤭹��ߤ����ݸ���ꡢ
-����åȥ����󤷤��ꤹ��ɬ�פ�����ޤ���
+<STRONG>MySQL</STRONG> の将来のバージョン(4.0)では、新しいスレーブサーバーのために、
+(できる限り、)データのスナップショットを不要にするつもりでいます。
+ロックをしなくても live backyup を通してスレーブをセットアップできるように。
+しかし現時点では、スナップショットを取る間は、マスターを
+read lock を使って全ての書き込みから保護したり、
+シャットダウンしたりする必要があります。
 
 </P>
 <P>
-��ö���졼�֤�Ŭ�ڤ˹������졢�¹Ԥ��Ƥ���С����졼�֤�ñ�˥ޥ���������³���ơ�
-���������������Τ��ԤĤǤ��礦��
-�⤷�ޥ��������ʤ��ʤä��ꡢ�ޤ��ϡ����졼�֤��ޥ������Ȥ���³���򼺤��С�
-���졼�֤Ϻ���³�Ǥ���ޤ� <CODE>master-connect-retry</CODE> �������³���ߡ�
-�����ơ������δƻ��Ƴ����ޤ���
+一旦スレーブが適切に構成され、実行していれば、スレーブは単にマスターに接続して、
+更新が処理されるのを待つでしょう。
+もしマスターがなくなったり、または、スレーブがマスターとの接続性を失えば、
+スレーブは再接続できるまで <CODE>master-connect-retry</CODE> 秒毎に接続を試み、
+そして、更新の監視を再開します。
 
 </P>
 <P>
@@ -129,23 +129,23 @@ below.
 <OL>
 <LI>
 
-�ޥ������ȥ��졼�֤ˡ��ǿ��� <STRONG>MySQL</STRONG> (Ʊ���С������) �򥤥󥹥ȡ��뤷�ޤ���
+マスターとスレーブに、最新の <STRONG>MySQL</STRONG> (同じバージョン) をインストールします。
 
-�С������ 3.23.29 �ʾ����Ѥ��뤳�ȡ�
-���������ΥС������Ǥϡ��Х��ʥ�����Υե����ޥåȤ��㤤���ޤ���������
-�С�������ľ�äƤ���Х���ޤޤ�ޤ���
-�ǿ��ΥС������ǳΤ����ޤǤϡ��Х���ݡ��Ȥ�����ʤ��Ǥ���������
+バージョン 3.23.29 以上を使用すること。
+これより前のバージョンでは、バイナリログのフォーマットが違い、また、新しい
+バージョンで直っているバグも含まれます。
+最新のバージョンで確かめるまでは、バグレポートを送らないでください。
 
 <LI>
 
-�ޥ�������ˡ���ץꥱ��������Ѥ����̤ʥ桼��������Ͽ���ޤ���
-���Υ桼�����ˤ� <CODE>FILE</CODE> ���¤�ɬ�פǤ������ƤΥ��졼�֤��餳�Υ桼������
-��³�Ǥ���褦�ˤ��ޤ���
-�⤷�桼��������ץꥱ�������Τ�(�侩)��Ԥʤ��ʤ顢
-¾�θ��¤�Ϳ����ɬ�פ�ͭ��ޤ���
+マスター上に、レプリケーション用の特別なユーザーを登録します。
+このユーザーには <CODE>FILE</CODE> 権限が必要です。全てのスレーブからこのユーザーで
+接続できるようにします。
+もしユーザーがレプリケーションのみ(推奨)を行なうなら、
+他の権限は与える必要は有りません。
 
-�㤨�С�<CODE>repl</CODE> �Ȥ���̾���Υ桼����(�ޥ������˥���������ǽ�ʥ桼����)��
-��������ˤϡ����Τ褦�ˤ��ޤ���
+例えば、<CODE>repl</CODE> という名前のユーザー(マスターにアクセス可能なユーザー)を
+作成するには、次のようにします：
 
 
 <PRE>
@@ -154,7 +154,7 @@ GRANT FILE ON *.* TO repl@"%" IDENTIFIED BY '&#60;password&#62;';
 
 <LI>
 
-�ޥ�������� <STRONG>MySQL</STRONG> ����ߡ�
+マスター上の <STRONG>MySQL</STRONG> を停止。
 
 
 <PRE>
@@ -163,10 +163,10 @@ mysqladmin -u root -p&#60;password&#62; shutdown
 
 <LI>
 
-�ޥ����������С��ˤ������ƤΥǡ����Υ��ʥåץ���åȤ��롣
+マスターサーバーにある全てのデータのスナップショットを取る。
 
-(Unix�Ǥ�) ��äȤ��ñ����ˡ�� <STRONG>tar</STRONG> ����Ѥ��ƥǡ����ǥ��쥯�ȥ��
-���������֤�������뤳�ȤǤ���
+(Unixでは) もっとも簡単な方法は <STRONG>tar</STRONG> を使用してデータディレクトリの
+アーカーブを作成することです。
 The exact data
 directory location depends on your installation.
 
@@ -180,9 +180,9 @@ the data directory.
 
 <LI>
 
-�ޥ������� <CODE>my.cnf</CODE> �ե�������� <CODE>[mysqld]</CODE> ���������ˡ�
-<CODE>log-bin</CODE> �� <CODE>server-id=unique number</CODE> ��ä��ޤ���
-�����ǻ��ꤹ��ޥ������� id �ֹ�ȥ��졼�֤� id �ֹ�ϰ㤦��ΤǤʤ��ƤϤʤ�ޤ���
+マスターの <CODE>my.cnf</CODE> ファイル中の <CODE>[mysqld]</CODE> セクションに、
+<CODE>log-bin</CODE> と <CODE>server-id=unique number</CODE> を加えます。
+ここで指定するマスターの id 番号とスレーブの id 番号は違うものでなくてはなりません。
 Think of <CODE>server-id</CODE> as something similar
 to the IP address - it uniquely identifies the server instance in the
 community of replication partners.
@@ -200,7 +200,7 @@ Restart <STRONG>MySQL</STRONG> on the master.
 
 <LI>
 
-���졼�֤� <CODE>my.cnf</CODE> �ե�����ˡ������ɲä��ޤ���
+スレーブの <CODE>my.cnf</CODE> ファイルに、次を追加します：
 
 
 <PRE>
@@ -213,35 +213,35 @@ server-id=&#60;some unique number between 2 and 2^32-1&#62;
 
 replacing the values in &#60;&#62; with what is relevant to your system.
 
-<CODE>server-id</CODE> �ˤϡ������С����줾��ǰ㤦�ֹ�ˤ��ʤ��ƤϤʤ�ޤ���
-(Ʊ��ʣ���Υ��롼�����)��
-�⤷ server-id ����ꤷ�ʤ���С� <CODE>master-host</CODE> ��̵�����ˤ� 1 ��
-�ʤꡢ����ʳ��ξ��ˤ� 2 �˼�ưŪ�ˤʤ�ޤ���
-�ޥ������� <CODE>server-id</CODE> �ε���ϳ�줬���ä���硢
-�ޥ������ϥ��졼�֤������³����ݤ��ޤ���
-���졼�־�Ǥε���ϳ��ξ��ˤϡ����졼�֤ϥޥ������ؤ���³����ݤ��ޤ���
+<CODE>server-id</CODE> には、サーバーそれぞれで違う番号にしなくてはなりません。
+(同じ複製のグループ内で)。
+もし server-id を指定しなければ、 <CODE>master-host</CODE> が無い場合には 1 に
+なり、それ以外の場合には 2 に自動的になります。
+マスターで <CODE>server-id</CODE> の記入漏れがあった場合、
+マスターはスレーブからの接続を拒否します。
+スレーブ上での記入漏れの場合には、スレーブはマスターへの接続を拒否します。
 Thus, omitting <CODE>server-id</CODE> is only good for backup with a
 binary log.
 
 <LI>
 
-���졼�֤Υǡ����ǥ��쥯�ȥ�˥ǡ����Υ��ʥåץ���åȤ򥳥ԡ����ޤ���
-�ե�����ȥǥ��쥯�ȥ�Υ桼�����ȥѡ��ߥå����ϳμ¤���������Τ�
-���Ƥ��������� �����Υե�������Ф��ơ� <STRONG>MySQL</STRONG> ��¹Ԥ��Ƥ���
-��������Ȥǡ��ɤ߽񤭤Ǥ���褦�ˤ���ɬ�פ�����ޤ���
+スレーブのデータディレクトリにデータのスナップショットをコピーします。
+ファイルとディレクトリのユーザーとパーミッションは確実に正しいものに
+してください。 これらのファイルに対して、 <STRONG>MySQL</STRONG> を実行している
+アカウントで、読み書きできるようにする必要があります。
 
-<LI>���졼�֤κƵ�ư��
+<LI>スレーブの再起動。
 
 </OL>
 
 <P>
-�嵭��Ԥʤä��塢���졼�֤ϥޥ���������³�������ʥåץ���åȰʸ��
-�����򥭥�å�����Ϥ��Ǥ���
+上記を行なった後、スレーブはマスターに接続し、スナップショット以後の
+更新をキャッチするはずです。
 
 </P>
 <P>
-�⤷���졼�֤� <CODE>server-id</CODE> �򥻥åȤ�˺�줿��硢���顼�����ե������
-���Τ褦�ʥ��顼���Ф�Ǥ��礦��
+もしスレーブに <CODE>server-id</CODE> をセットし忘れた場合、エラーログファイルに
+次のようなエラーが出るでしょう：
 
 </P>
 
@@ -251,24 +251,24 @@ The server will not act as a slave.
 </PRE>
 
 <P>
-�⤷�ޥ������˥��åȤ�˺�줿�ʤ顢���졼�֤ϥޥ���������³�Ǥ��ޤ���
+もしマスターにセットし忘れたなら、スレーブはマスターに接続できません。
 
 </P>
 <P>
-�⤷��������ͳ�ǥ��졼�֤�ʣ���Ǥ��ʤ��ä��ʤ顢���졼�־�Υ��顼����
-�ե�����ˡ����顼��å��������Ф�Ǥ��礦��
+もし何かの理由でスレーブが複製できなかったなら、スレーブ上のエラーログ
+ファイルに、エラーメッセージが出るでしょう。
 
 </P>
 <P>
-���٥��졼�֤���ץꥱ��������Ϥ᤿�ʤ顢
-���顼�����ե������Ʊ���ǥ��쥯�ȥ��
-<CODE>master.info</CODE> �ե�����򸫤뤳�Ȥ��Ǥ��ޤ���
-<CODE>master.info</CODE> �ե�����ϥ��졼�֤˻��Ѥ��졢
-����ϡ��ޥ������ΥХ��ʥ�����Τ����Ĥޤǽ������������ݻ����Ƥ��ޤ���
-���Υե������ä������Խ������ꤷ�Ƥ� <STRONG>�����ޤ���</STRONG>��
-(���ʤ���������Ȥ��Ƥ��뤳�Ȥ��μ¤�ʬ����ޤǤ�)��
-���������������ʤ����ˤϡ�
-<CODE>CHANGE MASTER TO</CODE> ���ޥ�ɤλ��Ѥ������ɤ��Ǥ���
+一度スレーブがレプリケーションを始めたなら、
+エラーログファイルと同じディレクトリに
+<CODE>master.info</CODE> ファイルを見ることができます。
+<CODE>master.info</CODE> ファイルはスレーブに使用され、
+これは、マスターのバイナリログのいくつまで処理したかを保持しています。
+このファイルを消したり編集したりしては <STRONG>いけません</STRONG>。
+(あなたがやろうとしていることが確実に分かるまでは)。
+そういうやむを得ない場合には、
+<CODE>CHANGE MASTER TO</CODE> コマンドの使用の方が良いです。
 
 </P>
 
@@ -289,14 +289,14 @@ Below is an explanation of what is supported and what is not:
 <UL>
 <LI>
 
-��ץꥱ�������� <CODE>AUTO_INCREMENT</CODE>,
-<CODE>LAST_INSERT_ID</CODE>, <CODE>TIMESTAMP</CODE> �ͤ������������ޤ���
+レプリケーションは <CODE>AUTO_INCREMENT</CODE>,
+<CODE>LAST_INSERT_ID</CODE>, <CODE>TIMESTAMP</CODE> 値を正しく扱います。
 
 <LI>
 
-������� <CODE>RAND()</CODE> �Ϥ��ޤ�ʣ���Ǥ��ޤ���
-<CODE>RAND(some_non_rand_expr)</CODE> �򹹿��ˤϻ��Ѥ��ޤ���
-�㤨�С�<CODE>UNIX_TIMESTAMP()</CODE> �� <CODE>RAND()</CODE>���ΰ����˻��Ѥ���Ȥ���
+更新中の <CODE>RAND()</CODE> はうまく複製できません。
+<CODE>RAND(some_non_rand_expr)</CODE> を更新には使用します。
+例えば、<CODE>UNIX_TIMESTAMP()</CODE> を <CODE>RAND()</CODE>　の引数に使用するとか。
 
 <LI>
 
@@ -306,17 +306,17 @@ propagation. <CODE>LOAD LOCAL DATA INFILE</CODE> will be skipped.
 
 <LI>
 
-�桼�����ѿ�����Ѥ���������ϡ�(�ޤ�) replication-safe �ǤϤ���ޤ���
+ユーザー変数を使用したクエリは、(まだ) replication-safe ではありません。
 
 <LI>
 
-<CODE>FLUSH</CODE> ���ޥ�ɤϥХ��ʥ�����˵�Ͽ����ޤ���
-������󡢥��졼�֤�ʣ������ޤ���
-����� <CODE>FLUSH</CODE> ���̾�ϲ���ǡ������ѹ����ʤ�����Ǥ���
-������������ <CODE>MySQL</CODE> �θ��¥ǡ����١�����ʣ�����Ƥ��ơ�
-<CODE>GRANT</CODE> ʸ�ǤϤʤ���ľ�� <CODE>MySQL</CODE> ���¥ơ��֥���ѹ��������ˤϡ�
-���¤�ȿ�Ǥ����뤿��ˡ����졼�־�� <CODE>FLUSH PRIVILEGES</CODE> ��Ԥʤ�ʤ��Ƥ�
-�ʤ�ޤ���
+<CODE>FLUSH</CODE> コマンドはバイナリログに記録されません。
+もちろん、スレーブに複製されません。
+これは <CODE>FLUSH</CODE> が通常は何もデータを変更しないからです。
+しかし、仮に <CODE>MySQL</CODE> の権限データベースを複製していて、
+<CODE>GRANT</CODE> 文ではなくて直接 <CODE>MySQL</CODE> 権限テーブルを変更した場合には、
+権限を反映させるために、スレーブ上で <CODE>FLUSH PRIVILEGES</CODE> を行なわなくては
+なりません。
 
 <LI>
 
@@ -335,7 +335,7 @@ your clients before all queries with temp tables.
 
 <LI>
 
-<STRONG>MySQL</STRONG> �� 1 �ĤΥޥ�������ʣ���Υ��졼�֤ι����Τߤ򥵥ݡ��Ȥ��ޤ���
+<STRONG>MySQL</STRONG> は 1 つのマスターと複数のスレーブの構成のみをサポートします。
 We will in 4.x
 add a voting algorithm to automatically change master if something goes
 wrong with the current master. We will also introduce 'agent' processes
@@ -344,23 +344,23 @@ slaves.
 
 <LI>
 
-�С������ 3.23.26 ���顢<CODE>log-slave-updates</CODE> ��ͭ���ˤ��뤳�Ȥǡ�
-�ޥ������ȥ��졼�֤δط����ؤä����ˤ��뤳�Ȥ���ǽ�Ǥ���
+バージョン 3.23.26 から、<CODE>log-slave-updates</CODE> を有効にすることで、
+マスターとスレーブの関係を輪っか状にすることが可能です。
 
-��������¿���Υ�����ϡ����μ�Υ��åȥ��åפǤ�������ư��ޤ���
-�㤦�������󥹡��㤦�����С��ǹԤʤ��빹���ˤ�äư���������
-����Ū��������б�����褦�ˡ����饤����ȥ����ɤ����դ��ƽ񤫤ʤ��¤�ϡ�
+しかし、多くのクエリは、この種のセットアップでは正しく動作しません。
+違うシーケンス、違うサーバーで行なわれる更新によって引き起こる
+潜在的な問題に対応するように、クライアントコードを注意して書かない限りは。
 
-����ϰʲ��Τ褦�ʥ��åȥ��åפ��̣���ޤ���
+これは以下のようなセットアップを意味します：
 
 
 <PRE>
 A -&#62; B -&#62; C -&#62; A
 </PRE>
 
-���Υ��åȥ��åפϥơ��֥�֤Ǥι����˲�����ͤ�̵�����ˤΤߡ�ư��ޤ���
-���� A �� C �ǥǡ����� insert ����Ȥ���C ��insert����쥳���ɤΥ�����
-���礹��褦�ʥ쥳���ɤ� A �� insert ���ƤϤ����ޤ���
+このセットアップはテーブル間での更新に何も衝突が無い場合にのみ、動作します。
+仮に A と C でデータを insert するとき、C にinsertするレコードのキーと
+競合するようなレコードを A に insert してはいけません。
 You should also not update the sam rows on two servers
 if the order in which the updates are applied matters.
 
@@ -369,12 +369,12 @@ pre-3.23.26 slaves will not be able to read it.
 
 <LI>
 
-�⤷���졼�־�ǥ����꤬���顼�ˤʤ�ȡ����졼�֤Υ���åɤ���ߤ��졢
- <CODE>.err</CODE> �ե�����˥�å������������ޤ���
-���ξ�硢���졼�֤��ư����³�������顼�θ���������(�㤨�С��ơ��֥뤬̵���Ȥ�)��
-���θ塢 <CODE>SLAVE START</CODE> SQL���ޥ�ɤ�¹Ԥ��ޤ�
-(���Υ��ޥ�ɤϥС������ 3.23.16 �ʾ夫��)��
-�С������ 3.23.15 �ޤǤϡ������С���Ƶ�ư���ʤ��ƤϤʤ�ޤ���
+もしスレーブ上でクエリがエラーになると、スレーブのスレッドは停止され、
+ <CODE>.err</CODE> ファイルにメッセージが現われます。
+この場合、スレーブを手動で接続し、エラーの原因を修正し(例えば、テーブルが無いとか)、
+その後、 <CODE>SLAVE START</CODE> SQLコマンドを実行します
+(このコマンドはバージョン 3.23.16 以上から)。
+バージョン 3.23.15 までは、サーバーを再起動しなくてはなりません。
 
 <LI>
 
@@ -415,14 +415,14 @@ this.
 
 <LI>
 
-�С������ 3.23.19 ���顢���������������ʤäơ��ĤäƤ���ʣ���򥯥꡼��ʥåפ��ơ�
-�ޤä����κǽ餫�鳫�Ϥ������Ȥ��Τ���ˡ�
- <CODE>FLUSH MASTER</CODE> �� <CODE>FLUSH SLAVE</CODE> ���ޥ�ɤ��Ѱդ���ޤ�����
-�С������ 3.23.26 ���顢������̾����
-<CODE>RESET MASTER</CODE> �� <CODE>RESET SLAVE</CODE> ���ѹ����ޤ�����
-�ߴ����Τ���ˡ��Ť� <CODE>FLUSH</CODE> ��ޤ�ư��ޤ���
-�������� ���Υ��ޥ�ɤϡ�bin log �� 001 ����˶������Ƥ��ޤ����ᡢ
-���ˤ�äƤ�ʣ���򤪤��������뤳�Ȥ�ͭ�롣���Ѥˤ����ա���
+バージョン 3.23.19 から、何かがおかしくなって、残っている複製をクリーンナップして、
+まったくの最初から開始したいときのために、
+ <CODE>FLUSH MASTER</CODE> と <CODE>FLUSH SLAVE</CODE> コマンドが用意されました。
+バージョン 3.23.26 から、これらの名前を
+<CODE>RESET MASTER</CODE> と <CODE>RESET SLAVE</CODE> に変更しました。
+互換性のために、古い <CODE>FLUSH</CODE> もまだ動作します。
+（訳注： このコマンドは、bin log を 001 からに強制してしまうため、
+場合によっては複製をおかしくすることも有る。使用には注意。）
 
 <LI>
 
@@ -449,9 +449,9 @@ with a different name on the slave.
 
 <LI>
 
-�С������ 3.23.28 ���顢
-���졼�֤��¹Ԥ��Ƥ������ˡ�
-�Ť����������뤿��ˡ� <CODE>PURGE MASTER LOGS TO 'log-name'</CODE> �����ѤǤ��ޤ���
+バージョン 3.23.28 から、
+スレーブが実行している最中に、
+古いログを取り去るために、 <CODE>PURGE MASTER LOGS TO 'log-name'</CODE> が使用できます。
 </UL>
 
 
@@ -459,16 +459,16 @@ with a different name on the slave.
 <H2><A NAME="Replication_Options" HREF="manual.ja_toc.html#Replication_Options">11.5  Replication Options in my.cnf</A></H2>
 
 <P>
-��ץꥱ����������Ѥ�����ϡ��桹��  <STRONG>MySQL</STRONG> Version 3.23.30 �ʹߤ�
-�侩���ޤ���
-������Ť��С������Ǥ�ư���ޤ������Ť�ʪ�ϥХ������ä��굡ǽ��̵���ä��ꤷ�ޤ���
+レプリケーションを使用する場合は、我々は  <STRONG>MySQL</STRONG> Version 3.23.30 以降を
+推奨します。
+これより古いバージョンでも動きますが、古い物はバグがあったり機能が無かったりします。
 
 </P>
 <P>
-�ޥ������ȥ��졼�֤�ξ���ˡ� <CODE>server-id</CODE> ���ץ����ɬ�פǤ���
-����ϰ�դΥ�ץꥱ�������id �򥻥åȤ��ޤ���
-�ޥ����������졼�֤��줾��Τ���ˡ���դ��ͤ�1 ���� 2^32-1 �ޤǤδ֤���
-���ФͤФʤ�ޤ���
+マスターとスレーブの両方に、 <CODE>server-id</CODE> オプションが必要です。
+これは一意のレプリケーションid をセットします。
+マスター、スレーブそれぞれのために、一意な値を、1 から 2^32-1 までの間から
+選ばねばなりません。
 Example: <CODE>server-id=3</CODE>
 
 </P>
@@ -496,9 +496,9 @@ and <CODE>RESET SLAVE</CODE>
 Because the user could issue the <CODE>FLUSH LOGS</CODE> command, we need to
 know which log is currently active and which ones have been rotated out
 and in what sequence. 
-���ξ���ϥХ��ʥ����index�ե�����˵��Ҥ���ޤ���
-�ǥե���ȤǤ� `hostname`.index �Ȥ����ե�����ˤʤ�ޤ���
-�㤦̾���ˤ��������ˡ����Υ��ץ�������Ѥ��ޤ���
+この情報はバイナリログindexファイルに記述されます。
+デフォルトでは `hostname`.index というファイルになります。
+違う名前にしたい場合に、このオプションを使用します。
 (Example: <CODE>log-bin-index=db.index</CODE>)
 
 </TR NOSAVE>
@@ -623,10 +623,10 @@ you have 3.23.28 or later, and use
 
 </TR NOSAVE>
 <TR><TD><CODE>log-slave-updates</CODE> </TD><TD>
-���졼�֥���åɤ���ι�����Х��ʥ�����˵�Ͽ����褦�ˡ����졼�֤˹𤲤ޤ���
-�ǥե���Ȥ� Off �Ǥ���
-�⤷���졼�֤Υǥ�������������(daisy-chain)��ͤ��Ƥ���ʤ�С�
-����� on �ˤ���ɬ�פ�����ޤ���
+スレーブスレッドからの更新をバイナリログに記録するように、スレーブに告げます。
+デフォルトは Off です・
+もしスレーブのデイジーチェーン(daisy-chain)を考えているならば、
+これを on にする必要があります。
 
 </TR NOSAVE>
 <TR><TD><CODE>replicate-rewrite-db=from_name-&#62;to_name</CODE> </TD><TD>
@@ -738,21 +738,21 @@ command line. (Slave)
 
 </TR NOSAVE>
 <TR><TD><CODE>PURGE MASTER LOGS TO 'logname'</CODE>
- </TD><TD> �С������ 3.23.28 ����ε�ǽ��
-index �ե�����˽񤫤�Ƥ�������ե�����Τ�����
-���ꤵ�줿�����������Υ����ե���������ƾä��ޤ���
-index �ե�����Υꥹ�Ȥ���⥨��ȥ��ä��ޤ���
-�����ơ����ꤵ�줿��������ֺǽ��ʪ�Ȥ��ޤ���
-�㤨�С�
+ </TD><TD> バージョン 3.23.28 からの機能。
+index ファイルに書かれているログファイルのうち、
+指定されたログよりも前のログファイルを全て消します。
+index ファイルのリストからもエントリを消します。
+そして、指定されたログを一番最初の物とします。
+例えば：
 
 
 <PRE>
 PURGE MASTER LOGS TO 'mysql-bin.010'
 </PRE>
 
-�������� ���Υ��ޥ�ɤξ�硢mysql-bin.001 �� mysql-bin.009 �ޤǤ�
-�ե�����Ͼä��졢mysql.index �ե��������Ȥϡ�mysql-bin.010 �Τߡ�
-���Ҥ������֤ˤʤ�Ȥ������ȡ���
+（訳注： このコマンドの場合、mysql-bin.001 ～ mysql-bin.009 までの
+ファイルは消され、mysql.index ファイルの中身は、mysql-bin.010 のみ、
+記述される状態になるということ。）
 
 This command will do nothing and fail with an error if you have an
 active slave that is currently reading one of the logs you are trying to
@@ -822,13 +822,13 @@ master when a new replication thread connects from the same slave
 
 </P>
 <P>
-<STRONG>Q</STRONG>: replication log ��ɤ���äƥ����ơ��Ȥ����?
+<STRONG>Q</STRONG>: replication log をどうやってローテートするの?
 
 </P>
 <P>
-<STRONG>A</STRONG>: �С������ 3.23.28 ����Ǥϡ�<CODE>PURGE MASTER LOGS TO</CODE> ���ޥ��
-����Ѥ���٤��Ǥ��� �¹����ˤϡ��ɤΥ������ä���뤫��ǧ�������ˤ�äƤ�
-�Хå����åפ��äƤ����ޤ���
+<STRONG>A</STRONG>: バージョン 3.23.28 からでは、<CODE>PURGE MASTER LOGS TO</CODE> コマンド
+を使用するべきです。 実行前には、どのログが消せれるか確認し、場合によっては
+バックアップを取っておきます。
 In earlier versions the process is much more
 painful, and cannot be safely done without stopping all the slaves in
 the case that you plan to re-use log names. You will need to stop the

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13101.html">[��]</a><a href="13103.html">[��]</a><a href="../list/13101-13200.html">[�ֹ�����]</a><a href="../thread/13101-13200.html">[����åɰ���]</a></p>
+<p class="button"><a href="13101.html">[前]</a><a href="13103.html">[次]</a><a href="../list/13101-13200.html">[番号順一覧]</a><a href="../thread/13101-13200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13102
 </p>
@@ -13,55 +13,55 @@ mysql:13102
 <p>
 From: Tetsuro IKEDA &lt;Tetsuro IKEDA &lt;te.ikeda@xxxxxxxxxx&gt;&gt;<br>
 Date: Mon, 19 Jun 2006 09:46:49 +0900<br>
-Subject: [mysql 13102] Re: ��¾���桩������<br>
+Subject: [mysql 13102] Re: 排他制御？？？？<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ĤǤ���
+池田です。
 
-<span class="quote1">&gt; ����äơ���¾����Ȥ����ΤǤ�����������</span>
+<span class="quote1">&gt; これって、排他制御というのですか。？？？</span>
 
-���͹�äƤ���Ȼפ��ޤ���
+概ね合っていると思います。
 
-�ʲ��Υ����ɤǤ�INSERTʸƱ�Τ�֤Ĥ��褦�Ȥ��Ƥ��ޤ���͡�
+以下のコードではINSERT文同士をぶつけようとしていますよね。
 
-���ä�InnoDB�ξ��ʤ顢��³���Ω�������ʬΥ��٥��
-SERIALIZABLE���ѹ�����Ȥ��ɤ��Ǥ��礦��
+従ってInnoDBの場合なら、接続を確立した後に分離レベルを
+SERIALIZABLEに変更するとかどうでしょう。
 
 con = DriverManager.getConnection(url,user,pass);
 con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
-���뤤��MyISAM�ξ��ʤɤǤ������ơ��֥���å���Ȥ��Ȥ���
+あるいはMyISAMの場合などですが、テーブルロックを使うとか。
 
 stat.executeUpdate(&quot;LOCK TABLES ff WRITE&quot;);
 for(int i =0;i&lt;100;i++){
-   ����������������
+   ・・・処理・・・
 }
 stat.executeUpdate(&quot;UNLOCK TABLES&quot;);
 
-��������ư�����ʤ��饤�᡼����Ĥ���Ǥ���������С�������
+いろいろ動かしながらイメージをつかんでいただければ・・・。
 
 TOMTOM wrote:
-<span class="quote1">&gt; ����ˤ��ϡ�</span>
-<span class="quote1">&gt; �������ߤ������Ȥ�����ΤǤ�����</span>
-<span class="quote1">&gt; �㤨�С�����Υѥ����󤫤顢mysql�˥ǡ�����</span>
-<span class="quote1">&gt; �ɲä��Ƥ�����������Υѥ����󤬡��ɲä��Ƥ�����ϡ�</span>
-<span class="quote1">&gt; ¾���ϡ��Ե����ơ��ɲä�����ä��Ȥ���</span>
-<span class="quote1">&gt; �Ե����Ƥ����������ɲù�����Ϥ��褦�ˤ������ΤǤ���</span>
-<span class="quote1">&gt; ����äơ���¾����Ȥ����ΤǤ�����������</span>
+<span class="quote1">&gt; こんにちは、</span>
+<span class="quote1">&gt; 教えて欲しいことがあるのですが、</span>
+<span class="quote1">&gt; 例えば、二台のパソコンから、mysqlにデータを</span>
+<span class="quote1">&gt; 追加している時、一方のパソコンが、追加している時は、</span>
+<span class="quote1">&gt; 他方は、待機して、追加が終わったとき、</span>
+<span class="quote1">&gt; 待機していた方が、追加更新を始めるようにしたいのです。</span>
+<span class="quote1">&gt; これって、排他制御というのですか。？？？</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ѥ����󤬰��椷����̵���Τǡ�</span>
-<span class="quote1">&gt; java�ǡ�����åȽ��������Ѥ��ơ��������⡢���椫�顢��������</span>
-<span class="quote1">&gt; ���Ƥ���褦�ʥ����ɤˤ��ơ��¹Ԥ����ΤǤ�����</span>
-<span class="quote1">&gt; ��ĤΥ���åȤ���ߤ˥����������Ƥ���ߤ����ǡ�</span>
-<span class="quote1">&gt; �ɤ����ͤˤ����顢���Ԥ�����</span>
-<span class="quote1">&gt; ���������ˤʤ뤫���ʲ��Υץ�������</span>
-<span class="quote1">&gt; �ɤΤ褦�ˡ���¤�����餤���Τ��������Ƥ���������</span>
+<span class="quote1">&gt; パソコンが一台しか、無いので、</span>
+<span class="quote1">&gt; javaで、スレット処理を利用して、あたかも、二台から、アクセス</span>
+<span class="quote1">&gt; しているようなコードにして、実行したのですが、</span>
+<span class="quote1">&gt; 二つのスレットが交互にアクセスしているみたいで、</span>
+<span class="quote1">&gt; どうの様にしたら、期待した、</span>
+<span class="quote1">&gt; アクセスになるか、以下のプログラムを</span>
+<span class="quote1">&gt; どのように、改造したらいいのか、教えてください。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ķ���win xp</span>
+<span class="quote1">&gt; 環境　win xp</span>
 <span class="quote1">&gt;       jdk 1.5</span>
 <span class="quote1">&gt;       mysql 5.0</span>
 <span class="quote1">&gt;       connector 3.1.11</span>
@@ -156,7 +156,7 @@ TOMTOM wrote:
 <span class="quote1">&gt; }</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; *****************************************************</span>
-<span class="quote1">&gt; �¹Է�̡�</span>
+<span class="quote1">&gt; 実行結果、</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; user1  0</span>
 <span class="quote1">&gt; user2  0</span>
@@ -168,7 +168,7 @@ TOMTOM wrote:
 <span class="quote1">&gt; user2  3</span>
 <span class="quote1">&gt; --------</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ����򡢰ʲ����ͤʡ��¹Է�̤ˤ������ΤǤ���</span>
+<span class="quote1">&gt; これを、以下の様な、実行結果にしたいのです。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; user1  0</span>
 <span class="quote1">&gt; user1  1</span>
@@ -183,7 +183,7 @@ TOMTOM wrote:
 <span class="quote1">&gt; --------</span>
 <span class="quote1">&gt; --------</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ����������ꤤ�������ޤ���</span>
+<span class="quote1">&gt; よろしくお願いいたします。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
@@ -203,11 +203,11 @@ FAX +81-3-5166-1189
 
 </pre>
 </div>
-<p class="button"><a href="13101.html">[��]</a><a href="13103.html">[��]</a><a href="../list/13101-13200.html">[�ֹ�����]</a><a href="../thread/13101-13200.html">[����åɰ���]</a></p>
+<p class="button"><a href="13101.html">[前]</a><a href="13103.html">[次]</a><a href="../list/13101-13200.html">[番号順一覧]</a><a href="../thread/13101-13200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="13101.html">  13101 2006-06-19 09:27 [TOMTOM &lt;tomf1@xxxxxx] ��¾���桩������                        </a></span>
-<span class="current">-&gt;&nbsp;<a href="13102.html">  13102 2006-06-19 09:46 ��[Tetsuro IKEDA &lt;te.ik]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13103.html">  13103 2006-06-19 14:21 ����[TOMTOM &lt;tomf1@xxxxxx] Re: : ��¾���桩������              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13101.html">  13101 2006-06-19 09:27 [TOMTOM &lt;tomf1@xxxxxx] 排他制御？？？？                        </a></span>
+<span class="current">-&gt;&nbsp;<a href="13102.html">  13102 2006-06-19 09:46 ┗[Tetsuro IKEDA &lt;te.ik]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13103.html">  13103 2006-06-19 14:21 　┗[TOMTOM &lt;tomf1@xxxxxx] Re: : 排他制御？？？？              </a></span>
 </pre>
 </body>
 </html>

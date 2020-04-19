@@ -5,29 +5,29 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="10662.html">[��]</a><a href="10664.html">[��]</a><a href="../list/10601-10700.html">[�ֹ�����]</a><a href="../thread/10601-10700.html">[����åɰ���]</a></p>
+<p class="button"><a href="10662.html">[前]</a><a href="10664.html">[次]</a><a href="../list/10601-10700.html">[番号順一覧]</a><a href="../thread/10601-10700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:10663
 </p>
 <div class="header">
 <p>
-From: ���Ƿ &lt;���Ƿ &lt;mark@xxxxxxxxxx&gt;&gt;<br>
+From: 渡邊昌之 &lt;渡邊昌之 &lt;mark@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 15 Dec 2004 17:01:01 +0900<br>
-Subject: [mysql 10663] Re: SELECT�ǥ�����˥쥳���ɤ�������ˡ(��)<br>
+Subject: [mysql 10663] Re: SELECTでランダムにレコードを得る方法(再)<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��Ǥ���
+渡邊です。
 
-�������ͤʥ���ץ���äƥƥ��Ȥ��Ƥߤޤ�������
-First��Second��ɤ��������������ʷ�̤��֤äƤ��ޤ���
-�������2��3�٤ȼ¹Ԥ��Ƥ����ۤʤ��Τ��֤äƤ��ޤ���
-�Ķ���Local��Perl 5.6.1 DBI+mysqlDBD�Ǥ���
+下記の様なサンプルを作ってテストしてみましたが、
+FirstもSecondもどちらも全くランダムな結果が返ってきます。
+もちろん2度3度と実行しても毎回異なるものが返ってきます。
+環境はLocalでPerl 5.6.1 DBI+mysqlDBDです。
 
-test���Ȥ����ơ��֥�ϡ�id�Ȥ����ե�����ɤ��������äơ�������1700
-���餤�ޤǤ��ͤ�������äƤ�������Τ�ΤǤ���
+test　というテーブルは、idというフィールドだけがあって、１から1700
+くらいまでの値が順に入っているだけのものです。
 ==============================================================
 $random_query=&quot;select id from test order by rand() limit 10&quot;;
 $sth=$master_dbh-&gt;prepare($random_query);
@@ -43,55 +43,55 @@ while($r=$sth-&gt;fetchrow_arrayref){
   printf(&quot;%4d\n&quot;,$$r[0]);
 }
 ===============================================================
-�Ȥꤢ���������ơ��ȥ��ȥϥ�ɥ�ϰ���prepare����������
-execute�����Ԥ��Ȥ������Ȥ򤷤���̡����ۤʤ��̤�Ф��ޤ�����
+とりあえず、ステートメントハンドルは一度prepareしただけで
+executeだけ行うということをした結果、毎回異なる結果を出しました。
 
-�ɤ�����Ʊ���褦���ͤ��֤äƤ����Ǥ��礦��
+どうして同じような値が返ってくるんでしょう。
 
-�ɤ������ץ������Ǽ¹Ԥ���Ƥ��뤫�狼��ʤ��Τǡ�����ʾ�Ϥ狼��ޤ���
-���Ȥ��о嵭�Υץ������Ǽ¸����ƤߤƤ��顢��̤Ϥɤ��ʤ�Ǥ��礦��
+どういうプログラムで実行されているかわからないので、これ以上はわかりませんが
+たとえば上記のプログラムで実験してみてたら、結果はどうなるでしょう。
 
 ml_mysql@xxxxxxxxxx wrote:
-<span class="quote1">&gt; ��⡢���󥽡���Ǥ�äƤߤ��Ȥ����������㤦�������󤬽ФƤ��ޤ�����</span>
-<span class="quote1">&gt; ����ʤ�OK�Ǥ���</span>
+<span class="quote1">&gt; 私も、コンソールでやってみたところ、全く違う数字の列が出てきました。</span>
+<span class="quote1">&gt; これならOKです。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �������󡡤ɤ����ǥ���å��夵��Ƥ���ߤ����Ǥ��͡�</span>
+<span class="quote1">&gt; うーーん　どこかでキャッシュされているみたいですね。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����꡼��</span>
+<span class="quote1">&gt; クエリーを</span>
 <span class="quote1">&gt; SELECT a,b,c,d FROM table WHERE b=&quot;hogehoge&quot; ORDER BY RAND()</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ȴ����ޤ�������</span>
-<span class="quote1">&gt; �ǽ�Σ��쥳���ɤϡ�Ʊ������Ǥ�����</span>
+<span class="quote1">&gt; と換えましたが、</span>
+<span class="quote1">&gt; 最初の２レコードは、同じ順序でした。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; PERL�ϡ�</span>
-<span class="quote1">&gt; Perl version 5.8.0���Ǥ���</span>
+<span class="quote1">&gt; PERLは　</span>
+<span class="quote1">&gt; Perl version 5.8.0　です。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ����������ꤤ���ޤ���</span>
+<span class="quote1">&gt; よろしくお願いします。</span>
 
 _______________________________________
-���Ƿ
+渡邊昌之
 mark@xxxxxxxxxx
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 </pre>
 </div>
-<p class="button"><a href="10662.html">[��]</a><a href="10664.html">[��]</a><a href="../list/10601-10700.html">[�ֹ�����]</a><a href="../thread/10601-10700.html">[����åɰ���]</a></p>
+<p class="button"><a href="10662.html">[前]</a><a href="10664.html">[次]</a><a href="../list/10601-10700.html">[番号順一覧]</a><a href="../thread/10601-10700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="10570.html">  10570 2004-11-30 17:35 [&lt;ml_mysql@xxxxxxxxxx] SELECT �ǥ�����˥쥳���ɤ�������ˡ   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10571.html">  10571 2004-11-30 17:40 ��[��ƣ ��͵ &lt;endo@xxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10572.html">  10572 2004-11-30 18:13 ����[&lt;ml_mysql@xxxxxxxxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10573.html">  10573 2004-11-30 18:29 ������[&quot;waya&quot; &lt;wayama@xxxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10574.html">  10574 2004-11-30 18:31 ������[��ƣ ��͵ &lt;endo@xxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10577.html">  10577 2004-11-30 22:31 ��������[&lt;ml_mysql@xxxxxxxxxx]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10575.html">  10575 2004-11-30 18:31 ������[Seiichi YANAI &lt;yanai]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10576.html">  10576 2004-11-30 20:48 ��[Daiju &lt;d.is.here@xxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10659.html">  10659 2004-12-15 14:56 ��[&lt;ml_mysql@xxxxxxxxxx] Re: SELECT �ǥ�����˥쥳���ɤ�������ˡ(��)</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10660.html">  10660 2004-12-15 15:28 ����[���Ƿ &lt;mark@xxxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10661.html">  10661 2004-12-15 16:24 ������[&lt;ml_mysql@xxxxxxxxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10662.html">  10662 2004-12-15 16:55 ��������[SUGAWARA Hajime &lt;sug]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10669.html">  10669 2004-12-15 20:20 ����������[&lt;ml_mysql@xxxxxxxxxx]                               </a></span>
-<span class="current">-&gt;&nbsp;<a href="10663.html">  10663 2004-12-15 17:01 ��������[���Ƿ &lt;mark@xxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10570.html">  10570 2004-11-30 17:35 [&lt;ml_mysql@xxxxxxxxxx] SELECT でランダムにレコードを得る方法   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10571.html">  10571 2004-11-30 17:40 ┣[遠藤 俊裕 &lt;endo@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10572.html">  10572 2004-11-30 18:13 ┃┗[&lt;ml_mysql@xxxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10573.html">  10573 2004-11-30 18:29 ┃　┣[&quot;waya&quot; &lt;wayama@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10574.html">  10574 2004-11-30 18:31 ┃　┣[遠藤 俊裕 &lt;endo@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10577.html">  10577 2004-11-30 22:31 ┃　┃┗[&lt;ml_mysql@xxxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10575.html">  10575 2004-11-30 18:31 ┃　┗[Seiichi YANAI &lt;yanai]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10576.html">  10576 2004-11-30 20:48 ┣[Daiju &lt;d.is.here@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10659.html">  10659 2004-12-15 14:56 ┗[&lt;ml_mysql@xxxxxxxxxx] Re: SELECT でランダムにレコードを得る方法(再)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10660.html">  10660 2004-12-15 15:28 　┗[渡邊昌之 &lt;mark@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10661.html">  10661 2004-12-15 16:24 　　┗[&lt;ml_mysql@xxxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10662.html">  10662 2004-12-15 16:55 　　　┣[SUGAWARA Hajime &lt;sug]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10669.html">  10669 2004-12-15 20:20 　　　┃┗[&lt;ml_mysql@xxxxxxxxxx]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="10663.html">  10663 2004-12-15 17:01 　　　┗[渡邊昌之 &lt;mark@xxxxx]                                 </a></span>
 </pre>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="8459.html">[��]</a><a href="8461.html">[��]</a><a href="../list/8401-8500.html">[�ֹ�����]</a><a href="../thread/8401-8500.html">[����åɰ���]</a></p>
+<p class="button"><a href="8459.html">[前]</a><a href="8461.html">[次]</a><a href="../list/8401-8500.html">[番号順一覧]</a><a href="../thread/8401-8500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:8460
 </p>
@@ -13,34 +13,34 @@ mysql:8460
 <p>
 From: &quot;ta ma&quot; &lt;&quot;ta ma&quot; &lt;chihuahuatyan2@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 09 Dec 2003 16:52:22 +0900<br>
-Subject: [mysql 08460] Re: MySQL �ϤɤΤ褦�� LIMIT  ���Ŭ�����뤫���ˤĤ���<br>
+Subject: [mysql 08460] Re: MySQL はどのように LIMIT  を最適化するか？について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-CHIWAKO�Ǥ�
+CHIWAKOです
 <span class="quote1">&gt; --------------------</span>
-<span class="quote1">&gt; 5.2.8 MySQL �ϤɤΤ褦�� LIMIT ���Ŭ�����뤫��</span>
+<span class="quote1">&gt; 5.2.8 MySQL はどのように LIMIT を最適化するか？</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���⤷ LIMIT # �� ORDER BY �ȶ��˻��Ѥ���ʤ�, MySQL �Ϻǽ�� # �Ԥ򸫤Ĥ�</span>
-��
-<span class="quote1">&gt; �餹���ˡ����ơ��֥�Υ����ȤϹԤ鷺�ˡ������Ȥ򽪤�餻�ޤ��� </span>
+<span class="quote1">&gt; ・もし LIMIT # を ORDER BY と共に使用するなら, MySQL は最初の # 行を見つけ</span>
+た
+<span class="quote1">&gt; らすぐに、全テーブルのソートは行わずに、ソートを終わらせます。 </span>
 <span class="quote1">&gt; --------------------</span>
 
-���ܸ�β�᤬�ʤ��ʤ��Ǥ��ʤ��ơ����露�����������Ǽ�����ޤ�����
-���¤ˤϷи�����տޤ����Ȥ������ս�ǻ������������Ф��ޤ���
-�������ޤǶ������Ф����֡�UPDATE����ʤ��������INSERT��Ǥ��礦�����ˤ�
-�����Ȥ����ޤ��ޤ��äƤ��ơ��¤ϻ�δ��㤤���ä��Τ��ȻפäƤ��ޤ��ޤ�����
-������ˡ�ޤǹͤ��Ƥޤ���Ǥ��������⤷�Ϥ���˽��֤��㤤�����鸫�Ĥ��Ƥ���
-������ˡ������Ƥ���ʤ顢�Ǹ�ޤǤ�餺�˽����Ƥ褷���Ȥ�����̣�Ǥ��͡�
+日本語の解釈がなかなかできなくて、かわじさんの説明で納得しました。
+現実には経験から意図したとおり日付順で指定件数だけ取り出せます。
+ただ今まで偶然取り出す順番（UPDATEされなければ大体INSERT順でしょうか？）と
+ソートがたまたまあっていて、実は私の勘違いだったのかと思ってしまいました。
+ソート法まで考えてませんでしたが、もしはじめに順番の低い方から見つけていく
+ソート法が取られているなら、最後までやらずに終えてよし。という意味ですね？
 
 
-���ä����ʤΤǡ��ºݤ˥ơ��֥���äƳΤ���Ƥߤޤ�����
-�С�������4.0.14
-OS��win2000�ǡ����ۤ���Ƥ����Х��ʥ��Ǥ���ष����ΤǤ���
+せっかくなので、実際にテーブルを作って確かめてみました。
+バージョンは4.0.14
+OSはwin2000で、配布されていたバイナリ版を解凍したものです。
 
-���ǡ���
+全データ
 mysql&gt; select bno,date1 from test;
 +------+---------------------+
 <span class="quote1">| bno  | date1               |</span>
@@ -60,7 +60,7 @@ mysql&gt; select bno,date1 from test;
 +------+---------------------+
 12 rows in set (0.05 sec)
 
-���ե��å�5���ܤ���5�����դν��
+オフセット5番目から5件日付の順で
 mysql&gt; select bno,date1 from test order by date1 limit 5,5 ;
 +------+---------------------+
 <span class="quote1">| bno  | date1               |</span>
@@ -73,7 +73,7 @@ mysql&gt; select bno,date1 from test order by date1 limit 5,5 ;
 +------+---------------------+
 5 rows in set (0.02 sec)
 
-���ե��å�5���ܤ���5��ʥ�����̵����
+オフセット5番目から5件（ソート無し）
 mysql&gt; select bno,date1 from test limit 5,5 ;
 +------+---------------------+
 <span class="quote1">| bno  | date1               |</span>
@@ -86,17 +86,17 @@ mysql&gt; select bno,date1 from test limit 5,5 ;
 +------+---------------------+
 5 rows in set (0.00 sec)
 
-���꤬�Ȥ��������ޤ���
+ありがとうございました
 Regards
 --CHIWAKO
 
 _________________________________________________________________
-ͧã��24���֥ۥåȥ饤���MSN ��å��󥸥㡼�ס�����������������ɡ�  
+友達と24時間ホットライン「MSN メッセンジャー」、今すぐダウンロード！  
 <a href="http://messenger.msn.co.jp">http://messenger.msn.co.jp</a> 
 
 
 </pre>
 </div>
-<p class="button"><a href="8459.html">[��]</a><a href="8461.html">[��]</a><a href="../list/8401-8500.html">[�ֹ�����]</a><a href="../thread/8401-8500.html">[����åɰ���]</a></p>
+<p class="button"><a href="8459.html">[前]</a><a href="8461.html">[次]</a><a href="../list/8401-8500.html">[番号順一覧]</a><a href="../thread/8401-8500.html">[スレッド一覧]</a></p>
 </body>
 </html>

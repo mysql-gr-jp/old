@@ -5,29 +5,29 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="16176.html">[��]</a><a href="16178.html">[��]</a><a href="../list/16101-16200.html">[�ֹ�����]</a><a href="../thread/16101-16200.html">[����åɰ���]</a></p>
+<p class="button"><a href="16176.html">[前]</a><a href="16178.html">[次]</a><a href="../list/16101-16200.html">[番号順一覧]</a><a href="../thread/16101-16200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:16177
 </p>
 <div class="header">
 <p>
-From: ���ľ��� &lt;���ľ��� &lt;m.kouda@xxxxxxxxxx&gt;&gt;<br>
+From: 香田昌俊 &lt;香田昌俊 &lt;m.kouda@xxxxxxxxxx&gt;&gt;<br>
 Date: Sun, 2 Nov 2014 18:16:03 +0900<br>
-Subject: [mysql 16177] Re: [mysql 16176] Re: [mysql 16175] LVS(DSR)�����Ѥ���MySQL�����ʬ���ˤĤ���<br>
+Subject: [mysql 16177] Re: [mysql 16176] Re: [mysql 16175] LVS(DSR)を利用したMySQLの負荷分散について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-yoku0825��
+yoku0825様
 
-������ĺ�����꤬�Ȥ��������ޤ���
+ご回答頂きありがとうございます。
 
-������ĺ�������Ƥ򸵤˺��ٸ�ľ�����Ȥ�����
-LVS¦��iptables��mysql�ε��������NEW���ơ��Ȥ����äƤ���ƶ��ǡ�
-MySQL¦��FIN���Ϥ��Ƥ��餺��LVS¦�ǥɥ��åפ���Ƥ���ޤ�����
+ご教授頂いた内容を元に再度見直したところ、
+LVS側のiptablesにmysqlの許可設定でNEWステートが入っている影響で、
+MySQL側にFINが届いておらず、LVS側でドロップされておりました。
 
-LVS¦��iptables�򲼵����ͤ��ѹ�������ϲ�褷�ޤ�����
+LVS側のiptablesを下記の様に変更し問題は解決しました。
 
 -----
 from
@@ -37,64 +37,64 @@ to
 -A RH-Firewall-1-INPUT -s xxxx -p tcp -m tcp --dport xxxx -j ACCEPT
 -----
 
-���꤬�Ȥ��������ޤ���!!
+ありがとうございました!!
 
 
-2014ǯ11��2�� 17:21 yoku ts. &lt;yoku0825@xxxxxxxxxx&gt;:
+2014年11月2日 17:21 yoku ts. &lt;yoku0825@xxxxxxxxxx&gt;:
 
-<span class="quote1">&gt; ����ˤ��ϡ�yoku0825�Ȥ����ޤ���</span>
+<span class="quote1">&gt; こんにちは、yoku0825といいます。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���Τ����ꡢ���ͤˤʤ�ʤ��Ǥ��礦����</span>
+<span class="quote1">&gt; このあたり、参考にならないでしょうか。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; LVS �� FIN ����Ȥ� | 3.1415.jp</span>
+<span class="quote1">&gt; LVS が FIN を落とす | 3.1415.jp</span>
 <span class="quote1">&gt; <a href="http://3.1415.jp/node/226">http://3.1415.jp/node/226</a></span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; yoku0825,</span>
-<span class="quote1">&gt;  2014/11/01 23:26 &quot;���ľ���&quot; &lt;m.kouda@xxxxxxxxxx&gt;:</span>
+<span class="quote1">&gt;  2014/11/01 23:26 &quot;香田昌俊&quot; &lt;m.kouda@xxxxxxxxxx&gt;:</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���Ĥȿ����ޤ���������Ƥ�����ĺ���ޤ���</span>
+<span class="quote1">&gt; 香田と申します。初めて投稿させて頂きます。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; MySQL�����ʬ���Ȥ���LVS(DSR)�����Ѥ���Postfix(���饤�����)����MySQL��</span>
-<span class="quote2">&gt;&gt; ���Ȥ����᡼���ۿ���Ԥ����ڤ�ԤäƤ���ޤ���</span>
+<span class="quote2">&gt;&gt; MySQLの負荷分散としてLVS(DSR)を利用し、Postfix(クライアント)からMySQLを</span>
+<span class="quote2">&gt;&gt; 参照させメール配信を行う検証を行っております。</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; --------</span>
-<span class="quote2">&gt;&gt; ����</span>
-<span class="quote2">&gt;&gt; - Postfix (���饤�����) ---&gt; LVS(DSR) ---&gt; MySQL</span>
+<span class="quote2">&gt;&gt; 構成</span>
+<span class="quote2">&gt;&gt; - Postfix (クライアント) ---&gt; LVS(DSR) ---&gt; MySQL</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; �С������</span>
+<span class="quote2">&gt;&gt; バージョン</span>
 <span class="quote2">&gt;&gt; - Keepalived 1.2.7</span>
 <span class="quote2">&gt;&gt; - MySQL 5.5.36</span>
 <span class="quote2">&gt;&gt; - Postfix 2.6.6-6</span>
 <span class="quote2">&gt;&gt; --------</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; Postfix¦��MySQL�򻲾Ȥ������᡼��������Ԥ���</span>
-<span class="quote2">&gt;&gt; ������λ��⡢MySQL��connection���Ĥ�³����Ȥ������ݤ�ȯ�����ޤ�����</span>
+<span class="quote2">&gt;&gt; Postfix側でMySQLを参照させ、メール送信を行うと</span>
+<span class="quote2">&gt;&gt; 送信完了後も、MySQLにconnectionが残り続けるという事象が発生しました。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; �᡼���ۿ��򤹤��٤�connection���Ĥ�³����</span>
-<span class="quote2">&gt;&gt; �ǽ�Ū��MySQL ��max connection����ã���Ƥ��ޤ��Ȥ��������Ǥ���</span>
+<span class="quote2">&gt;&gt; メール配信をする度にconnectionが残り続け、</span>
+<span class="quote2">&gt;&gt; 最終的にMySQL でmax connectionに到達してしまうという状況です。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; netstat�򸫤�ȡ�MySQL¦��ESTABLISHED���Ĥ�³����</span>
-<span class="quote2">&gt;&gt; Postfix¦��FIN_WAIT1��¿ȯ���Ƥ�������Ǥ���</span>
+<span class="quote2">&gt;&gt; netstatを見ると、MySQL側にESTABLISHEDが残り続け、</span>
+<span class="quote2">&gt;&gt; Postfix側にFIN_WAIT1が多発している状況です。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; �����ͤ������װ��������ɥХ�������������ȹ����Ǥ���</span>
-<span class="quote2">&gt;&gt; ���������ꤤ���ޤ���</span>
+<span class="quote2">&gt;&gt; 何か考えられる要因等、アドバイスいただけると幸いです。</span>
+<span class="quote2">&gt;&gt; 宜しくお願いします。</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;</span>
 
 </pre>
 </div>
 <div class="attach">
-<h3 class="attachtitle">ź�եե�����</h3>
+<h3 class="attachtitle">添付ファイル</h3>
 <ul>
 <li><a href="16177/0/index.html"> [text/html]</a>
 </ul>
 </div>
-<p class="button"><a href="16176.html">[��]</a><a href="16178.html">[��]</a><a href="../list/16101-16200.html">[�ֹ�����]</a><a href="../thread/16101-16200.html">[����åɰ���]</a></p>
+<p class="button"><a href="16176.html">[前]</a><a href="16178.html">[次]</a><a href="../list/16101-16200.html">[番号順一覧]</a><a href="../thread/16101-16200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="16175.html">@ 16175 2014-11-01 23:25 [���ľ��� &lt;m.kouda@xx] LVS(DSR)�����Ѥ���MySQL�����ʬ���ˤĤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16176.html">@ 16176 2014-11-02 17:21 ��[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16175] LVS(DSR)�����Ѥ���MySQL�����ʬ���ˤĤ���</a></span>
-<span class="current">-&gt;&nbsp;<a href="16177.html">@ 16177 2014-11-02 18:16 ����[���ľ��� &lt;m.kouda@xx] Re: [mysql 16176] Re: [mysql 16175] LVS(DSR)�����Ѥ���MySQL�����ʬ���ˤĤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16178.html">@ 16178 2014-11-03 23:27 ������[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16177] Re: [mysql 16176] Re: [mysql 16175] LVS(DSR)�����Ѥ���MySQL�����ʬ���ˤĤ���</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16175.html">@ 16175 2014-11-01 23:25 [香田昌俊 &lt;m.kouda@xx] LVS(DSR)を利用したMySQLの負荷分散について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16176.html">@ 16176 2014-11-02 17:21 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16175] LVS(DSR)を利用したMySQLの負荷分散について</a></span>
+<span class="current">-&gt;&nbsp;<a href="16177.html">@ 16177 2014-11-02 18:16 　┗[香田昌俊 &lt;m.kouda@xx] Re: [mysql 16176] Re: [mysql 16175] LVS(DSR)を利用したMySQLの負荷分散について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16178.html">@ 16178 2014-11-03 23:27 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16177] Re: [mysql 16176] Re: [mysql 16175] LVS(DSR)を利用したMySQLの負荷分散について</a></span>
 </pre>
 </body>
 </html>

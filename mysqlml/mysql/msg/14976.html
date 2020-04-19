@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14975.html">[��]</a><a href="14977.html">[��]</a><a href="../list/14901-15000.html">[�ֹ�����]</a><a href="../thread/14901-15000.html">[����åɰ���]</a></p>
+<p class="button"><a href="14975.html">[前]</a><a href="14977.html">[次]</a><a href="../list/14901-15000.html">[番号順一覧]</a><a href="../thread/14901-15000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14976
 </p>
@@ -13,41 +13,41 @@ mysql:14976
 <p>
 From: Mikiya Okuno &lt;Mikiya Okuno &lt;Mikiya.Okuno@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 17 Jul 2009 23:00:22 +0900<br>
-Subject: [mysql 14976] Re: MySQL Cluster�Υ��塼�˥���ˡ<br>
+Subject: [mysql 14976] Re: MySQL Clusterのチューニング方法<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���Ĥ��󡢤���Ф�ϡ�
+羽田さん、こんばんは。
 
-�������ݥ���Ȥ����Ҥ٤�����ĺ���ޤ���
+何点かポイントだけ述べさせて頂きます。
 
-<span class="quote1">&gt; SELECT * FROM [table_name]��LIMIT 3000,30;</span>
+<span class="quote1">&gt; SELECT * FROM [table_name]　LIMIT 3000,30;</span>
 
-���Τ褦�ʥ������¹Ԥ���ȡ�SQL�Ρ��ɤ�3000�ԥǡ����Ρ��ɤ���ե��å����ơ�
-���Τޤ޼ΤƤƤ��ޤ����Ȥˤʤ�ޤ��ΤǸ�Ψ���褯����ޤ���LIMIT��Ǥ�
-���ե��åȤ�������Ѥ��ʤ��褦�ˤ��ޤ��礦����������WHERE��Ǿ��ιʤ���ߤ�
-����褦�ˤ��ޤ��礦��
+このようなクエリを実行すると、SQLノードは3000行データノードからフェッチして、
+そのまま捨ててしまうことになりますので効率がよくありません。LIMIT句では
+オフセットを極力利用しないようにしましょう。その代わりWHERE句で条件の絞り込みを
+するようにしましょう。
 
-MySQL Cluster�Ǥϡ�ORDER BY�����ꤷ�ʤ��¤ꡢ�Ԥ������Ȥ���뤳�ȤϤ���ޤ���
-�嵭�Υ�����Ǥϡ��Ԥν���Ȥ�̵�ط��η�̤��֤äƤ��뤫���Τ�ޤ���
+MySQL Clusterでは、ORDER BY句を指定しない限り、行がソートされることはありません。
+上記のクエリでは、行の順序とは無関係の結果が返ってくるかも知れません。
 
-�ޤ����ͥåȥ�����Ӱ褬�ܥȥ�ͥå��ˤʤ�Τ��ɤ����ᡢ* �⤢�ޤ�
-���Ѥ���٤��ǤϤ���ޤ��󡣥�����ʤ���ळ�Ȥ���ǽ�����������礬����ޤ���
-MySQL Cluster�Ǥϥͥåȥ�����ܥȥ�ͥå��ˤʤ�䤹���Τ����դ��ޤ��礦��
+また、ネットワークの帯域がボトルネックになるのを防ぐため、* もあまり
+利用するべきではありません。カラムを絞り込むことで性能が改善する場合があります。
+MySQL Clusterではネットワークがボトルネックになりやすいので注意しましょう。
 
-�ơ��֥뤬������귿�ǤϤʤ��ǥ��������ξ�硢����å��奵��������������
-���֤��������礬����ޤ���
+テーブルがインメモリ型ではなくディスク型の場合、キャッシュサイズが小さいと
+時間がかかる場合があります。
 
-JOIN�ϻ��Ѥ��Ƥ��ʤ��Ǥ���͡�
+JOINは使用していないですよね？
 
-EXPLAIN�Ρ�type�פ�ALL�Ǥ��礦����
+EXPLAINの「type」はALLでしょうか？
 
-<span class="quote1">&gt; ���⤽�⡢����14�äȤ����Τ����������ν���®�٤ʤΤ���</span>
-<span class="quote1">&gt; �褯ʬ���äƤ��ʤ������ʤΤǤ���</span>
+<span class="quote1">&gt; そもそも、この14秒というのがそこそこの処理速度なのかも</span>
+<span class="quote1">&gt; よく分かっていない状況なのです。</span>
 
-�����٤��Ȼפ��ޤ���
+非常に遅いと思います。
 
 --
 Mikiya Okuno, MySQL Support Engineer
@@ -56,40 +56,40 @@ Sun Microsystems KK, Tokyo, Japan
 
 On 17/07/2009, at 10:13 PM, Kota Hada wrote:
 
-<span class="quote1">&gt; �Ϥ���ޤ��ơ����Ĥȿ����ޤ���</span>
+<span class="quote1">&gt; はじめまして。羽田と申します。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ML�ؤ���Ƥ����ƤʤΤǡ�����ʽ����򤷤Ƥ��ޤ������Τ�ޤ��󤬡�</span>
-<span class="quote1">&gt; �����ޤΤ��ηä��ҼڤǤ���ФȻפ��ޤ���</span>
+<span class="quote1">&gt; MLへの投稿が初めてなので、失礼な書き方をしてしまうかも知れませんが、</span>
+<span class="quote1">&gt; 皆さまのお知恵を拝借できればと思います。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; MySQL Cluster7.0�򥤥󥹥ȡ��뤷���ΤǤ�����</span>
-<span class="quote1">&gt; ��4���쥳���ɤΥơ��֥���Ф���SELECT * FROM [table_name]��LIMIT 3000,30;</span>
-<span class="quote1">&gt; �Τ褦�ˡ�select��¹Ԥ������˷�̤�ɽ����15�����٤����äƤ��ޤ��ޤ���</span>
+<span class="quote1">&gt; MySQL Cluster7.0をインストールしたのですが、</span>
+<span class="quote1">&gt; 約4万レコードのテーブルに対し、SELECT * FROM [table_name]　LIMIT 3000,30;</span>
+<span class="quote1">&gt; のように、selectを実行した場合に結果の表示に15秒程度かかってしまいます。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ����select�ν���������᤯�ʤ뤿��Υ��塼�˥���ˡ��Ƥ���Ƥ���ΤǤ�����</span>
-<span class="quote1">&gt; �ʤ��ʤ��ɤ���������������ޤ���</span>
+<span class="quote1">&gt; このselectの処理がより早くなるためのチューニング方法を検討しているのですが、</span>
+<span class="quote1">&gt; なかなか良い解決策が見当たりません。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ������Ǥϡ������꡼����å����ͭ��������åɥ���å�����ѹ���Ԥ��ޤ�������</span>
-<span class="quote1">&gt; �����Τ��Ȥʤ��顢���Υ����꡼���٤���̤��ФƤ��ޤ��ޤ���</span>
+<span class="quote1">&gt; 私の方では、クエリーキャッシュの有効、スレッドキャッシュの変更を行いましたが、</span>
+<span class="quote1">&gt; 当然のことながら、初回のクエリーは遅い結果が出てしまいます。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���⤽�⡢����14�äȤ����Τ����������ν���®�٤ʤΤ���</span>
-<span class="quote1">&gt; �褯ʬ���äƤ��ʤ������ʤΤǤ���</span>
+<span class="quote1">&gt; そもそも、この14秒というのがそこそこの処理速度なのかも</span>
+<span class="quote1">&gt; よく分かっていない状況なのです。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �����ɤ����塼�˥���ˡ����¸�ΤǤ����顢</span>
-<span class="quote1">&gt; ����������������ФȻפ��ޤ���</span>
+<span class="quote1">&gt; 何か良いチューニング方法等ご存知でしたら、</span>
+<span class="quote1">&gt; ご教授いただければと思います。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���������ꤤ�פ��ޤ���</span>
+<span class="quote1">&gt; 宜しくお願い致します。</span>
 <span class="quote1">&gt;</span>
 
 
 </pre>
 </div>
-<p class="button"><a href="14975.html">[��]</a><a href="14977.html">[��]</a><a href="../list/14901-15000.html">[�ֹ�����]</a><a href="../thread/14901-15000.html">[����åɰ���]</a></p>
+<p class="button"><a href="14975.html">[前]</a><a href="14977.html">[次]</a><a href="../list/14901-15000.html">[番号順一覧]</a><a href="../thread/14901-15000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14975.html">  14975 2009-07-17 22:13 [Kota Hada &lt;kthd.wing] MySQL Cluster�Υ��塼�˥���ˡ         </a></span>
-<span class="current">-&gt;&nbsp;<a href="14976.html">  14976 2009-07-17 23:00 ��[Mikiya Okuno &lt;Mikiya]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14977.html">  14977 2009-07-18 01:16 ����[Kota Hada &lt;kthd.wing]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14978.html">  14978 2009-07-18 11:14 ������[Mikiya Okuno &lt;Mikiya]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14984.html">  14984 2009-07-18 12:42 ��������[Kota Hada &lt;kthd.wing]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14975.html">  14975 2009-07-17 22:13 [Kota Hada &lt;kthd.wing] MySQL Clusterのチューニング方法         </a></span>
+<span class="current">-&gt;&nbsp;<a href="14976.html">  14976 2009-07-17 23:00 ┗[Mikiya Okuno &lt;Mikiya]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14977.html">  14977 2009-07-18 01:16 　┗[Kota Hada &lt;kthd.wing]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14978.html">  14978 2009-07-18 11:14 　　┗[Mikiya Okuno &lt;Mikiya]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14984.html">  14984 2009-07-18 12:42 　　　┗[Kota Hada &lt;kthd.wing]                                 </a></span>
 </pre>
 </body>
 </html>

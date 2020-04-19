@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="11666.html">[��]</a><a href="11668.html">[��]</a><a href="../list/11601-11700.html">[�ֹ�����]</a><a href="../thread/11601-11700.html">[����åɰ���]</a></p>
+<p class="button"><a href="11666.html">[前]</a><a href="11668.html">[次]</a><a href="../list/11601-11700.html">[番号順一覧]</a><a href="../thread/11601-11700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:11667
 </p>
@@ -13,64 +13,64 @@ mysql:11667
 <p>
 From: Hisamitsu Issei &lt;Hisamitsu Issei &lt;ds1i-hsmt@xxxxxxxxxx&gt;&gt;<br>
 Date: Sun, 3 Jul 2005 16:14:48 +0900<br>
-Subject: [mysql 11667] Ʊ���ơ��֥�ˣ��̤�η��򤷤Ƥ�����θ���<br>
+Subject: [mysql 11667] 同じテーブルに２通りの結合をしている場合の検索<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�Ϥ���ޤ��Ƶ׸��ȿ����ޤ�
+はじめまして久光と申します
 
-������ޤǥե�����᡼����Pro��Web�����С���ǽ��ͷ�� 
-�Ǥ����ΤǤ�����
-��󥿥륵���С����ư�����Ƥߤ����ʤäơ�����PHP 
-+MySQL���ٶ���
-�Ϥ�ޤ���������ޤǤϸ��褦���ޤͤǤʤ�Ȥ��ʤäƤ���Ǥ�����ʣ 
-����
-�ơ��֥뤬�ط�������ʬ����Ȥ����ǹԤ��ͤޤäƤ��ޤ��ޤ����� 
+　これまでファイルメーカーProのWebサーバー機能で遊ん 
+でいたのですが、
+レンタルサーバー上で動かしてみたくなって、先月からPHP 
++MySQLの勉強を
+始めました。これまでは見よう見まねでなんとかなってたんですが、複 
+数の
+テーブルが関係する部分を作るところで行き詰まってしまいました。 
 MySQL
-(4.0.24) PHP(4.3.10)�Ǥ���
+(4.0.24) PHP(4.3.10)です。
 
 
 
-�ơ��֥빽����
-�����ʾ����Ͽ���Ƥ���product
-�����̾��Ͽ���Ƥ���corporation
+テーブル構成は
+　商品情報を記録しているproduct
+　会社名を記録しているcorporation
 
-�ơ��֥�̾��product
+テーブル名：product
 ---------------------------
 id      name      maker_id
 ---------------------------
-1   �ѥ���ޣ�    1
-2   �����å����    3
-3   ���ޥꥭ�å�    1
-4   �������ޣ�      2
+1   パワー洗剤Ａ    1
+2   ウォッシュＢ    3
+3   洗剤リキッド    1
+4   液体洗剤Ｚ      2
 ---------------------------
 
 
-�ơ��֥�̾��corporation
+テーブル名：corporation
 ----------------
 id     name
 ----------------
-1   �׸�����
-2   ���ܻ���
-3   �������
-4   ������ʪ��
+1   久光商事
+2   日本産業
+3   技術東京
+4   神奈川物産
 ----------------
 
-������̾��¾�ˤ�᡼����̾��Ȥä������򤹤�Ȥ��ˤ�
+　商品名の他にもメーカー名を使った検索をするときには
 SELECT product.*, corporation.name FROM `product` LEFT JOIN  
 `corporation` ON product.maker_id = corporation.id WHERE  
-corporation.name = '�׸�����'
-�Ȥ���е׸���������¤���Ƥ���֥ѥ���ޣ��פȡ����ޥꥭ�åɡ� 
-����
-�ФǤ���ΤϤ狼��ޤ��������ޤǤϤ����ΤǤ����������������Ҥ� 
-����
-������褦�ȹͤ��Ƥ��ޤ������Ĥξ��ʤˤĤ���ʣ���������Ҥ�¸�� 
-����
-�Τǡ�
+corporation.name = '久光商事'
+とすれば久光商事が製造している「パワー洗剤Ａ」と「洗剤リキッド」 
+が抽
+出できるのはわかります。ここまではいいのですが、ここに販売会社の 
+情報
+も入れようと考えています。１つの商品について複数の販売会社が存在 
+する
+ので、
 
-�ơ��֥�̾��saler
+テーブル名：saler
 --------------
 p_id    c_id
 --------------
@@ -81,36 +81,36 @@ p_id    c_id
 3        4
 --------------
 
-�Ȥ����ơ��֥���äƾ��ʥơ��֥�Ȳ�ҥơ��֥��Ĥʤ����Ȥˤ� 
-�ޤ�
-����������̾��Ȥä������ʤ�
+というテーブルを作って商品テーブルと会社テーブルをつなぐことにし 
+まし
+た。販売会社名を使った検索なら
 
 SELECT product.*, saler.c_id, corporation.name FROM (`product` LEFT  
 JOIN `saler` ON product.id = saler.p_id) LEFT JOIN corporation ON  
-saler.c_id = corporation.id WHERE corporation.name = &quot;�׸�����&quot;  
+saler.c_id = corporation.id WHERE corporation.name = &quot;久光商事&quot;  
 GROUP BY product.id
 
-�Ȥ���е׸����������䤷�Ƥ���֥ѥ���ޣ��פȡ֥����å���¡� 
-����
-�ФǤ���ȹͤ��Ƥޤ���
+とすれば久光商事が販売している「パワー洗剤Ａ」と「ウォッシュＢ」 
+を抽
+出できると考えてます。
 
-���Ȥ����Ǥ�ä�����ʤΤǤ������嵭���ѥ�������Ȥ߹�碌���� 
-�硢��
-�ޤ���¤��Ҥ��ֵ׸������פ������Ҥ��ֿ�����ʪ���פǤ�������� 
-�ꥭ��
-�ɡפ���Ф���Ȥ����褦���Ȥ߹�碌�ΤȤ��ˤɤ��SQLʸ�� 
-���Ф���
-�Τ��Ȥ����Ȥ����ǹԤ��ͤޤäƤ��ޤ��ޤ������ɤ���� 
+　ところでやっと本題なのですが、上記２パターンを組み合わせた場 
+合、つ
+まり製造会社が「久光商事」で販売会社が「神奈川物産」である「洗剤 
+リキッ
+ド」を抽出するというような組み合わせのときにどんなSQL文を 
+作ればいい
+のかというところで行き詰まってしまいました。どちらも 
 corporation.name
-�ʤΤ���¤������ζ��̤�Ĥ����ʤ��ΤǤ�����¤�������ξ���� 
-��ä�
-�����Ҥ�����Τǡ���¤��ҥơ��֥�������ҥơ��֥�Σ��ơ��� 
-���
-���Τϴ��������ݤˤʤꤽ���ʤΤ��򤱤����ȻפäƤ��ޤ���
+なので製造と販売の区別をつけられないのです。製造と販売の両方を 
+やって
+いる会社があるので、製造会社テーブルと販売会社テーブルの２テーブ 
+ルを
+作るのは管理が面倒になりそうなので避けたいと思っています。
 
-������ʾ��Ϥɤ����Τ������ΤǤ��礦����������������ꤤ���� 
-����
-����
+　こんな場合はどうやるのがいいのでしょうか？　よろしくお願いいた 
+しま
+す。
 
 
 
@@ -124,11 +124,11 @@ corporation.name
 
 </pre>
 </div>
-<p class="button"><a href="11666.html">[��]</a><a href="11668.html">[��]</a><a href="../list/11601-11700.html">[�ֹ�����]</a><a href="../thread/11601-11700.html">[����åɰ���]</a></p>
+<p class="button"><a href="11666.html">[前]</a><a href="11668.html">[次]</a><a href="../list/11601-11700.html">[番号順一覧]</a><a href="../thread/11601-11700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="11667.html">  11667 2005-07-03 16:14 [Hisamitsu Issei &lt;ds1] Ʊ���ơ��֥�ˣ��̤�η��򤷤Ƥ�����θ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11669.html">  11669 2005-07-03 17:06 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11672.html">  11672 2005-07-03 17:50 ����[Hisamitsu Issei &lt;ds1]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="11667.html">  11667 2005-07-03 16:14 [Hisamitsu Issei &lt;ds1] 同じテーブルに２通りの結合をしている場合の検索</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11669.html">  11669 2005-07-03 17:06 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11672.html">  11672 2005-07-03 17:50 　┗[Hisamitsu Issei &lt;ds1]                                     </a></span>
 </pre>
 </body>
 </html>

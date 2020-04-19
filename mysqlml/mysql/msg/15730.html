@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15729.html">[��]</a><a href="15731.html">[��]</a><a href="../list/15701-15800.html">[�ֹ�����]</a><a href="../thread/15701-15800.html">[����åɰ���]</a></p>
+<p class="button"><a href="15729.html">[前]</a><a href="15731.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15730
 </p>
@@ -13,29 +13,29 @@ mysql:15730
 <p>
 From: &quot;ochiai&quot; &lt;&quot;ochiai&quot; &lt;s.ochiai@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 13 Apr 2012 10:32:27 +0900<br>
-Subject: [mysql 15730] Re: Left Join����դ���UPDATE�������֤�����Ĺ�������äơʲ������<br>
+Subject: [mysql 15730] Re: Left Join句を付けたUPDATE処理時間が非常に長くかかって（解決御礼）<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�����͡�ʿ����
+中川様、平塚様
 
-���꤬�Ȥ��������ޤ���
-�������ֿ��򤷤��塢����饯�����åȤ������줬�ƶ����Ƥ��뤫�⤷��ʤ�
-�Ȼפ�����
-ALTER�ǥơ��֥�Υǥե���ȥ���饯�����åȤ�CP932���ѹ��������١�
-explain���ͻҤ򸫤ޤ�����
-��̤ϡ��Ѥ��ޤ���Ǥ�����
+ありがとうございます。
+私も先の返信をした後、キャラクタセットの不統一が影響しているかもしれない
+と思い、、
+ALTERでテーブルのデフォルトキャラクタセットをCP932に変更し、再度、
+explainで様子を見ました。
+結果は、変わりませんでした。
 
-�����ǡ�ǰ�Τ��ᡢshow create table�ǥơ��֥�����򸫤��Ȥ�����
-�ơ��֥�Υǥե���ȥ���饯�����åȤ�CP932���ѹ�����Ƥ��ޤ�������
-varchar�γƥե�����ɤ������utf8���ɲä���Ƥ��ޤ�����
-���˥ǡ��������äƤ���ե�����ɤΥ���饯�����åȤ��ѹ��Ǥ��ʤ��Τ��⤷
-��ޤ���
+そこで、念のため、show create tableでテーブル定義を見たところ、
+テーブルのデフォルトキャラクタセットはCP932に変更されていましたが、
+varcharの各フィールドの定義にutf8が追加されていました。
+既にデータが入っているフィールドのキャラクタセットは変更できないのかもし
+れません。
 
-�����ǡ��ǽ餫��ơ��֥����ľ���ơ�explain���ͻҤ�ߤޤ�����
-��̤ϡ�˾��Ǥ�����̤Ȥʤ�ޤ�����
+そこで、最初からテーブルを作り直して、explainで様子をみました。
+結果は、望んでいた結果となりました。
 +----+-------------+---------+--------+---------------+-----------+---------+-----------------+--------+-------+
 
 <span class="quote1">| id | select_type | table | type | possible_keys | key | key_len | ref</span>
@@ -48,39 +48,39 @@ test.table-a.F1 | 1 | |
 +----+-------------+---------+--------+---------------+-----------+---------+-----------------+--------+-------+
 
 
-�ºݤˡ������UPDATE��Ԥä��Ȥ�������ʬ���٤ǽ�������λ���ޤ�����
+実際に、これでUPDATEを行ったところ、１分程度で処理が完了しました。
 
-ʿ���ͤˤϡ��ܤ�������򤤤�������Ǽ�����ޤ�����
-����饯�����åȤ��ۤʤ��硢���ۤΤ�����CAST���Ƥ���Ƥ���Ȥϡ��褯�ͤ����Ƥ��ޤ��͡�
-�Ȥ����ǡ�ʿ�ͤ���β���Τ褦�ʾ���Ϥɤ��ˤ���ΤǤ��礦�������������ж����Ƥ���������
+平塚様には、詳しい解説をいただき、納得しました。
+キャラクタセットが異なる場合、暗黙のうちにCASTしてくれているとは、よく考えられていますね。
+ところで、平塚さんの解説のような情報はどこにあるのでしょうか？よろしければ教えてください。
 
-����ζ������ǥե���ȥ���饯�����åȤϥ�������ñ�̤����ꤹ����ɤ���
+今回の教訓：デフォルトキャラクタセットはスキーマ単位で設定すると良い。
 
-���꤬�Ȥ��������ޤ�����
+ありがとうございました。
 
 
-(2012/04/11 18:24), ���� �� wrote:
-<span class="quote1">&gt; �ο��Ϥ���ޤ��󤬡����줬�ƶ����Ƥ����ǽ���Ϥ���ޤ���</span>
-<span class="quote1">&gt; �������͹����͹���ֹ漭��Υǡ�����utf8��cp932�Υơ��֥���������JOIN���Ƥߤޤ��������������ξ�硢</span>
-<span class="quote1">&gt; ���祤��˺������Ȥ��ޤ���Ǥ�����</span>
-<span class="quote1">&gt; �ʤ�����ʬ����ޤ��󤬡��祭��Ʊ�Τξ��ref�ˡ�func��ɽ��������ޤ������ξ�硢�ºݤˤɤ��ư���</span>
-<span class="quote1">&gt; ���Ƥ��뤫��ʬ����ޤ���</span>
-<span class="quote1">&gt; ��ˡ�charaset��cp932�˹�碌���Ķ��Ǥ⤦���ٻ�Ƹ��Ƥ���������</span>
+(2012/04/11 18:24), 中川 貴 wrote:
+<span class="quote1">&gt; 確信はありませんが、これが影響している可能性はあります。</span>
+<span class="quote1">&gt; 私も日本郵政の郵便番号辞書のデータでutf8とcp932のテーブルを作成してJOINしてみましたが副次キーの場合、</span>
+<span class="quote1">&gt; ジョインに索引が使われませんでした。</span>
+<span class="quote1">&gt; なぜだか分かりませんが、主キー同士の場合refに「func」表示が現れます。この場合、実際にどんな動作を</span>
+<span class="quote1">&gt; しているかは分かりません。</span>
+<span class="quote1">&gt; 試しに、charasetをcp932に合わせた環境でもう一度試して見てください。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; ****************************************</span>
-<span class="quote1">&gt; �����׾��󥷥��ƥ�������</span>
-<span class="quote1">&gt; ���ѻ�����</span>
-<span class="quote1">&gt; �����ץץ饶�����ӥ��ǥ������롼��</span>
-<span class="quote1">&gt; �����</span>
+<span class="quote1">&gt; コープ情報システム株式会社</span>
+<span class="quote1">&gt; 運用事業部</span>
+<span class="quote1">&gt; コーププラザサービスデスクグループ</span>
+<span class="quote1">&gt; 中川　貴</span>
 <span class="quote1">&gt; 175-0094</span>
-<span class="quote1">&gt; ����Խ�ë���ë3-29-8 �����ץץ饶5F</span>
+<span class="quote1">&gt; 東京都渋谷区渋谷3-29-8 コーププラザ5F</span>
 <span class="quote1">&gt; TEL 03-5778-8010</span>
 <span class="quote1">&gt; E-MAIL takashi.nakagawa@xxxxxxxxxx</span>
 <span class="quote1">&gt; ****************************************</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; (2012/04/11 17:03), ochiai wrote:</span>
-<span class="quote2">&gt;&gt; �����Ť������ȤǤ�������㤤��table-a��table-b�Υ���饯�����åȤ��ۤʤäƤ��ޤ����������cp932�����줷�ޤ���</span>
-<span class="quote2">&gt;&gt; ����ϱƶ�����Ǥ��礦����</span>
+<span class="quote2">&gt;&gt; 今気づいたことですが、手違いでtable-aとtable-bのキャラクタセットが異なっていました。本来はcp932で統一します。</span>
+<span class="quote2">&gt;&gt; これは影響するでしょうか？</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 
@@ -90,83 +90,83 @@ test.table-a.F1 | 1 | |
 From: &quot;HIRATSUKA Sadao&quot; &lt;hiratsuka.sadao@xxxxxxxxxx&gt;
 To: &lt;ml@xxxxxxxxxx&gt;
 Sent: Thursday, April 12, 2012 9:46 AM
-Subject: <a href="15729.html">[mysql 15729]</a> Re: Left Join����դ���UPDATE�������֤�����Ĺ�������äơ�Ĺʸ��
+Subject: <a href="15729.html">[mysql 15729]</a> Re: Left Join句を付けたUPDATE処理時間が非常に長くかかって（長文）
 
 
-<span class="quote1">&gt; ���Ϥ褦�������ޤ���ʿ�ͤǤ���</span>
+<span class="quote1">&gt; おはようございます、平塚です。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; On Wed, 11 Apr 2012 18:24:05 +0900</span>
-<span class="quote1">&gt; ���� ��&lt;takashi.nakagawa@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt; 中川 貴&lt;takashi.nakagawa@xxxxxxxxxx&gt; wrote:</span>
 <span class="quote1">&gt;</span>
-<span class="quote2">&gt;&gt; �ο��Ϥ���ޤ��󤬡����줬�ƶ����Ƥ����ǽ���Ϥ���ޤ���</span>
-<span class="quote2">&gt;&gt; �������͹����͹���ֹ漭��Υǡ�����utf8��cp932�Υơ��֥���������</span>
-<span class="quote2">&gt;&gt; JOIN���Ƥߤޤ��������������ξ�硢</span>
-<span class="quote2">&gt;&gt; ���祤��˺������Ȥ��ޤ���Ǥ�����</span>
+<span class="quote2">&gt;&gt; 確信はありませんが、これが影響している可能性はあります。</span>
+<span class="quote2">&gt;&gt; 私も日本郵政の郵便番号辞書のデータでutf8とcp932のテーブルを作成して</span>
+<span class="quote2">&gt;&gt; JOINしてみましたが副次キーの場合、</span>
+<span class="quote2">&gt;&gt; ジョインに索引が使われませんでした。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; (2012/04/11 17:03), ochiai wrote:</span>
 <span class="quote1">&gt;</span>
-<span class="quote3">&gt;&gt; &gt; �����Ť������ȤǤ�������㤤��table-a��table-b�Υ���饯�����åȤ�</span>
-<span class="quote3">&gt;&gt; &gt; �ۤʤäƤ��ޤ����������cp932�����줷�ޤ���</span>
-<span class="quote3">&gt;&gt; &gt; ����ϱƶ�����Ǥ��礦����</span>
+<span class="quote3">&gt;&gt; &gt; 今気づいたことですが、手違いでtable-aとtable-bのキャラクタセットが</span>
+<span class="quote3">&gt;&gt; &gt; 異なっていました。本来はcp932で統一します。</span>
+<span class="quote3">&gt;&gt; &gt; これは影響するでしょうか？</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ������Ǥ�Ƹ����ޤ�����</span>
-<span class="quote1">&gt; �����������Τ��ä�����̤�Ǵְ㤤�ʤ��Ȼפ��ޤ���</span>
-<span class="quote1">&gt; �����Ȥ��Ƥϡ�����饯�����åȤ����줷�Ƥ���������</span>
+<span class="quote1">&gt; こちらでも再現しました。</span>
+<span class="quote1">&gt; 原因は中川さんのおっしゃる通りで間違いないと思います。</span>
+<span class="quote1">&gt; 解決策としては、キャラクタセットを統一してください。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; ==</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ʲ�����Ǥ���</span>
+<span class="quote1">&gt; 以下解説です。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; FROM ta LEFT JOIN tb ON ta.c1 = tb.c1</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Ȥ���SQL�ˤ�����ta��utf8��tb��cp932�ξ�硢</span>
-<span class="quote1">&gt; ����Ū�˰ʲ��Τ褦���Ѵ����Ԥ�졢utf8Ʊ�ΤǤ���ӤȤʤ�ޤ���</span>
+<span class="quote1">&gt; というSQLにおいてtaがutf8、tbがcp932の場合、</span>
+<span class="quote1">&gt; 内部的に以下のような変換が行われ、utf8同士での比較となります。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; ta.c1 = CAST(tb.c1 AS CHAR CHARACTER SET utf8)</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; tb.c1���Ф��ƴؿ���Ŭ�Ѥ��Ƥ��뤿�ᡢ</span>
-<span class="quote1">&gt; tb.c1�˥���ǥå��������äƤ�Ȥ��ʤ��ʤ�ޤ���</span>
+<span class="quote1">&gt; tb.c1に対して関数を適用しているため、</span>
+<span class="quote1">&gt; tb.c1にインデックスがあっても使えなくなります。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; --</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �⤷�����SQL��INNER JOIN�Ǥ���С�</span>
-<span class="quote1">&gt; tb���ưɽ�Ȥ���ta.c1�Υ���ǥå�����Ȥ�</span>
-<span class="quote1">&gt; ������SQL�¹Էײ�ˤʤä���ǽ��������ޤ���</span>
+<span class="quote1">&gt; もし問題のSQLがINNER JOINであれば、</span>
+<span class="quote1">&gt; tbを駆動表としてta.c1のインデックスを使う</span>
+<span class="quote1">&gt; 次善のSQL実行計画になった可能性があります。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ������LEFT JOIN�Ǥ���</span>
-<span class="quote1">&gt; tb�˳����ʤ��Υǡ��������ȴ���Ƥ���ɬ�פ����뤿��</span>
-<span class="quote1">&gt; ta���ưɽ�Ȥ���SQL�¹Էײ褷�����٤���</span>
-<span class="quote1">&gt; �ե륹�������ʤ��Ȥʤ�ޤ���</span>
+<span class="quote1">&gt; しかしLEFT JOINですと</span>
+<span class="quote1">&gt; tbに該当なしのデータも引き抜いてくる必要があるため</span>
+<span class="quote1">&gt; taを駆動表としたSQL実行計画しか選べず、</span>
+<span class="quote1">&gt; フルスキャンやむなしとなります。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; --</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ޤ���ta��cp932��tb��utf8�Ȥ����դΥѥ�����Ǥ�</span>
+<span class="quote1">&gt; また、taがcp932、tbがutf8という逆のパターンでは</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; CAST(ta.c1 AS CHAR CHARACTER SET utf8) = tb.c1</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Ȥʤ뤿�ᡢta����ưɽ�Ǥ������</span>
-<span class="quote1">&gt; tb.c1�Υ���ǥå�����Ȥ����Ȥ��Ǥ��ޤ���</span>
+<span class="quote1">&gt; となるため、taが駆動表である場合に</span>
+<span class="quote1">&gt; tb.c1のインデックスを使うことができます。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���ΤȤ�tb��ref�ˡ�func�פ�����ޤ���</span>
-<span class="quote1">&gt; ta.c1��func��Ŭ�Ѥ�����Τ�tb.c1��JOIN����Ȥ�����̣�Ǥ���</span>
+<span class="quote1">&gt; このときtbのrefに「func」が現れます。</span>
+<span class="quote1">&gt; ta.c1にfuncを適用したものとtb.c1をJOINするという意味です。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; --</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���ޤ���ta��cp932��tb��eucjpms�ξ��ϡ�</span>
-<span class="quote1">&gt; ���ۤΥ���饯�����å��Ѵ����Ǥ������顼�Ȥʤ�ޤ���</span>
+<span class="quote1">&gt; おまけでtaがcp932、tbがeucjpmsの場合は、</span>
+<span class="quote1">&gt; 暗黙のキャラクタセット変換ができずエラーとなります。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; ERROR 1267 (HY000): Illegal mix of collations</span>
 <span class="quote1">&gt; (cp932_japanese_ci,IMPLICIT) and (eucjpms_japanese_ci,IMPLICIT)</span>
 <span class="quote1">&gt; for operation '='</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���ۤΥ���饯�����å��Ѵ����Ǥ���Τϡ�Ĵ�٤��¤�</span>
-<span class="quote1">&gt; cp932   �� utf8</span>
-<span class="quote1">&gt; eucjpms �� utf8</span>
-<span class="quote1">&gt; utf8    �� utf8mb4</span>
-<span class="quote1">&gt; �ʤ�utf8�˸����������ΤߤΤ褦�Ǥ���(latin1 �� cp932���Բ�)</span>
+<span class="quote1">&gt; 暗黙のキャラクタセット変換ができるのは、調べた限り</span>
+<span class="quote1">&gt; cp932   → utf8</span>
+<span class="quote1">&gt; eucjpms → utf8</span>
+<span class="quote1">&gt; utf8    → utf8mb4</span>
+<span class="quote1">&gt; などutf8に向かう方向のみのようです。(latin1 → cp932は不可)</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; -- </span>
-<span class="quote1">&gt; ʿ������ hiratsuka.sadao@xxxxxxxxxx</span>
+<span class="quote1">&gt; 平塚貞夫 hiratsuka.sadao@xxxxxxxxxx</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
@@ -178,23 +178,23 @@ Subject: <a href="15729.html">[mysql 15729]</a> Re: Left Join����դ���UPDATE���
 
 </pre>
 </div>
-<p class="button"><a href="15729.html">[��]</a><a href="15731.html">[��]</a><a href="../list/15701-15800.html">[�ֹ�����]</a><a href="../thread/15701-15800.html">[����åɰ���]</a></p>
+<p class="button"><a href="15729.html">[前]</a><a href="15731.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="15703.html">  15703 2012-03-29 15:08 [&quot;ochiai&quot; &lt;s.ochiai@x] Left Join����դ���UPDATE�������֤�����Ĺ�������ä�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15705.html">  15705 2012-03-29 16:56 ��[���� �� &lt;takashi.nak]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15706.html">  15706 2012-03-29 17:01 ��[���� �� &lt;takashi.nak]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15707.html">  15707 2012-03-29 17:12 ����[���� �� &lt;takashi.nak]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15708.html">  15708 2012-03-29 17:42 ������[&quot;ochiai&quot; &lt;s.ochiai@x]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15709.html">  15709 2012-03-29 17:46 ��������[���� �� &lt;takashi.nak]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15711.html">  15711 2012-03-29 17:58 ����������[&quot;ochiai&quot; &lt;s.ochiai@x]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15712.html">  15712 2012-03-29 20:25 ������������[HIRATSUKA Sadao &lt;hir]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15713.html">  15713 2012-03-30 01:27 ������������[��� &lt;nora1962@xxx]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15727.html">  15727 2012-04-11 17:03 ��������������[&quot;ochiai&quot; &lt;s.ochiai@x] Re: Left Join����դ���UPDATE�������֤�����Ĺ�������äơ�Ĺʸ��</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15728.html">  15728 2012-04-11 18:24 ����������������[���� �� &lt;takashi.nak]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15729.html">  15729 2012-04-12 09:46 ������������������[HIRATSUKA Sadao &lt;hir]                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="15730.html">  15730 2012-04-13 10:32 ��������������������[&quot;ochiai&quot; &lt;s.ochiai@x] Re: Left Join����դ���UPDATE�������֤�����Ĺ�������äơʲ������</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15733.html">  15733 2012-04-13 11:13 ����������������������[HIRATSUKA Sadao &lt;hir]                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15710.html">  15710 2012-03-29 17:47 ��������[Masaaki Matsuyama &lt;m]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15703.html">  15703 2012-03-29 15:08 [&quot;ochiai&quot; &lt;s.ochiai@x] Left Join句を付けたUPDATE処理時間が非常に長くかかって</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15705.html">  15705 2012-03-29 16:56 ┣[中川 貴 &lt;takashi.nak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15706.html">  15706 2012-03-29 17:01 ┗[中川 貴 &lt;takashi.nak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15707.html">  15707 2012-03-29 17:12 　┗[中川 貴 &lt;takashi.nak]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15708.html">  15708 2012-03-29 17:42 　　┗[&quot;ochiai&quot; &lt;s.ochiai@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15709.html">  15709 2012-03-29 17:46 　　　┣[中川 貴 &lt;takashi.nak]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15711.html">  15711 2012-03-29 17:58 　　　┃┗[&quot;ochiai&quot; &lt;s.ochiai@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15712.html">  15712 2012-03-29 20:25 　　　┃　┣[HIRATSUKA Sadao &lt;hir]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15713.html">  15713 2012-03-30 01:27 　　　┃　┗[中川貴 &lt;nora1962@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15727.html">  15727 2012-04-11 17:03 　　　┃　　┗[&quot;ochiai&quot; &lt;s.ochiai@x] Re: Left Join句を付けたUPDATE処理時間が非常に長くかかって（長文）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15728.html">  15728 2012-04-11 18:24 　　　┃　　　┗[中川 貴 &lt;takashi.nak]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15729.html">  15729 2012-04-12 09:46 　　　┃　　　　┗[HIRATSUKA Sadao &lt;hir]                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="15730.html">  15730 2012-04-13 10:32 　　　┃　　　　　┗[&quot;ochiai&quot; &lt;s.ochiai@x] Re: Left Join句を付けたUPDATE処理時間が非常に長くかかって（解決御礼）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15733.html">  15733 2012-04-13 11:13 　　　┃　　　　　　┗[HIRATSUKA Sadao &lt;hir]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15710.html">  15710 2012-03-29 17:47 　　　┗[Masaaki Matsuyama &lt;m]                                 </a></span>
 </pre>
 </body>
 </html>

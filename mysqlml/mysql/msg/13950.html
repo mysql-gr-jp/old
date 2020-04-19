@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13949.html">[��]</a><a href="13951.html">[��]</a><a href="../list/13901-14000.html">[�ֹ�����]</a><a href="../thread/13901-14000.html">[����åɰ���]</a></p>
+<p class="button"><a href="13949.html">[前]</a><a href="13951.html">[次]</a><a href="../list/13901-14000.html">[番号順一覧]</a><a href="../thread/13901-14000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13950
 </p>
@@ -13,48 +13,48 @@ mysql:13950
 <p>
 From: &lt;kinosita@xxxxxxxxxx&gt;<br>
 Date: Wed, 09 May 2007 11:45:55 +0900<br>
-Subject: [mysql 13950] ���ȥ��ɥץ����������Ȥ����٤��ʤ롩��<br>
+Subject: [mysql 13950] ストアドプロシージャを使うと遅くなる？？<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
 
-�Ϥ���ޤ��ơ��ڲ�����ȿ����ޤ���
+はじめまして。木下弘基と申します。
 
-���� MySQL 5.0.37 (WinXP) �� C API �����̥ǡ�������Ͽ����
-�ץ������γ�ȯ����Ω������ñ�ʥ���ץ����Ĵ���򤷤Ƥ��ޤ���
+現在 MySQL 5.0.37 (WinXP) ＋ C API で大量データを登録する
+プログラムの開発に先立ち、簡単なサンプルを作り調査をしています。
 
-�ץ��������Թ��ǡ�����ưŪ��������������������Ͽ����ɬ�פ����뤿�ᡢ
-�ե������ͳ��LOAD DATA LOCAL INFILE���ˤǤϤʤ������ȥ��ɥץ����������
-�¸����褦�ȹͤ��Ƥ��ޤ���
+プログラムの都合上データは動的に生成し、その都度登録する必要があるため、
+ファイル経由（LOAD DATA LOCAL INFILE～）ではなく、ストアドプロシージャで
+実現しようと考えています。
 
-�Ȥ��������Ǥ�INSERTʸ�򷫤��֤��¹Ԥ�����⡢���ȥ��ɥץ����������
-��Ͽ���ƤӽФ������������֤������ꡢ�ץ��ڥ��ɥ��ơ��ȥ��Ȥʤ��
-�Ǥ�INSERTʸ������ᤤ�Ȥ�����̤��ФƤ��ޤ��ޤ�����
+ところが、素のINSERT文を繰り返し実行するよりも、ストアドプロシージャで
+登録・呼び出す方が処理時間がかかり、プロペアドステートメントならば
+素のINSERT文よりやや早いという結果が出てしまいました。
 
-    �Ǥ�INSERTʸ�򣱣�����¹ԡ���������������
-    ���ȥ��ɥץ����������ͳ����Ͽ������������
-    �ץ�ڥ��ɥ��ơ��ȥ��Ȥ���Ͽ������������
+    素のINSERT文を１０万回実行・・・・・３３秒
+    ストアドプロシージャ経由で登録・・・３９秒
+    プリペアドステートメントで登録・・・２９秒
 
-����Υץ������ǰ����ǡ����η���Ͽ�ɴ���
-INSERT�Ǥʤ�UPDATE�ξ��⤢��ޤ���
+本来のプログラムで扱うデータの件数は数百万件、
+INSERTでなくUPDATEの場合もあります。
 
-��ʹ�����������ϼ����̤�Ǥ���
+お聞きしたい点は次の通りです。
 
-Q1. �ʤ��Υ���ץ�ǡ����ˤ����ơ˥��ȥ��ɥץ��������������
-    �٤��ʤ�Τϡ��������Ǥ�MySQL�������ȹͤ���٤��Ǥ��礦����
+Q1. （このサンプルデータにおいて）ストアドプロシージャの方が
+    遅くなるのは、現時点でのMySQLの特性と考えるべきでしょうか？
 
-Q2. Oracle���ͤˡ����ȥ��ɥץ�����������Ф��ƥХ�����ѿ���
-    �����Ϥ���ˡ�Ϥ���ޤ�����
-    ��API������ץ�򸫤�¤ꤳ���̵�������Ǥ���������
+Q2. Oracleの様に、ストアドプロシージャに対してバインド変数を
+    受け渡す方法はありますか？
+    （API、サンプルを見る限りこれは無さそうですが・・）
 
-Q3. ¾�˲�����®����Ͽ������ʤϹͤ�����Ǥ��礦����
+Q3. 他に何か高速に登録する手段は考えられるでしょうか？
 
 
-�¹Ԥ������Ƥϼ����̤�Ǥ���
+実行した内容は次の通りです。
 
-�� INSERTʸ���Τޤޤμ¹���
+■ INSERT文そのままの実行例
 
     for (nCnt = 1; nCnt &lt;= 100000; nCnt ++) {
         sprintf(cSQL, &quot;INSERT INTO proc_tb VALUES (%d,'%s%d','%s');&quot;, 
@@ -62,7 +62,7 @@ Q3. ¾�˲�����®����Ͽ������ʤϹͤ�����Ǥ��礦����
         mysql_query(mysql, cSQL);
     }
 
-�� ���ȥ��ɥץ����������ͳ�Ǥμ¹���
+■ ストアドプロシージャ経由での実行例
 
     char *gcInsProc = 
         &quot;CREATE PROCEDURE PROC_INSERT&quot;
@@ -80,7 +80,7 @@ Q3. ¾�˲�����®����Ͽ������ʤϹͤ�����Ǥ��礦����
         mysql_query(mysql, cSQL);
     }
 
-�� �ץ�ڥ��ɥ��ơ��ȥ��ȤǤμ¹���
+■ プリペアドステートメントでの実行例
 
 char *gcInsPrepare = &quot;INSERT INTO proc_tb VALUES (?, ?, ?)&quot;;
 
@@ -110,17 +110,17 @@ char *gcInsPrepare = &quot;INSERT INTO proc_tb VALUES (?, ?, ?)&quot;;
 
     mysql_stmt_close(stmt);
 
-�ʾ�Ǥ������������ꤤ���ޤ���
+以上です。宜しくお願いします。
 
 
 
 </pre>
 </div>
-<p class="button"><a href="13949.html">[��]</a><a href="13951.html">[��]</a><a href="../list/13901-14000.html">[�ֹ�����]</a><a href="../thread/13901-14000.html">[����åɰ���]</a></p>
+<p class="button"><a href="13949.html">[前]</a><a href="13951.html">[次]</a><a href="../list/13901-14000.html">[番号順一覧]</a><a href="../thread/13901-14000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="13950.html">  13950 2007-05-09 11:45 [&lt;kinosita@xxxxxxxxxx] ���ȥ��ɥץ����������Ȥ����٤��ʤ롩��</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13951.html">  13951 2007-05-09 14:02 ��[HIRATSUKA Sadao &lt;hir]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13952.html">  13952 2007-05-09 16:40 ����[&lt;kinosita@xxxxxxxxxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="13950.html">  13950 2007-05-09 11:45 [&lt;kinosita@xxxxxxxxxx] ストアドプロシージャを使うと遅くなる？？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13951.html">  13951 2007-05-09 14:02 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13952.html">  13952 2007-05-09 16:40 　┗[&lt;kinosita@xxxxxxxxxx]                                     </a></span>
 </pre>
 </body>
 </html>

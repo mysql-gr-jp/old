@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="9228.html">[��]</a><a href="9230.html">[��]</a><a href="../list/9201-9300.html">[�ֹ�����]</a><a href="../thread/9201-9300.html">[����åɰ���]</a></p>
+<p class="button"><a href="9228.html">[前]</a><a href="9230.html">[次]</a><a href="../list/9201-9300.html">[番号順一覧]</a><a href="../thread/9201-9300.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:9229
 </p>
@@ -13,49 +13,49 @@ mysql:9229
 <p>
 From: &quot;Matsunobu, Yoshinori&quot; &lt;&quot;Matsunobu, Yoshinori&quot; &lt;Yoshinori.Matsunobu@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 17 Apr 2004 00:43:55 +0900<br>
-Subject: [mysql 09229] Re: Ⱦ�ѥ������ʤΥ������Ѵ�<br>
+Subject: [mysql 09229] Re: 半角カタカナのコード変換<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�����ȿ����ޤ���
-����ƤǤ�������Ȥ����������ꤤ�����夲�ޤ���
+松信と申します。
+初投稿です。今後ともよろしくお願い申し上げます。
 
-<span class="quote1">&gt;   �ּ���MySQL4�פˤ⤢�ä��������С����饤����ȴ֤�ʸ�������ɤμ�ư��</span>
-<span class="quote1">&gt;   ��������ˤ� CONVERT(expr USING transcoding_name) ��Ȥä�ʸ��������</span>
-<span class="quote1">&gt;   �Ѵ��Ǥ�����Ⱦ�ѥ������ʤξ��ˤ�ư���ʤ��褦�ʤΤǤ���</span>
-<span class="quote1">&gt;   ư���Τϡ�ujis --&gt; utf8 ���Ѵ������ߤ����Ǥ���</span>
+<span class="quote1">&gt;   「実践MySQL4」にもあった、サーバ・クライアント間の文字コードの自動変</span>
+<span class="quote1">&gt;   換、さらには CONVERT(expr USING transcoding_name) を使った文字コード</span>
+<span class="quote1">&gt;   変換ですが、半角カタカナの場合には動かないようなのです。</span>
+<span class="quote1">&gt;   動くのは、ujis --&gt; utf8 の変換だけみたいです。</span>
 
-�С������4.1�ʹߤ�ʸ���������Ѵ��ε�ǽ�ˤĤ��ƤǤ�����
-���ե�JIS(sjis)�����ܸ�EUC(ujis)��Ⱦ�ѥ��ʤ��Ѵ�����ʸ����������Ȥ����ɾ��ϡ�
-1����ۤ����ˡ���δĶ��Ǥ�Ƹ����ޤ���(RedHat9+MySQL5.0.0alpha)��
+バージョン4.1以降の文字コード変換の機能についてですが、
+シフトJIS(sjis)と日本語EUC(ujis)の半角カナが変換時に文字化けするという症状は、
+1ヶ月ほど前に、私の環境でも再現しました(RedHat9+MySQL5.0.0alpha)。
 
-�����������ɤ�Ĵ�٤��Ȥ����Х��Ȼפ�줿�Τǡ�������ʬ�������ƺƥ���ѥ��뤷���Ȥ���������ư��ޤ�����
-������ʬ��ޤ��MySQL AB�Ҥ���𤷤��Ȥ������Х��Ǥ����ǧ��Ƥ�館��
-���ʤ��Ȥ�sjis�˴ؤ��ƤϽ���������ꡢ4.1.2����ȿ�Ǥ����褦�Ǥ���
+ソースコードを調べたところバグと思われたので、その部分を修正して再コンパイルしたところ正しく動作しました。
+修正部分も含めてMySQL AB社に報告したところ、バグであると認めてもらえ、
+少なくともsjisに関しては修正が終わり、4.1.2から反映されるようです。
 <a href="http://bugs.mysql.com/bug.php?id=3290">http://bugs.mysql.com/bug.php?id=3290</a>
 
-�ޤ�4.1.2�ϽФƤ��ʤ��褦�Ǥ��Τǡ��䤬ư���ǧ���������ս�(5.0.0alpha�Ǥ�����
-4.1.1�Ǥ⤪���餯Ʊ���ǤϤʤ��Ǥ��礦������ǧ���Ƥ��ޤ��󤬡�)��ʲ��˼����ޤ��Τǡ�
-�⤷ɬ�פ�����Ф������������
+まだ4.1.2は出ていないようですので、私が動作確認した修正箇所(5.0.0alphaですが、
+4.1.1でもおそらく同じではないでしょうか？確認していませんが…)を以下に示しますので、
+もし必要があればお試しください。
 
 ---
-Ⱦ�ѥ��ʤ�ʸ���������븶���ϡ�
+半角カナが文字化けする原因は、
 
-��sjis������Ѵ���sjis�ؤ��Ѵ��ˤĤ��Ƥϡ�sjis��Ⱦ�ѥ��ʤ�1�Х��ȤȤ��ư����Τ�
-MySQL�ǤϤʤ����Ȥ��2�Х��ȤȤ��ư��äƤ���
-��ujis�ؤ��Ѵ��ˤĤ��Ƥϡ�ujis��Ⱦ�ѥ��ʤ�2�Х��ȤȤ��ư����Τ�
-MySQL�ǤϤʤ���1�Х��ȤȤ��ư��äƤ���(ujis������Ѵ��ˤĤ��Ƥ�
-MySQL��2�Х��ȤȤ��ư��äƤ���Τ�����ʤ�)
+●sjisからの変換、sjisへの変換については、sjisは半角カナを1バイトとして扱うのに
+MySQLではなぜかともに2バイトとして扱っている
+●ujisへの変換については、ujisは半角カナを2バイトとして扱うのに
+MySQLではなぜか1バイトとして扱っている(ujisからの変換については
+MySQLが2バイトとして扱っているので問題ない)
 
-�Ȥ����Ȥ����ˤ���ޤ���������ʬ��ľ�����Ȥ���������ư��ޤ�����
+というところにあります。その部分を直したところ正しく動作しました。
 
 sjis
 1.ctype-sjis.c
-1-1.my_mb_wc_sjis�ؿ�
+1-1.my_mb_wc_sjis関数
 
-��:
+前:
 ....
   if (hi&lt;0x80)
   {
@@ -66,7 +66,7 @@ sjis
     return MY_CS_TOOFEW(0);
 ....
 
-��:
+後:
 ....
   if (hi&lt;0x80)
   {
@@ -85,9 +85,9 @@ sjis
 ....
 
 
-1-2.my_mb_wb_sjis�ؿ�
+1-2.my_mb_wb_sjis関数
 
-��:
+前:
 ....
   if (!(code=func_uni_sjis_onechar(wc)))
     return MY_CS_ILUNI;
@@ -99,7 +99,7 @@ sjis
   return 2;
 ....
 
-��:
+後:
 ....
   if (!(code=func_uni_sjis_onechar(wc)))
     return MY_CS_ILUNI;
@@ -122,9 +122,9 @@ sjis
 
 ujis
 2.ctype-ujis.c  
-my_wc_mb_euc_jp�ؿ�
+my_wc_mb_euc_jp関数
 
-��:
+前:
 ....
   ret=my_wc_mb_jisx0201(c,wc,buf,buf+2);
   if (ret==1)
@@ -138,7 +138,7 @@ my_wc_mb_euc_jp�ؿ�
   }
 ....
 
-��:
+後:
 ....
   ret=my_wc_mb_jisx0201(c,wc,buf,buf+2);
   if (ret==1)
@@ -153,18 +153,18 @@ my_wc_mb_euc_jp�ؿ�
 ....
 
 
-�ʾ�Ǥ���
+以上です。
 
 --
-���� ���� / Matsunobu Yoshinori
+松信 嘉範 / Matsunobu Yoshinori
 E-mail: Yoshinori.Matsunobu@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="9228.html">[��]</a><a href="9230.html">[��]</a><a href="../list/9201-9300.html">[�ֹ�����]</a><a href="../thread/9201-9300.html">[����åɰ���]</a></p>
+<p class="button"><a href="9228.html">[前]</a><a href="9230.html">[次]</a><a href="../list/9201-9300.html">[番号順一覧]</a><a href="../thread/9201-9300.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="9229.html">   9229 2004-04-17 00:43 [&quot;Matsunobu, Yoshinor] Re: Ⱦ�ѥ������ʤΥ������Ѵ�            </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9231.html">   9231 2004-04-19 21:23 ��[Hirofumi Fujiwara &lt;f]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="9229.html">   9229 2004-04-17 00:43 [&quot;Matsunobu, Yoshinor] Re: 半角カタカナのコード変換            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9231.html">   9231 2004-04-19 21:23 ┗[Hirofumi Fujiwara &lt;f]                                       </a></span>
 </pre>
 </body>
 </html>

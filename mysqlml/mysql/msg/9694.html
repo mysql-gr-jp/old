@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="9693.html">[��]</a><a href="9695.html">[��]</a><a href="../list/9601-9700.html">[�ֹ�����]</a><a href="../thread/9601-9700.html">[����åɰ���]</a></p>
+<p class="button"><a href="9693.html">[前]</a><a href="9695.html">[次]</a><a href="../list/9601-9700.html">[番号順一覧]</a><a href="../thread/9601-9700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:9694
 </p>
@@ -13,119 +13,119 @@ mysql:9694
 <p>
 From: &quot;HIROSE, Masaaki&quot; &lt;&quot;HIROSE, Masaaki&quot; &lt;hirose31@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 22 Jun 2004 00:36:44 +0900<br>
-Subject: [mysql 09694] db.opt�ˤĤ���<br>
+Subject: [mysql 09694] db.optについて<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�Ҥ����Ȥ����ޤ�
+ひろせといいます
 
-MySQL 4.1.1 ���� database ��ʸ�������ɤξ������¸���Ƥ�������ˡ�
-db.opt �Ȥ����ե����뤬�����褦�ˤʤ�ޤ��������Υե������
-CREATE DATABASE �� ALTER DATABASE ��¹Ԥ����Ȥ���
-DATADIR/DBNAME/db.opt �˺��졢�ƥ����ȷ�������Ȥ�
+MySQL 4.1.1 から database の文字コードの情報を保存しておくために、
+db.opt というファイルが作られるようになりました。このファイルは
+CREATE DATABASE や ALTER DATABASE を実行したときに
+DATADIR/DBNAME/db.opt に作られ、テキスト形式で中身は
 
   default-character-set=sjis
   default-collation=sjis_japanese_ci
 
-�Τ褦�ˤʤäƤ��ޤ���
+のようになっています。
 
-���� db.opt �˴ط����ơ��ȥ�֤ꤽ���ʾ��̤��ФƤ���褦�ʵ�������Τ�
-�����ɤ��ʤ�Ǥ��礦��? �Ȥ����᡼��Ǥ���
+この db.opt に関係して、トラブりそうな場面が出てくるような気がするので
+すがどうなんでしょうか? というメールです。
 
-# �ʤ󤫥ȥ�ӥ��μ�ߤ����ʥ᡼�����
-
-
-�ޤ� 4.1.2 �Ǥε�ư����󤷤ޤ���
-
-# ���ä��� find -type f -print0 | xargs -0 egrep '(db\.opt|MY_DB_OPT_FILE)'
-# �Ǹ��������Ǥϡ����ä�clone ���� bk �Ǥȡ�4.1.2 �ȤǤϰ㤤�Ϥʤ��褦
-# �Ǥ�����
-
-1 CREATE DATABASE ��¹Ԥ����Ȥ��� db.opt ������롣
-
-2 CREATE DATABASE �� CHARACTER SET ����ꤷ�����Ϥ���ʸ�������ɤ���
-  ¸����롣
-
-3 CREATE DATABASE �� CHARACTER SET ���ά��������
-  character_set_server ��ʸ�������ɤ���¸����롣
-
-4 ALTER DATABASE ��¹Ԥ����Ȥ��� db.opt �����졢���ꤷ��ʸ��������
-  ����¸����롣
-
-5 SHOW CREATE DATABASE �����Ϥ��� DEFAULT CHARACTER SET ��ˤϡ�db.opt
-  ������Ф���򡢤ʤ���� character_set_server ��ʸ�������ɤ�ɽ������
-  �롣
-
-6 database��test �� mysql ���� mysql_install_db �� CREATE DATABASE ��
-  ���Ѥ��Ƥ��ʤ��Τǡ�db.opt �Ϻ���ʤ���
-
-7 MySQL 4.0 �����δĶ�����ݤ��ȥ��ԡ����⤷���ϡ�mysqld �� 4.1 �˥С�
-  ����󥢥åפ������ϡ������� database �ˤ� db.opt ��¸�ߤ��ʤ���
-
-8 mysqldump �� CREATE DATABASE ʸ�� DEFAULT CHARACTER SET ����ղä���
-  ����(--compatible �����ꤵ��Ƥ��ʤ���С�CREATE TABLE �� DEFAULT
-  CHARSET ���ղä����)
-  ���äơ��쥹�ȥ����ˤϸ��� database �� db.opt �����äƤ⤽��Ȥϴط�
-  �ʤ����쥹�ȥ����� character_set_server �� database ��ʸ�������ɤȤ�
-  �� db.opt ����¸����롣
-
-9 db.opt ���ʤ� database �ǡ�DEFAULT CHARSET ���ά���� CREATE TABLE ��
-  ��ä� table ��ʸ�������ɤϡ�character_set_database ��ʸ�������ɤˤ�
-  �롣
+# なんかトリビアの種みたいなメールだ…
 
 
-³���� (�����Ĥ��äݤΤ⤢��ޤ���) �ͤ�����ȥ�֥�ζ�����Ǥ���¾
-�ˤ⤢��Хե��������ꤤ���ޤ���
+まず 4.1.2 での挙動を列挙します。
 
-# �ѿ� character_set_* ��������ˡ��
+# ざっくり find -type f -print0 | xargs -0 egrep '(db\.opt|MY_DB_OPT_FILE)'
+# で見た感じでは、さっきclone した bk 版と、4.1.2 とでは違いはないよう
+# でした。
+
+1 CREATE DATABASE を実行したときに db.opt が作られる。
+
+2 CREATE DATABASE で CHARACTER SET を指定した場合はその文字コードが保
+  存される。
+
+3 CREATE DATABASE で CHARACTER SET を省略した場合は
+  character_set_server の文字コードが保存される。
+
+4 ALTER DATABASE を実行したときに db.opt が作られ、指定した文字コード
+  が保存される。
+
+5 SHOW CREATE DATABASE が出力する DEFAULT CHARACTER SET 句には、db.opt
+  があればそれを、なければ character_set_server の文字コードが表示され
+  る。
+
+6 database、test と mysql を作る mysql_install_db は CREATE DATABASE を
+  使用していないので、db.opt は作られない。
+
+7 MySQL 4.0 以前の環境から丸ごとコピー、もしくは、mysqld を 4.1 にバー
+  ジョンアップした場合は、これらの database には db.opt は存在しない。
+
+8 mysqldump は CREATE DATABASE 文に DEFAULT CHARACTER SET 句を付加しな
+  い。(--compatible が指定されていなければ、CREATE TABLE の DEFAULT
+  CHARSET は付加される)
+  従って、レストア時には元の database に db.opt があってもそれとは関係
+  なく、レストア時の character_set_server が database の文字コードとし
+  て db.opt に保存される。
+
+9 db.opt がない database で、DEFAULT CHARSET を省略した CREATE TABLE で
+  作った table の文字コードは、character_set_database の文字コードにな
+  る。
+
+
+続いて (こじつけっぽのもありますが) 考えられるトラブルの具体例です。他
+にもあればフォローお願いします。
+
+# 変数 character_set_* の制御方法は
 # <a href="9586.html">[mysql:9586]</a> <a href="9586.html">http://www.mysql.gr.jp/mysqlml/mysql/msg/9586</a>
-# �򻲾Ȥ���������
+# を参照ください。
 
-A sjis �� database �� mysqldump �ǥ���פ��ơ�mysqld
-  --default-character-set=utf8 �ʥ����С��˥쥹�ȥ�������database ��ʸ
-  �������ɤ� sjis �ˤʤäƤ���Ĥ��ǡ�ʸ�������ɻ�����ά����
-  CREATE TABLE ������ table ��ʸ�������ɤ� sjis �ǤϤʤ���utf8 �ˤʤ�
-  �Ƥ��ޤä���[8]
-  �� ̵�Ѥʥȥ�֥����򤹤뤿��ˡ�4.1 �Ǥ� CREATE TABLE �ˤ�
-     DEFAULT CHARSET ��Ĥ���褦�ˤ�����������?
+A sjis の database を mysqldump でダンプして、mysqld
+  --default-character-set=utf8 なサーバーにレストアした。database の文
+  字コードが sjis になっているつもりで、文字コード指定を省略して
+  CREATE TABLE したら table の文字コードが sjis ではなく、utf8 になっ
+  てしまった。[8]
+  → 無用なトラブルを回避するために、4.1 での CREATE TABLE には
+     DEFAULT CHARSET をつけるようにした方がいい?
 
-B database mysql �� test �ˤ� db.opt ���ʤ��Τǡ������� database ��
-  DEFAULT CHARSET �ʤ��� CREATE TABLE �������� table ��ʸ�������ɤ�
-  �ѿ� character_set_database ���ͤˤ�ä����Ū�˷��ꤵ��Ƥ��ޤ���
+B database mysql と test には db.opt がないので、これらの database で
+  DEFAULT CHARSET なしで CREATE TABLE した場合の table の文字コードは
+  変数 character_set_database の値によって恣意的に決定されてしまう。
   [6,9]
-  �� character_set_database ���Ѥ����ꤷ�ʤ���mysql �� table �������ǡ�
-     ������� us-ascii ������test �Ϥ����ޤǥƥ����Ѥ� database �Ǥ��롢
-     �Ȥ�����ͳ�ǡ��ºݤ�����ˤʤ���̤Ͼ��ʤ�����?
+  → character_set_database を変えたりしない、mysql の table に入れるデー
+     タは専ら us-ascii だけ、test はあくまでテスト用の database である、
+     という理由で、実際に問題になる局面は少ないかも?
 
-C db.opt ���ʤ� database �� DEFAULT CHARSET ���ά���� CREATE TABLE ��
-  ��ä� table ��ʸ�������ɤϡ�SHOW CREATE DATABASE ��ɽ�������
-  database ��ʸ�������ɤȰۤʤ��礬���롣[5,9]
-  �� ̵�Ѥʥȥ�֥����򤹤뤿��ˡ�4.1 �Ǥ� CREATE TABLE �ˤ�
-     DEFAULT CHARSET ��Ĥ���褦�ˤ�����������?
+C db.opt がない database で DEFAULT CHARSET を省略した CREATE TABLE で
+  作った table の文字コードは、SHOW CREATE DATABASE で表示される
+  database の文字コードと異なる場合がある。[5,9]
+  → 無用なトラブルを回避するために、4.1 での CREATE TABLE には
+     DEFAULT CHARSET をつけるようにした方がいい?
 
 
-��ɡ�
-db.opt ������/�ʤ��˴ؤ�餺��database ��ʸ�������ɤˤϰ�¸���ʤ��褦
-�ˡ�CREATE TABLE �ˤ� DEFAULT CHARSET ��Ĥ���褦�ˤ��롢�Ȥ����Τ���
-���Ȥ������ȤǤ��礦���͡�
+結局、
+db.opt がある/ないに関わらず、database の文字コードには依存しないよう
+に、CREATE TABLE には DEFAULT CHARSET をつけるようにする、というのが安
+全ということでしょうかね。
 
-�ǤϤǤ�
+ではでは
 
 -- 
-�Ҥ���
+ひろせ
 <a href="http://www.irori.org/">http://www.irori.org/</a>
 
 </pre>
 </div>
-<p class="button"><a href="9693.html">[��]</a><a href="9695.html">[��]</a><a href="../list/9601-9700.html">[�ֹ�����]</a><a href="../thread/9601-9700.html">[����åɰ���]</a></p>
+<p class="button"><a href="9693.html">[前]</a><a href="9695.html">[次]</a><a href="../list/9601-9700.html">[番号順一覧]</a><a href="../thread/9601-9700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="9694.html">   9694 2004-06-22 00:36 [&quot;HIROSE, Masaaki&quot; &lt;h] db.opt�ˤĤ���                          </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9696.html">   9696 2004-06-22 10:32 ��[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9697.html">   9697 2004-06-22 12:16 ����[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9701.html">   9701 2004-06-23 10:17 ������[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="9698.html">   9698 2004-06-22 13:58 ����[Hirofumi Fujiwara &lt;f]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="9694.html">   9694 2004-06-22 00:36 [&quot;HIROSE, Masaaki&quot; &lt;h] db.optについて                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9696.html">   9696 2004-06-22 10:32 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9697.html">   9697 2004-06-22 12:16 　┣[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9701.html">   9701 2004-06-23 10:17 　┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9698.html">   9698 2004-06-22 13:58 　┗[Hirofumi Fujiwara &lt;f]                                     </a></span>
 </pre>
 </body>
 </html>

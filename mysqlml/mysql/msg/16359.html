@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="16358.html">[��]</a><a href="16360.html">[��]</a><a href="../list/16301-16400.html">[�ֹ�����]</a><a href="../thread/16301-16400.html">[����åɰ���]</a></p>
+<p class="button"><a href="16358.html">[前]</a><a href="16360.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:16359
 </p>
@@ -13,86 +13,86 @@ mysql:16359
 <p>
 From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 27 Jul 2016 15:37:36 +0900<br>
-Subject: [mysql 16359] Re: [mysql 16358] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] ��ĤΥ��٥�Ȥ��Ф���ʣ����SQL��¹Ԥ���TRIGGER�����������<br>
+Subject: [mysql 16359] Re: [mysql 16358] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-yoku0825�Ȥ����ޤ���
+yoku0825といいます。
 
 
-<span class="quote1">&gt; �⤷���줬�����Ȥ���ȡ��쥳���ɤι��������ॹ����פ�ưŪ�˵�Ͽ����ˤϤɤΤ褦�ˤ���Τ�����Ū�ʤΤǤ��礦����</span>
+<span class="quote1">&gt; もしこれが原因とすると、レコードの更新タイムスタンプを自動的に記録するにはどのようにするのが一般的なのでしょうか？</span>
 
-5.6�ǡ�lastupdtime��DATETIME���ʤ顢ON UPDATE CURRENT_TIMESTAMP°����Ȥ����Ȥ��Ǥ��ޤ���
-ALTER TABLE child_table MODIFY lastupdtime DATETIME (ɬ�פʤ�NOT NULL) ON
+5.6で、lastupdtimeがDATETIME型なら、ON UPDATE CURRENT_TIMESTAMP属性を使うことができます。
+ALTER TABLE child_table MODIFY lastupdtime DATETIME (必要ならNOT NULL) ON
 UPDATE CURRENT_TIMESTAMP;
-��¹Ԥ���ȡ�lastupdtime�����Ϲ����������뤿�Ӥˤ��λ���Υ����ॹ����פ˹�������ޤ���
+を実行すると、lastupdtimeカラムは更新がかかるたびにその時刻のタイムスタンプに更新されます。
 
 <a href="http://dev.mysql.com/doc/refman/5.6/ja/timestamp-initialization.html">http://dev.mysql.com/doc/refman/5.6/ja/timestamp-initialization.html</a>
 
-��������data�����ʳ����������줿���Ǥ�lastupdtime�ι���������ޤ���
-�Ŀ�Ū�ˤϡ�UPDATE���ơ��ȥ��Ȥ�á�����ץꥱ�������βս�� `lastupdtime = sysdate()`
-������Ƥ��Τ��ɤ������������ޤ�������
+ただし、dataカラム以外が更新された場合でもlastupdtimeの更新は走ります。
+個人的には、UPDATEステートメントを叩くアプリケーションの箇所で `lastupdtime = sysdate()`
+も入れてやるのが良い方が気がしますが。。
 
 
 yoku0825,
 
 
-2016ǯ7��27�� 15:29 ochiai &lt;s.ochiai@xxxxxxxxxx&gt;:
-<span class="quote1">&gt; yoku0825����</span>
+2016年7月27日 15:29 ochiai &lt;s.ochiai@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; yoku0825さま</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���꤬�Ȥ��������ޤ���</span>
-<span class="quote1">&gt; �����Ȥ�äƤ��뤦���ˡ����𤷤Ƥ��Ƥ��ޤ��ޤ�����������yoku0825���ޤΥ�����</span>
-<span class="quote1">&gt; �֤Ȥ����櫓�ǡ���ʣ�����ơ��ȥ��ȤΥȥꥬ��������Ǥ��ʤ��פǤϤʤ����ּ�ʬ���Ȥ�ƤӽФ��Ƥ��ޤ��褦�ʥȥꥬ���ʤΤ�UPDATE���ơ��ȥ��Ȥ�ž�����פΤ褦�ʵ������ޤ����פ��ɤ�ǡ��䤬������Ȥ��Ƥ��������Τ����������˻פ�����ޤ�����</span>
+<span class="quote1">&gt; ありがとうございます。</span>
+<span class="quote1">&gt; 色々とやっているうちに、混乱してきてしまいました。ただ、yoku0825さまのコメント</span>
+<span class="quote1">&gt; 「というわけで、「複数ステートメントのトリガーが定義できない」ではなく、「自分自身を呼び出してしまうようなトリガーなのでUPDATEステートメントが転けた」のような気がします。」を読んで、私が寄ろうとしていた処理のおかしい点に思い当りました。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; BEGIN</span>
-<span class="quote1">&gt; ��child�ơ��֥�����Ƥ��������줿�Τǡ�parent�ơ��֥�Υ����ॹ����פ򹹿����롣</span>
+<span class="quote1">&gt; ＃childテーブルの内容が更新されたので、parentテーブルのタイムスタンプを更新する。</span>
 <span class="quote1">&gt; update parent_table set lastupdtime = sysdate() where id = old.p_id;</span>
-<span class="quote1">&gt; ��child�ơ��֥�����Ƥ��������줿�Τǡ������쥳���ɤΥ����ॹ����פ򹹿����롣</span>
+<span class="quote1">&gt; ＃childテーブルの内容が更新されたので、当該レコードのタイムスタンプを更新する。</span>
 <span class="quote1">&gt; update child_table set lastupdtime = sysdate() where new.data &lt;&gt; old.data;</span>
 <span class="quote1">&gt; END;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Ĥޤꡢ��ʬ���ȤΥ쥳���ɤΥ����ॹ����פ򹹿��������ͤ˹��������ƤΥ쥳���ɤΥ����ॹ����פ⹹���������ΤǤ���</span>
-<span class="quote1">&gt; ��������������˼�ʬ���ȤΥ쥳���ɤΥ����ॹ����פ򤵤�˹�������С�update���٥�Ȥ�ȯ������Τǡ�̵�¥롼�פˤʤäƤ��ޤ���</span>
-<span class="quote1">&gt; ���줬�������ʤȻפ��ޤ�����</span>
+<span class="quote1">&gt; つまり、自分自身のレコードのタイムスタンプを更新時点の値に更新し、親のレコードのタイムスタンプも更新したいのです。</span>
+<span class="quote1">&gt; しかし、更新後に自分自身のレコードのタイムスタンプをさらに更新すれば、updateイベントが発生するので、無限ループになってしまう。</span>
+<span class="quote1">&gt; これが原因かなと思いました。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �⤷���줬�����Ȥ���ȡ��쥳���ɤι��������ॹ����פ�ưŪ�˵�Ͽ����ˤϤɤΤ褦�ˤ���Τ�����Ū�ʤΤǤ��礦����</span>
-<span class="quote1">&gt; before_update�Ǽ�ʬ���ȤΥ쥳���ɤΥ����ॹ����פ򹹿�����ΤǤ��礦����</span>
-<span class="quote1">&gt; ������Ϥɤ�����Ƥޤ�����</span>
+<span class="quote1">&gt; もしこれが原因とすると、レコードの更新タイムスタンプを自動的に記録するにはどのようにするのが一般的なのでしょうか？</span>
+<span class="quote1">&gt; before_updateで自分自身のレコードのタイムスタンプを更新するのでしょうか？</span>
+<span class="quote1">&gt; 皆さんはどうされてますか？</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; On 2016/07/27 12:00, yoku ts. wrote:</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ����ˤ��ϡ�yoku0825�Ȥ����ޤ���</span>
+<span class="quote2">&gt;&gt; こんにちは、yoku0825といいます。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; �ʤ󤫤����Ĥ������äƤ���Τ˵����դ��ޤ�����</span>
+<span class="quote2">&gt;&gt; なんかいくつか混じっているのに気が付きました！</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; �ȥꥬ�����оݤȤ��� �ơ��֥� �ιԤ򹹿����褦�Ȥ���Ȳ����Υ��顼��ȯ�������������Ǥ��ޤ���</span>
+<span class="quote4">&gt;&gt;&gt;&gt; トリガーの対象とした テーブル の行を更新しようとすると下記のエラーが発生し、更新ができません。</span>
 <span class="quote3">&gt;&gt;&gt;</span>
 <span class="quote3">&gt;&gt;&gt; Error Code: 1235. This version of MySQL doesn't yet support 'multiple</span>
 <span class="quote3">&gt;&gt;&gt; triggers with the same action time and event for one table'    0.016 sec</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ����� `CREATE TRIGGER` �λ��ˤ����Фʤ��Ϥ��Ǥ���UPDATE��INSERT�ǤϤ��Υ��顼��å���������ã���ʤ��Ϥ���</span>
-<span class="quote2">&gt;&gt; �������褦�Ȥ������Υ��顼��⤦���ٳ�ǧ���Ƥ�館�ޤ�����</span>
+<span class="quote2">&gt;&gt; これは `CREATE TRIGGER` の時にしか出ないはずです（UPDATEやINSERTではこのエラーメッセージに到達しないはず）</span>
+<span class="quote2">&gt;&gt; 更新しようとした時のエラーをもう一度確認してもらえますか？</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; show triggers�η�̤�DELIMITER��ȿ�Ǥ���Ƥ��ޤ���</span>
+<span class="quote4">&gt;&gt;&gt;&gt; show triggersの結果もDELIMITERが反映されていません。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; DELIMITER��ʣ�����ơ��ȥ��Ȥι�ʸ��BEGIN .. END�ˤ򥻥åȤ�������ص�Ū�����Ѥ��륭����ɤʤΤǡ�</span>
-<span class="quote2">&gt;&gt; `SHOW TRIGGERS` �� `SHOW CREATE TRIGGER` �ˤϽ��Ϥ���ޤ���</span>
-<span class="quote2">&gt;&gt; BEGIN .. END�Ǥ����ȰϤ��Ƥ���Τǡ�ξ���Υ��ơ��ȥ��Ȥ�ư���Ϥ��ʤΤǤ�����</span>
-<span class="quote2">&gt;&gt; �ʤ����ƥ��顼�ˤʤ�ʤ顢���Ȥ��Х�����̾�����㤦���Ȥ������ʤ��Ȥ�1235�Ǥʤ����顼�����ɤ��Ȼפ��ΤǤ�����</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; �ޤ���BEGIN ... END��END��&quot;;&quot;�ǤϤʤ���&quot;$$&quot;�ɤ��դ��ޤ�����Ʊ�����顼�Ǥ�����</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ����ϡ��ȥꥬ���������Υ��顼�Ǥ���͡� �ʤ���ϥ��顼1235�ΤϤ��Ǥ���</span>
+<span class="quote2">&gt;&gt; DELIMITERは複数ステートメントの構文（BEGIN .. END）をセットする時に便宜的に利用するキーワードなので、</span>
+<span class="quote2">&gt;&gt; `SHOW TRIGGERS` や `SHOW CREATE TRIGGER` には出力されません。</span>
+<span class="quote2">&gt;&gt; BEGIN .. ENDでちゃんと囲われているので、両方のステートメントが動くはずなのですが。</span>
+<span class="quote2">&gt;&gt; （そしてエラーになるなら、たとえばカラムの名前が違う、とか、少なくとも1235でないエラーコードだと思うのですが）</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; 1. �ʲ��ι�ʸ���ΤϹ�äƤ��ޤ��� `DROP TRIGGER child_table_AFTER_UPDATE`</span>
-<span class="quote2">&gt;&gt; ���Ƥ���⤦����ή���Ⱥ��������Ϥ��Ǥ���</span>
-<span class="quote2">&gt;&gt; �� �ʥ��顼1235���֤�ʤ顢¾��̾����AFTER UPDATE�ȥꥬ��������¸�ߤ��Ƥ��ޤ���</span>
+<span class="quote3">&gt;&gt;&gt; また、BEGIN ... ENDのENDに&quot;;&quot;ではなく、&quot;$$&quot;”を付けましたが同じエラーでした。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; これは、トリガー作成時のエラーですよね？ （これはエラー1235のはずです）</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 1. 以下の構文自体は合っています。 `DROP TRIGGER child_table_AFTER_UPDATE`</span>
+<span class="quote2">&gt;&gt; してからもう一度流すと作成されるはずです。</span>
+<span class="quote2">&gt;&gt; 　 （エラー1235が返るなら、他の名前でAFTER UPDATEトリガーが既に存在しています）</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; ```</span>
 <span class="quote2">&gt;&gt; DELIMITER $$</span>
@@ -106,7 +106,7 @@ yoku0825,
 <span class="quote2">&gt;&gt; $$</span>
 <span class="quote2">&gt;&gt; ```</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; 2. show triggers;��statement���ͤϰʲ��ǹ�äƤ��ޤ��ʰʲ��ˤʤ�аտޤ����ȥꥬ���κ������������Ƥ����</span>
+<span class="quote2">&gt;&gt; 2. show triggers;のstatementの値は以下で合っています（以下になれば意図したトリガーの作成に成功している）</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; ```</span>
 <span class="quote2">&gt;&gt; BEGIN</span>
@@ -115,17 +115,17 @@ yoku0825,
 <span class="quote2">&gt;&gt; END;</span>
 <span class="quote2">&gt;&gt; ```</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; 3. �ȥꥬ���κ������˥��顼�ˤʤä��Τ����ȥꥬ���κ������UPDATE���������ߥ󥰤ǥ��顼�ˤʤä��Τ��⤦���ٳ�ǧ���ƤߤƤ���������</span>
+<span class="quote2">&gt;&gt; 3. トリガーの作成時にエラーになったのか、トリガーの作成後にUPDATEしたタイミングでエラーになったのかもう一度確認してみてください。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; 4. �ȥꥬ����������Τϥ��顼�ˤʤ餺�Ǥ��ޤ�����5.7.13 on Linux, 5.6.31 on Linux, 5.6.31 on</span>
-<span class="quote2">&gt;&gt; Windows��3�Ķ��ǻ�Ƥ��ޤ��ʥ��饤����Ȥ�MySQL Workbench 6.3 on Windows�Ǥ���</span>
-<span class="quote2">&gt;&gt; 4-1. �������ޤ��褯�狼��ʤ��ä��Τǡ�ʸ����о줷�������ȳ���������������Ž��ޤ���</span>
+<span class="quote2">&gt;&gt; 4. トリガーの定義自体はエラーにならずできました。5.7.13 on Linux, 5.6.31 on Linux, 5.6.31 on</span>
+<span class="quote2">&gt;&gt; Windowsの3環境で試しています（クライアントはMySQL Workbench 6.3 on Windowsです）</span>
+<span class="quote2">&gt;&gt; 4-1. スキーマがよくわからなかったので、文中に登場したカラムと外部キーだけ雑に貼りました</span>
 <span class="quote2">&gt;&gt; <a href="https://gist.github.com/yoku0825/83d723a13b532caf6314496fe72e9007">https://gist.github.com/yoku0825/83d723a13b532caf6314496fe72e9007</a></span>
-<span class="quote2">&gt;&gt; ����mysqldump --triggers �ǥȥꥬ������Ϥ���Ƥ��ޤ���</span>
+<span class="quote2">&gt;&gt; 　　mysqldump --triggers でトリガーも出力されています。</span>
 <span class="quote2">&gt;&gt; 4-2.</span>
-<span class="quote2">&gt;&gt; UPDATE���褦�Ȥ����饨�顼�ˤʤ�ޤ�������1235�ǤϤ���ޤ���Ǥ���������Ϥ��֤󡢥ȥꥬ�������UPDATE�����㤦�ȥȥꥬ����̵�¥롼�פ����㤦������Ȼפ��ޤ���</span>
+<span class="quote2">&gt;&gt; UPDATEしようとしたらエラーになりましたが、1235ではありませんでした。これはたぶん、トリガーの中でUPDATEしちゃうとトリガーが無限ループしちゃうからだと思います。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ��UPDATE�ȥꥬ�������child_table��UPDATE����UPDATE�ȥꥬ�����ƤФ�Ƥ������child_table��UPDATE���Ƥޤ�UPDATE�ȥꥬ�����ġ�</span>
+<span class="quote2">&gt;&gt; （UPDATEトリガーの中でchild_tableをUPDATEしてUPDATEトリガーが呼ばれてその中でchild_tableをUPDATEしてまたUPDATEトリガーが…）</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; ```</span>
 <span class="quote2">&gt;&gt; Error Code: 1442. Can't update table 'child_table' in stored</span>
@@ -135,98 +135,98 @@ yoku0825,
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; �Ȥ����櫓�ǡ���ʣ�����ơ��ȥ��ȤΥȥꥬ��������Ǥ��ʤ��פǤϤʤ����ּ�ʬ���Ȥ�ƤӽФ��Ƥ��ޤ��褦�ʥȥꥬ���ʤΤ�UPDATE���ơ��ȥ��Ȥ�ž�����פΤ褦�ʵ������ޤ���</span>
+<span class="quote2">&gt;&gt; というわけで、「複数ステートメントのトリガーが定義できない」ではなく、「自分自身を呼び出してしまうようなトリガーなのでUPDATEステートメントが転けた」のような気がします。</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; yoku0825,</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; 2016ǯ7��27�� 11:19 ochiai &lt;s.ochiai@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt;&gt; 2016年7月27日 11:19 ochiai &lt;s.ochiai@xxxxxxxxxx&gt;:</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; yoku0825���󡢤��꤬�Ȥ��������ޤ���</span>
+<span class="quote3">&gt;&gt;&gt; yoku0825さん、ありがとうございます。</span>
 <span class="quote3">&gt;&gt;&gt;</span>
 <span class="quote3">&gt;&gt;&gt; On 2016/07/22 12:31, yoku ts. wrote:</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; ����ˤ��ϡ�yoku0825�Ȥ����ޤ���</span>
+<span class="quote4">&gt;&gt;&gt;&gt; こんにちは、yoku0825といいます。</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; CREATE TRIGGER��ʸˡ�Ϲ�äƤ���褦�ʵ������ޤ���</span>
+<span class="quote4">&gt;&gt;&gt;&gt; CREATE TRIGGERの文法は合っているような気がします。</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; Error Code: 1235. This version of MySQL doesn't yet support 'multiple</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; triggers with the same action time and event for one table'    0.016</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; sec</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; ���Υơ��֥�ˤϴ���AFTER UPDATE�ȥꥬ�������ꤵ��Ƥ��ޤ���</span>
-<span class="quote4">&gt;&gt;&gt;&gt; ���줬ͽ��������ΤǤʤ��ʺ����ꤵ��Ƥ���AFTER UPDATE�ȥꥬ���ϲ��٤���äƤ��뤦���˻Ĥä���ä��ˤ�ΤǤ���С�</span>
-<span class="quote4">&gt;&gt;&gt;&gt; DROP TRIGGER�Ǿä��Ƥ����Ƥ���������</span>
+<span class="quote4">&gt;&gt;&gt;&gt; そのテーブルには既にAFTER UPDATEトリガーが設定されています。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; それが予期したものでない（今設定されているAFTER UPDATEトリガーは何度かやっているうちに残っちゃった）ものであれば、</span>
+<span class="quote4">&gt;&gt;&gt;&gt; DROP TRIGGERで消してあげてください。</span>
 <span class="quote3">&gt;&gt;&gt;</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; AFTER UPDATE�ȥꥬ����ɥ��åפ��Ƥ��顢show triggers;�ǥɥ��åפ���Ƥ� ��Τ��ǧ����</span>
-<span class="quote3">&gt;&gt;&gt; CREATE TRIGGER ����show triggers;���������Ƥ���Τ��ǧ���Ƥ��ޤ���</span>
-<span class="quote3">&gt;&gt;&gt; �Ǥ����顢���٤���äƤ��뤦���˻Ĥä���ä��Ȥ��������ǤϤʤ��Ǥ��礦��</span>
+<span class="quote3">&gt;&gt;&gt; AFTER UPDATEトリガーをドロップしてから、show triggers;でドロップされてい るのを確認し、</span>
+<span class="quote3">&gt;&gt;&gt; CREATE TRIGGER し、show triggers;で定義されているのを確認しています。</span>
+<span class="quote3">&gt;&gt;&gt; ですから、何度かやっているうちに残っちゃったという状況ではないでしょう。</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; �������ꤵ��Ƥ���AFTER UPDATE�ȥꥬ�����ä��ʤ���Τξ�硢</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 現在設定されているAFTER UPDATEトリガーが消せないものの場合、</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; 1) MySQL 5.7��AFTER UPDATE�ȥꥬ����ʣ�����åȤǤ��ޤ�</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 1) MySQL 5.7はAFTER UPDATEトリガーを複数セットできます</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; MySQL 5.6 ��ե���󥹥ޥ˥奢��/13.1.19 CREATE TRIGGER ��ʸ �˰ʲ��Τ� ���ʵ��Ҥ�����ޤ��Τǡ�MySQL</span>
-<span class="quote3">&gt;&gt;&gt; 5.6�Ǥ�Ǥ���Τ��ʤȻפä��ΤǤ���</span>
+<span class="quote3">&gt;&gt;&gt; MySQL 5.6 リファレンスマニュアル/13.1.19 CREATE TRIGGER 構文 に以下のよ うな記述がありますので、MySQL</span>
+<span class="quote3">&gt;&gt;&gt; 5.6でもできるのかなと思ったのです。</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; ��trigger_body �ϡ��ȥꥬ���������ƥ��ֲ������Ȥ��˼¹Ԥ���륹�ơ��� ���ȤǤ���ʣ���Υ��ơ��ȥ��Ȥ�¹Ԥ���ˤϡ�BEGIN</span>
+<span class="quote3">&gt;&gt;&gt; 「trigger_body は、トリガーがアクティブ化されるときに実行されるステート メントです。複数のステートメントを実行するには、BEGIN</span>
 <span class="quote3">&gt;&gt;&gt; ...</span>
-<span class="quote3">&gt;&gt;&gt; END ʣ�祹�ơ� �ȥ��ȹ�¤��ʸ����Ѥ��ޤ����ޤ�������ˤ�ꡢ���ȥ��ɥ롼������ǵ���</span>
-<span class="quote3">&gt;&gt;&gt; �����Τ�Ʊ�����ơ��ȥ��Ȥ���Ѥ��뤳�Ȥ�Ǥ��ޤ����������� ��13.6.1 ��BEGIN ... END</span>
-<span class="quote3">&gt;&gt;&gt; ʣ�祹�ơ��ȥ��ȹ�ʸ�פ򻲾Ȥ��Ƥ��������������Υ��ơ� �ȥ��Ȥϡ��ȥꥬ����Ǥϵ��Ĥ���ޤ��󡣥��������D.1�֥��ȥ��ɥץ���</span>
-<span class="quote3">&gt;&gt;&gt; ��������פ�</span>
-<span class="quote3">&gt;&gt;&gt; ���Ȥ��Ƥ�����������</span>
+<span class="quote3">&gt;&gt;&gt; END 複合ステー トメント構造構文を使用します。また、これにより、ストアドルーチン内で許可</span>
+<span class="quote3">&gt;&gt;&gt; されるのと同じステートメントを使用することもできます。セクショ ン13.6.1 「BEGIN ... END</span>
+<span class="quote3">&gt;&gt;&gt; 複合ステートメント構文」を参照してください。一部のステー トメントは、トリガー内では許可されません。セクションD.1「ストアドプログ</span>
+<span class="quote3">&gt;&gt;&gt; ラムの制約」を</span>
+<span class="quote3">&gt;&gt;&gt; 参照してください。」</span>
 <span class="quote3">&gt;&gt;&gt; <a href="http://dev.mysql.com/doc/refman/5.6/ja/create-trigger.html">http://dev.mysql.com/doc/refman/5.6/ja/create-trigger.html</a></span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; ���ʤߤˣ������Υޥ˥奢��ʱ�ʸ�ˤ�Ĵ�٤��Ȥ�����Ʊ���褦�ʤ��Ȥ��񤤤� ����ޤ�����</span>
+<span class="quote3">&gt;&gt;&gt; ちなみに５．５のマニュアル（英文）も調べたところ、同じようなことが書いて ありました。</span>
 <span class="quote3">&gt;&gt;&gt; <a href="http://dev.mysql.com/doc/refman/5.5/en/create-trigger.html">http://dev.mysql.com/doc/refman/5.5/en/create-trigger.html</a></span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; �ޤ���BEGIN ... END��END��&quot;;&quot;�ǤϤʤ���&quot;$$&quot;�ɤ��դ��ޤ�����Ʊ�����顼�Ǥ�����</span>
+<span class="quote3">&gt;&gt;&gt; また、BEGIN ... ENDのENDに&quot;;&quot;ではなく、&quot;$$&quot;”を付けましたが同じエラーでした。</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; 5.7�ǤǤ��ޤ�������</span>
-<span class="quote3">&gt;&gt;&gt; MySQL�ΥС������ʳ�������Ȥ������ȤϤʤ��Ǥ�����</span>
-<span class="quote3">&gt;&gt;&gt; �㤨�С�unix�ǤϤǤ��뤬��windows�ǤϤǤ��ʤ��Ȥ���</span>
+<span class="quote3">&gt;&gt;&gt; 5.7でできましたか？</span>
+<span class="quote3">&gt;&gt;&gt; MySQLのバージョン以外の問題ということはないですか？</span>
+<span class="quote3">&gt;&gt;&gt; 例えば、unix版はできるが、windows版はできないとか。</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; �䤬���󥹥ȡ��뤷��MySQL�ϲ����Υ��󥹥ȡ��顼�ǥ��󥹥ȡ��뤷����ΤǤ���</span>
+<span class="quote3">&gt;&gt;&gt; 私がインストールしたMySQLは下記のインストーラーでインストールしたものです。</span>
 <span class="quote3">&gt;&gt;&gt; mysql-installer-community-5.6.31.0.msi</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; 2) ������AFTER UPDATE�ȥꥬ������˿������ȥꥬ���Υ��ơ��ȥ��Ȥ򺮤��ޤ�</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 2) 今あるAFTER UPDATEトリガーの中に新しいトリガーのステートメントを混ぜます</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; ���줬�Ǥ��ʤ��ΤǤ���</span>
+<span class="quote3">&gt;&gt;&gt; それができないのです。</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; 3) ����������BEFORE UPDATE�ȥꥬ�������ѤǤ��ʤ�����Ƥ���ޤ�</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 3) 新しい方をBEFORE UPDATEトリガーで代用できないか検討します</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; ����Ū�ʲ��ǤϤʤ������Ǥ���</span>
+<span class="quote3">&gt;&gt;&gt; 根本的な解決ではなさそうです。</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; �Τ����ɤ�����֤��Ȥˤʤ뤫�Ȼפ��ޤ���</span>
+<span class="quote4">&gt;&gt;&gt;&gt; のうちどれを選ぶことになるかと思います。</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
 <span class="quote4">&gt;&gt;&gt;&gt; yoku0825,</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; 2016ǯ7��22�� 12:16 ochiai&lt;s.ochiai@xxxxxxxxxx&gt;:</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 2016年7月22日 12:16 ochiai&lt;s.ochiai@xxxxxxxxxx&gt;:</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ML�γ��͡������äˤʤ�ޤ���</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; MLの皆様、お世話になります。</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; CREATE TRIGGER�Ǻ��äƤ��ޤ���</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ��ꤿ�����Ȥϡ��ƥơ��֥�Ȥ������٤Υơ��֥뤬���ꡢ���٥ơ��֥�Τ��� �줫�ιԤ���(data)�򹹿������顢�����Υ����ॹ����פ��</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; �ơ��֥�Ȼ�</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; �ơ��֥�Τ��줾��˵�Ͽ����Ȥ������ȤǤ���</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ����������ꤤ���ޤ���</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; CREATE TRIGGERで困っています。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; やりたいことは、親テーブルとその明細のテーブルがあり、明細テーブルのいず れかの行の値(data)を更新したら、更新のタイムスタンプを親</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; テーブルと子</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; テーブルのそれぞれに記録するということです。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; よろしくお願いします。</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ��ĤΥ��٥�Ȥ��Ф���ʣ����SQL��¹Ԥ���TRIGGER������������ΤǤ������� �ޤ��Ǥ��ޤ���</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; Ĵ�٤Ƥߤ��顢ʣ���Υ����Ȥ�CREATE TRIGGERʸ��DELIMITER��Ƕ����ʣ����</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; SQLʸ������Ǥ��롢�Ƚ񤤤Ƥ���ޤ����Τǡ������̤�ˤ��ޤ��������ޤ� �����ޤ���</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したいのですが、う まくできません。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 調べてみたら、複数のサイトにCREATE TRIGGER文をDELIMITER句で挟めば複数の</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; SQL文を定義できる、と書いてありましたので、その通りにやりましたがうまく いきません。</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ����create trigger�� delimiter $$������$$ delimiter;�Ǥ�����</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ����ʣ����SQLʸ��BEGIN������END�Ǥ�����</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ���ͤˤ��������ȡ�<a href="http://wikiwiki.jp/yonkoushi2/?MySQL%2Fdbonline%2Fview">http://wikiwiki.jp/yonkoushi2/?MySQL%2Fdbonline%2Fview</a></span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; １）create triggerを delimiter $$　～　$$ delimiter;でくくる</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; ２）複数のSQL文をBEGIN　～　ENDでくくる</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 参考にしたサイト：<a href="http://wikiwiki.jp/yonkoushi2/?MySQL%2Fdbonline%2Fview">http://wikiwiki.jp/yonkoushi2/?MySQL%2Fdbonline%2Fview</a></span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; �ʲ��Τ褦��MySQL Workbench(6.3Community)��SQL���ǥ������ǲ�����SQL���</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; �Ԥ������顼�ʤ��ȥꥬ������������ޤ������ȥꥬ�����оݤȤ��� �ơ��֥� �ιԤ򹹿����褦�Ȥ���Ȳ����Υ��顼��ȯ�������������Ǥ��ޤ���</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; �ʤ����ƥơ��֥�����٥ơ��֥�Ȥ�Ϣ�ȥ����� parent_table.id=child_table.p_id�Ǥ���</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 以下のようにMySQL Workbench(6.3Community)のSQLエディターで下記のSQLを実</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 行し、エラーなくトリガーが作成されますが、トリガーの対象とした テーブル の行を更新しようとすると下記のエラーが発生し、更新ができません。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; なお、親テーブルと明細テーブルとの連携キーは parent_table.id=child_table.p_idです。</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ��ȥꥬ��������</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; ＜トリガー作成＞</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; DELIMITER $$</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; CREATE DEFINER=`root`@`localhost` TRIGGER `child_table_AFTER_UPDATE`</span>
@@ -241,7 +241,7 @@ yoku0825,
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; DELIMITER ;</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; �㥨�顼��å�������</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; ＜エラーメッセージ＞</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; CREATE DEFINER=`root`@`localhost` TRIGGER `child_table_AFTER_UPDATE`</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; AFTER</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; UPDATE ON `child_table` FOR EACH ROW</span>
@@ -254,19 +254,19 @@ yoku0825,
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; triggers with the same action time and event for one table'    0.016</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; sec</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ��show triggers;��statement���͡�</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; ＜show triggers;のstatementの値＞</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; BEGIN</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; update parent_table set lastupdtime = sysdate() where id = old.p_id;</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; update child_table set lastupdtime = sysdate() where new.data =</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; old.data;</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; END;</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ���顼��å�������show triggers�η�̤�DELIMITER��ȿ�Ǥ���Ƥ��ޤ���</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; ���顼��å������ˡ�This version of MySQL doesn't yet support 'multiple</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; triggers...�ɤȤ���Τǡ�5.6.31�Ǥ��б����Ƥ��ʤ��Ȥ������ȤǤ��礦������ �����뤤���б����Ƥ���С������򶵤��Ƥ���������</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; エラーメッセージもshow triggersの結果もDELIMITERが反映されていません。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; エラーメッセージに“This version of MySQL doesn't yet support 'multiple</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; triggers...”とあるので、5.6.31では対応していないということでしょうか？対 策あるいは対応しているバージョンを教えてください。</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
-<span class="quote5">&gt;&gt;&gt;&gt;&gt; �����μ¹ԴĶ���</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 当方の実行環境：</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt; MySQL version:5.6.31-log MySQL Community Server(GPL)</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;         Compiled For: win32(AMD64)</span>
 <span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
@@ -281,15 +281,15 @@ yoku0825,
 
 </pre>
 </div>
-<p class="button"><a href="16358.html">[��]</a><a href="16360.html">[��]</a><a href="../list/16301-16400.html">[�ֹ�����]</a><a href="../thread/16301-16400.html">[����åɰ���]</a></p>
+<p class="button"><a href="16358.html">[前]</a><a href="16360.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="16354.html">  16354 2016-07-22 12:16 [ochiai &lt;s.ochiai@xxx] ��ĤΥ��٥�Ȥ��Ф���ʣ����SQL��¹Ԥ���TRIGGER�����������</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16355.html">  16355 2016-07-22 12:31 ��[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16354] ��ĤΥ��٥�Ȥ��Ф���ʣ����SQL��¹Ԥ���TRIGGER�����������</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16356.html">  16356 2016-07-27 11:19 ����[ochiai &lt;s.ochiai@xxx] Re: [mysql 16355] Re: [mysql 16354] =e4=b8e3a4�Υ��٥�Ȥ��Ф���ʣ����SQL��¹Ԥ���TRIGGER�����������</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16357.html">  16357 2016-07-27 12:00 ������[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] ��ĤΥ��٥�Ȥ��Ф���ʣ����SQL��¹Ԥ���TRIGGER�����������</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16358.html">  16358 2016-07-27 15:29 ��������[ochiai &lt;s.ochiai@xxx] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] ��ĤΥ��٥�Ȥ��Ф���ʣ����SQL��¹Ԥ���TRIGGER�����������</a></span>
-<span class="current">-&gt;&nbsp;<a href="16359.html">  16359 2016-07-27 15:37 ����������[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16358] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] ��ĤΥ��٥�Ȥ��Ф���ʣ����SQL��¹Ԥ���TRIGGER�����������</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16360.html">  16360 2016-07-27 15:47 ������������[ochiai &lt;s.ochiai@xxx] Re: [mysql 16359] Re: [mysql 16358] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] =e4=b8�ĤΥ��٥�Ȥ��Ф���ʣ����S</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16354.html">  16354 2016-07-22 12:16 [ochiai &lt;s.ochiai@xxx] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16355.html">  16355 2016-07-22 12:31 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16354] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16356.html">  16356 2016-07-27 11:19 　┗[ochiai &lt;s.ochiai@xxx] Re: [mysql 16355] Re: [mysql 16354] =e4=b8e3a4のイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16357.html">  16357 2016-07-27 12:00 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16358.html">  16358 2016-07-27 15:29 　　　┗[ochiai &lt;s.ochiai@xxx] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span class="current">-&gt;&nbsp;<a href="16359.html">  16359 2016-07-27 15:37 　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16358] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16360.html">  16360 2016-07-27 15:47 　　　　　┗[ochiai &lt;s.ochiai@xxx] Re: [mysql 16359] Re: [mysql 16358] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] =e4=b8つのイベントに対して複数のS</a></span>
 </pre>
 </body>
 </html>

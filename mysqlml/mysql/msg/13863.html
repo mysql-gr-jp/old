@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13862.html">[��]</a><a href="13864.html">[��]</a><a href="../list/13801-13900.html">[�ֹ�����]</a><a href="../thread/13801-13900.html">[����åɰ���]</a></p>
+<p class="button"><a href="13862.html">[前]</a><a href="13864.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13863
 </p>
@@ -13,77 +13,77 @@ mysql:13863
 <p>
 From: &quot;F.Y&quot; &lt;&quot;F.Y&quot; &lt;fumi_sby@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 13 Apr 2007 13:33:57 +0900 (JST)<br>
-Subject: [mysql 13863] Re: �ޥȥ�å����ơ��֥�κ�����ˡ<br>
+Subject: [mysql 13863] Re: マトリックステーブルの作成方法<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-sum�ȡ֤ޤȤ�������פϤɤ��㤦������ʤɰ�̣�郎��ʤ���ʬ¿��������
-���ˤ�����
+sumと「まとめて入れる」はどう違うんだ、など意味わがんない部分多々あり答
+えにくし。
 
-Ĵ����¿�������줾�����3�ĤޤǤι祳�������������������٤���𤷤�
-������
-��äȤ⥤������٤ι⤤�祳�����3�ĤϤ������뤿��λ������ߤ�����
+調査員多数がそれぞれ最大3つまでの合コン会場に潜入しイケメン度を報告して
+きた。
+もっともイケメン度の高い合コン会場を3つはしごするための資料が欲しい。
 
-truncate table �����;
+truncate table 会場一時;
 
-insert into ����� values(Ĵ����, ���1)
-select Ĵ����, min(���)
-from ���
-group by Ĵ����;
+insert into 会場一時 values(調査員, 会場1)
+select 調査員, min(会場)
+from 報告
+group by 調査員;
 
-update ����� set ��������� = (
-select sum(���������)
-from ���
-where �����.Ĵ���� = ���.Ĵ����
-and �����.���1 = ���.��� );
+update 会場一時 set イケメン度 = (
+select sum(イケメン度)
+from 報告
+where 会場一時.調査員 = 報告.調査員
+and 会場一時.会場1 = 報告.会場 );
 
-update �����
-set ���2 =(
-select min(���), 
-from ���
-where ���.Ĵ���� = �����.Ĵ����
-and ���.��� &lt;&gt; �����.���1);
+update 会場一時
+set 会場2 =(
+select min(会場), 
+from 報告
+where 報告.調査員 = 会場一時.調査員
+and 報告.会場 &lt;&gt; 会場一時.会場1);
 
-update ����� set ��������� = (
-select �����1.��������� + sum(���������)
-from ���
-where �����.Ĵ���� = ���.Ĵ����
-and �����.���2 = ���.��� );
+update 会場一時 set イケメン度 = (
+select 会場一時1.イケメン度 + sum(イケメン度)
+from 報告
+where 会場一時.調査員 = 報告.調査員
+and 会場一時.会場2 = 報告.会場 );
 
-update �����
-set ���3 =(
-select min(���)
-from ���
-where ���.Ĵ���� = �����.Ĵ����
-and ���.��� not in (�����.���1, �����.���2)
+update 会場一時
+set 会場3 =(
+select min(会場)
+from 報告
+where 報告.調査員 = 会場一時.調査員
+and 報告.会場 not in (会場一時.会場1, 会場一時.会場2)
 );
 
-update ����� set ��������� = (
-select �����.��������� + sum(���������)
-from ���
-where �����.Ĵ���� = ���.Ĵ����
-and �����.���3 = ���.��� );
+update 会場一時 set イケメン度 = (
+select 会場一時.イケメン度 + sum(イケメン度)
+from 報告
+where 会場一時.調査員 = 報告.調査員
+and 会場一時.会場3 = 報告.会場 );
 
-truncate table ��ɸ���;
+truncate table 目標会場;
 
-insert into ��ɸ��� (���1, ���2, ���3, ���������)
-select ���1, ���2, ���3, sum(���������)
-from �����
-group by ���1, ���2, ���3;
+insert into 目標会場 (会場1, 会場2, 会場3, イケメン度)
+select 会場1, 会場2, 会場3, sum(イケメン度)
+from 会場一時
+group by 会場1, 会場2, 会場3;
 
-ʸˡ����¾���ޤä������ڤ��Ƥ��餺��
-���������Τ�Τ��äƤ뤫�ɤ������ʡ����������
+文法その他、まったく検証しておらず。
+方向性そのものも合ってるかどうかかな～り怪しい。
 
 --- ml@xxxxxxxxxx wrote:
 
-<span class="quote1">&gt; ���ĤǤ���</span>
+<span class="quote1">&gt; 上田です。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; 5.0.37-max MySQL Community Edition ����Ѥ��Ƥ��ޤ���</span>
-<span class="quote1">&gt; ����ơ��֥�Ʊ�ΤΥޥȥ�å����ơ��֥�κ�����ˡ��õ���Ƥ��ޤ���</span>
+<span class="quote1">&gt; 5.0.37-max MySQL Community Edition を使用しています。</span>
+<span class="quote1">&gt; あるテーブル同士のマトリックステーブルの作成方法を探しています。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ʲ��Υơ��֥뤬����ޤ���</span>
+<span class="quote1">&gt; 以下のテーブルがあります。</span>
 <span class="quote1">&gt; CREATE TABLE user (</span>
 <span class="quote1">&gt; genre INT NOT NULL,</span>
 <span class="quote1">&gt; number INT NOT NULL,</span>
@@ -118,7 +118,7 @@ group by ���1, ���2, ���3;
 <span class="quote1">&gt; PRIMARY KEY(genre_1,genre_2,genre_3,seq)</span>
 <span class="quote1">&gt; );</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ǡ����ϰʲ��Τ褦�ˤʤ�ޤ���</span>
+<span class="quote1">&gt; データは以下のようになります。</span>
 <span class="quote1">&gt; user</span>
 <span class="quote1">&gt; 1,1,100</span>
 <span class="quote1">&gt; 1,2,200</span>
@@ -136,42 +136,42 @@ group by ���1, ���2, ���3;
 <span class="quote1">&gt; 2,1,1,1,-1</span>
 <span class="quote1">&gt; 3,2,1,2,10</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; user��genre��number�Ǽ��̤��졢0�İʾ��user_skill������ޤ���</span>
-<span class="quote1">&gt; genre��1-3���ͤ�����ޤ���</span>
-<span class="quote1">&gt; user_skill��line�Ǽ��̡�value���ͤ�����ޤ���</span>
+<span class="quote1">&gt; userはgenreとnumberで識別され、0個以上のuser_skillを持ちます。</span>
+<span class="quote1">&gt; genreは1-3の値を持ちます。</span>
+<span class="quote1">&gt; user_skillはlineで種別、valueで値を持ちます。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����Υǡ����Υޥȥ�å�����matrix�����matrix_skill�ơ��֥��Ƴ��</span>
-����
-<span class="quote1">&gt; ���פ��ޤ���</span>
+<span class="quote1">&gt; これらのデータのマトリックスをmatrixおよびmatrix_skillテーブルに導入</span>
+した
+<span class="quote1">&gt; く思います。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ޥȥ�å�������롼���</span>
-<span class="quote1">&gt; user��genre�ǹʹ���genre��1-3�Τ��줾��μ����user�����Ȥ߹�碌�롣</span>
-<span class="quote1">&gt; matrix��genre1-genre3�ˤ�user��number������</span>
-<span class="quote1">&gt; matrix��sum_unit�ˤ�genre1-genre3��user��unit��sum������</span>
-<span class="quote1">&gt; matrix_skill��genre1-genre3��user��user_skill��ޤȤ�������</span>
-<span class="quote1">&gt; matrix_skill��line��user_skill��line��sum_value��user_skill��value��sum</span>
-<span class="quote1">&gt; ������</span>
-<span class="quote1">&gt; �Ȥʤ�ޤ���</span>
+<span class="quote1">&gt; マトリックスを作るルールは</span>
+<span class="quote1">&gt; userのgenreで絞込みgenreが1-3のそれぞれの種類のuserを全組み合わせる。</span>
+<span class="quote1">&gt; matrixのgenre1-genre3にはuserのnumberが入る</span>
+<span class="quote1">&gt; matrixのsum_unitにはgenre1-genre3のuserのunitのsumが入る</span>
+<span class="quote1">&gt; matrix_skillはgenre1-genre3のuserのuser_skillをまとめて入れる</span>
+<span class="quote1">&gt; matrix_skillのlineはuser_skillのline、sum_valueはuser_skillのvalueのsum</span>
+<span class="quote1">&gt; が入る</span>
+<span class="quote1">&gt; となります。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ñ���userƱ�ΤΥޥȥ�å����ʤ��userƱ�Τ�join����INSET -- SELECT</span>
-<span class="quote1">&gt; ��</span>
-<span class="quote1">&gt; SQL��ȯ�Ǻ�줽���ʤΤǤ�����user_skill������Τ�Ƭ��Ǻ�ޤ��Ƥ��ޤ���</span>
+<span class="quote1">&gt; 単純にuser同士のマトリックスならばuser同士をjoinしてINSET -- SELECT</span>
+<span class="quote1">&gt; で</span>
+<span class="quote1">&gt; SQL一発で作れそうなのですが、user_skillがあるので頭を悩ませています。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ºݤΥơ��֥�ǤϤ⤦����ʣ���ʾ����Ȥ߹�碌��ɬ�פ����ꡢ���Ȥ�</span>
-���
-<span class="quote1">&gt; ����2���̤�ۤɤˤʤ븫�Ѥ��ˤʤäƤ��ޤ���</span>
-<span class="quote1">&gt; ��˥�����ץȤ��Ȥ߹�碌���������ư�����Ƥߤ�ȡ���λ�ޤǤ��ä�3</span>
-ǯ
-<span class="quote1">&gt; ���餤�����ꤽ���ˤʤä��Τ��᡹�˻ߤ�ޤ�����</span>
-<span class="quote1">&gt; ���ΤȤ���CPU����Ψ���ǧ����ȥ�����ץ�70%��mysqld30%�ȤʤäƤ��ޤ�</span>
-��
-<span class="quote1">&gt; �Τǡ�MySQL�ǥ����꡼�����ǺѤޤ���Ф⤦�������᤯�ʤ�ΤǤϤʤ�����</span>
-��
-<span class="quote1">&gt; ���������Ǥ���</span>
+<span class="quote1">&gt; 実際のテーブルではもう少し複雑な条件で組み合わせる必要があり、全組み</span>
+合わ
+<span class="quote1">&gt; せが2兆通りほどになる見積もりになっています。</span>
+<span class="quote1">&gt; 試しにスクリプトで組み合わせを作成して動かしてみると、終了までざっと3</span>
+年
+<span class="quote1">&gt; ぐらいかかりそうになったので早々に止めました。</span>
+<span class="quote1">&gt; そのときのCPU使用率を確認するとスクリプト70%、mysqld30%となっていまし</span>
+た
+<span class="quote1">&gt; ので、MySQLでクエリーだけで済ませればもう少しは早くなるのではないかと</span>
+目
+<span class="quote1">&gt; 論んだ次第です。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����餯�ץ������������ɬ�פ�����ΤǤϤȻפ��ޤ������������Ǥ�</span>
-����
-<span class="quote1">&gt; ������������</span>
+<span class="quote1">&gt; おそらくプロシージャを作る必要があるのではと思われますが、形だけでも</span>
+ご教
+<span class="quote1">&gt; 授ください。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
@@ -184,11 +184,11 @@ Protect Your PC Now ! -  0 yen Security Campaign
 
 </pre>
 </div>
-<p class="button"><a href="13862.html">[��]</a><a href="13864.html">[��]</a><a href="../list/13801-13900.html">[�ֹ�����]</a><a href="../thread/13801-13900.html">[����åɰ���]</a></p>
+<p class="button"><a href="13862.html">[前]</a><a href="13864.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="13862.html">  13862 2007-04-13 09:26 [&lt;ml@xxxxxxxxxx&gt;     ] �ޥȥ�å����ơ��֥�κ�����ˡ          </a></span>
-<span class="current">-&gt;&nbsp;<a href="13863.html">  13863 2007-04-13 13:33 ��[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13949.html">  13949 2007-05-09 08:05 ����[&lt;ml@xxxxxxxxxx&gt;     ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13862.html">  13862 2007-04-13 09:26 [&lt;ml@xxxxxxxxxx&gt;     ] マトリックステーブルの作成方法          </a></span>
+<span class="current">-&gt;&nbsp;<a href="13863.html">  13863 2007-04-13 13:33 ┗[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13949.html">  13949 2007-05-09 08:05 　┗[&lt;ml@xxxxxxxxxx&gt;     ]                                     </a></span>
 </pre>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="2110.html">[��]</a><a href="2112.html">[��]</a><a href="../list/2101-2200.html">[�ֹ�����]</a><a href="../thread/2101-2200.html">[����åɰ���]</a></p>
+<p class="button"><a href="2110.html">[前]</a><a href="2112.html">[次]</a><a href="../list/2101-2200.html">[番号順一覧]</a><a href="../thread/2101-2200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:2111
 </p>
@@ -19,56 +19,56 @@ Subject: [mysql 02111] Re: about MySQL JDBC Driver<br>
 </div>
 <div class="body">
 <pre>
-��Ĺ�Ǥ���
+鶴長です。
 
 
-<span class="quote1">&gt;  �ǡ����Υ������򸫤Ƥ���ȡ�MySQL�Υץ��ȥ���ˤ�С�����󤬤�����</span>
-<span class="quote1">&gt;�ʤȤ��������С�������饯�����åȤ�����Ǥ������ʡ��Ȥ�ʬ���ä��Τ�</span>
-<span class="quote1">&gt;�������ܤ��������򤷤Ƥ��ޤ���</span>
-���ޥ���Х��Ȥ��б����Ƥ��뤳�Ȥ˵��Ť����Τϡ����󤶤��ϫ���ơ�String
-�򤤤ä���byte[]����Ȥ�������� new String(b.getbyte(&quot;EUC_JP&quot;))
-�Ȥ������󤶤��ϫ����������������äȥ������������ơ�JDBC������encode
-����Ƥ��뤳�Ȥ˵��Ť��ޤ������ʤ��δ֣����֤��餤��
-�ǡ�������book.html���ɤ�Ǥߤ�ȡ������ȥޥ���Х��Ȥ��ä��񤤤�
-����ޤ�����
+<span class="quote1">&gt;  で、そのソースを見ていると、MySQLのプロトコルにもバージョンがあるんだ</span>
+<span class="quote1">&gt;なとか、サーバーがキャラクタセットを取得できるんだな、とか分かったので</span>
+<span class="quote1">&gt;すが、詳しくは理解していません。</span>
+私もマルチバイトに対応していることに気づいたのは、さんざん苦労して、String
+をいったんbyte[]に落とし、改めて new String(b.getbyte(&quot;EUC_JP&quot;))
+とか、さんざん苦労したあげく、ちょっとソースを覗いて、JDBC内部でencode
+されていることに気づきました。（この間２週間くらい）
+で、ちゃんとbook.htmlを読んでみると、ちゃんとマルチバイトの話が書いて
+ありました。
 
 Class.forName(&quot;org.gjt.mm.mysql.Driver&quot;);
-dbname = &quot;jdbc:mysql://&quot; + �ǡ����١��������С�̾+ &quot;/�ơ��֥�̾?useUnicode=true&amp;characterEncoding=EUC_JP&quot;;
-Connection  db = DriverManager.getConnection(dbname,�桼����̾,�ѥ����);
+dbname = &quot;jdbc:mysql://&quot; + データベースサーバー名+ &quot;/テーブル名?useUnicode=true&amp;characterEncoding=EUC_JP&quot;;
+Connection  db = DriverManager.getConnection(dbname,ユーザー名,パスワード);
 
-&quot;EUC_JP&quot;��&quot;SJIS&quot;���֤������뤳�Ȥ⡢¾��Java���������Ƥ��륨�󥳡���
-ˡ���֤������뤳�Ȥ����뤷�ǡ�Ǻ��Ǥ��������֤ϲ����ä��Τ��Ȼפ��Ĥġ�
-book����������ɤ��֤��Ƥ��ޤ���
+&quot;EUC_JP&quot;は&quot;SJIS&quot;に置き換えることも、他のJavaで定義されているエンコード
+法に置き換えることも出来るしで、悩んでいた２週間は何だったのかと思いつつ、
+bookを印刷して読み返しています。
 
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;  �Ȥ����ǡ��䤬�������� gwe JDBC Driver �Ǥ�����MEDIUMBLOB�ʤɤΥ����</span>
-<span class="quote1">&gt;�˵���ʥǡ������Ǽ���褦�Ȼ�ߤޤ�������������600000�Х������٤ΥХ���</span>
+<span class="quote1">&gt;  ところで、私が修正した gwe JDBC Driver ですが、MEDIUMBLOBなどのカラム</span>
+<span class="quote1">&gt;に巨大なデータを格納しようと試みました。しかし、600000バイト程度のバイナ</span>
 ........
-��Ƥߤޤ������Τ��˲����Υ��顼���Ǥ��ޤ�������ä�Ĺ���Ǥ����񤤤Ƥ�
-���ޤ����ʥ����С��γ��������Ϥ�����LONGBLOB���������Ƥ��ޤ�����
+試してみました。確かに下記のエラーを吐きます。ちょっと長いですが書いてお
+きます。（サーバーの該当カラムはちゃんとLONGBLOBで宣言されています。）
 
 java.lang.IllegalArgumentException: Packet is larger than max_allowed_packet from server configuration of 1048576 bytes
 	at org.gjt.mm.mysql.Buffer.ensureCapacity(Buffer.java, Compiled Code)
 	at org.gjt.mm.mysql.Buffer.writeBytesNoNull(Buffer.java:421)
 
-Buffer.java�򾯤������Ƥߤޤ���
+Buffer.javaを少し覗いてみます。
 
 ----
 Shin-ichi Tsurunaga  shin@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="2110.html">[��]</a><a href="2112.html">[��]</a><a href="../list/2101-2200.html">[�ֹ�����]</a><a href="../thread/2101-2200.html">[����åɰ���]</a></p>
+<p class="button"><a href="2110.html">[前]</a><a href="2112.html">[次]</a><a href="../list/2101-2200.html">[番号順一覧]</a><a href="../thread/2101-2200.html">[スレッド一覧]</a></p>
 <pre class="list">
 <span>&nbsp;&nbsp;&nbsp;<a href="2096.html">   2096 2000-05-23 22:00 [Tomohiro Takahashi &lt;] about MySQL JDBC Driver                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2105.html">   2105 2000-05-24 15:58 ��[Shin-ichi Tsurunaga ]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2108.html">   2108 2000-05-24 18:16 ����[Tomohiro KATO &lt;tomop]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2112.html">   2112 2000-05-24 21:10 ������[Shin-ichi Tsurunaga ]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2110.html">   2110 2000-05-24 19:49 ����[Tomohiro Takahashi &lt;]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="2111.html">   2111 2000-05-24 20:32 ������[Shin-ichi Tsurunaga ]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2113.html">   2113 2000-05-24 22:29 ��������[Tomohiro Takahashi &lt;]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2114.html">   2114 2000-05-24 23:52 ����������[Tomohiro Takahashi &lt;]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="2116.html">   2116 2000-05-25 12:15 ������������[Shin-ichi Tsurunaga ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2105.html">   2105 2000-05-24 15:58 ┗[Shin-ichi Tsurunaga ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2108.html">   2108 2000-05-24 18:16 　┣[Tomohiro KATO &lt;tomop]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2112.html">   2112 2000-05-24 21:10 　┃┗[Shin-ichi Tsurunaga ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2110.html">   2110 2000-05-24 19:49 　┗[Tomohiro Takahashi &lt;]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="2111.html">   2111 2000-05-24 20:32 　　┗[Shin-ichi Tsurunaga ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2113.html">   2113 2000-05-24 22:29 　　　┗[Tomohiro Takahashi &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2114.html">   2114 2000-05-24 23:52 　　　　┗[Tomohiro Takahashi &lt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2116.html">   2116 2000-05-25 12:15 　　　　　┗[Shin-ichi Tsurunaga ]                             </a></span>
 </pre>
 </body>
 </html>

@@ -5,74 +5,74 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="7918.html">[��]</a><a href="7920.html">[��]</a><a href="../list/7901-8000.html">[�ֹ�����]</a><a href="../thread/7901-8000.html">[����åɰ���]</a></p>
+<p class="button"><a href="7918.html">[前]</a><a href="7920.html">[次]</a><a href="../list/7901-8000.html">[番号順一覧]</a><a href="../thread/7901-8000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:7919
 </p>
 <div class="header">
 <p>
-From: ���� &lt;���� &lt;yokohama@xxxxxxxxxx&gt;&gt;<br>
+From: 横浜 &lt;横浜 &lt;yokohama@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 19 Jun 2003 15:03:05 +0900<br>
-Subject: [mysql 07919] solaris9 + Msql-Mysql-modules ������<br>
+Subject: [mysql 07919] solaris9 + Msql-Mysql-modules の問題<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ޤ��ơ�˾��ȿ����ޤ���
+初めまして。望月と申します。
 
-����sparc(sun4u)
+今回、sparc(sun4u)
     + solaris9 
     + mysql4-standard-4.0.12-sun-solaris2.9-sparc-64bit
     + perl-5.8.0
     + Msql-Mysql-modules-1.2216
-�Υ��󥹥ȡ���ǡ����ʤ�Ƥ����äƤޤ���
+のインストールで、かなりてこずってます。
 
-mysql���ΤΥ��󥹥ȡ��������ʤ�����ޤ�����
-��������Msql-Mysql-modules�Υ��󥹥ȡ������make test�λ����ǰʲ��Τ褦
-�ʥ��顼������������Фޤ���
+mysql自体のインストールは問題なく出来ました。
+しかし、Msql-Mysql-modulesのインストール時のmake testの時点で以下のよう
+なエラーが、たくさん出ます。
 
 t/ak-dbd.............. install_driver(mysql) failed: Can't load
 '/usr/local/src/Msql-Mysql-modules-1.2216/mysql/../blib/arch/auto/DBD/mysql/mysql.so'
 for sql.so: symbol mysql_init: referenced symbol not found at
 /usr/local/lib/perl5/5.8.0/sun4-solaris/DynaLoader.pm line 229.
 
-���������ȼ�ʬ�ʤ��Ĵ�٤Ƥߤ��Ȥ�����
-����perl�ȡ�Msql-Mysql-modules��ξ���Ȥ�Ʊ������ѥ���ǡ�����ѥ��뤵��Ƥ��ʤ���
-����make���˽��Ϥ�������򸵤ˡ���󥯥��ޥ�ɤ˥��ץ������ɲä��롣
-����perl Makefile.PL --static --config �Ȥ��Ƥߤ롣
-�ʤɤ��������Ǥ��ޤ�����
+いろいろと自分なりに調べてみたところ、
+１．perlと、Msql-Mysql-modulesが両方とも同じコンパイラで、コンパイルされていない。
+２．make時に出力される情報を元に、リンクコマンドにオプションを追加する。
+３．perl Makefile.PL --static --config としてみる。
+などが、検索できました。
 
-1�֤ξ�硢ξ���Ȥ�Ʊ��gcc�ǥ���ѥ��뤷�Ƥ���١�����Ϥʤ��Ȼפ��ޤ���
-(����)
+1番の場合、両方とも同じgccでコンパイルしている為、問題はないと思います。
+(出力)
 # gcc -v
 Reading specs from /usr/local/lib/gcc-lib/sparc-sun-solaris2.9/3.2.1/specs
 Configured with: ../configure --with-as=/usr/ccs/bin/as --with-ld=/usr/ccs/bin/ls--disable-nls
 Thread model: posix
 gcc version 3.2.1
 
-�ޤ���2�֤ξ��ɤ�����󥯥��ޥ�ɤ�libgcc.a�Υѥ�����ꤷ�ʤ��ƤϤ����ʤ��褦�ʤΤ�
-make�ν��Ϥ��ǧ�����Ȥ����������Ȼ��ꤵ��Ƥ����Τ�����ʤ����Ȼפ��ޤ���
-(����)
+また、2番の場合どうやらリンクコマンドにlibgcc.aのパスを指定しなくてはいけないようなので
+makeの出力を確認したところ、ちゃんと指定されていたので問題ないかと思います。
+(出力)
 # make
---ȴ��--
+--抜粋--
 /usr/local/mysql/lib/libmysqlclient.a -lm -lz -L/usr/local/lib/gcc-lib/sparc-sun-solaris2.9/3.2.1 -lgcc
 
-3�֤��Ƥߤޤ������ޤä����Ѥ��Ϥ���ޤ���Ǥ�����
+3番も試してみましたがまったく変わりはありませんでした。
 
-������linux�ʤɤǻ��Ѥ��Ƥ��������Ϥޤä������ꤢ��ޤ���Ǥ�����
-sparc�ޥ�����Ȥ������ʤΤǤ��礦����
-���������ʥɥ�����Ȥ򻲾Ȥ��ޤ������������褦��礦�����뤳�Ȥ�����ޤ���
-�ɤʤ�����Ʊ���褦������˽й�ä����ȤΤ����������󤴶����ꤨ�ʤ��Ǥ��礦����
-�ɤ�������������ꤤ�פ��ޤ���
+以前、linuxなどで使用していたころはまったく問題ありませんでした。
+sparcマシーンとの相性なのでしょうか？
+いろいろなドキュメントを参照しましたが、全くようりょうを得ることが出来ません。
+どなたか、同じような問題に出合ったことのある方、是非ご教授願えないでしょうか。
+どうぞよろしくお願い致します。
 
 
 </pre>
 </div>
-<p class="button"><a href="7918.html">[��]</a><a href="7920.html">[��]</a><a href="../list/7901-8000.html">[�ֹ�����]</a><a href="../thread/7901-8000.html">[����åɰ���]</a></p>
+<p class="button"><a href="7918.html">[前]</a><a href="7920.html">[次]</a><a href="../list/7901-8000.html">[番号順一覧]</a><a href="../thread/7901-8000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="7919.html">   7919 2003-06-19 15:03 [���� &lt;yokohama@xxxxx] solaris9 + Msql-Mysql-modules ������    </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7937.html">   7937 2003-06-24 15:55 ��[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="7919.html">   7919 2003-06-19 15:03 [横浜 &lt;yokohama@xxxxx] solaris9 + Msql-Mysql-modules の問題    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7937.html">   7937 2003-06-24 15:55 ┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
 </pre>
 </body>
 </html>

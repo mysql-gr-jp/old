@@ -1,37 +1,37 @@
-�����<br><br>�ܷTEXT��Ȥ��Ȥ褤�ȥ��ɥХ������Ƥ��������ơ��ơ��֥���뤳�Ȥ��Ǥ����ΤǤ���<br>�����ʵ��䤬�襤�Ƥ��ޤ����ΤǾܤ��������Ƥ��������ʤ��Ǥ��礦����<br><br>�ʤ�TEXT���ȹԥ�������Ķ���Ƥ����ΤǤ��礦����<br>�ޤ���TEXT�ξ��ξ�¤Ϸ�ޤäƤ���ΤǤ��礦����<br><br><div class="gmail_quote">2009/06/08 15:48 Mikiya Okuno <span dir="ltr">&lt;<a href="mailto:Mikiya.Okuno@sun.com">Mikiya.Okuno@sun.com</a>&gt;</span>:<br>
-<blockquote class="gmail_quote" style="border-left: 1px solid rgb(204, 204, 204); margin: 0pt 0pt 0pt 0.8ex; padding-left: 1ex;">����Ǥ���<br>
+奥野さん<br><br>本件、TEXTを使うとよいとアドバイスしていただいて、テーブルも作ることができたのですが<br>新たな疑問がわいてきましたので詳しく教えていただけないでしょうか？<br><br>なぜTEXTだと行サイズを超えても作れるのでしょうか？<br>また、TEXTの場合の上限は決まっているのでしょうか？<br><br><div class="gmail_quote">2009/06/08 15:48 Mikiya Okuno <span dir="ltr">&lt;<a href="mailto:Mikiya.Okuno@sun.com">Mikiya.Okuno@sun.com</a>&gt;</span>:<br>
+<blockquote class="gmail_quote" style="border-left: 1px solid rgb(204, 204, 204); margin: 0pt 0pt 0pt 0.8ex; padding-left: 1ex;">奥野です。<br>
 <br>
-���顼��å������ˤ�ɽ������Ƥ����̤ꡢMySQL Cluster������Ū��8052�Х��ȤȤ����ԥ������ξ�¤�����ޤ���<br>
-VARCHAR(2700)��utf8�ξ�硢�����2700 * 3 = 8100�Х��ȤˤʤäƤ��ޤ��ޤ��Τǡ��ԥ������ξ�¤�<br>
-Ķ���Ƥ��ޤ����Ȥˤʤ�ޤ��ΤǺ������뤳�Ȥ�����ޤ���<br>
+エラーメッセージにも表示されている通り、MySQL Clusterは内部的に8052バイトという行サイズの上限があります。<br>
+VARCHAR(2700)はutf8の場合、最大で2700 * 3 = 8100バイトになってしまいますので、行サイズの上限を<br>
+超えてしまうことになりますので作成することが出来ません。<br>
 <br>
-TEXT�����Ѥ��뤫��8052�Х��Ȥ����¤�Ķ���ʤ��褦�˥ơ��֥���߷פ��ޤ��礦��<br>
+TEXTを利用するか、8052バイトの制限を超えないようにテーブルを設計しましょう。<br>
 <font color="#888888">--<br>
 Mikiya Okuno, MySQL Support Engineer<br>
 Sun Microsystems KK, Tokyo, Japan<br>
 <a href="http://www-jp.mysql.com/" target="_blank">http://www-jp.mysql.com/</a><br>
 </font><div><div></div><div class="h5"><br>
-On 08/06/2009, at 3:31 PM, �������ɧ wrote:<br>
+On 08/06/2009, at 3:31 PM, 坂井田保彦 wrote:<br>
 <br>
-&gt; ����Ĥȿ����ޤ���<br>
+&gt; 坂井田と申します。<br>
 &gt;<br>
-&gt; MySQL Cluster��ǥ������١����ǻ��Ѥ��Ƥ��ޤ���<br>
-&gt; varchar��2700�Х��ȤΥ�����������褦�Ȥ���ȡ�ERROR 1118��ȯ�����ޤ���<br>
-&gt; ������Υ��ȥ졼�����󥸥���ʬ������InnoDB���Ѥ��ƻ���Ȥ����ơ��֥��������뤳�Ȥ��Ǥ��ޤ����Τ�<br>
-&gt; ���ȥ졼�����󥸥�ΰ㤤�ˤ���Τ��Ȼפ��ΤǤ���������NDB����Ѥ�������varchar��row size�κ����ͤϤ����Ĥˤʤ�Τ�<br>
-&gt; ��ʬ����ˤʤ����Ϥ���ä��㤤�ޤ�����<br>
+&gt; MySQL Clusterをディスクベースで使用しています。<br>
+&gt; varcharで2700バイトのカラムを作成しようとすると、ERROR 1118が発生します。<br>
+&gt; クエリのストレージエンジン部分だけをInnoDBに変えて試したところテーブルを作成することができましたので<br>
+&gt; ストレージエンジンの違いによるものだと思うのですが。。。NDBを使用した場合のvarcharのrow sizeの最大値はいくつになるのか<br>
+&gt; お分かりになる方はいらっしゃいますか？<br>
 &gt;<br>
-&gt; ��NDB<br>
+&gt; ■NDB<br>
 &gt; mysql&gt; CREATE TABLE `lengthtest` ( &nbsp; `hoge` varchar(2700) DEFAULT NULL ) TABLESPACE ts_1 STORAGE DISK ENGINE=NDB DEFAULT CHARSET=utf8;<br>
 &gt; ERROR 1118 (42000): Row size too large. The maximum row size for the used table type, not counting BLOBs, is 8052. You have to change some columns to TEXT or BLOBs<br>
 &gt;<br>
-&gt; ��InnoDB<br>
+&gt; ■InnoDB<br>
 &gt; mysql&gt; CREATE TABLE `lengthtest` ( &nbsp; `hoge` varchar(2700) DEFAULT NULL ) TABLESPACE ts_1 STORAGE DISK ENGINE=InnoDB DEFAULT CHARSET=utf8;<br>
 &gt; Query OK, 0 rows affected (0.24 sec)<br>
 &gt;<br>
-&gt; ���ƥ��Ȥ����Ķ�<br>
+&gt; ■テストした環境<br>
 &gt; Red Hat ES 4.6<br>
-&gt; MySQL Cluster 7.0.5(RPM��)<br>
+&gt; MySQL Cluster 7.0.5(RPM版)<br>
 <br>
 <br>
 </div></div></blockquote></div><br>

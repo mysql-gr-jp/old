@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15726.html">[��]</a><a href="15728.html">[��]</a><a href="../list/15701-15800.html">[�ֹ�����]</a><a href="../thread/15701-15800.html">[����åɰ���]</a></p>
+<p class="button"><a href="15726.html">[前]</a><a href="15728.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15727
 </p>
@@ -13,31 +13,31 @@ mysql:15727
 <p>
 From: &quot;ochiai&quot; &lt;&quot;ochiai&quot; &lt;s.ochiai@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 11 Apr 2012 17:03:02 +0900<br>
-Subject: [mysql 15727] Re: Left Join����դ���UPDATE�������֤�����Ĺ�������äơ�Ĺʸ��<br>
+Subject: [mysql 15727] Re: Left Join句を付けたUPDATE処理時間が非常に長くかかって（長文）<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-������
-ʿ����
+中川様
+平塚様
 
-��˻�����ꡢ����Ƴ���������ʤ��顢�ֿ����٤�ޤ������ȡ�����������ޤ���
-��ʬ�ǿ�����ơ���������Τ˼�ּ��ޤ�����
+お忙しい所、ご指導いただきながら、返信が遅れましたこと、申し訳ありません。
+自分で色々試して、整理するのに手間取りました。
 
-�ʲ��Τ褦�˼¹Ԥ��ޤ����������ޤ������ޤ���Ǥ�����
+以下のように実行しましたが、うまくいきませんでした。
 
-�ʤ������⤽���ꤿ�����Ȥϡ����٤Υ쥳���ɤ���ʤ�ơ��֥�����٥ơ��֥�ˤ��顢���٤򤢤륭���ǤޤȤ᤿�ơ��֥�ʼ�ơ��֥�ˤ����������ơ��֥��ID�����٥ơ��֥�����ꤹ�뤳�ȤǤ���
+なお、そもそもやりたいことは、明細のレコードからなるテーブル（明細テーブル）から、明細をあるキーでまとめたテーブル（主テーブル）を作成し、主テーブルのIDを明細テーブルに設定することです。
 
-����������1�ʼºݤΥơ��֥�ǹԤä���̡ˡ��������Ԥ����̤ˤʤ�ʤ��ä�
-�����ƥ��ȴĶ��Ǥ˼¹Է�̡��������������������������������Ԥ����̤ˤϤʤä������嵭����Ū�˹��ʤ���
+１．ケース1（実際のテーブルで行った結果）・・・期待する結果にならなかった
+２．テスト環境でに実行結果・・・・・・・・・・・・・・・期待する結果にはなったが、上記の目的に合わない。
 
-Ĺʸ�Ǥ���������������ꤤ���ޤ���
+長文ですが、よろしくお願いします。
 
-����������1�ʼºݤΥơ��֥�ǹԤä���̡�
+１．ケース1（実際のテーブルで行った結果）
 
-show create table �η��
-�ʤ����ơ��֥�̾�ϥե������̾�Ͻ�ľ���Ƥ��ޤ���
+show create table の結果
+なお、テーブル名はフィールド名は書き直しています。
 
 mysql&gt; show create table `table-a`;
 +-------------++
@@ -45,14 +45,14 @@ mysql&gt; show create table `table-a`;
 +-------------++
 <span class="quote1">| table-a | CREATE TABLE `table-a` (</span>
   `id` int(11) NOT NULL,
-  `table-bID` int(11) DEFAULT NULL COMMENT '��ơ��֥��ID�����դ������ꤹ�롣',
-  `F1` varchar(30) DEFAULT NULL COMMENT '���롼�ײ�����',
+  `table-bID` int(11) DEFAULT NULL COMMENT '主テーブルのID。後付けで設定する。',
+  `F1` varchar(30) DEFAULT NULL COMMENT 'グループ化キー',
   `Flag` tinyint(1) DEFAULT NULL COMMENT '',
-  ..........(35�ĤΥե������)
+  ..........(35個のフィールド)
   PRIMARY KEY (`id`),
   KEY `table-bID` (`table-bID`),
   KEY `F1` (`F1`),
-  KEY `F2` (`F2`),����...�ե���������ʬ��ά
+  KEY `F2` (`F2`),　　...フィールド定義分省略
   KEY `F3` (`F3`),
   KEY `F4` (`F4`),
   KEY `F5` (`F5`),
@@ -61,7 +61,7 @@ mysql&gt; show create table `table-a`;
   KEY `F8` (`F8`),
   KEY `F9` (`F9`),
   KEY `F10` (`F10`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='���٥ơ��֥롧table-aID' |
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='明細テーブル：table-aID' |
 +-------------++
 1 row in set (0.02 sec)
 
@@ -73,9 +73,9 @@ mysql&gt; show create table `table-b`;
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '',
   `table-aID` int(11) DEFAULT NULL COMMENT '',
   `meisai` int(11) DEFAULT '0' COMMENT '',
-  `F1` varchar(30) DEFAULT NULL COMMENT '���롼�ײ�����',
+  `F1` varchar(30) DEFAULT NULL COMMENT 'グループ化キー',
   `Flag` tinyint(1) DEFAULT '0' COMMENT '',
-  ..........(35�ĤΥե������)
+  ..........(35個のフィールド)
   PRIMARY KEY (`id`),
   UNIQUE KEY `F1_UNIQUE` (`F1`),
   KEY `F2` (`F2`),
@@ -88,7 +88,7 @@ mysql&gt; show create table `table-b`;
   KEY `F9` (`F9`),
   KEY `F10` (`F10`),
   KEY `F11` (`F11`)
-) ENGINE=InnoDB AUTO_INCREMENT=393211 DEFAULT CHARSET=cp932 COMMENT='��ơ��֥롣' |
+) ENGINE=InnoDB AUTO_INCREMENT=393211 DEFAULT CHARSET=cp932 COMMENT='主テーブル。' |
 +------------+
 1 row in set (0.00 sec)
 
@@ -107,9 +107,9 @@ NULL    | NULL | 183578 |             |
 +----+-------------+-------------+-------+---------------+--------------------+---------+------+--------+-------------+
 2 rows in set (0.00 sec)
 
-table-b��type��index�Τޤޤǡ�possible_keys ��NULL��ref ��NULL�ǡ�rows��1�ǤϤʤ�138317�Ⱦ������Ѥ��ޤ���Ǥ�����
-��ơ��֥�Υ���ǥå������ɤΤ褦�ˤʤäƤ��뤫���Ƥߤޤ�����
-����򸫤�ȡ�F1_UNIQUE ��Non_unique ��0�ȤʤäƤ���Τǡ���ˡ��������Ǥ��礦�� 
+table-bのtypeはindexのままで、possible_keys がNULL、ref もNULLで、rowsは1ではなく138317と状況は変わりませんでした。
+主テーブルのインデックスがどのようになっているか見てみました。
+これを見ると、F1_UNIQUE はNon_unique が0となっているので、ユニークキーでしょう。 
 
 
 mysql&gt; show index from `table-b`;
@@ -149,15 +149,15 @@ A         |      137304 |     NULL | NULL   |      | BTREE      |         |
 12 rows in set (0.58 sec)
 
 
-�����Ť������ȤǤ�������㤤��table-a��table-b�Υ���饯�����åȤ��ۤʤäƤ��ޤ����������cp932�����줷�ޤ���
-����ϱƶ�����Ǥ��礦����
+今気づいたことですが、手違いでtable-aとtable-bのキャラクタセットが異なっていました。本来はcp932で統一します。
+これは影響するでしょうか？
 
-�����ƥ��ȴĶ��Ǥ˼¹Է��
+２．テスト環境でに実行結果
 
-�ե�����ɥ������䥤��ǥå�������¿���Τ��������ʤȹͤ������Υ������ޤ����оݤȤʤ�ơ��֥�ΰ����Υե�����ɤΤߤ���Ф����ơ��֥��test�Ȥ����������ޤ�Insert INTO���ޥ�ɤǿ����˺���������Ƥ� 
-�ޤ�����
+フィールドサイズやインデックス数が多いのが原因かなと考え、元のスキーマから対象となるテーブルの一部のフィールドのみを抽出したテーブルをtestというスキーマにInsert INTOコマンドで新たに作成し、試してみ 
+ました。
 
-���˥ơ��֥�����Ǽ¹Ԥ���SQL�ϲ������̤�Ǥ���
+１）テーブル作成で実行したSQLは下記の通りです。
 
 USE `test`;
 
@@ -165,12 +165,12 @@ drop tables if exists `table-a`;
 
 CREATE TABLE `table-a` (
   `id` int(11) NOT NULL,
-  `table-b_ID` int(11) DEFAULT NULL COMMENT '���դ�������',
-  `F1` varchar(30) DEFAULT NULL COMMENT '���롼�ײ�����',
+  `table-b_ID` int(11) DEFAULT NULL COMMENT '後付けで設定',
+  `F1` varchar(30) DEFAULT NULL COMMENT 'グループ化キー',
   PRIMARY KEY (`id`),
   KEY `table-b_ID` (`table-b_ID`),
   KEY `F1` (`F1`)
-) ENGINE=InnoDB DEFAULT CHARSET=cp932 COMMENT='���٥ơ��֥�';
+) ENGINE=InnoDB DEFAULT CHARSET=cp932 COMMENT='明細テーブル';
 
 
 drop tables if exists `table-b`;
@@ -179,12 +179,12 @@ CREATE TABLE `table-b` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '',
   `table-a_ID` int(11) DEFAULT NULL COMMENT '',
   `meisai` int(11) DEFAULT '0' COMMENT '',
-  `F1` varchar(30) NOT NULL COMMENT '���롼�ײ���������ˡ���',
+  `F1` varchar(30) NOT NULL COMMENT 'グループ化キー。ユニーク',
   PRIMARY KEY (`id`),
   UNIQUE KEY `F1_UNIQUE` (`F1`)
-) ENGINE=InnoDB DEFAULT CHARSET=cp932 COMMENT='���٥ơ��֥�򥰥롼�ײ������ơ��֥�';
+) ENGINE=InnoDB DEFAULT CHARSET=cp932 COMMENT='明細テーブルをグループ化したテーブル';
 
-#`table-a`�򸵤Υ�������`aaa`����������ԡ�
+#`table-a`を元のスキーマ`aaa`から一部コピー
 INSERT INTO `table-a` (
  `id`,
  `F1`)
@@ -193,7 +193,7 @@ INSERT INTO `table-a` (
  `T1`.`F1`
     FROM `aaa`.`T1`;
 
-#`table-a`��`F1`�ǥ��롼�ײ�����`table-b`�����
+#`table-a`を`F1`でグループ化して`table-b`を作成
 INSERT INTO `table-b` (
  `table-a_ID`,
  `meisai`,
@@ -205,7 +205,7 @@ INSERT INTO `table-b` (
     FROM `table-a`
  GROUP BY `table-a`.`F1`;
 
-����show create table�η��
+２）show create tableの結果
 
 mysql&gt; show create table `table-a`;
 +---------+
@@ -213,12 +213,12 @@ mysql&gt; show create table `table-a`;
 +---------+
 <span class="quote1">| table-a | CREATE TABLE `table-a` (</span>
   `id` int(11) NOT NULL,
-  `table-b_ID` int(11) DEFAULT NULL COMMENT '���դ�������',
-  `F1` varchar(30) DEFAULT NULL COMMENT '���롼�ײ�����',
+  `table-b_ID` int(11) DEFAULT NULL COMMENT '後付けで設定',
+  `F1` varchar(30) DEFAULT NULL COMMENT 'グループ化キー',
   PRIMARY KEY (`id`),
   KEY `table-b_ID` (`table-b_ID`),
   KEY `F1` (`F1`)
-) ENGINE=InnoDB DEFAULT CHARSET=cp932 COMMENT='���٥ơ��֥�' 
+) ENGINE=InnoDB DEFAULT CHARSET=cp932 COMMENT='明細テーブル' 
 <span class="quote1">|</span>
 +---------+
 1 row in set (0.00 sec)
@@ -231,14 +231,14 @@ mysql&gt; show create table `table-b`;
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `table-a_ID` int(11) DEFAULT NULL,
   `meisai` int(11) DEFAULT '0',
-  `F1` varchar(30) NOT NULL COMMENT '���롼�ײ���������ˡ���',
+  `F1` varchar(30) NOT NULL COMMENT 'グループ化キー。ユニーク',
   PRIMARY KEY (`id`),
   UNIQUE KEY `F1_UNIQUE` (`F1`)
-) ENGINE=InnoDB AUTO_INCREMENT=196606 DEFAULT CHARSET=cp932 COMMENT='���٥ơ��֥�򥰥롼�ײ������ơ��֥�'                               |
+) ENGINE=InnoDB AUTO_INCREMENT=196606 DEFAULT CHARSET=cp932 COMMENT='明細テーブルをグループ化したテーブル'                               |
 +---------+
 1 row in set (0.00 sec)
 
-����explain�η�̣�
+３）explainの結果１
 
 mysql&gt; explain select
     -&gt;      `table-a`.`id`,
@@ -260,9 +260,9 @@ mysql&gt; explain select
 +----+-------------+---------+--------+---------------+-----------+---------+-----------------+--------+-------+
 2 rows in set (0.00 sec)
 
-�����Ǥϡ�˾���̤��ФƤ��ޤ���
+ここでは、望む結果が出ています。
 
-����USE INDEX��Ȥä�explain�η�̣�
+４）USE INDEXを使ったexplainの結果２
 
 mysql&gt; explain select
     -&gt;      `table-a`.`id`,
@@ -285,45 +285,45 @@ mysql&gt; explain select
 +----+-------------+---------+--------+---------------+-----------+---------+-----------------+--------+-------+
 2 rows in set (0.00 sec)
 
-USE INDEX��ȤäƤ�Ȥ�ʤ��Ƥ��̤�Ʊ���Ǥ�����
+USE INDEXを使っても使わなくても結果は同じでした。
 
-�ʤ������Υơ��֥�ǤϤ��ޤ������ʤ��ΤǤ��礦����
+なぜ、元のテーブルではうまくいかないのでしょうか？
 
 
 ----- Original Message ----- 
-From: &quot;���&quot; &lt;nora1962@xxxxxxxxxx&gt;
+From: &quot;中川貴&quot; &lt;nora1962@xxxxxxxxxx&gt;
 To: &lt;ml@xxxxxxxxxx&gt;
 Sent: Friday, March 30, 2012 1:27 AM
-Subject: <a href="15713.html">[mysql 15713]</a> Re: Left Join����դ���UPDATE�������֤�����Ĺ�������ä� 
+Subject: <a href="15713.html">[mysql 15713]</a> Re: Left Join句を付けたUPDATE処理時間が非常に長くかかって 
 
 
 
 <span class="quote1">&gt; (2012/03/29 17:58), ochiai wrote:</span>
-<span class="quote2">&gt;&gt; ������</span>
-<span class="quote2">&gt;&gt; ���꤬�Ȥ��������ޤ���</span>
+<span class="quote2">&gt;&gt; 中川様</span>
+<span class="quote2">&gt;&gt; ありがとうございます。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; �¹Է�̤ϰʲ����̤�Ȥʤ�ޤ�����</span>
+<span class="quote2">&gt;&gt; 実行結果は以下の通りとなりました。</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; select_type table type possible_keys key key_len ref rows Extra</span>
-<span class="quote2">&gt;&gt; SIMPLE table-a ALL NULL NULL NULL NULL 20��</span>
-<span class="quote2">&gt;&gt; SIMPLE table-b index NULL Kb 63 NULL 14�� Usingindex</span>
+<span class="quote2">&gt;&gt; SIMPLE table-a ALL NULL NULL NULL NULL 20万</span>
+<span class="quote2">&gt;&gt; SIMPLE table-b index NULL Kb 63 NULL 14万 Usingindex</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ----- Original Message ----- From: &quot;���� ��&quot; &lt;takashi.nakagawa@xxxxxxxxxx&gt;</span>
+<span class="quote2">&gt;&gt; ----- Original Message ----- From: &quot;中川 貴&quot; &lt;takashi.nakagawa@xxxxxxxxxx&gt;</span>
 <span class="quote2">&gt;&gt; To: &lt;ml@xxxxxxxxxx&gt;</span>
 <span class="quote2">&gt;&gt; Sent: Thursday, March 29, 2012 5:46 PM</span>
-<span class="quote2">&gt;&gt; Subject: <a href="15709.html">[mysql 15709]</a> Re: Left Join����դ���UPDATE�������֤�����Ĺ�������ä�</span>
-<span class="quote1">&gt; ����Ǥ���</span>
-<span class="quote1">&gt; ���𤷤ޤ�����</span>
-<span class="quote1">&gt; ���𤫤��ֿ����ޤ���</span>
-<span class="quote1">&gt; ���Ǥ˥쥹����Ƥ�����������ä��㤤�ޤ��������ߤμ¹Էײ�Ǥ�JOIN��INDEX�����Ѥ���Ƥ��ޤ���</span>
-<span class="quote1">&gt; ��USE INDEX ���ꤷ�Ƥ�ơ��֥륢�������κݤ�INDEX��ͳ�Ǥ�������ǵѤä����Ψ��</span>
+<span class="quote2">&gt;&gt; Subject: <a href="15709.html">[mysql 15709]</a> Re: Left Join句を付けたUPDATE処理時間が非常に長くかかって</span>
+<span class="quote1">&gt; 中川です。</span>
+<span class="quote1">&gt; 帰宅しました。</span>
+<span class="quote1">&gt; 自宅から返信します。</span>
+<span class="quote1">&gt; すでにレスされている方がいらっしゃいますが、現在の実行計画ではJOINにINDEXが使用されていません。</span>
+<span class="quote1">&gt; （USE INDEX 指定してもテーブルアクセスの際にINDEX経由であるだけで却って非効率）</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; table-b�ιԤ�ref��NULL�ˤʤäƤ���Τ��ڵ�Ǥ�������ʤ�table-a.Ka�ˤʤ�٤��ˡ� </span>
+<span class="quote1">&gt; table-bの行のrefがNULLになっているのが証拠です（本来ならtable-a.Kaになるべき）。 </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ͤ�����ΤϺ����κ�����ˡ�����äƤ��뤫��`table-a`.`Ka`��`table-b`.`kb����°�����㤦���ȤǤ��礦����</span>
-<span class="quote1">&gt; ʿ�ͤ���Τ��ä����Ȥ���ˡ�table-a�פȡ�table-b�פΡ�show create </span>
-<span class="quote1">&gt;  table�פη�̤򶵤��Ʋ�������</span>
-<span class="quote1">&gt; ����ǤϤ���������ꤤ���ޤ���</span>
+<span class="quote1">&gt; 考えられるのは索引の作成方法が誤っているか、`table-a`.`Ka`と`table-b`.`kb｀の属性が違うことでしょうか。</span>
+<span class="quote1">&gt; 平塚さんのおっしゃるとおりに「table-a」と「table-b」の「show create </span>
+<span class="quote1">&gt;  table」の結果を教えて下さい。</span>
+<span class="quote1">&gt; それではよろしくお願いします。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; </span>
@@ -331,23 +331,23 @@ Subject: <a href="15713.html">[mysql 15713]</a> Re: Left Join����դ���UPDATE���
 
 </pre>
 </div>
-<p class="button"><a href="15726.html">[��]</a><a href="15728.html">[��]</a><a href="../list/15701-15800.html">[�ֹ�����]</a><a href="../thread/15701-15800.html">[����åɰ���]</a></p>
+<p class="button"><a href="15726.html">[前]</a><a href="15728.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="15703.html">  15703 2012-03-29 15:08 [&quot;ochiai&quot; &lt;s.ochiai@x] Left Join����դ���UPDATE�������֤�����Ĺ�������ä�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15705.html">  15705 2012-03-29 16:56 ��[���� �� &lt;takashi.nak]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15706.html">  15706 2012-03-29 17:01 ��[���� �� &lt;takashi.nak]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15707.html">  15707 2012-03-29 17:12 ����[���� �� &lt;takashi.nak]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15708.html">  15708 2012-03-29 17:42 ������[&quot;ochiai&quot; &lt;s.ochiai@x]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15709.html">  15709 2012-03-29 17:46 ��������[���� �� &lt;takashi.nak]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15711.html">  15711 2012-03-29 17:58 ����������[&quot;ochiai&quot; &lt;s.ochiai@x]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15712.html">  15712 2012-03-29 20:25 ������������[HIRATSUKA Sadao &lt;hir]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15713.html">  15713 2012-03-30 01:27 ������������[��� &lt;nora1962@xxx]                             </a></span>
-<span class="current">-&gt;&nbsp;<a href="15727.html">  15727 2012-04-11 17:03 ��������������[&quot;ochiai&quot; &lt;s.ochiai@x] Re: Left Join����դ���UPDATE�������֤�����Ĺ�������äơ�Ĺʸ��</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15728.html">  15728 2012-04-11 18:24 ����������������[���� �� &lt;takashi.nak]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15729.html">  15729 2012-04-12 09:46 ������������������[HIRATSUKA Sadao &lt;hir]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15730.html">  15730 2012-04-13 10:32 ��������������������[&quot;ochiai&quot; &lt;s.ochiai@x] Re: Left Join����դ���UPDATE�������֤�����Ĺ�������äơʲ������</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15733.html">  15733 2012-04-13 11:13 ����������������������[HIRATSUKA Sadao &lt;hir]                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15710.html">  15710 2012-03-29 17:47 ��������[Masaaki Matsuyama &lt;m]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15703.html">  15703 2012-03-29 15:08 [&quot;ochiai&quot; &lt;s.ochiai@x] Left Join句を付けたUPDATE処理時間が非常に長くかかって</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15705.html">  15705 2012-03-29 16:56 ┣[中川 貴 &lt;takashi.nak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15706.html">  15706 2012-03-29 17:01 ┗[中川 貴 &lt;takashi.nak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15707.html">  15707 2012-03-29 17:12 　┗[中川 貴 &lt;takashi.nak]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15708.html">  15708 2012-03-29 17:42 　　┗[&quot;ochiai&quot; &lt;s.ochiai@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15709.html">  15709 2012-03-29 17:46 　　　┣[中川 貴 &lt;takashi.nak]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15711.html">  15711 2012-03-29 17:58 　　　┃┗[&quot;ochiai&quot; &lt;s.ochiai@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15712.html">  15712 2012-03-29 20:25 　　　┃　┣[HIRATSUKA Sadao &lt;hir]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15713.html">  15713 2012-03-30 01:27 　　　┃　┗[中川貴 &lt;nora1962@xxx]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="15727.html">  15727 2012-04-11 17:03 　　　┃　　┗[&quot;ochiai&quot; &lt;s.ochiai@x] Re: Left Join句を付けたUPDATE処理時間が非常に長くかかって（長文）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15728.html">  15728 2012-04-11 18:24 　　　┃　　　┗[中川 貴 &lt;takashi.nak]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15729.html">  15729 2012-04-12 09:46 　　　┃　　　　┗[HIRATSUKA Sadao &lt;hir]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15730.html">  15730 2012-04-13 10:32 　　　┃　　　　　┗[&quot;ochiai&quot; &lt;s.ochiai@x] Re: Left Join句を付けたUPDATE処理時間が非常に長くかかって（解決御礼）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15733.html">  15733 2012-04-13 11:13 　　　┃　　　　　　┗[HIRATSUKA Sadao &lt;hir]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15710.html">  15710 2012-03-29 17:47 　　　┗[Masaaki Matsuyama &lt;m]                                 </a></span>
 </pre>
 </body>
 </html>

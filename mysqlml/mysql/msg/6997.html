@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="6996.html">[��]</a><a href="6998.html">[��]</a><a href="../list/6901-7000.html">[�ֹ�����]</a><a href="../thread/6901-7000.html">[����åɰ���]</a></p>
+<p class="button"><a href="6996.html">[前]</a><a href="6998.html">[次]</a><a href="../list/6901-7000.html">[番号順一覧]</a><a href="../thread/6901-7000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:6997
 </p>
@@ -13,66 +13,66 @@ mysql:6997
 <p>
 From: &quot;kosugi&quot; &lt;&quot;kosugi&quot; &lt;kosugi@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 18 Feb 2003 19:45:36 +0900<br>
-Subject: [mysql 06997] tables_ ������ˤ�륢���������� (3.23.55)<br>
+Subject: [mysql 06997] tables_ ｐｒｉｖによるアクセス許可 (3.23.55)<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�����Ǥ�
+小杉です
 
-�����äˤʤäƤ���ޤ���
+お世話になっております。
 
-3.23.42����3.23.55�ؤΥС�����󥢥åפΥƥ��Ȥ�ԤäƤ��ޤ���
+3.23.42から3.23.55へのバージョンアップのテストを行っています。
 
-3.23.55��tables_priv�ˤ��ơ��֥�ؤΥ����������Ĥ�ȿ�Ǥ����
-���Ȥ������ݤ�ȯ�����ƶ�θ���Ƥ���ޤ���
-�桼����٥�ε��Ĥ�ǡ����١�����٥�ε��Ĥ������ư��Ƥ�
-�ޤ����ơ��֥��٥�Υ����������Ĥ�ǧ������ޤ���
+3.23.55でtables_privによるテーブルへのアクセス許可が反映されな
+いという現象が発生して苦慮しております。
+ユーザレベルの許可やデータベースレベルの許可は正常に動作してい
+ます。テーブルレベルのアクセス許可が認識されません。
 
-Ʊ�ͤθ��ݤˤĤ��Ʋ����ˡ�ʤɾ���򤪻������������������ꤤ��
-�����ޤ���
+同様の現象について解決方法など情報をお持ちの方、ご教授お願いい
+たします。
 
 
-��ꤿ�����Ȥϡ�����Υǡ����١������������Υơ��֥�����˥�
-���������Ĥ�Ϳ���뤳�ȤǤ���
-�̤Υǡ����١���������������Ū��ã�������ΤǤ������ѻ��ˤ�
-��Τǡ��ǡ����١�����ؤΥ����������Ĥ򥳥�ȥ����뤷�����Τ�
-����
+やりたいことは、特定のデータベースの中の特定のテーブルだけにア
+クセス許可を与えることです。
+別のデータベースを作成すれば目的は達成されるのですが、煩雑にな
+るので、データベース内へのアクセス許可をコントロールしたいので
+す。
 
 
 grant select on dbname.* to username@accessHost
-�Ȥ������ˤϡ�mysql.db�ơ��֥�˥���ȥ꡼���ɲä��쥢������
-����Ĥ���ޤ�����
+とした場合には、mysql.dbテーブルにエントリーが追加されアクセス
+を許可されますが、
 grant select on dbname.tablename to username@accessHost
-�Ȥ������ˤϡ�mysql.tables_priv�ơ��֥�˥���ȥ꡼���ɲä���
-�ޤ�����������������ݤ���Ƥ��ޤ��ޤ���
+とした場合には、mysql.tables_privテーブルにエントリーが追加され
+ますが、アクセスを拒否されてしまいます。
 
-grant���reload��ɬ�פϤʤ��ȥޥ˥奢��˽񤤤Ƥ���ޤ���������
-��reload���ޤ�������̤�Ʊ���Ǥ�����
+grant後はreloadの必要はないとマニュアルに書いてありましたが、一
+応reloadしました。結果は同じでした。
 
-3.23.42�λ���Ʊ�ͤ���ˡ������Υơ��֥������select���¤�Ϳ����
-���Ȥ����褿�ΤǤ�����3.23.55�ˤ��Ƥ���ơ��֥��٥�ε��Ĥ�̵
-�뤵��ơ������������ݤ���Ƥ��ޤ���
+3.23.42の時は同様の方法で特定のテーブルだけにselect権限を与える
+ことが出来たのですが、3.23.55にしてからテーブルレベルの許可は無
+視されて、アクセス拒否されています。
 
-mysqlaccess�ǥ����������Υ����å���Ԥ��ޤ�����
-�����ư��Ƥ���3.23.42�Ǥ⥢����������ݤ����3.23.55�Ǥ�
-tables_priv�Υ����å��ϹԤäƤ��ʤ��褦�˸����ޤ���
+mysqlaccessでアクセス権のチェックを行いました。
+正常に動作している3.23.42でもアクセスを拒否される3.23.55でも
+tables_privのチェックは行っていないように見えます。
 
-���󥹥ȡ���������꤫��tables_priv������Ƥ����ǽ�����⤤�ȹ�
-����myisamchk��Ԥä��ꡢ�ƥ��󥹥ȡ��뤷�Ƥߤޤ�����Ʊ���Ǥ�
-����
+インストール時の問題か、tables_privが壊れている可能性が高いと考
+え、myisamchkを行ったり、再インストールしてみましたが同じでし
+た。
 
-grantʸ�Υ��ڥ�ߥ����β�ǽ����ͤ���webmin�ʤɤΥġ����ͳ�ǥ�
-���������Ĥ����ꤷ�Ƥߤޤ�����Ʊ���Ǥ�����
+grant文のスペルミス等の可能性を考え、webminなどのツール経由でア
+クセス許可を設定してみましたが同じでした。
 
 
 MacOSX 10.2
-mysql 3.23.55 (�Х��ʥ�ѥå��������饤�󥹥ȡ����
+mysql 3.23.55 (バイナリパッケージからインストール）
 <a href="http://www.softagency.co.jp/MySQL/Downloads/MySQL-3.23/mysql-3.">http://www.softagency.co.jp/MySQL/Downloads/MySQL-3.23/mysql-3.</a>
 23.55-apple-darwin6.1-powerpc.tar.gz
 
-��������åɤϻ��ͤˤʤ�ޤ����������ݤ��Ѥ��ޤ���Ǥ�����
+下記スレッドは参考になりましたが、現象は変わりませんでした。
 
 <a href="../../msg.cgi%3Fml=mysql&amp;id=6428.html">http://www.mysql.gr.jp/mysqlml/msg.cgi?ml=mysql&amp;id=6428</a>
 <a href="../../msg.cgi%3Fml=mysql&amp;id=5520.html">http://www.mysql.gr.jp/mysqlml/msg.cgi?ml=mysql&amp;id=5520</a>
@@ -87,7 +87,7 @@ v
 lect
 
 
-�����������Ť�����������ޤ����顢����������ꤤ�������ޤ�
+何か、お気づきの点等ありましたら、よろしくお願いいたします
 
 --
 Tomoaki Kosugi
@@ -104,10 +104,10 @@ kosugi@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="6996.html">[��]</a><a href="6998.html">[��]</a><a href="../list/6901-7000.html">[�ֹ�����]</a><a href="../thread/6901-7000.html">[����åɰ���]</a></p>
+<p class="button"><a href="6996.html">[前]</a><a href="6998.html">[次]</a><a href="../list/6901-7000.html">[番号順一覧]</a><a href="../thread/6901-7000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="6997.html">   6997 2003-02-18 19:45 [&quot;kosugi&quot; &lt;kosugi@xxx] tables_ ������ˤ�륢���������� (3.23.55)</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6999.html">   6999 2003-02-19 18:56 ��[&quot;kosugi&quot; &lt;kosugi@xxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="6997.html">   6997 2003-02-18 19:45 [&quot;kosugi&quot; &lt;kosugi@xxx] tables_ ｐｒｉｖによるアクセス許可 (3.23.55)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6999.html">   6999 2003-02-19 18:56 ┗[&quot;kosugi&quot; &lt;kosugi@xxx]                                       </a></span>
 </pre>
 </body>
 </html>

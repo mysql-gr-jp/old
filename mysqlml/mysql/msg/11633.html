@@ -5,38 +5,38 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="11632.html">[��]</a><a href="11634.html">[��]</a><a href="../list/11601-11700.html">[�ֹ�����]</a><a href="../thread/11601-11700.html">[����åɰ���]</a></p>
+<p class="button"><a href="11632.html">[前]</a><a href="11634.html">[次]</a><a href="../list/11601-11700.html">[番号順一覧]</a><a href="../thread/11601-11700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:11633
 </p>
 <div class="header">
 <p>
-From: ����ζͺ &lt;����ζͺ &lt;kusano@xxxxxxxxxx&gt;&gt;<br>
+From: 草野龍雄 &lt;草野龍雄 &lt;kusano@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 28 Jun 2005 14:43:51 +0900<br>
-Subject: [mysql 11633] mysql�Υ��롼�ץåȤ�4CPU�����Ǥϴ�����ǽ�ˤʤ�ʤ���<br>
+Subject: [mysql 11633] mysqlのスループットが4CPU構成では期待性能にならない？<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ޤ��ơ�����ȿ����ޤ���
+初めまして。草野と申します。
 
-AMD-Optern252-4CPU��16GB������Ѥ�������Фˡ�
-MySQL 4.0.18(MyISAM)��12GB���٤Υǡ����̤�DB���Ȥ�Ǥ��ޤ���
+AMD-Optern252-4CPUで16GBメモリを積んだサーバに、
+MySQL 4.0.18(MyISAM)で12GB程度のデータ量のDBを組んでいます。
 
-OS��Fedora3��ȤäƤ��ޤ���
-# uname -a �ʥ�����̾�������Ƥ���ޤ���
+OSはFedora3を使っています。
+# uname -a （サーバ名は伏せてあります）
 Linux 2.6.11-1.14_FC3smp #1 SMP Thu Apr 7 19:36:23 EDT 2005 x86_64 x86_64 x86_64 GNU/Linux
 
-������Υǡ�����OS�Υǥ���������å���˼��ޤ�褦�˥ơ��֥���Ȥ�Ǥ���
-����(10GB���٤Ǥ���
+運用中のデータはOSのディスクキャッシュに収まるようにテーブルを組んでいま
+す。(10GB程度です）
 
-Ʊ����6��Υ����Ф�����®1000�����ꡦ500��³(���Τ�)�̤ΤȤ�����Ƭ�Ǥ���
-�ʤ�ޤ����ʥ��ͥ�����󥹥ס���ϻȤäƤ��ޤ����
-��my.cnf �� set-variable = max_connections=5000��
+同時に6台のサーバから秒速1000クエリ・500接続(全体で)位のところで頭打ちに
+なります。（コネクションスプールは使っていません）
+（my.cnf は set-variable = max_connections=5000）
 
 
-top�Ǹ���ȡ�
+topで見ると、
 
 top - 14:36:27 up 26 days,  9:36,  1 user,  load average: 1.40, 1.38, 1.29
 Tasks:  73 total,   1 running,  72 sleeping,   0 stopped,   0 zombie
@@ -50,25 +50,25 @@ Swap:  1020088k total,      208k used,  1019880k free, 10427348k cached
   PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
  7116 mysql     16   0 4901m 4.4g 3896 S 99.9 28.2  10768:07 mysqld
 
-�Ȥ������֤ˤʤäƤ��ꡢmysqld �Υץ�������100%�ȤʤäƤ��ޤ�����OSŪ��
-��idle���֤����ʤꤢ��ޤ���
+という状態になっており、mysqld のプロセスが100%となっていますが、OS的に
+はidle時間がかなりあります。
 
-Xeon����Opteron�˾�괹����ݤ˥���Х�ɤ�����򥯥ꥢ�Ǥ����ΤǤ�����
-�ɤ�������̤����ǽ���ФƤ��ޤ���
+XeonからOpteronに乗り換える際にメモリバンドの問題をクリアできたのですが、
+どうも期待通りの性能が出ていません。
 
-����äȷ׻������ Cpu0-3��user�ο�����­�����碌��Ȥ��礦��100�̤ˤʤ�
-�ޤ����Ȥ������Ȥϥޥ������åɤ�ư���ƤϤ����Τ�CPU�˴ؤ��Ƥ�Ʊ����
-���Ĥ������Ѥ��Ƥ��ʤ��ΤǤ��礦������
-�ʤĤޤꥫ����CPU�����ꥢ��������ʤɤ��̤�CPU��Ȥ��Ȥ�������
+ちょっと計算すると Cpu0-3のuserの数字を足しあわせるとちょうど100位になり
+ます。ということはマルチスレッドで動いてはいるもののCPUに関しては同時に
+１つしか利用していないのでしょうか？？
+（つまりカレントCPUがメモリアクセス中などに別のCPUを使うとか・・）
 
-�⤷������Ȥ���� Linux �Υ���åɥ饤�֥����ä��⤷�줺��ML�㤤�Ǥ�
-���餹�ߤޤ���
-�⤷�����餫�ξ��󤬤���ޤ����顢����������ꤤ���ޤ���
+もしかするとこれは Linux のスレッドライブラリの話かもしれず、ML違いでし
+たらすみません。
+もし、何らかの情報がありましたら、よろしくお願いします。
 
 
 
 </pre>
 </div>
-<p class="button"><a href="11632.html">[��]</a><a href="11634.html">[��]</a><a href="../list/11601-11700.html">[�ֹ�����]</a><a href="../thread/11601-11700.html">[����åɰ���]</a></p>
+<p class="button"><a href="11632.html">[前]</a><a href="11634.html">[次]</a><a href="../list/11601-11700.html">[番号順一覧]</a><a href="../thread/11601-11700.html">[スレッド一覧]</a></p>
 </body>
 </html>

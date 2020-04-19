@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="10904.html">[��]</a><a href="10906.html">[��]</a><a href="../list/10901-11000.html">[�ֹ�����]</a><a href="../thread/10901-11000.html">[����åɰ���]</a></p>
+<p class="button"><a href="10904.html">[前]</a><a href="10906.html">[次]</a><a href="../list/10901-11000.html">[番号順一覧]</a><a href="../thread/10901-11000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:10905
 </p>
@@ -13,52 +13,52 @@ mysql:10905
 <p>
 From: toki &lt;toki &lt;toki@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 08 Feb 2005 11:20:49 +0900<br>
-Subject: [mysql 10905] Re: ����ݡ��Ȼ��Υ��顼���Ϥȡ�InnoDB��MyISAM�ǤΥ����ȤˤĤ���<br>
+Subject: [mysql 10905] Re: インポート時のエラー出力と、InnoDB：MyISAMでのソートについて<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
 
-��) mysqlimport���ˡ�-v ��Ȥäưʲ��Τ褦�ʽ��Ϥ��Ф�ΤǤ�����
-�������Ρ�Warnings�������Ƥ��Τꤿ���ΤǤ���
-����������ˡ������ޤ��Ǥ��礦����
+１) mysqlimport時に、-v を使って以下のような出力が出るのですが、
+　　この　Warnings　の内容を知りたいのです。
+　　何か方法がありますでしょうか。
 
-<span class="quote1">&gt;mysqlimport �ǤϤʤ���LOAD DATA INFILE �������Ȥ��С�ľ���</span>
-<span class="quote1">&gt;SHOW WARNINGS �������¹Ԥ��뤳�Ȥ� Warnings �����Ƥ����Ϥ����ߤ���</span>
-<span class="quote1">&gt;�Ǥ���</span>
+<span class="quote1">&gt;mysqlimport ではなく、LOAD DATA INFILE クエリを使えば、直後に</span>
+<span class="quote1">&gt;SHOW WARNINGS クエリを実行することで Warnings の内容が出力されるみたい</span>
+<span class="quote1">&gt;です。</span>
 
-��mysql&gt; SHOW WARNINGS;
-��+---------+------+-------------------------------------------+
-��| Level   | Code | Message                                   |
-��+---------+------+-------------------------------------------+
-��| Warning | 1265 | Data truncated for column 'Date' at row 1 |
-��| Warning | 1265 | Data truncated for column 'Name' at row 1 |
-��+---------+------+-------------------------------------------+
+　mysql&gt; SHOW WARNINGS;
+　+---------+------+-------------------------------------------+
+　| Level   | Code | Message                                   |
+　+---------+------+-------------------------------------------+
+　| Warning | 1265 | Data truncated for column 'Date' at row 1 |
+　| Warning | 1265 | Data truncated for column 'Name' at row 1 |
+　+---------+------+-------------------------------------------+
 
-���ǡ�������Ȥ�����ǹ�ä����Ȥ�Ƚ��ޤ�����
+　データの中身が問題で合ったことが判りました。
 
-������ݡ������ˡ����������׽������ʤ���Фʤ�ʤ�ʸ�������ꡢ
-������ʸ�����ե�����ɤ�����Ƥ����Ȥ��������Ǥ�����
+　インポート前に、エスケープ処理しなければならない文字があり、
+　その文字がフィールドを壊していたという結論でした。
 
 
-<span class="quote2">&gt;&gt; 2) ����InnoDB�����Ѥ���DB���ۤ򤷤Ƥ����ΤǤ�����</span>
-<span class="quote2">&gt;&gt; ����order by �ˤ�륽���Ȥ������Ǥ��ޤ���Ǥ�����</span>
-<span class="quote1">&gt;	����</span>
-<span class="quote2">&gt;&gt; InnoDB�ˤϡ������ƥ��󥰤�����ʤ��ʤ�Х��⤷���ϻ��ͤ�</span>
-<span class="quote2">&gt;&gt; ����ΤǤ��礦����</span>
+<span class="quote2">&gt;&gt; 2) 当初InnoDBを利用してDB構築をしていたのですが、</span>
+<span class="quote2">&gt;&gt; 　　order by によるソートが巧くできませんでした。</span>
+<span class="quote1">&gt;	～～</span>
+<span class="quote2">&gt;&gt; InnoDBには、ソーティングが出来なくなるバグもしくは仕様が</span>
+<span class="quote2">&gt;&gt; あるのでしょうか。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;mysql-standard-4.1.9-pc-linux-gnu-i686 �ǻ�Ƥߤ���Ǥ�������ʤ���</span>
-<span class="quote1">&gt;���Ǥ�����Ǽ�ǡ��������꤬����Τ��⤷��ޤ��󤬡ġ�</span>
+<span class="quote1">&gt;mysql-standard-4.1.9-pc-linux-gnu-i686 で試してみたんですが問題ないよ</span>
+<span class="quote1">&gt;うです。格納データに問題があるのかもしれませんが…。</span>
 
-��InnoDB��MyISAM�ˤơ������Ȼ��˥ǡ����۾�˼夤�������Ȥ�����
-�����ͤΤ褦�Ǥ��͡�
+　InnoDBとMyISAMにて、ソート時にデータ異常に弱い、強いという、
+　仕様のようですね。
 
-������ݡ��ȥǡ���������˥��꡼��ʾ��֤ˤǤ���褦��
-��������ץȤ�������ơ�InnoDB�Ǥ����˥����Ȥ�
-����ǽ�ˤʤ�褦�ˤ��Ƥߤޤ���
+　インポートデータを事前にクリーンな状態にできるよう、
+　スクリプトを作成して、InnoDBでも綺麗にソートが
+　可能になるようにしてみます。
 
-�����Ťʾ��󡢤��꤬�Ȥ��������ޤ�����
+　貴重な情報、ありがとうございました。
 
 
 ------------------------ 
@@ -68,12 +68,12 @@ e-mail: toki@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="10904.html">[��]</a><a href="10906.html">[��]</a><a href="../list/10901-11000.html">[�ֹ�����]</a><a href="../thread/10901-11000.html">[����åɰ���]</a></p>
+<p class="button"><a href="10904.html">[前]</a><a href="10906.html">[次]</a><a href="../list/10901-11000.html">[番号順一覧]</a><a href="../thread/10901-11000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="10852.html">  10852 2005-01-30 17:00 [toki &lt;toki@xxxxxxxxx] ����ݡ��Ȼ��Υ��顼���Ϥȡ�InnoDB��MyISAM�ǤΥ����ȤˤĤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10853.html">  10853 2005-01-30 17:14 ��[toki &lt;toki@xxxxxxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10902.html">  10902 2005-02-08 09:55 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="10905.html">  10905 2005-02-08 11:20 ����[toki &lt;toki@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10852.html">  10852 2005-01-30 17:00 [toki &lt;toki@xxxxxxxxx] インポート時のエラー出力と、InnoDB：MyISAMでのソートについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10853.html">  10853 2005-01-30 17:14 ┣[toki &lt;toki@xxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10902.html">  10902 2005-02-08 09:55 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="10905.html">  10905 2005-02-08 11:20 　┗[toki &lt;toki@xxxxxxxxx]                                     </a></span>
 </pre>
 </body>
 </html>

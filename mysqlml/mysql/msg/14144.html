@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14143.html">[��]</a><a href="14145.html">[��]</a><a href="../list/14101-14200.html">[�ֹ�����]</a><a href="../thread/14101-14200.html">[����åɰ���]</a></p>
+<p class="button"><a href="14143.html">[前]</a><a href="14145.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14144
 </p>
@@ -13,56 +13,56 @@ mysql:14144
 <p>
 From: &quot;T.Hirotsu&quot; &lt;&quot;T.Hirotsu&quot; &lt;hirotsu@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 31 Jul 2007 21:26:26 +0900<br>
-Subject: [mysql 14144] Re: ���ץꥱ��������٥�Ǥν񤭹��ߤ�ʬ���ˤĤ���<br>
+Subject: [mysql 14144] Re: アプリケーションレベルでの書き込みの分散について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����ˤ��ϡ����ŤǤ���
+こんにちは、広津です。
 
-��Ҥ���Τ���Ƥϡ�����ȥ�󥶥�������ǥ�ʤ��Τ��ͤ���줿�����⤽����װ���Ϥ���
-��ˡ���Ȼפ��ޤ������������Ǥ��礦��
+金子さんのご提案は、２相トランザクションモデルなるものが考えられた、そもそもの要因をはらんだ
+方法だと思いますが、いかがでしょう？
 
-ʬ���ȥ�󥶥���������ݤʤΤϡ�
+分散トランザクションが面倒なのは、
 
 <span class="quote1">&gt;        $dbh-&gt;commit;</span>
 <span class="quote1">&gt;        $dbh_for_user_write1-&gt;commit;</span>
 
-�ξ��̤ǡ��ǽ�ΥΡ��ɤؤΥ��ߥåȤ�����������ˡ����ΥΡ��ɤؤΥ��ߥåȤ��������Ȥ��ˤɤ����뤫��
-�Ȥ������꤬ȯ�����뤫����Ȼפ��ޤ���
+の場面で、最初のノードへのコミットが成功した後に、次のノードへのコミットがコケたときにどうするか、
+という問題が発生するからだと思います。
 
-����ȥ�󥶥�������ǥ�Ǥϡ�����������б����뤿��ˡ����ߥåȲ�ǽ���Ȥ������֤��֤��ΤǤ�����
-����Ǥ⡢ʣ���Ρ��ɤؤκǽ�Ū�ʥ��ߥåȤ�����Ʊ�����������뤳�Ȥ��ݾڤ����ΤǤϤ���ޤ���
-�Ǥ��Τǡ���������Ȥˤʤä��Ȥ��ˤɤ����뤫�����뤤�ϡ��̤����Ʋ����Ǥ���Τ����Ȥ����Τ���
-ʬ���ȥ�󥶥��������Ѥ��������ƥ๽�ۻ���Ƭ��Ǻ�ޤ���Ȥ������ȡ�
+２相トランザクションモデルでは、この問題に対応するために、コミット可能かという状態を返すのですが、
+これでも、複数ノードへの最終的なコミットが全て同時に成功することを保証するものではありません。
+ですので、インダウトになったときにどうするか、あるいは、果たして何かできるのか、というのが、
+分散トランザクションを用いたシステム構築時に頭を悩ませるところかと。
 
-������󡢤��Τ褦�ʥ������ؤ��б��ϹԤ�ʤ��Ȥ��������⤢��ޤ����ʡ�����
-����������Ū�ˤϡ���̩�ʰ������ɬ�פǡ����ġ��㳲ȯ���������쥷�ʥꥪ�ʼ�ư���ߥåȡ�������Хå�����
-�����Τ�����Ǥ�����ˡ�ʬ���ȥ�󥶥��������Ѥ����̣������Ȼפ��ޤ���
+もちろん、このようなケースへの対応は行わないという選択肢もあります。（＾＾；
+しかし一般的には、厳密な一貫性が必要で、かつ、障害発生時の復旧シナリオ（手動コミット・ロールバック手順）
+が正確に定義できる場合に、分散トランザクションを用いる意味があると思います。
 
-�⤷����������Ȥ��ơ�ʬ���ȥ�󥶥��������Ѥ��������η�̡��Ȥ��ɤ��Ρ��ɴ֤ΰ������»�ʤ���
-����ɤ⡢¾�ˤ�����䤦��ˡ������ΤǤ����顢��������ȥ�󥶥������ΤߤΥ�ǥ�θ�Ƥ�ϡ���ʬ��
-���ͤ�����Ȼפ��ޤ���
+もし、現実問題として、分散トランザクションを用いず、その結果、ときどきノード間の一貫性が損なわれる
+けれども、他にそれを補う方法があるのでしたら、ローカルトランザクションのみのモデルの検討は、十分に
+価値があると思います。
 
-�դˡ��Ρ��ɴ֤ΰ������»�ʤ�줿�Ȥ���������ñ���䤦��ˡ������ΤǤ����顢ʬ���ȥ�󥶥��������Ѥ���
-��������Ȥˤʤä��Ȥ��������ΤƤơ����ä��Ǻƹ��ۤ���ȸ�����⤢��ޤ����ɡ��ʡ�����
+逆に、ノード間の一貫性が損なわれたとき、それを簡単に補う方法があるのでしたら、分散トランザクションを用い、
+インダウトになったときは全部捨てて、そっちで再構築すると言う手もありますけど。（＾＾；
 
-#��˿����ޤ����Ȥ��ꡢMySQL �Σ���ȥ�󥶥������ϼºݤ��Ѥ������Ȥ��ʤ����ޥ˥奢��ˤ��ä����
-#�ܤ��̤��������Ǥ��Τǡ��⤷�������顢�������˴ְ㤤�����뤫���Τ�ޤ��󤬡�����������̣�ǹͤ��ޤ��ȡ�
-#MySQL �ǤΣ���ȥ�󥶥�������Ϣ�μ����ϡ��⤦����ä��������Ȥ����ʤ����Ȥ��פ��ޤ����ʡ�����
+#先に申しましたとおり、MySQL の２相トランザクションは実際に用いたことがなく、マニュアルにざっくりと
+#目を通しただけですので、もしかしたら、私の理解に間違いがあるかも知れませんが、そういう意味で考えますと、
+#MySQL での２相トランザクション関連の実装は、もうちょっと便利だといいなぁ、とか思います。（＾＾；
 
 
 </pre>
 </div>
-<p class="button"><a href="14143.html">[��]</a><a href="14145.html">[��]</a><a href="../list/14101-14200.html">[�ֹ�����]</a><a href="../thread/14101-14200.html">[����åɰ���]</a></p>
+<p class="button"><a href="14143.html">[前]</a><a href="14145.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14138.html">  14138 2007-07-30 12:21 [&quot;Hiroyuki Yamada&quot; &lt;y] ���ץꥱ��������٥�Ǥν񤭹��ߤ�ʬ���ˤĤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14142.html">  14142 2007-07-31 15:00 ��[&quot;T.Hirotsu&quot; &lt;hirotsu]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14143.html">  14143 2007-07-31 18:18 ��[&quot;Kensuke Kaneko&quot; &lt;ky]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="14144.html">  14144 2007-07-31 21:26 ����[&quot;T.Hirotsu&quot; &lt;hirotsu]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14145.html">  14145 2007-07-31 23:53 ������[&quot;Hiroyuki Yamada&quot; &lt;y]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14151.html">  14151 2007-08-01 12:04 ��[&lt;ikari-ml@xxxxxxxxxx] [meiwaku#]Re:  ���ץꥱ��������٥�Ǥν񤭹��ߤ�ʬ���ˤĤ���</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14138.html">  14138 2007-07-30 12:21 [&quot;Hiroyuki Yamada&quot; &lt;y] アプリケーションレベルでの書き込みの分散について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14142.html">  14142 2007-07-31 15:00 ┣[&quot;T.Hirotsu&quot; &lt;hirotsu]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14143.html">  14143 2007-07-31 18:18 ┣[&quot;Kensuke Kaneko&quot; &lt;ky]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14144.html">  14144 2007-07-31 21:26 ┃┗[&quot;T.Hirotsu&quot; &lt;hirotsu]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14145.html">  14145 2007-07-31 23:53 ┃　┗[&quot;Hiroyuki Yamada&quot; &lt;y]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14151.html">  14151 2007-08-01 12:04 ┗[&lt;ikari-ml@xxxxxxxxxx] [meiwaku#]Re:  アプリケーションレベルでの書き込みの分散について</a></span>
 </pre>
 </body>
 </html>

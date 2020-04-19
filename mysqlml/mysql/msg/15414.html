@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15413.html">[��]</a><a href="15415.html">[��]</a><a href="../list/15401-15500.html">[�ֹ�����]</a><a href="../thread/15401-15500.html">[����åɰ���]</a></p>
+<p class="button"><a href="15413.html">[前]</a><a href="15415.html">[次]</a><a href="../list/15401-15500.html">[番号順一覧]</a><a href="../thread/15401-15500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15414
 </p>
@@ -13,30 +13,30 @@ mysql:15414
 <p>
 From: Meiji KIMURA &lt;Meiji KIMURA &lt;meiji.kimura@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 06 Oct 2010 13:25:42 +0900<br>
-Subject: [mysql 15414] Re: not in�礬���ޤ�ư���ʤ���<br>
+Subject: [mysql 15414] Re: not in句がうまく動かない。<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��¼�Ǥ���
+木村です。
 
-�����MySQL 4.x�Ǳ黻��NOT��ͥ���̤��Ǿ�̤��ä����Ȥ��������Ȼפ��ޤ���
-���Τ���id % 2 not in (1);�Ǥϡ�%������not�Τۤ������ɾ������Ƥ��ޤ���
-���ʤ��id % (2 not in (1));�����ˤʤꡢ��̥��åȤ����ʤ��Τ��Ȼפ��ޤ���
+これはMySQL 4.xで演算子NOTの優先順位が最上位だったことが原因だと思います。
+そのためid % 2 not in (1);では、%より先にnotのほうが先に評価されてしまう、
+すなわちid % (2 not in (1));相当になり、結果セットが戻らないのだと思います。
 
-# 5.x�Ǥ�NOT��ͥ���̤����ʤ겼����ޤ�����See this manual.
+# 5.xではNOTの優先順位がかなり下がりました。See this manual.
 
 <a href="http://dev.mysql.com/doc/refman/5.1/ja/operator-precedence.html">http://dev.mysql.com/doc/refman/5.1/ja/operator-precedence.html</a>
 
-������򤱤뤿��ˤϡ��ʤ��Ǥ��󤬹ԤäƤ���褦�ˡ����ä���Ĥ���
-ͥ���̤����Τˤ��뤫��MOD()�ؿ���Ȥ����������ͤ����ޤ���
+これを避けるためには、なかでさんが行っているように、かっこをつけて
+優先順位を明確にするか、MOD()関数を使うと正しい値が戻ります。
 
 mysql&gt; SELECT * FROM `usrs` WHERE (id % 2) not in (1);
 +----+------+
 <span class="quote1">| id | name |</span>
 +----+------+
-<span class="quote1">|  2 | �դ� |</span>
+<span class="quote1">|  2 | ふご |</span>
 +----+------+
 1 row in set (0.00 sec)
 
@@ -44,48 +44,48 @@ mysql&gt; SELECT * FROM `usrs` WHERE mod(id,2) not in (1);
 +----+------+
 <span class="quote1">| id | name |</span>
 +----+------+
-<span class="quote1">|  2 | �դ� |</span>
+<span class="quote1">|  2 | ふご |</span>
 +----+------+
 1 row in set (0.00 sec)
 
-�ʤ���������ݤ�ư���Τϡ��黻��!=��ͥ���̤�%����㤤����Ǥ���
+なお、下記も旨く動作するのは、演算子!=の優先順位が%より低いためです。
 
 <span class="quote1">&gt; SELECT * FROM `usrs` WHERE id % 2 != 1;</span>
 
 (2010/10/06 11:07), nakade wrote:
-<span class="quote1">&gt; �ʤ��Ǥȿ����ޤ���</span>
+<span class="quote1">&gt; なかでと申します。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����Ƥ����Ƥ�����������ˤĤ��ƤǤ�����</span>
-<span class="quote1">&gt; �����������Ǥ�������ä�����ˡ��ʬ����ޤ����Τ�</span>
-<span class="quote1">&gt; ��𤵤��Ƥ��������ޤ���</span>
+<span class="quote1">&gt; 先に投稿させていただいた件についてですが、</span>
+<span class="quote1">&gt; 原因は不明ですが、解消する方法が分かりましたので</span>
+<span class="quote1">&gt; 報告させていただきます。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; 2010ǯ10��5��19:28 nakade&lt;nakade@xxxxxxxxxx&gt;:</span>
+<span class="quote1">&gt; 2010年10月5日19:28 nakade&lt;nakade@xxxxxxxxxx&gt;:</span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt;&gt; ���ΤȤ���id�ե�����ɤ������Υǡ�������Ф�������</span>
+<span class="quote2">&gt;&gt; このとき、idフィールドが偶数のデータを取り出したくて</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; SELECT * FROM `usrs` WHERE id % 2 not in (1);</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; �Τ褦��SQL��ȯ�Ԥ����ΤǤ��������֤��ͤ����Ǥ���(�Կ�0)�פΤ褦��</span>
-<span class="quote2">&gt;&gt; ɽ��������ޤ����ʤ���</span>
+<span class="quote2">&gt;&gt; のようなSQLを発行したのですが、「返り値が空でした(行数0)」のような</span>
+<span class="quote2">&gt;&gt; 表示がされます。なお、</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; SELECT * FROM `usrs` WHERE id % 2 not in (1);</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ��</span>
+<span class="quote1">&gt; を</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; SELECT * FROM `usrs` WHERE (id % 2) not in (1);</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Τ褦�ˤ����Ȥ��������Ԥ���ư��Ȥʤ�ޤ�����</span>
+<span class="quote1">&gt; のようにしたところ、期待する動作となりました。</span>
 
 </pre>
 </div>
-<p class="button"><a href="15413.html">[��]</a><a href="15415.html">[��]</a><a href="../list/15401-15500.html">[�ֹ�����]</a><a href="../thread/15401-15500.html">[����åɰ���]</a></p>
+<p class="button"><a href="15413.html">[前]</a><a href="15415.html">[次]</a><a href="../list/15401-15500.html">[番号順一覧]</a><a href="../thread/15401-15500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="15412.html">  15412 2010-10-05 19:28 [nakade &lt;nakade@xxxxx] not in�礬���ޤ�ư���ʤ���              </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15413.html">  15413 2010-10-06 11:07 ��[nakade &lt;nakade@xxxxx]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="15414.html">  15414 2010-10-06 13:25 ����[Meiji KIMURA &lt;meiji.]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15415.html">  15415 2010-10-06 13:55 ������[nakade &lt;nakade@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15412.html">  15412 2010-10-05 19:28 [nakade &lt;nakade@xxxxx] not in句がうまく動かない。              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15413.html">  15413 2010-10-06 11:07 ┗[nakade &lt;nakade@xxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="15414.html">  15414 2010-10-06 13:25 　┗[Meiji KIMURA &lt;meiji.]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15415.html">  15415 2010-10-06 13:55 　　┗[nakade &lt;nakade@xxxxx]                                   </a></span>
 </pre>
 </body>
 </html>

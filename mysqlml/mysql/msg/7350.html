@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="7349.html">[��]</a><a href="7351.html">[��]</a><a href="../list/7301-7400.html">[�ֹ�����]</a><a href="../thread/7301-7400.html">[����åɰ���]</a></p>
+<p class="button"><a href="7349.html">[前]</a><a href="7351.html">[次]</a><a href="../list/7301-7400.html">[番号順一覧]</a><a href="../thread/7301-7400.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:7350
 </p>
@@ -13,79 +13,79 @@ mysql:7350
 <p>
 From: &quot;HIROSE, Masaaki&quot; &lt;&quot;HIROSE, Masaaki&quot; &lt;hirose31@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 25 Mar 2003 04:38:45 +0900<br>
-Subject: [mysql 07350] Re: ��������ʬ���׸����ε�ư�ˤĤ���<br>
+Subject: [mysql 07350] Re: 漢字の部分一致検索の挙動について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�Ҥ����Ȥ����ޤ�
+ひろせといいます
 
-on &quot;<a href="07213.html">[mysql 07213]</a> Re: ��������ʬ���׸����ε�ư�ˤĤ���&quot;
+on &quot;<a href="07213.html">[mysql 07213]</a> Re: 漢字の部分一致検索の挙動について&quot;
    &lt;20030318071646.3dfbfcba.tommy@xxxxxxxxxx&gt;
 at Tue, 18 Mar 2003 07:16:46 +0900
-   �Ȥߤ��ޤ��Ҥ� &lt;tommy@xxxxxxxxxx&gt; wrote:
+   とみたまさひろ &lt;tommy@xxxxxxxxxx&gt; wrote:
 
-<span class="quote2">&gt; &gt; �ɤ�Ǥ��������ȥѡɤȡȥ��ɤ����̤Ǥ��ʤ��Ȥ����������Ƥ��ޤ�������</span>
-<span class="quote2">&gt; &gt; ����Ĵ�٤Ƥߤ���̡�</span>
+<span class="quote2">&gt; &gt; どもです。先日“パ”と“ケ”が区別できないという問題を投稿しましたが、</span>
+<span class="quote2">&gt; &gt; 色々調べてみた結果、</span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; ��LIKE '%����%'������ʬ���׾���ȯ�����롣</span>
-<span class="quote2">&gt; &gt; ��(SELECT��̡֥��󥿥å����פȡ֥ѥ󥿥���פ��ޥå�)</span>
-<span class="quote2">&gt; &gt; ��MySQLVer4����ǤΤ�ȯ�����롣</span>
+<span class="quote2">&gt; &gt; ・LIKE '%ケンタ%'等の部分一致場合に発生する。</span>
+<span class="quote2">&gt; &gt; 　(SELECT結果「ケンタッキー」と「パンタロン」がマッチ)</span>
+<span class="quote2">&gt; &gt; ・MySQLVer4系列でのみ発生する。</span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; ���ͤǤ���</span>
-<span class="quote2">&gt; &gt; �������᤯���θ��ݤ�̵���ʤ뤳�Ȥ򵧤äơ�����</span>
+<span class="quote2">&gt; &gt; の様です。</span>
+<span class="quote2">&gt; &gt; 一日も早くこの現象が無くなることを祈って。。。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �������狼��ޤ�����MySQL 4.0.2 ��Ƴ�����줿��</span>
+<span class="quote1">&gt; 原因がわかりました。MySQL 4.0.2 で導入された、</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt;    * Use `Turbo Boyer-Moore' algorithm to speed up `LIKE &quot;%keyword%&quot;'</span>
 <span class="quote1">&gt;      searches.</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �αƶ��Τ褦�Ǥ���&quot;%string%&quot; ������ LIKE �������̤ʴؿ���Ƥ�ǽ�����</span>
-<span class="quote1">&gt; ��褦�ˤʤäƤޤ��������δؿ��ϥޥ���Х��Ȥ�ռ����Ƥޤ���</span>
+<span class="quote1">&gt; の影響のようです。&quot;%string%&quot; 形式の LIKE だけ特別な関数を呼んで処理す</span>
+<span class="quote1">&gt; るようになってました。その関数はマルチバイトを意識してません。</span>
 
-��ǰ�ʤ���������꡼�����줿 4.0.12 �Ǥ�ľ�äƤ��ޤ���Ǥ������ơ��֥�
-������� BINARY °����Ĥ����ꤹ��в���Ǥ���ΤǤ��������������ʸ��
-��ؿ����ޥ���Х��Ȥ�ռ����ʤ��ʤ�Τ�Ƭ���ˤ��Ǥ���
+残念ながら先日リリースされた 4.0.12 でも直っていませんでした。テーブル
+定義時に BINARY 属性をつけたりすれば回避できるのですが、そうすると文字
+列関数がマルチバイトを意識しなくなるので頭が痛いです。
 
-�Ȥ����ǡ�EXPLAIN �Ǹ���¤�ϥơ��֥�������� BINARY °������١�
-SELECT ���ʤɤ� BINARY �ؿ��λ��Ѥϸ�Ψ�������褦�ʤΤǡ���§��
+ところで、EXPLAIN で見る限りはテーブル定義時の BINARY 属性に比べ、
+SELECT 時などの BINARY 関数の使用は効率が悪いようなので、原則、
 
-  ʸ������ / �硦��ʸ��
+  文字種類 / 大・小文字
   =========================================================
-  �ѤΤ�   / ���̤��ʤ� �� BINARY °���ʤ����ؿ����Ѥ��ʤ�
-  �ѤΤ�   / ���̤���   �� BINARY °�����ꡢ�ؿ����Ѥ��ʤ�
-  �¤Τ�   / ���̤��ʤ� �� BINARY °���ʤ����ؿ����Ѥ��ʤ�
-  �¤Τ�   / ���̤���   �� BINARY °���ʤ����ؿ����Ѥ��ʤ�
-  ���º��� / ���̤��ʤ� �� BINARY °���ʤ����ؿ����Ѥ��ʤ�
-  ���º��� / ���̤���   �� BINARY °�����ꡢ�ؿ����Ѥ��ʤ�
+  英のみ   / 区別しない → BINARY 属性なし、関数使用しない
+  英のみ   / 区別する   → BINARY 属性あり、関数使用しない
+  和のみ   / 区別しない → BINARY 属性なし、関数使用しない
+  和のみ   / 区別する   → BINARY 属性なし、関数使用しない
+  英和混在 / 区別しない → BINARY 属性なし、関数使用しない
+  英和混在 / 区別する   → BINARY 属性あり、関数使用しない
 
-# �פ� ASCII ʸ�����ޤޤ����� BINARY °����Ĥ��롣
+# 要は ASCII 文字が含まれる場合は BINARY 属性をつける。
 
-�Ȥ������ˤǹͤ��Ƥ���ΤǤ���������������Ǥ��礦��?
-# ��� LIKE '%keyword%' ������̤Ȥ��ơ�
-## �Ǹ�Υ������� SUBSTRING ����ʸ����ؿ��λ��Ѥ����դ�ɬ�פǤ�����
+という方針で考えているのですが、これは妥当でしょうか?
+# 件の LIKE '%keyword%' 問題は別として。
+## 最後のケースは SUBSTRING 等の文字列関数の使用に注意が必要ですが。
 
 -- 
-�Ҥ���
+ひろせ
 
 </pre>
 </div>
-<p class="button"><a href="7349.html">[��]</a><a href="7351.html">[��]</a><a href="../list/7301-7400.html">[�ֹ�����]</a><a href="../thread/7301-7400.html">[����åɰ���]</a></p>
+<p class="button"><a href="7349.html">[前]</a><a href="7351.html">[次]</a><a href="../list/7301-7400.html">[番号順一覧]</a><a href="../thread/7301-7400.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="7140.html">   7140 2003-03-06 18:29 [Kitajima &lt;kitajima@x] ��������ʬ���׸����ε�ư�ˤĤ���        </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7149.html">   7149 2003-03-08 13:45 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7150.html">   7150 2003-03-09 18:18 ����[Kitajima &lt;kitajima@x]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7151.html">   7151 2003-03-09 19:29 ������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7159.html">   7159 2003-03-11 21:10 ��������[Takeyuki Miyagawa &lt;m]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7160.html">   7160 2003-03-12 02:08 ����������[Tomoyuki Ishino &lt;ish]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7161.html">   7161 2003-03-12 11:23 ������������[Kitajima &lt;kitajima@x]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7163.html">   7163 2003-03-13 02:30 ����������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7213.html">@  7213 2003-03-18 07:16 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7218.html">   7218 2003-03-18 13:22 ����[Kitajima &lt;kitajima@x]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="7350.html">   7350 2003-03-25 04:38 ����[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7361.html">   7361 2003-03-26 01:47 ������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7371.html">   7371 2003-03-26 18:36 ��������[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7140.html">   7140 2003-03-06 18:29 [Kitajima &lt;kitajima@x] 漢字の部分一致検索の挙動について        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7149.html">   7149 2003-03-08 13:45 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7150.html">   7150 2003-03-09 18:18 ┃┗[Kitajima &lt;kitajima@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7151.html">   7151 2003-03-09 19:29 ┃　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7159.html">   7159 2003-03-11 21:10 ┃　　┗[Takeyuki Miyagawa &lt;m]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7160.html">   7160 2003-03-12 02:08 ┃　　　┣[Tomoyuki Ishino &lt;ish]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7161.html">   7161 2003-03-12 11:23 ┃　　　┃┗[Kitajima &lt;kitajima@x]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7163.html">   7163 2003-03-13 02:30 ┃　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7213.html">@  7213 2003-03-18 07:16 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7218.html">   7218 2003-03-18 13:22 　┣[Kitajima &lt;kitajima@x]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="7350.html">   7350 2003-03-25 04:38 　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7361.html">   7361 2003-03-26 01:47 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7371.html">   7371 2003-03-26 18:36 　　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
 </pre>
 </body>
 </html>

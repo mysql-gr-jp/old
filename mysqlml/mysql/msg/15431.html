@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15430.html">[��]</a><a href="15432.html">[��]</a><a href="../list/15401-15500.html">[�ֹ�����]</a><a href="../thread/15401-15500.html">[����åɰ���]</a></p>
+<p class="button"><a href="15430.html">[前]</a><a href="15432.html">[次]</a><a href="../list/15401-15500.html">[番号順一覧]</a><a href="../thread/15401-15500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15431
 </p>
@@ -13,17 +13,17 @@ mysql:15431
 <p>
 From: &quot;kenji@xxxxxxxxxx&quot; &lt;&quot;kenji@xxxxxxxxxx&quot; &lt;kenji@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 19 Nov 2010 11:59:27 +0900<br>
-Subject: [mysql 15431] EUC-JP�ΰ�����ʸ����phpMyAdmin�ǲ�����<br>
+Subject: [mysql 15431] EUC-JPの一部の文字がphpMyAdminで化ける<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����ˤϡ����ڤȿ����ޤ���
+こんには、鈴木と申します。
 
-FreeBSD8.1 + mysql-server-5.5.4 + phpMyAdmin-3.3.4�Ǥ�
-MySQL��EUC-JP�ǻȤ������Τ�
-ports ���� WITH_CHARSET=ujis WITH_XCHARSET=all �ǥ��󥹥ȡ��롣
+FreeBSD8.1 + mysql-server-5.5.4 + phpMyAdmin-3.3.4です
+MySQLをEUC-JPで使いたいので
+ports から WITH_CHARSET=ujis WITH_XCHARSET=all でインストール。
 
 # cat /var/db/mysql/my.cnf
 [mysqld]
@@ -45,42 +45,42 @@ mysql&gt; SHOW VARIABLES LIKE 'character_set%';
 +--------------------------+----------------------------------+
 8 rows in set (0.00 sec)
 
-�嵭�δĶ���
+上記の環境で
 
 # cat test-euc.sql
 CREATE DATABASE `test` ;
 USE `test`;
 CREATE TABLE `sample` ( `moji` text ) CHARSET=ujis;
-INSERT INTO `sample` VALUES ('��'),('��'),('��'),('ʸ'),('��'),('��'),('��'),('��');
+INSERT INTO `sample` VALUES ('普'),('通'),('の'),('文'),('字'),('〓'),('〓'),('〓');
 
 # mysql -p&quot;PASSWORD&quot; &lt; test-euc.sql
 
-�Ȥ���test�ǡ����١�����sample�ơ��֥��EUC-JP��
-���̤�ʸ���ȵ����¸��ʸ��������ޤ���
+としてtestデータベースにsampleテーブルにEUC-JPで
+普通の文字と機種依存の文字を入れました
 
-���ޥ�ɥ饤�󤫤��
+コマンドラインからは
 
 mysql&gt; SELECT `moji` FROM `sample`;
 +------+
 <span class="quote1">| moji |</span>
 +------+
-<span class="quote1">| ��   |</span>
-<span class="quote1">| ��   |</span>
-<span class="quote1">| ��   |</span>
-<span class="quote1">| ʸ   |</span>
-<span class="quote1">| ��   |</span>
-<span class="quote1">| ��   |</span>
-<span class="quote1">| ��   |</span>
-<span class="quote1">| ��   |</span>
+<span class="quote1">| 普   |</span>
+<span class="quote1">| 通   |</span>
+<span class="quote1">| の   |</span>
+<span class="quote1">| 文   |</span>
+<span class="quote1">| 字   |</span>
+<span class="quote1">| 〓   |</span>
+<span class="quote1">| 〓   |</span>
+<span class="quote1">| 〓   |</span>
 +------+
 8 rows in set (0.00 sec)
 
-�ȴ����̤�ɽ������ޤ���
-�ޤ�EUC-JP�Ǻ�������PHP��Web�����Ȥ��������˰����ޤ���
+と期待通り表示されます。
+またEUC-JPで作成したPHPのWebサイトからも正常に扱えます。
 
-��������phpMyAdmin�Ǥϵ����¸ʸ������ʬ3�Ĥ�ʸ���������ޤ���
+しかし、phpMyAdminでは機種依存文字の部分3つは文字化けします。
 
-SHOW VARIABLES LIKE 'character_set%'���򸫤Ƥߤ�ȡ�
+SHOW VARIABLES LIKE 'character_set%'　を見てみると。
 Variable_name 	Value
 character_set_client 	utf8
 character_set_connection 	utf8
@@ -91,39 +91,39 @@ character_set_server 	ujis
 character_set_system 	utf8
 character_sets_dir 	/usr/local/share/mysql/charsets/
 
-�Τ褦�˥������Х��ͤȰ�ä����å�����ͤˤʤäƤ��뤷
-�֥饦����ɽ�������Τ⡡charset=utf-8���ʤΤ�
-phpMyAdmin �ǡ� �ޤ��� MySQL ����
-EUC-JP �� UTF-8 ���Ѵ�����ɽ�����Ƥ���Τ��Ȼפ��ΤǤ�����
+のようにグローバル値と違ったセッション値になっているし
+ブラウザに表示されるのも　charset=utf-8　なので
+phpMyAdmin で？ または MySQL が？
+EUC-JP を UTF-8 に変換して表示しているのだと思うのですが。
 
-EUC-JP �ε����¸ʸ�����Ѵ�����Ȥ���
+EUC-JP の機種依存文字は変換するときに
 
 mb_convert_encoding(mb_convert_encoding($moji,&quot;sjis-win&quot;,&quot;EUC-JP&quot;),&quot;UTF-8&quot;,&quot;sjis-win&quot;)
-���ͤ�
-EUC-JP �� sjis-win �� UTF-8 �μ����Ѵ����������ʤ�
+の様に
+EUC-JP → sjis-win → UTF-8 の手順で変換すると問題なく
 
-UTF-8�Ǻ�ä�Web�����ȤǤⰷ���ޤ�
+UTF-8で作ったWebサイトでも扱えます
 
-phpMyAdmin �Ǥ�����ʸ����������������褦�ˤ�����ˡ�Ϥ���ޤ���Ǥ���
-������
+phpMyAdmin でこれらの文字を正しく扱えるようにする方法はありませんでしょ
+うか？
 
-�ޤ��ϡ��ɤ��������꤬�ְ�äƤ���ΤǤ��礦����
+または、どこかの設定が間違っているのでしょうか？
 
-����������ꤤ���ޤ���
+よろしくお願いします。
 
 </pre>
 </div>
-<p class="button"><a href="15430.html">[��]</a><a href="15432.html">[��]</a><a href="../list/15401-15500.html">[�ֹ�����]</a><a href="../thread/15401-15500.html">[����åɰ���]</a></p>
+<p class="button"><a href="15430.html">[前]</a><a href="15432.html">[次]</a><a href="../list/15401-15500.html">[番号順一覧]</a><a href="../thread/15401-15500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="15431.html">  15431 2010-11-19 11:59 [&quot;kenji@xxxxxxxxxx&quot; &lt;] EUC-JP�ΰ�����ʸ����phpMyAdmin�ǲ�����  </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15432.html">  15432 2010-11-19 12:09 ��[Akio Imai &lt;suzuro204] Re: [mysql 15431] EUC-JP�ΰ�����ʸ����phpMyAdmin�ǲ�����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15433.html">  15433 2010-11-19 13:04 ����[&quot;kenji@xxxxxxxxxx&quot; &lt;] Re: EUC-JP�ΰ�����ʸ����phpMyAdmin�ǲ�����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15434.html">  15434 2010-11-19 13:29 ������[Akio Imai &lt;suzuro204] Re: [mysql 15433] Re: EUC-JP�ΰ�����ʸ����phpMyAdmin�ǲ�����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15436.html">  15436 2010-11-19 13:44 ��������[&quot;kenji@xxxxxxxxxx&quot; &lt;] Re: EUC-JP�ΰ�����ʸ����phpMyAdmin�ǲ�����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15435.html">  15435 2010-11-19 13:43 ������[SAKAI Kei &lt;sak2@xxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15437.html">  15437 2010-11-19 13:47 ��������[&quot;kenji@xxxxxxxxxx&quot; &lt;]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15438.html">  15438 2010-11-19 14:10 ����������[SAKAI Kei &lt;sak2@xxxx]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15439.html">  15439 2010-11-19 14:16 ������������[&quot;kenji@xxxxxxxxxx&quot; &lt;]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="15431.html">  15431 2010-11-19 11:59 [&quot;kenji@xxxxxxxxxx&quot; &lt;] EUC-JPの一部の文字がphpMyAdminで化ける  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15432.html">  15432 2010-11-19 12:09 ┗[Akio Imai &lt;suzuro204] Re: [mysql 15431] EUC-JPの一部の文字がphpMyAdminで化ける</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15433.html">  15433 2010-11-19 13:04 　┗[&quot;kenji@xxxxxxxxxx&quot; &lt;] Re: EUC-JPの一部の文字がphpMyAdminで化ける</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15434.html">  15434 2010-11-19 13:29 　　┣[Akio Imai &lt;suzuro204] Re: [mysql 15433] Re: EUC-JPの一部の文字がphpMyAdminで化ける</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15436.html">  15436 2010-11-19 13:44 　　┃┗[&quot;kenji@xxxxxxxxxx&quot; &lt;] Re: EUC-JPの一部の文字がphpMyAdminで化ける</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15435.html">  15435 2010-11-19 13:43 　　┗[SAKAI Kei &lt;sak2@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15437.html">  15437 2010-11-19 13:47 　　　┗[&quot;kenji@xxxxxxxxxx&quot; &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15438.html">  15438 2010-11-19 14:10 　　　　┗[SAKAI Kei &lt;sak2@xxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15439.html">  15439 2010-11-19 14:16 　　　　　┗[&quot;kenji@xxxxxxxxxx&quot; &lt;]                             </a></span>
 </pre>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13117.html">[��]</a><a href="13119.html">[��]</a><a href="../list/13101-13200.html">[�ֹ�����]</a><a href="../thread/13101-13200.html">[����åɰ���]</a></p>
+<p class="button"><a href="13117.html">[前]</a><a href="13119.html">[次]</a><a href="../list/13101-13200.html">[番号順一覧]</a><a href="../thread/13101-13200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13118
 </p>
@@ -13,23 +13,23 @@ mysql:13118
 <p>
 From: &quot;Akimasa&quot; &lt;&quot;Akimasa&quot; &lt;asamika2og@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 28 Jun 2006 13:20:09 +0900<br>
-Subject: [mysql 13118] ���շ������ջ��﷿����ӤˤĤ���<br>
+Subject: [mysql 13118] 日付型・日付時刻型の比較について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ޤ��ơ����ȿ����ޤ���
+初めまして、大月と申します。
 
-Ĺʸ�ˤʤꤹ�ߤޤ���
-MySQL�λ��ͤˤĤ��ơ�����Ǥ��ʤ��Ȥ��������ꡢ
-�������ɥХ�����ĺ�������᡼�뤵���Ƥ�餤�ޤ�����
+長文になりすみません。
+MySQLの仕様について、理解できないところがあり、
+何かアドバイスを頂きたくメールさせてもらいました。
 
-��Ķ���
+＜環境＞
 MySQL5.0.21
 FedoraCore4
 
-������
+＜質問＞
 CREATE TABLE hiduke_tb (
   hiduke date NOT NULL
 );
@@ -40,8 +40,8 @@ INSERT INTO hiduke_tb (hiduke) VALUES
 ('2006-06-01'),
 ('2006-06-10');
 
-�Ȥ���ư����ѤΥơ��֥���Ѱդ��ơ�
-�ʲ��Υ������¹Ԥ��ޤ���
+という動作検証用のテーブルを用意して、
+以下のクエリを実行しました
 
 
 mysql&gt; SELECT * FROM hiduke_tb WHERE hiduke &gt;=
@@ -77,52 +77,52 @@ mysql&gt; SELECT * FROM hiduke_tb WHERE CAST(hiduke AS date) &gt;=
 +------------+
 2 rows in set (0.00 sec)
 
-��(2)(3)(4)�ϡ��虜�����շ��������շ���CAST���Ƥ��ޤ�
+※(2)(3)(4)は、わざと日付型から日付型にCASTしています
 
 
-MySQL4.1���ܸ�ޥ˥奢��Ǥϡ��ʱѸ��ɤ�ʤ����5.0�ΤǤϤʤ�4.1�ΤǤ�����
+MySQL4.1日本語マニュアルでは、（英語読めないんで5.0のではなく4.1のですが）
 
-����6.2.2.2. DATETIME��DATE��TIMESTAMP ���פ��
-��������ʬ�ζ��ڤ국���ޤ�ʸ����Ȥ����ͤ���ꤹ���硢10 ��꾯�ʤ����
-���������ͤ� 2 ��ǻ��ꤹ��ɬ�פϤ���ޤ���
-��'1979-6-9' �� '1979-06-09' ��Ʊ����̣�ˤʤ�ޤ���Ʊ�ͤˡ�������ʬ�ζ��ڤ�
-�����ޤ�ʸ����Ȥ����ͤ���ꤹ���硢10 ��꾯�ʤ�����ʬ���ޤ����ä��ͤ�
-2 ��ǻ��ꤹ��ɬ�פϤ���ޤ���'1979-10-30 1:2:3' �� '1979-10-30 01:02:03'
-��Ʊ���Ǥ���
+　「6.2.2.2. DATETIME、DATE、TIMESTAMP 型」より
+　日付部分の区切り記号を含む文字列として値を指定する場合、10 より少ない月ま
+たは日の値を 2 桁で指定する必要はありません。
+　'1979-6-9' は '1979-06-09' と同じ意味になります。同様に、時刻部分の区切り
+記号を含む文字列として値を指定する場合、10 より少ない時、分、または秒の値を
+2 桁で指定する必要はありません。'1979-10-30 1:2:3' は '1979-10-30 01:02:03'
+と同じです。
 
-����6.3.1.2. ��ӱ黻�ҡפ��
-�������Τɤ��餫�� TIMESTAMP �ޤ��� DATETIME ���Υ����ǡ��⤦�����������
-��硢�������Ӥμ¹����˥����ॹ����פ��Ѵ�����롣����� ODBC �Ȥθߴ���
-����ݤ��뤿��˹Ԥ��롣
+　「6.3.1.2. 比較演算子」より
+　引数のどちらかが TIMESTAMP または DATETIME 型のカラムで、もう一方が定数の
+場合、定数は比較の実行前にタイムスタンプに変換される。これは ODBC との互換性
+を確保するために行われる。
 
-�Ȥ���Τǡ�
-(1)��(4)�ξ�Ｐ���������շ��Ȥ�����Ӥ���뤳�Ȥ���Ԥ��Ƥ��ޤ�������
+とあるので、
+(1)～(4)の条件式は全て日付型として比較されることを期待していましたが、
 
-�ºݤϡ�
-(1)�ξ�Ｐ�ǤϺ������ͤ����շ��Ȥ�����Ӥ��졢
-(2)(3)(4)�Τ褦�˰���CAST�ؿ����̤�������ʸ���󷿤���Ӥ���Ƥ���褦�˸�
-���ޤ���
-����Ϥ����������ͤʤΤǤ��礦����
+実際は、
+(1)の条件式では左右の値が日付型として比較され、
+(2)(3)(4)のように一度CAST関数を通した場合は文字列型で比較されているように見
+えます。
+これはそういう仕様なのでしょうか？
 
-¾��������Υ��ɥХ����ǡ�
-hiduke������CAST�����ͤϡ֥����פǤϤʤ����顢�嵭�ޥ˥奢��Ǥ����곰��
-�ʤ�
-�ɤη�����Ӥ���뤫��ʬ����ʤ�����
-�Ȥ������Ȥ��ʤȤ�פä��ΤǤ�����
-�ɤ����ˤ���ư��˴ؤ�����ͤ��������줿�ޥ˥奢��ʤɤϤʤ��Ǥ��礦����
+他の方からのアドバイスで、
+hidukeカラムをCASTした値は「カラム」ではないから、上記マニュアルでの想定外に
+なり
+どの型で比較されるかは分からない・・
+ということかなとも思ったのですが、
+どこかにこの動作に関する仕様が明記されたマニュアルなどはないでしょうか？
 
 
-��Ȥ�Ȥϡ����ջ��﷿�Υ��������շ����Ѵ�����
+もともとは、日付時刻型のカラムを日付型に変換して
 CAST(datetime_column AS date) BETWEEN '2006-6-1' AND '2006-6-30'
-�ʤɤΤ褦�ʤ��Ȥ�Ԥ����Ȼפäơ������ǰ��ä�����ޤ�����
-���켫�Τϡ��̤ν����ǲ���Ǥ���ΤǤ�����
-MySQL�λ��ͤ��褯ʬ����ʤ��ΤǼ��䤵���Ƥ�餤�ޤ�����
+などのようなことを行おうと思って、ここで引っかかりました。
+それ自体は、別の書き方で回避できるのですが、
+MySQLの仕様がよく分からないので質問させてもらいました。
 
-�ɤʤ�����¸�Τ���������ä��㤤�ޤ����顢
-�ɤ�������������ꤤ���ޤ���
+どなたかご存知の方がいらっしゃいましたら、
+どうぞよろしくお願いします。
 
 --
-��� ���� �ʤ����Ĥ� �����ޤ���
+大月 昭昌 （おおつき あきまさ）
 
 --------------------------------------
 Let's start Yahoo! Auction  -  Free Campaign Now!
@@ -130,20 +130,20 @@ Let's start Yahoo! Auction  -  Free Campaign Now!
 
 </pre>
 </div>
-<p class="button"><a href="13117.html">[��]</a><a href="13119.html">[��]</a><a href="../list/13101-13200.html">[�ֹ�����]</a><a href="../thread/13101-13200.html">[����åɰ���]</a></p>
+<p class="button"><a href="13117.html">[前]</a><a href="13119.html">[次]</a><a href="../list/13101-13200.html">[番号順一覧]</a><a href="../thread/13101-13200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="13118.html">  13118 2006-06-28 13:20 [&quot;Akimasa&quot; &lt;asamika2o] ���շ������ջ��﷿����ӤˤĤ���        </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13119.html">  13119 2006-06-28 14:24 ��[&quot;�Ҵ���&quot; &lt;katayose]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13120.html">  13120 2006-06-28 14:50 ����[&quot;Akimasa&quot; &lt;asamika2o]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13122.html">  13122 2006-06-28 16:13 ������[&quot;�Ҵ���&quot; &lt;katayose]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13123.html">  13123 2006-06-28 16:29 ��������[&quot;Akimasa&quot; &lt;asamika2o]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13124.html">  13124 2006-06-28 17:16 ����������[&quot;�Ҵ���&quot; &lt;katayose]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13125.html">  13125 2006-06-28 17:32 ������������[&quot;Akimasa&quot; &lt;asamika2o]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13126.html">  13126 2006-06-28 17:48 ��[SUGAWARA Hajime &lt;sug]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13127.html">  13127 2006-06-28 18:37 ����[&quot;Akimasa&quot; &lt;asamika2o]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13128.html">  13128 2006-06-28 19:16 ������[SUGAWARA Hajime &lt;sug]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13129.html">  13129 2006-06-28 19:49 ��������[&lt;milk_coffee_2004jp@]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13130.html">  13130 2006-06-28 22:48 ��������[&quot;Akimasa&quot; &lt;asamika2o]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="13118.html">  13118 2006-06-28 13:20 [&quot;Akimasa&quot; &lt;asamika2o] 日付型・日付時刻型の比較について        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13119.html">  13119 2006-06-28 14:24 ┣[&quot;片寄白王&quot; &lt;katayose]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13120.html">  13120 2006-06-28 14:50 ┃┗[&quot;Akimasa&quot; &lt;asamika2o]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13122.html">  13122 2006-06-28 16:13 ┃　┗[&quot;片寄白王&quot; &lt;katayose]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13123.html">  13123 2006-06-28 16:29 ┃　　┗[&quot;Akimasa&quot; &lt;asamika2o]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13124.html">  13124 2006-06-28 17:16 ┃　　　┗[&quot;片寄白王&quot; &lt;katayose]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13125.html">  13125 2006-06-28 17:32 ┃　　　　┗[&quot;Akimasa&quot; &lt;asamika2o]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13126.html">  13126 2006-06-28 17:48 ┗[SUGAWARA Hajime &lt;sug]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13127.html">  13127 2006-06-28 18:37 　┗[&quot;Akimasa&quot; &lt;asamika2o]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13128.html">  13128 2006-06-28 19:16 　　┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13129.html">  13129 2006-06-28 19:49 　　　┣[&lt;milk_coffee_2004jp@]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13130.html">  13130 2006-06-28 22:48 　　　┗[&quot;Akimasa&quot; &lt;asamika2o]                                 </a></span>
 </pre>
 </body>
 </html>

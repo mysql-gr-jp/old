@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="8458.html">[��]</a><a href="8460.html">[��]</a><a href="../list/8401-8500.html">[�ֹ�����]</a><a href="../thread/8401-8500.html">[����åɰ���]</a></p>
+<p class="button"><a href="8458.html">[前]</a><a href="8460.html">[次]</a><a href="../list/8401-8500.html">[番号順一覧]</a><a href="../thread/8401-8500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:8459
 </p>
@@ -13,59 +13,59 @@ mysql:8459
 <p>
 From: &quot;Kawaji, Shinya&quot; &lt;&quot;Kawaji, Shinya&quot; &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 09 Dec 2003 15:16:06 +0900<br>
-Subject: [mysql 08459] Re: MySQL �ϤɤΤ褦�� LIMIT ���Ŭ�����뤫���ˤĤ���<br>
+Subject: [mysql 08459] Re: MySQL はどのように LIMIT を最適化するか？について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���露���Ǥ���
+かわじ、です。
 
 
 <span class="quote1">&gt; --------------------</span>
-<span class="quote1">&gt; 5.2.8 MySQL �ϤɤΤ褦�� LIMIT ���Ŭ�����뤫��</span>
+<span class="quote1">&gt; 5.2.8 MySQL はどのように LIMIT を最適化するか？</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���⤷ LIMIT # �� ORDER BY �ȶ��˻��Ѥ���ʤ�, MySQL �Ϻǽ�� # �Ԥ򸫤Ĥ���</span>
-<span class="quote1">&gt; �餹���ˡ����ơ��֥�Υ����ȤϹԤ鷺�ˡ������Ȥ򽪤�餻�ޤ��� </span>
+<span class="quote1">&gt; ・もし LIMIT # を ORDER BY と共に使用するなら, MySQL は最初の # 行を見つけた</span>
+<span class="quote1">&gt; らすぐに、全テーブルのソートは行わずに、ソートを終わらせます。 </span>
 <span class="quote1">&gt; --------------------</span>
 
-���������ɤ�Ǥ��ʤ��Τǡ������쳰���Ƥ��鿽�����ʤ���Ǥ�����
-�����Ǹ����Ȥ��Ƥ��뤳�Ȥ�
+ソースを読んでいないので、万が一外してたら申し訳ないんですが、
+ここで言わんとしていることは
 
-  MySQL �ǤϺ�Ŭ���Τ���ˡ�limit �� order by ���Ȥ�˻��Ѥ���Ƥ����顢
-  �������������ιԤ򥽡��Ȥ��Ƥ��� limit ����ΤǤϤʤ��ơ�
-  �ǽ�� limit ʬ�������Ĥ���褦�˥����Ȥ��ޤ�
+  MySQL では最適化のために、limit と order by がともに使用されていたら、
+  いちいち全部の行をソートしてから limit するのではなくて、
+  最初の limit 分だけ見つかるようにソートします
 
-�Ȥ�����̣�ǤϤʤ��Ǥ��礦����
+という意味ではないでしょうか？
 
-�Ĥޤꡢid �Ȥ��������ǥ����Ȥ���Ȥ��ơ�100�Ԥ��ä���硢
-limit 10 �Ȥ���ȡ�id �����ʤ���Τ����� 10�Ը��Ĥ���С�
-���Ȥ� 90�Ԥ� id �ν��֤ʤ�ơ��ɤ��Ǥ⤤���ʷ׻����ʤ��Ƥ����ˤȤ���
-���Ȥ��Ȼפ��ޤ���
+つまり、id というカラムでソートするとして、100行あった場合、
+limit 10 とすると、id が少ないものから順に 10行見つければ、
+あとの 90行の id の順番なんて、どうでもいい（計算しなくていい）という
+ことだと思います。
 
-ñ�� order by id �ξ��     �� id �����ƥ����Ȥ���
-order by id limit 10 �ξ�� �� id �򾯤ʤ���Τ���10�Ը��Ĥ���
-                     ������ �� ��¾�ιԤϥ����Ȥ��ʤ���
-
-
-�ʤΤǡ�
-
-<span class="quote1">&gt; �ǿ������ս��10���ߤ����Ȥ���LIMIT��Ȥ鷺�ˡ��ޤ�ORDER BY���ơ����η�̤�</span>
-<span class="quote1">&gt; ���饤�����¦��10��������Ѥ���Ȥ�����ˡ�ˤʤ��Ǥ��礦����</span>
-
-�Ȥ���ɬ�פϤʤ��ơ���order by �θ�� limit ��ɾ�������פȤ���
-ǧ���Ǵְ㤤�ʤ��Ȼפ��ޤ���
+単に order by id の場合     → id を全てソートする
+order by id limit 10 の場合 → id を少ないものから10行見つける
+                     　　　 　 （他の行はソートしない）
 
 
-���ǧ�����ְ�äƤ��ޤ����顢�ɤʤ������Τ餻��������й����Ǥ���
+なので、
+
+<span class="quote1">&gt; 最新の日付順に10件欲しいときはLIMITを使わずに、まずORDER BYして、その結果を</span>
+<span class="quote1">&gt; クライアント側で10件だけ使用するという方法になるんでしょうか？</span>
+
+という必要はなくて、「order by の後で limit は評価される」という
+認識で間違いないと思います。
+
+
+私の認識が間違っていましたら、どなたかお知らせくだされば幸いです。
 
 
 </pre>
 </div>
-<p class="button"><a href="8458.html">[��]</a><a href="8460.html">[��]</a><a href="../list/8401-8500.html">[�ֹ�����]</a><a href="../thread/8401-8500.html">[����åɰ���]</a></p>
+<p class="button"><a href="8458.html">[前]</a><a href="8460.html">[次]</a><a href="../list/8401-8500.html">[番号順一覧]</a><a href="../thread/8401-8500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="8458.html">   8458 2003-12-09 13:03 [&quot;ta ma&quot; &lt;chihuahuaty] MySQL �ϤɤΤ褦�� LIMIT  ���Ŭ�����뤫���ˤĤ���</a></span>
-<span class="current">-&gt;&nbsp;<a href="8459.html">   8459 2003-12-09 15:16 ��[&quot;Kawaji, Shinya&quot; &lt;ka]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8458.html">   8458 2003-12-09 13:03 [&quot;ta ma&quot; &lt;chihuahuaty] MySQL はどのように LIMIT  を最適化するか？について</a></span>
+<span class="current">-&gt;&nbsp;<a href="8459.html">   8459 2003-12-09 15:16 ┗[&quot;Kawaji, Shinya&quot; &lt;ka]                                       </a></span>
 </pre>
 </body>
 </html>

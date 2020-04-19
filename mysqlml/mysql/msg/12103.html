@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="12102.html">[��]</a><a href="12104.html">[��]</a><a href="../list/12101-12200.html">[�ֹ�����]</a><a href="../thread/12101-12200.html">[����åɰ���]</a></p>
+<p class="button"><a href="12102.html">[前]</a><a href="12104.html">[次]</a><a href="../list/12101-12200.html">[番号順一覧]</a><a href="../thread/12101-12200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:12103
 </p>
@@ -13,29 +13,29 @@ mysql:12103
 <p>
 From: &lt;a2cf@xxxxxxxxxx&gt;<br>
 Date: Wed, 07 Sep 2005 20:54:10 +0900<br>
-Subject: [mysql 12103] MySQL4.1.14�Ǥ�LIKE�黻��<br>
+Subject: [mysql 12103] MySQL4.1.14でのLIKE演算子<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-atsushi�Ǥ���
+atsushiです。
 
-2����ۤ�����MySQL4.1.12�Ǥ�LIKE�黻�Ҥ˴ؤ��Ƽ��䤷����ΤǤ���
+2ヶ月ほど前にMySQL4.1.12でのLIKE演算子に関して質問したものです。
 (<a href="11642.html">[mysql 11642]</a>  <a href="http://bugs.mysql.com/bug.php?id=11650">http://bugs.mysql.com/bug.php?id=11650</a> )
 
-���θ塢�����������MySQL4.1.14������������ɤǤ���褦�ˤʤä��ΤǤ������ޤ����������꤬ȯ�����ޤ�����
-����Ʊ�͡��Х��ȿ�����Υ���ǥå�����ĥ�ä��ơ��֥���Ф���select�򤹤�ȡ��ͤˡ�_�פ��%�פ�ޤ�������ˤ�äƸ�����̤�0��ˤʤ�ޤ���
-����Ū�ˤϡ��ʲ��Ǻ��������ƥ��ȥơ��֥�ǡ�����ǥå����˻��ꤷ��3�Х����ܤޤǤ���ʬ���ͤˡ�_�פ��%�פ�ޤ�����ޥå����ʤ��ʤ�ޤ���
-3�Х��Ȥ������ʬ�ˡ�_�פ��%�פ�ޤ�������ꤢ��ޤ���
-�ޤ����Х��ȿ�����Υ���ǥå����Ǥʤ����ϡ��������ꤢ��ޤ���Ǥ�����
+その後、これを修正したMySQL4.1.14がダウンロードできるようになったのですが、また新たな問題が発生しました。
+前回同様、バイト数指定のインデックスを張ったテーブルに対してselectをすると、値に「_」や「%」を含む時、条件によって検索結果が0件になります。
+具体的には、以下で作成したテストテーブルで、インデックスに指定した3バイト目までの部分の値に「_」や「%」を含む時、マッチしなくなります。
+3バイトより後の部分に「_」や「%」を含む場合は問題ありません。
+また、バイト数指定のインデックスでない場合は、全て問題ありませんでした。
 
-¾�����Ǥ�Ʊ�ͤ������ȯ�����Ƥ���ޤ��Ǥ��礦����
+他の方でも同様の問題は発生しておりますでしょうか？
 
-�Ķ�: MySQL4.1.14 Linux (x86, glibc-2.2, static, gcc) Standard��
+環境: MySQL4.1.14 Linux (x86, glibc-2.2, static, gcc) Standard版
 
 ----------------------
-���ƥ��ȥơ��֥���� 
+●テストテーブル作成 
 drop table if exists t1;
 create table t1(c1 varchar(50) not null, index(c1(3))) engine = innodb default
 character set = cp932;
@@ -48,44 +48,44 @@ insert into t1 values('abc_ef');
 insert into t1 values('abcd_f');
 insert into t1 values('abcde_');
 
-���ƥ��ȷ��
-select * from t1 where c1 like 'ab_def';  ��2�� ����
+●テスト結果
+select * from t1 where c1 like 'ab_def';  →2件 正常
 
-select * from t1 where c1 like 'ab\_def';  ��0�� �۾� ��ab_def�פΤϤ�
-select * from t1 where c1 like 'ab#_def' escape '#';  ��0�� �۾� Ʊ��
+select * from t1 where c1 like 'ab\_def';  →0件 異常 「ab_def」のはず
+select * from t1 where c1 like 'ab#_def' escape '#';  →0件 異常 同上
 
-(����ǥå����˻��ꤷ���Х��ȿ�����ΤȤ����Ǥ�������)
+(インデックスに指定したバイト数より後のところでは正しい)
 
-select * from t1 where c1 like 'abc_ef';  ��2�� ����
+select * from t1 where c1 like 'abc_ef';  →2件 正常
 
-select * from t1 where c1 like 'abc\_ef';  ��1�� ����
-select * from t1 where c1 like 'abc#_ef' escape '#';  ��1�� ����
+select * from t1 where c1 like 'abc\_ef';  →1件 正常
+select * from t1 where c1 like 'abc#_ef' escape '#';  →1件 正常
 ----------------------
 
 
-�嵭�Ρ�_�פ��%�פ��Ѥ����ƥ��Ȥ�Ʊ�ͤǤ�����
-�ޤ���cp932�ʳ���utf8��ascii��latin1�Ǥ�Ʊ�ͤǤ�����(%�ϥƥ��Ȥ��Ƥ��ޤ���)
+上記の「_」を「%」に変えたテストも同様でした。
+また、cp932以外にutf8、ascii、latin1でも同様でした。(%はテストしていません)
 
-sjis�ˤ������ϡ���\�פΰ������餫���ʲ���SQL����������̤��ۤʤ�ޤ�����
-����ϼ�ʬ��SQL���Ҥ����꤫�Ȼפ��ޤ�����������
+sjisにした場合は、「\」の扱いからか、以下のSQLだけ検索結果が異なりました。
+これは自分のSQL記述の問題かと思いますが・・・。
 
-select * from t1 where c1 like 'abc\_ef';  ��0�� �۾�? ��abc_ef�פΤϤ�
-select * from t1 where c1 like 'abc\\_ef';  ��0�� �۾�? Ʊ��
-select * from t1 where c1 like 'abc#_ef' escape '#';  ��1�� ����
+select * from t1 where c1 like 'abc\_ef';  →0件 異常? 「abc_ef」のはず
+select * from t1 where c1 like 'abc\\_ef';  →0件 異常? 同上
+select * from t1 where c1 like 'abc#_ef' escape '#';  →1件 正常
 
 
 
-���Ȥ�����������ꤤ���ޤ���
+何とぞよろしくお願いします。
 
 
 
 </pre>
 </div>
-<p class="button"><a href="12102.html">[��]</a><a href="12104.html">[��]</a><a href="../list/12101-12200.html">[�ֹ�����]</a><a href="../thread/12101-12200.html">[����åɰ���]</a></p>
+<p class="button"><a href="12102.html">[前]</a><a href="12104.html">[次]</a><a href="../list/12101-12200.html">[番号順一覧]</a><a href="../thread/12101-12200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="12103.html">  12103 2005-09-07 20:54 [&lt;a2cf@xxxxxxxxxx&gt;   ] MySQL4.1.14�Ǥ�LIKE�黻��               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12105.html">  12105 2005-09-08 08:42 ��[&quot;Shuichi Tamagawa&quot; &lt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12106.html">  12106 2005-09-08 09:03 ����[&lt;a2cf@xxxxxxxxxx&gt;   ]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="12103.html">  12103 2005-09-07 20:54 [&lt;a2cf@xxxxxxxxxx&gt;   ] MySQL4.1.14でのLIKE演算子               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12105.html">  12105 2005-09-08 08:42 ┗[&quot;Shuichi Tamagawa&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12106.html">  12106 2005-09-08 09:03 　┗[&lt;a2cf@xxxxxxxxxx&gt;   ]                                     </a></span>
 </pre>
 </body>
 </html>

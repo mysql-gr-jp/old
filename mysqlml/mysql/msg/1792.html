@@ -5,13 +5,13 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="1791.html">[��]</a><a href="1793.html">[��]</a><a href="../list/1701-1800.html">[�ֹ�����]</a><a href="../thread/1701-1800.html">[����åɰ���]</a></p>
+<p class="button"><a href="1791.html">[前]</a><a href="1793.html">[次]</a><a href="../list/1701-1800.html">[番号順一覧]</a><a href="../thread/1701-1800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:1792
 </p>
 <div class="header">
 <p>
-From: �Ȥߤ��ޤ��Ҥ� &lt;�Ȥߤ��ޤ��Ҥ� &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+From: とみたまさひろ &lt;とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 22 Mar 2000 01:52:02 +0900<br>
 Subject: [mysql 01792] Re: sjis &amp; order by<br>
 
@@ -19,38 +19,38 @@ Subject: [mysql 01792] Re: sjis &amp; order by<br>
 </div>
 <div class="body">
 <pre>
-�Ȥߤ��Ǥ���
+とみたです。
 
 At Tue, 21 Mar 2000 20:18:42 +0900,
 takeshi@xxxxxxxxxx wrote:
 
-<span class="quote1">&gt; ���ߤ� MySQL �Υ����ɤǤϡ�char �����������줿 SJIS ʸ����</span>
-<span class="quote1">&gt; 2byte �ܤ� 0x41-0x5a (=[a-z]), 0x61-0x7a (=[A-Z]) �λ��ˡ�</span>
-<span class="quote1">&gt; 2byte �ܤ� ���������¸�ǥ����Ȥ���Ƥ��ޤ��ޤ���</span>
+<span class="quote1">&gt; 現在の MySQL のコードでは、char 型に代入された SJIS 文字の</span>
+<span class="quote1">&gt; 2byte 目が 0x41-0x5a (=[a-z]), 0x61-0x7a (=[A-Z]) の時に、</span>
+<span class="quote1">&gt; 2byte 目が ケース非依存でソートされてしまいます。</span>
 
-������SJIS �ˤϤ����������꤬���ä���Ǥ��͡���Ƥߤ�ȳΤ��� &quot;��&quot;,
-&quot;��&quot;, &quot;��&quot; �� &quot;��&quot;, &quot;��&quot;, &quot;��&quot; �ν���¤󤸤㤤�ޤ��͡����Ť��ޤ���Ǥ�
-����
+ああ、SJIS にはそういう問題があったんですね。試してみると確かに &quot;１&quot;,
+&quot;Ａ&quot;, &quot;Ｂ&quot; が &quot;Ｂ&quot;, &quot;１&quot;, &quot;Ａ&quot; の順に並んじゃいますね。気づきませんでし
+た。
 
-<span class="quote1">&gt; MySQL �� --with-charset=sjis �Ǻ������ơ�</span>
-<span class="quote1">&gt; char ��(binary °���ϤĤ��ʤ�)�� sjis �ǡ��������줿����</span>
-<span class="quote1">&gt; order by ���������������Фʤ��ä��Τ�������ѥå��Ǥ���</span>
-<span class="quote1">&gt; ���ڤ��ƤߤƤ���������</span>
-<span class="quote1">&gt; 3.22.32�ѤΥѥå��Ǥ�</span>
+<span class="quote1">&gt; MySQL を --with-charset=sjis で作成して、</span>
+<span class="quote1">&gt; char 型(binary 属性はつけない)に sjis データを入れた時、</span>
+<span class="quote1">&gt; order by が一部、正しく出なかったのを修正するパッチです。</span>
+<span class="quote1">&gt; 検証してみてください。</span>
+<span class="quote1">&gt; 3.22.32用のパッチです</span>
 
-�����Ĥ��ޤ����Ȥ���������褦�Ǥ����ºݤ����꤬ȯ������Τ��ǧ�����櫓
-�ǤϤ���ޤ��󤬡��Хåե��򥪡��С����ƥǡ������ɤ߽񤭤����ǽ��������
-���ꡢ��\�פθ�ˣ��Х��ȥǡ�������뤳�Ȥ���θ����Ƥʤ��ä���ġ�
+いくつかまずいところがあるようです。実際に問題が発生するのを確認したわけ
+ではありませんが。バッファをオーバーしてデータを読み書きする可能性があっ
+たり、「\」の後に２バイトデータが来ることが考慮されてなかったり…。
 
-# GBK �Ȥ���̾�Τ��ĤäƤ���� :-)
+# GBK という名称が残ってたり… :-)
 
-�Ȥ������Ȥǻ��ѥå����äƤߤޤ���(ctype-sjis.c ����)��strnxfrm �Ȥ� 
-like_range �Ȥ����ɤ����򤻤��˽񤤤Ƥ���Τǡ��Ѥ��⤷��ޤ���� (^^;
+ということで私もパッチを作ってみました(ctype-sjis.c だけ)。strnxfrm とか 
+like_range とかを良く理解せずに書いているので、変かもしれません… (^^;
 
-# �¤Ĥ� GBK �Υ����ɤ������������ä��ꤷ�ơ� (^^;;
+# ぢつわ GBK のコードの方が正しかったりして… (^^;;
 
 -- 
-�Ȥߤ��ޤ��Ҥ� &lt;tommy@xxxxxxxxxx&gt;
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;
 
 *** ctype-sjis.c.orig	Sun Apr 26 20:35:20 1998
 --- ctype-sjis.c	Wed Mar 22 01:28:44 2000
@@ -193,11 +193,11 @@ like_range �Ȥ����ɤ����򤻤��˽񤤤Ƥ���Τǡ��Ѥ��⤷��ޤ���� (^^;
 
 </pre>
 </div>
-<p class="button"><a href="1791.html">[��]</a><a href="1793.html">[��]</a><a href="../list/1701-1800.html">[�ֹ�����]</a><a href="../thread/1701-1800.html">[����åɰ���]</a></p>
+<p class="button"><a href="1791.html">[前]</a><a href="1793.html">[次]</a><a href="../list/1701-1800.html">[番号順一覧]</a><a href="../thread/1701-1800.html">[スレッド一覧]</a></p>
 <pre class="list">
 <span>&nbsp;&nbsp;&nbsp;<a href="1790.html">   1790 2000-03-21 20:18 [&lt;takeshi@xxxxxxxxxx&gt;] sjis &amp;amp; order by                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="1792.html">   1792 2000-03-22 01:52 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1794.html">   1794 2000-03-22 04:23 ����[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="1792.html">   1792 2000-03-22 01:52 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1794.html">   1794 2000-03-22 04:23 　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
 </pre>
 </body>
 </html>

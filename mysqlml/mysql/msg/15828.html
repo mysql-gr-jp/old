@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15827.html">[��]</a><a href="15829.html">[��]</a><a href="../list/15801-15900.html">[�ֹ�����]</a><a href="../thread/15801-15900.html">[����åɰ���]</a></p>
+<p class="button"><a href="15827.html">[前]</a><a href="15829.html">[次]</a><a href="../list/15801-15900.html">[番号順一覧]</a><a href="../thread/15801-15900.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15828
 </p>
@@ -13,29 +13,29 @@ mysql:15828
 <p>
 From: Tomohiro 'Tomo-p' KATO &lt;Tomohiro 'Tomo-p' KATO &lt;tomop@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 28 Aug 2012 01:37:57 +0900<br>
-Subject: [mysql 15828] Re: mysql���ޥ�ɤǺǿ��Υǡ����򻲾Ȥ�����<br>
+Subject: [mysql 15828] Re: mysqlコマンドで最新のデータを参照したい<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-������Ф�ϡ����Ȥ��Ǥ���
+　こんばんは。かとうです。
 
-On 12/08/28 0:31, �Ҥ� wrote:
-<span class="quote1">&gt; �¤ϡ֤⤷�����ơפȻפ�����2�Υѥ������Ʊ���褦��commit���Ƥߤ��ΤǤ�����</span>
-<span class="quote1">&gt; �ƥ������󤹤�ޤǺǿ��η�̤ϼ��ޤ���Ǥ�����</span>
-<span class="quote1">&gt; �������Ȼפ��ȡ����⤷�ʤ��Ƥ��㣱��C3�Ǻǿ��Υǡ�����������⤢��ޤ�����</span>
-<span class="quote1">&gt; ��������������Ƥ��ޤä�����Ǥ���</span>
+On 12/08/28 0:31, ひろ wrote:
+<span class="quote1">&gt; 実は「もしかして」と思い、例2のパターンと同じようにcommitを試してみたのですが、</span>
+<span class="quote1">&gt; 再ログインするまで最新の結果は取れませんでした。</span>
+<span class="quote1">&gt; そうかと思うと、何もしなくても例１のC3で最新のデータが取れる時もありました。</span>
+<span class="quote1">&gt; それで途方に暮れてしまった次第です。</span>
 
-��������¸����Ƥߤޤ�����Ʊ���Ƥǲ��٤���äƤߤޤ�������selectʸ��
-��&quot;LOCK IN SHARE MODE&quot;��&quot;FOR UPDATE&quot; ��Ĥ��ƥ��å�������������ˤϡ�
-��commit�����Ȥ⹹��������Ƥ�������Ƥ��ޤ��������å���������ʤ�ñ
-�����selectʸ�ξ��ˤϹ����������Ƥ����ФƤ��ޤ���Ǥ�����
+　　一応実験してみました。同内容で何度かやってみましたが、select文に
+　&quot;LOCK IN SHARE MODE&quot;や&quot;FOR UPDATE&quot; をつけてロックを獲得した場合には、
+　commitせずとも更新後の内容を取得していますが、ロックを獲得しない単
+　純なselect文の場合には更新前の内容しか出てきませんでした。
 
 
-�¸��Ķ�: VineSeed + MySQL-5.5.25
+実験環境: VineSeed + MySQL-5.5.25
 
-*�¸�1: ñ���selectʸ
+*実験1: 単純なselect文
 -----------------------------------------------------------------
 mysql&gt; select * from test;
 +----+------+
@@ -46,39 +46,39 @@ mysql&gt; select * from test;
 1 row in set (0.00 sec)
 
 
-   (��) ��������ü�����鹹��
+   (※) ここで別端末から更新
 
 
 mysql&gt; select * from test;
 +----+------+
 <span class="quote1">| id | val  |</span>
 +----+------+
-<span class="quote1">|  1 |  100 |       &lt;--------------------- �Ѳ��ʤ�</span>
+<span class="quote1">|  1 |  100 |       &lt;--------------------- 変化なし</span>
 +----+------+
 1 row in set (0.00 sec)
 
-mysql&gt; select * from test;  &lt;------------- ǰ�Τ�����ټ¹�
+mysql&gt; select * from test;  &lt;------------- 念のため再度実行
 +----+------+
 <span class="quote1">| id | val  |</span>
 +----+------+
-<span class="quote1">|  1 |  100 |       &lt;--------------------- �Ѳ��ʤ�</span>
+<span class="quote1">|  1 |  100 |       &lt;--------------------- 変化なし</span>
 +----+------+
 1 row in set (0.01 sec)
 
-mysql&gt; commit;      &lt;--------------------- commit���Ƥߤ�
+mysql&gt; commit;      &lt;--------------------- commitしてみる
 Query OK, 0 rows affected (0.00 sec)
 
 mysql&gt; select * from test;
 +----+------+
 <span class="quote1">| id | val  |</span>
 +----+------+
-<span class="quote1">|  1 |  200 |       &lt;--------------------- �Ѳ�����</span>
+<span class="quote1">|  1 |  200 |       &lt;--------------------- 変化あり</span>
 +----+------+
 1 row in set (0.00 sec)
 -----------------------------------------------------------------
 
 
-*�¸�2: ���å�����selectʸ��ȤäƤߤ�
+*実験2: ロックありselect文を使ってみる
 -----------------------------------------------------------------
 mysql&gt; select * from test;
 +----+------+
@@ -89,22 +89,22 @@ mysql&gt; select * from test;
 1 row in set (0.00 sec)
 
 
-   (��) ��������ü�����鹹��
+   (※) ここで別端末から更新
 
 
 mysql&gt; select * from test;
 +----+------+
 <span class="quote1">| id | val  |</span>
 +----+------+
-<span class="quote1">|  1 |  200 |       &lt;--------------------- �Ѳ��ʤ�</span>
+<span class="quote1">|  1 |  200 |       &lt;--------------------- 変化なし</span>
 +----+------+
 1 row in set (0.00 sec)
 
-mysql&gt; select * from test for update;  &lt;-- ���å������select���Ƥߤ�
+mysql&gt; select * from test for update;  &lt;-- ロックありでselectしてみる
 +----+------+
 <span class="quote1">| id | val  |</span>
 +----+------+
-<span class="quote1">|  1 |  300 |       &lt;--------------------- �Ѳ�����</span>
+<span class="quote1">|  1 |  300 |       &lt;--------------------- 変化あり</span>
 +----+------+
 1 row in set (0.00 sec)
 
@@ -113,8 +113,8 @@ Query OK, 0 rows affected (0.00 sec)
 -----------------------------------------------------------------
 
 
-��������äȸŤ��Ǥ������ʲ��Υ����Ȥ˥ȥ�󥶥������ʬΥ��٥뤴�Ȥ�
-��MySQL�ε�ư������������ޤ����ΤǤ�������������
+　　ちょっと古いですが、以下のサイトにトランザクション分離レベルごとの
+　MySQLの挙動の説明がありましたのでご覧ください。
 
 <a href="http://www.y2sunlight.com/ground/?MySQL4.1%2F9.MySQL%A4%CE%BC%C2%B8%B3%2F4.%A5%C8%A5%E9%A5%F3%A5%B6%A5%AF%A5%B7%A5%E7%A5%F3">http://www.y2sunlight.com/ground/?MySQL4.1%2F9.MySQL%A4%CE%BC%C2%B8%B3%2F4.%A5%C8%A5%E9%A5%F3%A5%B6%A5%AF%A5%B7%A5%E7%A5%F3</a>
 -- 
@@ -125,23 +125,23 @@ _/_/  Key fingerprint = A6D8 3981 3575 9F00 EFC3  9C2B F03A 5383 9287 74D9
 
 </pre>
 </div>
-<p class="button"><a href="15827.html">[��]</a><a href="15829.html">[��]</a><a href="../list/15801-15900.html">[�ֹ�����]</a><a href="../thread/15801-15900.html">[����åɰ���]</a></p>
+<p class="button"><a href="15827.html">[前]</a><a href="15829.html">[次]</a><a href="../list/15801-15900.html">[番号順一覧]</a><a href="../thread/15801-15900.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="15820.html">@ 15820 2012-08-27 11:52 [�Ҥ� &lt;hiro@xxxxxxxxx] mysql���ޥ�ɤǺǿ��Υǡ����򻲾Ȥ����� </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15822.html">  15822 2012-08-27 18:31 ��[yoku ts &lt;yoku0825@xx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15823.html">@ 15823 2012-08-27 19:39 ����[�Ҥ� &lt;hiro@xxxxxxxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15824.html">  15824 2012-08-27 20:20 ������[Tomohiro 'Tomo-p' KA]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15825.html">@ 15825 2012-08-27 20:28 ��������[�Ҥ� &lt;hiro@xxxxxxxxx]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15826.html">  15826 2012-08-27 20:49 ����������[Tomohiro 'Tomo-p' KA]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15827.html">@ 15827 2012-08-28 00:31 ������������[�Ҥ� &lt;hiro@xxxxxxxxx]                             </a></span>
-<span class="current">-&gt;&nbsp;<a href="15828.html">  15828 2012-08-28 01:37 ��������������[Tomohiro 'Tomo-p' KA]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15829.html">@ 15829 2012-08-28 10:13 ����������������[�Ҥ� &lt;hiro@xxxxxxxxx]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15830.html">@ 15830 2012-08-28 11:11 ������������������[&quot;Mr. Gimmick&quot; &lt;midri]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15831.html">@ 15831 2012-08-28 11:28 ��������������������[�Ҥ� &lt;hiro@xxxxxxxxx]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15832.html">  15832 2012-08-28 21:59 ������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15833.html">@ 15833 2012-08-29 10:59 ��������[�Ҥ� &lt;hiro@xxxxxxxxx]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15835.html">  15835 2012-08-30 09:54 ����������[yoku ts &lt;yoku0825@xx]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15836.html">@ 15836 2012-08-30 11:14 ������������[�Ҥ� &lt;hiro@xxxxxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15820.html">@ 15820 2012-08-27 11:52 [ひろ &lt;hiro@xxxxxxxxx] mysqlコマンドで最新のデータを参照したい </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15822.html">  15822 2012-08-27 18:31 ┗[yoku ts &lt;yoku0825@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15823.html">@ 15823 2012-08-27 19:39 　┗[ひろ &lt;hiro@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15824.html">  15824 2012-08-27 20:20 　　┣[Tomohiro 'Tomo-p' KA]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15825.html">@ 15825 2012-08-27 20:28 　　┃┗[ひろ &lt;hiro@xxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15826.html">  15826 2012-08-27 20:49 　　┃　┗[Tomohiro 'Tomo-p' KA]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15827.html">@ 15827 2012-08-28 00:31 　　┃　　┗[ひろ &lt;hiro@xxxxxxxxx]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="15828.html">  15828 2012-08-28 01:37 　　┃　　　┗[Tomohiro 'Tomo-p' KA]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15829.html">@ 15829 2012-08-28 10:13 　　┃　　　　┗[ひろ &lt;hiro@xxxxxxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15830.html">@ 15830 2012-08-28 11:11 　　┃　　　　　┗[&quot;Mr. Gimmick&quot; &lt;midri]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15831.html">@ 15831 2012-08-28 11:28 　　┃　　　　　　┗[ひろ &lt;hiro@xxxxxxxxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15832.html">  15832 2012-08-28 21:59 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15833.html">@ 15833 2012-08-29 10:59 　　　┗[ひろ &lt;hiro@xxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15835.html">  15835 2012-08-30 09:54 　　　　┗[yoku ts &lt;yoku0825@xx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15836.html">@ 15836 2012-08-30 11:14 　　　　　┗[ひろ &lt;hiro@xxxxxxxxx]                             </a></span>
 </pre>
 </body>
 </html>

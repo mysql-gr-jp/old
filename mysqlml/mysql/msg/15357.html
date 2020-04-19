@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15356.html">[��]</a><a href="15358.html">[��]</a><a href="../list/15301-15400.html">[�ֹ�����]</a><a href="../thread/15301-15400.html">[����åɰ���]</a></p>
+<p class="button"><a href="15356.html">[前]</a><a href="15358.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15357
 </p>
@@ -13,36 +13,36 @@ mysql:15357
 <p>
 From: Mikiya Okuno &lt;Mikiya Okuno &lt;mikiya.okuno@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 1 Jul 2010 15:57:34 +0900<br>
-Subject: [mysql 15357] Re: ������參����Ļ����ˤ������θ�������ǽ�ˤĤ��ơ�<br>
+Subject: [mysql 15357] Re: 検索条件カラムを縦持ちにした場合の検索の性能について。<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����Ǥ���
+奥野です。
 
-��Ω��������ǥå����ξ�硢cond�ơ��֥뤬��ưɽ�ˤʤ������ʤ���Ǥ�����
-����ɽ�ˤʤäƤ��ޤ��ȷ��Τ����a_id����ǥå��������Ѥ��뤿��
-cond����ǥå����������ޤ��󡣤��ξ�硢(a_id, cond1)�Ȥ����褦��
-ʣ�祤��ǥå�����ɬ�פˤʤ�ޤ������������Τ褦�ʥ���ǥå�������¸�ߤ��ʤ���
-���٤�condñ�ΤǸ������뤳�Ȥ�����ʤ��ʤ뤿�ᡢ����Ȥ��̤�
-��Ω��������ǥå������Ϥ�ɬ�פǤ���cond���Ȥ�ñ�ΤΥ���ǥå�����
-ʣ�祤��ǥå����򤢤碌��ĤΤϡ��������ޤ���͡�
+独立したインデックスの場合、condテーブルが駆動表になれば問題ないんですが、
+内部表になってしまうと結合のためにa_idインデックスを利用するため
+condインデックスが効きません。その場合、(a_id, cond1)というような
+複合インデックスが必要になります。しかしそのようなインデックスしか存在しないと
+今度はcond単体で検索することが出来なくなるため、それとは別に
+独立したインデックスもやはり必要です。condごとに単体のインデックスと
+複合インデックスをあわせもつのは、躊躇しますよね。
 
-�ʤ���������ݤʤ��Ȥˤʤ뤫�Ȥ����ȡ�MySQL�Ǥ�INTERSECT�򥵥ݡ��Ȥ��Ƥ��ʤ�
-����Ǥ��͡���bug #31336��Index merge(intersect)�Ȥ����������르�ꥺ�ब
-����ޤ��������Τ褦���ϰϸ����Ǥϸ����ޤ���
+なぜこんな面倒なことになるかというと、MySQLではINTERSECTをサポートしていない
+からですね。（bug #31336）Index merge(intersect)という検索アルゴリズムが
+ありますが、このような範囲検索では効きません。
 
-�Ȥꤢ�������ͤ����������Ȥ��Ƥϡ�
+とりあえず、考えられる方策としては、
 
-���ơ��֥륹�����и��JOIN�ǤϤʤ�AND�Ǿ����礵���롣
-����JOIN���Ȥ˥������ȯ��������������˥ޥ��Ǥ��͡�
-�������и���ΤΥ���ǥå�����ʣ�祤��ǥå����򤢤碌��ġ�
-��cond���Ȥ˥ơ��֥��ʬ���롣�ʤɤä��ˤ�������ǥå�����ɬ�פǤ�����
-�����֥���������Ѥ��롣�ʲ������ȡ�
+・テーブルスキャン覚悟でJOINではなくANDで条件を結合させる。
+　※JOINごとにスキャンが発生するよりは遙かにマシですね。
+・色々覚悟で体のインデックスと複合インデックスをあわせもつ。
+・condごとにテーブルを分ける。（どっちにしろインデックスは必要です。）
+・サブクエリを利用する。（下記参照）
 
-���֥�����ˤĤ��Ƥϡ�cond���Ȥˤ��ʤ�Կ���ʤ�����褦�ʤ��Ƹ���
-���ͤ�����Ȼפ��ޤ���
+サブクエリについては、condごとにかなり行数を絞り込めるようなら試して見る
+価値があると思います。
 
 SELECT a_id, o.val
 FROM a
@@ -50,22 +50,22 @@ JOIN (SELECT a_id FROM cond WHERE cond1 BETWEEN 00110 AND 00120) AS c1 USING (a_
 JOIN (SELECT a_id FROM cond WHERE cond2 BETWEEN 00270 AND 00290) AS c2 USING (a_id)
 JOIN o USING (a_id);
 
-�ǤϤǤϡ�
+ではでは。
 -- 
-���� ���� 
+奥野 幹也 
 <a href="http://www.google.com/profiles/mikiya.okuno">http://www.google.com/profiles/mikiya.okuno</a> 
 <a href="http://nippondanji.blogspot.com/">http://nippondanji.blogspot.com/</a> 
 <a href="http://twitter.com/nippondanji">http://twitter.com/nippondanji</a> 
 
 
-On 28/06/2010, at 11:35 PM, �Ȥߤ��ޤ��Ҥ� wrote:
+On 28/06/2010, at 11:35 PM, とみたまさひろ wrote:
 
-<span class="quote1">&gt; �Ȥߤ��Ǥ���</span>
+<span class="quote1">&gt; とみたです。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; On Mon, 28 Jun 2010 21:38:23 +0900</span>
 <span class="quote1">&gt; MATSUNAGA Ichiro &lt;vikke.bsd@xxxxxxxxxx&gt; wrote:</span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt;&gt; ���ξ��֤ǡ�¾��table(other)��join���Ĥġ�cond1(001)��10���뤤��20������cond2(002)��70���뤤��80���뤤��90�ξ��򸫤���record���ߤ�����硢</span>
+<span class="quote2">&gt;&gt; この状態で、他のtable(other)をjoinしつつ、cond1(001)が10あるいは20、かつcond2(002)が70あるいは80あるいは90の条件を見たすrecordが欲しい場合、</span>
 <span class="quote2">&gt;&gt; select a_id, o.val</span>
 <span class="quote2">&gt;&gt; from</span>
 <span class="quote2">&gt;&gt; 	a</span>
@@ -75,9 +75,9 @@ On 28/06/2010, at 11:35 PM, �Ȥߤ��ޤ��Ҥ� wrote:
 <span class="quote2">&gt;&gt; where </span>
 <span class="quote2">&gt;&gt; 	c1.cond between 00110 and 00120</span>
 <span class="quote2">&gt;&gt; 	and c2.cond between 00270 and 00290;</span>
-<span class="quote2">&gt;&gt; �Ȥ���sql��¹Ԥ��Ƥߤ��ΤǤ������빽�Ť����֤Ǥ���</span>
+<span class="quote2">&gt;&gt; というsqlを実行してみたのですが、結構重い状態です。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���Τ褦�� cond ��������Ω��������ǥå�����ĥ�äƤߤƤϤ������Ǥ��礦����</span>
+<span class="quote1">&gt; 次のように cond カラムに独立したインデックスを張ってみてはいかがでしょうか。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; create table cond (</span>
 <span class="quote1">&gt; 	a_id int(10) not null,</span>
@@ -87,19 +87,19 @@ On 28/06/2010, at 11:35 PM, �Ȥߤ��ޤ��Ҥ� wrote:
 <span class="quote1">&gt; )</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; -- </span>
-<span class="quote1">&gt; �Ȥߤ��ޤ��Ҥ� &lt;tommy@xxxxxxxxxx&gt;</span>
-<span class="quote1">&gt; ����MySQL�桼���� <a href="../../../index.html">http://www.mysql.gr.jp</a></span>
+<span class="quote1">&gt; とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; 日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a></span>
 <span class="quote1">&gt; </span>
 
 
 </pre>
 </div>
-<p class="button"><a href="15356.html">[��]</a><a href="15358.html">[��]</a><a href="../list/15301-15400.html">[�ֹ�����]</a><a href="../thread/15301-15400.html">[����åɰ���]</a></p>
+<p class="button"><a href="15356.html">[前]</a><a href="15358.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="15349.html">@ 15349 2010-06-28 21:38 [MATSUNAGA Ichiro &lt;vi] ������參����Ļ����ˤ������θ�������ǽ�ˤĤ��ơ�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15350.html">@ 15350 2010-06-28 21:44 ��[MATSUNAGA Ichiro &lt;vi]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15351.html">  15351 2010-06-28 23:35 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="15357.html">  15357 2010-07-01 15:57 ����[Mikiya Okuno &lt;mikiya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15349.html">@ 15349 2010-06-28 21:38 [MATSUNAGA Ichiro &lt;vi] 検索条件カラムを縦持ちにした場合の検索の性能について。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15350.html">@ 15350 2010-06-28 21:44 ┣[MATSUNAGA Ichiro &lt;vi]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15351.html">  15351 2010-06-28 23:35 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="15357.html">  15357 2010-07-01 15:57 　┗[Mikiya Okuno &lt;mikiya]                                     </a></span>
 </pre>
 </body>
 </html>

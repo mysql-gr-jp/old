@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="8461.html">[��]</a><a href="8463.html">[��]</a><a href="../list/8401-8500.html">[�ֹ�����]</a><a href="../thread/8401-8500.html">[����åɰ���]</a></p>
+<p class="button"><a href="8461.html">[前]</a><a href="8463.html">[次]</a><a href="../list/8401-8500.html">[番号順一覧]</a><a href="../thread/8401-8500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:8462
 </p>
@@ -19,107 +19,107 @@ Subject: [mysql 08462] <br>
 </div>
 <div class="body">
 <pre>
-�Ϥ���ޤ��ơ���ë�ȿ����ޤ���
+はじめまして。大谷と申します。
 
-�Ͷ�Ȭ�줷�ʤ���SQL��񤤤Ƥ���ΤǤ������������ˡ��
-����פʤΤ��ȿ��ۤˤʤꡢ��Ƥ������ޤ���
+四苦八苦しながらSQLを書いているのですが、こんな方法で
+大丈夫なのかと心配になり、投稿いたします。
 
-�Ż��ι��������򤹤륢�ץꥱ��������������Ƥ��ޤ���
-�ҤȤĤλŻ��ˤϤ����Ĥ��ι��������ꡢ���Ĺ����ο���
-����ǤϤʤ��Τ��̥ơ��֥�ǹ�����������뤳�Ȥˤ��ޤ�����
+仕事の工程管理をするアプリケーションを作成しています。
+ひとつの仕事にはいくつかの工程があり、かつ工程の数が
+固定ではないので別テーブルで工程を管理することにしました。
 
-��+-------------+
-��|�Ż��ơ��֥� |
-��|=============|
-��|   �Ż�ID    |
-��|-------------|
-��|   �Ż�̾    | A��web������B��web�����ʤ�
-��+-------------+
+　+-------------+
+　|仕事テーブル |
+　|=============|
+　|   仕事ID    |
+　|-------------|
+　|   仕事名    | A社web作成／B社web作成など
+　+-------------+
 
-��+-------------+
-��|�����ơ��֥� |
-��|=============|
-��|   �Ż�ID    |
-��|-------------|
-��|   ����̾    | ���������������Ǽ�ʤʤ�
-��|-------------|
-��|    ����     | 11.4��12.20�ʤ�
-��+-------------+
+　+-------------+
+　|工程テーブル |
+　|=============|
+　|   仕事ID    |
+　|-------------|
+　|   工程名    | 受注／製作／修正／納品など
+　|-------------|
+　|    期限     | 11.4／12.20など
+　+-------------+
 
---------������-----------------------------------------
-�Ż��Υꥹ�Ȥ�ɽ������ɬ�פ�����ޤ���
-�ꥹ�ȤˤϤ����Ĥ��ι�����ɽ������ɬ�פ�����ޤ���
-�ꥹ�ȤϹ����ι��ܤǤ⥽���Ȥ���ǽ�Ǥ���ɬ�פ�����ޤ���
-��+-----------------------+
-��|�Ż�̾     |���� |Ǽ�� |
-��+-----------------------+
-��|A��web���� |11.4 |12.1 |
-��+-----------------------+
-��|B��web���� |11.20|12.10|
-��+-----------------------+
+--------問題点-----------------------------------------
+仕事のリストを表示する必要があります。
+リストにはいくつかの工程も表示する必要があります。
+リストは工程の項目でもソートが可能である必要があります。
+　+-----------------------+
+　|仕事名     |受注 |納品 |
+　+-----------------------+
+　|A社web作成 |11.4 |12.1 |
+　+-----------------------+
+　|B社web作成 |11.20|12.10|
+　+-----------------------+
 
---------��ʬ�ʤ�β����ˡ-----------------------------
-�ե�����ɤ��ͤˤ������ʼ�����Ǽ�ʡˤ��餽�줾��
-�ơ��֥����������������ơ��֥��Ż��ơ��֥�ȷ�硣
+--------自分なりの解決方法-----------------------------
+フィールドの値にある情報（受注、納品）からそれぞれ
+テーブルを作成。作成したテーブルを仕事テーブルと結合。
 
-�嵭��Ƨ�ޤ��ưʲ��Τ褦��SQL��񤭤ޤ�����
+上記を踏まえて以下のようなSQLを書きました。
 
 
 --------SQL--------------------------------------------
-#�����ƥ�ݥ��ơ��֥����
+#受注テンポラリテーブル作成
 CREATE temporary table T1 as
-    SELECT �Ż�ID, ����̾ as &quot;����&quot;
-    FROM   �����ơ��֥�
-    WHERE  ����̾ = &quot;����&quot;;
+    SELECT 仕事ID, 工程名 as &quot;受注&quot;
+    FROM   工程テーブル
+    WHERE  工程名 = &quot;受注&quot;;
 
-#����ǥå�������
-ALTER table T1 add index (�Ż�ID);
+#インデックス作成
+ALTER table T1 add index (仕事ID);
 
 
-#Ǽ�ʥƥ�ݥ��ơ��֥����
+#納品テンポラリテーブル作成
 CREATE temporary table T2 as
-    SELECT �Ż�ID, ����̾ as &quot;Ǽ��&quot;
-    FROM   �����ơ��֥�
-    WHERE  ����̾ = &quot;Ǽ��&quot;;
+    SELECT 仕事ID, 工程名 as &quot;納品&quot;
+    FROM   工程テーブル
+    WHERE  工程名 = &quot;納品&quot;;
 
-#����ǥå�������
-ALTER table T2 add index (�Ż�ID);
+#インデックス作成
+ALTER table T2 add index (仕事ID);
 
-#�Ż��ꥹ�Ⱥ���
+#仕事リスト作成
 
-SELECT �Ż�̾,����,Ǽ��
-FROM   �Ż��ơ��֥�
-       LEFT JOIN T1 ON T1.�Ż�ID = �Ż��ơ��֥�.�Ż�ID
-       LEFT JOIN T2 ON T2.�Ż�ID = �Ż��ơ��֥�.�Ż�ID
+SELECT 仕事名,受注,納品
+FROM   仕事テーブル
+       LEFT JOIN T1 ON T1.仕事ID = 仕事テーブル.仕事ID
+       LEFT JOIN T2 ON T2.仕事ID = 仕事テーブル.仕事ID
 
---------���ۤ���---------------------------------------
-��SQL�äƤ���ʻȤ����򤹤�Τ��ʥ��ץꥱ��������
-����褹�٤�����ʤΤ���
-�����⤽��ǡ����١������߷פ������Τ�
+--------心配な点---------------------------------------
+・SQLってこんな使い方をするのか（アプリケーションで
+　解決すべき問題なのか）
+・そもそもデータベースの設計が悪いのか
 -------------------------------------------------------
 
-���������������������뤫���԰¤Ǥ��������ͤΰո���
-����������ФȻפ��ޤ���
+こんな説明で正しく伝わるかは不安ですが、皆様の意見を
+いただければと思います。
 
-����������ꤤ���ޤ���
+よろしくお願いします。
 
 -- 
-��ë�ٹ�
+大谷泰弘
 
 
 </pre>
 </div>
-<p class="button"><a href="8461.html">[��]</a><a href="8463.html">[��]</a><a href="../list/8401-8500.html">[�ֹ�����]</a><a href="../thread/8401-8500.html">[����åɰ���]</a></p>
+<p class="button"><a href="8461.html">[前]</a><a href="8463.html">[次]</a><a href="../list/8401-8500.html">[番号順一覧]</a><a href="../thread/8401-8500.html">[スレッド一覧]</a></p>
 <pre class="list">
 <span class="current">-&gt;&nbsp;<a href="8462.html">   8462 2003-12-10 01:06 [tani &lt;tanitani@xxxxx]                                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8463.html">   8463 2003-12-10 01:22 ��[tani &lt;tanitani@xxxxx] Re: �ե�����ɤ��ͤ�ե�����ɤˤ���  </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8465.html">   8465 2003-12-10 07:50 ����[&quot;KAWAI,Takanori&quot; &lt;GC]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8473.html">   8473 2003-12-10 23:50 ������[tani &lt;tanitani@xxxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8464.html">   8464 2003-12-10 01:25 ��[&quot;T.P.S.Nakagawa&quot; &lt;ya]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8474.html">   8474 2003-12-11 00:05 ����[tani &lt;tanitani@xxxxx] Re: �ե�����ɤ��ͤ�ե�����ɤˤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8487.html">   8487 2003-12-14 09:00 ����[Kazuhiro Yoshida &lt;mo] enum vs master table (Re: )         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8490.html">   8490 2003-12-14 09:22 ������[&quot;T.P.S.Nakagawa&quot; &lt;ya]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8491.html">   8491 2003-12-15 04:36 ������[&quot;zen kishimoto&quot; &lt;zen] MySQL ��ե���󥹡��ޥ˥奢������ܸ����������������罸</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8463.html">   8463 2003-12-10 01:22 ┣[tani &lt;tanitani@xxxxx] Re: フィールドの値をフィールドにする  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8465.html">   8465 2003-12-10 07:50 ┃┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8473.html">   8473 2003-12-10 23:50 ┃　┗[tani &lt;tanitani@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8464.html">   8464 2003-12-10 01:25 ┗[&quot;T.P.S.Nakagawa&quot; &lt;ya]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8474.html">   8474 2003-12-11 00:05 　┣[tani &lt;tanitani@xxxxx] Re: フィールドの値をフィールドにする</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8487.html">   8487 2003-12-14 09:00 　┗[Kazuhiro Yoshida &lt;mo] enum vs master table (Re: )         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8490.html">   8490 2003-12-14 09:22 　　┣[&quot;T.P.S.Nakagawa&quot; &lt;ya]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8491.html">   8491 2003-12-15 04:36 　　┗[&quot;zen kishimoto&quot; &lt;zen] MySQL レファレンス・マニュアルを日本語に翻訳出来る方を募集</a></span>
 </pre>
 </body>
 </html>

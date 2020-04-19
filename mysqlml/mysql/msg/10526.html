@@ -5,36 +5,36 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="10525.html">[��]</a><a href="10527.html">[��]</a><a href="../list/10501-10600.html">[�ֹ�����]</a><a href="../thread/10501-10600.html">[����åɰ���]</a></p>
+<p class="button"><a href="10525.html">[前]</a><a href="10527.html">[次]</a><a href="../list/10501-10600.html">[番号順一覧]</a><a href="../thread/10501-10600.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:10526
 </p>
 <div class="header">
 <p>
-From: ������ &lt;������ &lt;makoto@xxxxxxxxxx&gt;&gt;<br>
+From: 原田誠 &lt;原田誠 &lt;makoto@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 27 Nov 2004 18:21:32 +0800<br>
-Subject: [mysql 10526] Re: MySQL-4.1.x��InnoDB�ǡ��礭�ʥ쥳���ɤ�INSERT�Ǥ��ʤ�<br>
+Subject: [mysql 10526] Re: MySQL-4.1.xのInnoDBで、大きなレコードがINSERTできない<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ĤǤ������󤢤꤬�Ȥ��������ޤ���
+原田です。情報ありがとうございます。
 
-<span class="quote1">&gt; �Ԥκ���Ĺ�ϡ�BLOB��TEXT����������ơ��ǡ����١����ڡ�����Ⱦʬ��꾯��</span>
-<span class="quote1">&gt; û�������ʤ�����Ԥκ���Ĺ�Ϥ��褽8000�Х��ȤǤ��롣</span>
-<span class="quote1">&gt; LONGBLOB�ڤ�LONGTEXT������4GB���û���ʤ���Фʤ餺��BLOB�ڤ�TEXT����</span>
-<span class="quote1">&gt; ���ޤ���Ԥ�Ĺ���ι�פ�4GB���û���ʤ���Фʤ�ʤ���</span>
+<span class="quote1">&gt; 行の最大長は、BLOBとTEXTコラムを除いて、データベースページの半分より少し</span>
+<span class="quote1">&gt; 短い。すなわち、行の最大長はおよそ8000バイトである。</span>
+<span class="quote1">&gt; LONGBLOB及びLONGTEXTカラムは4GBより短くなければならず、BLOB及びTEXTカラ</span>
+<span class="quote1">&gt; ムを含んだ行の長さの合計は4GBより短くなければならない。</span>
 <span class="quote1">&gt; ---</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ȥ������ȤΤ褦�Ǥ���</span>
+<span class="quote1">&gt; ということのようです。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���»���Ȥ��ƥޥ˥奢����������Ƥ��뤯�餤�ʤ�ǡ������ˤϽ�������ʤ�</span>
-<span class="quote1">&gt; �褦�ʵ������ޤ���</span>
-<span class="quote1">&gt; �פ�8000bytes��Ķ����ʤ�BLOB��TEXT��Ȥ��Ȥ������ȤǤϤʤ��Ǥ��礦����</span>
+<span class="quote1">&gt; 制限事項としてマニュアルに明記しているくらいなんで、すぐには修正されない</span>
+<span class="quote1">&gt; ような気がします。</span>
+<span class="quote1">&gt; 要は8000bytesを超えるならBLOBかTEXTを使えということではないでしょうか。</span>
 
-CHAR(1000)�ʤɤϡ�TEXT���Ѵ������Τǡ�TEXT�Ǥ�8000byte�����¤������ä�
-����褦�Ǥ����ʥ������������İʾ�ξ���
+CHAR(1000)などは、TEXTに変換されるので、TEXTでも8000byteの制限が起こって
+いるようです。（カラム数が１１個以上の場合）
 
 mysql&gt; create table a( b char(777) ) type=innodb;
 mysql&gt; desc a;
@@ -47,59 +47,59 @@ mysql&gt; desc a;
 
 
 
-�⤷�������顢CHAR(1000)�ǤϤʤ�������Ū�ˡ�TEXT�ˤ����鵯����ʤ��ʤ뤫
-�⡦����4.1.6�Ǥ�Ʊ�ͤΥ��顼�������뤬��4.0.16�Ǥϥ��顼�������ʤ�����
-���Ư���ޤ�����
-4.0.16����4.1.6�ޤǤδ֤ˡ�����Х������ΤǤ��礦����
+もしかしたら、CHAR(1000)ではなく（明示的に）TEXTにしたら起こらなくなるか
+も・・・4.1.6では同様のエラーが起こるが、4.0.16ではエラーが起きないで正
+常に働きました。
+4.0.16から4.1.6までの間に、エンバグしたのでしょうか。
 
 
-4.0.16�λ����Ǥϡ�����Ū��TEXT����ꤷ�ʤ���
+4.0.16の時点では、明示的にTEXTを指定しないと
 mysql&gt; create table a( b char(777) ) type=innodb;
 ERROR 1074 (00000): Too big column length for column 'b' (max = 255). Use BLOB instead
-�ȸ����ޤ��͡��դ�TEXT������Ū�˻��ꤹ�뤳�Ȥǡ�8000byte�����¤⥯�ꥢ
-�����褦�Ǥ���
+と言われますね。逆にTEXTを明示的に指定することで、8000byteの制限もクリア
+されるようです。
 
 
-TEXT������Ū�˻Ȥ���4.1.x�Ǥϵ��ޤ����8000byte�����¤˵���Ĥ����5.0.0
-�ǤϽ�������Ƥ����͡��Ȥ��������Ǥ��͡�
+TEXTを明示的に使う＋4.1.xでは気まぐれな8000byteの制限に気をつける＋5.0.0
+では修正されてる模様、という感じですね。
 
-�ޥ˥奢������¤Ȥ���ʪ�Ȥ��ơ��Х��ȥ�å�����Ƥ����ۤ����褤�Ǥ��礦
-����
+マニュアルの制限とは別物として、バグトラックに投稿したほうがよいでしょう
+か？
 
 
-<span class="quote1">&gt; ����äȵ��ˤʤ뤳�ȤȤ��Ƥϡ�</span>
+<span class="quote1">&gt; ちょっと気になることとしては、</span>
 <span class="quote1">&gt; <a href="http://dev.mysql.com/doc/mysql/ja/InnoDB_restrictions.html">http://dev.mysql.com/doc/mysql/ja/InnoDB_restrictions.html</a></span>
-<span class="quote1">&gt; �����ܸ�ޥ˥奢��򸫤�ȡ�</span>
+<span class="quote1">&gt; に日本語マニュアルを見ると、</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; ---</span>
-<span class="quote1">&gt; InnoDB �� 3.23.40 �ʲ��ΥС������Ǥϡ��쥳���ɤκ���Ĺ���ǡ����١���</span>
-<span class="quote1">&gt; �ڡ�����Ⱦʬ�����侮��������������꡼�� 3.23.41 ��ꡢBLOB ����� </span>
-<span class="quote1">&gt; TEXT ������ 4 GB ̤���ˤ��뤳�Ȥ���ǽ�Ȥʤä����쥳���ɤι�פ�Ĺ���� </span>
-<span class="quote1">&gt; 4 GB ̤���Ǥʤ���Фʤ�ʤ���</span>
+<span class="quote1">&gt; InnoDB の 3.23.40 以下のバージョンでは、レコードの最大長がデータベース</span>
+<span class="quote1">&gt; ページの半分よりもやや小さい。ソースリリース 3.23.41 より、BLOB および </span>
+<span class="quote1">&gt; TEXT カラムを 4 GB 未満にすることが可能となった。レコードの合計の長さも </span>
+<span class="quote1">&gt; 4 GB 未満でなければならない。</span>
 <span class="quote1">&gt; ---</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ȥ���ޤ���</span>
+<span class="quote1">&gt; とあります。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����Ť��Τ��Ȼפ��ޤ������С������θ��ڤ����ꡢ�ɤ��3.23.41�ʹߤǤ�</span>
-<span class="quote1">&gt; ��8000bytes�����󤬤ʤ��ʤäƤ����С�����󤬤��ä����Τ褦�˼��ޤ���</span>
+<span class="quote1">&gt; 訳が古いのだと思いますが、バージョンの言及があり、読むと3.23.41以降でこ</span>
+<span class="quote1">&gt; の8000bytesの制約がなくなっていたバージョンがあったかのように取れます。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ɤ��ʤ�Ǥ��礦��</span>
+<span class="quote1">&gt; どうなんでしょう。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
 
 -- 
-������ &lt;makoto@xxxxxxxxxx&gt;
+原田誠 &lt;makoto@xxxxxxxxxx&gt;
 
 
 </pre>
 </div>
-<p class="button"><a href="10525.html">[��]</a><a href="10527.html">[��]</a><a href="../list/10501-10600.html">[�ֹ�����]</a><a href="../thread/10501-10600.html">[����åɰ���]</a></p>
+<p class="button"><a href="10525.html">[前]</a><a href="10527.html">[次]</a><a href="../list/10501-10600.html">[番号順一覧]</a><a href="../thread/10501-10600.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="10516.html">@ 10516 2004-11-26 20:09 [������ &lt;makoto@xxxxx] MySQL-4.1.x��InnoDB�ǡ��礭�ʥ쥳���ɤ�INSERT�Ǥ��ʤ�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10517.html">  10517 2004-11-26 20:33 ��[&quot;���� ����&quot; &lt;d-sano@]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10518.html">  10518 2004-11-26 21:33 ����[������ &lt;makoto@xxxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10519.html">  10519 2004-11-27 01:34 ����[George Akimoto &lt;geor]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="10526.html">  10526 2004-11-27 19:21 ������[������ &lt;makoto@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10516.html">@ 10516 2004-11-26 20:09 [原田誠 &lt;makoto@xxxxx] MySQL-4.1.xのInnoDBで、大きなレコードがINSERTできない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10517.html">  10517 2004-11-26 20:33 ┗[&quot;佐野 大輔&quot; &lt;d-sano@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10518.html">  10518 2004-11-26 21:33 　┣[原田誠 &lt;makoto@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10519.html">  10519 2004-11-27 01:34 　┗[George Akimoto &lt;geor]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="10526.html">  10526 2004-11-27 19:21 　　┗[原田誠 &lt;makoto@xxxxx]                                   </a></span>
 </pre>
 </body>
 </html>

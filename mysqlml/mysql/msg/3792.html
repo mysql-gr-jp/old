@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="3791.html">[��]</a><a href="3793.html">[��]</a><a href="../list/3701-3800.html">[�ֹ�����]</a><a href="../thread/3701-3800.html">[����åɰ���]</a></p>
+<p class="button"><a href="3791.html">[前]</a><a href="3793.html">[次]</a><a href="../list/3701-3800.html">[番号順一覧]</a><a href="../thread/3701-3800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:3792
 </p>
@@ -13,63 +13,63 @@ mysql:3792
 <p>
 From: Masanori Maeda &lt;Masanori Maeda &lt;gun@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 20 Jun 2001 01:43:33 +0900<br>
-Subject: [mysql 03792] Re: ��⡼�Ȥ����  mysqld ����ߤȵ�ư  or ���å�<br>
+Subject: [mysql 03792] Re: リモートからの  mysqld の停止と起動  or ロック<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
 
-���ĤǤ�������Ф�ϡ�
+前田です。こんばんは。
 
-�ߤʤ���ɤ��⿧���ȰƤ򤴶���ĺ��ͭ���񤦤������ޤ���
-��Ϥ꿧���ȼ�ˡ�Ϥ���ΤǤ��͡��Ǥ���Τ��Ǥ��ʤ��Τ���ʬ���餺
-��õ����֤ǻ��֤��᤮�Ƥ��äƤ����Τǡ��ۤ�Ƚ�����ޤ�����
+みなさんどうも色々と案をご教授頂き有り難うございます。
+やはり色々と手法はあるのですね。できるのかできないのかも分からず
+手探り状態で時間が過ぎていっていたので、ほんと助かりました。
 
-���褵���
-��������mysqldump����Ѥ���ȼ�ڤ˥��ץ����ǥ��å����Ǥ���Τ�
-��ͤβ��ͤϤ���ȻפäƤ��ޤ����������ǡ����̤��빽����ΤǤޤ�
-��ƤϤ��ʤ��ΤǤ���������פȰ��̤Ƿ빽���֤��ݤ��äƤ��ޤ��Τ��ʡ�
-�Ȥ����Ȥ��������ˤʤäƤ��ޤ���
-rsync�ǥ��ԡ�������åȤ����̤ϰ��̤ˤϵڤФʤ��ΤǤ���������
-����Ƥ��ʤ��ե�����ϥ��ԡ�����ʤ��ΤǥХå����åפ�®�٤��夬��
-�Ȥ������ȤǤ��礦��������פ�����֤�ʤ��Ǥ������Ȥ��äƤ⡢
-mysqldump����Ѥ���ΤǤ���Х��󥯥��󥿥�Хå����åפȤ�����
-�⤢��褦�ʤΤǡ�����Ȱ��̤�ʻ�Ѥ���и�Ψ���ɤ������Ǥ��͡�
+松嶋さん＞
+たしかにmysqldumpを使用すると手軽にオプションでロックができるので
+一考の価値はあると思っています。ただ、データ量が結構あるのでまだ
+試してはいないのですが、ダンプと圧縮で結構時間が掛かってしまうのかな？
+というところが気になっています。
+rsyncでコピーを取るメリットは容量は圧縮には及ばないのですが、更新
+されていないファイルはコピーされないのでバックアップの速度が上がる
+ということでしょうか。ダンプする時間もないですし。といっても、
+mysqldumpを使用するのであればインクリメンタルバックアップというの
+もあるようなので、それと圧縮を併用すれば効率は良さそうですね。
 
-���Ľ�ʿ�����
-mysqlhotcopy�Ȥ���������ץȤ⤢�ä��ΤǤ��͡�
-�ޥ˥奢����ɤ�����ޤ��ޤ��ɤ�­��ʤ���ȿ�ʤ��Ƥ���ޤ�(--;
-���Ѥ��Ƥ���mysql�ΥС������ϸ����ѹ����뤳�Ȥ�����ʤ��ΤǤ�����
-3.23.39�ʳ��ǤϤɤΤ褦���Զ�礬¸�ߤ���ΤǤ��礦����
+富田修平さん＞
+mysqlhotcopyというスクリプトもあったのですね。
+マニュアルの読み方もまだまだ読み足りないと反省しております(--;
+使用しているmysqlのバージョンは現状変更することが出来ないのですが、
+3.23.39以外ではどのような不具合が存在するのでしょうか？
 
-�Ȥߤ������
-�Ȥꤢ����FLUSH TABLES WITH READ LOCK;���Ƥߤ褦�Ȼפ��ޤ���
-�⤷�ʤ����rsh�Ǥ�STD�ط��������ϥ�����쥯�ȤǤ���ߡ��Ƶ�ư��
-��ߤƤߤޤ���
+とみたさん＞
+とりあえずFLUSH TABLES WITH READ LOCK;を試してみようと思います。
+もしなければrshでのSTD関係の入出力リダイレクトでの停止・再起動を
+試みてみます。
 
-��Ĥκ�Ȥ򤹤�ΤǤ⡢��������������ꡢ�ɤ줬�����Τ�Ǻ�ޤ���
-�Ǥ�����������ĺ������ˡ�򤽤줾���Ƥߤơ������δĶ��ˤ��ä�
-����򤷤褦�Ȼפ��ޤ���
+一つの作業をするのでも、色々やり方があり、どれがいいのか悩ましい
+ですが、教えて頂いた手法をそれぞれ試してみて、現状の環境にあった
+選択をしようと思います。
 
-�ɤ��⤢�꤬�Ȥ��������ޤ������ŤͤƤ��鿽���夲�ޤ����ޤ�����̤�
-����𤵤���ĺ�����Ȼפ��ޤ���
+どうもありがとうございました、重ねてお礼申し上げます。また、結果も
+ご報告させて頂こうと思います。
 
-����Ǥϡ�����Ϥ���ˤƼ����פ��ޤ���
+それでは、今回はこれにて失礼致します。
 
 -----------
-���Ĳ���(gun@xxxxxxxxxx)
+前田雅紀(gun@xxxxxxxxxx)
 
 </pre>
 </div>
-<p class="button"><a href="3791.html">[��]</a><a href="3793.html">[��]</a><a href="../list/3701-3800.html">[�ֹ�����]</a><a href="../thread/3701-3800.html">[����åɰ���]</a></p>
+<p class="button"><a href="3791.html">[前]</a><a href="3793.html">[次]</a><a href="../list/3701-3800.html">[番号順一覧]</a><a href="../thread/3701-3800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="3787.html">   3787 2001-06-19 19:26 [Masanori Maeda &lt;masa] ��⡼�Ȥ���� mysqld ����ߤȵ�ư or ���å�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3789.html">   3789 2001-06-19 22:42 ��[�����ʸ &lt;mats@xxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3790.html">   3790 2001-06-19 22:52 ����[Shuhei Tomita &lt;shuhe]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="3792.html">   3792 2001-06-20 01:43 ����[Masanori Maeda &lt;gun@]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3791.html">   3791 2001-06-19 23:55 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3795.html">   3795 2001-06-20 15:35 ��[&quot;Masato OHTA&quot; &lt;heiwa]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3787.html">   3787 2001-06-19 19:26 [Masanori Maeda &lt;masa] リモートからの mysqld の停止と起動 or ロック</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3789.html">   3789 2001-06-19 22:42 ┣[松嶋祥文 &lt;mats@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3790.html">   3790 2001-06-19 22:52 ┃┣[Shuhei Tomita &lt;shuhe]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="3792.html">   3792 2001-06-20 01:43 ┃┗[Masanori Maeda &lt;gun@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3791.html">   3791 2001-06-19 23:55 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3795.html">   3795 2001-06-20 15:35 ┗[&quot;Masato OHTA&quot; &lt;heiwa]                                       </a></span>
 </pre>
 </body>
 </html>

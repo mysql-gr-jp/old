@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13237.html">[��]</a><a href="13239.html">[��]</a><a href="../list/13201-13300.html">[�ֹ�����]</a><a href="../thread/13201-13300.html">[����åɰ���]</a></p>
+<p class="button"><a href="13237.html">[前]</a><a href="13239.html">[次]</a><a href="../list/13201-13300.html">[番号順一覧]</a><a href="../thread/13201-13300.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13238
 </p>
@@ -13,110 +13,110 @@ mysql:13238
 <p>
 From: &quot;Tetsuro IKEDA&quot; &lt;&quot;Tetsuro IKEDA&quot; &lt;ikdttr@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 11 Aug 2006 01:12:42 +0900<br>
-Subject: [mysql 13238] Re: FEDERATED���ȥ졼�������󥸥�Ǥ����ܸ��갷��<br>
+Subject: [mysql 13238] Re: FEDERATEDストレージ・エンジンでの日本語取り扱い<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���Ӥ������ĤǤ���
+たびたび池田です。
 
-�Ȥꤢ����ʸ�������θ���������������ʬ���ä����Ȥ�ޤȤ�Ƥ����ޤ���
+とりあえず文字化けの原因等、現時点で分かったことをまとめておきます。
 
-FEDERATED���󥸥��Ȥ��ȡ�CREATE TABLE��������ӥ��饤�����¦��
-MySQL��ư���Ƥ������SELECT���оݥơ��֥�˹Ԥ��Ȥ��ˡ�
-���饤�����¦�ϥޥ���¦����³��Ԥ��ޤ���
+FEDERATEDエンジンを使うと、CREATE TABLE時、およびクライアント側の
+MySQLを起動してから初めてSELECTを対象テーブルに行うときに、
+クライアント側はマスタ側へ接続を行います。
 
-���λ���ñ���mysql_real_query��Ƥ�Ǥ�������Ǥ��뤿�ᡢ
-charset�ˤĤ��Ƥϡ�����ѥ������default charset�򥯥饤�����¦��
-charset�Ȥ��ƥǡ�����������ˤ����ޤ���
+この時、単純にmysql_real_queryを呼んでいるだけであるため、
+charsetについては、コンパイル時のdefault charsetをクライアント側の
+charsetとしてデータを受け取りにいきます。
 
-�㤨�Хޥ���¦�Υơ��֥뤬utf8�Ǥ��ꡢ���饤�����¦�Υơ��֥������
-utf8�Ǥ��ä��Ȥ��Ƥ⡢�����ǻ��Ѥ��Ƥ�����³��charset��&quot;default charset&quot;
-(�㤨��latin1�Ȥ��ˤǤ��뤿�ᡢdefault charset�����ʸ��������ȯ�����ޤ���
+例えばマスタ側のテーブルがutf8であり、クライアント側のテーブル定義も
+utf8であったとしても、ここで使用している接続のcharsetが&quot;default charset&quot;
+(例えばlatin1とか）であるため、default charset次第で文字化けが発生します。
 
-�ޥ˥奢�����������ή���ɤߤ򤷤��¤�Ǥϡ���������椹����ˡ��
-�ʤ����Ǥ�����
+マニュアル＆ソースの流し読みをした限りでは、これを制御する方法は
+なさげでした。
 
-���ˡ�Ȥ��Ƥϡ��ۻ������ĤäƤ���褦�ˡ�default charset��Ʊ����
-�ʤ�褦�˥���ѥ��뤹��Ȥ�����ˡ���ޤ�����ޤ���
+解決法としては、館山さんも仰っているように、default charsetが同じに
+なるようにコンパイルするという方法がまずあります。
 
-��������������ȼ�����ѥ���򤹤뤳�ȤˤʤꡢMySQL AB�����ۤ��Ƥ���
-�Х��ʥ�Ȥ����Ȥ��ޤ���
+しかしそれだと独自コンパイルをすることになり、MySQL ABが配布している
+バイナリとかが使えません。
 
-�����ǡ�¾�˲�����ˡ���ʤ����Ȥ������Ȥǡ�����Υ᡼��ǿ��줿�Τ���
-�ޥ���¦��my.cnf��&quot;init-connect=set names utf8&quot;�ʤɤ�Ź����
-�֤���ˡ�Ǥ�����
+そこで、他に何か方法がないかということで、前回のメールで触れたのが、
+マスタ側のmy.cnfに&quot;init-connect=set names utf8&quot;などを仕込んで
+置く方法でした。
 
-�����Ź���Ǥ����ȡ����饤�����¦��mysqld���ޥ���¦��mysqld����³
-�����ݤˡ���³��charset�������charset�ˤʤ뤿�ᡢʸ�����������Ǥ��ޤ���
+これを仕込んでおくと、クライアント側のmysqldがマスタ側のmysqldに接続
+した際に、接続のcharsetが指定のcharsetになるため、文字化けを回避できます。
 
-����������������ˡ���Դ�������ˡ�ȸ������Ȥ�狼��ޤ�����
-������ˡ�ϡ��ʲ��ξ���ʸ���������Ƥ��ޤ��ޤ���
+が、しかしこの方法は不完全な方法と言うこともわかりました。
+この方法は、以下の場合に文字が化けてしまいます。
 
-���ơ��֥�����ΤΤ������饤�����¦mysqld�ȥޥ���¦��mysqld�Ȥ���³��
-���ʤ�餫����ͳ�ˤ�����Ǥ��Ƥ��ޤä���硣
+・テーブル作成ののち、クライアント側mysqldとマスタ側のmysqldとの接続が
+　なんらかの理由により切断してしまった場合。
 
-���ΤȤ������饤�����¦mysqld���Ф��ƥ��ץꥵ��������SELECT��ȯ�Ԥ���
-�����ߥ󥰤ǡ�mysql���饤�����API�μ�ư����³��ǽ�ˤ�ꡢ΢�Ǥ��ä���
-��³�����ٹԤ��ơ��ǡ�������������֤��Ȥ���������������ޤ���
+このとき、クライアント側mysqldに対してアプリサーバ等がSELECTを発行した
+タイミングで、mysqlクライアントAPIの自動再接続機能により、裏でこっそり
+接続が再度行われて、データを取得し、返すという処理が起こります。
 
-���μ�ư����³�����ϡ�mysql���饤�����API��mysql_reconnect�ؿ���
-�Ԥ��ΤǤ��������δؿ�����³��������ʤ����ȡ�&quot;SET NAMES&quot;���ޥ�ɤ�
-ȯ�Ԥ��ޤ��������Ƥ���SET NAMES���ޥ�ɤ����Ѥ���charset�ϡ�
-default_charaset�Ǥ����Ĥޤꤳ����&quot;SET NAMES latin1&quot;�Ȥ��ˤʤ��ǽ��������ޤ���
+この自動再接続処理は、mysqlクライアントAPIのmysql_reconnect関数が
+行うのですが、この関数は接続を作成しなおすと、&quot;SET NAMES&quot;コマンドを
+発行します。そしてこのSET NAMESコマンドが使用するcharsetは、
+default_charasetです。つまりここで&quot;SET NAMES latin1&quot;とかになる可能性があります。
 
-����ˤ��ʸ��������ȯ��������硢�ʲ��Τ褦����ˡ�ǲ�äǤ��ޤ�����
-�����饤�����¦��mysqld��Ƶ�ư
-�����饤�����¦�Υơ��֥�������ƺ��ľ��
-��������ʤ��Ǥ���͡�
+これにより文字化けが発生した場合、以下のような方法で解消できますが、
+・クライアント側のmysqldを再起動
+・クライアント側のテーブルを削除して作り直し
+よろしくないですよね。
 
-�Ȥ��������ǡ����ΤȤ�����������ӥ�ɤ��������ˡ���ʤ��ΤǤϤȻפ��ޤ�����
+という感じで、今のところカスタムビルドしか解決方法がないのではと思いました。
 
-Ĺ���ʤ�ޤ������������硣
+長くなりましたが、いじょ。
 
-06/08/10 �� Tetsuro IKEDA&lt;ikdttr@xxxxxxxxxx&gt; ����Ͻ񤭤ޤ���:
-<span class="quote1">&gt; ���ĤǤ���</span>
+06/08/10 に Tetsuro IKEDA&lt;ikdttr@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; 池田です。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���ʥ쥹�Ǥ���</span>
-<span class="quote1">&gt; ��ۤɤ�&quot;--init-connect=set names utf8&quot;�ȸ��������ä��ΤǤ�����</span>
-<span class="quote1">&gt; �긵�ǻ���Ȥ������ܤǤ��������̥���������˰ʲ��Τ褦�ˤǤޤ���</span>
+<span class="quote1">&gt; 自己レスです。</span>
+<span class="quote1">&gt; 先ほどは&quot;--init-connect=set names utf8&quot;と言いたかったのですが、</span>
+<span class="quote1">&gt; 手元で試したところ駄目でした。一般クエリログに以下のようにでます。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; 2 Query       set names cp932</span>
 <span class="quote1">&gt; 2 Query       SET NAMES latin1</span>
 <span class="quote1">&gt; 2 Query       SHOW TABLE STATUS LIKE 'StaffV'</span>
 <span class="quote1">&gt; 2 Query       SELECT `No`, `Name`, `UserName` FROM `StaffV`</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; latin1�Ǿ�񤭤������äƤޤ���</span>
+<span class="quote1">&gt; latin1で上書きされちゃってます。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; 06/08/10 �� Tetsuro IKEDA&lt;ikdttr@xxxxxxxxxx&gt; ����Ͻ񤭤ޤ���:</span>
-<span class="quote2">&gt; &gt; ���ĤǤ���</span>
+<span class="quote1">&gt; 06/08/10 に Tetsuro IKEDA&lt;ikdttr@xxxxxxxxxx&gt; さんは書きました:</span>
+<span class="quote2">&gt; &gt; 池田です。</span>
 <span class="quote2">&gt; &gt;</span>
-<span class="quote2">&gt; &gt; FEDERATED���󥸥�ϡ�ha_federated.cpp�򤵤�äȸ��������Ǥϡ�</span>
-<span class="quote2">&gt; &gt; mysql���饤�����API��Ȥä����̤�connect����select���Ƥ���褦�Ǥ��͡�</span>
+<span class="quote2">&gt; &gt; FEDERATEDエンジンは、ha_federated.cppをさらっと見た感じでは、</span>
+<span class="quote2">&gt; &gt; mysqlクライアントAPIを使って普通にconnectしてselectしているようですね。</span>
 <span class="quote2">&gt; &gt;</span>
-<span class="quote2">&gt; &gt; # mysql_real_connect �Ȥ�</span>
-<span class="quote2">&gt; &gt; # mysql_real_query�Ȥ�</span>
+<span class="quote2">&gt; &gt; # mysql_real_connect とか</span>
+<span class="quote2">&gt; &gt; # mysql_real_queryとか</span>
 <span class="quote2">&gt; &gt;</span>
-<span class="quote2">&gt; &gt; �����ǡ������ռ�ˤȤäơ��ޥ���¦��--init-connect=utf8�Ȥ���Ź��ࡢ</span>
-<span class="quote2">&gt; &gt; �Ȥ����ΤȤ��Ϥɤ��Ǥ��礦��</span>
+<span class="quote2">&gt; &gt; そこで、これを逆手にとって、マスタ側に--init-connect=utf8とかを仕込む、</span>
+<span class="quote2">&gt; &gt; というのとかはどうでしょう？</span>
 <span class="quote2">&gt; &gt;</span>
-<span class="quote2">&gt; &gt; �פ��Ĥ��ǡ��긵�ǻ�Ƥ⤤�ޤ��󤬡ʡ�����</span>
+<span class="quote2">&gt; &gt; 思いつきで、手元で試してもいませんが（＾＾；</span>
 <span class="quote2">&gt; &gt;</span>
-<span class="quote2">&gt; &gt; 06/08/10 �� tateyan&lt;tateyan@xxxxxxxxxx&gt; ����Ͻ񤭤ޤ���:</span>
-<span class="quote3">&gt; &gt; &gt; ���Ƥ��ä�</span>
+<span class="quote2">&gt; &gt; 06/08/10 に tateyan&lt;tateyan@xxxxxxxxxx&gt; さんは書きました:</span>
+<span class="quote3">&gt; &gt; &gt; たてやんっす</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt; ����Ƭ�������Ƥ��뤳�Ȥ�FEDERATED���ȥ졼�������󥸥�Ǥ����ܸ�ɽ���ʤ�</span>
-<span class="quote3">&gt; &gt; &gt; �Ǥ���(FEDERATED���ȥ졼�������󥸥��5.0����ε�ǽ��</span>
-<span class="quote3">&gt; &gt; &gt; mysql�ΥС�������5.0.22��ȤäƤޤ�</span>
+<span class="quote3">&gt; &gt; &gt; 現在頭を抱えていることがFEDERATEDストレージ・エンジンでの日本語表示なん</span>
+<span class="quote3">&gt; &gt; &gt; です。(FEDERATEDストレージ・エンジンは5.0からの機能）</span>
+<span class="quote3">&gt; &gt; &gt; mysqlのバージョンは5.0.22を使ってます</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt; ����ѥ����������Ū��--with-charset=utf8�Ȼ��ꤷ��ư����Ƥ��륵����</span>
-<span class="quote3">&gt; &gt; &gt; Ʊ�Τ��Ȥ��ޤ��Ԥ��ΤǤ��������Υ���ѥ��륪�ץ�������ꤷ�Ƶ�ʤ�����</span>
-<span class="quote3">&gt; &gt; &gt; �����ˤʤ�ȡ��ơ��֥��������ܸ줬???? �ˤʤäƤ��ޤ����ޤ������Ǥ�</span>
-<span class="quote3">&gt; &gt; &gt; �ʤ��Ȥ�����ʬ�Ǥ�</span>
+<span class="quote3">&gt; &gt; &gt; コンパイル時に明示的に--with-charset=utf8と指定して動作させているサーバ</span>
+<span class="quote3">&gt; &gt; &gt; 同士だとうまく行くのですが、このコンパイルオプションを指定して居ないサー</span>
+<span class="quote3">&gt; &gt; &gt; バ相手になると、テーブルの中の日本語が???? になってしまいうまく取得でき</span>
+<span class="quote3">&gt; &gt; &gt; ないという部分です</span>
 <span class="quote3">&gt; &gt; &gt;</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt; �ޥ�����������</span>
+<span class="quote3">&gt; &gt; &gt; マスターサーバ</span>
 <span class="quote3">&gt; &gt; &gt; create table `StaffV` (</span>
 <span class="quote3">&gt; &gt; &gt; No  varchar(4) NOT NULL ,</span>
 <span class="quote3">&gt; &gt; &gt; Name varchar(64),</span>
@@ -124,7 +124,7 @@ default_charaset�Ǥ����Ĥޤꤳ����&quot;SET NAMES latin1&quot;�Ȥ��ˤʤ��ǽ����
 <span class="quote3">&gt; &gt; &gt; PRIMARY KEY  (No)</span>
 <span class="quote3">&gt; &gt; &gt; );</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt; ���饤����ȥ�����</span>
+<span class="quote3">&gt; &gt; &gt; クライアントサーバ</span>
 <span class="quote3">&gt; &gt; &gt; create table `StaffV` (</span>
 <span class="quote3">&gt; &gt; &gt; No  varchar(4) NOT NULL ,</span>
 <span class="quote3">&gt; &gt; &gt; Name varchar(64),</span>
@@ -134,34 +134,34 @@ default_charaset�Ǥ����Ĥޤꤳ����&quot;SET NAMES latin1&quot;�Ȥ��ˤʤ��ǽ����
 <span class="quote3">&gt; &gt; &gt; CONNECTION='mysql://username:password@xxxxxxxxxx:3306/DataBase/StaffV';</span>
 <span class="quote3">&gt; &gt; &gt;</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt; �ǡ�������Ȥ�</span>
-<span class="quote3">&gt; &gt; &gt; 'S001','tateyan','�ܻ� ����'</span>
-<span class="quote3">&gt; &gt; &gt; 'A001','hogehoge','�沼 ��Ϻ'</span>
+<span class="quote3">&gt; &gt; &gt; データの中身は</span>
+<span class="quote3">&gt; &gt; &gt; 'S001','tateyan','舘山 聖司'</span>
+<span class="quote3">&gt; &gt; &gt; 'A001','hogehoge','穂下 太郎'</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt; �äƤ��ä�����</span>
+<span class="quote3">&gt; &gt; &gt; っていった感じ</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt; �����</span>
-<span class="quote3">&gt; &gt; &gt; �ޥ����������饤����ȡ����ܸ�ɽ��</span>
+<span class="quote3">&gt; &gt; &gt; これで</span>
+<span class="quote3">&gt; &gt; &gt; マスター　クライアント　日本語表示</span>
 <span class="quote3">&gt; &gt; &gt; utf8      utf8          OK</span>
-<span class="quote3">&gt; &gt; &gt; utf8      ̵����        NG</span>
+<span class="quote3">&gt; &gt; &gt; utf8      無指定        NG</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt; �ȤʤäƤ��ޤäƤޤ�</span>
+<span class="quote3">&gt; &gt; &gt; となってしまってます</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt; �׵�Ȥ��Ƥϥ���ѥ���˴ؤ�餺���饤�����¦�Υ����о�����ܸ�ʸ��ɽ��</span>
-<span class="quote3">&gt; &gt; &gt; (utf8)��ɽ�����������ΤǤ���</span>
+<span class="quote3">&gt; &gt; &gt; 要求としてはコンパイルに関わらずクライアント側のサーバ上で日本語文字表示</span>
+<span class="quote3">&gt; &gt; &gt; (utf8)を表示させたいのですが</span>
 <span class="quote3">&gt; &gt; &gt;</span>
 <span class="quote3">&gt; &gt; &gt; mysql --default-character-set=utf8 DataBase</span>
-<span class="quote3">&gt; &gt; &gt; �Ȥ��Ƥ�ΣǤǤ�</span>
+<span class="quote3">&gt; &gt; &gt; としてもＮＧです</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote3">&gt; &gt; &gt; ���ߤλ��ͤȤ��Ƥϥ���ѥ������--with-charset=utf8��ʸ�����꤬ɬ�פȤ�</span>
-<span class="quote3">&gt; &gt; &gt; �����ȤʤΤ��ʤ�����...</span>
-<span class="quote3">&gt; &gt; &gt; ��������Ȥ��Ƥ��뤫�ʤ�^_^;</span>
+<span class="quote3">&gt; &gt; &gt; 現在の仕様としてはコンパイル時に--with-charset=utf8と文字指定が必要とい</span>
+<span class="quote3">&gt; &gt; &gt; うことなのかなぁ？と...</span>
+<span class="quote3">&gt; &gt; &gt; 何か見落としているかなぁ^_^;</span>
 <span class="quote3">&gt; &gt; &gt;</span>
 <span class="quote3">&gt; &gt; &gt;</span>
 <span class="quote3">&gt; &gt; &gt; --</span>
-<span class="quote3">&gt; &gt; &gt;   ����к        ���Ƥ��ä�</span>
-<span class="quote3">&gt; &gt; &gt;  d��/��-��      &lt;tateyan@xxxxxxxxxx&gt;</span>
-<span class="quote3">&gt; &gt; &gt;  ��&quot;��&quot;Ш</span>
+<span class="quote3">&gt; &gt; &gt;   彡彡从        たてやんっす</span>
+<span class="quote3">&gt; &gt; &gt;  d□/□-ｂ      &lt;tateyan@xxxxxxxxxx&gt;</span>
+<span class="quote3">&gt; &gt; &gt;  ヽ&quot;ー&quot;丿</span>
 <span class="quote3">&gt; &gt; &gt;</span>
 <span class="quote3">&gt; &gt; &gt; Key fingerprint = 5D56 8EA3 B9FE A721 4866  FB4A 0041 672C 08DD C33A</span>
 <span class="quote3">&gt; &gt; &gt;</span>
@@ -172,19 +172,19 @@ default_charaset�Ǥ����Ĥޤꤳ����&quot;SET NAMES latin1&quot;�Ȥ��ˤʤ��ǽ����
 
 </pre>
 </div>
-<p class="button"><a href="13237.html">[��]</a><a href="13239.html">[��]</a><a href="../list/13201-13300.html">[�ֹ�����]</a><a href="../thread/13201-13300.html">[����åɰ���]</a></p>
+<p class="button"><a href="13237.html">[前]</a><a href="13239.html">[次]</a><a href="../list/13201-13300.html">[番号順一覧]</a><a href="../thread/13201-13300.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="13235.html">  13235 2006-08-10 22:41 [tateyan &lt;tateyan@xxx] FEDERATED���ȥ졼�������󥸥�Ǥ����ܸ��갷��</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13236.html">  13236 2006-08-10 22:57 ��[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13237.html">  13237 2006-08-10 23:22 ����[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="13238.html">  13238 2006-08-11 01:12 ������[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13239.html">  13239 2006-08-11 22:39 ��������[Tetsuro IKEDA &lt;te.ik]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13240.html">  13240 2006-08-11 22:57 ����������[tateyan &lt;tateyan@xxx]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13242.html">@ 13242 2006-08-14 17:39 ������������[&lt;ska_king2005@xxxxxx]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13243.html">  13243 2006-08-14 18:04 ��������������[&quot;Tetsuro IKEDA&quot; &lt;ikd]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13244.html">  13244 2006-08-15 10:06 ����������������[&lt;ska_king2005@xxxxxx]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13245.html">  13245 2006-08-15 12:25 ������������������[Tetsuro IKEDA &lt;te.ik]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13246.html">  13246 2006-08-15 16:31 ��������������������[&lt;ska_king2005@xxxxxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13235.html">  13235 2006-08-10 22:41 [tateyan &lt;tateyan@xxx] FEDERATEDストレージ・エンジンでの日本語取り扱い</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13236.html">  13236 2006-08-10 22:57 ┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13237.html">  13237 2006-08-10 23:22 　┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="13238.html">  13238 2006-08-11 01:12 　　┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13239.html">  13239 2006-08-11 22:39 　　　┗[Tetsuro IKEDA &lt;te.ik]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13240.html">  13240 2006-08-11 22:57 　　　　┗[tateyan &lt;tateyan@xxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13242.html">@ 13242 2006-08-14 17:39 　　　　　┗[&lt;ska_king2005@xxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13243.html">  13243 2006-08-14 18:04 　　　　　　┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13244.html">  13244 2006-08-15 10:06 　　　　　　　┗[&lt;ska_king2005@xxxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13245.html">  13245 2006-08-15 12:25 　　　　　　　　┗[Tetsuro IKEDA &lt;te.ik]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13246.html">  13246 2006-08-15 16:31 　　　　　　　　　┗[&lt;ska_king2005@xxxxxx]                     </a></span>
 </pre>
 </body>
 </html>

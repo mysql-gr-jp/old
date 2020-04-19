@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="8073.html">[��]</a><a href="8075.html">[��]</a><a href="../list/8001-8100.html">[�ֹ�����]</a><a href="../thread/8001-8100.html">[����åɰ���]</a></p>
+<p class="button"><a href="8073.html">[前]</a><a href="8075.html">[次]</a><a href="../list/8001-8100.html">[番号順一覧]</a><a href="../thread/8001-8100.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:8074
 </p>
@@ -13,63 +13,63 @@ mysql:8074
 <p>
 From: &quot;Takanori Jokura&quot; &lt;&quot;Takanori Jokura&quot; &lt;sora_iro@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 24 Jul 2003 12:51:39 +0900<br>
-Subject: [mysql 08074] Out of resources when opening file = �ե����륪���ץ��������顼��<br>
+Subject: [mysql 08074] Out of resources when opening file = ファイルオープン最大数エラー？<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��̵�������Ƥ���ޤ�����
-��Ǥ���
+ご無沙汰しておりました。
+城です。
 
-���ޤǲ�ư���Ƥ���ޤ��������ƥब������Ĵ�ˤʤ�ޤ�����
+今まで稼動しておりましたシステムが突然不調になりました。
 
-���Υ����ƥ�Ǥ�����
-MySQL������ windows2k�� 3.23.52-nt��ư�����Ƥ���ޤ�
-������TCP/IP��³�ǥ����֥�åȥ���ƥʤ�������³��200����³���Ƥ��ޤ���
+そのシステムですが、
+MySQLサーバ windows2kで 3.23.52-ntを動かしております
+そこにTCP/IP接続でサーブレットコンテナが最大接続数200で接続しています。
 
-���ȤȤ���LAN�����֥뤬����������³����³Ū�ˤʤäƤ��ޤ���
-MySQL�����ФؤΥ�������ʤɤ�����Ƥ��ޤ����Ȥ�¿������ޤ�����
-���Τ���ޤ����ͥ�����󥨥顼�ˤ����å��������ꡢ
-�����
+おととい、LANケーブルが断線して接続が断続的になってしまい、
+MySQLサーバへのクエリ中などに落ちてしまうことが多数ありました。
+そのためまずコネクションエラーによるロックがかかり、
+それを
 C:\mysqladmin flush-hosts
-�ǲ�����ޤ�����
+で解除しました。
 
-�������³�ϤǤ���褦�ˤʤä���ΤΡ�
-Out of resources when opening file '.\DB̾\�ơ��֥�̾.MYD'
-�ȸ������顼��
-Can't find file  '.\DB̾\�ơ��֥�̾.MYD'
-�ȸ������顼���ФƤ��ޤ��ޤ���
+これで接続はできるようになったものの、
+Out of resources when opening file '.\DB名\テーブル名.MYD'
+と言うエラーと
+Can't find file  '.\DB名\テーブル名.MYD'
+と言うエラーが出てしまいます。
 
-ML�Υ�����Ĵ�٤ޤ��ơ�user�ν�ͭ�����ʡ��Ȥ��פä���Ǥ���
-windows�ǽ�ͭ�Ԥ�Everyone�ˤʤäƤ��ޤ���
+MLのログを調べまして、userの所有権かな？とか思ったんですが
+windowsで所有者はEveryoneになっています。
 
-�ޤ������ˤ��������Ȥ��ơ��ơ��֥�ο�����3000�Ĥۤɤ���ޤ���
-�ʤ����߷פϤ��������ʤ��Ǥ��� ��)
-�⤷��������ե����륪���ץ������˰��ä����äƤ�Τ��ʤȻפ��ޤ�����
-������MySQL�Ǥϥ�ߥåȤʤ�(0)�����ꤷ�Ƥ���ޤ���
-�Ȥꤢ����Open_files�򸫤Ƥߤޤ����Ȥ���
+また、気にかかる点として、テーブルの数が約3000個ほどありまして
+（この設計はいただけないですね 汗)
+もしかしたらファイルオープン最大数に引っかかってるのかなと思いました。
+しかしMySQLではリミットなし(0)に設定してあります。
+とりあえずOpen_filesを見てみましたところ
 Open_files                         4294964669
-������ʿ��Ǥ����������OS�Υե����륪���ץ������˰��ä����äƤ⤪��������
-���Ǥ���
+と膨大な数でした、これはOSのファイルオープン最大数に引っかかってもおかしくな
+いです。
 
-���ξ����ˤĤ��Ƴ��ͤ˽����򤤤����������Ȼפ��ޤ���
-����ϲ��������ǵ����Ƥ��ޤäƤ���ΤǤ��礦����
-����ˡ�MySQL�����Фϥơ��֥�򸫤���ˤ���򥭥�å��夷��
-�ե�������Ĥ��Ƥ��줿��Ϥ��ʤ���Ǥ��礦����
+この状況について皆様に助言をいただきたいと思います。
+これは何が原因で起きてしまっているのでしょうか？
+さらに、MySQLサーバはテーブルを見た後にそれをキャッシュして
+ファイルを閉じてくれたりはしないんでしょうか？
 
-����������ꤤ�������ޤ���
+よろしくお願いいたします。
 
-��
+城
 sora_iro@xxxxxxxxxx
 
 
 </pre>
 </div>
-<p class="button"><a href="8073.html">[��]</a><a href="8075.html">[��]</a><a href="../list/8001-8100.html">[�ֹ�����]</a><a href="../thread/8001-8100.html">[����åɰ���]</a></p>
+<p class="button"><a href="8073.html">[前]</a><a href="8075.html">[次]</a><a href="../list/8001-8100.html">[番号順一覧]</a><a href="../thread/8001-8100.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="8074.html">   8074 2003-07-24 12:51 [&quot;Takanori Jokura&quot; &lt;s] Out of resources when opening file = �ե����륪���ץ��������顼��</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8093.html">   8093 2003-08-03 12:42 ��[bon &lt;bon@xxxxxxxxxx&gt;]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="8074.html">   8074 2003-07-24 12:51 [&quot;Takanori Jokura&quot; &lt;s] Out of resources when opening file = ファイルオープン最大数エラー？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8093.html">   8093 2003-08-03 12:42 ┗[bon &lt;bon@xxxxxxxxxx&gt;]                                       </a></span>
 </pre>
 </body>
 </html>

@@ -5,91 +5,91 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="8113.html">[��]</a><a href="8115.html">[��]</a><a href="../list/8101-8200.html">[�ֹ�����]</a><a href="../thread/8101-8200.html">[����åɰ���]</a></p>
+<p class="button"><a href="8113.html">[前]</a><a href="8115.html">[次]</a><a href="../list/8101-8200.html">[番号順一覧]</a><a href="../thread/8101-8200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:8114
 </p>
 <div class="header">
 <p>
-From: ��ƣ �ø� &lt;��ƣ �ø� &lt;k5_ito@xxxxxxxxxx&gt;&gt;<br>
+From: 伊藤 恵吾 &lt;伊藤 恵吾 &lt;k5_ito@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 7 Aug 2003 18:47:38 +0900 (JST)<br>
-Subject: [mysql 08114] Re: InnoDB �ؤ����� INSERT ����®�� <br>
+Subject: [mysql 08114] Re: InnoDB への大量 INSERT ，高速化 <br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ɥХ�����ĺ�������͡�
+アドバイスを頂いた皆様：
 
-������Τ����������˹�®�����뤳�Ȥ��Ǥ��ޤ�����
-���꤬�Ȥ��������ޤ�����
+皆さんのお陰で大幅に高速化することができました。
+ありがとうございました。
 
-�����ݥ���ȤȤʤä��Τϡ�
-��innodb_buffer_pool_size�פȡ�
-��set autocommit=0;�פǤ���
-�ʤɤ��餬���̤�⤿�餷���Τ��������Ǥ�����
+キーポイントとなったのは、
+「innodb_buffer_pool_size」と、
+「set autocommit=0;」です。
+（どちらが効果をもたらしたのかは不明です。）
 
-�ʲ����ͻ��Ǥ���
+以下、考察です。
 
-��7.6.9 Performance tuning tips��
+「7.6.9 Performance tuning tips」
 <a href="http://www.mysql.gr.jp/jpdoc/3.23.x/manual.ja_Table_types.html#InnoDB_Consistent_read_example">http://www.mysql.gr.jp/jpdoc/3.23.x/manual.ja_Table_types.html#InnoDB_Consistent_read_example</a>
-���ʲ���ȴ�衣
+より以下、抜粋。
 
-1. �⤷ Unix `top' �� Windows `Task Manager' �� CPU ����
-Ψ�� 70% ̤����ɽ�����Ƥ����硢�����餯��disk ��������
-�˽���������Ƥ��ޤ����ȤƤ�¿���Υȥ�󥶥������Υ�
-�ߥåȤ�������Ƥ��뤫���Хåե��ס��뤬�������ΤǤ��礦
-���Хåե��ס�����礭��������ɤ��ʤ�ޤ���������������
-�åե��ס����ʪ������� 80% ����礭�����ʤ��褦�ˡ�
+1. もし Unix `top' や Windows `Task Manager' が CPU 使用
+率を 70% 未満に表示している場合、おそらく、disk アクセス
+に処理が取られています。とても多くのトランザクションのコ
+ミットを作成しているか、バッファプールが小さいのでしょう
+。バッファプールを大きくすれば良くなりますが、しかし、バ
+ッファプールは物理メモリの 80% より大きくしないように。
 
-  �� /etc/my.cnf ��
+  → /etc/my.cnf で
      set-variable = innodb_buffer_pool_size=64M
-  ����ꤷ����
+  を指定した。
 
-7. InnoDB �˥ǡ�����ή��������ˤϡ� MySQL �����꤬
+7. InnoDB にデータを流し込む場合には、 MySQL の設定が
 autocommit=1 
-�ˤʤäƤ��ʤ��褦�ˤ��ޤ������줾������Ƥ� insert �� log
+になっていないようにします。それぞれの全ての insert が log
 
-��ǥ������˥ե�å��夹�뤳�Ȥ��׵᤹�뤫��Ǥ�������
-�� SQL �κǽ�� 
+をディスクにフラッシュすることを要求するからです。取り込
+む SQL の最初に 
 
 set autocommit=0;
 
-���ɲä����Ǹ�� 
+を追加し、最後に 
 
 commit;
 
-��񤭤ޤ��� 
+を書きます。 
 
-  �� set autocommit=0;
+  → set autocommit=0;
      commit;
-  ���ɲä�����
+  を追加した。
 
 
-����������
+　　　　↓
 
-���ޤ�10���ְʾ夫���äƤ�����Τ���2����50ʬ�ۤɤǴ�λ
-����褦�ˤʤ�ޤ�����
+今まで10時間以上かかっていたものが、2時間50分ほどで完了
+するようになりました。
 
-�����ɥХ��������ˤ��꤬�Ȥ��������ޤ�����
+　アドバイス、誠にありがとうございました。
 
 
- --- Tatsuhiko Miyagawa &lt;miyagawa@xxxxxxxxxx&gt; ����Υ��
-��������
-<span class="quote1">&gt; ����Ǥ���</span>
+ --- Tatsuhiko Miyagawa &lt;miyagawa@xxxxxxxxxx&gt; からのメッ
+セージ：
+<span class="quote1">&gt; 宮川です。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; At Thu, 7 Aug 2003 14:07:05 +0900 (JST),</span>
-<span class="quote1">&gt; ��ƣ �ø� wrote:</span>
-<span class="quote3">&gt; &gt; &gt; ���commit���Ƥ���ΤǤϡ�</span>
+<span class="quote1">&gt; 伊藤 恵吾 wrote:</span>
+<span class="quote3">&gt; &gt; &gt; 毎回commitしているのでは？</span>
 <span class="quote3">&gt; &gt; &gt;</span>
-<span class="quote1">&gt; 1000��insert�����飱��commit�ʤ�ƴ����Ǥ����᤯�ʤ�&gt;</span>
-<span class="quote1">&gt; �ޤ���</span>
+<span class="quote1">&gt; 1000回insertしたら１回commitなんて感じでやれば早くなり&gt;</span>
+<span class="quote1">&gt; ます．</span>
 <span class="quote3">&gt; &gt; &gt; </span>
-<span class="quote3">&gt; &gt; &gt; �����Ƥ��餴�����㤤</span>
+<span class="quote3">&gt; &gt; &gt; 外してたらごめんちゃい</span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; 1000�Ĥ�VALUE</span>
-<span class="quote1">&gt; ����٤�INSERT���Ƥ��ޤ�������Ū�ˤϤ�����</span>
-<span class="quote2">&gt; &gt; ����</span>
+<span class="quote2">&gt; &gt; 1000個のVALUE</span>
+<span class="quote1">&gt; を一度にINSERTしています。具体的にはこうで</span>
+<span class="quote2">&gt; &gt; す。</span>
 <span class="quote2">&gt; &gt; </span>
 <span class="quote2">&gt; &gt; LOCK TABLES foo WRITE;</span>
 <span class="quote2">&gt; &gt; INSERT INTO foo VALUES</span>
@@ -103,7 +103,7 @@ commit;
 <span class="quote1">&gt; INSERT INTO ..:</span>
 <span class="quote1">&gt; COMMIT;</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ǤϤɤ��Ǥ��礦����</span>
+<span class="quote1">&gt; ではどうでしょうか？</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; -- </span>
@@ -112,15 +112,15 @@ commit;
 
 </pre>
 </div>
-<p class="button"><a href="8113.html">[��]</a><a href="8115.html">[��]</a><a href="../list/8101-8200.html">[�ֹ�����]</a><a href="../thread/8101-8200.html">[����åɰ���]</a></p>
+<p class="button"><a href="8113.html">[前]</a><a href="8115.html">[次]</a><a href="../list/8101-8200.html">[番号順一覧]</a><a href="../thread/8101-8200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="8108.html">   8108 2003-08-07 11:29 [��ƣ �ø� &lt;k5_ito@xx] InnoDB �ؤ����� INSERT ����®��         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8109.html">   8109 2003-08-07 12:00 ��[hironaka &lt;hironaka@x]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8110.html">   8110 2003-08-07 13:57 ����[ken &lt;t_takahashi@xxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8111.html">   8111 2003-08-07 14:07 ����[��ƣ �ø� &lt;k5_ito@xx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8113.html">   8113 2003-08-07 14:27 ������[Tatsuhiko Miyagawa &lt;]                                   </a></span>
-<span class="current">-&gt;&nbsp;<a href="8114.html">   8114 2003-08-07 18:47 ��������[��ƣ �ø� &lt;k5_ito@xx]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8112.html">   8112 2003-08-07 14:25 ��[SUGAWARA Hajime &lt;sug]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8108.html">   8108 2003-08-07 11:29 [伊藤 恵吾 &lt;k5_ito@xx] InnoDB への大量 INSERT ，高速化         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8109.html">   8109 2003-08-07 12:00 ┣[hironaka &lt;hironaka@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8110.html">   8110 2003-08-07 13:57 ┃┣[ken &lt;t_takahashi@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8111.html">   8111 2003-08-07 14:07 ┃┗[伊藤 恵吾 &lt;k5_ito@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8113.html">   8113 2003-08-07 14:27 ┃　┗[Tatsuhiko Miyagawa &lt;]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="8114.html">   8114 2003-08-07 18:47 ┃　　┗[伊藤 恵吾 &lt;k5_ito@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8112.html">   8112 2003-08-07 14:25 ┗[SUGAWARA Hajime &lt;sug]                                       </a></span>
 </pre>
 </body>
 </html>

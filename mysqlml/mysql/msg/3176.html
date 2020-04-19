@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="3175.html">[��]</a><a href="3177.html">[��]</a><a href="../list/3101-3200.html">[�ֹ�����]</a><a href="../thread/3101-3200.html">[����åɰ���]</a></p>
+<p class="button"><a href="3175.html">[前]</a><a href="3177.html">[次]</a><a href="../list/3101-3200.html">[番号順一覧]</a><a href="../thread/3101-3200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:3176
 </p>
@@ -13,57 +13,57 @@ mysql:3176
 <p>
 From: Tomohiro Takahashi &lt;Tomohiro Takahashi &lt;t_takahashi@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 06 Feb 2001 22:55:46 +0900<br>
-Subject: [mysql 03176] Re: �ե�����ɤس�Ǽ��ǽ�ʥ������ˤĤ���<br>
+Subject: [mysql 03176] Re: フィールドへ格納可能なサイズについて<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-  �ⶶ(��)�Ǥ���
+  高橋(智)です。
 
 Mitsuru Maruno wrote:
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; MARU�Ǥ���</span>
-<span class="quote1">&gt; ���ߡ�LONGBLOB���Υե�����ɤإǡ�������������ƥ��Ȥ�ԤäƤ����</span>
-<span class="quote1">&gt; �Ǥ�������16MB�̰ʾ�Υǡ�����INSERT�����������ޤ��󡣲������¤�</span>
-<span class="quote1">&gt; ����ΤǤ��礦���������Τ褦��SQL�Ǥ���(LOAD_FILE�ؿ���ȤäƤ��ޤ�)</span>
+<span class="quote1">&gt; MARUです。</span>
+<span class="quote1">&gt; 現在、LONGBLOB型のフィールドへデータを挿入するテストを行っているの</span>
+<span class="quote1">&gt; ですが、約16MB位以上のデータをINSERTする事が出来ません。何か制限が</span>
+<span class="quote1">&gt; あるのでしょうか？下記のようなSQLです。(LOAD_FILE関数を使っています)</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; update t1 set dt=load_file(&quot;d:/temp/test.dat&quot;) where id=1</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����Ф������my.ini�ե��������ǡ�</span>
-<span class="quote1">&gt; max_allowed_packet=30M    '�ѥ��åȤκ��祵������30M������</span>
-<span class="quote1">&gt; �Ȥ��Ƥ��ޤ���</span>
+<span class="quote1">&gt; サーバの設定でmy.iniファイルの中で、</span>
+<span class="quote1">&gt; max_allowed_packet=30M    'パケットの最大サイズを30Mと設定</span>
+<span class="quote1">&gt; としています。</span>
 
-  JDBC�ɥ饤�Ф��ĥ���Ƥ���ʬ���ä��ΤǤ�����MySQL�����ꤷ�Ƥ���ѥ��å�
-�ι�¤�˸���������Ȼפ��ޤ���MySQL����������SQLʸ�䡢MySQL������������
-���åȤ��ѥ��åȤȤȤ������������硢���Υѥ��åȤ���Ƭ��SQLʸ���Τ�Ĺ
-���򥻥åȤ��뤳�Ȥˤʤ�ΤǤ��������åȤǤ��륵��������16MB�ޤǤʤΤǤ���
+  JDBCドライバを拡張していて分かったのですが、MySQLが規定しているパケット
+の構造に原因があると思います。MySQLが受信するSQL文や、MySQLが送信する結果
+セットををパケットととして送信する場合、そのパケットの先頭にSQL文全体の長
+さをセットすることになるのですが、セットできるサイズが約16MBまでなのです。
 
-  ����Ū�ˤϡ�3�Х��ȤΥե�����ɤǤ�äƥѥ��åȤΥ���������ꤷ�ޤ��ơ�
-����Υѥ��åȥ����� L ��
-   L = x + (y * 256) + (z * 256 * 256) + 1 = 16843009 �Х���
-     (������ 0 &lt;= x,y,z =&lt; 256 )
-�Ȥʤꡢ��16MB�ˤʤ�ޤ���
-�� + 1 �Ȥ���;ʬ�ʤ�Τϡ�����1�Х��ȤǤ�ä�SQL���ޥ�ɤμ��̤򼨤�����
-�˻��Ѥ���ޤ���
+  具体的には、3バイトのフィールドでもってパケットのサイズを指定しまして、
+最大のパケットサイズ L は
+   L = x + (y * 256) + (z * 256 * 256) + 1 = 16843009 バイト
+     (ただし 0 &lt;= x,y,z =&lt; 256 )
+となり、約16MBになります。
+※ + 1 という余分なものは、それ1バイトでもってSQLコマンドの種別を示すため
+に使用されます。
 
-  �ǡ����Υѥ��åȤι�¤�ˤ�С�����󤬤���褦�ǡ���̤ΥС�������
-�ѥ��åȹ�¤����Ѥ���褦�ʥɥ饤�Ф��������С��ɤ��Ǥ��ˤ��Τ���
-����ޤ��󡣤��������ܤ������Ȥ�ʬ����ޤ���
-  �ɤʤ����ܤ���������ä��㤤�ޤ���? &gt; �ߤʤ���
+  で、このパケットの構造にもバージョンがあるようで、上位のバージョンの
+パケット構造を採用するようなドライバを作成すれば、壁を打ち破れるのかも
+しれません。しかし、詳しいことは分かりません。
+  どなたか詳しい方いらっしゃいませんか? &gt; みなさん
 
 
 -- 
-�ⶶ�ҹ�
-  Java�ɽ��( <a href="http://www.t3-jpn.com/bof/">http://www.t3-jpn.com/bof/</a> )
+高橋智宏
+  Java読書会( <a href="http://www.t3-jpn.com/bof/">http://www.t3-jpn.com/bof/</a> )
   T3-Japan( <a href="http://www.t3-jpn.com/">http://www.t3-jpn.com/</a> )
 
 </pre>
 </div>
-<p class="button"><a href="3175.html">[��]</a><a href="3177.html">[��]</a><a href="../list/3101-3200.html">[�ֹ�����]</a><a href="../thread/3101-3200.html">[����åɰ���]</a></p>
+<p class="button"><a href="3175.html">[前]</a><a href="3177.html">[次]</a><a href="../list/3101-3200.html">[番号順一覧]</a><a href="../thread/3101-3200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="3167.html">   3167 2001-02-06 14:17 [&quot;Mitsuru Maruno&quot; &lt;ma] �ե�����ɤس�Ǽ��ǽ�ʥ������ˤĤ���    </a></span>
-<span class="current">-&gt;&nbsp;<a href="3176.html">   3176 2001-02-06 22:55 ��[Tomohiro Takahashi &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3167.html">   3167 2001-02-06 14:17 [&quot;Mitsuru Maruno&quot; &lt;ma] フィールドへ格納可能なサイズについて    </a></span>
+<span class="current">-&gt;&nbsp;<a href="3176.html">   3176 2001-02-06 22:55 ┗[Tomohiro Takahashi &lt;]                                       </a></span>
 </pre>
 </body>
 </html>

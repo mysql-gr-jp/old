@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="16393.html">[��]</a><a href="16395.html">[��]</a><a href="../list/16301-16400.html">[�ֹ�����]</a><a href="../thread/16301-16400.html">[����åɰ���]</a></p>
+<p class="button"><a href="16393.html">[前]</a><a href="16395.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:16394
 </p>
@@ -13,65 +13,65 @@ mysql:16394
 <p>
 From: Yuji Fujihara &lt;Yuji Fujihara &lt;yflab73@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 06 Apr 2017 01:14:24 +0000<br>
-Subject: [mysql 16394] MySQL�ΰ���ơ��֥�ȥѡ��ƥ��������߷פˤĤ���<br>
+Subject: [mysql 16394] MySQLの一時テーブルとパーティションの設計について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�����äˤʤäƤ���ޤ���ƣ���ȿ����ޤ���
+お世話になっております。藤原と申します。
 
-�ʲ���2�ĤˤĤ��Ƽ��䤵���Ƥ���������
-�ʤ��������µ��Ǥ⸡�ڤ���ͽ��Ǥ���
+以下、2つについて質問させてください。
+なお、後日実機でも検証する予定です。
 
-����ơ��֥�Υǥ��쥯�ȥ�ξ������̡�����ˤĤ���
-����ͤǤϡ�/tmp�˰���ơ��֥뤬��������ޤ��������ΰ���ơ��֥���ΰ�ϡ��ɤΤ褦���߷פ��뤳�Ȥ�¿���Τ���¸�ΤǤ�����߷���򶵤��Ƥ��������ޤ��Ǥ��礦����
+一時テーブルのディレクトリの場所と容量、設定について
+初期値では、/tmpに一時テーブルが作成されますが、この一時テーブルの領域は、どのように設計することが多いのかご存知であれば設計例を教えていただけますでしょうか。
 
-OS�ΰ��MySQL�Υǡ����ΰ�Υǥ������ѡ��ƥ�������ʬ���Ƥ��ޤ���
+OS領域とMySQLのデータ領域のディスクパーティションは分けています。
 
-���ˤʤ�Τ����̤�SQL���¹Ԥ��졢����ơ��֥뤬�������졢�ǥ������ե�ˤʤäƤ��ޤä����ε�ư�Ǥ���
+気になるのは大量のSQLが実行され、一時テーブルが作成され、ディスクフルになってしまった時の挙動です。
 
-�ǥ������ե�ˤʤ뤫�⤷��ʤ����Ȥ����ꤷ����硢����ơ��֥��OS�ΰ�¦��MySQL�Υǡ����ΰ�Τɤ���ˤ��Ƥ����Τ��٥����Ǥ��礦����
+ディスクフルになるかもしれないことを想定した場合、一時テーブルはOS領域側とMySQLのデータ領域のどちらにしておくのがベターでしょうか。
 
-�ޤ�������ơ��֥뤬�ʤ�٤���������ʤ��褦�ˡ�tmp_table_size��max_heap_table_size�Ϥɤ����٤����̤���ꤹ�٤��Ǥ��礦����
+また、一時テーブルがなるべく作成されないように、tmp_table_sizeとmax_heap_table_sizeはどの程度の容量を指定すべきでしょうか。
 
-�ʲ��Υڡ����򻲹ͤˤ��Ƥ��ޤ���
+以下のページを参考にしています。
 <a href="https://dev.mysql.com/doc/refman/5.6/ja/internal-temporary-tables.html">https://dev.mysql.com/doc/refman/5.6/ja/internal-temporary-tables.html</a>
 <a href="https://dev.mysql.com/doc/refman/5.6/ja/temporary-files.html">https://dev.mysql.com/doc/refman/5.6/ja/temporary-files.html</a>
 <a href="http://k-1-ne-jp.blogspot.jp/2012/10/mysqltmpdir.html?m=1">http://k-1-ne-jp.blogspot.jp/2012/10/mysqltmpdir.html?m=1</a>
 
 
 
-�ѡ��ƥ�������ɲû���InnoDB�ν񤭹��ߥ��å��ˤĤ���
-MySQL�θ����ڡ����Ǥϡ��ѡ��ƥ�����������ϡ��ơ��֥�ν񤭹��ߥ��å���������ȵ��ܤ�����ޤ���
+パーティション追加時のInnoDBの書き込みロックについて
+MySQLの公式ページでは、パーティション操作時は、テーブルの書き込みロックがかかると記載があります。
 
-InnoDB�ξ��Ϥɤ��ʤΤ��Ȥ������ܤ��ä˸��Ĥ���ʤ��ΤǤ��������ȥ졼�����󥸥�˴ؤ�餺��ɬ���񤭹��ߥ��å���������ȹͤ��Ƥ褤�ΤǤ��礦����
+InnoDBの場合はどうなのかという記載は特に見つからないのですが、ストレージエンジンに関わらず、必ず書き込みロックがかかると考えてよいのでしょうか。
 
-���ꤷ�Ƥ���ϡ�1�ơ��֥���Ф��ơ�����˥ѡ��ƥ�������������Ƥ��ꡢ�������̤�����Υѡ��ƥ��������ɲä��Ƥ��ޤ������λ���InnoDB�ˤ����ơ��񤭹��ߥ��å��������äƤ��ޤ��Τ��ɤ������񤭹��ߥ��å��β�����ˡ������Τ��ɤ����Ǥ���
+想定しているは、1テーブルに対して、日毎にパーティションを作成しており、一日一回未来日のパーティションを追加しています。この時、InnoDBにおいて、書き込みロックがかかってしまうのかどうか、書き込みロックの回避方法があるのかどうかです。
 
-��¸�Τ���������ޤ����餴�������������ޤ��ȹ����Ǥ���
+ご存知の方がおりましたらご教授いただけますと幸いです。
 
-�񤭹��ߥ��å�������Ǥ��ʤ����ϡ�������̤�����Υѡ��ƥ�������������Ƥ������Ȥ�ͤ��Ƥ��ޤ���1�ơ��֥���Ф���ѡ��ƥ����������ξ���ͤ�8192�Ȥ������Ȥ����򤷤Ƥ��ޤ���
+書き込みロックが回避できない場合は、事前に未来日のパーティションを作成しておくことも考えています。1テーブルに対するパーティション作成の上限値は8192ということも理解しています。
 
-�ʲ��Υڡ����򻲹ͤˤ��Ƥ��ޤ���
+以下のページを参考にしています。
 <a href="https://dev.mysql.com/doc/refman/5.6/ja/partitioning-limitations.html">https://dev.mysql.com/doc/refman/5.6/ja/partitioning-limitations.html</a>
 <a href="https://dev.mysql.com/doc/refman/5.6/ja/online-ddl-partitioning.html">https://dev.mysql.com/doc/refman/5.6/ja/online-ddl-partitioning.html</a>
 <a href="https://dev.mysql.com/doc/refman/5.6/ja/partitioning-limitations-locking.html">https://dev.mysql.com/doc/refman/5.6/ja/partitioning-limitations-locking.html</a>
 
-ƣ��
+藤原
 
 </pre>
 </div>
 <div class="attach">
-<h3 class="attachtitle">ź�եե�����</h3>
+<h3 class="attachtitle">添付ファイル</h3>
 <ul>
 <li><a href="16394/0/index.html"> [text/html]</a>
 </ul>
 </div>
-<p class="button"><a href="16393.html">[��]</a><a href="16395.html">[��]</a><a href="../list/16301-16400.html">[�ֹ�����]</a><a href="../thread/16301-16400.html">[����åɰ���]</a></p>
+<p class="button"><a href="16393.html">[前]</a><a href="16395.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="16394.html">@ 16394 2017-04-06 10:14 [Yuji Fujihara &lt;yflab] MySQL�ΰ���ơ��֥�ȥѡ��ƥ��������߷פˤĤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16395.html">  16395 2017-04-06 18:19 ��[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16394] MySQL�ΰ���ơ��֥�ȥѡ��ƥ��������߷פˤĤ���</a></span>
+<span class="current">-&gt;&nbsp;<a href="16394.html">@ 16394 2017-04-06 10:14 [Yuji Fujihara &lt;yflab] MySQLの一時テーブルとパーティションの設計について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16395.html">  16395 2017-04-06 18:19 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16394] MySQLの一時テーブルとパーティションの設計について</a></span>
 </pre>
 </body>
 </html>

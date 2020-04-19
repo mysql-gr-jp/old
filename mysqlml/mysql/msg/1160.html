@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="1159.html">[��]</a><a href="1161.html">[��]</a><a href="../list/1101-1200.html">[�ֹ�����]</a><a href="../thread/1101-1200.html">[����åɰ���]</a></p>
+<p class="button"><a href="1159.html">[前]</a><a href="1161.html">[次]</a><a href="../list/1101-1200.html">[番号順一覧]</a><a href="../thread/1101-1200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:1160
 </p>
@@ -13,7 +13,7 @@ mysql:1160
 <p>
 From: &lt;takeshi@xxxxxxxxxx&gt;<br>
 Date: Thu, 26 Aug 1999 12:23:13 +0900<br>
-Subject: [mysql 01160] Re: ����ǥå��������Υȥ�֥�<br>
+Subject: [mysql 01160] Re: インデックス作成のトラブル<br>
 
 </p>
 </div>
@@ -22,86 +22,86 @@ Subject: [mysql 01160] Re: ����ǥå��������Υȥ�֥�<br>
 At Thu, 26 Aug 1999 11:26:07 +0900,
 Yuzuru Goto &lt;kn6y-gtu@xxxxxxxxxx&gt; wrote:
 
-<span class="quote1">&gt; ����ܤ�index������ܤ�index�������ˤϻ��֤������餺</span>
-<span class="quote1">&gt; index��Ĥ�����ܤ�������ˤĤ줳����������٤λ��֤�</span>
-<span class="quote1">&gt; �޷�������Ƥ����Ȥ�����ΤǤ�����</span>
+<span class="quote1">&gt; 一つ目のindexや二つ目のindex作成時には時間がかからず</span>
+<span class="quote1">&gt; indexをつける項目が増えるにつれこれを作成する為の時間が</span>
+<span class="quote1">&gt; 急激に増えていくというものでした。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ȥ������Ȥǡ�����εܸ�����η�ȤϾ��������Ϥʤ줿�äǤ�����</span>
+<span class="quote1">&gt; ということで、今回の宮原さんの件とは少しかけはなれた話でした。</span>
 
-�錄���ϡ�Ʊ�����ȻפäƤޤ�
+わたしは、同じだと思ってます
 
-  ���饤����ȡ��������������������С�
-  mysql command ��
-  alter table      - �׵� -&gt; �������(��)�� mysqld thread ������
-                                \�㤦����å�(��)�˽���������
+  クライアント　　　　　　　　サーバー
+  mysql command で
+  alter table      - 要求 -&gt; おおもと(親)の mysqld thread が受け
+                                \違うスレッド(子)に処理させる
                                   |
                                   V
-                               �㤦(��)����åɤ� alter table �¹�
-                                  ���Υơ��֥�(.ISD, .ISM) ��
-                                  ��԰�ԡ������å����ѹ�����
-                                  A-1.* �˥��ԡ�
+                               違う(子)スレッドが alter table 実行
+                                  今のテーブル(.ISD, .ISM) を
+                                  一行一行、チェック、変更して
+                                  A-1.* にコピー
 
-                                  A-1.* �����������顢A-1.* ��
-                                  �ơ��֥�̾.* �˥�͡���
+                                  A-1.* が完成したら、A-1.* を
+                                  テーブル名.* にリネーム
 
-                                  �ǡ�������ɴ�ᥬ�Ȥ�����ȡ�
-                                  disk �򤬤꤬���äƤ��ޤ�
+                                  データが何百メガとかあると、
+                                  disk をがりがりやってしまう
 
-                               ������λ�塢������Ȥο� mysqld ���֤�
+                               処理終了後、おおもとの親 mysqld に返る
                                   |
                                   V
-   mysql ���ޥ�ɤ�  &lt;- �� -  �� mysqld ������
-  ��̼������
+   mysql コマンドが  &lt;- 返 -  親 mysqld が返答
+  結果受け取り
 
-��ή��Ǥ��� (���졢�Ҷ���ľ����������Τ��ä�����)
+の流れです。 (あれ、子供が直接返答するのだったけ？)
 
-����ǥå����ϡ�&quot;�ơ��֥�̾.ISM&quot; �Ȥ����ե�����ˤ�����ޤ�
-�����Υǡ����� &quot;�ơ��֥�̾.ISD&quot; �Ȥ����ե�����Ǥ���
+インデックスは、&quot;テーブル名.ISM&quot; というファイルにかかれます
+全部のデータは &quot;テーブル名.ISD&quot; というファイルです。
 
-�Ǥ��Τǡ��Ϥ륤��ǥå�����¿���ʤ�С�.ISM ��¿���ʤ�ޤ�����
-�񤭹��ߤ�����å���¿���ʤ�ޤ���
-��̡�disk ����������¿���ʤäơ��٤��ʤ�ޤ�
-
-
-���ȡ����ή����̤ꡢ���饤����ȤǤ��� mysql ���ޥ�ɤ�
-ñ���׵��ȯ�Ԥ��ơ����������ԤäƤ�������ʤΤǡ�
-���饤����Ȥ� &quot;mysql ���ޥ��&quot; ����Ȥ��Ƥ⡢
-̿���¹Ԥ��褦�Ȥ��Ƥ��륵���С��Υ���åɤˤϤ��ޤ�ƶ�������
-&quot;�ʤˤ��֤äƤ��ʤ�&quot; �Ȥ� &quot;˽������&quot; �Ȥ���
-�����ʹ֤ϻפäƤ��ޤ��ޤ���
-
-����ˡ��Ƥ� mysqld ����åɤ� kill ���Ƥ�
-( mysql.server stop �� �Ƥ� mysqld ����åɤ� kill ���Ƥ������ )
-�Ҷ��Υ���åɤ�̿��򴰿뤷�褦�Ȥ��Ƥ��ޤ��Τǡ�
-kill �Ǥ��ʤ��ä���Ȥ���
-���뤤�ϡ��Ƥ� kill -9 ���Ƥ⡢�Ҥ��̤Υץ������ǻŻ���³���Ƥ�����Ȥ���
-�ȡ��������Ȥˤʤ�ޤ���
-# ��Ϥ� mysqladmin ���ޥ�ɤ���Ȥ��Τ�����ˡ����
+ですので、はるインデックスが多くなれば、.ISM も多くなりますし、
+書き込みもチェックも多くなります。
+結果、disk アクセスが多くなって、遅くなります
 
 
-�������������Ǥ��Τǡ�
-mysqldump (or mysql&gt; SELECT ... INTO OUTFILE) �Ǽ�ä���Τ�
-mysqlimport (or mysql&gt; LOAD DATA INFILE .... ) ���᤹����
-�٤��Ǥ���
+あと、上の流れの通り、クライアントである mysql コマンドは
+単に要求を発行して、受け取りを待っているだけなので、
+クライアントの &quot;mysql コマンド&quot; を落としても、
+命令を実行しようとしているサーバーのスレッドにはあまり影響せず、
+&quot;なにも返ってこない&quot; とか &quot;暴走した&quot; とか、
+操作した人間は思ってしまいます。
 
-# MySQL �ϰ��̥ե�����˽񤤤Ƥ���Ȥ������������Ǥ��ꡢ
-# �ޤ����ڤ˰�����Ȥ��������Ǥ⤢���...
+さらに、親の mysqld スレッドを kill しても
+( mysql.server stop は 親の mysqld スレッドを kill しているだけ )
+子供のスレッドが命令を完遂しようとしていますので、
+kill できなかったりとか、
+あるいは、親を kill -9 しても、子は別のプロセスで仕事し続けているだとか、
+と、いうことになります。
+# やはり mysqladmin コマンドで落とすのが正攻法かと
+
+
+こういう処理ですので、
+mysqldump (or mysql&gt; SELECT ... INTO OUTFILE) で取ったものを
+mysqlimport (or mysql&gt; LOAD DATA INFILE .... ) で戻すよりも
+遅いです。
+
+# MySQL は一般ファイルに書いているという点が弱点であり、
+# また気軽に扱えるという利点でもありで...
 
 -- 
- ¼�� ��  takeshi@xxxxxxxxxx
+ 村上 毅  takeshi@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="1159.html">[��]</a><a href="1161.html">[��]</a><a href="../list/1101-1200.html">[�ֹ�����]</a><a href="../thread/1101-1200.html">[����åɰ���]</a></p>
+<p class="button"><a href="1159.html">[前]</a><a href="1161.html">[次]</a><a href="../list/1101-1200.html">[番号順一覧]</a><a href="../thread/1101-1200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="1134.html">   1134 1999-08-23 13:48 [Yutaka Miyahara &lt;yut] ����ǥå��������Υȥ�֥�              </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1136.html">   1136 1999-08-23 15:32 ��[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1146.html">   1146 1999-08-24 14:07 ����[Yutaka Miyahara &lt;yut]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1147.html">   1147 1999-08-24 15:34 ��[Yuzuru Goto &lt;kn6y-gt]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1148.html">   1148 1999-08-24 18:23 ����[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1150.html">   1150 1999-08-25 10:58 ������[Yutaka Miyahara &lt;yut]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1158.html">   1158 1999-08-26 11:26 ������[Yuzuru Goto &lt;kn6y-gt]                                   </a></span>
-<span class="current">-&gt;&nbsp;<a href="1160.html">   1160 1999-08-26 12:23 ��������[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1134.html">   1134 1999-08-23 13:48 [Yutaka Miyahara &lt;yut] インデックス作成のトラブル              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1136.html">   1136 1999-08-23 15:32 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1146.html">   1146 1999-08-24 14:07 ┃┗[Yutaka Miyahara &lt;yut]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1147.html">   1147 1999-08-24 15:34 ┗[Yuzuru Goto &lt;kn6y-gt]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1148.html">   1148 1999-08-24 18:23 　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1150.html">   1150 1999-08-25 10:58 　　┣[Yutaka Miyahara &lt;yut]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1158.html">   1158 1999-08-26 11:26 　　┗[Yuzuru Goto &lt;kn6y-gt]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="1160.html">   1160 1999-08-26 12:23 　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
 </pre>
 </body>
 </html>

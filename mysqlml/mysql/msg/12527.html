@@ -5,73 +5,73 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="12526.html">[��]</a><a href="12528.html">[��]</a><a href="../list/12501-12600.html">[�ֹ�����]</a><a href="../thread/12501-12600.html">[����åɰ���]</a></p>
+<p class="button"><a href="12526.html">[前]</a><a href="12528.html">[次]</a><a href="../list/12501-12600.html">[番号順一覧]</a><a href="../thread/12501-12600.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:12527
 </p>
 <div class="header">
 <p>
-From: ����� &lt;����� &lt;shimizu.kiyoshi@xxxxxxxxxx&gt;&gt;<br>
+From: 清水潔 &lt;清水潔 &lt;shimizu.kiyoshi@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 01 Dec 2005 23:56:58 +0900<br>
-Subject: [mysql 12527] Re: INSERT��1064���顼<br>
+Subject: [mysql 12527] Re: INSERTで1064エラー<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-ʿ���
+平野さん。
 
-��Ƥߤ��Ȥ�����������Ǥ�'�ǤΥ��������פʤ饨�顼��
-ȯ�����ʤ����Ϥ狼��ޤ�����
-�ʤ�����text�Ǥ���
+試してみたところ、こちらでも'でのエスケープならエラーが
+発生しない事はわかりました。
+なお型はtextです。
 
-����������ʸ�����PHP��addslashes�ؿ��ǥ��������פ��Ƥ���Τ�
-'����''���Ѥ���Ȥ����Τϡ���Ǥʤ����Ƚ��ʤ������å���
-���äƤ�Ȥ������ˤʤꤽ���ʤΤǡ��ɤ����褦���¤äƤޤ���
+ただ、入力文字列をPHPのaddslashes関数でエスケープしているので
+'だけ''に変えるというのは、後でなんだか判らないロジックが
+入ってるという事になりそうなので、どうしようか迷ってます。
 
-�����⤦�����ʤꤳ�ߤޤ�����
+問題をもう少し絞りこみました。
 
-�ʣ���ʸ�����Ȥ߹�碌
-�����ȯ������ʸ������Ȥ߹�碌�򹹤�Ĵ�٤��Ȥ����֤�פ�ľ��
-�ˡ�'�פ��Ĥʤ���ȡ����Σ�ʸ�������Ǥ�ȯ������Ȥ����Τ����狼
-��ޤ��������Σ�ʸ���δ֤�Ⱦ�ѥ��ڡ�����������OK�Ǥ�����
+（１）文字の組み合わせ
+問題の発生する文字列の組み合わせを更に調べたところ「ら」の直後
+に「'」がつながると、この２文字だけでも発生するというのが、わか
+りました。この２文字の間に半角スペースが入れればOKでした。
 
-�ʣ�������Τ��꤫
-PHP����mysql�ؿ���ƤӽФ��Ƥν������ȯ�����Ƥ���Τǡ�PHP¦��
-����Τ���mysql¦�ˤ���Τ��ڤ�ʬ������ʤ����ͤ��Ƥߤޤ�����
-���ޥ�ɥץ���ץȤ���mysql��ƤӽФ��ơ�INSERTʸ��¹Ԥ���
-�Ȥ����֤�'�פ���Ͽ�Ǥ��ޤ�����PHP����mysql���Ϥ��Ȥ���ȯ������
-����Τ��Ȼפ��ޤ�������������PHP�ξ���EUC-JP��INSERTʸ
-�ʤΤ��Ф��ơ����ޥ�ɥץ���ץȤξ���SJIS�ʤΤǡ�����Ǥ�
-�ڤ�ʬ���ˤϤʤ�ʤ��ΤǤ���͡����äȡ�
+（２）問題のありか
+PHPからmysql関数を呼び出しての処理中に発生しているので、PHP側に
+あるのか、mysql側にあるのか切り分け出来ないか考えてみました。
+コマンドプロンプトからmysqlを呼び出して、INSERT文を実行した
+ところ「ら'」が登録できました。PHPからmysqlに渡すときに発生して
+いるのかと思いました。しかし、PHPの場合はEUC-JPのINSERT文
+なのに対して、コマンドプロンプトの場合はSJISなので、これでは
+切り分けにはならないのですよね、きっと。
 
 
-�Х�塼��ʿ�� wrote:
-<span class="quote1">&gt; ʿ��ȿ����ޤ���</span>
+バリュー　平野 wrote:
+<span class="quote1">&gt; 平野と申します。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt;&gt;�ʲ���SQLʸ�μ¹Ԥ�1064�Υ��顼�ˤʤäƤ��ޤ��ޤ���</span>
+<span class="quote2">&gt;&gt;以下のSQL文の実行で1064のエラーになってしまいます。</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;INSERT INTO xps_whatsnew</span>
-<span class="quote2">&gt;&gt;VALUES(0,'manual','(desc_show)','','883840200','\'95����\'97�������� ');</span>
+<span class="quote2">&gt;&gt;VALUES(0,'manual','(desc_show)','','883840200','\'95から\'97の大会一覧 ');</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;1064 : You have an error in your SQL syntax. Check the manual that</span>
 <span class="quote2">&gt;&gt;corresponds to your MySQL server version for the right syntax to use</span>
-<span class="quote2">&gt;&gt;near '97�������� ')' at line 1</span>
+<span class="quote2">&gt;&gt;near '97の大会一覧 ')' at line 1</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt;&gt;�ʤˤ��Ѥ���Ф褯�ʤ�Τ������狼��ޤ���</span>
+<span class="quote2">&gt;&gt;なにか変えればよくなるのか全くわかりません。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���ߤޤ���MySQL�λ����������ǿͤǡ����걾���Ϥ狼</span>
-<span class="quote1">&gt; ��ʤ��ΤǤ���������Ķ������夵��������㤦�Τ�</span>
-<span class="quote1">&gt; �������������Ѥ���ȸ�����̣�ǡ�������</span>
+<span class="quote1">&gt; すみません、MySQLの事は全くの素人で、設定云々はわか</span>
+<span class="quote1">&gt; らないのですし、試した環境は清水さんと全く違うので</span>
+<span class="quote1">&gt; すが、視点を変えると言う意味で・・・。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ��ޡ����ʥХå�����å���ˤǥ��������פ��Ƥ����</span>
-<span class="quote1">&gt; ��򡢥��󥰥륯�����ơ������ǥ��������פ�����</span>
-<span class="quote1">&gt; ǡ���Ǥ��礦����</span>
+<span class="quote1">&gt; ￥マーク（バックスラッシュ）でエスケープしている場</span>
+<span class="quote1">&gt; 所を、シングルクォーテーションでエスケープする手は</span>
+<span class="quote1">&gt; 如何でしょうか。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����狼��ʤ��ä��Τǡ�verchar �ǻ�Ƥߤޤ�����</span>
+<span class="quote1">&gt; 型がわからなかったので、verchar で試してみました。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; SELECT version()</span>
@@ -79,39 +79,39 @@ PHP����mysql�ؿ���ƤӽФ��Ƥν������ȯ�����Ƥ���Τǡ�PHP¦��
 <span class="quote1">&gt; --------- </span>
 <span class="quote1">&gt; 5.0.16-nt </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���:1�� (0ms)</span>
+<span class="quote1">&gt; 結果:1件 (0ms)</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; drop table qtest</span>
-<span class="quote1">&gt; �¹Ԥ��ޤ����� (16ms)</span>
+<span class="quote1">&gt; 実行しました。 (16ms)</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; create table qtest (fielda varchar(30))</span>
-<span class="quote1">&gt; �¹Ԥ��ޤ����� (0ms)</span>
+<span class="quote1">&gt; 実行しました。 (0ms)</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; INSERT INTO qtest VALUES('''95����''97��������')</span>
-<span class="quote1">&gt; ���: 1 �ﹹ�� (0ms)</span>
+<span class="quote1">&gt; INSERT INTO qtest VALUES('''95から''97の大会一覧')</span>
+<span class="quote1">&gt; 結果: 1 件更新 (0ms)</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; INSERT INTO qtest VALUES('''97��������')</span>
-<span class="quote1">&gt; ���: 1 �ﹹ�� (0ms)</span>
+<span class="quote1">&gt; INSERT INTO qtest VALUES('''97の大会一覧')</span>
+<span class="quote1">&gt; 結果: 1 件更新 (0ms)</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; INSERT INTO qtest VALUES('''95����')</span>
-<span class="quote1">&gt; ���: 1 �ﹹ�� (0ms)</span>
+<span class="quote1">&gt; INSERT INTO qtest VALUES('''95から')</span>
+<span class="quote1">&gt; 結果: 1 件更新 (0ms)</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; select * from qtest</span>
 <span class="quote1">&gt; fielda               </span>
 <span class="quote1">&gt; -------------------- </span>
-<span class="quote1">&gt; '95����'97�������� </span>
-<span class="quote1">&gt; '97��������        </span>
-<span class="quote1">&gt; '95����              </span>
+<span class="quote1">&gt; '95から'97の大会一覧 </span>
+<span class="quote1">&gt; '97の大会一覧        </span>
+<span class="quote1">&gt; '95から              </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���:3�� (0ms)</span>
+<span class="quote1">&gt; 結果:3件 (0ms)</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���ͤˤʤ�ʤ��ä��餴���ʤ�����</span>
+<span class="quote1">&gt; 参考にならなかったらごめんなさい。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ʾ�Ǥ�������������ꤤ�פ��ޤ���</span>
+<span class="quote1">&gt; 以上です。よろしくお願い致します。</span>
 <span class="quote1">&gt; 0--------1---------2---------3---------4---------5</span>
-<span class="quote1">&gt; ������ҥХ�塼���եȥ�����</span>
+<span class="quote1">&gt; 株式会社バリューソフトウエア</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ʿ���</span>
+<span class="quote1">&gt; 平野　源</span>
 <span class="quote1">&gt; hirano@xxxxxxxxxx</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; ValueSQL -- For all SQL developers --  </span>
@@ -124,14 +124,14 @@ PHP����mysql�ؿ���ƤӽФ��Ƥν������ȯ�����Ƥ���Τǡ�PHP¦��
 
 </pre>
 </div>
-<p class="button"><a href="12526.html">[��]</a><a href="12528.html">[��]</a><a href="../list/12501-12600.html">[�ֹ�����]</a><a href="../thread/12501-12600.html">[����åɰ���]</a></p>
+<p class="button"><a href="12526.html">[前]</a><a href="12528.html">[次]</a><a href="../list/12501-12600.html">[番号順一覧]</a><a href="../thread/12501-12600.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="12524.html">  12524 2005-12-01 00:36 [����� &lt;shimizu.kiyo] INSERT��1064���顼                      </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12526.html">  12526 2005-12-01 17:29 ��[�Х�塼��ʿ�� &lt;hira]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="12527.html">  12527 2005-12-01 23:56 ����[����� &lt;shimizu.kiyo]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12533.html">  12533 2005-12-02 12:12 ������[�Х�塼��ʿ�� &lt;hira]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12534.html">  12534 2005-12-03 09:18 ��������[����� &lt;shimizu.kiyo]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12535.html">  12535 2005-12-03 11:21 ����������[����� &lt;shimizu.kiyo]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12524.html">  12524 2005-12-01 00:36 [清水潔 &lt;shimizu.kiyo] INSERTで1064エラー                      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12526.html">  12526 2005-12-01 17:29 ┗[バリュー　平野 &lt;hira]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="12527.html">  12527 2005-12-01 23:56 　┗[清水潔 &lt;shimizu.kiyo]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12533.html">  12533 2005-12-02 12:12 　　┗[バリュー　平野 &lt;hira]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12534.html">  12534 2005-12-03 09:18 　　　┗[清水潔 &lt;shimizu.kiyo]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12535.html">  12535 2005-12-03 11:21 　　　　┗[清水潔 &lt;shimizu.kiyo]                               </a></span>
 </pre>
 </body>
 </html>

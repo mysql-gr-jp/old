@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="12660.html">[��]</a><a href="12662.html">[��]</a><a href="../list/12601-12700.html">[�ֹ�����]</a><a href="../thread/12601-12700.html">[����åɰ���]</a></p>
+<p class="button"><a href="12660.html">[前]</a><a href="12662.html">[次]</a><a href="../list/12601-12700.html">[番号順一覧]</a><a href="../thread/12601-12700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:12661
 </p>
@@ -13,50 +13,50 @@ mysql:12661
 <p>
 From: Hisamitsu Issei &lt;Hisamitsu Issei &lt;ds1i-hsmt@xxxxxxxxxx&gt;&gt;<br>
 Date: Mon, 23 Jan 2006 19:30:25 +0900<br>
-Subject: [mysql 12661] ʣ���θ�����̤�Ĥʤ����碌�Ƽ���������<br>
+Subject: [mysql 12661] 複数の検索結果をつなぎあわせて取得したい<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�׸��ȿ����ޤ�
+久光と申します
 
 
 MySQL 4.0.24
 PHP 4.3.11
-�Υ�󥿥륵���С���ȤäƤ��ޤ���
+のレンタルサーバーを使っています。
 
-�����Τ褦��num�ե�����ɤ�����ο��͡�list�ե����� 
-�ɤˡ�|�פǶ��ڤ�
-�줿ʣ���Υ����ƥब���Ϥ���Ƥ���ơ��֥뤬����ޤ��ʼºݤˤ�list
-�ե�����ɤˤ�1��40�����٤Υ����ƥब���Ϥ���Ƥ��� 
-2000�����٤Υơ�
-�֥�Ǥ��ˡ�
+下記のようなnumフィールドに特定の数値、listフィール 
+ドに「|」で区切ら
+れた複数のアイテムが入力されているテーブルがあります（実際にはlist
+フィールドには1～40個程度のアイテムが入力されている 
+2000行程度のテー
+ブルです）。
 
 ---------------------------------------------------------
 id  name   num                 list
 ---------------------------------------------------------
-1   ��     6   |���|�ߤ���|�����|�� 
-����|������|����|
-2   ��     3   |���|�����|����|
-3   ��     5   |�ߤ���|�����|���|�� 
-����|����|
-4   ��     6   |���|�ߤ���|�����|�� 
-����|������|����|
-5   ��     3   |������|������|����|
-6   ��     4   |�ߤ���|�����|������|����|
+1   あ     6   |リンゴ|みかん|メロン|ス 
+イカ|イチゴ|カキ|
+2   い     3   |リンゴ|メロン|カキ|
+3   う     5   |みかん|メロン|リンゴ|イ 
+チゴ|カキ|
+4   え     6   |リンゴ|みかん|メロン|ス 
+イカ|イチゴ|カキ|
+5   お     3   |スイカ|イチゴ|カキ|
+6   か     4   |みかん|メロン|スイカ|カキ|
 
-��������������2000�Ԥ��餤��
+・・・・・・（2000行くらい）
 ---------------------------------------------------------
 
-���Υơ��֥���Ф���
-SELECT id, num FROM `prod` WHERE `list` like '%|���|%'
-SELECT id, num FROM `prod` WHERE `list` like '%|������|%'
-�򤽤줾��¹Ԥ������ʼºݤˤϾ����ˤ�äƿ����Ĥ�SELECT 
-ʸ��ɬ�פ�
-�����礬����ޤ��ˡ����Ƥθ�����̤�ñ��ˤĤʤ��Ƥ�������β� 
-����
-�褦��id�����֤ä����֤η�̤Ȥ��Ƽ�������
+このテーブルに対して
+SELECT id, num FROM `prod` WHERE `list` like '%|リンゴ|%'
+SELECT id, num FROM `prod` WHERE `list` like '%|イチゴ|%'
+をそれぞれ実行した場合（実際には状況によって数十個のSELECT 
+文を必要と
+する場合があります）、全ての検索結果を単純につなげているだけの下 
+記の
+ようなidがダブった状態の結果として取得し、
 
 ---------
 id  num
@@ -72,8 +72,8 @@ id  num
 5   3
 ---------
 
-�����ǽ�Ū�ˤ�id���Ȥ�num�ͤ��פ��ơ�����ͤ��� 
-��������¤�ľ����
+これを最終的にはidごとにnum値を合計して、合計値が大 
+きい順に並べ直して
 
 ---------
 id  SUM
@@ -86,51 +86,51 @@ id  SUM
 5   3
 ---------
 
-�����Τ褦�ʷ�̤�����������ΤǤ��������������η�̤ʤ��ˤ��� 
-�ʤ�
-�Ǹ�η�̤������Ǥ���Ф���ˤ��������ȤϤʤ��ΤǤ�����
+↑このような結果を取得したいのです。もちろん途中の結果なしにいき 
+なり
+最後の結果が取得できればそれにこしたことはないのですが。
 
 
-�����餯����ޤ�MySQL�Ǽ¹Ԥ��ƺǸ��PHP������ؿ��� 
-�Ȥä����������
-��̵��������Ȼפ�
-(SELECT id, num FROM `prod` WHERE `list` like '%|���|%')
+おそらく途中までMySQLで実行して最後はPHPの配列関数を 
+使って整理するの
+が無難だろうと思い
+(SELECT id, num FROM `prod` WHERE `list` like '%|リンゴ|%')
 UNION
-(SELECT id, num FROM `prod` WHERE `list` like '%|������|%')
-UNION������������
-�Τ褦�ʿ����Ĥ�SELECTʸ��UNION�ǤĤʤ������������ 
-�Ԥ����Ȥ�����id
-�����֤�ʤ��褦���������줿��̤����Ϥ���Ƥ��ޤ��ޤ��� 
-��WHERE��OR
-�ǤĤʤ�������Ʊ����̡ˡ���ɡ�PHP�η����֤��ؿ���Ȥä�
+(SELECT id, num FROM `prod` WHERE `list` like '%|イチゴ|%')
+UNION・・・・・・
+のような数十個のSELECT文をUNIONでつないだ検索式を実 
+行したところ、id
+がダブらないように整理された結果が出力されてしまいました 
+（WHEREをOR
+でつないだ場合と同じ結果）。結局、PHPの繰り返し関数を使って
 
-1)SELECT id, num FROM �ơ��֥�̾ WHERE `list` like '%|�ѿ�| 
-%'��¹�
-2)��̤�PHP��id�򥭡��ˤ���Ϣ������˳�Ǽ�ʽ�� 
-id�ʤ��ɲá������Ѥ�
-���ʤ�û���
+1)SELECT id, num FROM テーブル名 WHERE `list` like '%|変数| 
+%'を実行
+2)結果をPHPでidをキーにした連想配列に格納（初出 
+idなら追加、作成済み
+　なら加算）
 
-��䡹�ȷ����֤��ơ��Ǹ��PHP�������߽�ˤ���Ȥ������� 
-��ץȤ���
-�ߤޤ������������Ū�Ȥ����̤Ͻ��ϤǤ����ΤǤ�����������Ⱦ�� 
-�ˤ��
-�Ƥϰ��٤�40��ᤤSELECTʸ��MySQL�˽��������� 
-���Ȥˤʤ�Τǡ�������
-�٤��ʤä����󥿥륵���С���;�פ���٤򤫤��Ƥ�ΤǤϤʤ����� 
-����
-�Ƥ��ޤ�����äȸ�ΨŪ�ʤ����������ΤǤϤʤ����Ȼפ��ΤǤ����� 
-�ʤˤ�
-�褤��ˡ�Ϥʤ��Ǥ��礦��������������ꤤ���ޤ���
+を延々と繰り返して、最後にPHPの配列を降順にするというスク 
+リプトを組
+みました。これで目的とする結果は出力できたのですが、これだと場合 
+によっ
+ては一度に40回近いSELECT文をMySQLに処理させる 
+ことになるので、応答が
+遅くなったりレンタルサーバーに余計な負荷をかけてるのではないかと 
+感じ
+ています。もっと効率的なやり方があるのではないかと思うのですが、 
+なにか
+よい方法はないでしょうか。よろしくお願いします。
 
 
-�ɲ�
-������num�ͤι�פ������ˡ�ǥ�����ץȤ��Ȥ�Ǥ��ޤ����� 
-id���Ȥ�
-�����ҥåȲ������ơ֥ҥåȲ���ι�ס�num�͡פˤ�ä� 
-��Ʊ�����
-������Ǥ��ޤ������������Ȥ�ľ���ȸ�ΨŪ����ˡ�����Ĥ��뤫�⡢�� 
-�פ�
-���ΤǤ���Ƭ�����𤷤��������ǰ���Ƥ��ޤ���
+追加
+　今はnum値の合計を求める方法でスクリプトを組んでいますが、 
+idごとに
+検索ヒット回数を求めて「ヒット回数の合計×num値」によって 
+も同じ結果
+を取得できます。この線で組み直すと効率的な方法が見つかるかも、と 
+思っ
+たのですが頭が混乱して途中で断念しています。
 
 
 =================================
@@ -143,12 +143,12 @@ id���Ȥ�
 
 </pre>
 </div>
-<p class="button"><a href="12660.html">[��]</a><a href="12662.html">[��]</a><a href="../list/12601-12700.html">[�ֹ�����]</a><a href="../thread/12601-12700.html">[����åɰ���]</a></p>
+<p class="button"><a href="12660.html">[前]</a><a href="12662.html">[次]</a><a href="../list/12601-12700.html">[番号順一覧]</a><a href="../thread/12601-12700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="12661.html">  12661 2006-01-23 19:30 [Hisamitsu Issei &lt;ds1] ʣ���θ�����̤�Ĥʤ����碌�Ƽ���������</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12662.html">  12662 2006-01-23 20:32 ��[UNO Shintaro &lt;uno@xx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12663.html">  12663 2006-01-24 02:06 ����[Hisamitsu Issei &lt;ds1]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12664.html">  12664 2006-01-24 07:57 ������[UNO Shintaro &lt;uno@xx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="12661.html">  12661 2006-01-23 19:30 [Hisamitsu Issei &lt;ds1] 複数の検索結果をつなぎあわせて取得したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12662.html">  12662 2006-01-23 20:32 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12663.html">  12663 2006-01-24 02:06 　┗[Hisamitsu Issei &lt;ds1]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12664.html">  12664 2006-01-24 07:57 　　┗[UNO Shintaro &lt;uno@xx]                                   </a></span>
 </pre>
 </body>
 </html>

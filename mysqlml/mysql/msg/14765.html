@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14764.html">[��]</a><a href="14766.html">[��]</a><a href="../list/14701-14800.html">[�ֹ�����]</a><a href="../thread/14701-14800.html">[����åɰ���]</a></p>
+<p class="button"><a href="14764.html">[前]</a><a href="14766.html">[次]</a><a href="../list/14701-14800.html">[番号順一覧]</a><a href="../thread/14701-14800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14765
 </p>
@@ -13,63 +13,63 @@ mysql:14765
 <p>
 From: Mikiya Okuno &lt;Mikiya Okuno &lt;Mikiya.Okuno@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 10 Mar 2009 10:55:20 +0900<br>
-Subject: [mysql 14765] Re: MySQL���饹������ǽ�ˤĤ��Ƥμ���<br>
+Subject: [mysql 14765] Re: MySQLクラスタの性能についての質問<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���Ϥ褦�������ޤ���
+おはようございます。
 
-MySQL Cluster����ǽ���ǡ����Ρ��ɤ��ɲäˤ�äƥ������뤹�뤫�ɤ�����
-���������Ƥ䥷���ƥ๽���˰���ޤ���
+MySQL Clusterの性能がデータノードの追加によってスケールするかどうかは
+処理の内容やシステム構成に因ります。
 
-�ޤ�������Τϡ�MySQL Cluster�ϼ祭�������Ƥˤ�äƥǡ������Ǽ����
-�Ρ��ɤ�ʬ���Ƥ���Τǡ��祭���ˤ�뻲�Ȥ�1�Ԥ����ι����ϤȤƤ��®�Ǥ��ꡢ
-�Ρ��ɤ���������䤹���Ȥˤ�äƥ������뤹��Ȥ������ȤǤ���
+まず言えるのは、MySQL Clusterは主キーの内容によってデータを格納する
+ノードを分けているので、主キーによる参照や1行だけの更新はとても高速であり、
+ノードの台数を増やすことによってスケールするということです。
 
-�����Ǥʤ��������դ�ɬ�פǤ����ä��ϰϸ����䥤��ǥå��������Ѥ��ʤ��������Ǥ�
-���󥿡����ͥ��Ȥ��ܥȥ�ͥå��ˤʤäư���ʾ她�����뤷�ʤ���ǽ��������ޤ���
+そうでない場合は注意が必要です。特に範囲検索やインデックスを利用しないスキャンでは
+インターコネクトがボトルネックになって一定以上スケールしない可能性があります。
 
-MySQL Cluster�Ǥϡ�SQL�Ρ��ɤ��ȥ�󥶥������򳫻Ϥ���ȡ�
-��ĤΥǡ����Ρ��ɤ�TC�ʥȥ�󥶥�����󡦥����ǥ��͡����ˤȤ������򤷡�
-���Υȥ�󥶥�����󤬽�λ����ޤ�Ʊ��TC���ͳ���ƥꥯ�����Ȥ��������ޤ���
-�祭���ˤ�뻲�Ȥ乹���ξ��Ǥ⡢���Υȥ�󥶥���������Ϣ³����
-���٤������Ԥ��褦�ʾ��ˤϡ�TC��˥ǡ�����¸�ߤ��ʤ���礬���ꡢ
-���ξ��ϥǡ����Ρ��ɴ֤��̿�����ɬ�פ�����ΤǾ嵭��Ʊ����
-���󥿡����ͥ��Ȥ��ܥȥ�ͥå��ˤʤ��ǽ��������ޤ���
+MySQL Clusterでは、SQLノードがトランザクションを開始すると、
+一つのデータノードをTC（トランザクション・コーディネータ）として選択し、
+そのトランザクションが終了するまで同じTCを経由してリクエストを送信します。
+主キーによる参照や更新の場合でも、一回のトランザクション内で連続して
+何度も処理を行うような場合には、TC上にデータが存在しない場合があり、
+その場合はデータノード間で通信する必要があるので上記と同じく
+インターコネクトがボトルネックになる可能性があります。
 
-��������ϡ�JOIN�䥵�֥�����ˤ����Ƹ����ˤʤ�ޤ���������MySQL 6.0�����
-BKA�Ȥ�����Ŭ����ˡ���ɲä����Τǡ������Υܥȥ�ͥå���¿���ޥ��ˤʤ�Ǥ��礦��
-��MySQL 6.0 + NDB 6.x�Ȥ����Ȥ߹�碌�Ȥ�����̣�Ǥ�����
+この問題は、JOINやサブクエリにおいて顕著になります。ただしMySQL 6.0からは
+BKAという最適化手法が追加されるので、これらのボトルネックは多少マシになるでしょう。
+（MySQL 6.0 + NDB 6.xという組み合わせという意味です。）
 
-�嵭�Τ褦�ʾ�硢���󥿡����ͥ��ȤΥܥȥ�ͥå����ä���Х������뤷�ޤ���
-¿���ΥΡ��ɤ���³���ʤ��Ȥ����ʤ����ˤϡ�SCI��10GbE�ʤɹ�®��
-���󥿡����ͥ��Ȥ�Ȥ��ޤ��礦��
+上記のような場合、インターコネクトのボトルネックを解消すればスケールします。
+多数のノードを接続しないといけない場合には、SCIや10GbEなど高速な
+インターコネクトを使いましょう。
 
-������귿�ǤϤʤ��ǥ������ơ��֥�����Ѥ����硢�ǡ����Ρ��ɤ�������
-���Ȥˤ����åȤ��礭���Ǥ����ǥ������ϥ����ͥåȥ����ꤺ�ä�
-��®�Ǥ��뤿�ᡢ�ǥ������ؤι����仲�Ȥ��Ρ��ɴ֤�ʬ������С�������ǽ��
-�夬���ǽ��������ޤ���
+インメモリ型ではなくディスクテーブルを利用する場合、データノードが増える
+ことによるメリットが大きいです。ディスクはメモリやネットワークよりずっと
+低速であるため、ディスクへの更新や参照がノード間に分散すれば、処理性能が
+上がる可能性があります。
 
-�ޤȤ��ȡ����Τ褦�ʾ�����ǽ���夬��䤹�����Ȥˤʤ�ޤ���
-���٤������������̤�ȯ�����롣
-��������Ǽ祭������ꤷ�Ƥ��롣
-����®�ʥ��󥿡����ͥ��Ȥ����Ѥ��Ƥ��롣
-���ǥ������ơ��֥�����Ѥ��Ƥ��롣
+まとめると、次のような場合に性能が上がりやすいことになります。
+・細かい処理が大量に発生する。
+・クエリで主キーを指定している。
+・高速なインターコネクトを利用している。
+・ディスクテーブルを利用している。
 
-���Τ褦�ʾ��ˤϥ������뤷�ʤ���ǽ��������ޤ���
-��ʣ���ʥ������������롣
-  ��JOIN�����֥�����
-  �߰��٤����̤˹�������ȥ�󥶥������
-���ϰϸ����ʤɡ��祭���ʥϥå���ˤ����Ѥ��ʤ������꤬¿����
-�����󥿡����ͥ��Ȥ��٤���
+次のような場合にはスケールしない可能性があります。
+・複雑なクエリを処理する。
+  ×JOIN、サブクエリ
+  ×一度に大量に更新するトランザクション
+・範囲検索など、主キー（ハッシュ）を利用しないクエリが多い。
+・インターコネクトが遅い。
 
-���������������뤷�ʤ��ȸ��äƤ⽽ʬ���Ѥ��Ѥ����٥�Ǥ��Τǡ�
-Active/Active�ǻȤ��������䡢��ڤ�HA�����������ˤ�MySQL Cluster�������Ǥ���
+ただし、スケールしないと言っても十分実用に耐えるレベルですので、
+Active/Activeで使いたい場合や、手軽にHA化したい場合にはMySQL Clusterは便利です。
 
-�Ȥ����櫓�ǡ������ƥ�ˤ�������ͽ���䥢�ץꥱ��������������褯��θ����
-���Ѥ�����򸫶ˤ�ޤ��礦��
+というわけで、システムにかけられる予算やアプリケーションの特性をよく考慮して
+利用する場合を見極めましょう。
 --
 Mikiya Okuno, MySQL Support Engineer
 Sun Microsystems KK, Tokyo, Japan
@@ -77,45 +77,45 @@ Sun Microsystems KK, Tokyo, Japan
 
 On 10/03/2009, at 10:22 AM, Hiroyuki Ogawa wrote:
 
-<span class="quote1">&gt; ���Ĥ⤪���äˤʤäƤ���ޤ���</span>
-<span class="quote1">&gt; ���ߡ�MySQL���饹������ǽ�ˤĤ���Ĵ�٤Ƥ��ޤ���</span>
-<span class="quote1">&gt; �ޤ���Ĵ���Ȥ��Ƥ�ʣ����PC���Ѱդ��Ƥ��줾���PC�����</span>
-<span class="quote1">&gt; �����Ρ��ɡ��ǡ����Ρ��ɡ�</span>
-<span class="quote1">&gt; SQL�Ρ��ɤ򤹤٤ƥ��󥹥ȡ��뤷�ޤ���</span>
-<span class="quote1">&gt; �����ܤǹ��������Ȥ�����������insert�ν�������ϣ��桢���桢�����</span>
-<span class="quote1">&gt; ��������������Ӥ��ơ���ǽ�Ͼ夬��ΤǤ��礦����</span>
-<span class="quote1">&gt; ��PC��OS�Ϥ��٤�Linux��CentOS�������ˤǤ���</span>
+<span class="quote1">&gt; いつもお世話になっております。</span>
+<span class="quote1">&gt; 現在、MySQLクラスタの性能について調べています。</span>
+<span class="quote1">&gt; まず、調査としては複数のPCを用意してそれぞれのPC１台に</span>
+<span class="quote1">&gt; 管理ノード、データノード、</span>
+<span class="quote1">&gt; SQLノードをすべてインストールします。</span>
+<span class="quote1">&gt; １台目で構成したとき１秒当たりinsertの処理件数は２台、３台、４台で</span>
+<span class="quote1">&gt; 構成した場合と比較して、性能は上がるのでしょうか。</span>
+<span class="quote1">&gt; 各PCのOSはすべてLinux（CentOS５．２）です。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; select�Ǥ�PC��Linux�ˤ�PC��Windows)����³����Windows</span>
-<span class="quote1">&gt; PC�ǣ��ô������겿��select�Ǥ��뤫��Ĵ�����Ƥ��ޤ���</span>
-<span class="quote1">&gt; ���ΤȤ���PC��Linux)��������椫�飴������䤷����硢</span>
-<span class="quote1">&gt; ��ǽ�������뤫��Ĵ�٤Ƥ��ޤ���</span>
-<span class="quote1">&gt; MySQL���饹���ϥǡ����Ρ��ɤʤɤ����������ǽ��</span>
-<span class="quote1">&gt; ������ΤǤ��礦����</span>
-<span class="quote1">&gt; ����Ȥ⡢���������ã�������ǽ�ϼ�«����ΤǤ��礦����</span>
+<span class="quote1">&gt; selectではPC（Linux）とPC（Windows)を接続してWindows</span>
+<span class="quote1">&gt; PCで１秒間当たり何件selectできるかを調査しています。</span>
+<span class="quote1">&gt; このときもPC（Linux)の台数を２台から４台に増やした場合、</span>
+<span class="quote1">&gt; 性能があがるかを調べています。</span>
+<span class="quote1">&gt; MySQLクラスタはデータノードなどが増えると性能は</span>
+<span class="quote1">&gt; あがるのでしょうか。</span>
+<span class="quote1">&gt; それとも、ある台数に達すると性能は収束するのでしょうか。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ʬ����ˤ���Ĺ������ˤʤäƤ��ޤ��ޤ���������������</span>
-<span class="quote1">&gt; ���ꤤ�������ޤ���</span>
+<span class="quote1">&gt; 分かりにくく長い質問になってしまいましたが、ご教授を</span>
+<span class="quote1">&gt; お願いいたします。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���Ѥ���MySQL Cluster�ΥС�������6.3.20����Ѥ��ޤ���</span>
+<span class="quote1">&gt; 使用するMySQL Clusterのバージョンは6.3.20を使用します。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ʾ塢����������ꤤ�������ޤ���</span>
+<span class="quote1">&gt; 以上、よろしくお願いいたします。</span>
 
 
 </pre>
 </div>
-<p class="button"><a href="14764.html">[��]</a><a href="14766.html">[��]</a><a href="../list/14701-14800.html">[�ֹ�����]</a><a href="../thread/14701-14800.html">[����åɰ���]</a></p>
+<p class="button"><a href="14764.html">[前]</a><a href="14766.html">[次]</a><a href="../list/14701-14800.html">[番号順一覧]</a><a href="../thread/14701-14800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14763.html">@ 14763 2009-03-10 10:22 [Hiroyuki Ogawa &lt;eng1] MySQL���饹������ǽ�ˤĤ��Ƥμ���       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14764.html">  14764 2009-03-10 10:35 ��[Tetsuro IKEDA &lt;te.ik]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="14765.html">  14765 2009-03-10 10:55 ��[Mikiya Okuno &lt;Mikiya]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14766.html">@ 14766 2009-03-10 13:46 ����[Hiroyuki Ogawa &lt;eng1]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14767.html">  14767 2009-03-10 14:00 ������[Mikiya Okuno &lt;Mikiya]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14768.html">@ 14768 2009-03-10 15:43 ��������[Hiroyuki Ogawa &lt;eng1]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14769.html">  14769 2009-03-10 15:56 ����������[Mikiya Okuno &lt;Mikiya]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14770.html">@ 14770 2009-03-10 18:55 ������������[Hiroyuki Ogawa &lt;eng1]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14771.html">  14771 2009-03-10 22:03 ��������������[Mikiya Okuno &lt;Mikiya]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14772.html">@ 14772 2009-03-10 23:14 ����������������[Hiroyuki Ogawa &lt;eng1]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14763.html">@ 14763 2009-03-10 10:22 [Hiroyuki Ogawa &lt;eng1] MySQLクラスタの性能についての質問       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14764.html">  14764 2009-03-10 10:35 ┣[Tetsuro IKEDA &lt;te.ik]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14765.html">  14765 2009-03-10 10:55 ┗[Mikiya Okuno &lt;Mikiya]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14766.html">@ 14766 2009-03-10 13:46 　┗[Hiroyuki Ogawa &lt;eng1]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14767.html">  14767 2009-03-10 14:00 　　┗[Mikiya Okuno &lt;Mikiya]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14768.html">@ 14768 2009-03-10 15:43 　　　┗[Hiroyuki Ogawa &lt;eng1]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14769.html">  14769 2009-03-10 15:56 　　　　┗[Mikiya Okuno &lt;Mikiya]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14770.html">@ 14770 2009-03-10 18:55 　　　　　┗[Hiroyuki Ogawa &lt;eng1]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14771.html">  14771 2009-03-10 22:03 　　　　　　┗[Mikiya Okuno &lt;Mikiya]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14772.html">@ 14772 2009-03-10 23:14 　　　　　　　┗[Hiroyuki Ogawa &lt;eng1]                         </a></span>
 </pre>
 </body>
 </html>

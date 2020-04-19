@@ -21,7 +21,7 @@ Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Pr
 <A NAME="IDX707"></A>
 
 
-<H2><A NAME="Replication" HREF="manual.ja_toc.html#Replication">19.1  �ǡ����١�����ʣ��</A></H2>
+<H2><A NAME="Replication" HREF="manual.ja_toc.html#Replication">19.1  データベースの複製</A></H2>
 
 <P>
 One way replication can be used both to increase robustness and
@@ -45,33 +45,33 @@ some info on how do to it.
 
 </P>
 <P>
-�ǡ����١�����ʣ������Ǥ����Ū����ˡ�ϡ�������������Ѥ��뤳�ȤǤ���
- ��<A HREF="manual.ja_Server.html#Update_log">9.2  ��������</A>���Ỳ�ȡ�����ϡ�����ǡ����١������ޥ�����(��)�Ȥ���ư���
-(���ƤΥǡ����ѹ��������ǹԤ��ޤ�)����İʾ��¾�Τ�Τ����졼��(��)��
-����ư��뤳�Ȥ��׵ᤷ�ޤ������졼�֤򹹿�����ˤ� 
-<CODE>mysql &#60; update_log</CODE> ��¹Ԥ��ޤ���
-���졼�֥ǡ����١�����Ŭ�ڤʥۥ��ȡ��桼�������ѥ���ɥ��ץ����򤢤�����
-�ޥ���������ι������������Ϥ˻��Ѥ��ޤ���
+データベースを複製する最も一般的な方法は、更新ログを使用することです。
+ 「<A HREF="manual.ja_Server.html#Update_log">9.2  更新ログ</A>」節参照。これは、あるデータベースがマスター(主)として動作して
+(全てのデータ変更がここで行われます)、一つ以上の他のものがスレーブ(従)と
+して動作することを要求します。スレーブを更新するには 
+<CODE>mysql &#60; update_log</CODE> を実行します。
+スレーブデータベースに適切なホスト、ユーザー、パスワードオプションをあたえ、
+マスターからの更新ログを入力に使用します。
 
 </P>
 <P>
-�⤷���ơ��֥뤫��ʤˤ������뤳�Ȥ�̵����硢 <CODE>TIMESTAMP</CODE> �����Ѥ���С�
-�Ǹ��ʣ�����ʸ�ˡ��������������줿��Τ��ѹ����줿��Τ�����
-�ߥ顼�����С��˥��ԡ��Ǥ��ޤ���(ʣ�����λ��֤���Ӥ������ФǤ��ޤ�)
+もし、テーブルからなにも削除することが無い場合、 <CODE>TIMESTAMP</CODE> 項を使用すれば、
+最後の複製時以後に、新規に挿入されたものや変更されたものだけを
+ミラーサーバーにコピーできます。(複製時の時間と比較すれば抽出できます)
 
 </P>
 <P>
-��������(����Τ���)�ȥ����ॹ�����(ξ¦��)��ξ������Ѥ���2�Ĥ���ˡ��
-���������ƥ���뤳�Ȥ��Ǥ��ޤ������������ξ��ϡ�Ʊ���ǡ�����ξ¦����
-�����줿���ˡ����ʤ������ͤ����Ǥ��ʤ���Фʤ�ޤ��󡣤��ʤ��Ϥ����餯
-�����������줿������ꤹ��Τ�����뤿��ˡ��Ť��С��������ݻ���������
-���礦��
+更新ログ(削除のため)とタイムスタンプ(両側で)の両方を使用する2つの方法の
+更新システムを作ることができます。しかしこの場合は、同じデータが両側で変
+更された時に、あなたが衝突を操作できなければなりません。あなたはおそらく
+何が更新されたかを決定するのを助けるために、古いバージョンを保持したいで
+しょう。
 
 </P>
 <P>
-���ξ���ʣ���� SQL ���ơ��ȥ��ȤǹԤ��뤿�ᡢ�ǡ����١����򹹿���
-�륹�ơ��ȥ�����Ǽ��δؿ��ϻȤäƤϤ����ޤ��󡣤�����¾�� 
-<STRONG>MySQL</STRONG> �����ФǤϰۤʤ��ͤ��֤�����Ǥ�:
+この場合の複製は SQL ステートメントで行われるため、データベースを更新す
+るステートメント中で次の関数は使ってはいけません。これらは他の 
+<STRONG>MySQL</STRONG> サーバでは異なる値を返すからです:
 
 </P>
 
@@ -89,8 +89,8 @@ some info on how do to it.
 </UL>
 
 <P>
-���Ƥλ���ؿ��ϡ�ɬ�פʾ��˥ߥ顼�˥����ॹ����פ�����褦�ˤ��ơ���
-���˻��ѤǤ��ޤ���<CODE>LAST_INSERT_ID()</CODE> ������˻��ѤǤ��ޤ���
+全ての時刻関数は、必要な場合にミラーにタイムスタンプを送るようにして、安
+全に使用できます。<CODE>LAST_INSERT_ID()</CODE> も安全に使用できます。
 
 </P>
 
@@ -98,64 +98,64 @@ some info on how do to it.
 <A NAME="IDX708"></A>
 
 
-<H2><A NAME="Backup" HREF="manual.ja_toc.html#Backup">19.2  �ǡ����١����ΥХå����å�</A></H2>
+<H2><A NAME="Backup" HREF="manual.ja_toc.html#Backup">19.2  データベースのバックアップ</A></H2>
 
 <P>
-<STRONG>MySQL</STRONG> �ơ��֥�ϥե�����Ȥ��Ƴ�Ǽ����뤿�ᡢ�Хå����åפ��
-���Τϴ�ñ�Ǥ���̷��Τʤ��Хå����åפ����뤿��ˤϡ�<CODE>LOCK TABLES</CODE> 
-���Ϣ����ơ��֥�ǹԤäƤ��������� ��<A HREF="manual.ja_Reference.html#LOCK_TABLES">7.24  <CODE>LOCK TABLES/UNLOCK TABLES</CODE> ��ʸ</A>���Ỳ��.
-�ɤ߹��ߥ��å���
-����ɬ�פʤΤǡ����Υơ��֥�ǥǡ����١����ǥ��쥯�ȥ�Υե�����Υ��ԡ�
-���Ԥ��Ƥ���֤⡢¾�Υ���åɤϥ�������³�Ǥ��ޤ����⤷���ϡ�SQL ��
-�٥�ΥХå����åפ�Ԥ������ΤǤ���С�<CODE>SELECT INTO OUTFILE</CODE> ���
-�ѤǤ��ޤ���
+<STRONG>MySQL</STRONG> テーブルはファイルとして格納されるため、バックアップを行
+うのは簡単です。矛盾のないバックアップを得るためには、<CODE>LOCK TABLES</CODE> 
+を関連するテーブルで行ってください。 「<A HREF="manual.ja_Reference.html#LOCK_TABLES">7.24  <CODE>LOCK TABLES/UNLOCK TABLES</CODE> 構文</A>」節参照.
+読み込みロックだ
+けが必要なので、そのテーブルでデータベースディレクトリのファイルのコピー
+が行われている間も、他のスレッドはクエリを継続できます。もしくは、SQL レ
+ベルのバックアップを行いたいのであれば、<CODE>SELECT INTO OUTFILE</CODE> を使
+用できます。
 
 </P>
 <P>
-¾����ˡ�� <CODE>mysqldump</CODE> �ץ���������Ѥ��뤳�ȤǤ�:
+他の方法は <CODE>mysqldump</CODE> プログラムを使用することです:
 
 </P>
 
 <OL>
 <LI>
 
-�ե�Хå����åפ�Ȥ�ˤϡ�
+フルバックアップをとるには：
 
 
 <PRE>
 shell&#62; mysqldump --tab=/path/to/some/dir --opt --full
 </PRE>
 
-�㤷�����С������ä����ǡ������ѹ��򤷤ʤ��ΤǤ���С�
-ñ�����ƤΥơ��֥�ե�����(<TT>`*.frm'</TT>, <TT>`*.MYD'</TT>, <TT>`*.MYI'</TT> files)��
-���ԡ���������Ǥ⹽���ޤ���
+若しサーバーがいっさいデータの変更をしないのであれば、
+単に全てのテーブルファイル(<TT>`*.frm'</TT>, <TT>`*.MYD'</TT>, <TT>`*.MYI'</TT> files)を
+コピーするだけでも構いません。
 
 <LI>
 
 <A NAME="IDX709"></A>
-<CODE>mysqld</CODE> ��ߤᡢ������ <CODE>--log-update</CODE> ���ץ�����Ĥ��Ƶ�ư���ޤ���
-<TT>`<KBD>hostname</KBD>.n'</TT> �Ȥ���̾���ǥ����ե����뤬��������ޤ��������� <CODE>n</CODE> �Ͽ����ǡ�
-����� <CODE>mysqladmin refresh</CODE>, <CODE>mysqladmin flush-logs</CODE> ��¹Ԥ����٤������Ƥ����ޤ���
-<CODE>FLUSH LOGS</CODE> ��ʸ����Ѥ����ꡢ�����С���Ƶ�ư���Ƥ������ޤ���
-���������ե�����ϡ� <CODE>mysqldump</CODE> �¹Ը�˹Ԥ�줿�ǡ����١������ѹ���
-ʣ�����뤿��ξ����Ϳ���Ƥ���ޤ���
+<CODE>mysqld</CODE> を止め、そして <CODE>--log-update</CODE> オプションをつけて起動します。
+<TT>`<KBD>hostname</KBD>.n'</TT> という名前でログファイルが作成されます。ここで <CODE>n</CODE> は数字で、
+これは <CODE>mysqladmin refresh</CODE>, <CODE>mysqladmin flush-logs</CODE> を実行する度に増えていきます。
+<CODE>FLUSH LOGS</CODE> 構文を使用したり、サーバーを再起動しても増えます。
+これらログファイルは、 <CODE>mysqldump</CODE> 実行後に行われたデータベースの変更を
+複製するための情報を与えてくれます。
 </OL>
 
 <P>
-�⤷�ꥹ�ȥ��򤷤ʤ���Фʤ�ʤ���硢�ޤ��ǽ�� <CODE>myisamchk -r</CODE> ��¹Ԥ���
-�ơ��֥�ν������ߤƤ���������
-�ۤȤ�ɤξ�硢99.9% �����ϤǤ���Ϥ��Ǥ���
-�⤷ <CODE>myisamchk</CODE> �����Ԥ�����硢�ʲ��Τ褦�ˤ��ޤ���
+もしリストアをしなければならない場合、まず最初に <CODE>myisamchk -r</CODE> を実行して
+テーブルの修復を試みてください。
+ほとんどの場合、99.9% 修復はできるはずです。
+もし <CODE>myisamchk</CODE> が失敗した場合、以下のようにします：
 
 </P>
 
 <OL>
 <LI>
 
-���ꥸ�ʥ�� <CODE>mysqldump</CODE> �Хå����åץǡ�����ꥹ�ȥ����ޤ���
+オリジナルの <CODE>mysqldump</CODE> バックアップデータをリストアします。
 <LI>
 
-�ʲ��Υ��ޥ�ɤΤ褦�ˤ��ơ����������˵�Ͽ����Ƥ����ѹ���Ŭ�Ѥ��ޤ���
+以下のコマンドのようにして、更新ログに記録されている変更を適用します。
 
 <PRE>
 shell&#62; ls -1 -t -r hostname.[0-9]* | xargs cat | mysql
@@ -164,15 +164,15 @@ shell&#62; ls -1 -t -r hostname.[0-9]* | xargs cat | mysql
 </OL>
 
 <P>
-<CODE>ls</CODE> �ϡ����ƤΥ����ե������������������뤿��˹Ԥ��ޤ���
+<CODE>ls</CODE> は、全てのログファイルを正しい順で得るために行われます。
 
 </P>
 <P>
-<CODE>SELECT * INTO OUTFILE 'file_name' FROM tbl_name</CODE> �Ǥ�����Ū�Хå����åפ� 
-<CODE>LOAD DATA FROM INFILE 'file_name' REPLACE ...</CODE> �ǤΥꥹ�ȥ���Ԥ�
-���Ȥ�Ǥ��ޤ�����ʣ�쥳���ɤ��򤱤뤿��ˤϡ��ơ��֥���� <CODE>PRIMARY KEY</CODE>
- or a <CODE>UNIQUE</CODE> ��ɬ�פǤ���<CODE>REPLACE</CODE> �ϡ�'��ʣ����ǥå���' ���ͤ����ä���硢
-�������쥳���ɤ�����������˸Ť��쥳���ɤ���������Τ��֤��������뤳�Ȥ��̣���ޤ���
+<CODE>SELECT * INTO OUTFILE 'file_name' FROM tbl_name</CODE> での選択的バックアップと 
+<CODE>LOAD DATA FROM INFILE 'file_name' REPLACE ...</CODE> でのリストアを行う
+こともできます。重複レコードを避けるためには、テーブル内に <CODE>PRIMARY KEY</CODE>
+ or a <CODE>UNIQUE</CODE> が必要です。<CODE>REPLACE</CODE> は、'重複インデックス' 衝突があった場合、
+新しいレコードを挿入する時に古いレコードが新しいものに置き換えられることを意味します。
 
 </P>
 
@@ -180,22 +180,22 @@ shell&#62; ls -1 -t -r hostname.[0-9]* | xargs cat | mysql
 <A NAME="IDX710"></A>
 
 
-<H2><A NAME="Multiple_servers" HREF="manual.ja_toc.html#Multiple_servers">19.3  Ʊ��ޥ�����ʣ���� <STRONG>MySQL</STRONG> �����С������餻��</A></H2>
+<H2><A NAME="Multiple_servers" HREF="manual.ja_toc.html#Multiple_servers">19.3  同一マシン上に複数の <STRONG>MySQL</STRONG> サーバーを走らせる</A></H2>
 
 <P>
-Ʊ���ޥ�����ʣ���Υ����С������餻������礬����ޤ���
-�㤨�С����Ǥ�¸�ߤ��Ƥ��륵���С��Ϥ��Τޤޤˤ��Ƥ����ơ������� <STRONG>MySQL</STRONG> ��ƥ��Ȥ��������䡢
-���뤤�ϡ����󥿡��ͥåȥץ��Х�������Ĥ�Ǥ��ơ�<STRONG>MySQL</STRONG> �򤽤줾��θܵ��Ѥ��󶡤��������ʤɡ�
-
-</P>
-<P>
-ʣ���Υ����С��򤿤��������硢��ñ����ˡ�Ȥ��ơ�
-TCP/IP �ݡ��ȡ������åȥե�������Ѥ��ơ������С��򥳥�ѥ��뤹����ˡ������ޤ���
+同じマシン上で複数のサーバーを走らせたい場合があります。
+例えば、すでに存在しているサーバーはそのままにしておいて、新しい <STRONG>MySQL</STRONG> をテストしたい場合や、
+あるいは、インターネットプロバイダーを営んでいて、<STRONG>MySQL</STRONG> をそれぞれの顧客用に提供したい場合など。
 
 </P>
 <P>
-���Ǥ����äƤ��륵���С����ǥե���ȤΥݡ����ֹ�ȥ����åȥե������ư��Ƥ���Ȥ��ޤ���
-�����������С�����ˤϡ��ʲ��Τ褦�� <CODE>configure</CODE> ���ޤ���
+複数のサーバーをたちあげる場合、簡単な方法として、
+TCP/IP ポート、ソケットファイルを変えて、サーバーをコンパイルする方法があります。
+
+</P>
+<P>
+そでに走っているサーバーがデフォルトのポート番号とソケットファイルで動作しているとします。
+新しくサーバーを作るには、以下のように <CODE>configure</CODE> します：
 
 </P>
 
@@ -206,12 +206,12 @@ shell&#62; ./configure  --with-tcp-port=port_number \
 </PRE>
 
 <P>
-<CODE>port_number</CODE> �� <CODE>file_name</CODE> �ˤϡ��ǥե���ȤΥݡ����ֹ桢�����åȥե�����Ȥϰ㤦��Τ���ꤷ�ޤ���
-������ <CODE>--prefix</CODE> �򡢤��Ǥ����äƤ��� <STRONG>MySQL</STRONG> �Υ��󥹥ȡ�����Ȥϰ㤦�ǥ��쥯�ȥ꡼�˻��ꤷ�ޤ���
+<CODE>port_number</CODE> と <CODE>file_name</CODE> には、デフォルトのポート番号、ソケットファイルとは違うものを指定します。
+そして <CODE>--prefix</CODE> を、すでに走っている <STRONG>MySQL</STRONG> のインストール先とは違うディレクトリーに指定します。
 
 </P>
 <P>
-�������äƤ��� <STRONG>MySQL</STRONG> �����С��Υ����åȤȥݡ��Ȥ��Τ�ˤϡ��ʲ��Τ褦�ˤ��ޤ���
+現在走っている <STRONG>MySQL</STRONG> サーバーのソケットとポートを知るには、以下のようにします：
 
 </P>
 
@@ -220,18 +220,18 @@ shell&#62; mysqladmin -h hostname --port=port_number variables
 </PRE>
 
 <P>
-���ʤ������Ѥ��Ƥ���ݡ��Ȥ� <STRONG>MySQL</STRONG> �����С������äƤ���С�
-������ѹ���ǽ�� <STRONG>MySQL</STRONG> �ѿ���(�����åȥե������̾����ޤ��)���Ϥ��ޤ���
+あなたが使用しているポートに <STRONG>MySQL</STRONG> サーバーが走っていれば、
+これは変更可能な <STRONG>MySQL</STRONG> 変数を(ソケットファイルの名前も含んで)出力します。
 
 </P>
 <P>
-Ω���夲������ץ�(�����餯 <TT>`mysql.server'</TT> �ե�����)���Խ�����
-ʣ���� <STRONG>MySQL</STRONG> �����С���Ω�������Ƥ⹽���ޤ���
+立ち上げスクリプト(おそらく <TT>`mysql.server'</TT> ファイル)を編集して
+複数の <STRONG>MySQL</STRONG> サーバーを立ちあげても構いません。
 
 </P>
 <P>
-���ξ�硢 <STRONG>MySQL</STRONG> �����С���ƥ���ѥ��뤹��ɬ�פϤ���ޤ���
-<CODE>safe_mysqld</CODE> �Υ��ץ�������ꤷ�ƥ����С���ư����С��ݡ��Ȥȥ����åȤ��ѹ��Ǥ��ޤ���
+この場合、 <STRONG>MySQL</STRONG> サーバーを再コンパイルする必要はありません。
+<CODE>safe_mysqld</CODE> のオプションを指定してサーバーを起動すれば、ポートとソケットを変更できます：
 
 </P>
 
@@ -240,21 +240,21 @@ shell&#62; /path/to/safe_mysqld --socket=file-name --port=port_number
 </PRE>
 
 <P>
-�⤷��¾�Υ����С��������󥰤�ԤäƤ���ǥ��쥯�ȥ��Ʊ���ǡ����١����ǥ��쥯�ȥ��
-�����������С��ǻ��Ѥ���ΤǤ���С������ե������̾������ꤹ�٤��Ǥ���
-( <CODE>safe_mysqld</CODE> �� <CODE>--log</CODE> �� <CODE>--log-update</CODE> ����ꤹ��)
-�������ʤ��ȡ�ξ���Υ����С���Ʊ�������ե�����˽񤭹��⤦�Ȥ��뤫��Ǥ���
+もし、他のサーバーがロギングを行っているディレクトリと同じデータベースディレクトリを、
+新しいサーバーで使用するのであれば、ログファイルの名前を指定すべきです。
+( <CODE>safe_mysqld</CODE> に <CODE>--log</CODE> と <CODE>--log-update</CODE> を指定する)
+そうしないと、両方のサーバーが同じログファイルに書き込もうとするからです。
 
 </P>
 <P>
-<STRONG>Warning</STRONG>: �̾��ĥ����С���Ʊ���ǡ����١����������ƤϤ����ޤ���
-�⤷���Ѥ��Ƥ��� OS �� fault-free system locking �򥵥ݡ��Ȥ��Ƥ��ʤ��ȡ�
-������Ỵ�ʤ��Ȥˤʤ�Ǥ��礦��
+<STRONG>Warning</STRONG>: 通常、二つサーバーに同じデータベースを操作させてはいけません！
+もし使用している OS が fault-free system locking をサポートしていないと、
+これは悲惨なことになるでしょう！
 
 </P>
 <P>
-�⤷����ܤΥ����С��˰㤦�ǡ����١����ǥ��쥯�ȥ����Ѥ���������硢
- <CODE>safe_mysqld</CODE> �� <CODE>--datadir=path</CODE> ���ץ�������ꤷ�ޤ���
+もし二つ目のサーバーに違うデータベースディレクトリを使用させたい場合、
+ <CODE>safe_mysqld</CODE> に <CODE>--datadir=path</CODE> オプションを指定します。
 
 </P>
 
@@ -264,21 +264,21 @@ shell&#62; /path/to/safe_mysqld --datadir=/new/path/to/datadir \
 </PRE>
 
 <P>
-�⤷�㤦�ݡ��Ȥ����äƤ��� <STRONG>MySQL</STRONG> �����С��ˡ�
-����ޤ��㤦�ݡ��Ȥ���Ѥ���褦�˺��줿���饤����Ȥ�����³��������硢
-�ʲ��Τ褦�ˤ��ޤ���
+もし違うポートで走っている <STRONG>MySQL</STRONG> サーバーに、
+これまた違うポートを使用するように作られたクライアントから接続したい場合、
+以下のようにします：
 
 </P>
 
 <UL>
 <LI>
 
-���饤����Ȥ� <CODE>--host 'hostname' --port=port_numer</CODE> ��
-<CODE>[--host localhost] --socket=file_name</CODE> ���ץ����ǵ�ư���ޤ���
+クライアントを <CODE>--host 'hostname' --port=port_numer</CODE> か
+<CODE>[--host localhost] --socket=file_name</CODE> オプションで起動します。
 
 <LI>
 
-C ���뤤�� Perl �ץ������ξ�硢�ݡ��Ȥȥ����åȤ�Ϳ���뤳�Ȥ��Ǥ��ޤ���
+C あるいは Perl プログラムの場合、ポートとソケットを与えることができます：
 
 <LI>
 
@@ -286,18 +286,18 @@ C ���뤤�� Perl �ץ������ξ�硢�ݡ��Ȥȥ����åȤ�Ϳ���뤳�Ȥ��Ǥ��ޤ���
 <A NAME="IDX712"></A>
 <A NAME="IDX713"></A>
 <A NAME="IDX714"></A>
-<CODE>MYSQL_UNIX_PORT</CODE> �� <CODE>MYSQL_TCP_PORT</CODE> �Ķ��ѿ��� UNIX �����åȥե������
- TCP/IP �Υݡ����ֹ�ȥ��åȤ������饤����Ȥ�Ω�������ޤ���
-�⤷�����Υݡ����ֹ�䥽���åȥե�������˻��Ѥ���ΤǤ���С�
- <TT>`.login'</TT> �ե����뤫�ʤˤ��˴Ķ��ѿ��򥻥åȤ���褦�˽񤤤Ƥ����Ф褤�Ǥ��礦��
- ��<A HREF="manual.ja_Tools.html#Programs">12.1  �͡��� <STRONG>MySQL</STRONG> �ץ������γ���</A>���Ỳ��.
+<CODE>MYSQL_UNIX_PORT</CODE> と <CODE>MYSQL_TCP_PORT</CODE> 環境変数に UNIX ソケットファイルと
+ TCP/IP のポート番号とセットし、クライアントを立ちあげます。
+もし、このポート番号やソケットファイルを常に使用するのであれば、
+ <TT>`.login'</TT> ファイルかなにかに環境変数をセットするように書いておけばよいでしょう。
+ 「<A HREF="manual.ja_Tools.html#Programs">12.1  様々な <STRONG>MySQL</STRONG> プログラムの概要</A>」節参照.
 
 <LI>
 
 <A NAME="IDX715"></A>
-���ʤ��Υۡ���ǥ��쥯�ȥ�� <TT>`.my.cnf'</TT> �ե�����ˡ�
-�̾���Ѥ���ݡ����ֹ�ȥ����åȥե������񤯤��Ȥ�Ǥ��ޤ���
- ��<A HREF="manual.ja_Installing.html#Option_files">4.15.4  ���ץ����ե����� ( <CODE>my.cnf</CODE> )</A>���Ỳ��.
+あなたのホームディレクトリの <TT>`.my.cnf'</TT> ファイルに、
+通常使用するポート番号とソケットファイルを書くこともできます。
+ 「<A HREF="manual.ja_Installing.html#Option_files">4.15.4  オプションファイル ( <CODE>my.cnf</CODE> )</A>」節参照.
 </UL>
 
 <P><HR><P>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="623.html">[��]</a><a href="625.html">[��]</a><a href="../list/601-700.html">[�ֹ�����]</a><a href="../thread/601-700.html">[����åɰ���]</a></p>
+<p class="button"><a href="623.html">[前]</a><a href="625.html">[次]</a><a href="../list/601-700.html">[番号順一覧]</a><a href="../thread/601-700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:624
 </p>
@@ -24,56 +24,56 @@ Subject: <a href="00623.html">[mysql 00623]</a> Re: MyODBC EUC Ver 0.02
 Date: Fri, 22 Jan 1999 15:49:40 +0900
 Message-ID: &lt;199901220646.PAA01300@xxxxxxxxxx&gt;
 
-wm&gt; &gt;UPDATE��INSERT����ODBC�������С�¦�η����ݻ����Ƥ���Τʤ顢
-wm&gt; &gt;�Ǥ����Ǥ��礦�͡���äȥ������򸫤Ƥߤޤ���
-wm&gt; ��������������
-wm&gt; ODBC�ɥ饤�Ф�����SJIS��������ˤ��Ƥ��ʤ����顢�ä˷������
-wm&gt; ���Ƥ��ʤ������Τ�ʤ��櫓�Ǥ��͡�
-wm&gt; �⤷�����ݻ����Ƥ��ʤ���С�UPDATE��INSERT��SQLȯ�Ԥλ����ǡ�
-wm&gt; ��˷���������ơ��Х��ʥ귿���ɤ�����ɾ����ɬ�פˤʤ�Ȥ���
-wm&gt; �櫓�Ǥ��͡�
+wm&gt; &gt;UPDATEとINSERT時にODBCがサーバー側の型を保持しているのなら、
+wm&gt; &gt;できるんでしょうね。もっとソースを見てみます。
+wm&gt; あぁ、そうか。
+wm&gt; ODBCドライバが元々SJISしか前提にしていないから、特に型を取得
+wm&gt; していないかも知れないわけですね。
+wm&gt; もし型を保持していなければ、UPDATEやINSERTのSQL発行の時点で、
+wm&gt; 先に型を取得して、バイナリ型かどうかの評価が必要になるという
+wm&gt; わけですね。
 
-��� source �� SJIS ����Ǥ�ʤ���
- (ñ�ʤ� 8bit clean ^^; 
-  ������SJIS�̤��ʤ龯���ѹ���ɬ��. ����ML�˥ѥå�����ή��ޤ���. )
-ODBC �Ϸ���������ư������ꤹ��Ϥ��Ǥ�����
-��ɡ��桼�������ꤲ���ͤ����ۤ�Ȥ����ܸ�ʤΤ��Х��ʥ꤫
-ʬ����ʤ������Ȼפ��ޤ���
+もと source は SJIS 前提でもなくて
+ (単なる 8bit clean ^^; 
+  本当にSJIS通すなら少し変更が必要. このMLにパッチが昔流れました. )
+ODBC は型を持たせて一応やり取りするはずですが、
+結局、ユーザーが投げた値が、ほんとに日本語なのかバイナリか
+分からない点だと思います。
 
-char binary �ˤ�����BLOB�ˤ�����MySQL �� (�㤨�� jpeg�ե�����ʤ�)
-insert ����Ȥ����ü�ʸ���ϥ��������פ��ʤ���Фʤ�ʤ��ΤǤ�����
-����ϥ桼����¦�����ʪ�Ȥ������̡�MyODBC, MySQL �����С������Ǥ�
-�ԤäƤ��ʤ��Ϥ���
+char binary にしろ、BLOBにしろ、MySQL に (例えば jpegファイルなど)
+insert するとき、特殊文字はエスケープしなければならないのですが、
+それはユーザー側がやる物として特別　MyODBC, MySQL サーバーの方では
+行っていないはず。
 
-�ǡ��Ȥꤢ�������н�Ȥ��ơ�
+で、とりあえずの対処として、
 
-a. nkf �ʤɤ���äƤ���褦�ˡ�100% �ǤϤʤ��ˤ�����
-   �������� ���ܸ�ʸ�����ɤ�����Ƚ�ꤷ�Ƥߤ롣
-   X nkf �� less �ߤ�����Ƚ��Τ���˸���ʸ������¿���������Ǥ��ʤ��Τǡ�
-     Ƚ��ߥ���¿���ʤ뤫��
+a. nkf などがやっているように、100% ではないにしろ、
+   扱う前に 日本語文字かどうかを判定してみる。
+   X nkf や less みたいに判定のために見る文字数を多く取る事ができないので、
+     判定ミスが多くなるかも
 
-b. �Х��ʥ������Ƥ�餦�Ȥ��ϡ�ʸ���κǽ�ˡ����������ɰʳ���char���Х��Ȥ���
-   �桼����¦�ˤĤ��Ƥ�餦��(asciiʸ���Ǥ����ܸ�ʸ���Ǥ�ʤ��褦��ʸ����)
-   ���줬�����̵�Ѵ�������(������)���ʤ���� ascii+���ܸ�
-   X �桼���������ݤ��ʡ�
+b. バイナリを入れてもらうときは、文字の最初に、漢字コード以外のchar何バイトか、
+   ユーザー側につけてもらう。(ascii文字でも日本語文字でもないような文字を。)
+   それがあれば無変換で送り(受信し)、なければ ascii+日本語
+   X ユーザーが面倒かな？
 
-# myodbc �� sjis �ѥå��ϡ����ܸ�ʸ���ȿ��ꤷ�ơ�
-# ����ʸ������ '\' ���Ƥ��Ǥ����ä���
-# �����μ�ưȽ�̤ߤ����ʤ��󤸡�
-# ���ä��顢��ưȽ�̤Ǥ�빽�Ԥ������˻פ��ޤ���...
+# myodbc の sjis パッチは、日本語文字と推定して、
+# ある文字だけ '\' してるんでしたっけ？
+# ある種の自動判別みたいなかんじ？
+# だったら、自動判別でも結構行きそうに思いますが...
 
- ¼�� ��  takeshi@xxxxxxxxxx
+ 村上 毅  takeshi@xxxxxxxxxx
  PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
  [ <a href="http://www.softagency.co.jp/mysql/">http://www.softagency.co.jp/mysql/</a> ]
  [ MySQL ML: mysql-help@xxxxxxxxxx ]
 
 </pre>
 </div>
-<p class="button"><a href="623.html">[��]</a><a href="625.html">[��]</a><a href="../list/601-700.html">[�ֹ�����]</a><a href="../thread/601-700.html">[����åɰ���]</a></p>
+<p class="button"><a href="623.html">[前]</a><a href="625.html">[次]</a><a href="../list/601-700.html">[番号順一覧]</a><a href="../thread/601-700.html">[スレッド一覧]</a></p>
 <pre class="list">
 <span>&nbsp;&nbsp;&nbsp;<a href="618.html">    618 1999-01-22 12:23 [&quot;Satoshi Tatsuoka&quot; &lt;] Re: MyODBC EUC Ver 0.02                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="623.html">    623 1999-01-22 15:49 ��[Masato Toyoshima &lt;wm]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="624.html">    624 1999-01-22 16:57 ����[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="623.html">    623 1999-01-22 15:49 ┗[Masato Toyoshima &lt;wm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="624.html">    624 1999-01-22 16:57 　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
 </pre>
 </body>
 </html>

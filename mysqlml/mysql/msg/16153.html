@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="16152.html">[��]</a><a href="16154.html">[��]</a><a href="../list/16101-16200.html">[�ֹ�����]</a><a href="../thread/16101-16200.html">[����åɰ���]</a></p>
+<p class="button"><a href="16152.html">[前]</a><a href="16154.html">[次]</a><a href="../list/16101-16200.html">[番号順一覧]</a><a href="../thread/16101-16200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:16153
 </p>
@@ -13,22 +13,22 @@ mysql:16153
 <p>
 From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 16 Sep 2014 11:59:33 +0900<br>
-Subject: [mysql 16153] Re: [mysql 16152] innodb_file_per_table = 0 �� ALTER TABLE �¹Ի��� ibdata1 �γ�ĥ�ˤĤ���<br>
+Subject: [mysql 16153] Re: [mysql 16152] innodb_file_per_table = 0 で ALTER TABLE 実行時の ibdata1 の拡張について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����ˤ��ϡ�yoku0825�Ȥ����ޤ���
+こんにちは、yoku0825といいます。
 
-�����������ä�������ȡ�1) �˶ᤤ�Ǥ���
-��������ibdata1�˶������ڡ��������ä����Ϥ��ζ������ڡ�����Ȥ��ޤ���
+だいたいざっくり言うと、1) に近いです。
+ただし、ibdata1に空きスペースがあった場合はその空きスペースを使います。
 
-�⤷��ibdata1��500MB�ζ������̤�¸�ߤ���С�
-�������� + ����600MB��Ȥä�ibdata1�����ä�600MB�����θ�ibdata1����˶������̤�1GBȯ�����ޤ���
-�������̤������ʤ����ibdata1��1.1GB�����ơ����θ�������̤�1GBȯ�����ޤ���
+もし、ibdata1に500MBの空き容量が存在すれば、
+空き容量 + 新規600MBを使ってibdata1の増加は600MB、その後ibdata1の中に空き容量が1GB発生します。
+空き容量が全くなければibdata1は1.1GB増えて、その後空き容量が1GB発生します。
 
-ibdata1�ζ������̤�SHOW TABLE STATUS�Ǥʤ�Ȥʤ��Ȳ�Ǥ��ޤ���
+ibdata1の空き容量はSHOW TABLE STATUSでなんとなく照会できます。
 
 
 mysql51&gt; SHOW TABLE STATUS LIKE 't1'\G
@@ -42,7 +42,7 @@ mysql51&gt; SHOW TABLE STATUS LIKE 't1'\G
     Data_length: 338542592
 Max_data_length: 0
    Index_length: 83492864
-      Data_free: 236978176               -- ����
+      Data_free: 236978176               -- ココ
  Auto_increment: NULL
     Create_time: 2014-09-16 11:53:01
     Update_time: NULL
@@ -58,43 +58,43 @@ yoku0825,
 
 
 
-2014ǯ9��16�� 11:24 Yuya Takeyama &lt;sign.of.the.wolf.pentagram@xxxxxxxxxx&gt;:
+2014年9月16日 11:24 Yuya Takeyama &lt;sign.of.the.wolf.pentagram@xxxxxxxxxx&gt;:
 
-<span class="quote1">&gt; �ݻ��ȿ����ޤ���</span>
+<span class="quote1">&gt; 竹山と申します。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ʲ��ξ����� ALTER TABLE ��¹Ԥ����Ȥ���ibdata1 �����̤��ɤΤ褦�˳�ĥ����뤫�ˤĤ��Ƥμ���Ǥ���</span>
+<span class="quote1">&gt; 以下の状況で ALTER TABLE を実行したとき、ibdata1 の容量がどのように拡張されるかについての質問です。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; MySQL �ΥС������ = 5.1</span>
-<span class="quote1">&gt; ���ȥ졼�����󥸥� = InnoDB</span>
+<span class="quote1">&gt; MySQL のバージョン = 5.1</span>
+<span class="quote1">&gt; ストレージエンジン = InnoDB</span>
 <span class="quote1">&gt; innodb_file_per_table = 0</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �����Ǥ���ơ��֥�� ALTER TABLE �ǥ���ǥå������ɲä�Ԥ������ΤǤ�����</span>
-<span class="quote1">&gt; (��̩�ˤϴ�¸ UNIQUE KEY �˥������ɲ�)</span>
-<span class="quote1">&gt; �ǡ����١������̤����줷�����֤ȤʤäƤ��ꡢ�ɤΤ褦�� ibdata1 ����ĥ�����Τ������ˤʤäƤ��ޤ���</span>
+<span class="quote1">&gt; ここであるテーブルに ALTER TABLE でインデックスの追加を行いたいのですが、</span>
+<span class="quote1">&gt; (厳密には既存 UNIQUE KEY にカラムを追加)</span>
+<span class="quote1">&gt; データベース容量がやや苦しい状態となっており、どのように ibdata1 が拡張されるのか、気になっています。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �㤨�и��� 1GB ����ǥå���������Ȥ��ơ�ALTER TABLE �ˤ�ä� 1.1GB �ˤʤä��Ȥ���</span>
-<span class="quote1">&gt; ���� 1.1GB �Ϥɤ�������ݤ����ΤǤ��礦����</span>
+<span class="quote1">&gt; 例えば現状 1GB インデックスがあるとして、ALTER TABLE によって 1.1GB になったとき、</span>
+<span class="quote1">&gt; その 1.1GB はどこから確保されるのでしょうか。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ������Ǥϰʲ��� 2 �ѥ�����ͽ�ۤ��ޤ�����</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; ---</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; 1) ibdata1 ������������ 1.1GB ���ݤ����</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���ξ��ǡ����١������ΤΥ������Ȥ��Ƥ� 1.1GB �����뤳�Ȥˤʤ�Ȼפ��ޤ���</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; 2) ��¸�� 1GB ���Ȥ��ޤ蘆�줿��ǡ�0.1 GB �Ͽ����˳��ݤ����</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���ξ��ϥǡ����١������ΤΥ������Ȥ��Ƥ� 0.1 GB �����뤳�Ȥˤʤ�Ȼפ��ޤ���</span>
+<span class="quote1">&gt; こちらでは以下の 2 パターン予想しました。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; ---</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ����Ū�ʲ��Ȥ��Ƥ� innodb_file_per_table = 1 �ˤ��������ǥǡ����١������Τκ�������Ԥ�ͽ��Ǥ�����</span>
-<span class="quote1">&gt; ������Ϥޤ���ˤʤꤽ���ʤΤǡ��Ȥꤢ�����Ͼ����Ǥ����̤����󤷤������Ȥ������֤Ǥ���</span>
+<span class="quote1">&gt; 1) ibdata1 上全く新たに 1.1GB 確保される</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �������ˤĤ��Ƥ�¸�ΤΤɤʤ���������������������й����Ǥ���</span>
+<span class="quote1">&gt; この場合データベース全体のサイズとしては 1.1GB 増えることになると思います。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ʾ塢����������ꤤ�������ޤ���</span>
+<span class="quote1">&gt; 2) 既存の 1GB が使いまわされた上で、0.1 GB は新たに確保される</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この場合はデータベース全体のサイズとしては 0.1 GB 増えることになると思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ---</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 根本的な解決としては innodb_file_per_table = 1 にしたうえでデータベース全体の再生成を行う予定ですが、</span>
+<span class="quote1">&gt; そちらはまだ先になりそうなので、とりあえずは少しでも容量を節約したい、とうい状態です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この点についてご存知のどなたか、ご教示いただければ幸いです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 以上、よろしくお願いいたします。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; ---</span>
 <span class="quote1">&gt;</span>
@@ -105,18 +105,18 @@ yoku0825,
 </pre>
 </div>
 <div class="attach">
-<h3 class="attachtitle">ź�եե�����</h3>
+<h3 class="attachtitle">添付ファイル</h3>
 <ul>
 <li><a href="16153/0/index.html"> [text/html]</a>
 </ul>
 </div>
-<p class="button"><a href="16152.html">[��]</a><a href="16154.html">[��]</a><a href="../list/16101-16200.html">[�ֹ�����]</a><a href="../thread/16101-16200.html">[����åɰ���]</a></p>
+<p class="button"><a href="16152.html">[前]</a><a href="16154.html">[次]</a><a href="../list/16101-16200.html">[番号順一覧]</a><a href="../thread/16101-16200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="16152.html">  16152 2014-09-16 11:24 [Yuya Takeyama &lt;sign.] innodb_file_per_table = 0  �� ALTER TABLE  �¹Ի��� ibdata1  �γ�ĥ�ˤĤ���</a></span>
-<span class="current">-&gt;&nbsp;<a href="16153.html">@ 16153 2014-09-16 11:59 ��[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16152] innodb_file_per_table = 0 �� ALTER TABLE �¹Ի��� ibdata1 �γ�ĥ�ˤĤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16154.html">@ 16154 2014-09-16 14:33 ����[&quot;yoku ts.&quot; &lt;yoku0825]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16156.html">  16156 2014-09-16 14:42 ������[Yuya Takeyama &lt;sign.] Re: [mysql 16154] Re: [mysql 16152] innodb_file_per_table = 0 �� ALTER TABLE �¹Ի��� ibdata1 �γ�ĥ�ˤĤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16155.html">  16155 2014-09-16 14:36 ����[Yuya Takeyama &lt;sign.] Re: [mysql 16153] Re: [mysql 16152] innodb_file_per_table = 0 �� ALTER TABLE �¹Ի��� ibdata1 �γ�ĥ�ˤĤ���</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16152.html">  16152 2014-09-16 11:24 [Yuya Takeyama &lt;sign.] innodb_file_per_table = 0  で ALTER TABLE  実行時の ibdata1  の拡張について</a></span>
+<span class="current">-&gt;&nbsp;<a href="16153.html">@ 16153 2014-09-16 11:59 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16152] innodb_file_per_table = 0 で ALTER TABLE 実行時の ibdata1 の拡張について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16154.html">@ 16154 2014-09-16 14:33 　┣[&quot;yoku ts.&quot; &lt;yoku0825]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16156.html">  16156 2014-09-16 14:42 　┃┗[Yuya Takeyama &lt;sign.] Re: [mysql 16154] Re: [mysql 16152] innodb_file_per_table = 0 で ALTER TABLE 実行時の ibdata1 の拡張について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16155.html">  16155 2014-09-16 14:36 　┗[Yuya Takeyama &lt;sign.] Re: [mysql 16153] Re: [mysql 16152] innodb_file_per_table = 0 で ALTER TABLE 実行時の ibdata1 の拡張について</a></span>
 </pre>
 </body>
 </html>

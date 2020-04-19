@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="16062.html">[��]</a><a href="16064.html">[��]</a><a href="../list/16001-16100.html">[�ֹ�����]</a><a href="../thread/16001-16100.html">[����åɰ���]</a></p>
+<p class="button"><a href="16062.html">[前]</a><a href="16064.html">[次]</a><a href="../list/16001-16100.html">[番号順一覧]</a><a href="../thread/16001-16100.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:16063
 </p>
@@ -19,81 +19,81 @@ Subject: [mysql 16063] Re: Host 'xx.xx.xx.xx' is blocked because of many connect
 </div>
 <div class="body">
 <pre>
-����ˤ��ϡ�yoku�Ȥ����ޤ���
+こんにちは、yokuといいます。
 
-ɽ�����줿���顼�����Ƥϡ�
-��xx.xx.xx.xx����Υ��ͥ�����󥨥顼�����ͤ�Ķ��������֥��å����Ƥ���
-�Ȥ�����̣�Ǥ���
-����ϥݡ��ȥ�������DDoS�ʤɤؤ��ɸ�Τ���ε������ä��Ȼפ��ޤ���
+表示されたエラーの内容は、
+「xx.xx.xx.xxからのコネクションエラーが閾値を超えたからブロックしてるよ」
+という意味です。
+本来はポートスキャンやDDoSなどへの防御のための機構だったと思います。
 
-�إ륹�����å��ʤɤ褯����ΤǤ�����TCP��MySQL�Υݡ��Ȥ�á������á���Ƥ��������Ǥ��Ƥ��ʤ��ä��ꤹ��ȥ��ͥ�����󥨥顼�Ȥ��ƥ�����ȥ��åפ��줿�ꤷ�ޤ���
-(MyODBC�������ư��򤷤Ƥ��뤫�ɤ����Ϥ褯�狼��ޤ���)
+ヘルスチェックなどよくあるのですが、TCPでMySQLのポートを叩くだけ叩いてちゃんと切断していなかったりするとコネクションエラーとしてカウントアップされたりします。
+(MyODBCがそんな動作をしているかどうかはよくわかりません)
 
-�֥��å���������ˤ�
+ブロックを解除するには
 shell&gt; mysqladmin -uroot -pxxxx flush-hosts
-�ޤ���
+または
 mysql&gt; FLUSH HOSTS;
-�ǽ���ޤ���
+で出来ます。
 
-�ɤ���Ǥ⤫�ޤ��ޤ��󤬡��������ˤ�RELOAD���¤�ɬ�פˤʤ�Τǡ�����Ū�ˤ�MySQL��root������ɬ�פ�����ޤ���
+どちらでもかまいませんが、この操作にはRELOAD権限が必要になるので、一般的にはMySQLのrootで操作する必要があります。
 
-�ޤ���Ĵ�٤�줿��̤�mysqld_safe�Ǥ����������max_connect_errors�Ȥ������ͥ�����󥨥顼=&gt; �֥��å��ˤ��������ͤ�����Ǥ���
-���ˤ˥��ͥ�����󥨥顼���Фơ����ġ����줬��������ΤǤʤ��ȳξڤ����Ƥ���ΤǤ���С�������礭�����뤳�Ȥǥ֥��å�����ʤ��褦�ˤ��ޤ���
+また、調べられた結果のmysqld_safeですが、これはmax_connect_errorsというコネクションエラー=&gt; ブロックにいたる閾値の設定です。
+頻繁にコネクションエラーが出て、かつ、それが怪しいものでないと確証が取れているのであれば、これを大きくすることでブロックされないようにします。
 
-�����Ĥϰʲ��Τ����줫����ˡ������Ǥ��ޤ���
-99999999�ΤȤ����Ͻ�ʬ�礭�ʹ������ͤ��Ѥ��Ƥ���������2^ 32- 1�ޤ���2^ 64- 1�������κ����ͤǤ���
-���ʤߤ˰��ۤΥǥե���Ȥ�5.1, 5.5�Ǥ�10, 5.6�Ǥ�100�Ǥ���
+コイツは以下のいずれかの方法で設定できます。
+99999999のところは十分大きな好きな値に変えてください。2^ 32- 1または2^ 64- 1が設定上の最大値です。
+ちなみに暗黙のデフォルトは5.1, 5.5では10, 5.6では100です。
 
 mysql&gt; SET GLOBAL max_connect_errors= 99999999;
- =&gt; SUPER���¤�ɬ�פʤΤ�root�Ǥ�äƤ����������������������mysqld��Ƶ�ư��������꤬�ä��ޤ���
+ =&gt; SUPER権限が必要なのでrootでやってください。ただしこちらはmysqldを再起動すると設定が消えます。
 
-my.cnf�˰ʲ��ε��ܤ򤷤ƺƵ�ư
+my.cnfに以下の記載をして再起動
 max_connect_errors= 99999999
- =&gt; mysqld_safe --max-connect-errors=xxx &amp; �Ϥ����Ʊ�����ȤǤ���
- =&gt; �Ƶ�ư�Ǥ���ʤ餳�����
+ =&gt; mysqld_safe --max-connect-errors=xxx &amp; はこれと同じことです。
+ =&gt; 再起動できるならこちらを。
 
 
-�Ȥ���������Ǥɤ��Ǥ��礦����
+というあたりでどうでしょうか？
 
 
 /* yoku0825 */
 
-2013ǯ11��28�� 9:11 Isamu Moriyama &lt;moriyama@xxxxxxxxxx&gt;:
-<span class="quote1">&gt; ���Ĥ⡢�����äˤʤäƤ���ޤ���</span>
+2013年11月28日 9:11 Isamu Moriyama &lt;moriyama@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; いつも、お世話になっております。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ޤ��ä����ʿ�����ͦ�ˤȿ����ޤ���</span>
+<span class="quote1">&gt; まじっかぁ（森山　勇）と申します。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; myODBC��MySQL�Υ����С���Windows�Υ��ץ����³���Ƥ���ޤ���</span>
+<span class="quote1">&gt; myODBCでMySQLのサーバーとWindowsのアプリを接続しております。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; mySQL�Υ����С��ǥ桼�������äơ�</span>
-<span class="quote1">&gt; �ۥ��Ȥε��Ĥ������Ԥäơ���³�ƥ��Ȥ�Ԥä��ݤ�</span>
-<span class="quote1">&gt; �������³�Ǥ���DB�����Ƥ⻲�ȤǤ��ޤ�����</span>
+<span class="quote1">&gt; mySQLのサーバーでユーザーを作って、</span>
+<span class="quote1">&gt; ホストの許可の設定を行って、接続テストを行った際は</span>
+<span class="quote1">&gt; 正常に接続でき、DBの内容も参照できました。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���λ����Ǥ�OK���ä��ΤǤ����ġ�</span>
+<span class="quote1">&gt; この時点ではOKだったのですが…。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �����塢Ʊ���ץ�������Ʊ�������С�����³�����Ȥ�����</span>
-<span class="quote1">&gt; �������顼��ɽ������ޤ�����</span>
+<span class="quote1">&gt; 数日後、同じプログラムで同じサーバーに接続したところ、</span>
+<span class="quote1">&gt; 下記エラーが表示されました。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ��ɽ�����줿���顼���ơ�</span>
+<span class="quote1">&gt; 【表示されたエラー内容】</span>
 <span class="quote1">&gt; Host 'xx.xx.xx.xx' is blocked because of many connection errors; unblock with 'mysqladmin flush-hosts'</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ͥåȤ�Ĵ�٤Ƥߤ��ΤǤ�����</span>
+<span class="quote1">&gt; ネットで調べてみたのですが、</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; shell��</span>
-<span class="quote1">&gt; ��mysqld_safe -O max_connect_errors=10000 &amp;��</span>
-<span class="quote1">&gt; ��¹Ԥ���Ф褤�ߤ����ʤ��Ȥ��񤤤Ƥ��ä��Τǡ�</span>
-<span class="quote1">&gt; phpMyAdmin����¹Ԥ��Ƥߤ��ΤǤ�����</span>
-<span class="quote1">&gt; ������Υ桼�������¤Ǽ¹ԤǤ��ޤ���Ǥ�����</span>
+<span class="quote1">&gt; shellで</span>
+<span class="quote1">&gt; 「mysqld_safe -O max_connect_errors=10000 &amp;」</span>
+<span class="quote1">&gt; を実行すればよいみたいなことが書いてあったので、</span>
+<span class="quote1">&gt; phpMyAdminから実行してみたのですが、</span>
+<span class="quote1">&gt; こちらのユーザー権限で実行できませんでした。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���ҤϤ��Υ����С���MySQL�δ����ԤǤϤʤ��Τǡ�</span>
-<span class="quote1">&gt; �������ѹ��Ǥ��ʤ��褦�Ǥ���</span>
+<span class="quote1">&gt; 弊社はそのサーバーのMySQLの管理者ではないので、</span>
+<span class="quote1">&gt; 設定等変更できないようです。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �����������狼����������ä��㤤�ޤ����顢</span>
-<span class="quote1">&gt; �������ꤨ�ޤ���Ǥ��礦����</span>
+<span class="quote1">&gt; 何か原因等わかる方がいらっしゃいましたら、</span>
+<span class="quote1">&gt; ご教授願えませんでしょうか？</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ����������ꤤ�������ޤ���</span>
+<span class="quote1">&gt; よろしくお願いいたします。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ��­��OS��WINXP�Ǥ������ץ��Delphi7��ODBC��3.51�Ǥ���</span>
+<span class="quote1">&gt; 補足：OSはWINXPです。アプリはDelphi7、ODBCは3.51です。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; --</span>
 <span class="quote1">&gt; Isamu Moriyama&lt;moriyama@xxxxxxxxxx&gt;</span>
@@ -102,11 +102,11 @@ max_connect_errors= 99999999
 
 </pre>
 </div>
-<p class="button"><a href="16062.html">[��]</a><a href="16064.html">[��]</a><a href="../list/16001-16100.html">[�ֹ�����]</a><a href="../thread/16001-16100.html">[����åɰ���]</a></p>
+<p class="button"><a href="16062.html">[前]</a><a href="16064.html">[次]</a><a href="../list/16001-16100.html">[番号順一覧]</a><a href="../thread/16001-16100.html">[スレッド一覧]</a></p>
 <pre class="list">
 <span>&nbsp;&nbsp;&nbsp;<a href="16062.html">  16062 2013-11-28 09:11 [Isamu Moriyama &lt;mori] Host 'xx.xx.xx.xx' is blocked because of many connection errors; unblock with 'mysqladmin flush-hosts'</a></span>
-<span class="current">-&gt;&nbsp;<a href="16063.html">  16063 2013-11-28 10:35 ��[&quot;yoku ts.&quot; &lt;yoku0825]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16064.html">  16064 2013-11-28 11:40 ����[Isamu Moriyama &lt;mori]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="16063.html">  16063 2013-11-28 10:35 ┗[&quot;yoku ts.&quot; &lt;yoku0825]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16064.html">  16064 2013-11-28 11:40 　┗[Isamu Moriyama &lt;mori]                                     </a></span>
 </pre>
 </body>
 </html>

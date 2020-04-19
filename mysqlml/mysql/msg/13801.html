@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13800.html">[��]</a><a href="13802.html">[��]</a><a href="../list/13801-13900.html">[�ֹ�����]</a><a href="../thread/13801-13900.html">[����åɰ���]</a></p>
+<p class="button"><a href="13800.html">[前]</a><a href="13802.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13801
 </p>
@@ -13,150 +13,150 @@ mysql:13801
 <p>
 From: Shintaro Shirai &lt;Shintaro Shirai &lt;ytgs2767@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 15 Mar 2007 14:30:17 +0900<br>
-Subject: [mysql 13801] Re: Windows ¦�ġ��뤫�黲�ȤǤ��ʤ��ΤϤʤ���<br>
+Subject: [mysql 13801] Re: Windows 側ツールから参照できないのはなぜ？<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���Ǥ���
+白井です。
 
-�䤬��ä����Ȥ�����Ķ��ϰʲ��ξ����Ǥ���
-���Ĥ����褦�Ǥ������¸��Ѥ��İ����Ǥ��뤳�Ȥ���ǧ����Ƥ���LAN��Ǥ��äǤ���
-RHEL��CentOS��Debian��FreeBSD�ǤϷи�����ΤǤ�����SUSE��̵���Τ�ͽ
-�۳��Τ��Ȥ����뤫�⤷��ޤ��󤬡�����
+私がやったことがある環境は以下の状況です。
+しつこいようですが、実験用かつ安全であることが確認されているLAN内での話です。
+RHELやCentOS、Debian、FreeBSDでは経験あるのですが、SUSEは無いので予
+想外のことがあるかもしれませんが。。。
 
-�����������Ķ�
-             �֥����ɥХ�ɥ롼��(192.168.3.1)
-                     ��
-  ������              |              ���饤�����
-MySQL5.0�� on Linux   |        MySQL Administrator on Windows
-    �� ----HUB----------------HUB-------��
-IP���ɥ쥹
+▼成功した環境
+             ブロードバンドルータ(192.168.3.1)
+                     ■
+  サーバ              |              クライアント
+MySQL5.0系 on Linux   |        MySQL Administrator on Windows
+    ■ ----HUB----------------HUB-------■
+IPアドレス
  192.168.3.20                      192.168.3.21
-���֥ͥåȥޥ���
+サブネットマスク
  255.255.255.0                     255.255.255.0
-�ǥե���ȥ롼��
+デフォルトルート
  192.168.3.1                       192.168.3.1
 
-�ޤ���ǧ���뤳�ȤǤ���
+まず確認することですが
 
-1.ping �ǡ������Фޤ����̤��뤳�Ȥ��ǧ
- �����饤����ȤΥ��ޥ�ɥ饤��� ping 192.168.3.20
-     �����̤��ʤ��ä��顦����
-       �������֥��OK�Ǥ������ޤ�ľ��������Υ�󥯥��׳�ǧ
+1.ping で、サーバまで疎通することを確認
+ →クライアントのコマンドラインで ping 192.168.3.20
+     →疎通しなかったら・・・
+       →ケーブルはOKですか？挿し直し・機器のリンクランプ確認
 
-2.�ݡ��Ȥ������Ƥ��뤳�Ȥ��ǧ
- �����饤����Ȥ���ݡ��ȥ������ġ���ʤɤ�3306�γ������ǧ
- �������Ƥʤ��ä��顦����
-     �����⤽��MySQL��Ω���夬�äƤ��뤫��
-     �������о��iptables�ʤɤǥե��륿��󥰤���Ƥʤ�����
-     ��hosts.allow hosts.deny�ʤɤε��Ҥ�OK����-&gt; /etc ������ˤ���
-����
+2.ポートが空いていることを確認
+ →クライアントからポートスキャンツールなどで3306の開放を確認
+ →空いてなかったら・・・
+     →そもそもMySQLは立ち上がっているか？
+     →サーバ上でiptablesなどでフィルタリングされてないか？
+     →hosts.allow hosts.denyなどの記述はOKか？-&gt; /etc あたりにある
+かと
 
-3.�����о��
+3.サーバ上で
 GRANT ALL PRIVILEGES ON *.* TO root@'%' IDENTIFIED BY 'ABCdefG' WITH
 GRANT OPTION;
 
-��¹Ԥ��ޤ���
+を実行します。
 
- ���Ȥ� ����⤫����Ƥ��ޤ�����% = any host�Ȥ�����̣�Ǥ�������SQL
-ʸ�����ܸ�ˤ����
+ かとう さんもかかれていますが、% = any hostという意味です。このSQL
+文を日本語にすると
 
-��root�Ȥ����桼����(�ѥ���ɤ�ABCdefG)�ˤ��٤Ƥ�DB�Ф��ơ�������
-��Ϳ���ʤ������ʤ�������³�����������ۥ���(�Ĥޤ� any host)��
+　rootというユーザー(パスワードはABCdefG)にすべてのDB対して、全権限
+を与えなさい。なおかつ接続元は全外部ホスト(つまり any host)。
 
-�Ȥ������ȤǤ���
+ということです。
 
-4.MySQL Administrator��
-�ۥ��ȥ͡��� 192.168.3.20
-�ݡ���       3306
-�桼��̾     root
-�ѥ����   ABCdefG
+4.MySQL Administratorで
+ホストネーム 192.168.3.20
+ポート       3306
+ユーザ名     root
+パスワード   ABCdefG
 
-����³�Ǥ��Ƥ��ޤ���
+で接続できています。
 
-���ˤ��ޤ������ʤ���С�
-root��mysql���ޥ�ɥ饤������ä�
+次にうまくいかなければ、
+rootでmysqlコマンドラインに入って
 mysql&gt; use mysql;
 mysel&gt; SELECT user,host FROM User;
 
-�η�̤򸫤Ƥߤ�Ȳ����ҥ�Ȥ����뤫�⤷��ޤ���
+の結果を見てみると何かヒントがあるかもしれません。
 
-���ȡ����顼��å������Ϥ��ä��ꤽ�Τޤ޾�ά�����˺ܤ��뤳�Ȥ򤪤���
-�ᤷ�ޤ���
+あと、エラーメッセージはそっくりそのまま省略せずに載せることをおすす
+めします。
 
-����Ʈ�򤪵��ꤷ�ޤ���
+ご健闘をお祈りします。
 
 On Thu, 15 Mar 2007 13:05:30 +0900
-�������� &lt;VYG01106@xxxxxxxxxx&gt; wrote:
+深海水草 &lt;VYG01106@xxxxxxxxxx&gt; wrote:
 
-<span class="quote1">&gt; Ĺë�Ǥ���</span>
+<span class="quote1">&gt; 長谷です。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���ڤ�����椵�󡢤�����ͭ�񤦤������ޤ���</span>
+<span class="quote1">&gt; 鈴木さん、白井さん、ご回答有難うございます。</span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt; &gt; ���ϥ��ꥢ���Ƥ���ȤΤ��ȤʤΤǡ��桼�����꤬localhost�ʳ��Τ�Τ�����</span>
-<span class="quote2">&gt; &gt; ���Ƥ��뤫��</span>
+<span class="quote2">&gt; &gt; １はクリアしているとのことなので、ユーザ設定がlocalhost以外のものを設定</span>
+<span class="quote2">&gt; &gt; しているか？</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ��������椵��ζ���Ū�ʥ��ɥХ���������ޤ����Τǡ���Ҥ��ޤ���</span>
+<span class="quote1">&gt; ここは白井さんの具体的なアドバイスがありましたので、後述します。</span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt; &gt; ���Υѥ��������ϡ���֥������󤹤�桼���Υѥ���ɤ�OLD_PASSWORD��</span>
-<span class="quote2">&gt; &gt; �Ѵ����Ƥ�뤳�Ȥǥ��ꥢ�Ǥ��ޤ���</span>
+<span class="quote2">&gt; &gt; ３のパスワード問題は、遠隔ログインするユーザのパスワードをOLD_PASSWORDで</span>
+<span class="quote2">&gt; &gt; 変換してやることでクリアできます。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���ä�...����ϲ��Ǥ����ä���</span>
-<span class="quote1">&gt; Linux �Υ��ޥ�ɤǤϤʤ��Ǥ���͡�</span>
-<span class="quote1">&gt; Ĵ�٤Ƥߤޤ���</span>
+<span class="quote1">&gt; えっと...これは何でしたっけ？</span>
+<span class="quote1">&gt; Linux のコマンドではないですよね？</span>
+<span class="quote1">&gt; 調べてみます。</span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt; &gt; �ʲ���SQLʸ��ȯ�Ԥ��ƤߤƤϤ������Ǥ��礦����</span>
+<span class="quote2">&gt; &gt; 以下のSQL文を発行してみてはいかがでしょうか？</span>
 <span class="quote1">&gt; </span>
 <span class="quote2">&gt; &gt; mysql&gt; GRANT ALL PRIVILEGES ON *.* TO root@'%' IDENTIFIED BY</span>
 <span class="quote2">&gt; &gt; 'abcdefg' WITH GRANT OPTION;</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ��äƤߤޤ�����query OK �Ǥ�����</span>
+<span class="quote1">&gt; やってみました。query OK でした。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ɤ��������Ȥ��狼��ʤ��Ǥ�����root@'%' �� % �ʤ�桼����</span>
-<span class="quote1">&gt; �ϥơ��֥��ˤʤ��ơ����󥹥ȡ�����˻��ꤷ����������ۥ���</span>
-<span class="quote1">&gt; ̾�����äƤ��ޤ����ΤǤ��Τ褦�ˤ��ޤ�����</span>
+<span class="quote1">&gt; どういうことかわからないですが、root@'%' の % なるユーザ？</span>
+<span class="quote1">&gt; はテーブル上になくて、インストール時に指定したローカルホスト</span>
+<span class="quote1">&gt; 名が入っていましたのでそのようにしました。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ȥ�������Windows ���� MySQL Administrator �������³�Ǥ�����</span>
-<span class="quote1">&gt; Ʊ�����顼���Ǥޤ�����Ū�� IP ���ɥ쥹��¸�ߤ��ʤ����� ping</span>
-<span class="quote1">&gt; ���Ƥߤʤ������Ȥ�����ΤǤ��������Τ����λ�Ŧ�� IP ���ɥ쥹</span>
-<span class="quote1">&gt; �� MySQL ��Ƴ������ SUSE  ���ǤϤʤ���Windows ���Τ�Τ��֤�</span>
-<span class="quote1">&gt; ����äơ���å��������Ф�ΤǤ���...</span>
+<span class="quote1">&gt; ところが、Windows 機の MySQL Administrator からは接続できず、</span>
+<span class="quote1">&gt; 同じエラーがでます。目的の IP アドレスが存在しないから ping</span>
+<span class="quote1">&gt; してみなさい、というものですが、何故かその指摘の IP アドレス</span>
+<span class="quote1">&gt; は MySQL を導入した SUSE  機ではなく、Windows 機のものに置き</span>
+<span class="quote1">&gt; 換わって？メッセージが出るのですが...</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ɤ��� SUSE ���Υ����ɡ��򳰤��ʤ��Ǥ���褦�ʵ��⤹��ΤǤ�</span>
-<span class="quote1">&gt; ��...root@'%' �桼�����ʤ��ä��Τⵤ�ˤʤ�ޤ���root@'%'</span>
-<span class="quote1">&gt; �����󥹥ȡ�����˻��ꤷ����������ۥ��Ȥ��֤�����äƤ���ʤ�</span>
-<span class="quote1">&gt; ������������Ǥ����Ȥ��ʤ��ΤǤϤʤ������Ȥ�פ��ΤǤ���...</span>
+<span class="quote1">&gt; どうも SUSE 機のガード？を外せないでいるような気もするのです</span>
+<span class="quote1">&gt; が...root@'%' ユーザがなかったのも気になります。root@'%'</span>
+<span class="quote1">&gt; がインストール時に指定したローカルホストに置き換わっているなら</span>
+<span class="quote1">&gt; それもローカルでしか使えないのではないか、とも思うのですが...</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���ߤ⿧����Ժ������Ƥ��ޤ��������Ǥ��Ƥ��ޤ���</span>
-<span class="quote1">&gt; �������ɥХ���������С�����������ꤤ���ޤ���</span>
+<span class="quote1">&gt; 現在も色々試行錯誤していますが、解決できていません。</span>
+<span class="quote1">&gt; 何かアドバイスがあれば、よろしくお願いします。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; -- </span>
-<span class="quote1">&gt; Ĺë &lt;VYG01106@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; 長谷 &lt;VYG01106@xxxxxxxxxx&gt;</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
 
-����������������������������� ����Ϻ&lt;ytgs2767@xxxxxxxxxx&gt;
+　　　　　　　　　　　　　白井 慎太郎&lt;ytgs2767@xxxxxxxxxx&gt;
 -----------End of message
 
 
 </pre>
 </div>
-<p class="button"><a href="13800.html">[��]</a><a href="13802.html">[��]</a><a href="../list/13801-13900.html">[�ֹ�����]</a><a href="../thread/13801-13900.html">[����åɰ���]</a></p>
+<p class="button"><a href="13800.html">[前]</a><a href="13802.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="13794.html">  13794 2007-03-13 23:58 [�������� &lt;VYG01106@x] Windows ¦�ġ��뤫�黲�ȤǤ��ʤ��ΤϤʤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13795.html">  13795 2007-03-14 00:51 ��[moo_moo_boogie &lt;moo_]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13796.html">  13796 2007-03-14 11:18 ��[Shintaro Shirai &lt;ytg]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13797.html">  13797 2007-03-15 13:05 ����[�������� &lt;VYG01106@x]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13798.html">  13798 2007-03-15 13:46 ������[YuGo &lt;yu.gotou@xxxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13799.html">  13799 2007-03-15 13:53 ������[moo_moo_boogie &lt;moo_]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13800.html">  13800 2007-03-15 13:53 ������[Tomohiro 'Tomo-p' KA]                                   </a></span>
-<span class="current">-&gt;&nbsp;<a href="13801.html">  13801 2007-03-15 14:30 ������[Shintaro Shirai &lt;ytg]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13802.html">  13802 2007-03-15 17:45 ��������[�������� &lt;VYG01106@x] �β�衩�� Re: Windows ¦�ġ��뤫�黲�ȤǤ��ʤ��ΤϤʤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13803.html">  13803 2007-03-15 19:41 ����������[moo_moo_boogie &lt;moo_]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13804.html">  13804 2007-03-15 21:31 ������������[�������� &lt;VYG01106@x]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13805.html">  13805 2007-03-15 23:27 ��������������[moo_moo_boogie &lt;moo_]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13794.html">  13794 2007-03-13 23:58 [深海水草 &lt;VYG01106@x] Windows 側ツールから参照できないのはなぜ？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13795.html">  13795 2007-03-14 00:51 ┣[moo_moo_boogie &lt;moo_]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13796.html">  13796 2007-03-14 11:18 ┗[Shintaro Shirai &lt;ytg]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13797.html">  13797 2007-03-15 13:05 　┗[深海水草 &lt;VYG01106@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13798.html">  13798 2007-03-15 13:46 　　┣[YuGo &lt;yu.gotou@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13799.html">  13799 2007-03-15 13:53 　　┣[moo_moo_boogie &lt;moo_]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13800.html">  13800 2007-03-15 13:53 　　┣[Tomohiro 'Tomo-p' KA]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="13801.html">  13801 2007-03-15 14:30 　　┗[Shintaro Shirai &lt;ytg]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13802.html">  13802 2007-03-15 17:45 　　　┗[深海水草 &lt;VYG01106@x] ［解決？〕 Re: Windows 側ツールから参照できないのはなぜ？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13803.html">  13803 2007-03-15 19:41 　　　　┗[moo_moo_boogie &lt;moo_]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13804.html">  13804 2007-03-15 21:31 　　　　　┗[深海水草 &lt;VYG01106@x]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13805.html">  13805 2007-03-15 23:27 　　　　　　┗[moo_moo_boogie &lt;moo_]                           </a></span>
 </pre>
 </body>
 </html>

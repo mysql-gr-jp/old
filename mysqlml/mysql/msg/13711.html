@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13710.html">[��]</a><a href="13712.html">[��]</a><a href="../list/13701-13800.html">[�ֹ�����]</a><a href="../thread/13701-13800.html">[����åɰ���]</a></p>
+<p class="button"><a href="13710.html">[前]</a><a href="13712.html">[次]</a><a href="../list/13701-13800.html">[番号順一覧]</a><a href="../thread/13701-13800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13711
 </p>
@@ -13,61 +13,61 @@ mysql:13711
 <p>
 From: Mamiya Masataka &lt;Mamiya Masataka &lt;xc8m-mmy@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 07 Feb 2007 02:12:09 +0900<br>
-Subject: [mysql 13711] Re: like ����Ф������������<br>
+Subject: [mysql 13711] Re: like で抽出する場合の注意点<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�����󤳤�Ф�ϡ����δֵܤǤ���
-���� like �μ�갷���Ǥ����ѵ��Ťʾ���򤢤꤬�Ȥ��������ޤ�����
+皆さんこんばんは。茨城の間宮です。
+今回 like の取り扱いでは大変貴重な情報をありがとうございました。
 
-�����󤫤餤������������ǡ���ʬ�ʤ����������������õ�äƤߤޤ�����
-�Ǥ⡢�ʤ��ʤ����ޤ������ޤ���
-���ܸ�Ǥθ�����ʸ�������ɤȤδط������������򤷤Ƥ��ʤ��Ȥ����ʤ���
-���������Ѥ���ʸ�������ɤ������� mySQL �����ꤷ�Ƥ��ʤ��ȥ���Ǥ��͡�
-
-
-------�����ϰʲ��Τ褦�Ǥ�------
-����ʸ�������ʤɤ�ʤ��ä��Τǡ�
-ʸ�������ɤˤĤ��Ƥʤ������⤷�ޤ���Ǥ�����
-�ȸ������Ȥ�
-Windows �Ǥ� sjis ��ʸ���������mySQL �Ϥ��ΤޤޤΥǡ�������¸�ʤΤǤ��礦��
-
-������Ф˴�Ϣ�������Х���ʸ���ȣ��Х���ʸ���κ�Ʊ���򤱤뤿�ᡢ
-�ƥ����ȥǡ����� EUC-JP ����¸���Ƥߤޤ�����
-mySQL ������ϲ��⤷�ʤ������ǡ�
-ʸ�������ɤ��� Jcode.pm �� euc ���Ѵ�������¸������Ǥ���
-�����ɽ�������������ʸ���������ޤ��Τǡ�
-ɽ���κ� sjis ���ᤷ�Ƥ��ޤ�����
-�����ɽ������ϤȤꤢ������褷�����˸����ޤ�����
-�ǡ�������� sjis �� euc �����ߤ���ȸ��������Ǥ���
-�ѿ���ASCII�ˤ����ܸ�ξ��ɤ�ʸ�������ɤǤ�Ʊ���ǡ�����Ϥʤ������Ǥ���
+皆さんからいただいた情報で、自分なりに整理し、解決策を探ってみました。
+でも、なかなかうまくいきません。
+日本語での検索、文字コードとの関係を正しく理解していないといけない。
+当初より利用する文字コードで正しく mySQL を設定していないとダメですね。
 
 
+------現状は以下のようです------
+当初文字化けなどもなかったので、
+文字コードについてなんの設定もしませんでした。
+と言うことは
+Windows では sjis で文字を持ち、mySQL はそのままのデータで保存なのでしょう。
 
-���Τ褦�ʾ����Ǹ����򤦤ޤ��Ԥ����ᡢʸ�������ɤ����ꤷ�Ƥߤޤ�����
-my.ini �� default-character-set=ujis
-��ä���ȡ���������������ˤʤäƤ��ޤ��ޤ���
-like ���Ϥ�ʸ����ϡ������� euc ���Ѵ�����
-̵��̵����¸���� euc �ƥ����ȥǡ����򸡺�����ΤǤ�����
+今回抽出に関連し、１バイト文字と２バイト文字の混同を避けるため、
+テキストデータを EUC-JP で保存してみました。
+mySQL の設定は何もしない状況で、
+文字コードだけ Jcode.pm で euc に変換して保存したんです。
+それを表示する場合は当然文字化けしますので、
+表示の際 sjis に戻してやりました。
+これで表示問題はとりあえず解決したかに見えました。
+データの中に sjis と euc が混在すると言う状況です。
+英数（ASCII）は日本語の場合どの文字コードでも同じで、問題はなさそうです。
+
+
+
+このような状況で検索をうまく行うため、文字コードを設定してみました。
+my.ini に default-character-set=ujis
+を加えると、検索が全くだめになってしまいます。
+like に渡す文字列は、事前に euc に変換し、
+無理無理保存した euc テキストデータを検索するのですが、
 default-character-set=ujis
-������ȸ���ʸ�����������פ��ʤ��ʤäƤ��ޤ��ޤ���
-�񤭤ʤ���פ��Ф����ΤǤ�����
-����ʸ����� euc ���Ѵ������� quotemeta �ǥ��������פ��Ƥޤ���
-������������ä��ꤹ��ΤǤ��礦����
+があると検索文字が全く一致しなくなってしまいます。
+書きながら思い出したのですが…
+検索文字列は euc に変換した後 quotemeta でエスケープしてます。
+ここが問題だったりするのでしょうか？
 
-ʸ������򲿤���ꤷ�ʤ���硢�����Ϥ��ޤ������ޤ���
-â��������ΰ�Ϣ�Υ���åɤ��̤ꡢ������ʸ������̤Ǥ��ʤ��ΤǤ�����
+文字設定を何も指定しない場合、検索はうまくいきます。
+但し、今回の一連のスレッドの通り、一部の文字を区別できないのですが…
 
 
-ʸ�������ɤ�ɤΤ褦�����ꤷ���餤�������äƤ��ޤ��ޤ�����
-�Ϥʤ������ʤ���Τ�ͤ��ƺ��äƤ��ޤäƤ���Τ���
-�������ˡ�������Τ���
-����ʤ��ȸ������Ȥ��狼������Ǥ������ޤ���
+文字コードをどのように設定したらいいか困ってしまいました。
+はなから出来ないものを考えて困ってしまっているのか、
+設定の方法があるものか。
+出来ないと言うことがわかるだけでも助かります。
 
-���Τ��������򤤤�������Ф��꤬�����Ȼפ��ޤ���
-�ɤ�������������ꤤ�������ޤ���
+そのあたり情報をいただければありがたいと思います。
+どうぞよろしくお願いいたします。
 
 
 
@@ -83,14 +83,14 @@ masataka-orange@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="13710.html">[��]</a><a href="13712.html">[��]</a><a href="../list/13701-13800.html">[�ֹ�����]</a><a href="../thread/13701-13800.html">[����åɰ���]</a></p>
+<p class="button"><a href="13710.html">[前]</a><a href="13712.html">[次]</a><a href="../list/13701-13800.html">[番号順一覧]</a><a href="../thread/13701-13800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="13695.html">  13695 2007-01-28 12:25 [Mamiya Masataka &lt;xc8] like ����Ф������������             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13696.html">  13696 2007-01-29 04:29 ��[Tasuku SUENAGA &lt;a@xx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13700.html">  13700 2007-01-29 11:02 ����[Mamiya Masataka &lt;xc8]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13703.html">  13703 2007-01-30 08:09 ����[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="13711.html">  13711 2007-02-07 02:12 ������[Mamiya Masataka &lt;xc8]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13701.html">  13701 2007-01-29 12:12 ��[YuGo &lt;yu.gotou@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13695.html">  13695 2007-01-28 12:25 [Mamiya Masataka &lt;xc8] like で抽出する場合の注意点             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13696.html">  13696 2007-01-29 04:29 ┣[Tasuku SUENAGA &lt;a@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13700.html">  13700 2007-01-29 11:02 ┃┣[Mamiya Masataka &lt;xc8]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13703.html">  13703 2007-01-30 08:09 ┃┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="13711.html">  13711 2007-02-07 02:12 ┃　┗[Mamiya Masataka &lt;xc8]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13701.html">  13701 2007-01-29 12:12 ┗[YuGo &lt;yu.gotou@xxxxx]                                       </a></span>
 </pre>
 </body>
 </html>

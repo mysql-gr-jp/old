@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15515.html">[��]</a><a href="15517.html">[��]</a><a href="../list/15501-15600.html">[�ֹ�����]</a><a href="../thread/15501-15600.html">[����åɰ���]</a></p>
+<p class="button"><a href="15515.html">[前]</a><a href="15517.html">[次]</a><a href="../list/15501-15600.html">[番号順一覧]</a><a href="../thread/15501-15600.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15516
 </p>
@@ -13,62 +13,62 @@ mysql:15516
 <p>
 From: &lt;shin-1@xxxxxxxxxx&gt;<br>
 Date: Thu, 24 Feb 2011 12:48:08 +0900<br>
-Subject: [mysql 15516] 2���ܤ�JOIN����ȶ�ü���٤��ʤ�<br>
+Subject: [mysql 15516] 2項目でJOINすると極端に遅くなる<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�ߤʤ��󤳤�ˤ��ϡ�nomoto�Ǥ���
-���ηä��ߤ��Ƥ���������
+みなさんこんにちは、nomotoです。
+お知恵を貸してください。
 
-CentOS�Ķ���MySQL5.0.77�ǡ������Υơ��֥뤫��⤦�����Υơ��֥��
-���פ���쥳���ɤ�¸�ߤ��ʤ��쥳���ɤ�������Ф�������
-2�ĤΥơ��֥��JOIN���ơ����פ��ʤ��쥳���ɤ�NULLȽ�ꤷ��
-ȴ���Ф����Ȥ��Ƥ��ޤ���
+CentOS環境のMySQL5.0.77で、片方のテーブルからもう片方のテーブルに
+一致するレコードが存在しないレコードだけを抽出したく、
+2つのテーブルをJOINして、合致しないレコードをNULL判定して
+抜き出そうとしています。
 
-������2���ܤ���Ӥ��ʤ��ȥ쥳��������Ǥ��ʤ��ǡ����ʤ���
-2���ܤ�AND��JOIN���褦�Ȥ��Ƥ���ΤǤ�����1���ܤ�JOIN�ʤ��ɤ���
-�Ǥ�����2���ܤ���Ӥ���JOIN���褦�Ȥ����Index��ȤäƤ���ʤ�
-�ʤꡢ������10ʬ�ʾ夫���äƤ��ޤ��ޤ���
-1���ܤ�����JOIN����п��äǽ����Τǡ�Ʊ���٤�®�٤���Ԥ���
-����ΤǤ�����2���ܤ��Ȥ��ޤ���٤����Ƽ��Ѥ��Ѥ����ޤ���
+ただ、2項目で比較しないとレコード特定できないデータなため
+2項目のANDでJOINしようとしているのですが、1項目のJOINなら良いの
+ですが、2項目を比較してJOINしようとするとIndexを使ってくれなく
+なり、処理に10分以上かかってしまいます。
+1項目だけでJOINすれば数秒で終わるので、同程度の速度を期待して
+いるのですが、2項目だとあまりに遅すぎて実用に耐えられません。
 
-ʣ��Index��ĥ��ʤ������Ȥ���������ɤ��Index��Ž�äƤ����
-�Ǥ���������������Index���Ȥ��ʤ��ʤ�ΤǤ��礦����
-�������ɥХ���������������������������ꤤ�������ޤ���
+複合Indexを張らなきゃダメという情報も読んでIndexは貼ってあるの
+ですが、何が原因でIndexが使われなくなるのでしょうか。
+何かアドバイスいただきたく、よろしくお願いいたします。
 
-�ǡ�������Ū�ˤ�MyISAM�ǡ�tableB���� 84,000��ˤ�tableC���� 5,000���
-�����ꡢ���줾��VARCHAR(20)��code1,code2�Ȥ������ܤ�ʸ���ǡ�����
-���äƤ��ơ�����2���ܤ�ʸ���ǡ�����ξ���Ĥ���碌�ơ��Ϥ����
-�쥳���ɤ����꤬�Ǥ���ǡ������ƤǤ���
-��code1,code2�ϳƥơ��֥��b_code1,b_code2�Ȥ������˾���̾����
-�㤤�ޤ���
+データ構成的にはMyISAMで、tableB（約 84,000件）とtableC（約 5,000件）
+があり、それぞれVARCHAR(20)のcode1,code2という項目に文字データが
+入っていて、その2項目の文字データを両方つき合わせて、はじめて
+レコードの特定ができるデータ内容です。
+※code1,code2は各テーブルでb_code1,b_code2という具合に少し名前が
+違います。
 
-tableB��20�ե���������٤�1�쥳���ɤ������ɴ�Х������٤�
-ʸ���ǡ����Τߡ�tableC�Ͽ��Ĥ�ʸ���ե�����ɤȡ�6��8MB���٤�
-�Х��ʥ�ǡ��������ä�midiumblob�ι���1�ĤǤ���
+tableBは20フィールド程度で1レコードあたり数百バイト程度の
+文字データのみ。tableCは数個の文字フィールドと、6～8MB程度の
+バイナリデータの入ったmidiumblobの項目1個です。
 
-tableB��code1,code2�Ϥۤ�����Х�Х顢code1��code2�⤽�줾��
-��ʣ�Ͽ�ɴ�����٤Ǥ���
+tableBのcode1,code2はほぼ全件バラバラ、code1もcode2もそれぞれ
+重複は数百件程度です。
 
-tableC��code1�Ϥۤ�����Х�Х顢code2�϶�ʸ��''����Ͽ����Ƥ���
-�ǡ�����9��ʾ�ǡ�code2���ͤ����äƤ���쥳���ɤϤ�����������
-����ޤ���ʺ��塢code2���ͤ��դ����ǡ�����������ͽ���
-�ʤΤǡ������Ǥ�code1,code2��2�ơ��֥��JOIN����Ȱ��פ���Τ�
-������ǡ��ۤȤ�ɤ��԰��פˤʤ�ޤ���
+tableCのcode1はほぼ全件バラバラ、code2は空文字''で登録されている
+データが9割以上で、code2に値が入っているレコードはごく少数しか
+ありません（今後、code2に値の付いたデータが増える予定）
+なので、現状ではcode1,code2で2テーブルをJOINすると一致するのは
+数十件で、ほとんどが不一致になります。
 
 
-���������������Ȥ���EXPLAIN��Ȥ�ޤ�����
+原因究明の第一歩としてEXPLAINをとりました。
 
-1���ܤǤ�JOIN�ʤ�ξ�ơ��֥�Ȥ�Using Index���ФƤ��ޤ�����
-2���ܤ�AND��JOIN�����tableC�ˤ�Index���Ȥ��Ƥʤ��褦�Ǥ���
+1項目でのJOINなら両テーブルともUsing Indexが出ていますが、
+2項目のANDでJOINするとtableCにはIndexが使われてないようです。
 
-ξ�ơ��֥��code1,code2�ϡ�ʣ��Index��ɬ�פ�������
-(code1),(code2),(code1,code2)�Ȥ���3�ѥ������Index��ɤ���ˤ�
-Ž�äƤ���ޤ���
+両テーブルのcode1,code2は、複合Indexが必要だろうと
+(code1),(code2),(code1,code2)という3パターンのIndexをどちらにも
+貼ってあります。
 
-1���ܤ�����Join�ʤ�Index���Ȥ��ޤ���
+1項目だけのJoinならIndexが使われます。
 mysql&gt; explain select count(*) from tableB left join tableC
  on(c_code1=b_code1) where c_code1 is null;
 +----+-------------+--------+-------+-------------------+-----------+---------+-----------------+-------+-------------+
@@ -79,7 +79,7 @@ mysql&gt; explain select count(*) from tableB left join tableC
 +----+-------------+--------+-------+-------------------+-----------+---------+-------------------+-------+-------------+
 2 rows in set (0.00 sec)
 
-2����AND����JOIN�����tableC��Index���Ȥ��ޤ���
+2項目AND条件でJOINするとtableCでIndexが使われません
 
 mysql&gt; explain select count(*) from tableB left join tableC
  on(c_code1=b_code1 and c_code2=b_code2) where c_code1 is null;
@@ -91,14 +91,14 @@ mysql&gt; explain select count(*) from tableB left join tableC
 +----+-------------+--------+-------+---------------------------+-----------+---------+---------------------+-------+-------------+
 2 rows in set (0.00 sec)
 
-���Τ�����򸫤��ʤɡ����ɥХ�����ɤ�������������ꤤ�������ޤ���
+このあたりを見ろなど、アドバイスをどうぞよろしくお願いいたします。
 
 </pre>
 </div>
-<p class="button"><a href="15515.html">[��]</a><a href="15517.html">[��]</a><a href="../list/15501-15600.html">[�ֹ�����]</a><a href="../thread/15501-15600.html">[����åɰ���]</a></p>
+<p class="button"><a href="15515.html">[前]</a><a href="15517.html">[次]</a><a href="../list/15501-15600.html">[番号順一覧]</a><a href="../thread/15501-15600.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="15516.html">  15516 2011-02-24 12:48 [&lt;shin-1@xxxxxxxxxx&gt; ] 2���ܤ�JOIN����ȶ�ü���٤��ʤ�         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15517.html">  15517 2011-02-26 00:11 ��[��� &lt;nora1962@xxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="15516.html">  15516 2011-02-24 12:48 [&lt;shin-1@xxxxxxxxxx&gt; ] 2項目でJOINすると極端に遅くなる         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15517.html">  15517 2011-02-26 00:11 ┗[中川貴 &lt;nora1962@xxx]                                       </a></span>
 </pre>
 </body>
 </html>

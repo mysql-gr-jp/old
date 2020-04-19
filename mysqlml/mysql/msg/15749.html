@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15748.html">[��]</a><a href="15750.html">[��]</a><a href="../list/15701-15800.html">[�ֹ�����]</a><a href="../thread/15701-15800.html">[����åɰ���]</a></p>
+<p class="button"><a href="15748.html">[前]</a><a href="15750.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15749
 </p>
@@ -13,17 +13,17 @@ mysql:15749
 <p>
 From: Tsubasa Tanaka &lt;Tsubasa Tanaka &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 21 Apr 2012 01:06:04 +0900<br>
-Subject: [mysql 15749] Re: �����Ѵ���Ԥ��������®������ˤϡ�<br>
+Subject: [mysql 15749] Re: 行列変換を行う処理を高速化するには？<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���Ӥ�������Ǥ���
-����Ф�ϡ�
+たびたび田中です。
+こんばんは。
 
-̵������INDEX�����������ͤ�SQL��ͤ��Ƥߤޤ�����
-INDEX(npdt,sycd,nm)���������Ƥ�������Ǥ���
+無理矢理INDEXを利かせる様なSQLを考えてみました。
+INDEX(npdt,sycd,nm)が定義されている前提です。
 
 SELECT nm,h101,h102,...,h131
 FROM (
@@ -44,130 +44,130 @@ LEFT JOIN (
 ...
 ) AS t131 USING(nm);
 
-npdt��DATE����DATETIME����TIMESTAMP���Τ����줫�Ȳ��ꤷ�ơ�
+npdtがDATE型、DATETIME型、TIMESTAMP型のいずれかと仮定して、
 Mid(CAST(npdt AS CHAR),7,2)='xx'
-��
-DAY(npdt) = xx ���֤������Ƥ��ޤ���
-�����ͤޤǤˡ���
+を
+DAY(npdt) = xx に置き換えています。
+ご参考までに。。
 
 
-<span class="quote1">&gt; �Ĥ����и�§�Ȥ��Ƥϰ���MySQL����ǡ����򥤥�ݡ��Ȥ���Access��˥ơ��֥���äƤ����ơ�</span>
-<span class="quote1">&gt; ���Υơ��֥�򸫤˹Ԥ�������ˤ����������ä�®���Ȼפ��ޤ���</span>
-�񤭤��Ӥ�Ƥ��ޤ��ޤ�����������ݡ��ȸ�˥���ǥå�����Ž��Τ�˺��ʤ���
+<span class="quote1">&gt; …が、経験則としては一度MySQLからデータをインポートしてAccess上にテーブルを作ってあげて、</span>
+<span class="quote1">&gt; そのテーブルを見に行くクエリにした方がずっと速いと思います。</span>
+書きそびれてしまいましたが、インポート後にインデックスを貼るのをお忘れなく。
 
-����Ǥϡ�
+それでは。
 
 
 ts. tanaka//
 
-2012ǯ4��20��22:05 Tsubasa Tanaka &lt;yoku0825@xxxxxxxxxx&gt;:
-<span class="quote1">&gt; �Ϥ���ޤ��ơ�����ȿ����ޤ���</span>
+2012年4月20日22:05 Tsubasa Tanaka &lt;yoku0825@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; はじめまして、田中と申します。</span>
 <span class="quote1">&gt;</span>
 <span class="quote2">&gt;&gt; id    select_type    table    type    possible_keys    key    key_len    ref    rows    Extra</span>
 <span class="quote2">&gt;&gt; 1    SIMPLE    t@nippod    range    idx1    idx1    26    NULL    111    Using where; Using temporary; Using filesort</span>
-<span class="quote1">&gt; Using temporary�ϥƥ�ݥ��ơ��֥��侩����Ƥ���ΤǤϤʤ���</span>
-<span class="quote1">&gt; �����������˥�����˼��ޤ�ʤ��ä��Τǡ��ƥ�ݥ��ơ��֥����ޤ�����Ȥ����������Ǥ���</span>
+<span class="quote1">&gt; Using temporaryはテンポラリテーブルを推奨されているのではなく、</span>
+<span class="quote1">&gt; クエリ処理中にメモリ内に収まらなかったので、テンポラリテーブルを作りましたよという事後報告です。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���֤ϥ�����˥�����η�̤����Ƽ��ޤ뤳�ȤǤ�����</span>
-<span class="quote1">&gt; �ƥ�ݥ��ơ��֥�Ϥޤ��ϥ����˺���ޤ��Τǡ������ʳ��Ǥ���Ф����ޤ��٤��ʤ�ޤ���</span>
-<span class="quote1">&gt; �ǰ��Υ��ʥꥪ�ϥƥ�ݥ��ơ��֥�������˼��ޤ餺��</span>
-<span class="quote1">&gt; DISK��˥ƥ�ݥ��ơ��֥뤬����Ƥ��ޤ����ȤǤ���</span>
-<span class="quote1">&gt; �������������ǺѤ���Τ�DISK�ޤǽ񤤤Ƥ��ޤä��Τ���EXPLAIN�η�̤�������Ǥ�Ƚ�ǤǤ��ޤ���</span>
+<span class="quote1">&gt; 一番はメモリ内にクエリの結果が全て収まることですが、</span>
+<span class="quote1">&gt; テンポラリテーブルはまずはメモリ上に作られますので、この段階であればそこまで遅くなりません。</span>
+<span class="quote1">&gt; 最悪のシナリオはテンポラリテーブルもメモリ内に収まらず、</span>
+<span class="quote1">&gt; DISK上にテンポラリテーブルが作られてしまうことです。</span>
+<span class="quote1">&gt; ただし、メモリ上で済んだのかDISKまで書いてしまったのかはEXPLAINの結果からだけでは判断できません。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; MyISAM�ơ��֥�ξ�硢</span>
-<span class="quote1">&gt; read_buffer_size &gt; ��̥��åȤ��礭�����ξ��ˤϥƥ�ݥ��ơ��֥�ϻȤ��ޤ���</span>
-<span class="quote1">&gt; InnoDB�ơ��֥�ξ�������Ū�ʥ��ơ�������̵���ä��ͤʵ������ޤ�����</span>
-<span class="quote1">&gt; innodb_buffer_pool_size�Ȥ����ѿ����礭����Ϣ���Ƥ��ޤ���</span>
-<span class="quote1">&gt; �ޤ��Ϥɤ���Υơ��֥��ȤäƤ��뤫�ǡ��������ͤ�ʲ�ǽ�ʤ�С��礭�����Ʋ�������</span>
+<span class="quote1">&gt; MyISAMテーブルの場合、</span>
+<span class="quote1">&gt; read_buffer_size &gt; 結果セットの大きさ　の場合にはテンポラリテーブルは使われません。</span>
+<span class="quote1">&gt; InnoDBテーブルの場合は明示的なステータスは無かった様な気がしますが、</span>
+<span class="quote1">&gt; innodb_buffer_pool_sizeという変数が大きく関連しています。</span>
+<span class="quote1">&gt; まずはどちらのテーブルを使っているかで、これらの値を（可能ならば）大きくして下さい。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ��̥��åȤ��礭�����Τ���ˡ��̵���Τǡ�Ŭ�����礭�����Ʋ�������</span>
-<span class="quote1">&gt; DB���ѤΥ����ФǤ���С�read_buffer_size���������25%��50%��</span>
-<span class="quote1">&gt; innodb_buffer_pool_size���������80%���ܰ¤Ȥ����Ƥ��ޤ���</span>
+<span class="quote1">&gt; 結果セットの大きさを知る方法は無いので、適当に大きくして下さい。</span>
+<span class="quote1">&gt; DB専用のサーバであれば、read_buffer_sizeは全メモリの25%～50%、</span>
+<span class="quote1">&gt; innodb_buffer_pool_sizeは全メモリの80%が目安といわれています。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Ĥ����и�§�Ȥ��Ƥϰ���MySQL����ǡ����򥤥�ݡ��Ȥ���Access��˥ơ��֥���äƤ����ơ�</span>
-<span class="quote1">&gt; ���Υơ��֥�򸫤˹Ԥ�������ˤ����������ä�®���Ȼפ��ޤ���</span>
-<span class="quote1">&gt; ���1�٤ν��פǤ���С�������ˡ�Ϥɤ��Ǥ��礦����</span>
+<span class="quote1">&gt; …が、経験則としては一度MySQLからデータをインポートしてAccess上にテーブルを作ってあげて、</span>
+<span class="quote1">&gt; そのテーブルを見に行くクエリにした方がずっと速いと思います。</span>
+<span class="quote1">&gt; 月に1度の集計であれば、この方法はどうでしょうか？</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; may your problem is solved!</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; ts. tanaka//</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; 2012ǯ4��20��17:58 ram &lt;ram@xxxxxxxxxx&gt;:</span>
-<span class="quote2">&gt;&gt; ������</span>
-<span class="quote2">&gt;&gt; �ŤͽŤͥ�����ͭ�񤦤������ޤ���</span>
+<span class="quote1">&gt; 2012年4月20日17:58 ram &lt;ram@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt;&gt; 中川様</span>
+<span class="quote2">&gt;&gt; 重ね重ねコメント有難うございます。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; ���Ȥ���SELECTʸ��EXPLAIN�η�̤ϽФ��ޤ�����</span>
+<span class="quote3">&gt;&gt;&gt; お使いのSELECT文のEXPLAINの結果は出せますか？</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; EXPLAIN�ϻȤä����Ȥ�̵���ΤǤ�����</span>
-<span class="quote2">&gt;&gt; SELECTʸ����Ƭ��EXPLAIN���դ��ơ�������쥯�ȤǼ¹Ԥ�����̡��ʲ��Τ褦�˽Фޤ���</span>
-<span class="quote2">&gt;&gt; t@nippod �Ȥ����Τ��¥ơ��֥�̾�ǡ�</span>
-<span class="quote2">&gt;&gt; idx1�Ȥ����Τ���ĥ�äƤ��륤��ǥå����Ǥ���</span>
+<span class="quote2">&gt;&gt; EXPLAINは使ったことが無いのですが、</span>
+<span class="quote2">&gt;&gt; SELECT文の先頭にEXPLAINと付けて、リダイレクトで実行した結果、以下のように出ます。</span>
+<span class="quote2">&gt;&gt; t@nippod というのが実テーブル名で、</span>
+<span class="quote2">&gt;&gt; idx1というのが今張ってあるインデックスです。</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; id    select_type    table    type    possible_keys    key    key_len    ref    rows    Extra</span>
 <span class="quote2">&gt;&gt; 1    SIMPLE    t@nippod    range    idx1    idx1    26    NULL    111    Using where; Using temporary; Using filesort</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; idx1�ϡ�WHERE�����˴ޤޤ�Ƥ�����ȥ����Ȥν�Ǥ��롡sycd, npdt, nm���Ǥ���</span>
+<span class="quote2">&gt;&gt; idx1は　WHERE句の中に含まれている列とソートの順である　sycd, npdt, nm　です。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ���� Using temporary �����ˤʤ�ޤ�����CREATE TEMPORARY TABLE�ǡ�</span>
-<span class="quote2">&gt;&gt; �ƥ�ݥ��ơ��֥��Ȥä��ۤ�����������ΨŪ�Ȥ�����̣�ʤ�Ǥ��͡�</span>
+<span class="quote2">&gt;&gt; この Using temporary が気になりますが、CREATE TEMPORARY TABLEで、</span>
+<span class="quote2">&gt;&gt; テンポラリテーブルを使ったほうが処理が効率的という意味なんですね？</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt;�塢</span>
+<span class="quote3">&gt;&gt;&gt;後、</span>
 <span class="quote3">&gt;&gt;&gt;read_buffer_size</span>
 <span class="quote3">&gt;&gt;&gt;read_rnd_buffer_size</span>
 <span class="quote3">&gt;&gt;&gt;sort_buffer_size</span>
-<span class="quote3">&gt;&gt;&gt;�Ϥ��줾��ɤ���ͤ����ꤵ��Ƥ��ޤ�����</span>
+<span class="quote3">&gt;&gt;&gt;はそれぞれどんな値を設定されていますか？</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; read_buffer_size    65536</span>
 <span class="quote2">&gt;&gt; read_rnd_buffer_size    262144</span>
 <span class="quote2">&gt;&gt; sort_buffer_size    262144</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; �ǡ��ǥե���Ȥ����ѹ����Ƥ��ޤ���</span>
+<span class="quote2">&gt;&gt; で、デフォルトから変更していません。</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt; ------------------------------------------</span>
-<span class="quote2">&gt;&gt; ���桡��Ϻ</span>
+<span class="quote2">&gt;&gt; 初穂　太郎</span>
 <span class="quote2">&gt;&gt;</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; (2012/04/20 15:24), ���� �� wrote:</span>
+<span class="quote2">&gt;&gt; (2012/04/20 15:24), 中川 貴 wrote:</span>
 <span class="quote3">&gt;&gt;&gt; (2012/04/20 13:58), ram wrote:</span>
-<span class="quote4">&gt;&gt;&gt;&gt; �����͡�������ͭ�񤦤������ޤ�����</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 中川様　コメント有難うございました。</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; ���Υ���ǥå���������ѤߤǤ������ۤȤ�ɸ��̤�����ޤ���Ǥ�����</span>
-<span class="quote4">&gt;&gt;&gt;&gt; ���󤬤�����­��ʤ��ƿ������ʤ��Ǥ���</span>
+<span class="quote4">&gt;&gt;&gt;&gt; このインデックスは設定済みですが、ほとんど効果がありませんでした。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 情報がお伝え足りなくて申し訳ないです。</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; �⤦���١������Ƥ��顢��������ǥѥե����ޥ���Ӥ򤷤ޤ�������</span>
-<span class="quote4">&gt;&gt;&gt;&gt; ʿ�ѱ������֤ϡ��ۤȤ���Ѥ�äƤ��ޤ���Ǥ�����</span>
+<span class="quote4">&gt;&gt;&gt;&gt; もう一度、外してから、その前後でパフォーマンス比較をしましたが、</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 平均応答時間は、ほとんど変わっていませんでした。</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
-<span class="quote4">&gt;&gt;&gt;&gt; �ޤ�����˷����ʤ������ۤ����褤���Ȼפ������֥����꡼����Ф�����ˡ�</span>
-<span class="quote4">&gt;&gt;&gt;&gt; GROUP BY��ԤäƤ�ߤޤ�����������⡢�ۤȤ���Ѥ�餺���ɤ��餫�Ȥ����ȡ�</span>
-<span class="quote4">&gt;&gt;&gt;&gt; �鷺���˥ѥե����ޥ󥹤�����ޤ�����</span>
+<span class="quote4">&gt;&gt;&gt;&gt; また、先に件数を絞り込んだほうがよいかと思い、サブクエリーで抽出した後に、</span>
+<span class="quote4">&gt;&gt;&gt;&gt; GROUP BYを行ってもみましたが、これも、ほとんど変わらず、どちらかというと、</span>
+<span class="quote4">&gt;&gt;&gt;&gt; わずかにパフォーマンスが落ちました。</span>
 <span class="quote4">&gt;&gt;&gt;&gt;</span>
 <span class="quote4">&gt;&gt;&gt;&gt; SELECT x.nm,</span>
 <span class="quote4">&gt;&gt;&gt;&gt; sum(case when x.dd = '01' then 1 else 0 end) as 'h101',</span>
 <span class="quote4">&gt;&gt;&gt;&gt; sum(case when x.dd = '02' then 1 else 0 end) as 'h102',</span>
-<span class="quote4">&gt;&gt;&gt;&gt; ����ά��</span>
+<span class="quote4">&gt;&gt;&gt;&gt; （中略）</span>
 <span class="quote4">&gt;&gt;&gt;&gt; sum(case when x.dd = '31' then 1 else 0 end) as 'h131'</span>
 <span class="quote4">&gt;&gt;&gt;&gt; FROM (SELECT nm,Mid(CAST(npdt AS CHAR),7,2) as dd</span>
 <span class="quote4">&gt;&gt;&gt;&gt; FROM nippo</span>
 <span class="quote4">&gt;&gt;&gt;&gt; WHERE sycd = #ck_sycd# and npdate&gt;= #from_ymd# and npdate&lt;  #to_ymd# ) as x</span>
 <span class="quote4">&gt;&gt;&gt;&gt; GROUP BY x.nm ORDER BY x.nm</span>
-<span class="quote3">&gt;&gt;&gt; ���Ȥ���SELECTʸ��EXPLAIN�η�̤ϽФ��ޤ�����</span>
+<span class="quote3">&gt;&gt;&gt; お使いのSELECT文のEXPLAINの結果は出せますか？</span>
 <span class="quote3">&gt;&gt;&gt;</span>
-<span class="quote3">&gt;&gt;&gt; �塢</span>
+<span class="quote3">&gt;&gt;&gt; 後、</span>
 <span class="quote3">&gt;&gt;&gt; read_buffer_size</span>
 <span class="quote3">&gt;&gt;&gt; read_rnd_buffer_size</span>
 <span class="quote3">&gt;&gt;&gt; sort_buffer_size</span>
-<span class="quote3">&gt;&gt;&gt; �Ϥ��줾��ɤ���ͤ����ꤵ��Ƥ��ޤ�����</span>
+<span class="quote3">&gt;&gt;&gt; はそれぞれどんな値を設定されていますか？</span>
 <span class="quote3">&gt;&gt;&gt;</span>
 <span class="quote3">&gt;&gt;&gt; ****************************************</span>
-<span class="quote3">&gt;&gt;&gt; �����׾��󥷥��ƥ�������</span>
-<span class="quote3">&gt;&gt;&gt; ���ѻ�����</span>
-<span class="quote3">&gt;&gt;&gt; �����ץץ饶�����ӥ��ǥ������롼��</span>
-<span class="quote3">&gt;&gt;&gt; �����</span>
+<span class="quote3">&gt;&gt;&gt; コープ情報システム株式会社</span>
+<span class="quote3">&gt;&gt;&gt; 運用事業部</span>
+<span class="quote3">&gt;&gt;&gt; コーププラザサービスデスクグループ</span>
+<span class="quote3">&gt;&gt;&gt; 中川　貴</span>
 <span class="quote3">&gt;&gt;&gt; 175-0094</span>
-<span class="quote3">&gt;&gt;&gt; ����Խ�ë���ë3-29-8 �����ץץ饶5F</span>
+<span class="quote3">&gt;&gt;&gt; 東京都渋谷区渋谷3-29-8 コーププラザ5F</span>
 <span class="quote3">&gt;&gt;&gt; TEL 03-5778-8010</span>
 <span class="quote3">&gt;&gt;&gt; E-MAIL takashi.nakagawa@xxxxxxxxxx</span>
 <span class="quote3">&gt;&gt;&gt; ****************************************</span>
@@ -179,28 +179,28 @@ ts. tanaka//
 
 </pre>
 </div>
-<p class="button"><a href="15748.html">[��]</a><a href="15750.html">[��]</a><a href="../list/15701-15800.html">[�ֹ�����]</a><a href="../thread/15701-15800.html">[����åɰ���]</a></p>
+<p class="button"><a href="15748.html">[前]</a><a href="15750.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="15742.html">  15742 2012-04-20 09:36 [ram &lt;ram@xxxxxxxxxx&gt;] �����Ѵ���Ԥ��������®������ˤϡ�    </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15743.html">  15743 2012-04-20 11:12 ��[���� �� &lt;takashi.nak]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15744.html">  15744 2012-04-20 13:58 ����[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15745.html">  15745 2012-04-20 15:24 ������[���� �� &lt;takashi.nak]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15747.html">  15747 2012-04-20 17:58 ��������[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15748.html">  15748 2012-04-20 22:05 ����������[Tsubasa Tanaka &lt;yoku]                               </a></span>
-<span class="current">-&gt;&nbsp;<a href="15749.html">  15749 2012-04-21 01:06 ������������[Tsubasa Tanaka &lt;yoku]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15750.html">  15750 2012-04-21 02:05 ��������������[Tsubasa Tanaka &lt;yoku]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15753.html">  15753 2012-04-23 15:39 ����������������[ram &lt;ram@xxxxxxxxxx&gt;]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15756.html">  15756 2012-04-25 14:54 ����������[���� �� &lt;takashi.nak]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15758.html">  15758 2012-04-25 16:34 ������������[ram &lt;ram@xxxxxxxxxx&gt;]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15759.html">  15759 2012-04-25 17:09 ��������������[���� �� &lt;takashi.nak]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15760.html">  15760 2012-04-25 17:18 ����������������[Tomohiro 'Tomo-p' KA]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15761.html">  15761 2012-04-25 18:25 ������������������[���� �� &lt;takashi.nak]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15762.html">  15762 2012-04-25 19:05 ��������������������[Tomohiro 'Tomo-p' KA]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15752.html">  15752 2012-04-23 14:17 ��[&lt;gotou1213@xxxxxxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15754.html">  15754 2012-04-23 19:53 ����[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15755.html">  15755 2012-04-24 13:50 ������[&lt;gotou1213@xxxxxxxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15757.html">  15757 2012-04-25 15:39 ��������[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15765.html">  15765 2012-04-26 14:12 ����������[&lt;gotou1213@xxxxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15742.html">  15742 2012-04-20 09:36 [ram &lt;ram@xxxxxxxxxx&gt;] 行列変換を行う処理を高速化するには？    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15743.html">  15743 2012-04-20 11:12 ┣[中川 貴 &lt;takashi.nak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15744.html">  15744 2012-04-20 13:58 ┃┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15745.html">  15745 2012-04-20 15:24 ┃　┗[中川 貴 &lt;takashi.nak]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15747.html">  15747 2012-04-20 17:58 ┃　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15748.html">  15748 2012-04-20 22:05 ┃　　　┣[Tsubasa Tanaka &lt;yoku]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="15749.html">  15749 2012-04-21 01:06 ┃　　　┃┗[Tsubasa Tanaka &lt;yoku]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15750.html">  15750 2012-04-21 02:05 ┃　　　┃　┗[Tsubasa Tanaka &lt;yoku]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15753.html">  15753 2012-04-23 15:39 ┃　　　┃　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15756.html">  15756 2012-04-25 14:54 ┃　　　┗[中川 貴 &lt;takashi.nak]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15758.html">  15758 2012-04-25 16:34 ┃　　　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15759.html">  15759 2012-04-25 17:09 ┃　　　　　┗[中川 貴 &lt;takashi.nak]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15760.html">  15760 2012-04-25 17:18 ┃　　　　　　┗[Tomohiro 'Tomo-p' KA]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15761.html">  15761 2012-04-25 18:25 ┃　　　　　　　┗[中川 貴 &lt;takashi.nak]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15762.html">  15762 2012-04-25 19:05 ┃　　　　　　　　┗[Tomohiro 'Tomo-p' KA]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15752.html">  15752 2012-04-23 14:17 ┗[&lt;gotou1213@xxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15754.html">  15754 2012-04-23 19:53 　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15755.html">  15755 2012-04-24 13:50 　　┗[&lt;gotou1213@xxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15757.html">  15757 2012-04-25 15:39 　　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15765.html">  15765 2012-04-26 14:12 　　　　┗[&lt;gotou1213@xxxxxxxxx]                               </a></span>
 </pre>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="16394.html">[��]</a><a href="16396.html">[��]</a><a href="../list/16301-16400.html">[�ֹ�����]</a><a href="../thread/16301-16400.html">[����åɰ���]</a></p>
+<p class="button"><a href="16394.html">[前]</a><a href="16396.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:16395
 </p>
@@ -13,103 +13,103 @@ mysql:16395
 <p>
 From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 6 Apr 2017 18:19:05 +0900<br>
-Subject: [mysql 16395] Re: [mysql 16394] MySQL�ΰ���ơ��֥�ȥѡ��ƥ��������߷פˤĤ���<br>
+Subject: [mysql 16395] Re: [mysql 16394] MySQLの一時テーブルとパーティションの設計について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����ˤ��ϡ�yoku0825�Ǥ���
+こんにちは、yoku0825です。
 
-<span class="quote1">&gt; ����ơ��֥�Υǥ��쥯�ȥ�ξ������̡�����ˤĤ���</span>
+<span class="quote1">&gt; 一時テーブルのディレクトリの場所と容量、設定について</span>
 <span class="quote1">&gt; &lt;snip&gt;</span>
-<span class="quote1">&gt; �ǥ������ե�ˤʤ뤫�⤷��ʤ����Ȥ����ꤷ����硢����ơ��֥��OS�ΰ�¦��MySQL�Υǡ����ΰ�Τɤ���ˤ��Ƥ����Τ��٥����Ǥ��礦����</span>
+<span class="quote1">&gt; ディスクフルになるかもしれないことを想定した場合、一時テーブルはOS領域側とMySQLのデータ領域のどちらにしておくのがベターでしょうか。</span>
 
-�ǥ������ե������ͤ���ΤǤ���С����Τ褦�ˤʤ�ޤ���
+ディスクフルだけを考えるのであれば、↓のようになります。
 
-- OS�ΰ�¦�˺�ä����ĥե�ˤʤä����˥ǡ����١�������»���ۤ���ɬ�פϤʤ������������ø��桼������ư���Ƥ��뤽��¾�Υǡ����ϻ�̤��⤷��ʤ�
-- MySQL�ΰ�¦�˺�ä����ĥե�ˤʤä����ˤޤ��ְ㤤�ʤ�binlog�ϲ���롢mysqld�ʳ��Υץ������ϱƶ�������ʤ�
+- OS領域側に作った場合…フルになった時にデータベースの破損を心配する必要はない、ただし非特権ユーザーで動いているその他のデーモンは死ぬかもしれない
+- MySQL領域側に作った場合…フルになった時にまず間違いなくbinlogは壊れる、mysqld以外のプロセスは影響を受けない
 
-OS�ΰ� &lt; MySQL�ΰ� �ǥ��ȥ졼�����ڤ뤳�Ȥ�¿�����ȡʥ��ȥ졼�����������礭������礭���ۤɥǥ������ե�ϱ�Τ��ˤ�
-�Ѥ˥ǡ���󤬤���̤��MySQL�������ޤ�äȥꥹ�ȥ�����������ñ�ʤ��ȡʤ���������˸Ŀ�Ū�Ǥ����ˤ���
-�錄���ʤ�MySQL�ΰ�¦��tmpdir�����ꤷ�ޤ���
+OS領域 &lt; MySQL領域 でストレージを切ることが多いこと（ストレージサイズが大きければ大きいほどディスクフルは遠のく）と
+変にデーモンがが死ぬよりMySQLを全部まるっとリストアする方が簡単なこと（これは本当に個人的ですが）から
+わたしならMySQL領域側にtmpdirを設定します。
 
-2�ѡ��ƥ������ˤ������ʤ��ʤ顢tmpdir���Ѥ˥ѡ��ƥ��������ڤ�Τ����ְ���¦���ݤ��������Ǥ��礦����
-
-
-<span class="quote1">&gt; �ޤ�������ơ��֥뤬�ʤ�٤���������ʤ��褦�ˡ�tmp_table_size��max_heap_table_size�Ϥɤ����٤����̤���ꤹ�٤��Ǥ��礦����</span>
-
-�ǥ������ΰ�򿩤��Ĥ֤��褦�ʥƥ�ݥ�꡼�ơ��֥�ʽ�GBñ�̡��ˤ��Ф��Ƥϡ�
-tmp_table_size �� max_heap_table_size
-�����椹��Τ��񤷤��Ȼפ��ޤ���100GB�����ꤷ�Ƥ������Ȥ����ǡ�100GB + ���ˤʤä�������100GB�Ǥ����Ȥ������ȤʤΤǡ�
-Ĵã�̤Ǥ⡢�ʤ��Ȥ��С�100GB�Υ��꡼����ݤ������100GB���ȥ졼����­����tmpdir���Ѥ��ΰ���ڤä�������ñ�ʵ������ޤ�����
+2パーティションにこだわらないなら、tmpdir専用にパーティションを切るのが一番安全側に倒した感じでしょうか。
 
 
-<span class="quote1">&gt; InnoDB�ξ��Ϥɤ��ʤΤ��Ȥ������ܤ��ä˸��Ĥ���ʤ��ΤǤ��������ȥ졼�����󥸥�˴ؤ�餺��ɬ���񤭹��ߥ��å���������ȹͤ��Ƥ褤�ΤǤ��礦����</span>
+<span class="quote1">&gt; また、一時テーブルがなるべく作成されないように、tmp_table_sizeとmax_heap_table_sizeはどの程度の容量を指定すべきでしょうか。</span>
 
-1. ���ȥ졼�����󥸥����Υ쥤�䡼�ǥ��å�����ޤ��ʥ᥿�ǡ������å��ˡ����δ֤��ɤ߽񤭤ɤ����Ǥ��ޤ���
-2. InnoDB�Υ쥤�䡼�ǥ��å����ꤽ���Ǥ�����ADD PARTITION�ξ��ϥ��å�����ʤ������ˤ⸫���ޤ���
+ディスク領域を食いつぶすようなテンポラリーテーブル（十GB単位？）に対しては、
+tmp_table_size と max_heap_table_size
+で制御するのは難しいと思います（100GBに設定しておいたところで、100GB + αになった時点で100GB吐かれるということなので）
+調達面でも、（たとえば）100GBのメモリーを確保するよりは100GBストレージを足してtmpdir専用に領域を切った方が簡単な気がします。。
+
+
+<span class="quote1">&gt; InnoDBの場合はどうなのかという記載は特に見つからないのですが、ストレージエンジンに関わらず、必ず書き込みロックがかかると考えてよいのでしょうか。</span>
+
+1. ストレージエンジンより上のレイヤーでロックを取ります（メタデータロック）。この間は読み書きどちらもできません。
+2. InnoDBのレイヤーでロックを取りそうですが、ADD PARTITIONの場合はロックを取らなさそうにも見えます。
     <a href="https://github.com/mysql/mysql-server/blob/mysql-5.7.17/storage/innobase/handler/ha_innopart.cc#L4271-L4293">https://github.com/mysql/mysql-server/blob/mysql-5.7.17/storage/innobase/handler/ha_innopart.cc#L4271-L4293</a>
-    ��ä��Ȥ���ibd�ե�������Ф��Ƴ������å����Ƥ���褦�ˤ�פ��롣����̤���ڡ�
+    取ったとしてibdファイルに対して外部ロックしているようにも思える。。（未検証）
 
 ALTER TABLE t1 ADD PARTITION (..), ALGORITHM= INPLACE, LOCK=NONE;
-����ʸ���顼�Ȥ��ƽ���줿�Τǡ�
-���⤽�⥪��饤��ALTER TABLE�Ȥ��ƥѡ�������Ƥ��ʤ��Ȼפ��ޤ��ʤΤǡ����Ĥ��̤�ν񤭹��ߥ֥��å����Ȼפ��ޤ���
+が構文エラーとして蹴られたので、
+そもそもオンラインALTER TABLEとしてパースされていないと思います（ので、いつも通りの書き込みブロックだと思います）
 
-������ADD PARTITION�����ʤ�ڤ����ʽ����˸�����ΤǤ����ɤ��Ǥ��礦�ġ� �ʤĤޤꡢ���ޤ󤹤��
+ただ、ADD PARTITIONだけなら軽そうな処理に見えるのですがどうでしょう…？ （つまり、がまんする）
 
 
 yoku0825,
 
 
-2017ǯ4��6�� 10:14 Yuji Fujihara &lt;yflab73@xxxxxxxxxx&gt;:
-<span class="quote1">&gt; �����äˤʤäƤ���ޤ���ƣ���ȿ����ޤ���</span>
+2017年4月6日 10:14 Yuji Fujihara &lt;yflab73@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; お世話になっております。藤原と申します。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ʲ���2�ĤˤĤ��Ƽ��䤵���Ƥ���������</span>
-<span class="quote1">&gt; �ʤ��������µ��Ǥ⸡�ڤ���ͽ��Ǥ���</span>
+<span class="quote1">&gt; 以下、2つについて質問させてください。</span>
+<span class="quote1">&gt; なお、後日実機でも検証する予定です。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ����ơ��֥�Υǥ��쥯�ȥ�ξ������̡�����ˤĤ���</span>
-<span class="quote1">&gt; ����ͤǤϡ�/tmp�˰���ơ��֥뤬��������ޤ��������ΰ���ơ��֥���ΰ�ϡ��ɤΤ褦���߷פ��뤳�Ȥ�¿���Τ���¸�ΤǤ�����߷���򶵤��Ƥ��������ޤ��Ǥ��礦����</span>
+<span class="quote1">&gt; 一時テーブルのディレクトリの場所と容量、設定について</span>
+<span class="quote1">&gt; 初期値では、/tmpに一時テーブルが作成されますが、この一時テーブルの領域は、どのように設計することが多いのかご存知であれば設計例を教えていただけますでしょうか。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; OS�ΰ��MySQL�Υǡ����ΰ�Υǥ������ѡ��ƥ�������ʬ���Ƥ��ޤ���</span>
+<span class="quote1">&gt; OS領域とMySQLのデータ領域のディスクパーティションは分けています。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���ˤʤ�Τ����̤�SQL���¹Ԥ��졢����ơ��֥뤬�������졢�ǥ������ե�ˤʤäƤ��ޤä����ε�ư�Ǥ���</span>
+<span class="quote1">&gt; 気になるのは大量のSQLが実行され、一時テーブルが作成され、ディスクフルになってしまった時の挙動です。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ǥ������ե�ˤʤ뤫�⤷��ʤ����Ȥ����ꤷ����硢����ơ��֥��OS�ΰ�¦��MySQL�Υǡ����ΰ�Τɤ���ˤ��Ƥ����Τ��٥����Ǥ��礦����</span>
+<span class="quote1">&gt; ディスクフルになるかもしれないことを想定した場合、一時テーブルはOS領域側とMySQLのデータ領域のどちらにしておくのがベターでしょうか。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ޤ�������ơ��֥뤬�ʤ�٤���������ʤ��褦�ˡ�tmp_table_size��max_heap_table_size�Ϥɤ����٤����̤���ꤹ�٤��Ǥ��礦����</span>
+<span class="quote1">&gt; また、一時テーブルがなるべく作成されないように、tmp_table_sizeとmax_heap_table_sizeはどの程度の容量を指定すべきでしょうか。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ʲ��Υڡ����򻲹ͤˤ��Ƥ��ޤ���</span>
+<span class="quote1">&gt; 以下のページを参考にしています。</span>
 <span class="quote1">&gt; <a href="https://dev.mysql.com/doc/refman/5.6/ja/internal-temporary-tables.html">https://dev.mysql.com/doc/refman/5.6/ja/internal-temporary-tables.html</a></span>
 <span class="quote1">&gt; <a href="https://dev.mysql.com/doc/refman/5.6/ja/temporary-files.html">https://dev.mysql.com/doc/refman/5.6/ja/temporary-files.html</a></span>
 <span class="quote1">&gt; <a href="http://k-1-ne-jp.blogspot.jp/2012/10/mysqltmpdir.html?m=1">http://k-1-ne-jp.blogspot.jp/2012/10/mysqltmpdir.html?m=1</a></span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ѡ��ƥ�������ɲû���InnoDB�ν񤭹��ߥ��å��ˤĤ���</span>
-<span class="quote1">&gt; MySQL�θ����ڡ����Ǥϡ��ѡ��ƥ�����������ϡ��ơ��֥�ν񤭹��ߥ��å���������ȵ��ܤ�����ޤ���</span>
+<span class="quote1">&gt; パーティション追加時のInnoDBの書き込みロックについて</span>
+<span class="quote1">&gt; MySQLの公式ページでは、パーティション操作時は、テーブルの書き込みロックがかかると記載があります。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; InnoDB�ξ��Ϥɤ��ʤΤ��Ȥ������ܤ��ä˸��Ĥ���ʤ��ΤǤ��������ȥ졼�����󥸥�˴ؤ�餺��ɬ���񤭹��ߥ��å���������ȹͤ��Ƥ褤�ΤǤ��礦����</span>
+<span class="quote1">&gt; InnoDBの場合はどうなのかという記載は特に見つからないのですが、ストレージエンジンに関わらず、必ず書き込みロックがかかると考えてよいのでしょうか。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���ꤷ�Ƥ���ϡ�1�ơ��֥���Ф��ơ�����˥ѡ��ƥ�������������Ƥ��ꡢ�������̤�����Υѡ��ƥ��������ɲä��Ƥ��ޤ������λ���InnoDB�ˤ����ơ��񤭹��ߥ��å��������äƤ��ޤ��Τ��ɤ������񤭹��ߥ��å��β�����ˡ������Τ��ɤ����Ǥ���</span>
+<span class="quote1">&gt; 想定しているは、1テーブルに対して、日毎にパーティションを作成しており、一日一回未来日のパーティションを追加しています。この時、InnoDBにおいて、書き込みロックがかかってしまうのかどうか、書き込みロックの回避方法があるのかどうかです。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ��¸�Τ���������ޤ����餴�������������ޤ��ȹ����Ǥ���</span>
+<span class="quote1">&gt; ご存知の方がおりましたらご教授いただけますと幸いです。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �񤭹��ߥ��å�������Ǥ��ʤ����ϡ�������̤�����Υѡ��ƥ�������������Ƥ������Ȥ�ͤ��Ƥ��ޤ���1�ơ��֥���Ф���ѡ��ƥ����������ξ���ͤ�8192�Ȥ������Ȥ����򤷤Ƥ��ޤ���</span>
+<span class="quote1">&gt; 書き込みロックが回避できない場合は、事前に未来日のパーティションを作成しておくことも考えています。1テーブルに対するパーティション作成の上限値は8192ということも理解しています。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ʲ��Υڡ����򻲹ͤˤ��Ƥ��ޤ���</span>
+<span class="quote1">&gt; 以下のページを参考にしています。</span>
 <span class="quote1">&gt; <a href="https://dev.mysql.com/doc/refman/5.6/ja/partitioning-limitations.html">https://dev.mysql.com/doc/refman/5.6/ja/partitioning-limitations.html</a></span>
 <span class="quote1">&gt; <a href="https://dev.mysql.com/doc/refman/5.6/ja/online-ddl-partitioning.html">https://dev.mysql.com/doc/refman/5.6/ja/online-ddl-partitioning.html</a></span>
 <span class="quote1">&gt; <a href="https://dev.mysql.com/doc/refman/5.6/ja/partitioning-limitations-locking.html">https://dev.mysql.com/doc/refman/5.6/ja/partitioning-limitations-locking.html</a></span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ƣ��</span>
+<span class="quote1">&gt; 藤原</span>
 
 </pre>
 </div>
-<p class="button"><a href="16394.html">[��]</a><a href="16396.html">[��]</a><a href="../list/16301-16400.html">[�ֹ�����]</a><a href="../thread/16301-16400.html">[����åɰ���]</a></p>
+<p class="button"><a href="16394.html">[前]</a><a href="16396.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="16394.html">@ 16394 2017-04-06 10:14 [Yuji Fujihara &lt;yflab] MySQL�ΰ���ơ��֥�ȥѡ��ƥ��������߷פˤĤ���</a></span>
-<span class="current">-&gt;&nbsp;<a href="16395.html">  16395 2017-04-06 18:19 ��[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16394] MySQL�ΰ���ơ��֥�ȥѡ��ƥ��������߷פˤĤ���</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16394.html">@ 16394 2017-04-06 10:14 [Yuji Fujihara &lt;yflab] MySQLの一時テーブルとパーティションの設計について</a></span>
+<span class="current">-&gt;&nbsp;<a href="16395.html">  16395 2017-04-06 18:19 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16394] MySQLの一時テーブルとパーティションの設計について</a></span>
 </pre>
 </body>
 </html>

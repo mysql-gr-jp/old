@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15596.html">[��]</a><a href="15598.html">[��]</a><a href="../list/15501-15600.html">[�ֹ�����]</a><a href="../thread/15501-15600.html">[����åɰ���]</a></p>
+<p class="button"><a href="15596.html">[前]</a><a href="15598.html">[次]</a><a href="../list/15501-15600.html">[番号順一覧]</a><a href="../thread/15501-15600.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15597
 </p>
@@ -13,49 +13,49 @@ mysql:15597
 <p>
 From: KOJIMA Takanori &lt;KOJIMA Takanori &lt;takanori.kojima@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 26 May 2011 17:38:56 +0900<br>
-Subject: [mysql 15597] Re: SELECT MAX �� FOR UPDATE  �� INSERT  �ǥǥåɥ��å�<br>
+Subject: [mysql 15597] Re: SELECT MAX ～ FOR UPDATE  と INSERT  でデッドロック<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����Ǥ���
+児島です。
 
-<span class="quote1">&gt; �������ͤ� [A] �� [B] �Υȥ�󥶥�����������˼¹Ԥ����Ȥ�����</span>
+<span class="quote1">&gt; 下記の様に [A] と [B] のトランザクションを並列に実行したところ、</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;  [A] BEGIN;</span>
 <span class="quote1">&gt;  [B]   BEGIN;</span>
 <span class="quote1">&gt;  [A] SELECT @a:=MAX(id) FROM xx FOR UPDATE;</span>
-<span class="quote1">&gt;  [B]   SELECT @a:=MAX(id) FROM xx FOR UPDATE; /* ���å������Ԥ� */</span>
-<span class="quote1">&gt;  [A] INSERT INTO xx VALUES(IFNULL(@a,0) + 1); /* �ǥåɥ��å��� */</span>
+<span class="quote1">&gt;  [B]   SELECT @a:=MAX(id) FROM xx FOR UPDATE; /* ロック解放待ち */</span>
+<span class="quote1">&gt;  [A] INSERT INTO xx VALUES(IFNULL(@a,0) + 1); /* デッドロック？ */</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; [A]��INSERT�ǰʲ����̤ꥨ�顼�ˤʤ�ޤ�����</span>
+<span class="quote1">&gt; [A]のINSERTで以下の通りエラーになりました。</span>
 <span class="quote1">&gt;  ERROR 1213 (40001): Deadlock found when trying to get lock; try restarting transaction</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���ޤ�ȯ������Ȥ��Ǥ�̵���ơ���ν��֤Ǽ¹Ԥ����ɴȯɴ���ȯ�����ޤ���</span>
-<span class="quote1">&gt; �嵭���ͤ���ˡ��Ϣ�֤�������������ϤȤ⤫���Ȥ��ơ�</span>
-<span class="quote1">&gt; �ǥåɥ��å��򤷤Ƥ��ޤ���ͳ���狼��ޤ���</span>
+<span class="quote1">&gt; たまに発生するとかでは無くて、上の順番で実行すると百発百中で発生します。</span>
+<span class="quote1">&gt; 上記の様な方法で連番を生成する是非はともかくとして、</span>
+<span class="quote1">&gt; デッドロックをしてしまう理由がわかりません。</span>
 
-InnoDB �Υͥ����ȥ������å��ˤ���Τ��Ȼפ��ޤ���
-��ˡ��ʲ��Τ褦�˥ȥ�󥶥������ʬΥ��٥���ѹ������
-�ǥåɥ��å��Ϥ����ޤ���Ǥ�����
+InnoDB のネクストキーロックによるものだと思います。
+試しに、以下のようにトランザクション分離レベルを変更すると
+デッドロックはおきませんでした。
 
   [A] SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
   [B] SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
   [A] BEGIN;
   [B]   BEGIN;
   [A] SELECT @a:=MAX(id) FROM xx FOR UPDATE;
-  [B]   SELECT @a:=MAX(id) FROM xx FOR UPDATE; /* ���å������Ԥ� */
-  [A] INSERT INTO xx VALUES(IFNULL(@a,0) + 1); /* ���� */
+  [B]   SELECT @a:=MAX(id) FROM xx FOR UPDATE; /* ロック解放待ち */
+  [A] INSERT INTO xx VALUES(IFNULL(@a,0) + 1); /* 成功 */
 
 </pre>
 </div>
-<p class="button"><a href="15596.html">[��]</a><a href="15598.html">[��]</a><a href="../list/15501-15600.html">[�ֹ�����]</a><a href="../thread/15501-15600.html">[����åɰ���]</a></p>
+<p class="button"><a href="15596.html">[前]</a><a href="15598.html">[次]</a><a href="../list/15501-15600.html">[番号順一覧]</a><a href="../thread/15501-15600.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="15596.html">  15596 2011-05-26 15:55 [&lt;gotou1213@xxxxxxxxx] SELECT MAX �� FOR UPDATE  �� INSERT  �ǥǥåɥ��å�</a></span>
-<span class="current">-&gt;&nbsp;<a href="15597.html">  15597 2011-05-26 17:38 ��[KOJIMA Takanori &lt;tak]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15598.html">  15598 2011-05-26 20:19 ����[&lt;gotou1213@xxxxxxxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15599.html">  15599 2011-05-26 20:28 ������[&lt;gotou1213@xxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15596.html">  15596 2011-05-26 15:55 [&lt;gotou1213@xxxxxxxxx] SELECT MAX ～ FOR UPDATE  と INSERT  でデッドロック</a></span>
+<span class="current">-&gt;&nbsp;<a href="15597.html">  15597 2011-05-26 17:38 ┗[KOJIMA Takanori &lt;tak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15598.html">  15598 2011-05-26 20:19 　┗[&lt;gotou1213@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15599.html">  15599 2011-05-26 20:28 　　┗[&lt;gotou1213@xxxxxxxxx]                                   </a></span>
 </pre>
 </body>
 </html>

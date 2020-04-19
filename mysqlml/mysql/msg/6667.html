@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="6666.html">[��]</a><a href="6668.html">[��]</a><a href="../list/6601-6700.html">[�ֹ�����]</a><a href="../thread/6601-6700.html">[����åɰ���]</a></p>
+<p class="button"><a href="6666.html">[前]</a><a href="6668.html">[次]</a><a href="../list/6601-6700.html">[番号順一覧]</a><a href="../thread/6601-6700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:6667
 </p>
@@ -13,24 +13,24 @@ mysql:6667
 <p>
 From: &quot;matsuda&quot; &lt;&quot;matsuda&quot; &lt;matsuda@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 5 Dec 2002 19:38:03 +0900<br>
-Subject: [mysql 06667] ROUND �ؿ��λͼθ����ˤĤ���<br>
+Subject: [mysql 06667] ROUND 関数の四捨五入について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����ˤ���
-���ƻ��ä����Ƥ��������ޤ����ޤĤ��Ǥ���
-���Ĥ�������򸫤ƻ��ͤˤ����Ƥ��������Ƥ��ޤ���
+こんにちわ
+初めて参加させていただきます、まつだです。
+いつも過去ログを見て参考にさせていただいています。
 
-�Ķ���Windows2000��SP1
-MySQL��4.0.4-beta-max
-��������ǥƥ��Ȥ��Ƥ��ޤ���
+環境：Windows2000　SP1
+MySQL：4.0.4-beta-max
+ローカルでテストしています。
 
-ROUND�ؿ���Ȥäơ��������裱�̤�ͼθ����������˴ݤ᤿���ΤǤ�����
-�������裱�̤�&quot;5&quot;�λ����ͼθ�������Ƥ��ʤ��褦�ʤΤǤ���
+ROUND関数を使って、小数点第１位を四捨五入し整数に丸めたいのですが、
+小数点第１位が&quot;5&quot;の時、四捨五入されていないようなのです。
 
-��MySQL�¹����ơ�
+＜MySQL実行内容＞
 -------------------------------------------------
 mysql&gt; create table test(tanka decimal(15,3) null);
 Query OK, 0 rows affected (0.09 sec)
@@ -59,54 +59,54 @@ mysql&gt; select * from test;
 1 row in set (0.00 sec)
 -------------------------------------------------
 
-�嵭SQLʸ��ꡢ(update test set tanka=round(tanka*0.95,0);)
+上記SQL文より、(update test set tanka=round(tanka*0.95,0);)
 890*0.95=845.5
-�Ȥʤ�Τǡ��������裱�̤�ͼθ���������
+となるので、小数点第１位を四捨五入したら
 846
-�ˤʤ�Ϥ��ʤΤǤ�������̤�
+になるはずなのですが、結果は
 845
-�ȤʤäƤ��ޤ��ޤ���
+となってしまいます。
 
-���Τ��Ȥ��鲼���Τ褦��ROUND�ؿ���Ȥä��ͤ�ľ��INSERTʸ��Ȥä�
-�ơ��֥�˥ǡ������������Ƥߤޤ��������ʲ��Τ褦�ʷ�̤ˤʤäƤ��ޤ�
-�ޤ�����
+このことから下記のようなROUND関数を使った値を直接INSERT文を使って
+テーブルにデータを挿入してみましたが、以下のような結果になってしまい
+ました。
 
-��ROUND(845.49,0)  ---&gt; 845 ��
-��ROUND(845.5 ,0)  ---&gt; 845 ��
-��ROUND(845.50,0)  ---&gt; 845 ��
-��ROUND(845.51,0)  ---&gt; 846 ��
-��ROUND(845.59,0)  ---&gt; 846 ��
+・ROUND(845.49,0)  ---&gt; 845 ×
+・ROUND(845.5 ,0)  ---&gt; 845 ×
+・ROUND(845.50,0)  ---&gt; 845 ×
+・ROUND(845.51,0)  ---&gt; 846 ○
+・ROUND(845.59,0)  ---&gt; 846 ○
 
-�ե�����ɤη��˸���������Τ��Ȼפ���double���ˤ��Ƥߤޤ�����
-��̤�Ʊ���Ǥ�����
-�ޤ����������裱�̤�&quot;5&quot;�ʳ��ΤȤ��ϡ������̤�λͼθ����η�̤�
-�֤äƤ��ޤ���
-����ˡ��������裱�̰ʳ��Ǥ��Ƥߤޤ���������Ϥ��̤�Ʊ���Ǥ�����
+フィールドの型に原因があるのかと思い、double型にしてみましたが
+結果は同じでした。
+また、小数点第１位が&quot;5&quot;以外のときは、期待通りの四捨五入の結果が
+返ってきます。
+さらに、小数点第１位以外でも試してみましたが、やはり結果は同じでした。
 
-�����MySQL������Ū�˹ԤäƤ���(�Τ��ʡ�)�����˸���������Τ�
-���礦����
-�⤷���ϡ�Ŭ���ʤ��ե�����ɤη��Ȥ�������ΤǤ��礦����
+これはMySQLが内部的に行っている(のかな？)処理に原因があるので
+しょうか？
+もしくは、適さないフィールドの型とかがあるのでしょうか？
 
 
-�������狼�餺���äƤ��ޤ���ML�˼��䤵���Ƥ��������ޤ�����
+原因がわからず困ってしまい、MLに質問させていただきました。
 
-�ʾ塢����������ꤤ�������ޤ���
+以上、よろしくお願いいたします。
 
-�ޤĤ�
+まつだ
 
 
 
 </pre>
 </div>
-<p class="button"><a href="6666.html">[��]</a><a href="6668.html">[��]</a><a href="../list/6601-6700.html">[�ֹ�����]</a><a href="../thread/6601-6700.html">[����åɰ���]</a></p>
+<p class="button"><a href="6666.html">[前]</a><a href="6668.html">[次]</a><a href="../list/6601-6700.html">[番号順一覧]</a><a href="../thread/6601-6700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="6667.html">   6667 2002-12-05 19:38 [&quot;matsuda&quot; &lt;matsuda@x] ROUND �ؿ��λͼθ����ˤĤ���            </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6668.html">   6668 2002-12-05 23:59 ��[KAWAJI Shinya &lt;kawaj]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6669.html">   6669 2002-12-06 00:08 ����[KAWAJI Shinya &lt;kawaj]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6671.html">   6671 2002-12-06 19:59 ��[Takeyuki Miyagawa &lt;m]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6675.html">   6675 2002-12-07 21:42 ����[Masahiro Utsumi &lt;uts]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6676.html">   6676 2002-12-09 00:43 ����[&quot;kossy&quot; &lt;kossy@xxxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6677.html">   6677 2002-12-09 13:23 ������[&quot;matsuda&quot; &lt;matsuda@x]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="6667.html">   6667 2002-12-05 19:38 [&quot;matsuda&quot; &lt;matsuda@x] ROUND 関数の四捨五入について            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6668.html">   6668 2002-12-05 23:59 ┣[KAWAJI Shinya &lt;kawaj]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6669.html">   6669 2002-12-06 00:08 ┃┗[KAWAJI Shinya &lt;kawaj]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6671.html">   6671 2002-12-06 19:59 ┗[Takeyuki Miyagawa &lt;m]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6675.html">   6675 2002-12-07 21:42 　┣[Masahiro Utsumi &lt;uts]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6676.html">   6676 2002-12-09 00:43 　┗[&quot;kossy&quot; &lt;kossy@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6677.html">   6677 2002-12-09 13:23 　　┗[&quot;matsuda&quot; &lt;matsuda@x]                                   </a></span>
 </pre>
 </body>
 </html>

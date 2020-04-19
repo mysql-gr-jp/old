@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="10769.html">[��]</a><a href="10771.html">[��]</a><a href="../list/10701-10800.html">[�ֹ�����]</a><a href="../thread/10701-10800.html">[����åɰ���]</a></p>
+<p class="button"><a href="10769.html">[前]</a><a href="10771.html">[次]</a><a href="../list/10701-10800.html">[番号順一覧]</a><a href="../thread/10701-10800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:10770
 </p>
@@ -13,43 +13,43 @@ mysql:10770
 <p>
 From: &quot;TAKAHASHI, Tomohiro&quot; &lt;&quot;TAKAHASHI, Tomohiro&quot; &lt;t_takahashi@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 11 Jan 2005 13:15:18 +0900<br>
-Subject: [mysql 10770] Re: Java DataSource   �������³�ǻ��֤�Ω�Ĥȥ��顼�ˤʤ�<br>
+Subject: [mysql 10770] Re: Java DataSource   からの接続で時間が立つとエラーになる<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-  �ⶶ(��)�Ǥ���
+  高橋(智)です。
 
 Teruyuki SATAKE wrote:
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt; &gt;  ���Τ褦�ʾ��ˤϡ��԰դ���³���ڤ줿�Ȥ��Ƥ⡢Connection�����׵���ˡ�</span>
-<span class="quote2">&gt; &gt;DBCP�Υ�٥�ǥ��ͥ�����������������֤��褦��DBCP �� validationQuery</span>
-<span class="quote2">&gt; &gt;�ץ��ѥƥ�����Ѥ���Τ��̾�ǤϤʤ��Ǥ��礦��?</span>
+<span class="quote2">&gt; &gt;  このような場合には、不意に接続が切れたとしても、Connection取得要求時に、</span>
+<span class="quote2">&gt; &gt;DBCPのレベルでコネクションを再生成して返すよう、DBCP の validationQuery</span>
+<span class="quote2">&gt; &gt;プロパティを使用するのが通常ではないでしょうか?</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����󡢡��̾�פȤ�����깥�ߤȤ������ݥꥷ�������꤫�ʡ�������館�Ƥޤ���</span>
-<span class="quote1">&gt; Driver ��ͭ(DB��ͭ�ˤε�ǽ��Ȥ�Ĺ�ꡦû��Ϥ���ޤ�����DBCP�ε�ǽ��</span>
+<span class="quote1">&gt; う～ん、「通常」というより好みというかポリシーの問題かな・・と捕らえてます。</span>
+<span class="quote1">&gt; Driver 特有(DB特有）の機能を使う長所・短所はありますし、DBCPの機能を</span>
 
-  �����������ǤϤʤ���ʪ��Ū�� java.sql.Connection ���ΤȤ��μ�����
-�Ĥޤ�JDBC�ɥ饤�м��Ȥ�������Ū�˾���˺���³��Ԥ��Ȥ���ȡ����꤬
-���ʣ���ˤʤ�ޤ���? �㤨�С��ʲ��Τ褦�ʥȥ�󥶥������������
-�ˤ����꤬���뤫��? �Ȼפ��ΤǤ������ºݤΤȤ����ɤ��ʤ�Ǥ��礦��?
-  Connector/J�μ��������Ͼܤ����ʤ��Ǥ��������⤽����ΤɤΤ褦�ʻ�����
-����³���Ԥ���ΤǤ��礦��?
-   1. java.sql.Connection �� ����
-   2. �ȥ�󥶥�����󳫻�
-   3. SQLʸ A �� �¹Գ���
-   4. SQLʸ A �� �¹Խ�λ
-   5. Connection���԰դ�����
-   6. SQLʸ B �� �¹Գ���
-   7. Connection�κ���³����??
-   8. SQLʸ B �� �¹Խ�λ
-   9. �ȥ�󥶥�����󥳥ߥå�
-   10.Connection�Υ�������
+  いえ、そうではなく、物理的な java.sql.Connection 自体とその実装、
+つまりJDBCドライバ自身が、内部的に勝手に再接続を行うとすると、問題が
+より複雑になりませんか? 例えば、以下のようなトランザクションが絡む場合
+には問題があるかも? と思うのですが、実際のところどうなんでしょうか?
+  Connector/Jの実装内部は詳しくないですが、そもそも一体どのような時点で
+再接続が行われるのでしょうか?
+   1. java.sql.Connection の 取得
+   2. トランザクション開始
+   3. SQL文 A の 実行開始
+   4. SQL文 A の 実行終了
+   5. Connectionの不意の切断
+   6. SQL文 B の 実行開始
+   7. Connectionの再接続する??
+   8. SQL文 B の 実行終了
+   9. トランザクションコミット
+   10.Connectionのクローズ
 
-  ��ϤꡢDBCP�ʤꥳ�ͥ������ס���ʤ꤬�󶡤�������Ū�ʥ�٥�Ǥ�
-java.sql.Connection����������³��validation��Ԥ��Τ�����ɤ��Ȼפ���
-�ΤǤ������������Ǥ��礦��?
+  やはり、DBCPなりコネクションプールなりが提供する論理的なレベルでの
+java.sql.Connection実装が、接続のvalidationを行うのがより良いと思える
+のですが、いかがでしょうか?
 
 Regards,
 I love Borland
@@ -57,24 +57,24 @@ TAKAHASHI, KEN, Tomohiro
 
 </pre>
 </div>
-<p class="button"><a href="10769.html">[��]</a><a href="10771.html">[��]</a><a href="../list/10701-10800.html">[�ֹ�����]</a><a href="../thread/10701-10800.html">[����åɰ���]</a></p>
+<p class="button"><a href="10769.html">[前]</a><a href="10771.html">[次]</a><a href="../list/10701-10800.html">[番号順一覧]</a><a href="../thread/10701-10800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="10760.html">  10760 2005-01-09 21:58 [Hiroshi Kitabata &lt;ki] Java DataSource�������³�ǻ��֤�Ω�Ĥȥ��顼�ˤʤ�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10761.html">  10761 2005-01-10 01:27 ��[bon &lt;bon@xxxxxxxxxx&gt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10764.html">  10764 2005-01-10 19:53 ����[Hiroshi Kitabata &lt;ki]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10763.html">  10763 2005-01-10 03:56 ��[Teruyuki SATAKE &lt;sat]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10765.html">  10765 2005-01-10 19:56 ����[Hiroshi Kitabata &lt;ki]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10767.html">  10767 2005-01-11 10:10 ������[&quot;TAKAHASHI, Tomohiro]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10768.html">  10768 2005-01-11 12:24 ��������[Teruyuki SATAKE &lt;sat]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10769.html">  10769 2005-01-11 12:41 ����������[seiji takegata &lt;take]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10771.html">  10771 2005-01-11 13:15 ������������[&quot;TAKAHASHI, Tomohiro]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10775.html">  10775 2005-01-11 20:17 ��������������[seiji takegata &lt;take] ���ͥ������ס����    </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10776.html">  10776 2005-01-11 20:29 ����������������[&quot;TAKAHASHI, Tomohiro]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10777.html">  10777 2005-01-11 22:42 ������������������[seiji takegata &lt;take]                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="10770.html">  10770 2005-01-11 13:15 ����������[&quot;TAKAHASHI, Tomohiro]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10772.html">  10772 2005-01-11 13:55 ������������[Teruyuki SATAKE &lt;sat]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10773.html">  10773 2005-01-11 14:09 ��������������[&quot;TAKAHASHI, Tomohiro]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10778.html">  10778 2005-01-12 07:36 ������������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10760.html">  10760 2005-01-09 21:58 [Hiroshi Kitabata &lt;ki] Java DataSourceからの接続で時間が立つとエラーになる</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10761.html">  10761 2005-01-10 01:27 ┣[bon &lt;bon@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10764.html">  10764 2005-01-10 19:53 ┃┗[Hiroshi Kitabata &lt;ki]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10763.html">  10763 2005-01-10 03:56 ┗[Teruyuki SATAKE &lt;sat]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10765.html">  10765 2005-01-10 19:56 　┗[Hiroshi Kitabata &lt;ki]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10767.html">  10767 2005-01-11 10:10 　　┗[&quot;TAKAHASHI, Tomohiro]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10768.html">  10768 2005-01-11 12:24 　　　┗[Teruyuki SATAKE &lt;sat]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10769.html">  10769 2005-01-11 12:41 　　　　┣[seiji takegata &lt;take]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10771.html">  10771 2005-01-11 13:15 　　　　┃┗[&quot;TAKAHASHI, Tomohiro]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10775.html">  10775 2005-01-11 20:17 　　　　┃　┗[seiji takegata &lt;take] コネクションプーリング    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10776.html">  10776 2005-01-11 20:29 　　　　┃　　┗[&quot;TAKAHASHI, Tomohiro]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10777.html">  10777 2005-01-11 22:42 　　　　┃　　　┗[seiji takegata &lt;take]                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="10770.html">  10770 2005-01-11 13:15 　　　　┗[&quot;TAKAHASHI, Tomohiro]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10772.html">  10772 2005-01-11 13:55 　　　　　┣[Teruyuki SATAKE &lt;sat]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10773.html">  10773 2005-01-11 14:09 　　　　　┃┗[&quot;TAKAHASHI, Tomohiro]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10778.html">  10778 2005-01-12 07:36 　　　　　┗[とみたまさひろ &lt;tomm]                             </a></span>
 </pre>
 </body>
 </html>

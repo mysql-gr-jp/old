@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13375.html">[��]</a><a href="13377.html">[��]</a><a href="../list/13301-13400.html">[�ֹ�����]</a><a href="../thread/13301-13400.html">[����åɰ���]</a></p>
+<p class="button"><a href="13375.html">[前]</a><a href="13377.html">[次]</a><a href="../list/13301-13400.html">[番号順一覧]</a><a href="../thread/13301-13400.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13376
 </p>
@@ -13,28 +13,28 @@ mysql:13376
 <p>
 From: &quot;YOSHINO. Satoki&quot; &lt;&quot;YOSHINO. Satoki&quot; &lt;yoshino@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 21 Sep 2006 12:00:49 +0900<br>
-Subject: [mysql 13376] InnoDB �ǥ��֥������Ȥä� update  �¹���˽񤭹��ߥ֥��å�<br>
+Subject: [mysql 13376] InnoDB でサブクエリを使った update  実行中に書き込みブロック<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�Ϥ���ޤ��ơ�����ε��ȿ����ޤ���
+はじめまして、吉野仁規と申します。
 
-MySQL5.0 �ǥХ������Τ�ʤ����ݤ���ǧ�Ǥ����Τǡ���Ƥ�����
-���������ޤ�����
+MySQL5.0 でバグかも知れない現象が確認できたので、投稿させて
+いただきました。
 
-�ڳ��ס�
+【概要】
 
-�ե�������ؿ���group by���Ȥä�selectʸ��update��
-set��ǻȤ��ȡ�from��ǻ��ꤷ���ơ��֥�ؤν񤭹��ߤ�
-�Ǥ��ʤ��ʤ�ޤ���
+フロー制御関数とgroup by句を使ったselect文をupdateの
+set句で使うと、from句で指定したテーブルへの書き込みが
+できなくなります。
 
-�ڴĶ���
+【環境】
 
-OS�ϡ�CentOS 4.3�Ǥ���
+OSは、CentOS 4.3です。
 
-�ʲ���mysqlbug�ν��Ϥ����ȴ��Ǥ���
+以下はmysqlbugの出力からの抜粋です。
 
 Release: mysql-5.0.24a-standard (MySQL Community Edition - Standard (GPL))
 
@@ -46,9 +46,9 @@ System: Linux log 2.6.9-22.EL #1 Sat Oct 8 17:48:27 CDT 2005 i686 i686
 i386 GNU/Linux
 Architecture: i686
 
-��my.cnf��
+【my.cnf】
 
-my.cnf �����ƤǤ���
+my.cnf の内容です。
 
 [client]
 port=3306
@@ -84,7 +84,7 @@ innodb_log_file_size=10M
 innodb_thread_concurrency=8
 
 
-�ڥơ��֥빽¤��
+【テーブル構造】
 
 mysql&gt; desc summary;
 +---------------------+----------+------+-----+---------+----------------+
@@ -112,28 +112,28 @@ mysql&gt; desc user;
 <span class="quote1">| kind       | int(10)             | NO   |     | 0       |                |</span>
 +------------+---------------------+------+-----+---------+----------------+
 
-summary �ˤ�10�쥳���ɡ�log �ˤ���1300���쥳���ɡ�user �ˤ���2800���
-�ǡ��������äƤ��ޤ���
+summary には10レコード、log には約1300万レコード、user には約2800件の
+データが入っています。
 
 
-�ڸ��ݤξܺ١�
+【現象の詳細】
 
-log �ơ��֥뤫����˹��פ���ǡ���������ȴ���Ф�
-summary �ơ��֥�Υǡ�����������������ץ����������
-�¹Ԥ��Ƥ��ޤ�����
+log テーブルから条件に合致するデータを件数を抜き出し
+summary テーブルのデータを毎日更新するプログラムを定期
+実行していました。
 
-���������������֤˰۾�˻��֤��ݤ��ꡢ�ޤ���log�ؤ�
-�񤭹��ߤ�Ԥ����ץꥱ������󤬻Ȥ��ʤ��Ȥ������
-���ä��Τ�Ĵ����Ԥ��ޤ�����
+しかし、処理事態に異常に時間が掛かり、また、logへの
+書き込みを行うアプリケーションが使えないという報告が
+あったので調査を行いました。
 
-set���select��Ǵְ�ä�ɬ�פ�̵��group by ��ȤäƤ������Ȥ�
-�������ä��ΤǤ���������Ǥ⥨�顼���֤����˥����꤬�¹Ԥ��졢
-�ơ��֥�Υǡ�������������ޤ���
+set句のselect中で間違って必要の無いgroup by を使っていたことが
+原因だったのですが、それでもエラーを返さずにクエリが実行され、
+テーブルのデータが更新されます。
 
-�ʲ���Ĵ���Ǥ狼�ä����Ȥ�񤭽Ф��Ƥ��ޤ���
+以下、調査でわかったことを書き出しています。
 
-������SQL��¹���ˡ��ơ��֥� log �ؤ�insert/update/delete ��
-�֥��å�����ޤ���
+下記のSQLを実行中に、テーブル log へのinsert/update/delete が
+ブロックされます。
 
 update summary
    set sum =
@@ -150,7 +150,7 @@ mysql&gt; insert log set kind = '0';
 ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction
 
 
-�ʲ��� /var/lib/mysql/�ǡ����١���̾-slow.log �ν��Ϸ�̤Ǥ���
+以下は /var/lib/mysql/データベース名-slow.log の出力結果です。
 
 # User@Host: root[root] @ localhost []
 # Query_time: 51  Lock_time: 0  Rows_sent: 0  Rows_examined: 0
@@ -181,39 +181,39 @@ select count(distinct if (kind = 0, user_id, 1)) - 1
  group by month(create_on);
 
 
-���顼�����ʥ����С�̾.err�ˤˤϲ�����Ϥ���ޤ���
+エラーログ（サーバー名.err）には何も出力されません。
 
-log �ơ��֥�ؤ�update��¹���ˡ�mysql&gt; show processlist ��
-���󤫼¹Ԥ��뤳�Ȥǡ�State�ξ��֤���Sorting result�פ���
-��Sending data�פ����ܤ��Ƥ��뤳�Ȥ���ǧ�Ǥ��ޤ�����
+log テーブルへのupdateを実行中に、mysql&gt; show processlist を
+何回か実行することで、Stateの状態が「Sorting result」から
+「Sending data」に遷移していることが確認できました。
 
-State����Sending data�פξ��֤λ��˽񤭹��ߥ֥��å���
-ȯ�����ޤ���
+Stateが「Sending data」の状態の時に書き込みブロックが
+発生します。
 
-select ��ñ�ȤǼ¹Ԥ���ȡ�Sorting result�פ�����ä��ʳ���
-��̤��֤�����Sending data�פˤ����ܤ��ޤ���
+select を単独で実行すると「Sorting result」が終わった段階で
+結果を返し、「Sending data」には遷移しません。
 
-select��if��ȤäƤ���ս��case�ˤ��ƽ񤭴����Ƥ⡢Ʊ��
-���ݤ�ȯ�����ޤ���
+selectでifを使っている箇所をcaseにして書き換えても、同じ
+現象が発生します。
 
-select����ե�������ؿ��⤷���� group by ������ȡ�
-update�¹���ν񤭹��ߥ֥��å���ȯ�����ޤ���
+selectからフロー制御関数もしくは group by を除くと、
+update実行中の書き込みブロックは発生しません。
 
-�����select���group by ��ʤ��Ƥ⡢��̤�����0��λ��ʳ���
-��̤�0��λ���group by ��ȤäƤ��ʤ��ȡ�-1�פˤʤ롣
-group by ��Ȥ��ȡ�0�סˤʤΤǡ�group by ��Ȥ�ɬ������
-̵���ΤǤ�����ɬ�פʾ��⤢�뤫�Ȼפ��ޤ���
-�ʺ����㤬�פ��Ĥ��ʤ��ƿ������ʤ��ΤǤ�����
+今回はselect中のgroup by を省いても、結果が一緒（0件の時以外。
+結果が0件の時にgroup by を使っていないと「-1」になる。
+group by を使うと「0」）なので、group by を使う必然性が
+無いのですが、必要な場合もあるかと思います。
+（今は例が思いつかなくて申し訳ないのですが）
 
-�ޤ����⤷group by ��set���select��ǻȤ�ɬ�פ����Ф�
-̵����С�group by ��Ȥä������ǥ��顼�ˤ��٤����Ȼפ���
-�Ǥ������ɤ��Ǥ��礦����
+また、もしgroup by をset句のselect内で使う必要が絶対に
+無ければ、group by を使った時点でエラーにすべきだと思うの
+ですが、どうでしょうか？
 
-�ʾ塢���θ��ݡʥХ����ˤ˴ؤ������ʤɤ���Ф���������������
-����������ꤤ�פ��ޤ���
+以上、この現象（バグ？）に関する情報などあればお教えください。
+よろしくお願い致します。
 
 </pre>
 </div>
-<p class="button"><a href="13375.html">[��]</a><a href="13377.html">[��]</a><a href="../list/13301-13400.html">[�ֹ�����]</a><a href="../thread/13301-13400.html">[����åɰ���]</a></p>
+<p class="button"><a href="13375.html">[前]</a><a href="13377.html">[次]</a><a href="../list/13301-13400.html">[番号順一覧]</a><a href="../thread/13301-13400.html">[スレッド一覧]</a></p>
 </body>
 </html>

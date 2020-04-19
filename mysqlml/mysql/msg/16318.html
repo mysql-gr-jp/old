@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="16317.html">[��]</a><a href="16319.html">[��]</a><a href="../list/16301-16400.html">[�ֹ�����]</a><a href="../thread/16301-16400.html">[����åɰ���]</a></p>
+<p class="button"><a href="16317.html">[前]</a><a href="16319.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:16318
 </p>
@@ -13,24 +13,24 @@ mysql:16318
 <p>
 From: &lt;vbwnvwnpwvwenemcew@xxxxxxxxxx&gt;<br>
 Date: Fri, 18 Mar 2016 16:33:20 +0900 (JST)<br>
-Subject: [mysql 16318] MySQL�Υ桼���ѿ��ǡ�ʬ�ϴؿ������ѤǤ��뤫��<br>
+Subject: [mysql 16318] MySQLのユーザ変数で、分析関数を代用できるか？<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-HibinoMeguru�ȿ����ޤ���
+HibinoMeguruと申します。
 
-TeraTail�Ǽ��䤷���ΤǤ����������ʤ��Τǡ�
+TeraTailで質問したのですが回答がないので、
 <a href="https://teratail.com/questions/29899">https://teratail.com/questions/29899</a>
-������Ǽ��䤵���Ʋ�������
+こちらで質問させて下さい。
 
 <a href="http://stackoverflow.com/questions/532878/how-to-perform-grouped-ranking-in-mysql">http://stackoverflow.com/questions/532878/how-to-perform-grouped-ranking-in-mysql</a> 
-�ǾҲ𤵤�Ƥ�ʬ�ϴؿ���MySQL�Υ桼���ѿ������Ѥ���Selectʸ�ϡ�
+で紹介されてる分析関数をMySQLのユーザ変数で代用するSelect文は、
 
-���ִĶ��ǻ��Ѥ���Selectʸ�ǡ��ȤäƤ�����ΤʤΤǤ��礦���� 
+本番環境で使用するSelect文で、使っていいものなのでしょうか？ 
 
-���Ȥ��С�������StackOverFlow�β�����Selectʸ�ˤ����ơ� 
+たとえば、リンク先のStackOverFlowの下記のSelect文において、 
 
 SELECT id_student, id_class, grade,
  @student:=CASE WHEN @class &lt;&gt; id_class THEN 0 ELSE @student+1 END AS rn,
@@ -42,43 +42,43 @@ FROM
  FROM mytable
  ORDER BY id_class, id_student) t
 
-���Ȥ��С� 
-���ƤιԤ�@class:=id_class �Ȥ������ɾ������Ƥ��顢 
-���ƤιԤ�@student:=CASE WHEN @class &lt;&gt; id_class THEN 0 ELSE @student+1 END AS rn 
-��ɾ������Ȥ����顢��̤ϴ��Ԥ����̤�ˤʤ�ʤ��� 
+たとえば、 
+全ての行の@class:=id_class という列を評価されてから、 
+全ての行の@student:=CASE WHEN @class &lt;&gt; id_class THEN 0 ELSE @student+1 END AS rn 
+を評価するとしたら、結果は期待した通りにならないし 
 
-���⤽�� 
-ORDER BY id_class, id_student�ν��֤ǡ� 
-����Select��κ����鱦�˥桼���ѿ���ɾ������ʤ��¤� 
-���Ԥ�����̤ˤʤ�ʤ��Ȼפ��ޤ��� 
+そもそも 
+ORDER BY id_class, id_studentの順番で、 
+かつSelect句の左から右にユーザ変数が評価されない限り 
+期待した結果にならないと思います。 
 
-�����ơ� 
-MySQL�Υޥ˥奢��ˤ⡢�桼���ѿ���ɾ������ϡ��������Ƥ��ʤ��ȵ��ܤ���Ƥ��ޤ��� 
+そして、 
+MySQLのマニュアルにも、ユーザ変数の評価順序は、定義されていないと記載されています。 
 <a href="http://download.nust.na/pub6/mysql/doc/refman/5.1-olh/ja/user-variables.html">http://download.nust.na/pub6/mysql/doc/refman/5.1-olh/ja/user-variables.html</a> 
-<span class="quote1">&gt;�桼�����ѿ���ɾ��������������Ƥ��餺�� </span>
-<span class="quote1">&gt;Ϳ����줿�����꡼������Ǥ˴�Ť����ѹ�����뤳�Ȥ�����ޤ��� </span>
-<span class="quote1">&gt;SELECT @a, @a := @a+1 ...�Ǥϡ�MySQL ��@a �����ɾ�������˳�����Ƥ��¹Ԥ����褦�˸����ޤ����� </span>
-<span class="quote1">&gt;�����꡼���ѹ��ʤ��Ȥ��� GROUP BY��HAVING �ޤ��� ORDER BY ��ˤ���ѹ��� </span>
-<span class="quote1">&gt;��ɾ��������ѹ������ǽ��������ޤ��� </span>
-<span class="quote1">&gt;����Ū�ʵ�§�ϡ����ơ��ȥ��Ȥΰ����ǥ桼�����ѿ��ͤ������Ƥʤ����Ȥ���� </span>
-<span class="quote1">&gt;Ʊ�쥹�ơ��ȥ������¾��ʬ��Ʊ���ѿ�����Ѥ��ʤ����ȤǤ��� </span>
-<span class="quote1">&gt;�����̤�η�̤������뤫�⤷��ޤ��󤬡�����ϳ��󤵤�Ƥ��ޤ���</span>
+<span class="quote1">&gt;ユーザー変数の評価順序は定義されておらず、 </span>
+<span class="quote1">&gt;与えられたクエリー内の要素に基づいて変更されることがあります。 </span>
+<span class="quote1">&gt;SELECT @a, @a := @a+1 ...では、MySQL は@a を先に評価し次に割り当てが実行されるように見えますが、 </span>
+<span class="quote1">&gt;クエリーの変更（たとえば GROUP BY、HAVING または ORDER BY 節による変更） </span>
+<span class="quote1">&gt;は評価順序を変更する可能性があります。 </span>
+<span class="quote1">&gt;基本的な規則は、ステートメントの一部でユーザー変数値を割り当てないことおよび </span>
+<span class="quote1">&gt;同一ステートメント内の他部分で同じ変数を使用しないことです。 </span>
+<span class="quote1">&gt;期待通りの結果を得られるかもしれませんが、これは確約されていません。</span>
 
-�嵭����ͳ���� 
-selectʸ�ǥ桼���ѿ���ʣ����Ȥäơ� 
-ʬ�ϴؿ������Ѥ���Selectʸ�ϡ���̤��ݾڤ���ʤ��Τ����� 
-���ִĶ��ʤɤǤϡ������Ȥ�ʪ�ˤʤ�ʤ��Ȥ����Τ����ǧ���ʤΤǤ����� 
-�ߤʤ���Ϥɤ��Ǥ��礦���� 
+上記の理由から 
+select文でユーザ変数を複数回使って、 
+分析関数を代用するSelect文は、結果が保証されないのだから 
+本番環境などでは、全く使い物にならないというのが私の認識なのですが、 
+みなさんはどうでしょうか？ 
 
 
 
 </pre>
 </div>
-<p class="button"><a href="16317.html">[��]</a><a href="16319.html">[��]</a><a href="../list/16301-16400.html">[�ֹ�����]</a><a href="../thread/16301-16400.html">[����åɰ���]</a></p>
+<p class="button"><a href="16317.html">[前]</a><a href="16319.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="16318.html">  16318 2016-03-18 16:33 [&lt;vbwnvwnpwvwenemcew@] MySQL�Υ桼���ѿ��ǡ�ʬ�ϴؿ������ѤǤ��뤫��</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16319.html">  16319 2016-03-20 16:46 ��[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16318] MySQL�Υ桼���ѿ��ǡ�ʬ�ϴؿ������ѤǤ��뤫��</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16320.html">  16320 2016-03-22 18:18 ����[&lt;vbwnvwnpwvwenemcew@] Re: [mysql 16319] Re: [mysql 16318] MySQL�Υ桼���ѿ��ǡ�ʬ�ϴؿ������ѤǤ��뤫��</a></span>
+<span class="current">-&gt;&nbsp;<a href="16318.html">  16318 2016-03-18 16:33 [&lt;vbwnvwnpwvwenemcew@] MySQLのユーザ変数で、分析関数を代用できるか？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16319.html">  16319 2016-03-20 16:46 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16318] MySQLのユーザ変数で、分析関数を代用できるか？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16320.html">  16320 2016-03-22 18:18 　┗[&lt;vbwnvwnpwvwenemcew@] Re: [mysql 16319] Re: [mysql 16318] MySQLのユーザ変数で、分析関数を代用できるか？</a></span>
 </pre>
 </body>
 </html>

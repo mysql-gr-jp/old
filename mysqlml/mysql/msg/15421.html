@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15420.html">[��]</a><a href="15422.html">[��]</a><a href="../list/15401-15500.html">[�ֹ�����]</a><a href="../thread/15401-15500.html">[����åɰ���]</a></p>
+<p class="button"><a href="15420.html">[前]</a><a href="15422.html">[次]</a><a href="../list/15401-15500.html">[番号順一覧]</a><a href="../thread/15401-15500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15421
 </p>
@@ -13,26 +13,26 @@ mysql:15421
 <p>
 From: &quot;Suzuki, Ikuo&quot; &lt;&quot;Suzuki, Ikuo&quot; &lt;ikuo.suzuki@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 9 Nov 2010 11:47:13 +0900<br>
-Subject: [mysql 15421] Connector/J�Υե����륪���С�������³��ReadOnly�ˤʤ�<br>
+Subject: [mysql 15421] Connector/Jのフェイルオーバー時の接続がReadOnlyになる<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ܥ�˥����ʳ��ˤ�SE�Ȥ���Ư���Ƥ������ڤȿ����ޤ���
-Java�ˤ��Web���ץ곫ȯ�и�����ǯ�ۤɤ���ޤ�����
-MySQL�����Ѥ��Ϥ᤿�Τϣ�����ۤ�������Ǥ���
+日本ユニシス（株）でSEとして働いている鈴木と申します。
+JavaによるWebアプリ開発経験が５年ほどありますが、
+MySQLを利用し始めたのは１ヶ月ほど前からです。
 
-MySQL Cluster��Connector/J�����Ѥ��ƥե����륪���С���
-��¸����褦�Ȥ��Ƥ���ΤǤ�����
-failOverReadOnly=false�ˤ��Ƥ���ˤ�ؤ�餺��³��
-Read Only�ˤʤ�����Ǻ��äƤ��ޤ���
+MySQL ClusterとConnector/Jを利用してフェイルオーバーを
+を実現しようとしているのですが、
+failOverReadOnly=falseにしているにも関わらず接続が
+Read Onlyになる問題で困っています。
 
-���饹���ϣ���Ƿ������Ƥ��ꡢξ���Υޥ����
-���줾������Ρ��ɡ�SQL�Ρ��ɡ��ǡ����Ρ��ɤε�ǽ���������
-�ʲ��ι����ȤʤäƤ��ޤ���
+クラスタは２台で形成しており、両方のマシンに
+それぞれ管理ノード、SQLノード、データノードの機能を持たせた
+以下の構成となっています。
 
-�ڥ��饹��������
+【クラスタ構成】
 ========================================================================
 ndb_mgm&gt; show
 Connected to Management Server at: localhost:1186
@@ -51,16 +51,16 @@ id=5    @xxxxxxxxxx  (mysql-5.1.47 ndb-7.1.8)
 id=6    @xxxxxxxxxx  (mysql-5.1.47 ndb-7.1.8)
 ========================================================================
 
-�ޤ����ƥ��եȥ������ΥС������ϰʲ��ΤȤ���Ǥ���
-�ڥС�������
-��MySQL 5.1.47
-��MySQL Cluster 7.1.8
-��Connector/J 5.1.13
+また、各ソフトウェアのバージョンは以下のとおりです。
+【バージョン】
+・MySQL 5.1.47
+・MySQL Cluster 7.1.8
+・Connector/J 5.1.13
 
-���ҤδĶ�����SQL�Ρ��ɤ�������id=5, 10.32.152.114�ˤ���ߤ��ơ�
-�ʲ��Υץ�������¹Ԥ�������꤬�Ƹ����ޤ���
+前述の環境下でSQLノードの片方（id=5, 10.32.152.114）を停止して、
+以下のプログラムを実行すると問題が再現します。
 
-�ڥץ�������
+【プログラム】
 ========================================================================
 package jp.co.unisys.mysql;
 
@@ -72,7 +72,7 @@ import com.mysql.jdbc.Connection;
 
 public class Test {
   public static void main(String[] args) throws Exception {
-    System.out.println(&quot;�ǡ����Υ��åץǡ��Ȥ򳫻Ϥ��ޤ���&quot;);
+    System.out.println(&quot;データのアップデートを開始します。&quot;);
     String url = &quot;jdbc:mysql://10.32.152.114:3306,10.32.152.115:3306/test&quot;;
     Properties prop = new Properties();
     prop.put(&quot;autoReconnect&quot;, &quot;true&quot;);
@@ -87,7 +87,7 @@ public class Test {
       for (int index = 0;; index++) {
         ps.setString(1, &quot;New Name &quot; + index);
         ps.executeUpdate();
-        System.out.println(&quot;New Name &quot; + index + &quot; �˹������ޤ�����&quot;);
+        System.out.println(&quot;New Name &quot; + index + &quot; に更新しました。&quot;);
       }
     } finally {
       ps.close();
@@ -97,15 +97,15 @@ public class Test {
 }
 ========================================================================
 
-���Ԥ����̤�10.32.152.114������Ƥ��뤿�ᡢ
-�����10.32.152.115����³��UPDATE�������¹Ԥ��뤳�ȤʤΤǤ�����
-�ºݤˤϰʲ��Τ褦����³��Read Only�Ȥ�����ͳ��UPDATE�����꤬�¹ԤǤ���
-����
+期待する結果は10.32.152.114が落ちているため、
+代わりに10.32.152.115に接続しUPDATEクエリを実行することなのですが、
+実際には以下のように接続がRead Onlyという理由でUPDATEクエリが実行できま
+せん。
 
-�ڷ�̡�
+【結果】
 ========================================================================
 <span class="quote1">&gt; java -jar test-5.1.13.jar</span>
-�ǡ����Υ��åץǡ��Ȥ򳫻Ϥ��ޤ���
+データのアップデートを開始します。
 Exception in thread &quot;main&quot; java.sql.SQLException: Connection is
 read-only. Queries leading to data modification are not allowed
         at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1075)
@@ -121,57 +121,57 @@ com.mysql.jdbc.PreparedStatement.executeUpdate(PreparedStatement.java:2312)
         at jp.co.unisys.epi.mysql.Test1.main(Test1.java:29)
 ========================================================================
 
-�Ȥ����ǡ�Google�ǥХ��ȥ�å����β������򸡺������Ȥ�����
-�ʲ�����Ƥ�ߤĤ��ޤ�����
+ところで、Googleでバグトラッカーの過去ログを検索したところ、
+以下の投稿をみつけました。
 
 MySQL Bugs: #34946: failoverReadOnly=false with multimaster does not work
 &lt;<a href="http://bugs.mysql.com/bug.php?id=34946">http://bugs.mysql.com/bug.php?id=34946</a>&gt;
 
-������ɤ�ȡ��ե����륪���С���ɬ��Read Only�ˤʤ�褦��
-�����ѹ����줿�Τǡ�failoverReadOnly�Υե饰�ϵ�ǽ������
-�ѻߤ��٤����ȸ��äƤ���Ȼפ��ޤ���
+これを読むと、フェイルオーバーは必ずRead Onlyになるように
+仕様変更されたので、failoverReadOnlyのフラグは機能せず、
+廃止すべきだと言っていると思います。
 
-������Ƥ�����ΥС������Ǥϵ�ư���㤦�ΤǤϤȻפ���
-���Connector/J�ΥС�������5.0.8���ѹ����ơ�
-��ۤɤ�Ʊ�ͤΥץ�������¹Ԥ��Ƥߤޤ�����
-����ȡ�UPDATE�������¹Ԥ��뤳�Ȥ��Ǥ��ޤ�����
+この投稿から過去のバージョンでは挙動が違うのではと思い、
+試しにConnector/Jのバージョンを5.0.8に変更して、
+先ほどと同様のプログラムを実行してみました。
+すると、UPDATEクエリを実行することができました。
 
-�ڷ�̡ʰ����ˡ�
+【結果（一部）】
 ========================================================================
 <span class="quote1">&gt; java -jar test-5.0.8.jar</span>
-�ǡ����Υ��åץǡ��Ȥ򳫻Ϥ��ޤ���
-New Name 0 �˹������ޤ�����
-New Name 1 �˹������ޤ�����
-New Name 2 �˹������ޤ�����
-New Name 3 �˹������ޤ�����
-New Name 4 �˹������ޤ�����
-New Name 5 �˹������ޤ�����
-New Name 6 �˹������ޤ�����
-New Name 7 �˹������ޤ�����
-New Name 8 �˹������ޤ�����
-New Name 9 �˹������ޤ�����
+データのアップデートを開始します。
+New Name 0 に更新しました。
+New Name 1 に更新しました。
+New Name 2 に更新しました。
+New Name 3 に更新しました。
+New Name 4 に更新しました。
+New Name 5 に更新しました。
+New Name 6 に更新しました。
+New Name 7 に更新しました。
+New Name 8 に更新しました。
+New Name 9 に更新しました。
 ========================================================================
 
-���η�̤��顢������SQL�Ρ��ɤ���������Υե����륪���С���
-Connector/J��5.0.8��Ȥ��м¸��Ǥ��������ȹͤ��Ƥ���ΤǤ�����
-���⤽�⡢�ʤ�5.0.8����5.1.13�δ֤Ǥ������������ѹ��������ʤ�줿�Τ�
-���Τꤿ���ȻפäƤ��ޤ���
+この結果から、片方のSQLノードが落ちた場合のフェイルオーバーは
+Connector/Jの5.0.8を使えば実現できそうだと考えているのですが、
+そもそも、なぜ5.0.8から5.1.13の間でこうした仕様変更がおこなわれたのか
+を知りたいと思っています。
 
-���Τ�����λ����¸�������Ϥ���ä��㤤�ޤ����顢
-�����Ƥ��������ʤ��Ǥ��礦����
-�ɤ�������������ꤤ�����夲�ޤ���
+このあたりの事情をご存じの方はいらっしゃいましたら、
+教えていただけないでしょうか？
+どうぞよろしくお願い申し上げます。
 
-�ʾ�
+以上
 --------------------------------------------------------
-���ܥ�˥����������
-�ɣãԥ����ӥ����׳�ȯ�� ����塼�����ȯ��
-��ȯ�����롼��
-���ڡ���ͺ
-tel:050-3132-6999��mailto:ikuo.suzuki@xxxxxxxxxx
+日本ユニシス株式会社
+ＩＣＴサービス基盤開発部 ソリューション開発室
+開発３グループ
+鈴木　生雄
+tel:050-3132-6999　mailto:ikuo.suzuki@xxxxxxxxxx
 --------------------------------------------------------
 
 </pre>
 </div>
-<p class="button"><a href="15420.html">[��]</a><a href="15422.html">[��]</a><a href="../list/15401-15500.html">[�ֹ�����]</a><a href="../thread/15401-15500.html">[����åɰ���]</a></p>
+<p class="button"><a href="15420.html">[前]</a><a href="15422.html">[次]</a><a href="../list/15401-15500.html">[番号順一覧]</a><a href="../thread/15401-15500.html">[スレッド一覧]</a></p>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="10705.html">[��]</a><a href="10707.html">[��]</a><a href="../list/10701-10800.html">[�ֹ�����]</a><a href="../thread/10701-10800.html">[����åɰ���]</a></p>
+<p class="button"><a href="10705.html">[前]</a><a href="10707.html">[次]</a><a href="../list/10701-10800.html">[番号順一覧]</a><a href="../thread/10701-10800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:10706
 </p>
@@ -13,29 +13,29 @@ mysql:10706
 <p>
 From: mattun &lt;mattun &lt;mattun@xxxxxxxxxx&gt;&gt;<br>
 Date: Mon, 20 Dec 2004 18:27:17 +0900<br>
-Subject: [mysql 10706] Re: SELECT��®�٤��٤�<br>
+Subject: [mysql 10706] Re: SELECTの速度が遅い<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ä����Τ��ֻ����꤬�Ȥ��������ޤ������ݤǤ���
+さっそくのお返事ありがとうございます、松丸です。
 
 <span class="quote1">&gt; explain select b.id, b.name from messages as a, users as b where</span>
 <span class="quote1">&gt; a.target=b.id and b.sid=53 and a.isread='f' group by b.id order</span>
 <span class="quote1">&gt; by b.id</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �쥳���ɷ���ˤ���Ȼפ��ޤ�����</span>
-<span class="quote1">&gt; ����ǥå�������Ѥ����˥쥳���ɤ������ʤ��ɬ�פ��������</span>
-<span class="quote1">&gt; �������֤�������Ȼפ��ޤ��Τǡ�����ǥå�������Ѥ���褦�˥���</span>
-<span class="quote1">&gt; �꡼��񤭴�����Ф����ΤǤϤʤ����Ȼפ��ޤ����ġ������Ƥ����餴</span>
-<span class="quote1">&gt; ���ʤ�����</span>
+<span class="quote1">&gt; レコード件数にもよると思いますが、</span>
+<span class="quote1">&gt; インデックスを使用せずにレコードを数万件なめる必要がある場合は</span>
+<span class="quote1">&gt; 当然時間がかかると思いますので、インデックスを使用するようにクエ</span>
+<span class="quote1">&gt; リーを書き換えればいいのではないかと思いますが…。外していたらご</span>
+<span class="quote1">&gt; めんなさい。</span>
 
-�嵭���äƤߤ��Ȥ�����
+上記をやってみたところ、
 +-------+--------+-----------------------+---------+--------- 
 +----------+--------+----------------------------------------------+
 <span class="quote1">| table | type   | possible_keys         | key     | key_len | ref       </span>
-<span class="quote1">| rows   | Extra                                       ������ |</span>
+<span class="quote1">| rows   | Extra                                       　　　 |</span>
 +-------+--------+-----------------------+---------+--------- 
 +----------+--------+----------------------------------------------+
 <span class="quote1">| a     | ALL    | messages_target_index | NULL    |    NULL | NULL      </span>
@@ -45,54 +45,54 @@ Subject: [mysql 10706] Re: SELECT��®�٤��٤�<br>
 +-------+--------+-----------------------+---------+--------- 
 +----------+--------+----------------------------------------------+
 
-�ȤǤޤ�����a�Τۤ�������ǥå�����ȤäƤʤ����֤ʤΤǤ��礦����
+とでました。aのほうがインデックスを使ってない状態なのでしょうか？
 
-���륵���С�����㤦�����С��˥ǡ������ư�������ʤɤˤϡ�����ǥå����Ϻ��ʤ������ۤ����ɤ��ΤǤ��礦����
+あるサーバーから違うサーバーにデータを移動した場合などには、インデックスは作りなおしたほうが良いのでしょうか？
 
-�ܹ����Υ����С��Ǥϡ�
+移行前のサーバーでは、
 
 select b.id, b.name from messages as a, users as b where
 a.target=b.id and b.sid=53 and a.isread='f' group by b.id order
 by b.id
 
-�ǡ������ϤϤ䤯ư�����褦�Ǥ���
+で、今よりははやく動いたようです。
 
-<span class="quote1">&gt; ��phpMyAdmin��ȤäƤ���Ȥ������Ȥϡ�PHP��MySQL�˥����������Ƥ���櫓��</span>
-<span class="quote1">&gt; �����顢PHP¦������Ǥ�MySQL������Ǥ�ʤ������ݤ���ν񤫤줿�ץ������</span>
-<span class="quote1">&gt; ��������Ȼפ��ޤ���</span>
+<span class="quote1">&gt; 　phpMyAdminを使っているということは、PHPでMySQLにアクセスしているわけで</span>
+<span class="quote1">&gt; すから、PHP側の問題でもMySQLの問題でもなく、松丸さんの書かれたプログラム</span>
+<span class="quote1">&gt; の問題だと思います。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ��Ʊ���ǡ����١�����Ʊ��SQL�ǥꥯ�����Ȥ��Ƥ��Ǥ���͡�</span>
+<span class="quote1">&gt; ＃同じデータベースに同じSQLでリクエストしてるんですよね？</span>
 
-�����Ǥ��͡�Ʊ���ǡ������١����˥ꥯ�����Ȥ��Ƥ��ޤ���
+そうですね、同じデーターベースにリクエストしています。
 
 
-<span class="quote1">&gt; Where��ΤߤǤη���Ԥ鷺�ˡ�Form���JOIN�����Ѥ��ƤߤƤ�</span>
-<span class="quote1">&gt; �������Ǥ��礦����</span>
-<span class="quote1">&gt; DB2, Oracle�Ǥϡ�������ˡ��®�٤�夲�뤳�Ȥ��Ǥ��ޤ�����</span>
+<span class="quote1">&gt; Where句のみでの結合を行わずに、Form句でJOINを利用してみては</span>
+<span class="quote1">&gt; いかがでしょうか？</span>
+<span class="quote1">&gt; DB2, Oracleでは、この方法で速度を上げることができました。</span>
 
 
 select users.id,users.name from messages INNER JOIN users on  
 target=users.id where users.sid = 53 and messages.isread='f'
 
-����ʴ�����JOIN���Ƥߤޤ�������̤ϡ������Υ������Ʊ���ˤʤ�ޤ����������֤ϤΤӤƤ��ޤ�����10�ä����äƤ��ޤ��ޤ�����
+こんな感じでJOINしてみました。結果は、以前のクエリと同じになりましたが、時間はのびてしまい、約10秒かかってしまいました。
 
-JOIN�λ������ְ�äƤ���ΤǤ��礦����
+JOINの仕方が間違っているのでしょうか？
 
-�ʾ����������ꤤ�������ޤ���
+以上よろしくお願いいたします。
 
-��������
+松丸頒泰
 mattun@xxxxxxxxxx
 <a href="http://www.meganebu.com">http://www.meganebu.com</a>
 
 
 </pre>
 </div>
-<p class="button"><a href="10705.html">[��]</a><a href="10707.html">[��]</a><a href="../list/10701-10800.html">[�ֹ�����]</a><a href="../thread/10701-10800.html">[����åɰ���]</a></p>
+<p class="button"><a href="10705.html">[前]</a><a href="10707.html">[次]</a><a href="../list/10701-10800.html">[番号順一覧]</a><a href="../thread/10701-10800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="10706.html">  10706 2004-12-20 18:27 [mattun &lt;mattun@xxxxx] Re: SELECT��®�٤��٤�                  </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10707.html">  10707 2004-12-20 19:36 ��[al-kamil &lt;al-kamil@x]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10709.html">  10709 2004-12-21 10:44 ��[Hideki SUNADA &lt;hidek]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10711.html">  10711 2004-12-21 15:10 ����[mattun &lt;mattun@xxxxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="10706.html">  10706 2004-12-20 18:27 [mattun &lt;mattun@xxxxx] Re: SELECTの速度が遅い                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10707.html">  10707 2004-12-20 19:36 ┣[al-kamil &lt;al-kamil@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10709.html">  10709 2004-12-21 10:44 ┗[Hideki SUNADA &lt;hidek]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10711.html">  10711 2004-12-21 15:10 　┗[mattun &lt;mattun@xxxxx]                                     </a></span>
 </pre>
 </body>
 </html>

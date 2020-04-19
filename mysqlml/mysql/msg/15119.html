@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15118.html">[��]</a><a href="15120.html">[��]</a><a href="../list/15101-15200.html">[�ֹ�����]</a><a href="../thread/15101-15200.html">[����åɰ���]</a></p>
+<p class="button"><a href="15118.html">[前]</a><a href="15120.html">[次]</a><a href="../list/15101-15200.html">[番号順一覧]</a><a href="../thread/15101-15200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15119
 </p>
@@ -13,94 +13,94 @@ mysql:15119
 <p>
 From: Seiichirou Hiraoka &lt;Seiichirou Hiraoka &lt;flathill@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 24 Dec 2009 18:44:04 +0900 (JST)<br>
-Subject: [mysql 15119] MySQL �ξ�Ĺ�����ˤˤĤ���<br>
+Subject: [mysql 15119] MySQL の冗長化方針について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-ʿ���ȿ����ޤ���
+平岡と申します。
 
-���� MySQL �� 2 ��Υ����Ф�Ƴ�����ơ����ѷϤ��Ե��ϤȤ���
-ư����ơ����ѷϤ˾㳲��ȯ�������ݤ���ߤ�ɬ�פʾ���
-IP ���ɥ쥹���Ե��Ϥ��դ��ؤ��뤳�ȤǱ��Ѥ��Ƥ��ޤ���
+現在 MySQL を 2 台のサーバに導入して、運用系と待機系として
+動作させて、運用系に障害が発生した際や停止が必要な場合は
+IP アドレスを待機系と付け替えることで運用しています。
 
-  Server1:MySQL (���ѷ�)          Server2:MySQL (�Ե���)
+  Server1:MySQL (運用系)          Server2:MySQL (待機系)
             ^
             |
-       ���ȡ�����
+       参照・更新
 
-���Υ����ƥ�򺣸�ʲ��Τ褦�˲����������Ȼפ��ޤ���
+このシステムを今後以下のように改善したいと思います。
 
-  - ���ʬ��
-    ����®�ٸ���Τ��ᡢ�����׵�� 2 ��Υ����Ф�ʬ����������
-    �����׵���̾������Υ����ФΤߤǽ��������ɤ����������Ф�
-    ��ߤ����ݤ��̤Υ����Ф���Ԥ�������
-  - Ʊ��
-    2 ��Υ����Ф��ץꥱ�������ˤ�꼫ưŪ��Ʊ����������    
-  - ��Ĺ��
-    ���ѷϤ����Ե��Ϥ��ڤ��ؤ���ɬ�פ�̵���褦�ˤ�������
-  - �㳲����߻��б�
-    �㳲����ߤ�ȯ�������ݤˡ������¤��ưפ��̾���֤�
-    ���줵��������
-  - ���ץꥱ���������б�
-    �嵭���׷�򥢥ץꥱ�������¦���б�̵���Ǽ¸���������
+  - 負荷分散
+    応答速度向上のため、参照要求を 2 台のサーバに分散したい。
+    更新要求は通常片方のサーバのみで処理して良いが、サーバが
+    停止した際は別のサーバで代行したい。
+  - 同期
+    2 台のサーバをレプリケーションにより自動的に同期したい。    
+  - 冗長化
+    運用系から待機系に切り替える必要が無いようにしたい。
+  - 障害・停止時対応
+    障害や停止が発生した際に、出来る限り容易に通常状態に
+    復旧させたい。
+  - アプリケーションの対応
+    上記の要件をアプリケーション側の対応無しで実現したい。
 
-�����¸����뤿��ˡ��ʲ�����ˡ��Ƥ���Ƥ���ޤ���
+これを実現するために、以下の方法を検討しております。
 
-  o ���󥰥�ޥ��������󥰥륹�졼��
-    (�ޥ����ι������Ƥ򥹥졼�֤˥�ץꥱ�������)
+  o シングルマスタ、シングルスレーブ
+    (マスタの更新内容をスレーブにレプリケーション)
 
-  Server1:MySQL (�ޥ���) -- ���� --&gt; Server2:MySQL (���졼��)
+  Server1:MySQL (マスタ) -- 更新 --&gt; Server2:MySQL (スレーブ)
             ^                                  ^
             |                                  |
-       ���ȡ�����                            ����
+       参照・更新                            参照
 
-  - ���졼��¦�ؤι����׵�ϼ��Ԥ��뤿�ᡢ�ޥ���¦�ؤϹ�����
-    ���ȡ����졼��¦�ؤϻ��ȤΤߤ� (���ץꥱ�������¦���ռ�
-    ���뤳��̵��) ����ʬ������ˡ�Ϥ���ޤ��Ǥ��礦����
-    MySQL Proxy �����Ѥ���Τ�Ŭ���Ǥ��礦����
-  - �ޥ�������ߤ���ȡ��������Ԥ��ʤ��ʤ�Ȼפ��ޤ�����
-    ���졼�֤� (���Ū��) ��Ԥ�����ϲ�ǽ�Ǥ��礦����
-    �ޥ�����������ϡ����졼�֤˹Ԥä�������ޥ����ˤ��ñ
-    ��ȿ�Ǥ��롢�Ȥ��ä��Թ���ɤ�����ͤ��Ƥ��ޤ���
+  - スレーブ側への更新要求は失敗するため、マスタ側へは更新・
+    参照、スレーブ側へは参照のみを (アプリケーション側が意識
+    すること無く) 振り分ける方法はありますでしょうか。
+    MySQL Proxy を利用するのが適当でしょうか。
+  - マスタを停止すると、更新が行えなくなると思いますが、
+    スレーブで (一時的に) 代行する事は可能でしょうか。
+    マスタの復帰後は、スレーブに行った更新をマスタにも簡単
+    に反映する、といった都合の良い事を考えています。
 
-  o �ޥ���ޥ���
-    (��ߤ˹������Ƥ��ץꥱ�������)
+  o マルチマスタ
+    (相互に更新内容をレプリケーション)
 
-  Server1:MySQL (�ޥ���) &lt;-- ���� --&gt; Server2:MySQL (�ޥ���)
+  Server1:MySQL (マスタ) &lt;-- 更新 --&gt; Server2:MySQL (マスタ)
             ^                                  ^
             |                                  |
-       ���ȡ�����                         ���ȡ�����
+       参照・更新                         参照・更新
 
-  - 2 ��Υޥ������Ф��ơ�Ʊ����Ʊ���ǡ����ι�����Ԥä���硢
-    �����������ʤ��ʤ�Ȥ��ä��������Ϥ���ޤ��Ǥ��礦����
-  - ��¦���㳲���Ȥ���ߤ����ݤˡ��Ƥӵ�ư����ݤˤϲ��餫
-    �μ�֤�ɬ�פǤ��礦����
-  - ���ץꥱ������󤫤� 2 ��Υ����Фؤ���³�׵�򿶤�ʬ����
-    ��ˡ�Ȥ��ơ�DNS �Υ饦��ɥ��ӥ������Ϥ���Ǥ��礦����
-    �ޤ�������ʳ����ɤ���ˡ�Ϥ���ޤ��Ǥ��礦����
+  - 2 台のマスタに対して、同時に同じデータの更新を行った場合、
+    整合性が取れなくなるといった危険性はありますでしょうか。
+  - 片側が障害や作業で停止した際に、再び起動する際には何らか
+    の手間が必要でしょうか。
+  - アプリケーションから 2 台のサーバへの接続要求を振り分ける
+    方法として、DNS のラウンドロビンで問題はあるでしょうか。
+    また、それ以外に良い方法はありますでしょうか。
 
-��������Ū�ˤ� MySQL Cluster ��Ȥ����ǤϤʤ��ȹͤ��Ƥ���
-�ޤ����ޤ����ޥ���ޥ����Ͼ㳲ȯ�����Υꥫ�Х꤬���ѤǤ���
-�ȹͤ��Ƥ���ޤ��Τǡ������Х��󥰥�ޥ����Ǳ��Ѥ�������
-�פ��ޤ���
-�⤷���ϡ��嵭�ʳ�����ˡ������и涵��ĺ���ޤ��ȹ����Ǥ���
+尚、規模的には MySQL Cluster を使う程ではないと考えており
+ます。また、マルチマスタは障害発生時のリカバリが大変である
+と考えておりますので、出来ればシングルマスタで運用したいと
+思います。
+もしくは、上記以外の方法があれば御教示頂けますと幸いです。
 
-�ʾ塢����������ꤤ�פ��ޤ���
+以上、よろしくお願い致します。
 
 --
-ʿ�� ����ϯ
+平岡 征一朗
 
 </pre>
 </div>
-<p class="button"><a href="15118.html">[��]</a><a href="15120.html">[��]</a><a href="../list/15101-15200.html">[�ֹ�����]</a><a href="../thread/15101-15200.html">[����åɰ���]</a></p>
+<p class="button"><a href="15118.html">[前]</a><a href="15120.html">[次]</a><a href="../list/15101-15200.html">[番号順一覧]</a><a href="../thread/15101-15200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="15119.html">  15119 2009-12-24 18:44 [Seiichirou Hiraoka &lt;] MySQL �ξ�Ĺ�����ˤˤĤ���              </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15120.html">  15120 2009-12-24 19:19 ��[&quot;Tadayuki Abraham HA] MySQL �Υǡ����ν���Υǡ������Ф��ơ����𥫡�����¢��iso7816���ޡ��ȥ�����IC���Żҽ�̾����Ϳ�Ǥ��ޤ�����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15127.html">  15127 2010-01-05 10:17 ��[Seiichirou Hiraoka &lt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15141.html">  15141 2010-01-11 06:56 ����[konbuizm &lt;konbuizm@x]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15142.html">  15142 2010-01-12 11:12 ������[Seiichirou Hiraoka &lt;]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="15119.html">  15119 2009-12-24 18:44 [Seiichirou Hiraoka &lt;] MySQL の冗長化方針について              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15120.html">  15120 2009-12-24 19:19 ┣[&quot;Tadayuki Abraham HA] MySQL のデータの所定のデータに対して、住基カード内蔵のiso7816スマートカードICで電子署名を付与できますか？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15127.html">  15127 2010-01-05 10:17 ┗[Seiichirou Hiraoka &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15141.html">  15141 2010-01-11 06:56 　┗[konbuizm &lt;konbuizm@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15142.html">  15142 2010-01-12 11:12 　　┗[Seiichirou Hiraoka &lt;]                                   </a></span>
 </pre>
 </body>
 </html>

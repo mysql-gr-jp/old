@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="7652.html">[��]</a><a href="7654.html">[��]</a><a href="../list/7601-7700.html">[�ֹ�����]</a><a href="../thread/7601-7700.html">[����åɰ���]</a></p>
+<p class="button"><a href="7652.html">[前]</a><a href="7654.html">[次]</a><a href="../list/7601-7700.html">[番号順一覧]</a><a href="../thread/7601-7700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:7653
 </p>
@@ -13,63 +13,63 @@ mysql:7653
 <p>
 From: UNO Shintaro &lt;UNO Shintaro &lt;uno@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 06 May 2003 19:33:18 +0900<br>
-Subject: [mysql 07653] Re: &lt;JDBC&gt; �����꡼�Ǵؿ���Ȥ��ˤϡ�<br>
+Subject: [mysql 07653] Re: &lt;JDBC&gt; クエリーで関数を使うには？<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-<span class="quote1">&gt;����������</span>
-<span class="quote1">&gt;JAVA�ץ�����फ��MySql�˥���������������MySql�Υ��ޥ�</span>
-<span class="quote1">&gt;�ɥ饤�󥤥󥿥ե�������������̤˼¹ԤǤ��ޤ��ˡ�MySql</span>
-<span class="quote1">&gt;�δؿ���Ȥä�Selectʸ���¹ԤǤ��ʤ���</span>
+<span class="quote1">&gt;（問題点）</span>
+<span class="quote1">&gt;JAVAプログラムからMySqlにアクセスした場合（MySqlのコマン</span>
+<span class="quote1">&gt;ドラインインタフェースからは普通に実行できます）、MySql</span>
+<span class="quote1">&gt;の関数を使ったSelect文が実行できない。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;�����</span>
+<span class="quote1">&gt;（例）</span>
 <span class="quote1">&gt;select * from master;</span>
-<span class="quote1">&gt;������ʸ�ϡ��¹ԤǤ��ޤ���</span>
+<span class="quote1">&gt;↑この文は、実行できます。</span>
 <span class="quote1">&gt;select sum(aaa) from master;</span>
-<span class="quote1">&gt;������ʸ�ϼ¹ԤǤ��ޤ���</span>
+<span class="quote1">&gt;↑この文は実行できません。</span>
 
-�������������Ȥ�ؤ��ơּ¹ԤǤ��ʤ��פȤ��ä���äƤ��ޤ�����
+何が起きたことを指して「実行できない」とおっしゃっていますか？
 
-��������ˡ���ResultSet�����顢ResultSet.getInt()��̾������ꤷ���ͤ�
-���Ф����Ȥ��������Ф��ʤ���&quot;sum(aaa)&quot;�Ȥ���&quot;aaa&quot;�Ȥ���&quot;sum&quot;�Ȥ���
-�������ꤷ�Ƥߤ����ɡġפȤ������ȤʤΤǤϤʤ����ȡ�
-�⤷���������äǤ���С�
+想像するに、「ResultSet型から、ResultSet.getInt()で名前を指定して値を
+取り出そうとしたが取り出せない。&quot;sum(aaa)&quot;とか、&quot;aaa&quot;とか、&quot;sum&quot;とか、
+色々指定してみたけど…」ということなのではないかと。
+もしそういう話であれば、
 
-��
-SQLʸ�ǡ���������̾��Ĥ��Ƥ��ޤ���
+解１
+SQL文で、カラムに別名をつけてやります。
 select sum(aaa) asum from master
-�Ĥ�����̾����ꤷ�Ƽ��Ф����Ȥ��Ǥ��ޤ���
+つけた別名を指定して取り出すことができます。
 int xxx = rs.getInt(&quot;asum&quot;);
 
-��
-̾���Ǥʤ�����।��ǥå����ǻ��ꤹ���̾���ϴط�����ޤ���
+解２
+名前でなくカラムインデックスで指定すれば名前は関係ありません。
 int xxx = rs.getInt(1);
 
-�Ȥ����櫓�ǡ�
+というわけで、
 
-<span class="quote1">&gt;�������⤷�����ơ������椦���ʤ�Ǥ��礦�����ʴ��˴ؿ�</span>
-<span class="quote1">&gt;���Ѥ����褦�ʷ�̤��ߤ������ϡ�����Ū��ResultSet�ʤ�</span>
-<span class="quote1">&gt;�Ȥ��С�select * from</span>
-<span class="quote1">&gt;master;�Τ褦�ʡˤ�������Ƥ��顢JAVA</span>
-<span class="quote1">&gt;�Υ�������ǿ����˼�ʬ�ǥǡ�����ù����ʤ���Фʤ�ʤ���</span>
-<span class="quote1">&gt;�Ǥ��礦����</span>
+<span class="quote1">&gt;・・・もしかして、こうゆうもんなんでしょうか？（汗）関数</span>
+<span class="quote1">&gt;を用いたような結果が欲しい場合は、全体的なResultSet（た</span>
+<span class="quote1">&gt;とえば、select * from</span>
+<span class="quote1">&gt;master;のような）を取得してから、JAVA</span>
+<span class="quote1">&gt;のソース上で新たに自分でデータを加工しなければならないの</span>
+<span class="quote1">&gt;でしょうか？</span>
 
-�ʤɤȤ������ȤϤʤ��Ǥ���
+などということはないです。
 
 
 -- 
-UNO Shintaro, ���� ����Ϻ
+UNO Shintaro, 宇野 信太郎
 mailto:uno@xxxxxxxxxx
 <a href="http://www.venus.dti.ne.jp/~uno/">http://www.venus.dti.ne.jp/~uno/</a>
 
 </pre>
 </div>
-<p class="button"><a href="7652.html">[��]</a><a href="7654.html">[��]</a><a href="../list/7601-7700.html">[�ֹ�����]</a><a href="../thread/7601-7700.html">[����åɰ���]</a></p>
+<p class="button"><a href="7652.html">[前]</a><a href="7654.html">[次]</a><a href="../list/7601-7700.html">[番号順一覧]</a><a href="../thread/7601-7700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="7649.html">   7649 2003-05-06 18:01 [���� ������ &lt;kuro_ta] &amp;lt;JDBC&amp;gt; �����꡼�Ǵؿ���Ȥ��ˤϡ� </a></span>
-<span class="current">-&gt;&nbsp;<a href="7653.html">   7653 2003-05-06 19:33 ��[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7649.html">   7649 2003-05-06 18:01 [くろ たろう &lt;kuro_ta] &amp;lt;JDBC&amp;gt; クエリーで関数を使うには？ </a></span>
+<span class="current">-&gt;&nbsp;<a href="7653.html">   7653 2003-05-06 19:33 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
 </pre>
 </body>
 </html>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="10518.html">[��]</a><a href="10520.html">[��]</a><a href="../list/10501-10600.html">[�ֹ�����]</a><a href="../thread/10501-10600.html">[����åɰ���]</a></p>
+<p class="button"><a href="10518.html">[前]</a><a href="10520.html">[次]</a><a href="../list/10501-10600.html">[番号順一覧]</a><a href="../thread/10501-10600.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:10519
 </p>
@@ -13,64 +13,64 @@ mysql:10519
 <p>
 From: George Akimoto &lt;George Akimoto &lt;george@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 27 Nov 2004 01:34:59 +0900<br>
-Subject: [mysql 10519] Re: MySQL-4.1.x��InnoDB�ǡ��礭�ʥ쥳���ɤ�INSERT�Ǥ��ʤ�<br>
+Subject: [mysql 10519] Re: MySQL-4.1.xのInnoDBで、大きなレコードがINSERTできない<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�����ȿ����ޤ���
+秋元と申します。
 
-<span class="quote1">&gt;InnoDB-4.x�Ǥϡ�row��Ĺ����8000byte��Ķ����</span>
-<span class="quote1">&gt;�ơ��֥��������뤳�Ȥ�����ʤ����ͤΤ褦�Ǥ���</span>
-<span class="quote1">&gt;(5.x�ǤϽ����ΤǤ���������ä�ʬ����ʤ��Ǥ������ߤޤ���)</span>
+<span class="quote1">&gt;InnoDB-4.xでは、rowの長さが8000byteを超える</span>
+<span class="quote1">&gt;テーブルを作成することが出来ない仕様のようです。</span>
+<span class="quote1">&gt;(5.xでは出来るのですか？ちょっと分からないです、すみません。)</span>
 
-����Ǥ������ޥ˥奢���ߤ��
+これですが、マニュアルをみると
 <a href="http://dev.mysql.com/doc/mysql/en/InnoDB_restrictions.html">http://dev.mysql.com/doc/mysql/en/InnoDB_restrictions.html</a>
-��3���ܤ�����˽񤫤�Ƥ��ơ���ñ��������
+の3行目あたりに書かれていて、簡単に訳すと
 
 ---
-�Ԥκ���Ĺ�ϡ�BLOB��TEXT����������ơ��ǡ����١����ڡ�����Ⱦʬ��꾯��
-û�������ʤ�����Ԥκ���Ĺ�Ϥ��褽8000�Х��ȤǤ��롣
-LONGBLOB�ڤ�LONGTEXT������4GB���û���ʤ���Фʤ餺��BLOB�ڤ�TEXT����
-���ޤ���Ԥ�Ĺ���ι�פ�4GB���û���ʤ���Фʤ�ʤ���
+行の最大長は、BLOBとTEXTコラムを除いて、データベースページの半分より少し
+短い。すなわち、行の最大長はおよそ8000バイトである。
+LONGBLOB及びLONGTEXTカラムは4GBより短くなければならず、BLOB及びTEXTカラ
+ムを含んだ行の長さの合計は4GBより短くなければならない。
 ---
 
-�Ȥ������ȤΤ褦�Ǥ���
+ということのようです。
 
-���»���Ȥ��ƥޥ˥奢����������Ƥ��뤯�餤�ʤ�ǡ������ˤϽ�������ʤ�
-�褦�ʵ������ޤ���
-�פ�8000bytes��Ķ����ʤ�BLOB��TEXT��Ȥ��Ȥ������ȤǤϤʤ��Ǥ��礦����
+制限事項としてマニュアルに明記しているくらいなんで、すぐには修正されない
+ような気がします。
+要は8000bytesを超えるならBLOBかTEXTを使えということではないでしょうか。
 
 
-����äȵ��ˤʤ뤳�ȤȤ��Ƥϡ�
+ちょっと気になることとしては、
 <a href="http://dev.mysql.com/doc/mysql/ja/InnoDB_restrictions.html">http://dev.mysql.com/doc/mysql/ja/InnoDB_restrictions.html</a>
-�����ܸ�ޥ˥奢��򸫤�ȡ�
+に日本語マニュアルを見ると、
 
 ---
-InnoDB �� 3.23.40 �ʲ��ΥС������Ǥϡ��쥳���ɤκ���Ĺ���ǡ����١���
-�ڡ�����Ⱦʬ�����侮��������������꡼�� 3.23.41 ��ꡢBLOB ����� 
-TEXT ������ 4 GB ̤���ˤ��뤳�Ȥ���ǽ�Ȥʤä����쥳���ɤι�פ�Ĺ���� 
-4 GB ̤���Ǥʤ���Фʤ�ʤ���
+InnoDB の 3.23.40 以下のバージョンでは、レコードの最大長がデータベース
+ページの半分よりもやや小さい。ソースリリース 3.23.41 より、BLOB および 
+TEXT カラムを 4 GB 未満にすることが可能となった。レコードの合計の長さも 
+4 GB 未満でなければならない。
 ---
 
-�Ȥ���ޤ���
+とあります。
 
-�����Ť��Τ��Ȼפ��ޤ������С������θ��ڤ����ꡢ�ɤ��3.23.41�ʹߤǤ�
-��8000bytes�����󤬤ʤ��ʤäƤ����С�����󤬤��ä����Τ褦�˼��ޤ���
+訳が古いのだと思いますが、バージョンの言及があり、読むと3.23.41以降でこ
+の8000bytesの制約がなくなっていたバージョンがあったかのように取れます。
 
-�ɤ��ʤ�Ǥ��礦��
+どうなんでしょう。
 
 
 </pre>
 </div>
-<p class="button"><a href="10518.html">[��]</a><a href="10520.html">[��]</a><a href="../list/10501-10600.html">[�ֹ�����]</a><a href="../thread/10501-10600.html">[����åɰ���]</a></p>
+<p class="button"><a href="10518.html">[前]</a><a href="10520.html">[次]</a><a href="../list/10501-10600.html">[番号順一覧]</a><a href="../thread/10501-10600.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="10516.html">@ 10516 2004-11-26 20:09 [������ &lt;makoto@xxxxx] MySQL-4.1.x��InnoDB�ǡ��礭�ʥ쥳���ɤ�INSERT�Ǥ��ʤ�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10517.html">  10517 2004-11-26 20:33 ��[&quot;���� ����&quot; &lt;d-sano@]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10518.html">  10518 2004-11-26 21:33 ����[������ &lt;makoto@xxxxx]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="10519.html">  10519 2004-11-27 01:34 ����[George Akimoto &lt;geor]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="10526.html">  10526 2004-11-27 19:21 ������[������ &lt;makoto@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10516.html">@ 10516 2004-11-26 20:09 [原田誠 &lt;makoto@xxxxx] MySQL-4.1.xのInnoDBで、大きなレコードがINSERTできない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10517.html">  10517 2004-11-26 20:33 ┗[&quot;佐野 大輔&quot; &lt;d-sano@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10518.html">  10518 2004-11-26 21:33 　┣[原田誠 &lt;makoto@xxxxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="10519.html">  10519 2004-11-27 01:34 　┗[George Akimoto &lt;geor]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10526.html">  10526 2004-11-27 19:21 　　┗[原田誠 &lt;makoto@xxxxx]                                   </a></span>
 </pre>
 </body>
 </html>

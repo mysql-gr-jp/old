@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="7660.html">[��]</a><a href="7662.html">[��]</a><a href="../list/7601-7700.html">[�ֹ�����]</a><a href="../thread/7601-7700.html">[����åɰ���]</a></p>
+<p class="button"><a href="7660.html">[前]</a><a href="7662.html">[次]</a><a href="../list/7601-7700.html">[番号順一覧]</a><a href="../thread/7601-7700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:7661
 </p>
@@ -13,66 +13,66 @@ mysql:7661
 <p>
 From: &quot;m.yamazaki&quot; &lt;&quot;m.yamazaki&quot; &lt;yamazaki.ms@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 7 May 2003 10:12:30 +0900<br>
-Subject: [mysql 07661] Re: C ����� API  �ˤ�륯��������ǤˤĤ���<br>
+Subject: [mysql 07661] Re: C 言語の API  によるクエリの中断について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����Ǥ���
+山崎です。
 
-�Ȥߤ����󡢤��������꤬�Ȥ��������ޤ���
+とみたさん、ご返答ありがとうございます。
 
-<span class="quote2">&gt; &gt; �������ޤ�ĥ�ä�1ʬ���mysql_close����</span>
-<span class="quote2">&gt; &gt;   ��mysql_query�ؿ��������äƤ��ޤ�����</span>
-<span class="quote2">&gt; &gt;     ��������SQLʸ�����Ǥ����ǡ�������������Ƥ��ޤ��ޤ���</span>
+<span class="quote2">&gt; &gt; ・タイマを張って1分後にmysql_closeする</span>
+<span class="quote2">&gt; &gt;   →mysql_query関数からは戻ってきますが、</span>
+<span class="quote2">&gt; &gt;     投入したSQL文が中断せずデータが挿入されてしまいます。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; SIGALRM �Υ����ʥ�ϥ�ɥ�� mysql_close() ��Ƥ���äƤ��ȤǤ��礦����</span>
-<span class="quote1">&gt; ��äƤ����Τ��ʡ�(^^;</span>
+<span class="quote1">&gt; SIGALRM のシグナルハンドラで mysql_close() を呼んだってことでしょうか。</span>
+<span class="quote1">&gt; やっていいのかな…(^^;</span>
 
-���ä����Ȥ���Ǥ���
-�����ʥ��������exit()���ʤ���
-segmentation fault�������ΤǤ���Ǥ��͡�����
+おっしゃるとおりです。
+シグナル受信時にexit()しないと
+segmentation faultで落ちるのでだめですね。。。
 
-<span class="quote2">&gt; &gt; ��mysql_thread_id�ˤ���³����åɼ����塢�����ޤ�ĥ�ä�1ʬ���</span>
-<span class="quote2">&gt; &gt;   mysql_kill��</span>
-<span class="quote2">&gt; &gt;   ��mysql_query�ؿ�������äƤ��ʤ����ᡢmysql_kill��</span>
-<span class="quote2">&gt; &gt;     LOAD DATAʸ��λ��ˤ�����������ʤ���</span>
+<span class="quote2">&gt; &gt; ・mysql_thread_idにて接続スレッド取得後、タイマを張って1分後に</span>
+<span class="quote2">&gt; &gt;   mysql_kill。</span>
+<span class="quote2">&gt; &gt;   →mysql_query関数から戻ってこないため、mysql_killが</span>
+<span class="quote2">&gt; &gt;     LOAD DATA文終了後にしか投入されない。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ץ�������ޥ������åɲ����ơ�mysql_query() �Ȥ��̤Υ��ͥ�������</span>
-<span class="quote1">&gt; ĥ�äơ����ä��� mysql_kill() ������ˡ�Ϥɤ��Ǥ��礦��</span>
+<span class="quote1">&gt; プログラムをマルチスレッド化して、mysql_query() とは別のコネクションを</span>
+<span class="quote1">&gt; 張って、そっちで mysql_kill() する方法はどうでしょう？</span>
 
-������ˡ���Ƥߤ���Ǥ��ޤ�����
-�ƥץ������ǥ���å�ID������塢�����޴ƻ��Ѥλҥץ�������
-����å�ID���Ϥ��Ƶ�ư����
-�ҥץ������ǥ����ॢ���Ȼ���MySQL����³����
-�Ϥ��줿����å�ID��mysql_kill()����Ȥ�����ˡ�ˤ��褦�Ȼפ��ޤ���
-���꤬�Ȥ��������ޤ�����
+この方法を試してみたらできました。
+親プロセスでスレッドIDを取得後、タイマ監視用の子プロセスを
+スレッドIDを渡して起動し、
+子プロセスでタイムアウト時にMySQLに接続して
+渡されたスレッドIDをmysql_kill()するという方法にしようと思います。
+ありがとうございました。
 
-<span class="quote1">&gt; ���⤽�� LOAD DATA ʸ�μ¹���ˡ�����ǻߤ����Τ��ɤ����Ȥ�������</span>
-<span class="quote1">&gt; �⤢��褦�ʵ����� (^^;</span>
+<span class="quote1">&gt; そもそも LOAD DATA 文の実行中に、途中で止められるのかどうかという問題</span>
+<span class="quote1">&gt; もあるような気が… (^^;</span>
 
-�嵭����ˡ�ǻ���Ȥ�����
-�������kill�Ǥ��Ƥ���褦�ǡ�
-����ޤǤΥǡ�������������Ƥ��ޤ�����
-�ʤ���Ǥ����Τ��Ȥ�������Ϥ���ޤ�����������
-1�쥳����3�����Υơ��֥�ǽ��������ΤǤ�����
-���Ǥ��Ƥ�ǽ��쥳���ɤ�3�����ˤ�
-������ȥǡ�������������Ƥ��ޤ�����
+上記の方法で試したところ、
+きちんとkillできているようで、
+途中までのデータが挿入されていました。
+（それでいいのかという疑問はありますが。。。）
+1レコード3カラムのテーブルで十数回試したのですが、
+中断しても最終レコードの3カラムには
+きちんとデータが挿入されていました。
 
 <span class="quote1">&gt; --</span>
-<span class="quote1">&gt; �Ȥߤ��ޤ��Ҥ� &lt;tommy@xxxxxxxxxx&gt;</span>
-<span class="quote1">&gt; ����MySQL�桼���� <a href="../../../index.html">http://www.mysql.gr.jp</a></span>
+<span class="quote1">&gt; とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; 日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a></span>
 <span class="quote1">&gt;</span>
 
 
 </pre>
 </div>
-<p class="button"><a href="7660.html">[��]</a><a href="7662.html">[��]</a><a href="../list/7601-7700.html">[�ֹ�����]</a><a href="../thread/7601-7700.html">[����åɰ���]</a></p>
+<p class="button"><a href="7660.html">[前]</a><a href="7662.html">[次]</a><a href="../list/7601-7700.html">[番号順一覧]</a><a href="../thread/7601-7700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="7650.html">   7650 2003-05-06 18:29 [&quot;m.yamazaki&quot; &lt;yamaza] C ����� API �ˤ�륯��������ǤˤĤ��� </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7658.html">   7658 2003-05-07 08:09 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="7661.html">   7661 2003-05-07 10:12 ����[&quot;m.yamazaki&quot; &lt;yamaza]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7650.html">   7650 2003-05-06 18:29 [&quot;m.yamazaki&quot; &lt;yamaza] C 言語の API によるクエリの中断について </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7658.html">   7658 2003-05-07 08:09 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="7661.html">   7661 2003-05-07 10:12 　┗[&quot;m.yamazaki&quot; &lt;yamaza]                                     </a></span>
 </pre>
 </body>
 </html>

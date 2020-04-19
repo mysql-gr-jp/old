@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="11408.html">[��]</a><a href="11410.html">[��]</a><a href="../list/11401-11500.html">[�ֹ�����]</a><a href="../thread/11401-11500.html">[����åɰ���]</a></p>
+<p class="button"><a href="11408.html">[前]</a><a href="11410.html">[次]</a><a href="../list/11401-11500.html">[番号順一覧]</a><a href="../thread/11401-11500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:11409
 </p>
@@ -13,99 +13,99 @@ mysql:11409
 <p>
 From: zen kishimoto &lt;zen kishimoto &lt;zen@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 12 May 2005 20:46:14 -0700<br>
-Subject: [mysql 11409] 5��: Joins, Temporary  Tables�� Transactions,  ��Beginning MySQL,Database Design and Optimization: From Novice to Professional��<br>
+Subject: [mysql 11409] 5章: Joins, Temporary  Tablesと Transactions,  「Beginning MySQL,Database Design and Optimization: From Novice to Professional」<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-5��: Joins, Temporary Tables�� Transactions
+5章: Joins, Temporary Tablesと Transactions
 <a href="http://dev.mysql.com/tech-resources/articles/mysql-db-design-ch5.html">http://dev.mysql.com/tech-resources/articles/mysql-db-design-ch5.html</a>
 
-MySQL Developer Zone ��2004ǯ�˽��Ǥ��줿
-Jon Stephens��Chad Russell�����Ρ�Beginning MySQL
+MySQL Developer Zone は2004年に出版された
+Jon Stephens・Chad Russell共著の「Beginning MySQL
 Database Design and Optimization: From Novice to
-Professional��
+Professional」
 (<a href="http://www.apress.com/book/bookDisplay.html?bID=338">http://www.apress.com/book/bookDisplay.html?bID=338</a>)
-�ΰ����򤳤���ȯɽ������Ĥ����ޤ�����
-�����ǡ����Ϥ� Joins, Temporary Tables��Transactions��
-���򤷤ޤ�����
+の一部をここに発表する許可を得ました。
+そこで、５章の Joins, Temporary TablesとTransactionsを
+選択しました。
 
-���ξϤǤ�MySQL�Υ��ץꥱ�������򥹥ԡ��ɥ��å�
-�Ǥ��룳�Ĥε�ǽ�ˤĤ��ƽҤ٤ޤ������ĤϤ��ߤ���ľ��
-�ϴ�Ϣ���Ƥ��ޤ��󤬡����줾�����Ѥ���Хǡ����١����Υ�������
-�����ɤΥ����С��إåɤ�︺���뤳�Ȥ��Ǥ��ޤ��������ɥ�٥��
-������䥪�ڥ졼�������Ȥ߹�碌�ƾ��ʤ����Υ�˥å�
-�ˤ��뤳�Ȥ�ã�����ޤ���
+この章ではMySQLのアプリケーションをスピードアップ
+できる３つの機能について述べます。３つはお互いに直接
+は関連していませんが、それぞれを使用すればデータベースのサイズや
+コードのオーバーヘッドを削減することができます。コードレベルで
+クエリやオペレーションを組み合わせて少ない数のユニット
+にすることで達成します。
 
-* Join�ϣ��Ĥ�SQL���ơ��ȥ��Ȥ�ʣ���Υơ��֥뤫��
-�ǡ���������Ǥ���褦�ˤ��ޤ���
-* Temporary table�ϥ����꤫����Ф����ǡ����򿷤���
-�ơ��֥�˳�Ǽ������ˡ���󶡤��ޤ�������ϸ���
-��MySQL�Υ桼�����å����³���¤겿�٤⥯���ꤹ�뤳�Ȥ�
-�Ǥ��ޤ���
-* Transaction �ϴ�Ϣ�������ڥ졼�����򣱤Ĥ�
-���롼�פȤ��ƤޤȤᡢ���ƤΥ��ڥ顼���������
-�������뤫���Ԥ��뤫�Τ褦�˼¹ԤǤ��ޤ���
+* Joinは１つのSQLステートメントで複数のテーブルから
+データを選択できるようにします。
+* Temporary tableはクエリから抽出したデータを新しい
+テーブルに格納する方法を提供します。それは現在
+のMySQLのユーザセッションが続く限り何度もクエリすることが
+できます。
+* Transaction は関連したオペレーションを１つの
+グループとしてまとめ、全てのオペラーションが全て
+成功するか失敗するかのように実行できます。
 
-���줾��ε�ǽ�˴ؤ��ƽҤ٤ޤ����Ĥޤꤽ��ϲ������ɤΤ褦��
-ư���Τ������ץ����Ǥɤ��Ȥ��Τ��Ǥ���
+それぞれの機能に関して述べます。つまりそれは何か、どのように
+動作するのか、アプリの中でどう使うのかです。
 
-join���طʤˤ���Τ����Ū��ñ�Ǥ��� ���ĤΥ������
-ȯ�����������Ĥ�Υ������ȯ��������Ψ���ɤ��ΤǤ���
-���Ĥ�ξ����ȣ��ĤΥ�����η�̤�¾�Υ������
-���Ȥʤ�ޤ���
+joinの背景にあるのは比較的簡単です。 １つのクエリを
+発する方が幾つものクエリを発するよりも効率が良いのです。
+幾つもの場合だと１つのクエリの結果が他のクエリの
+条件となります。
 
-�����फ��join������ޤ����㤤�ϤɤΤ褦�ˣ��ĤΥơ��֥�
-����Ϣ����¾�Υơ��֥�ȥޥå����ʤ��Ȥ��ˤ��� ����ͤ�
-�������뤫�Ǥ���
+何種類かのjoinがあります。違いはどのように１つのテーブル
+が関連する他のテーブルとマッチしないときにその 列の値を
+処理するかです。
 
-���줾�����֤˥��С����ޤ�������¾���Ĥ�����
-(theta-style��ANSI-style) ��join
-�˴ؤ��ƽҤ٤ޤ�������¾MySQL�ǻ��Ѳ�ǽ�ʴ�Ϣ����
-���֤�Ҥ٤ޤ���
+それぞれを順番にカバーします。その他２つの定番
+(theta-styleとANSI-style) のjoin
+に関して述べます。その他MySQLで使用可能な関連して
+形態も述べます。
 
-temporary table����Ѥ��뤳�Ȥǻ��֤�ϫ�Ϥ�����Ȥʤ�
-�ޤ����ä��礭���ƻ��̤ä���̤��ִԤ���
-ʣ���Υ�����򰷤��Ȥ���ͭ���Ǥ��� ���ĤΥ��å�����
-Ʊ���ơ��֥�Υǡ�������ʬ����򲿲󤫼�갷����硢����
-�������夲�ƥƥ�ݥ�꡼�Υơ��֥�˳�Ǽ��������¾��
-��ˡ����®���Ǥ���¾����ˡ�ϥץ�������������array�� hash)
-�˳�Ǽ���뤫��ʣ����join�����Ԥ����ȤǤ���
-���̤Υǡ���������ʬ��ޤ���Ĥ��η�̻��Ѥ���
-�����硢ɬ�פ����ƤΥǡ�����ޤ��̤����ꤷ�ƥƥ�ݥ�꡼
-�Υơ��֥�˳�Ǽ���Ƥ��Υƥ�ݥ�꡼�Υơ��֥뤫������
-����Τ�˾�ޤ����Ǥ����ƥ�ݥ�꡼���ơ��֥��MySQL��
-���Ѥ���Τ�Ŭ���Ƥ��ޤ����ʤ��ʤ�С��ƥ�ݥ��
-�ơ��֥�Ϥ��줾��Υ桼�����å����ˤĤ���ˡ���������Ǥ���
-�ɤ�������̣���ξܺ٤ȤɤΤ褦�˻��Ѥ��뤫��Ҥ٤ޤ���
+temporary tableを使用することで時間と労力の節約となり
+ます。特に大きくて似通った結果を返還する
+複数のクエリを扱うときに有効です。 １つのセッションで
+同じテーブルのデータの部分集合を何回か取り扱う場合、一度
+だけ取り上げてテンポラリーのテーブルに格納する方が他の
+方法よりも速いです。他の方法はプログラムの内部（arrayや hash)
+に格納するか、複雑なjoinを数回行うことです。
+共通のデータの大部分を含む幾つかの結果使用して
+いる場合、必要な全てのデータを含む結果を入手してテンポラリー
+のテーブルに格納してこのテンポラリーのテーブルから選択
+するのが望ましいです。テンポラリー・テーブルはMySQLで
+使用するのに適しています。なぜならば、テンポラリ
+テーブルはそれぞれのユーザセッションにつきユニークだからです。
+どういう意味かの詳細とどのように使用するかを述べます。
 
-Transaction��ͭ�פǤ����ǡ����δ��������ݾڤ�����ˡ���󶡤���
-����Ǥ����ȥ�󥶥�������Ȥä�������Ψ���ɤ��Ǥ���
-�㤨�С����줾��Υ�����򥢥ץꥱ�������Υ����å�
-�Ǹ��̤˽��������ꡢ���������Ԥ�ƥ��Ȥ����ꡢ���Ԥ���
-�ݸ��ξ��֤��᤹���Ȥ�ͤ���Ȥ������������Ψ���ɤ��Ǥ���
+Transactionは有益です。データの完全性を保証する方法を提供する
+からです。トランザクションを使った方が効率が良いです。
+例えば、それぞれのクエリをアプリケーションのロジック
+で戸別に処理したり、成功・失敗をテストしたり、失敗した
+際元の状態に戻すことを考えるとこちらの方が効率が良いです。
 
-InnoDB��Berkeley DB (BDB) �ơ��֥뤫�ȥ�󥶥�������Ȥ���
-MySQL�ˤ��Υ�������ưŪ�˹Ԥ碌�뤳�Ȥ��Ǥ��ޤ������Ѥ����
-���Ѥ��ʤ�������٤�®���ʤ�櫓�ǤϤ���ޤ��󡣼º�
-MyISAM �ơ��֥�(�ȥ�󥶥������򥵥ݡ��Ȥ��ޤ���)
-��InnoDB�ޤ��� BDB �ơ��֥� (�ȥ�󥶥������򥵥ݡ���)���
-®���Ǥ�������������ȯ�λ��֤�����Ǥ������ץ��¿����
-�����ɤ��פ��ޤ��󡣤���Ϥ��줾��Υ��������̤�
-�ƥ��Ȥ����긵���ᤷ���ꤹ��ɬ�פ��ʤ�����Ǥ���
-���ξϤǤϴ���Ū�ʥȥ�󥶥������������ȡ�
-MySQL�ǤɤΤ褦�˼�������Ƥ��뤫�򥫥С����ޤ�������ξ�
-�ʣ��ϡˤ�PHP, Python�� Perl���ǻ��Ѥ���Ƥ��뤫�򸫤ޤ���
+InnoDBかBerkeley DB (BDB) テーブルかトランザクションを使うと
+MySQLにこのタスクを自動的に行わせることができます。使用すると
+使用しない時に比べて速くなるわけではありません。実際
+MyISAM テーブル(トランザクションをサポートしません)
+はInnoDBまたは BDB テーブル (トランザクションをサポート)より
+速いです。しかし、開発の時間を節約でき、アプリも多くの
+コードを要しません。それはそれぞれのクエリを戸別に
+テストしたり元に戻したりする必要がないからです。
+この章では基本的なトランザクションの理論と、
+MySQLでどのように実装されているかをカバーしましす。後の章
+（７章）でPHP, Pythonと Perl　で使用されているかを見ます。
 
-�����ε�����Ĺ���Τ�PDF�Υե�����ˤ��ޤ�������������
-����������ɤǤ��ޤ�����Ͽ��ɬ�פ���ޤ��󡣡�â���Ѹ��
+全部の記事は長いのでPDFのファイルにしました。ここから
+ダウンロードできます。登録は必要ありません。（但し英語）
 <a href="http://dev.mysql.com/tech-resources/articles/mysql-db-design-ch5.pdf">http://dev.mysql.com/tech-resources/articles/mysql-db-design-ch5.pdf</a>
 
 
 
 </pre>
 </div>
-<p class="button"><a href="11408.html">[��]</a><a href="11410.html">[��]</a><a href="../list/11401-11500.html">[�ֹ�����]</a><a href="../thread/11401-11500.html">[����åɰ���]</a></p>
+<p class="button"><a href="11408.html">[前]</a><a href="11410.html">[次]</a><a href="../list/11401-11500.html">[番号順一覧]</a><a href="../thread/11401-11500.html">[スレッド一覧]</a></p>
 </body>
 </html>

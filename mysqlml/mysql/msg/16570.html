@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="16569.html">[��]</a><a href="16571.html">[��]</a><a href="../list/16501-16600.html">[�ֹ�����]</a><a href="../thread/16501-16600.html">[����åɰ���]</a></p>
+<p class="button"><a href="16569.html">[前]</a><a href="16571.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:16570
 </p>
@@ -13,44 +13,44 @@ mysql:16570
 <p>
 From: yoku0825 &lt;yoku0825 &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
 Date: Sun, 8 Mar 2020 12:07:53 +0900<br>
-Subject: [mysql 16570] Re: [mysql 16567] LOAD DATA INFILE��default�ͤ��ʤ��Ȥ������顼��Field 'SHAPE' doesn't have a default value��<br>
+Subject: [mysql 16570] Re: [mysql 16567] LOAD DATA INFILEでdefault値がないというエラー（Field 'SHAPE' doesn't have a default value）<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-yoku0825�Ȥ����ޤ���
+yoku0825といいます。
 
-<span class="quote1">&gt; �����ǡ��ߤ�̵�������Τ褦��Geometry�ե�����ɤ�default NULL�Ȥ���SPATIAL</span>
-<span class="quote1">&gt; KEY�����ꤻ���˥ơ��֥����������嵭��LOAD DATA</span>
-<span class="quote1">&gt; INFILE��¹Ԥ���ȡ����顼��ȯ�����ޤ���</span>
+<span class="quote1">&gt; そこで、止む無く下記のようにGeometryフィールドをdefault NULLとし、SPATIAL</span>
+<span class="quote1">&gt; KEYも設定せずにテーブルを定義し、上記のLOAD DATA</span>
+<span class="quote1">&gt; INFILEを実行すると、エラーは発生しません。</span>
 
-���λ�����Ȥˤϥ�����ȥ귿�Υǡ��������������äƤ������Ǥ����� ��NULL�ˤϤʤäƤ��ʤ���
+この時、中身にはジオメトリ型のデータがちゃんと入っていそうですか？ （NULLにはなっていない？
 
-NULL�ˤʤäƤ��ޤäƤ���ʤ顢�Ϥ��ǡ������������餪�������������ޤ�����
-�����ȥǡ��������äƤ���ʤ颭���̤�ˤʤ����Ȼפ��ޤ���
+NULLになってしまっているなら、渡すデータが何かしらおかしい気がしますし、
+ちゃんとデータが入っているなら↓の通りになるんだと思います。
 
-<span class="quote1">&gt; LOAD DATA INFILE��SET��ʸ��Spatial</span>
-<span class="quote1">&gt; Function��Ȥ����˥Х�������ΤǤϤʤ��Ǥ��礦����</span>
+<span class="quote1">&gt; LOAD DATA INFILEのSET構文でSpatial</span>
+<span class="quote1">&gt; Functionを使う場合にバグがあるのではないでしょうか？</span>
 
-MySQL�Υ桼��������ѿ�(���ξ��� @wkt_tmp )�ˤϥǡ��������ʤ��Τǡ�
-ST_GeometryFromText�����Ƥ���ʳ��Υǡ������Ȥ��ư��ٳ�Ǽ����Ƥ��ޤäƤ���󤸤�ʤ����ʤ����������Ƥ��ޤ���
+MySQLのユーザー定義変数(この場合は @wkt_tmp )にはデータ型がないので、
+ST_GeometryFromTextが許容する以外のデータ型として一度格納されてしまっているんじゃないかなあと想像しています。
 
-@wkt_tmp������Ƥ���ʸ�����1�Ĥ��ɤ��Τǥ���ץ�Ȥ��ƽФ��Ƥ�館�ʤ��Ǥ��礦����
-�ʤ���ǺƸ�����ʤ�Х���ݡ��Ȥ�Ǥ���Τǡ�
+@wkt_tmpに入れている文字列を1つで良いのでサンプルとして出してもらえないでしょうか？
+（それで再現するならバグレポートもできるので）
 
 
-�Ȥ�������ʸ�桢 LOAD DATA INFILE��LOAD DATA LOCAL INFILE�����礳���礳�����äƤ��ơ�
-LOAD DATA LOCAL INFILE�����ϡ־�˥��顼��IGNORE����פ褦��ư���ˤʤ뵤������ΤǤ�����
-�����LOAD DATA INFILE�����Ǥ�ä���̤Ǥ����͡ġ� �ʤǤʤ��Ⱥ��٤ϥɥ�����ȴְ㤤�β�ǽ����
+ところで本文中、 LOAD DATA INFILEとLOAD DATA LOCAL INFILEがちょこちょこ混じっていて、
+LOAD DATA LOCAL INFILEの方は「常にエラーをIGNOREする」ような動きになる気がするのですが、
+これはLOAD DATA INFILEの方でやった結果ですかね…？ （でないと今度はドキュメント間違いの可能性が
 
 <span class="quote1">&gt; With LOAD DATA LOCAL, data-interpretation and duplicate-key errors become warnings and the operation continues because the server has no way to stop transmission of the file in the middle of the operation. For duplicate-key errors, this is the same as if IGNORE is specified. IGNORE is explained further later in this section.</span>
 
 <a href="https://dev.mysql.com/doc/refman/8.0/en/load-data.html">https://dev.mysql.com/doc/refman/8.0/en/load-data.html</a>
 
 
-���Υ���ब�ĤäƤ��ɤ��ʤ顢wkt_tmp���Τ�Τ���٥����˳�Ǽ�����Ƥ��ޤäƼ��ǥե���Ȥ�Ȥä�SHAPE������������������Ǥ��ʤ��Ǥ��礦���͡ġ�
-�����פʤ�Ǹ��wkt_tmp������DROP���Ƥ��ޤ��Ĥ��λ����ǥե���Ȥ⤤����ʤ��ȥ��顼�ˤʤꤽ����ͽ�������Ƥ��ޤ�������
+このカラムが残っても良いなら、wkt_tmpそのものを一度カラムに格納させてしまって式デフォルトを使ってSHAPEカラムを派生させたりできないでしょうかね…。
+（不要なら最後にwkt_tmpカラムをDROPしてしまう…この時式デフォルトもいじらないとエラーになりそうな予感がしてきましたが）
 
 CREATE TABLE `mesh05439` (
    `OGR_FID` int(11) NOT NULL AUTO_INCREMENT,
@@ -67,18 +67,18 @@ CREATE TABLE `mesh05439` (
    SPATIAL KEY `SHAPE` (`SHAPE`)
 ) ENGINE=InnoDB;
 
-2020ǯ3��4��(��) 11:49 ��� ��Ϻ &lt;s.ochiai@xxxxxxxxxx&gt;:
+2020年3月4日(水) 11:49 落合 司郎 &lt;s.ochiai@xxxxxxxxxx&gt;:
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���Ĥ⤪���äˤʤ�ޤ���</span>
+<span class="quote1">&gt; いつもお世話になります。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; WKT�����ǵ��Ҥ��줿Geometry�ǡ�����ޤ�CSV�ե������LOAD DATA</span>
-<span class="quote1">&gt; INFILE�ǥơ��֥�˼����⤦�Ȥ��Ƥ��ޤ���</span>
-<span class="quote1">&gt; Geometry�ǡ����������Geometry�ե�����ɤˤ�SPATIAL KEY�����ꤷ�������ᡢNOT</span>
-<span class="quote1">&gt; NULL�����Ĥ���ɬ�פ����ꡢ��������Υơ��֥��ʲ��Τ褦��Geometry�ե�����ɤ�NOT</span>
-<span class="quote1">&gt; NULL��default�ͤ����ꤷ�ʤ���������ޤ�����</span>
+<span class="quote1">&gt; WKT形式で記述されたGeometryデータを含むCSVファイルをLOAD DATA</span>
+<span class="quote1">&gt; INFILEでテーブルに取り込もうとしています。</span>
+<span class="quote1">&gt; Geometryデータを取り込むGeometryフィールドにはSPATIAL KEYを設定したいため、NOT</span>
+<span class="quote1">&gt; NULL制約をつける必要があり、取り込み先のテーブルを以下のようにGeometryフィールドをNOT</span>
+<span class="quote1">&gt; NULL、default値を設定しないで定義しました。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; #���顼��ȯ�������Ȥ��Υơ��֥�</span>
-<span class="quote1">&gt; # geometry����NOT NULL�ˤ�ޤ�ơ��֥����</span>
+<span class="quote1">&gt; #エラーが発生したときのテーブル</span>
+<span class="quote1">&gt; # geometry型（NOT NULL）を含むテーブル定義</span>
 <span class="quote1">&gt; drop tables if exists mesh05439;</span>
 <span class="quote1">&gt; CREATE TABLE `mesh05439` (</span>
 <span class="quote1">&gt;    `OGR_FID` int(11) NOT NULL AUTO_INCREMENT,</span>
@@ -94,19 +94,19 @@ CREATE TABLE `mesh05439` (
 <span class="quote1">&gt;    SPATIAL KEY `SHAPE` (`SHAPE`)</span>
 <span class="quote1">&gt; ) ENGINE=InnoDB;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �����˼���LOAD DATA</span>
-<span class="quote1">&gt; INFILE��¹Ԥ���ȡ�CSV�ե�����Τ��٤ƤΥ쥳���ɤ˥ǡ������ͤ����äƤ⡢default�ͤ��ʤ��Ȥ������顼��ȯ�����ޤ�����</span>
-<span class="quote1">&gt; �ʤ���LOAD DATA</span>
-<span class="quote1">&gt; INFILE�Ǽ�����CSV�ե������text�ե�����Ǥʤ���Фʤ�ʤ��Τǡ�CSV�ե������Geometry�ǡ�����WKT�ե����ޥåȤ�ʸ����Ȥ��Ƥ��ޤ���</span>
+<span class="quote1">&gt; 下記に示すLOAD DATA</span>
+<span class="quote1">&gt; INFILEを実行すると、CSVファイルのすべてのレコードにデータに値があっても、default値がないというエラーが発生しました。</span>
+<span class="quote1">&gt; なお、LOAD DATA</span>
+<span class="quote1">&gt; INFILEで取り込むCSVファイルはtextファイルでなければならないので、CSVファイルのGeometryデータはWKTフォーマットの文字列としています。</span>
 <span class="quote1">&gt; LOAD DATA</span>
-<span class="quote1">&gt; INFILE�Ǥ�Geometry�ǡ��������ѿ��������ơ�SET��ʸ��ST_GeometryFromText()��Geometry�ե�����ɤ��ͤ򥻥åȤ��Ƥ��ޤ���</span>
+<span class="quote1">&gt; INFILEではGeometryデータをワーク変数を割り当て、SET構文でST_GeometryFromText()でGeometryフィールドに値をセットしています。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; #�¹Ԥ���LOAD DATA INFILE</span>
+<span class="quote1">&gt; #実行したLOAD DATA INFILE</span>
 <span class="quote1">&gt; # LOAD DATA</span>
-<span class="quote1">&gt; INFILE�Ǽ�����CSV�ե������text�ե�����Ǥʤ���Фʤ�ʤ��Τǡ�</span>
-<span class="quote1">&gt; # CSV�ե�����Ǥ�Geometry�ǡ�����WKT�ե����ޥåȤ�ʸ����Ȥ���LOAD DATA</span>
-<span class="quote1">&gt; INFILE�Ǥϥ���ѿ��������ơ�</span>
-<span class="quote1">&gt; # SET��ʸ��ST_GeometryFromText()��Geometry�ե�����ɤ��ͤ򥻥åȤ��ޤ���</span>
+<span class="quote1">&gt; INFILEで取り込むCSVファイルはtextファイルでなければならないので、</span>
+<span class="quote1">&gt; # CSVファイルではGeometryデータはWKTフォーマットの文字列とし、LOAD DATA</span>
+<span class="quote1">&gt; INFILEではワーク変数を割り当て、</span>
+<span class="quote1">&gt; # SET構文でST_GeometryFromText()でGeometryフィールドに値をセットします。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; LOAD DATA LOCAL INFILE 'C:******/MESH05439.csv' INTO TABLE mesh05439</span>
 <span class="quote1">&gt; FIELDS TERMINATED BY ',' ENCLOSED BY '&quot;' LINES TERMINATED BY '\r\n'</span>
@@ -114,13 +114,13 @@ CREATE TABLE `mesh05439` (
 <span class="quote1">&gt; (@wkt_tmp, key_code, mesh1_id, mesh2_id, mesh3_id, mesh4_id, mesh5_id,</span>
 <span class="quote1">&gt; obj_id) SET SHAPE=ST_GeometryFromText(@wkt_tmp,2451);</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; # ȯ���������顼</span>
+<span class="quote1">&gt; # 発生したエラー</span>
 <span class="quote1">&gt; Error Code: 1364. Field 'SHAPE' doesn't have a default value</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �����ǡ��ߤ�̵�������Τ褦��Geometry�ե�����ɤ�default NULL�Ȥ���SPATIAL</span>
-<span class="quote1">&gt; KEY�����ꤻ���˥ơ��֥����������嵭��LOAD DATA</span>
-<span class="quote1">&gt; INFILE��¹Ԥ���ȡ����顼��ȯ�����ޤ���</span>
+<span class="quote1">&gt; そこで、止む無く下記のようにGeometryフィールドをdefault NULLとし、SPATIAL</span>
+<span class="quote1">&gt; KEYも設定せずにテーブルを定義し、上記のLOAD DATA</span>
+<span class="quote1">&gt; INFILEを実行すると、エラーは発生しません。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; drop tables if exists mesh05439;</span>
 <span class="quote1">&gt; CREATE TABLE `mesh05439` (</span>
@@ -136,33 +136,33 @@ CREATE TABLE `mesh05439` (
 <span class="quote1">&gt;    PRIMARY KEY `OGR_FID` (`OGR_FID`)</span>
 <span class="quote1">&gt; ) ENGINE=InnoDB;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; Geometry�ե�����ɤˤ�SPATIAL KEY�����ꤷ�����Τǡ����������ˡ�ALTER TABLE��Geometry�ե�����ɤ�NOT</span>
-<span class="quote1">&gt; NULL�ˡ��ޤ���SPATIAL KEY���ɲä�����Ȥ��Ƥ��ޤ���</span>
+<span class="quote1">&gt; GeometryフィールドにはSPATIAL KEYを設定したいので、取り込んだ後に、ALTER TABLEでGeometryフィールドをNOT</span>
+<span class="quote1">&gt; NULLに、また、SPATIAL KEYを追加する手順としています。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; ALTER TABLE `mesh05439`</span>
 <span class="quote1">&gt; CHANGE COLUMN `SHAPE` `SHAPE` GEOMETRY NOT NULL ,</span>
 <span class="quote1">&gt; ADD SPATIAL KEY `SHAPE` (`SHAPE`);</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Ȥ����ǡ�LOAD DATA INFILE�ǥ���ѿ��������ơ�SET��ʸ�ǥơ��֥��NOT</span>
-<span class="quote1">&gt; NULL��������줿�ե�����ɤ��ͤ����ꤹ�뤳�Ȥϡ�Geometry���ʳ��Υե�����ɤʤ��Spatial</span>
-<span class="quote1">&gt; Function��ޤޤʤ��׻����ʤ�����ʤ��Ǥ��ޤ���</span>
+<span class="quote1">&gt; ところで、LOAD DATA INFILEでワーク変数を割り当て、SET構文でテーブルのNOT</span>
+<span class="quote1">&gt; NULLで定義されたフィールドに値を設定することは、Geometry型以外のフィールドならばSpatial</span>
+<span class="quote1">&gt; Functionを含まない計算式なら問題なくできます。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; LOAD DATA INFILE��SET��ʸ��Spatial</span>
-<span class="quote1">&gt; Function��Ȥ����˥Х�������ΤǤϤʤ��Ǥ��礦����</span>
+<span class="quote1">&gt; LOAD DATA INFILEのSET構文でSpatial</span>
+<span class="quote1">&gt; Functionを使う場合にバグがあるのではないでしょうか？</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �¹ԴĶ���</span>
-<span class="quote1">&gt; OS:Windows 8.0 64�ӥå�</span>
-<span class="quote1">&gt; MySQL:Ver.8.0.12��GPL��</span>
+<span class="quote1">&gt; 実行環境：</span>
+<span class="quote1">&gt; OS:Windows 8.0 64ビット</span>
+<span class="quote1">&gt; MySQL:Ver.8.0.12　GPL版</span>
 <span class="quote1">&gt; Workbench:Ver.6.3.9</span>
 <span class="quote1">&gt;</span>
 
 </pre>
 </div>
-<p class="button"><a href="16569.html">[��]</a><a href="16571.html">[��]</a><a href="../list/16501-16600.html">[�ֹ�����]</a><a href="../thread/16501-16600.html">[����åɰ���]</a></p>
+<p class="button"><a href="16569.html">[前]</a><a href="16571.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="16567.html">  16567 2020-03-04 11:48 [��� ��Ϻ &lt;s.ochiai@] LOAD DATA INFILE��default�ͤ��ʤ��Ȥ������顼��Field 'SHAPE' doesn't have a default value��</a></span>
-<span class="current">-&gt;&nbsp;<a href="16570.html">  16570 2020-03-08 12:07 ��[yoku0825 &lt;yoku0825@x] Re: [mysql 16567] LOAD DATA INFILE��default�ͤ��ʤ��Ȥ������顼��Field 'SHAPE' doesn't have a default value��</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16567.html">  16567 2020-03-04 11:48 [落合 司郎 &lt;s.ochiai@] LOAD DATA INFILEでdefault値がないというエラー（Field 'SHAPE' doesn't have a default value）</a></span>
+<span class="current">-&gt;&nbsp;<a href="16570.html">  16570 2020-03-08 12:07 ┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16567] LOAD DATA INFILEでdefault値がないというエラー（Field 'SHAPE' doesn't have a default value）</a></span>
 </pre>
 </body>
 </html>

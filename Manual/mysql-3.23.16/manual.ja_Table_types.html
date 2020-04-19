@@ -29,8 +29,8 @@ trying to use a table type that is not incompiled or activated,
 
 </P>
 <P>
-<CODE>ALTER TABLE</CODE> ʸ����Ѥ���С��ơ��֥��㤦�������ѹ��Ǥ��ޤ���
- ��<A HREF="manual.ja_Reference.html#ALTER_TABLE">7.8  <CODE>ALTER TABLE</CODE>��ʸ</A>���Ỳ��.
+<CODE>ALTER TABLE</CODE> 文を使用すれば、テーブルを違う形式に変更できます。
+ 「<A HREF="manual.ja_Reference.html#ALTER_TABLE">7.8  <CODE>ALTER TABLE</CODE>構文</A>」節参照.
 
 </P>
 <P>
@@ -92,15 +92,15 @@ of both worlds.
 <H2><A NAME="MyISAM" HREF="manual.ja_toc.html#MyISAM">8.1  MyISAM tables</A></H2>
 
 <P>
-<CODE>MyISAM</CODE> �ϡ�<STRONG>MySQL</STRONG> 3.23 �ǤΥǥե���ȤΥơ��֥�����Ǥ���
-����� <CODE>ISAM</CODE> �����ɤ��ˤ���¿���������ʳ�ĥ��ǽ����äƤ��ޤ���
+<CODE>MyISAM</CODE> は、<STRONG>MySQL</STRONG> 3.23 でのデフォルトのテーブル形式です．
+これは <CODE>ISAM</CODE> コードを基にし、多くの便利な拡張機能を持っています。
 
 </P>
 <P>
-����ǥå����� <CODE>.MYI</CODE> (MYindex) ��ĥ�ҤΤĤ��ե��������¸���졢
-�ǡ����ϡ� <CODE>.MYD</CODE> (MYData) ��ĥ�ҤΤĤ��ե��������¸����ޤ���
-<CODE>myisamchk</CODE> �桼�ƥ���ƥ�����Ѥ��ơ� <CODE>MyISAM</CODE> �ơ��֥��
-��������������ǽ�Ǥ���  ��<A HREF="manual.ja_Maintenance.html#Crash_recovery">15.6  Using <CODE>myisamchk</CODE> for crash recovery</A>���Ỳ��.
+インデックスは <CODE>.MYI</CODE> (MYindex) 拡張子のつくファイルに保存され、
+データは、 <CODE>.MYD</CODE> (MYData) 拡張子のつくファイルに保存されます。
+<CODE>myisamchk</CODE> ユーティリティを使用して、 <CODE>MyISAM</CODE> テーブルの
+検査・修復が可能です。  「<A HREF="manual.ja_Maintenance.html#Crash_recovery">15.6  Using <CODE>myisamchk</CODE> for crash recovery</A>」節参照.
 
 </P>
 <P>
@@ -111,19 +111,19 @@ The following is new in <CODE>MyISAM</CODE>:
 <UL>
 <LI>
 
-���륹��åɤ��ɤ߹�����Υơ��֥���Ф����㤦����åɤ�
-Ʊ���ơ��֥�ˡ��������Ԥ� <CODE>INSERT</CODE> �Ǥ��ޤ���
-����Ϥʤ���
+あるスレッドが読み込み中のテーブルに対し、違うスレッドが
+同じテーブルに、新しい行を <CODE>INSERT</CODE> できます。
+削除はなしで
 You can <CODE>INSERT</CODE> new rows in a table without deleted rows,
 while other threads are reading from the table.
 <LI>
 
-��ե����� (63 bit) �Υ��ݡ��ȡ�
-��������filesystems/operating systems ������ե�����򥵥ݡ��Ȥ��Ƥ����硣
+大ファイル (63 bit) のサポート。
+ただし、filesystems/operating systems が巨大ファイルをサポートしている場合。
 <LI>
 
-���ǡ����ϡ����̥Х��Ȥ���ˤ�����ޤ��� ����ϡ��ǡ����򡢥ޥ���OS
-���¸�ˤ��ޤ�����
+全データは、下位バイトが先にかかれます。 これは、データを、マシン・OS
+非依存にしました。
 The only requirement is that the machine uses twos-complement
 signed integers (as every machine for the last 20 years has)
 and IEEE floating point format (also totally dominant among mainstream
@@ -132,8 +132,8 @@ compatibility are embedded systems (because they sometimes have peculiar
 processors).
 <LI>
 
-�����ͥ����Ϲ�̥Х��Ȥ���˽񤫤�ޤ��� ����ϥ���ǥå����ΰ���Ψ��
-�ɤ����ޤ���
+全数値キーは高位バイトが先に書かれます。 これはインデックスの圧縮率を
+良くします。
 <LI>
 
 Internal handling of one <CODE>AUTO_INCREMENT</CODE> column. <CODE>MyISAM</CODE>
@@ -150,14 +150,14 @@ column) the key tree will be split so that the high node only contains one
 key. This will improve the space utilization in the key tree.
 <LI>
 
-<CODE>BLOB</CODE> �� <CODE>TEXT</CODE> �ե�����ɤ˥���ǥå�����ĥ��ޤ�
+<CODE>BLOB</CODE> と <CODE>TEXT</CODE> フィールドにインデックスが張れます
 <LI>
 
-<CODE>NULL</CODE> �ͤ򥤥�ǥå�����ĥ��줿�ե�����ɤ˵����ޤ��� This takes 0-1
+<CODE>NULL</CODE> 値をインデックスの張られたフィールドに許します． This takes 0-1
 bytes/key.
 <LI>
 
-���ߡ������κ���Ĺ�ϥǥե���Ȥ� 500 �Ǥ��� In cases of keys longer
+現在、キーの最大長はデフォルトで 500 です。 In cases of keys longer
 than 250 bytes, a bigger key block size than the default of 1024 bytes
 is used for this key.
 <LI>
@@ -185,7 +185,7 @@ with updates and inserts.  This is done by automatically combining adjacent
 deleted blocks and by extending blocks if the next block is deleted.
 <LI>
 
-<CODE>myisampack</CODE> �� <CODE>BLOB</CODE> �� <CODE>VARCHAR</CODE> �ե�����ɤ�ѥå����뤳�Ȥ���ǽ�Ǥ���
+<CODE>myisampack</CODE> は <CODE>BLOB</CODE> と <CODE>VARCHAR</CODE> フィールドをパックすることが可能です。
 </UL>
 
 <P>
@@ -264,9 +264,9 @@ This is the default format. It's used when the table contains no
 
 </P>
 <P>
-���Υե����ޥåȤϡ��Ǥ�ñ�㡢���ġ������ʥե����ޥåȤǤ���
-�����, Disk ��˺����ơ��֥����ǡ��Ǥ�®���ե����ޥåȤǤ⤢��ޤ���
-����ϥǥ�������Υǡ����򸫤Ĥ��䤹������Ǥ���
+このフォーマットは、最も単純、かつ、安全なフォーマットです。
+これは, Disk 上に作られるテーブルの中で、最も速いフォーマットでもあります。
+これはディスク上のデータを見つけやすいからです。
 When looking up something with a index and static
 format it very simple, just multiply the row number with the row length.
 
@@ -277,32 +277,32 @@ records with each disk read.
 
 </P>
 <P>
-�������Ȥ����Τϡ������ͤʤ��ȤǤ���
-�⤷���ˡ���Ū(����Ĺ) MyISAM �ե�����˽񤭹�����ˡ�
-���ʤ��Υ���ԥ塼��������å��夷����硢
-<CODE>myisamchk</CODE> �ϡ����줾��Υ쥳���ɤγ������Ƚ�λ����°פ˸��Ĥ��뤳�Ȥ���
-��ޤ��� 
+安全、というのは、次の様なことです。
+もし仮に、静的(固定長) MyISAM ファイルに書き込み中に、
+あなたのコンピュータがクラッシュした場合、
+<CODE>myisamchk</CODE> は、それぞれのレコードの開始点と終了点を安易に見つけることが出
+来ます。 
 So it can usually reclaim all records except the
 partially written one. 
-MySQL �Ǥϡ���ˡ����ƤΥ���ǥå������ƹ��ۤǤ��뤳�Ȥ����դ��Ƥ���������
+MySQL では、常に、全てのインデックスが再構築できることに注意してください。
 
 </P>
 
 <UL>
 <LI>
 
-���Ƥ� <CODE>CHAR</CODE>, <CODE>NUMERIC</CODE>, <CODE>DECIMAL</CODE> �ե�����ɤϡ����Υե������
-Ĺ��­��ʤ���ʬ�ˤϥ��ڡ����������ޤ���
+全ての <CODE>CHAR</CODE>, <CODE>NUMERIC</CODE>, <CODE>DECIMAL</CODE> フィールドは、そのフィールド
+長に足りない部分にはスペースが埋められます。
 <LI>
 
-�ȤƤ�®��
+とても速い
 <LI>
 
-����å��夷�䤹����
+キャッシュしやすい。
 <LI>
 
-����å���θ�ƹ��ۤ��䤹�����ʤ��ʤ�쥳���ɤ����ꤵ�줿���֤˳�����Ƥ��Ƥ�
-�뤫�顣
+クラッシュの後再構築しやすい。なぜならレコードが固定された位置に割り当てられてい
+るから。
 <LI>
 
 Doesn't have to be reorganized (with <CODE>myisamchk</CODE>) unless a huge number of
@@ -310,7 +310,7 @@ records are deleted and you want to return free disk space to the operating
 system.
 <LI>
 
-�̾ưŪ�ơ��֥����¿���Υǥ��������̤�ɬ�ס�
+通常、動的テーブルよりも多くのディスク容量が必要。
 </UL>
 
 
@@ -324,15 +324,15 @@ or <CODE>TEXT</CODE> columns or if the table was created with
 
 </P>
 <P>
-���η����Ͼ���ʣ���Ǥ��� �ʤ��ʤ餽�줾��Υ쥳���ɤ����쥳���ɤ��ɤΤ��餤��
-Ĺ������äƤ��뤫��Ͽ����إå�������äƤ��뤫��Ǥ���
+この形式は少し複雑です。 なぜならそれぞれのレコードが、レコードがどのぐらいの
+長さを持っているかを記録するヘッダーを持っているからです。
 One record can also end up at more than one
 location when it is made longer at an update.
 
 </P>
 <P>
-<CODE>OPTIMIZE table</CODE> �� <CODE>myisamchk</CODE> ����Ѥ��ơ��ơ��֥��
-�ե饰���ơ������������뤳�Ȥ���ǽ�Ǥ���
+<CODE>OPTIMIZE table</CODE> か <CODE>myisamchk</CODE> を使用して、テーブルの
+フラグメンテーションを修正することが可能です。
 If you have static data that you acess/change a lot in the same
 table as some <CODE>VARCHAR</CODE> or <CODE>BLOB</CODE> columns, it might be a good
 idea to move the dynamic columns to other tables just to avoid
@@ -343,26 +343,26 @@ fragmentation.
 <UL>
 <LI>
 
-���Ƥ�ʸ���ե�����ɤ�ưŪ�ˤʤ�ޤ��ʤ�����4byte���û��ʪ�Ͻ����ޤ���
+全ての文字フィールドが動的になります（ただし4byteより短い物は除きます）
 <LI>
 
-���줾��Υ쥳���ɤ���Ƭ�ˤϡ��ե�����ɤξ��֤�ɽ���ӥåȡ��ޥåפ����ޤ���
-���ΥӥåȤϡ��ɤ�ʸ�����ե�����ɤ���ʸ��(<CODE>''</CODE>)�ʤΤ���
-�ɤο��ͥե�����ɤ������ʤΤ��򼨤��ޤ���
-(����ϥե�����ɤ��ͤ� <CODE>NULL</CODE> �ͤȤϰ㤤�ޤ�)��
-�⤷��ʸ�����ե�����ɤ�ʸ�����Ĺ��(���³������ϼ��������)�� ���� ��
-���ä��ꡢ���뤤�ϡ����ͥե�����ɤ��ͤ� ���� �Ǥ��ä����ϡ�
-���Υե�����ɤϥӥåȡ��ޥåפ˥ޡ������졢�ͤϥǥ������ˤ���¸����ޤ���
-��ʸ���ǤϤʤ����ϡ�ʸ����ΥХ��ȿ����ӥåȡ��ޥåפ˵�Ͽ���졢
-ʸ���󼫿Ȥ��ե�����ɤ���¸����ޤ���
+それぞれのレコードの先頭には、フィールドの状態を表すビット・マップがきます。
+このビットは、どの文字型フィールドが空文字(<CODE>''</CODE>)なのか、
+どの数値フィールドがゼロなのかを示します。
+(これはフィールドの値が <CODE>NULL</CODE> 値とは違います)。
+もし、文字型フィールドの文字列の長さ(後に続く空白は取り除かれる)が ゼロ で
+あったり、あるいは、数値フィールドの値が ゼロ であった場合は、
+そのフィールドはビット・マップにマークされ、値はディスクには保存されません。
+空文字ではない場合は、文字列のバイト数がビット・マップに記録され、
+文字列自身がフィールドに保存されます。
 <LI>
 
-�̾����Ĺ�Υơ��֥���⾯�ʤ��ǥ��������̤Ǥ��ߤޤ�
+通常、固定長のテーブルよりも少ないディスク容量ですみます
 <LI>
 
-���줾��Υ쥳���ɤϡ��׵ᤵ�줿�����Υ��ڡ�������Ѥ��ޤ���
-�⤷����쥳���ɤ��礭���ʤ�ȡ��׵ᤵ�줿ʬ�������¿�������Ҥ�ʬ���ޤ���
-���η�̡��쥳���ɤΥե饰���ơ������ȯ�����ޤ���
+それぞれのレコードは、要求されただけのスペースを使用します。
+もしあるレコードが大きくなると、要求された分、それを多くの断片に分けます。
+この結果、レコードのフラグメンテーションが発生します。
 <LI>
 
 If you update a row with information that extends the row length, the
@@ -375,16 +375,16 @@ Not as easy to reconstruct after a crash, because a record may be fragmented
 into many pieces and a link (fragment) may be missing.
 <LI>
 
-���Ԥ����쥳���ɤ�Ĺ���ϡ�
+期待されるレコードの長さは：
 
 
 <PRE>
 3
-+ (�ե�����ɿ� + 7) / 8
-+ (char �ե�����ɤο�)
-+ ���ͥե�����ɤ�ѥå�����������
-+ ʸ����Ĺ��
-+ (NULL �ե�����ɤο� + 7) / 8
++ (フィールド数 + 7) / 8
++ (char フィールドの数)
++ 数値フィールドをパックしたサイズ
++ 文字の長さ
++ (NULL フィールドの数 + 7) / 8
 </PRE>
 
 There is a penalty of 6 bytes for each link. A dynamic record is linked
@@ -399,7 +399,7 @@ with <CODE>myisamchk -ed</CODE>. All links may be removed with <CODE>myisamchk -
 <H4><A NAME="Compressed_format" HREF="manual.ja_toc.html#Compressed_format">8.1.2.3  Compressed table characteristics</A></H4>
 
 <P>
-������ɤ߹������Ѥη��ǡ����ץ����ġ���� <CODE>myisampack</CODE> �Ǻ�������ޤ���
+これは読み込み専用の型で、オプションツールの <CODE>myisampack</CODE> で作成されます。
 (<CODE>pack_isam</CODE> for <CODE>ISAM</CODE> tables).
 
 </P>
@@ -474,7 +474,7 @@ rather soon because <CODE>MyISAM</CODE> is a better implementation of the same
 thing. ISAM uses a <CODE>B-tree</CODE> index. The index is stored in a file
 with the <CODE>.ISM</CODE> extension and the data is stored in file with the
 <CODE>.ISD</CODE> extension.  You can check/repair ISAM tables with the
-<CODE>isamchk</CODE> utility.  ��<A HREF="manual.ja_Maintenance.html#Crash_recovery">15.6  Using <CODE>myisamchk</CODE> for crash recovery</A>���Ỳ��.
+<CODE>isamchk</CODE> utility.  「<A HREF="manual.ja_Maintenance.html#Crash_recovery">15.6  Using <CODE>myisamchk</CODE> for crash recovery</A>」節参照.
 
 </P>
 <P>
@@ -497,7 +497,7 @@ with the <CODE>.ISM</CODE> extension and the data is stored in file with the
 
 <P>
 Most of the things for <CODE>MyISAM</CODE> tables are also true for <CODE>ISAM</CODE>
-tables.  ��<A HREF="manual.ja_Table_types.html#MyISAM">8.1  MyISAM tables</A>���Ỳ��. The major differences compared to <CODE>MyISAM</CODE>
+tables.  「<A HREF="manual.ja_Table_types.html#MyISAM">8.1  MyISAM tables</A>」節参照. The major differences compared to <CODE>MyISAM</CODE>
 tables are:
 
 </P>
@@ -528,8 +528,8 @@ data stored in them.  <CODE>HEAP</CODE> is very useful as temporary tables!
 
 </P>
 <P>
-<STRONG>MySQL</STRONG> ���� HEAP �ơ��֥�ϡ�100% �����ʥåߥå����ϥå��󥰤�
-���Ѥ��Ƥ����ޤ��ʥ����С��ե������ꥢ̵���ˡˡ�
+<STRONG>MySQL</STRONG> 内部 HEAP テーブルは、100% ダイナッミック・ハッシングを
+使用しておいます（オーバーフローエリア無しに）。
 There is no extra space needed for free lists.
 <CODE>HEAP</CODE> tables also don't have problems with delete + inserts, which
 normally is common with hashed tables..
@@ -644,7 +644,7 @@ improving and optimizing it to get it this stable real soon.
 <P>
 If you are running with <CODE>AUTOCOMMIT=0</CODE> then your changes in BDB
 tables will not be updated until you execute <CODE>COMMIT</CODE>.  Instead of commit
-you can execute <CODE>ROLLBACK</CODE> to forget your changes.  ��<A HREF="manual.ja_Reference.html#COMMIT">7.26  <CODE>COMMIT/ROLLBACK</CODE> ��ʸ</A>���Ỳ��.
+you can execute <CODE>ROLLBACK</CODE> to forget your changes.  「<A HREF="manual.ja_Reference.html#COMMIT">7.26  <CODE>COMMIT/ROLLBACK</CODE> 構文</A>」節参照.
 
 </P>
 <P>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="12977.html">[��]</a><a href="12979.html">[��]</a><a href="../list/12901-13000.html">[�ֹ�����]</a><a href="../thread/12901-13000.html">[����åɰ���]</a></p>
+<p class="button"><a href="12977.html">[前]</a><a href="12979.html">[次]</a><a href="../list/12901-13000.html">[番号順一覧]</a><a href="../thread/12901-13000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:12978
 </p>
@@ -13,76 +13,76 @@ mysql:12978
 <p>
 From: Kazuhiro Yoshida &lt;Kazuhiro Yoshida &lt;moriq@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 06 May 2006 11:01:55 +0900<br>
-Subject: [mysql 12978] Re: Apollo��MySQL����³����ˤ�<br>
+Subject: [mysql 12978] Re: ApolloでMySQLに接続するには<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��꤭�夦�Ǥ���
+もりきゅうです。
 
 wada toshiki wrote:
-<span class="quote1">&gt; C:/project/mysql_apollo.rb:2: in `active=': �ǡ����ץ��Х���/�ѥ��åȤ�����ޤ�</span>
-<span class="quote1">&gt; �� (EDatabaseError)</span>
+<span class="quote1">&gt; C:/project/mysql_apollo.rb:2: in `active=': データプロバイダ/パケットがありませ</span>
+<span class="quote1">&gt; ん (EDatabaseError)</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ȥʤ�ޤ���</span>
+<span class="quote1">&gt; となります。</span>
 
 <span class="quote1">&gt; dataset = RDB::SQLClientQuery.new</span>
 
 dataset = RDB::SQLClientDataSet.new
-�ˤ���Ȥ����ߤ����Ǥ�����ͳ�Ϥ褯ʬ����ޤ����
+にするといいみたいです。理由はよく分かりません…
 
-���ȡ�RDB::SQLClientDataSet�ǤϹ���������å��夵���Τǡ�ȿ�Ǥ����뤿���
+あと、RDB::SQLClientDataSetでは更新がキャッシュされるので、反映させるために
 form.on_close_query = proc do |sender, can_close|
   p dataset.apply_updates(0)
   true
 end
-�Ȥ�����ɬ�פ�����ޤ���
+とかする必要があります。
 
-���ȡ�Apollo.exe��Ǽ¹Ԥ���Ȥʤ����Ǥޤ�ޤ���
-MySQL���ؤ���SQLite�� (dbxpress��) �������ʤ��Τǡ������dbx adapter
-¦������ʤΤ��ʤ���
-ruby_ap.exe, Apollo.exe -q�Ǥ�����ʤ������Ǥ���
+あと、Apollo.exe上で実行するとなぜか固まります。
+MySQLに替えてSQLiteを (dbxpressで) 試すと問題ないので、これもdbx adapter
+側の問題なのかなあ。
+ruby_ap.exe, Apollo.exe -qでは問題なさそうです。
 
-<span class="quote1">&gt; SQLDataSet�Ǥ���Ф��Τ褦�ʥ��顼�ˤϤʤ餺fields�����Ƥ��ǧ�Ǥ����ΤǤ�����</span>
-<span class="quote1">&gt; GBGrid��ñ�����Υǡ������åȤ��б����Ƥ��ʤ��ȤΤ��ȤʤΤ�...��</span>
+<span class="quote1">&gt; SQLDataSetであればこのようなエラーにはならずfieldsの内容を確認できたのですが、</span>
+<span class="quote1">&gt; GBGridで単方向のデータセットは対応していないとのことなので...。</span>
 
-�Ǥ��͡�
+ですね…
 
-<span class="quote2">&gt;&gt;MySQL5.0�ǤΤ��ǧ���Ƥߤ�ȡ��б�����Ƥ���褦�ʤΤǡ�</span>
+<span class="quote2">&gt;&gt;MySQL5.0版のを確認してみると、対応されているようなので、</span>
 <span class="quote2">&gt;&gt;<a href="http://www.justsoftwaresolutions.co.uk/delphi/dbexpress_and_mysql_5.html">http://www.justsoftwaresolutions.co.uk/delphi/dbexpress_and_mysql_5.html</a></span>
-<span class="quote2">&gt;&gt;�����餫��IndexCursor.pas�򤤤������ơ�Ŭ�Ѥ��Ƥߤ�Ȥ��ޤ������ޤ�����</span>
+<span class="quote2">&gt;&gt;こちらからIndexCursor.pasをいただいて、適用してみるとうまくいきました。</span>
 <span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;�Ȥ����櫓�ǡ�MySQL4.1�Ǥ�dbx driver�Ϥޤ���Ժ������ʤ��ȻȤ������ˤʤ�</span>
-<span class="quote2">&gt;&gt;����Ǥ���</span>
+<span class="quote2">&gt;&gt;というわけで、MySQL4.1版のdbx driverはまだ試行錯誤しないと使えそうにない</span>
+<span class="quote2">&gt;&gt;かもです。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ��ɸ��MySQL�פΤޤޥ��åȥ��åפ��Ƥ����ޤǤ�äȤ��ޤ�������MySQL5.0��Ƥ����</span>
-<span class="quote1">&gt; ���������Ǥ��礦����</span>
+<span class="quote1">&gt; 「標準MySQL」のままセットアップしてここまでやっときましたが、MySQL5.0を検討した</span>
+<span class="quote1">&gt; 方がいいでしょうか。</span>
 
-MySQL5.0�Ǥ�dbxpress driver���㤨��getTables��̤�����Ǥ���������������
-4.1�ǤȤ��ޤ��Ѥ��ʤ��褦�˻פ��ޤ���
+MySQL5.0版のdbxpress driverも例えばgetTablesが未実装ですし、実装状況は
+4.1版とあまり変わらないように思います。
 
-MySQL4.1�� (Ruby on Rails��) ActiveRecord (win32��ʤΤ�Ruby/MySQL�ˤʤ�
-�ޤ�) ��ͳ����³���ơ�Apollo�Ǻ�ä�GUI���Ϥ������Ȥ�����Ȥ�����ޤ�
-����DBGrid��Ȥ������Ȥʤ�ȡ�RDB��ͳ�ˤʤ�ޤ��͡�
+MySQL4.1を (Ruby on Railsの) ActiveRecord (win32上なのでRuby/MySQLになり
+ます) 経由で接続して、Apolloで作ったGUIに渡す形で組んだことがあります
+が、DBGridを使いたいとなると、RDB経由になりますね…
 
-Delphi����MySQL��Ȥ��Ȥ��Ϥߤʤ���ɤ����Ƥ�Τ��������äƤߤ��Ȥ�����
-�ϡ�dbxpress��ͳ�ǤϤʤ���ľ��MySQL���饤�����DLL��Ƥ֥饤�֥���Ȥ�
-�Τ�����Ū�ʤ褦�Ǥ���Ruby�Ǥ����ȡ�MySQL/Ruby��Ȥ��Ȥ������ȤǤ��͡�
-���Τۤ�ODBC, ADO��ͳ�ˤ���褦�Ǥ���
+DelphiからMySQLを使うときはみなさんどうしてるのか、ぐぐってみたところで
+は、dbxpress経由ではなく、直接MySQLクライアントDLLを呼ぶライブラリを使う
+のが一般的なようです。Rubyでいうと、MySQL/Rubyを使うということですね。
+そのほかODBC, ADO経由にするようです。
 
 
 </pre>
 </div>
-<p class="button"><a href="12977.html">[��]</a><a href="12979.html">[��]</a><a href="../list/12901-13000.html">[�ֹ�����]</a><a href="../thread/12901-13000.html">[����åɰ���]</a></p>
+<p class="button"><a href="12977.html">[前]</a><a href="12979.html">[次]</a><a href="../list/12901-13000.html">[番号順一覧]</a><a href="../thread/12901-13000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="12973.html">  12973 2006-05-03 11:54 [wada toshiki &lt;wada-t] Apollo��MySQL����³����ˤ�             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12974.html">  12974 2006-05-03 15:52 ��[Kazuhiro Yoshida &lt;mo]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12975.html">  12975 2006-05-04 11:29 ����[wada toshiki &lt;wada-t]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12976.html">  12976 2006-05-05 03:57 ������[Kazuhiro Yoshida &lt;mo]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12977.html">  12977 2006-05-05 12:22 ��������[wada toshiki &lt;wada-t]                                 </a></span>
-<span class="current">-&gt;&nbsp;<a href="12978.html">  12978 2006-05-06 11:01 ����������[Kazuhiro Yoshida &lt;mo]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12979.html">  12979 2006-05-06 19:35 ������������[wada toshiki &lt;wada-t]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12973.html">  12973 2006-05-03 11:54 [wada toshiki &lt;wada-t] ApolloでMySQLに接続するには             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12974.html">  12974 2006-05-03 15:52 ┗[Kazuhiro Yoshida &lt;mo]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12975.html">  12975 2006-05-04 11:29 　┗[wada toshiki &lt;wada-t]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12976.html">  12976 2006-05-05 03:57 　　┗[Kazuhiro Yoshida &lt;mo]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12977.html">  12977 2006-05-05 12:22 　　　┗[wada toshiki &lt;wada-t]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="12978.html">  12978 2006-05-06 11:01 　　　　┗[Kazuhiro Yoshida &lt;mo]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12979.html">  12979 2006-05-06 19:35 　　　　　┗[wada toshiki &lt;wada-t]                             </a></span>
 </pre>
 </body>
 </html>

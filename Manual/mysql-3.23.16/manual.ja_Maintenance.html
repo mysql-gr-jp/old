@@ -15,76 +15,76 @@ Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_To
 
 
 
-<H2><A NAME="Table_maintenance" HREF="manual.ja_toc.html#Table_maintenance">15.1  �ơ��֥�Υ��ƥʥ󥹡�����å��夫��ν����Τ���� <CODE>myisamchk</CODE> ����</A></H2>
+<H2><A NAME="Table_maintenance" HREF="manual.ja_toc.html#Table_maintenance">15.1  テーブルのメンテナンス、クラッシュからの修復のための <CODE>myisamchk</CODE> 使用</A></H2>
 
 <P>
 Starting with <STRONG>MySQL</STRONG> 3.23.13, you can check tables MyISAM with the
-<CODE>CHECK TABLE</CODE> command.  ��<A HREF="manual.ja_Reference.html#CHECK_TABLE">7.11  <CODE>CHECK TABLE</CODE> ��ʸ</A>���Ỳ��.  You can repair tables
-with the <CODE>REPAIR TABLE</CODE> command.  ��<A HREF="manual.ja_Reference.html#REPAIR_TABLE">7.12  <CODE>REPAIR TABLE</CODE> ��ʸ</A>���Ỳ��.
+<CODE>CHECK TABLE</CODE> command.  「<A HREF="manual.ja_Reference.html#CHECK_TABLE">7.11  <CODE>CHECK TABLE</CODE> 構文</A>」節参照.  You can repair tables
+with the <CODE>REPAIR TABLE</CODE> command.  「<A HREF="manual.ja_Reference.html#REPAIR_TABLE">7.12  <CODE>REPAIR TABLE</CODE> 構文</A>」節参照.
 
 </P>
 <P>
-MyISAM �ơ��֥� (<CODE>.MYI</CODE> and <CODE>.MYD</CODE>) �θ����������ˤ� <CODE>myisamchk</CODE> ��
-���Ѥ��ޤ���
-ISAM �ơ��֥� (<CODE>.ISM</CODE> and <CODE>.ISD</CODE>) �θ����������ˤ� <CODE>isamchk</CODE> ��
-���Ѥ��ޤ���
- ��<A HREF="manual.ja_Table_types.html#Table_types">8  MySQL table types</A>���Ỳ��.
+MyISAM テーブル (<CODE>.MYI</CODE> and <CODE>.MYD</CODE>) の検査・修復には <CODE>myisamchk</CODE> を
+使用します。
+ISAM テーブル (<CODE>.ISM</CODE> and <CODE>.ISD</CODE>) の検査・修復には <CODE>isamchk</CODE> を
+使用します。
+ 「<A HREF="manual.ja_Table_types.html#Table_types">8  MySQL table types</A>」節参照.
 
 </P>
 <P>
-�ʲ���ʸ�� <CODE>myisamchk</CODE> �ˤĤ��ƽҤ٤Ƥ��ޤ�����<CODE>isamchk</CODE> �ˤ⤹�٤�
-���ƤϤޤ�ޤ���
+以下の文は <CODE>myisamchk</CODE> について述べていますが、<CODE>isamchk</CODE> にもすべて
+当てはまります。
 
 </P>
 <P>
-<CODE>myisamchk</CODE> �桼�ƥ���ƥ��ϡ��ǡ����١����Υơ��֥�ξ���������ꡢ
-�����å������ꡢ�ơ��֥�ν������Ŭ���˻��Ѥ��ޤ���
-�ʲ��Υ��������Ǥϡ� <CODE>myisamchk</CODE> �ε�ư��ˡ(���ץ�����������ޤ�)��
-�ơ��֥���ݼ饹�����塼��Τ�������
-<CODE>myisamchk</CODE> �ο����ʵ�ǽ�λȤ�����Ҥ٤ޤ���
+<CODE>myisamchk</CODE> ユーティリティは、データベースのテーブルの情報を得たり、
+チェックしたり、テーブルの修復や最適化に使用します。
+以下のセクションでは、 <CODE>myisamchk</CODE> の起動方法(オプションの説明も含む)、
+テーブルの保守スケジュールのたて方、
+<CODE>myisamchk</CODE> の色々な機能の使い方を述べます。
 
 </P>
 <P>
-�⤷ <CODE>mysqld</CODE> �� <CODE>--skip-locking</CODE> �����餻�Ƥ���ʤ顢
-(����� Linux �ʤɡ������Ĥ��Υ����ƥ�ǥǥե���ȤǤ�)��
-<CODE>mysqld</CODE> ������ơ��֥����Ѥ��Ƥ���Ȥ������ʤ���Ʊ���ơ��֥���Ф���
- <CODE>myisamchk</CODE> �ǳμ¤˸����Ǥ��ޤ��󡣤⤷ <CODE>myisamchk</CODE> ��ˡ�
-����� <CODE>mysqld</CODE> ���̤��Ƥ��Υơ��֥�򥢥��������ʤ��Τ��μ¤ʤ顢
-�ơ��֥�򸡺��������� <CODE>mysqladmin flush-tables</CODE> ��Ԥ��٤��Ǥ���
-�����Ǥʤ���硢�ơ��֥�θ������ <CODE>mysqld</CODE> ����Ȥ��٤��Ǥ���
-�⤷ <CODE>mysqld</CODE> ���ơ��֥�򹹿���� <CODE>myisamchk</CODE> ��¹Ԥ�����硢
-�ơ��֥뤬�ѹ����줿�ݤΥ�˥󥰤��Ǥ�Ǥ��礦��
+もし <CODE>mysqld</CODE> を <CODE>--skip-locking</CODE> で走らせているなら、
+(これは Linux など、いくつかのシステムでデフォルトです)、
+<CODE>mysqld</CODE> があるテーブルを使用しているとき、あなたは同じテーブルに対して
+ <CODE>myisamchk</CODE> で確実に検査できません。もし <CODE>myisamchk</CODE> 中に、
+だれも <CODE>mysqld</CODE> を通してそのテーブルをアクセスしないのが確実なら、
+テーブルを検査する前に <CODE>mysqladmin flush-tables</CODE> を行うべきです。
+そうでない場合、テーブルの検査中は <CODE>mysqld</CODE> を落とすべきです。
+もし <CODE>mysqld</CODE> がテーブルを更新中に <CODE>myisamchk</CODE> を実行した場合、
+テーブルが変更された旨のワーニングがでるでしょう。
 
 </P>
 <P>
-�⤷ <CODE>--skip-locking</CODE> ����Ѥ��Ƥ��ʤ��ʤ顢���ĤǤ� <CODE>myisamchk</CODE> ��
-���ѤǤ��ޤ��������¹Ԥ��Ƥ���֡����ƤΥơ��֥�򹹿����륯�饤����Ȥ�
-<CODE>myisamchk</CODE> �������Ǥ���ޤ��Ԥ��ޤ���
+もし <CODE>--skip-locking</CODE> を使用していないなら、いつでも <CODE>myisamchk</CODE> は
+使用できます。これを実行している間、全てのテーブルを更新するクライアントは
+<CODE>myisamchk</CODE> が準備できるまで待ちます。
 
 </P>
 <P>
-�⤷ <CODE>myisamchk</CODE> ��ơ��֥�ν�������Ŭ���˻��Ѥ���ʤ顢���κ���ˡ�
-<CODE>mysqld</CODE> �����Υơ��֥�����Ф˻��Ѥ��ʤ��褦�ˤ��ʤ����
-�ʤ�ޤ��󡣤���� <CODE>--skip-locking</CODE> ����Ѥ��Ƥ�����˵����ꤨ�ޤ���
-�⤷ <CODE>mysqld</CODE> ������󤵤��Ƥ��ʤ��ʤ顢���� <CODE>myisamchk</CODE> �¹����ˡ�
- <CODE>mysqladmin flush-tables</CODE> ��¹Ԥ��٤��Ǥ���
+もし <CODE>myisamchk</CODE> をテーブルの修復、最適化に使用するなら、その最中に、
+<CODE>mysqld</CODE> がそのテーブルを絶対に使用しないようにしなければ
+なりません。これは <CODE>--skip-locking</CODE> を使用している場合に起こりえます。
+もし <CODE>mysqld</CODE> をダウンさせていないなら、最低 <CODE>myisamchk</CODE> 実行前に、
+ <CODE>mysqladmin flush-tables</CODE> を実行すべきです。
 
 </P>
 <P>
-�ơ��֥�ν����Ⱥ�Ŭ���Τ���ˡ��ۤȤ�ɤξ�硢 <CODE>OPTIMIZE TABLES</CODE> 
-���ޥ�ɤ����ѤǤ��ޤ�������������� <CODE>myisamchk</CODE> ����٤ơ�
-�٤��Ƴμ¤Ǥ⤢��ޤ���(fatal errorȯ�����ξ��)�������
-����ȿ�̡�������ˡ����ñ�ǥơ��֥�Υե�å���򵤤ˤ�����ɬ�פ�����ޤ���
- ��<A HREF="manual.ja_Reference.html#OPTIMIZE_TABLE">7.10  <CODE>OPTIMIZE TABLE</CODE>��ʸ</A>���Ỳ��.
+テーブルの修復と最適化のために、ほとんどの場合、 <CODE>OPTIMIZE TABLES</CODE> 
+コマンドが使用できます。しかしこれは <CODE>myisamchk</CODE> に比べて、
+遅くて確実でもありません。(fatal error発生時の場合)。これは
+その反面、使用方法が簡単でテーブルのフラッシュを気にかける必要がありません。
+ 「<A HREF="manual.ja_Reference.html#OPTIMIZE_TABLE">7.10  <CODE>OPTIMIZE TABLE</CODE>構文</A>」節参照.
 
 </P>
 
 
 
-<H2><A NAME="myisamchk_syntax" HREF="manual.ja_toc.html#myisamchk_syntax">15.2  <CODE>myisamchk</CODE> ��ư��ʸ</A></H2>
+<H2><A NAME="myisamchk_syntax" HREF="manual.ja_toc.html#myisamchk_syntax">15.2  <CODE>myisamchk</CODE> 起動構文</A></H2>
 
 <P>
-<CODE>myisamchk</CODE> �ϰʲ��Τ褦�ˤ��Ƶ�ư���ޤ�:
+<CODE>myisamchk</CODE> は以下のようにして起動します:
 
 </P>
 
@@ -93,28 +93,28 @@ shell&#62; myisamchk [options] tbl_name
 </PRE>
 
 <P>
-<CODE>options</CODE> �ˡ����ʤ��� <CODE>myisamchk</CODE> �ˤ����������Ȥ���ꤷ�ޤ���
-���������ϸ�Ҥ��ޤ���(<CODE>myisamchk --help</CODE> �ȼ¹Ԥ���С����ץ����ΰ��������ޤ�)��
-���ץ���󤬤ʤ���С� <CODE>myisamchk</CODE> ��ñ�˥ơ��֥�򸡺���������Ǥ���
-���¿���ξ���������������뤤�ϡ� <CODE>myisamchk</CODE> �˸��������ι�ư���餻����ˤĤ��Ƥϡ���Ҥ��ޤ���
+<CODE>options</CODE> に、あなたが <CODE>myisamchk</CODE> にさせたいことを指定します。
+その説明は後述します。(<CODE>myisamchk --help</CODE> と実行すれば、オプションの一覧が取れます)。
+オプションがなければ、 <CODE>myisamchk</CODE> は単にテーブルを検査するだけです。
+より多くの情報を得たい、あるいは、 <CODE>myisamchk</CODE> に誤り訂正の行動を取らせる事については、後述します。
 
 </P>
 <P>
-<CODE>tbl_name</CODE> �ϸ����������ơ��֥�̾�Ǥ���
-�⤷�ɤ����㤦�ǥ��쥯�ȥ�ˤ���ǡ����١������Ф��� <CODE>myisamchk</CODE> �����餻�����ʤ顢
- <CODE>myisamchk</CODE> �ˤϥե����뤬�ɤ��ˤ��뤫�狼��ʤ��Τǡ�
-�ե�����Υѥ�����ꤷ�ʤ���Фʤ�ޤ���
-�ºݡ� <CODE>myisamchk</CODE> �Ϥ��ʤ������Ѥ��Ƥ���ե����뤬�ǡ����١����Υǥ��쥯�ȥ�ˤ��뤫�ɤ����Ϲ�θ���ޤ���
-�ۤ��ξ��˥ǡ����١����ơ��֥�Υե�����򥳥ԡ��������Υ��ԡ������ե�������Ф���
-��������¹Ԥ��뤳�Ȥ��Ǥ��ޤ���
+<CODE>tbl_name</CODE> は検査したいテーブル名です。
+もしどこか違うディレクトリにあるデータベースに対して <CODE>myisamchk</CODE> を走らせたいなら、
+ <CODE>myisamchk</CODE> にはファイルがどこにあるかわからないので、
+ファイルのパスを指定しなければなりません。
+実際、 <CODE>myisamchk</CODE> はあなたが使用しているファイルがデータベースのディレクトリにあるかどうかは考慮しません；
+ほかの場所にデータベーステーブルのファイルをコピーし、そのコピーしたファイルに対して
+回復操作を実行することができます。
 
 </P>
 <P>
-<CODE>myisamchk</CODE> ���ޥ�ɥ饤��ˤϡ�ʣ���Υơ��֥�̾������Ǥ��ޤ���
-�ޤ�������ǥå����ե�����̾(<TT>`.MYI'</TT> ������ΤĤ����ե�����)�����Ǥ���
-����� <TT>`*.MYI'</TT> �Ȥ���С��ǥ��쥯�ȥ�������ƤΥơ��֥뤬����Ǥ��ޤ���
-�㤨�С����ߤΥ����ȥǥ��쥯�ȥ꤬�ǡ������١����ǥ��쥯�ȥ�ʤ�С�
-���Υǥ��쥯�ȥ�������ƤΥơ��֥�ϡ��ʲ��Τ褦�ˤ��Ƹ����Ǥ��ޤ���
+<CODE>myisamchk</CODE> コマンドラインには、複数のテーブル名が指定できます。
+また、インデックスファイル名(<TT>`.MYI'</TT> 接尾語のついたファイル)も指定でき、
+さらに <TT>`*.MYI'</TT> とすれば、ディレクトリ内の全てのテーブルが指定できます。
+例えば、現在のカレントディレクトリがデーターベースディレクトリならば、
+そのディレクトリ内の全てのテーブルは、以下のようにして検査できます：
 
 </P>
 
@@ -123,8 +123,8 @@ shell&#62; myisamchk *.MYI
 </PRE>
 
 <P>
-�ǡ����١����ǥ��쥯�ȥ�����äƤ��ʤ���硢
-�ѥ�����ꤹ�뤳�Ȥˤ�����ƤΥơ��֥뤬�����Ǥ��ޤ���
+データベースディレクトリに入っていない場合、
+パスを指定することにより全てのテーブルが検査できます：
 
 </P>
 
@@ -133,8 +133,8 @@ shell&#62; myisamchk /path/to/database_dir/*.MYI
 </PRE>
 
 <P>
-<STRONG>MySQL</STRONG> �ǡ����ǥ��쥯�ȥ�Υѥ��˥磻��ɥ����ɤ���Ѥ��뤳�Ȥˤ�ꡢ
-�ǡ����١��������ƤΥơ��֥�⸡���Ǥ��ޤ���
+<STRONG>MySQL</STRONG> データディレクトリのパスにワイルドカードを使用することにより、
+データベースの全てのテーブルも検査できます：
 
 </P>
 
@@ -143,70 +143,70 @@ shell&#62; myisamchk /path/to/datadir/*/*.MYI
 </PRE>
 
 <P>
-<CODE>myisamchk</CODE> �ϰʲ��Υ��ץ���������ޤ�:
+<CODE>myisamchk</CODE> は以下のオプションを持ちます:
 
 </P>
 <DL COMPACT>
 
 <DT><CODE>-a, --analyze</CODE>
 <DD>
-������ʬ��(����)��ʬ�Ϥ��ޤ���
-����� <STRONG>MySQL</STRONG> �Τ����Ĥ��η���®�����ޤ���
+キーの分布(配置)を分析します。
+これは <STRONG>MySQL</STRONG> のいくつかの結合を速くします。
 
 <DT><CODE>-#, --debug=debug_options</CODE>
 <DD>
-�ǥХå������ν��ϡ�
-<CODE>debug_options</CODE> �Ϥ褯 <CODE>'d:t:o,filename'</CODE> �Ȥ���ޤ���
+デバッグログの出力。
+<CODE>debug_options</CODE> はよく <CODE>'d:t:o,filename'</CODE> とされます。
 
 <DT><CODE>-d, --description</CODE>
 <DD>
-�ơ��֥�˴ؤ��뤤���餫�ξ����ɽ�����ޤ�
+テーブルに関するいくらかの情報を表示します
 
 <DT><CODE>-e, --extend-check</CODE>
 <DD>
-�ơ��֥������Ű��Ū�˸������ޤ���
-��ü�ʾ��ˤ�����ɬ�פȤ���ޤ���
-�̾� <CODE>myisamchk</CODE> �ϡ����Υ��ץ����ʤ������ƤΥ��顼�򸫤Ĥ���Ϥ��Ǥ���
+テーブルを非常に徹底的に検査します。
+極端な場合にだけで必要とされます。
+通常 <CODE>myisamchk</CODE> は、このオプションなしで全てのエラーを見つけるはずです。
 
 <DT><CODE>-f, --force</CODE>
 <DD>
-�Ť����Ū�ʥե�������񤭤��ޤ���
-<CODE>myisamchk</CODE> �� <CODE>-r</CODE> �ʤ������餻�ƥơ��֥�򸡺����Ƥ���Ȥ��ˡ�
-<CODE>-f</CODE> ����Ѥ���ʤ�С�
-<CODE>myisamchk</CODE> �ϥ���å��ǥ��顼���Ф��ơ��֥���Ф��ơ�
-��ưŪ�� <CODE>-r</CODE> ��ȼ�äơ�������Ƴ����ޤ���
+古い一時的なファイルを上書きします。
+<CODE>myisamchk</CODE> を <CODE>-r</CODE> なしで走らせてテーブルを検査しているときに、
+<CODE>-f</CODE> を使用するならば、
+<CODE>myisamchk</CODE> はチャックでエラーが出たテーブルに対して、
+自動的に <CODE>-r</CODE> を伴って、検査を再開します。
 
 <DT><CODE>--help</CODE>
 <DD>
-�إ�פ�ɽ�����ƽ�λ��
+ヘルプを表示して終了。
 
 <DT><CODE>-i, --information</CODE>
 <DD>
-�������줿�ơ��֥�����׾����ɽ����
+検査されたテーブルの統計情報を表示。
 
 <DT><CODE>-k #, --keys-used=#</CODE>
 <DD>
-<CODE>-r</CODE> �ȶ��˻��Ѥ��ޤ���
-NISAM �ơ��֥�ϥ�ɥ顼�˺ǽ�� <CODE>#</CODE> ����ǥå��������򹹿�����褦�˻ؼ����ޤ���
+<CODE>-r</CODE> と共に使用します。
+NISAM テーブルハンドラーに最初の <CODE>#</CODE> インデックスだけを更新するように指示します。
 If you are using MyISAM tells which keys to use, where each
 binary bit stands for one key (First key is bit 0).
-����ϥ��󥵡��Ȥ�®�����ޤ���
-�󥢥��ƥ��֤ˤʤä�����ǥå����ϡ�<CODE>myisamchk -r</CODE> ����Ѥ���кƤӥ����ƥ��֤ˤʤ�ޤ���
+これはインサートを速くします！
+非アクティブになったインデックスは、<CODE>myisamchk -r</CODE> を使用すれば再びアクティブになります。
 
 <DT><CODE>-l, --no-symlinks</CODE>
 <DD>
-�������˥���ܥ�å���󥯤��ɤ��ޤ���
-�̾<CODE>myisamchk</CODE> �ϥ���ܥ�å���󥯤��ؤ������ơ��֥�⽤�����ޤ���
+修復時にシンボリックリンクを追いません。
+通常、<CODE>myisamchk</CODE> はシンボリックリンクが指し示すテーブルも修復します。
 
 <DT><CODE>-q, --quick</CODE>
 <DD>
-<CODE>-r</CODE> �ȶ��˻��Ѥ��졢�������᤯�Ԥ��ޤ���
-�̾���ꥸ�ʥ�Υǡ����ե�����ϸ�������ޤ���
-��� <CODE>-q</CODE> ����ꤹ��ȡ�����Ū�˥��ꥸ�ʥ�Υǡ����ե��������Ѥ��ޤ���
+<CODE>-r</CODE> と共に使用され、修復を早く行います。
+通常、オリジナルのデータファイルは検査されません；
+二回 <CODE>-q</CODE> を指定すると、強制的にオリジナルのデータファイルも使用します。
 
 <DT><CODE>-r, --recover</CODE>
 <DD>
-�����⡼�ɡ�
+修復モード。
 Can fix almost anything except unique keys that aren't unique
 (which is a extremely unlikely error with ISAM/MyISAM tables).
 If you want to recover a table, this is the option to try first. Only if
@@ -216,42 +216,42 @@ fails, the data file is still intact).
 
 <DT><CODE>-o, --safe-recover</CODE>
 <DD>
-�����⡼�ɡ�
-�Ť�������ˡ����Ѥ��ޤ� (reads through all rows in order and updates
-all index trees based on the found rows)��
-����� <CODE>-r</CODE> �����٤��Ǥ����� <CODE>-r</CODE> �������ʤ���Τⰷ���ޤ���
+修復モード。
+古い修復方法を使用します (reads through all rows in order and updates
+all index trees based on the found rows)；
+これは <CODE>-r</CODE> よりも遅いですが、 <CODE>-r</CODE> が扱えないものも扱えます。
 Normally one should always first repair with
 <CODE>-r</CODE> and only if this fails use <CODE>-o</CODE>.
 
 <DT><CODE>-O var=option, --set-variable var=option</CODE>
 <DD>
-�ѿ����ͤ�����ޤ�����ǽ���ѿ��ϸ�Ҥ��ޤ���
+変数に値を入れます。可能な変数は後述します。
 
 <DT><CODE>-s, --silent</CODE>
 <DD>
-�Žͥ⡼�ɡ�
-���顼�Τߤ���Ϥ��ޤ���
-���� <CODE>-s</CODE> ����ꤹ���(<CODE>-ss</CODE>)��<CODE>myisamchk</CODE> ��
-�ۤȤ�ɽ��Ϥ򤷤ʤ��ʤ�ޤ���
+静粛モード。
+エラーのみを出力します。
+二度 <CODE>-s</CODE> を指定すると(<CODE>-ss</CODE>)、<CODE>myisamchk</CODE> は
+ほとんど出力をしなくなります。
 
 <DT><CODE>-S, --sort-index</CODE>
 <DD>
-����ǥå����֥��å��Υ����ȡ�
-����ϡ����ץꥱ�������Ǥ� ``read-next'' ��®�����ޤ���
+インデックスブロックのソート。
+これは、アプリケーションでの ``read-next'' を速くします。
 
 <DT><CODE>-R index_num, --sort-records=index_num</CODE>
 <DD>
-����ǥå����˽��äƥ����ȡ�
-����Ϥ��ʤ��Υǡ�������褯���֤������Υ���ǥå����ؤ�
- <CODE>SELECT</CODE>, <CODE>ORDER BY</CODE> ���ڥ졼������®�����ޤ���
-(�������κǽ�Υ����Ȥ������٤��ʤ뤫�⤷��ޤ���)
-�ơ��֥�Υ���ǥå������ֹ��ߤĤ���ˤ� <CODE>SHOW INDEX</CODE> ����Ѥ��ޤ�����
-����� <CODE>myisamchk</CODE> ���ơ��֥�Υ���ǥå����򸫤Ĥ���Τ�Ʊ������ǹԤ��ޤ���
-����ǥå����ֹ�� 1 ����Ϥޤ�ޤ���
+インデックスに従ってソート。
+これはあなたのデータをよりよく配置し、このインデックスへの
+ <CODE>SELECT</CODE>, <CODE>ORDER BY</CODE> オペレーションを速くします。
+(この操作の最初のソートは非常に遅くなるかもしれません！)
+テーブルのインデックスの番号をみつけるには <CODE>SHOW INDEX</CODE> を使用しますが、
+これは <CODE>myisamchk</CODE> がテーブルのインデックスを見つけるのと同じ順序で行います。
+インデックス番号は 1 から始まります。
 
 <DT><CODE>-u, --unpack</CODE>
 <DD>
-<CODE>pack_isam</CODE> �ǥѥå����줿�ơ��֥�򥢥�ѥå����ޤ���
+<CODE>pack_isam</CODE> でパックされたテーブルをアンパックします。
 
 <DT><CODE>-U, --update-status</CODE>
 <DD>
@@ -263,21 +263,21 @@ using the table and you are running <CODE>mysqld</CODE> with
 
 <DT><CODE>-v, --verbose</CODE>
 <DD>
-��Ĺ�⡼�ɡ����¿���������Ϥ��ޤ���
-<CODE>-d</CODE> �� <CODE>-e</CODE> ���ץ����ȶ��˻��ѤǤ��ޤ���
-<CODE>-v</CODE> ��ʣ�����ꤹ���(<CODE>-vv</CODE>, <CODE>-vvv</CODE>)����äȽ��Ϥ�¿���ʤ�ޤ���
+冗長モード。より多く情報を出力します。
+<CODE>-d</CODE> と <CODE>-e</CODE> オプションと共に使用できます。
+<CODE>-v</CODE> を複数指定すると(<CODE>-vv</CODE>, <CODE>-vvv</CODE>)、もっと出力が多くなります！
 
 <DT><CODE>-V, --version</CODE>
 <DD>
-<CODE>myisamchk</CODE> �С�������ɽ�����ƽ�λ��
+<CODE>myisamchk</CODE> バージョンを表示して終了。
 
 <DT><CODE>-w, --wait</CODE>
 <DD>
-�ơ��֥뤬���å�����Ƥ������Ԥ��ޤ���
+テーブルがロックされていたら待ちます。
 </DL>
 
 <P>
-<CODE>--set-variable</CODE> (<CODE>-O</CODE>) ���ץ����ǲ�ǽ���ѿ���
+<CODE>--set-variable</CODE> (<CODE>-O</CODE>) オプションで可能な変数：
 
 </P>
 
@@ -304,17 +304,17 @@ of the above buffers will be used at at time.
 </P>
 
 
-<H2><A NAME="myisamchk_memory" HREF="manual.ja_toc.html#myisamchk_memory">15.3  <CODE>myisamchk</CODE> �������</A></H2>
+<H2><A NAME="myisamchk_memory" HREF="manual.ja_toc.html#myisamchk_memory">15.3  <CODE>myisamchk</CODE> メモリ使用</A></H2>
 
 <P>
-<CODE>myisamchk</CODE> �����餹��ǥ��꡼����ʬ�Ͻ��פǤ���
-<CODE>myisamchk</CODE> �� <CODE>-O</CODE> ���ץ�������������ʾ�Υ���ϻ��Ѥ��ޤ���
-�ȤƤ��礭�ʥե�����Τ������� <CODE>myisamchk</CODE> �򤫤������ʤ顢
-���꡼��ɤ줯�餤���Ѥ��뤫��ǽ�˷��ʤ��ƤϤʤ�ޤ���
-�ǥե���Ȥϸ������ 3M ��������Ѥ��ޤ����礭���ͤ���Ѥ��뤳�Ȥǡ�
-<CODE>myisamchk</CODE> ����®��ư��Ǥ��ޤ���
-�㤨�С�32MBytes��RAM������ʤ顢�ʲ��Τ褦�˻���Ǥ��ޤ�
-(¾�Υ��ץ�������ꤷ��):
+<CODE>myisamchk</CODE> を走らす上でメモリーの配分は重要です。
+<CODE>myisamchk</CODE> は <CODE>-O</CODE> オプションで定義した以上のメモリは使用しません。
+とても大きなファイルのたいして <CODE>myisamchk</CODE> をかけたいなら、
+メモリーをどれくらい使用するかを最初に決めなくてはなりません。
+デフォルトは固定で約 3M だけを使用します。大きな値を使用することで、
+<CODE>myisamchk</CODE> をより速く動作できます。
+例えば、32MBytesのRAMがあるなら、以下のように指定できます
+(他のオプションも指定して):
 
 </P>
 
@@ -323,13 +323,13 @@ shell&#62; myisamchk -O sort=16M -O key=16M -O read=1M -O write=1M ...
 </PRE>
 
 <P>
-<CODE>-O sort=16M</CODE> �λ��Ѥ�¿���ξ�礪���餯��ʬ�Ǥ��礦��
+<CODE>-O sort=16M</CODE> の使用は多くの場合おそらく十分でしょう。
 
 </P>
 <P>
-��������<CODE>myisamchk</CODE> �� <CODE>TMPDIR</CODE> ��˰���ե��������Ѥ��ޤ���
-<CODE>TMPDIR</CODE> ������ե����륷���ƥ��ؤ��Ƥ�����ϡ���ñ�� out of
-memory ���顼������Ǥ��礦��
+しかし、<CODE>myisamchk</CODE> は <CODE>TMPDIR</CODE> 内に一時ファイルを使用します。
+<CODE>TMPDIR</CODE> がメモリファイルシステムを指している場合は、簡単に out of
+memory エラーを得るでしょう。
 If this happens, set <CODE>TMPDIR</CODE> to point at some directory
 with more space and restart <CODE>myisamchk</CODE>
 
@@ -337,35 +337,35 @@ with more space and restart <CODE>myisamchk</CODE>
 
 
 
-<H2><A NAME="Maintenance_regimen" HREF="manual.ja_toc.html#Maintenance_regimen">15.4  �ơ��֥���ݼ�����������</A></H2>
+<H2><A NAME="Maintenance_regimen" HREF="manual.ja_toc.html#Maintenance_regimen">15.4  テーブルの保守体制の設定</A></H2>
 
 <P>
-���꤬ȯ������ޤ��ԤĤ�ꡢ���Ū�˥ơ��֥�򸡺������������褤�ͤ��Ǥ���
-�ݼ���Ū�ˤϡ�<CODE>myisamchk -s</CODE> �ǥơ��֥�򸡺�����Τ��褤�Ǥ��礦��
-<CODE>-s</CODE> ���ץ����ϥ������ȥ⡼�ɤʤΤǡ����顼�����������ˤ�����å���������Ϥ��ޤ���
+問題が発生するまで待つより、定期的にテーブルを検査する方がよりよい考えです。
+保守目的には、<CODE>myisamchk -s</CODE> でテーブルを検査するのがよいでしょう。
+<CODE>-s</CODE> オプションはサイレントモードなので、エラーが起きた場合にだけメッセージを出力します。
 
 </P>
 <P>
 <A NAME="IDX672"></A>
-�����С��򳫻Ϥ���Ȥ��˥ơ��֥�򸡺�����Τ�褤�ͤ��Ǥ���
-�㤨�С���������˥ޥ��󤬥�֡��Ȥ��줿�ʤ顢���ƤΥơ��֥�˴ؤ���
-���αƶ����ʤ�����������ɬ�פ�����ޤ����ʤ����``expected crashed table''�Ǥ���
-��֡��ȸ�ˤ⤷�Ť� <TT>`.pid'</TT> �ե�����(�ץ�����ID) ������ʤ�С�
-24���ְ�����ѹ����줿�ơ��֥���Ф��� <CODE>myisamchk</CODE> �����餻�Ƹ���������褦�ˡ�
-<CODE>safe_mysqld</CODE> �˥ƥ��Ȥ��ɲä��Ƥ⹽���ޤ���
-(<TT>`.pid'</TT> �ե������ <CODE>mysqld</CODE> ��ư���˺��졢�̾､λ���˾ä���ޤ���
-�������Ȼ��� <TT>`.pid'</TT> �ե����뤬¸�ߤ���ʤ� <CODE>mysqld</CODE> ���۾ｪλ�������Ȥ򼨤��ޤ���)
+サーバーを開始するときにテーブルを検査するのもよい考えです。
+例えば、更新最中にマシンがリブートされたなら、全てのテーブルに関して
+その影響がないか検査する必要があります。（これは``expected crashed table''です）
+リブート後にもし古い <TT>`.pid'</TT> ファイル(プロセスID) があるならば、
+24時間以内に変更されたテーブルに対して <CODE>myisamchk</CODE> を走らせて検査させるように、
+<CODE>safe_mysqld</CODE> にテストを追加しても構いません。
+(<TT>`.pid'</TT> ファイルは <CODE>mysqld</CODE> 起動時に作られ、通常修了時に消されます。
+スタート時に <TT>`.pid'</TT> ファイルが存在するなら <CODE>mysqld</CODE> が異常終了したことを示します。)
 
 </P>
 <P>
-�ɤ��ƥ��Ȥϡ�<TT>`.pid'</TT> �ե�����κ������ְʹߤ��ѹ����줿
-���ƤΥơ��֥�򸡺�����ƥ��ȤǤ���
+良いテストは、<TT>`.pid'</TT> ファイルの作成時間以降に変更された
+全てのテーブルを検査するテストです。
 
 </P>
 <P>
-�̾�Υ����ƥ౿����ˤ�ơ��֥�򸡺����٤��Ǥ���
-TcX �Ǥϡ����˰��١� <CODE>cron</CODE> ����Ѥ��ƽ��פʥơ��֥�򸡺����Ƥ��ޤ���
-<TT>`crontab'</TT> �ե�����ˤϰʲ��Τ褦�˵��Ҥ��ޤ���
+通常のシステム運用中にもテーブルを検査すべきです。
+TcX では、週に一度、 <CODE>cron</CODE> を使用して重要なテーブルを検査しています。
+<TT>`crontab'</TT> ファイルには以下のように記述します：
 
 </P>
 
@@ -374,59 +374,59 @@ TcX �Ǥϡ����˰��١� <CODE>cron</CODE> ����Ѥ��ƽ��פʥơ��֥�򸡺����Ƥ��ޤ��
 </PRE>
 
 <P>
-����ϲ��줿�ơ��֥�ξ������Ϥ��ޤ��Τǡ�ɬ�פȤ���и������������Ԥ���櫓�Ǥ���
+これは壊れたテーブルの情報を出力しますので、必要とあらば検査、修復が行えるわけです。
 
 </P>
 <P>
-ͽ�۳��λ��Τǲ��줿�ơ��֥�(�ϡ��ɥ������Υȥ�֥뤬����������)�������
-2,3ǯ�֡��ơ��֥�ϲ��줿���ȤϤ���ޤ���(����������������Ǥ�)��
-�Τǡ��콵�֤˰��٤Υ����å��Ǥ⽽ʬ�Ǥ���
+予想外の事故で壊れたテーブル(ハードウェアのトラブルが原因で崩壊)を除き、
+2,3年間、テーブルは壊れたことはありません(これは本当に本当です)。
+ので、一週間に一度のチェックでも十分です。
 
 </P>
 <P>
-24���ְ�����ѹ����줿���ƤΥơ��֥���Ф��ơ�
-<CODE>myisamchk -s</CODE> �����ռ¹Ԥ�����򴫤�ޤ���
-��������С����ʤ��ϲ桹��Ʊ�����餤�� <STRONG>MySQL</STRONG> ��
-���ꤹ�뤳�Ȥˤʤ�ޤ���
+24時間以内に変更された全てのテーブルに対して、
+<CODE>myisamchk -s</CODE> を毎晩実行する事を勧めます。
+そうすれば、あなたは我々と同じぐらいに <STRONG>MySQL</STRONG> を
+信頼することになります。
 
 </P>
 
 
 
-<H2><A NAME="Table-info" HREF="manual.ja_toc.html#Table-info">15.5  �ơ��֥�������</A></H2>
+<H2><A NAME="Table-info" HREF="manual.ja_toc.html#Table-info">15.5  テーブル情報取得</A></H2>
 
 <P>
-�ơ��֥뤫��ܺ�/���פ����뤿��ˤϡ�������ˡ����Ѥ��ޤ�����Ǥ���˾ܺ٤ʾ�
-��򤤤��Ĥ��������ޤ���
+テーブルから詳細/統計を得るためには、次の方法を使用します。後でさらに詳細な情
+報をいくつか説明します。
 
 </P>
 <DL COMPACT>
 
 <DT><CODE>myisamchk -d tbl_name</CODE>
 <DD>
-<CODE>myisamchk</CODE> �� ``describe mode'' �Ǽ¹Ԥ����ơ��֥���������Ҥ���ޤ���
-<CODE>--skip-locking</CODE> ����ꤷ�� <STRONG>MySQL</STRONG> �����С���ư������硢
-<CODE>myisamchk</CODE> �� myisamchk �¹���˹������줿�ơ��֥�ˤĤ��ƥ��顼����𤷤ޤ�.
-������ <CODE>myisamchk</CODE> �� describe mode �Ǥϥơ��֥���Ѥ��ʤ��Τǡ�
-�ǡ������˲�����������Ϥ���ޤ���
+<CODE>myisamchk</CODE> を ``describe mode'' で実行し、テーブルの説明記述を作ります。
+<CODE>--skip-locking</CODE> を指定して <STRONG>MySQL</STRONG> サーバーを起動した場合、
+<CODE>myisamchk</CODE> は myisamchk 実行中に更新されたテーブルについてエラーを報告します.
+しかし <CODE>myisamchk</CODE> は describe mode ではテーブルを変えないので、
+データを破壊する危険性はありません。
 
 <DT><CODE>myisamchk -d -v tbl_name</CODE>
 <DD>
-<CODE>myisamchk</CODE> �����Ƥ��뤳�Ȥ˴ؤ��롢���¿���ξ������Ф��ˤϡ�
-<CODE>-v</CODE> ��Ĥ��ƾ�Ĺ�⡼�ɤ����餻��褦�ˤ��ޤ���
+<CODE>myisamchk</CODE> がしていることに関する、より多くの情報を作り出すには、
+<CODE>-v</CODE> をつけて冗長モードで走らせるようにします。
 
 <DT><CODE>myisamchk -eis tbl_name</CODE>
 <DD>
-�ơ��֥뤫��Ǥ���פʾ�������򼨤��ޤ���
-�ơ��֥����Τ��ɤޤʤ���Фʤ�ʤ��Τǡ��٤��Ǥ���
+テーブルから最も重要な情報だけを示します。
+テーブル全体を読まなければならないので、遅いです。
 
 <DT><CODE>myisamchk -eiv tbl_name</CODE>
 <DD>
-<CODE>-eis</CODE> �Ȼ��Ƥ��뤬������ԤäƤ��뤫��ɽ�����ޤ���
+<CODE>-eis</CODE> と似ているが、何を行っているかを表示します。
 </DL>
 
 <P>
-<CODE>myisamchk -d</CODE> ���Ϥ���:
+<CODE>myisamchk -d</CODE> 出力の例:
 
 <PRE>
 ISAM file:     company.MYI
@@ -449,7 +449,7 @@ Key Start Len Index   Type
 </PRE>
 
 <P>
-<CODE>myisamchk -d -v</CODE> ���Ϥ���:
+<CODE>myisamchk -d -v</CODE> 出力の例:
 
 <PRE>
 ISAM file:     company.MYI
@@ -478,7 +478,7 @@ Key Start Len Index   Type                      Root Blocksize Rec/key
 </PRE>
 
 <P>
-<CODE>myisamchk -eis</CODE> ���Ϥ���:
+<CODE>myisamchk -eis</CODE> 出力の例:
 
 <PRE>
 Checking ISAM file: company.MYI
@@ -507,7 +507,7 @@ Voluntary context switches 639, Involuntary context switches 28966
 </PRE>
 
 <P>
-<CODE>myisamchk -eiv</CODE> ���Ϥ���:
+<CODE>myisamchk -eiv</CODE> 出力の例:
 
 <PRE>
 Checking ISAM file: company.MYI
@@ -562,7 +562,7 @@ Voluntary context switches 10604, Involuntary context switches 122798
 </PRE>
 
 <P>
-��ǻ��Ѥ��줿�ơ��֥�Υǡ����ե����륵�����򤳤��˼����ޤ�:
+上で使用されたテーブルのデータファイルサイズをここに示します:
 
 </P>
 
@@ -574,210 +574,210 @@ Voluntary context switches 10604, Involuntary context switches 122798
 </PRE>
 
 <P>
-<CODE>myisamchk</CODE> ��������������������ʲ��˼����ޤ���
-``keyfile'' �ϥ���ǥå����ե�����Ǥ���
-``Record'' �� ``row'' ��Ʊ���Ǥ���
+<CODE>myisamchk</CODE> が生成する情報の説明を以下に示します。
+``keyfile'' はインデックスファイルです。
+``Record'' と ``row'' は同義です。
 
 </P>
 <DL COMPACT>
 
 <DT><CODE>ISAM file</CODE>
 <DD>
-ISAM (index) �ե������̾��
+ISAM (index) ファイルの名前
 
 <DT><CODE>Isam-version</CODE>
 <DD>
-ISAM �����ΥС�����󡣸��ߤϾ�� 2 ��
+ISAM 形式のバージョン。現在は常に 2 。
 
 <DT><CODE>Creation time</CODE>
 <DD>
-�ǡ����ե����뤬�������줿����
+データファイルが生成された時。
 
 <DT><CODE>Recover time</CODE>
 <DD>
-����ǥå���/�ǡ����ե����뤬�Ǹ�˺ƹ��ۤ��줿����
+インデックス/データファイルが最後に再構築された時。
 
 <DT><CODE>Data records</CODE>
 <DD>
-�쥳����/�Ԥο���
+レコード/行の数。
 
 <DT><CODE>Deleted blocks</CODE>
 <DD>
-ͽ�󤵤줿�ΰ��ޤ����äƤ������֥��å�����
-���Υ��ڡ�����Ǿ��ˤ��뤿��˼�ʬ�Υơ��֥���Ŭ�����뤳�Ȥ��Ǥ��ޤ���
- ��<A HREF="manual.ja_Maintenance.html#Optimization">15.6.3  �ơ��֥�κ�Ŭ��</A>���Ỳ��.
+予約された領域をまだ持っている削除ブロック数。
+このスペースを最小にするために自分のテーブルを最適化することができます。
+ 「<A HREF="manual.ja_Maintenance.html#Optimization">15.6.3  テーブルの最適化</A>」節参照.
 
 <DT><CODE>Datafile: Parts</CODE>
 <DD>
-ưŪ�ʥ쥳���ɷ����ˤ����ĤΥǡ����֥��å������뤫��ɽ�����ޤ���
-ʬ��ʤ��Ǻ�Ŭ�����줿�ơ��֥�Ǥ� <CODE>Data records</CODE> ��Ʊ���Ǥ���
+動的なレコード形式にいくつのデータブロックがあるかを表示します。
+分割なしで最適化されたテーブルでは <CODE>Data records</CODE> と同じです。
 
 <DT><CODE>Deleted data</CODE>
 <DD>
-��������Ƥ��ʤ�����ǡ����ΥХ��ȿ���
-���Υ��ڡ�����Ǿ��ˤ��뤿��˼�ʬ�Υơ��֥���Ŭ�����뤳�Ȥ��Ǥ��ޤ���
- ��<A HREF="manual.ja_Maintenance.html#Optimization">15.6.3  �ơ��֥�κ�Ŭ��</A>���Ỳ��.
+改善されていない削除データのバイト数。
+このスペースを最小にするために自分のテーブルを最適化することができます。
+ 「<A HREF="manual.ja_Maintenance.html#Optimization">15.6.3  テーブルの最適化</A>」節参照.
 
 <DT><CODE>Datafile pointer</CODE>
 <DD>
-�ǡ����ե�����ݥ��󥿤��礭��(�Х��ȿ�)����������� 2, 3, 4 �ޤ��� 5 ��
-���ȤǤ���¿���Υơ��֥�� 2 �Х��ȤǴ�������ޤ���������Ϥޤ� 
-<STRONG>MySQL</STRONG> ��������Ǥ��ޤ��󡣸���ơ��֥�ǤϤ���ϥ쥳���ɥ��ɥ�
-���Ǥ���ưŪ�ơ��֥�ǤϤ���ϥХ��ȥ��ɥ쥹�Ǥ���
+データファイルポインタの大きさ(バイト数)。これは普通 2, 3, 4 または 5 バ
+イトです。多くのテーブルは 2 バイトで管理されますが、これはまだ 
+<STRONG>MySQL</STRONG> から制御できません。固定テーブルではこれはレコードアドレ
+スです。動的テーブルではこれはバイトアドレスです。
 
 <DT><CODE>Keyfile pointer</CODE>
 <DD>
-�ǡ����ե�����ݥ��󥿤ΥХ��ȿ������������ 1, 2 �ޤ��� 3 �Х��ȤǤ���
-¿���Υơ��֥�� 2 �Х��ȤǴ�������ޤ���������� <STRONG>MySQL</STRONG> �Ǥϼ�ưŪ��
-�׻�����ޤ�������Ͼ�˥֥��å����ɥ쥹�Ǥ���
+データファイルポインタのバイト数。これは普通 1, 2 または 3 バイトです。
+多くのテーブルは 2 バイトで管理されますが、これは <STRONG>MySQL</STRONG> では自動的に
+計算されます。これは常にブロックアドレスです。
 
 <DT><CODE>Max datafile length</CODE>
 <DD>
-�ơ��֥�Υǡ����ե����� (<CODE>.MYD</CODE> �ե�����) �������Ǥ���Ĺ�� (�Х��ȿ�)��
+テーブルのデータファイル (<CODE>.MYD</CODE> ファイル) が獲得できる長さ (バイト数)。
 
 <DT><CODE>Max keyfile length</CODE>
 <DD>
-�ơ��֥�Υ����ե����� (<CODE>.MYI</CODE> �ե�����) �������Ǥ���Ĺ�� (�Х��ȿ�)��
+テーブルのキーファイル (<CODE>.MYI</CODE> ファイル) が獲得できる長さ (バイト数)。
 
 <DT><CODE>Recordlength</CODE>
 <DD>
-�ƥ쥳����/�Ԥ����Ѥ����ΰ���礭��(�Х��ȿ�)��
+各レコード/行が使用する領域の大きさ(バイト数)。
 
 <DT><CODE>Record format</CODE>
 <DD>
-�ƥơ��֥�ιԤ����ķ�����������Ǥ� <CODE>Fixed length</CODE> ����Ѥ��ޤ���
-¾���ͤǲ�ǽ��ʪ��<CODE>����</CODE>��<CODE>�ѥå�</CODE>���ޤ���
+各テーブルの行が持つ形式。この例では <CODE>Fixed length</CODE> を使用します。
+他の値で可能な物は<CODE>圧縮</CODE>、<CODE>パック</CODE>します。
 
 <DT><CODE>table description</CODE>
 <DD>
-�ơ��֥�������ƤΥ����Υꥹ�ȡ��ƥ����ˤĤ��ơ������Ĥ������٥�����󶡤�
-��ޤ�:
+テーブル内の全てのキーのリスト。各キーについて、いくつかの低レベル情報が提供さ
+れます:
 
 <DL COMPACT>
 
 <DT><CODE>Key</CODE>
 <DD>
-���Υ����ֹ档
+このキー番号。
 
 <DT><CODE>Start</CODE>
 <DD>
-���Υ���ǥå����������Ϥ���쥳����/����ΰ��֡�
+このインデックス部が開始するレコード/行内の位置。
 
 <DT><CODE>Len</CODE>
 <DD>
-����ǥå�������Ĺ�����ѥå����줿���ͤǤϡ�����Ͼ�˹��ܤδ�����Ĺ���ˤʤ�ޤ���
+インデックス部の長さ。パックされた数値では、これは常に項目の完全な長さになります。
 
-ʸ�����ˤ����Ƥϡ�ʸ�����ι��ܤ�Ƭ����ʬ�˥���ǥå������Ĥ����ˤʤ�ޤ��Τǡ�
-����ǥå������ܤκ���Ĺ�����⤳���ͤ�û���ʤ�Ǥ��礦��
+文字型においては、文字型の項目の頭の部分にインデックスがつく事になりますので、
+インデックス項目の最大長さよりもこの値は短くなるでしょう。
 
 <DT><CODE>Index</CODE>
 <DD>
-<CODE>unique</CODE> or <CODE>multip.</CODE> (multiple). ���Υ���ǥå�����Ǥ�1�Ĥ��ͤ�ʣ��
-��¸�ߤ����ޤ���
+<CODE>unique</CODE> or <CODE>multip.</CODE> (multiple). このインデックス内では1つの値が複数
+回存在し得ます。
 
 <DT><CODE>Type</CODE>
 <DD>
-���Υ���ǥå����������ĥǡ�������
-����� NISAM �ǡ������ǡ�
-<CODE>packed</CODE>, <CODE>stripped</CODE> �� <CODE>empty</CODE> ���ץ���������ޤ���
+このインデックス部が持つデータ型。
+これは NISAM データ型で、
+<CODE>packed</CODE>, <CODE>stripped</CODE> か <CODE>empty</CODE> オプションを持ちます。
 
 <DT><CODE>Root</CODE>
 <DD>
-�롼�ȥ���ǥå����֥��å��Υ��ɥ쥹��
+ルートインデックスブロックのアドレス。
 
 <DT><CODE>Blocksize</CODE>
 <DD>
-�ƥ���ǥå����֥��å��Υ�����������ϥǥե���ȤǤ� 1024 �Ǥ����������
-��������ѹ��Ǥ��ޤ���
+各インデックスブロックのサイズ。これはデフォルトでは 1024 ですが、コンパ
+イル時に変更できます。
 
 <DT><CODE>Rec/key</CODE>
 <DD>
-����ϥ��ץƥ��ޥ����ˤ�äƻ��Ѥ���������ͤǤ������Υ������ͤ��ȤΥ쥳��
-�ɿ����Τ餻�ޤ�����ˡ��������Ͼ��1���ͤ�����ޤ�������ϥơ��֥뤬�����ɤ�
-�줿(�ޤ����礭���ѹ����줿)��� <CODE>myisamchk -a</CODE> �ǹ�������ޤ�������
-��������������ʤ����ϥǥե�����ͤ� 30 ��Ϳ�����ޤ���
+これはオプティマイザによって使用される統計値です。このキーの値ごとのレコー
+ド数を知らせます。ユニークキーは常に1の値を持ちます。これはテーブルがロードさ
+れた(または大きく変更された)後に <CODE>myisamchk -a</CODE> で更新されます。これ
+が全く更新されない場合はデフォルト値の 30 が与えられます。
 </DL>
 
 <DT><CODE></CODE>
 <DD>
-��κǽ����Ǥϡ�9���ܤΥ�����2�Ĥ���ʬ���ä��ޥ���ѡ��ȥ����Ǥ���
+上の最初の例では、9番目のキーは2つの部分をもったマルチパートキーです。
 
 <DT><CODE>Keyblocks used</CODE>
 <DD>
-���Ѥ��줿�����֥��å��Υѡ�����ơ��������Υơ��֥�� <CODE>myisamchk</CODE> �Ǻ�����
-����뤿�ᡢ�ͤϤȤƤ�⤯�ʤ�ޤ� (����Ū�ʺ���ˤȤƤ�᤯�ʤ�ޤ�)��
+使用されたキーブロックのパーセンテージ。このテーブルは <CODE>myisamchk</CODE> で再配置
+されるため、値はとても高くなります (理論的な最大にとても近くなります)。
 
 <DT><CODE>Packed</CODE>
 <DD>
-<STRONG>MySQL</STRONG> �ϰ��̤��������ǥ����Υѥå����ߤޤ��������
-<CODE>CHAR</CODE>/<CODE>VARCHAR</CODE>/<CODE>DECIMAL</CODE> �����Ǥ������ѤǤ��ޤ���̾����
-�褦��Ĺ��ʸ����Ǥϡ�����ϻ����ΰ�����˸��餷�ޤ�����λ����ܤ���Ǥ�4����
-�Υ�����10ʸ��Ĺ�ǡ��ΰ��60%�θ��������ޤ���
+<STRONG>MySQL</STRONG> は一般の接尾辞でキーのパックを試みます。これは
+<CODE>CHAR</CODE>/<CODE>VARCHAR</CODE>/<CODE>DECIMAL</CODE> キーでだけ使用できます。名前の
+ような長い文字列では、これは使用領域を顕著に減らします。上の三番目の例では4番目
+のキーが10文字長で、領域の60%の減少を得ます。
 
 <DT><CODE>Max levels</CODE>
 <DD>
-���Υ����� Btree �ο�����Ĺ������������礭�ʥơ��֥�Ϲ⤤�ͤ����ޤ���
+このキーの Btree の深さ。長いキーを持つ大きなテーブルは高い値を得ます。
 
 <DT><CODE>Records</CODE>
 <DD>
-�ơ��֥뤬���äƤ���Կ���
+テーブルが持っている行数。
 
 <DT><CODE>M.recordlength</CODE>
 <DD>
-ʿ�Ѥι�Ĺ������ơ��֥�Ǥϡ�����ϥ쥳����Ĺ�Ǥ���
+平均の行長。固定テーブルでは、これはレコード長です。
 
 <DT><CODE>Packed</CODE>
 <DD>
-<STRONG>MySQL</STRONG> ��ʸ����κǸ夫����������ޤ�������ˤ�ä����󤵤줿
-�ѡ�����ơ����� <CODE>Packed</CODE> �ϼ����ޤ���
+<STRONG>MySQL</STRONG> は文字列の最後から空白を除きます。これによって節約された
+パーセンテージを <CODE>Packed</CODE> は示します。
 
 <DT><CODE>Recordspace used</CODE>
 <DD>
-�ǡ����ե����뤬���Ѥ��줿�ѡ�����ơ�����
+データファイルが使用されたパーセンテージ。
 
 <DT><CODE>Empty space</CODE>
 <DD>
-�ǡ����ե����뤬���Ѥ���Ƥ��ʤ��ѡ�����ơ�����
+データファイルが使用されていないパーセンテージ。
 
 <DT><CODE>Blocks/Record</CODE>
 <DD>
-�쥳������Υ֥��å��� (i.e., ���Ҳ��쥳���ɤι�����)��
-����ϸ�������ơ��֥�ǤϾ��1�Ǥ��������ͤϲ�ǽ�ʸ�
-�� 1.0 ��α�ޤ�ޤ������줬�礭��������ϡ�<CODE>myisamchk</CODE> �ǥơ��֥������֤Ǥ��ޤ���
- ��<A HREF="manual.ja_Maintenance.html#Optimization">15.6.3  �ơ��֥�κ�Ŭ��</A>���Ỳ��.
+レコード毎のブロック数 (i.e., 断片化レコードの構成数)。
+これは固定形式テーブルでは常に1です。この値は可能な限
+り 1.0 に留まります。これが大きすぎる場合は、<CODE>myisamchk</CODE> でテーブルを再配置できます。
+ 「<A HREF="manual.ja_Maintenance.html#Optimization">15.6.3  テーブルの最適化</A>」節参照.
 
 <DT><CODE>Recordblocks</CODE>
 <DD>
-���Ѥ��줿�֥��å� (links) �������귿���ǤϤ���ϥ쥳���ɿ���Ʊ���Ǥ���
+使用されたブロック (links) 数。固定型式ではこれはレコード数と同じです。
 
 <DT><CODE>Deleteblocks</CODE>
 <DD>
-������줿�֥��å� (links) ����
+削除されたブロック (links) 数。
 
 <DT><CODE>Recorddata</CODE>
 <DD>
-�ǡ����ե�������ˤ���ºݤΥ桼���ǡ����ΥХ��ȿ���
+データファイル中にある実際のユーザデータのバイト数。
 
 <DT><CODE>Deleted data</CODE>
 <DD>
-�ǡ����ե�������ˤ��������줿(unused)�ǡ����ΥХ��ȿ��� 
+データファイル中にある削除された(unused)データのバイト数。 
 
 <DT><CODE>Lost space</CODE>
 <DD>
-�쥳���ɤ����û��Ĺ���˹������줿��硢�����Ĥ����ΰ褬�����ޤ�������
-�Ϥ��Τ褦�ʾü������Ƥι�פǤ���in bytes.
+レコードがより短い長さに更新された場合、いくつかの領域が失われます。これ
+はそのような消失の全ての合計です。in bytes.
 
 <DT><CODE>Linkdata</CODE>
 <DD>
-ưŪ�����λ��ѻ����֥��å��ϥݥ���(4��7�Х���)�˥�󥯤���ޤ���<CODE>Linkdata</CODE>��
-���Υݥ��󥿤����Ƥι�פǤ���
+動的形式の使用時、ブロックはポインタ(4～7バイト)にリンクされます。<CODE>Linkdata</CODE>は
+そのポインタの全ての合計です。
 </DL>
 
 <P>
-�ơ��֥뤬 <CODE>pack_isam</CODE> �ǰ��̤���Ƥ���ʤ顢<CODE>myisamchk -d</CODE> ��
-���줾��Υơ��֥륳���˴ؤ����ɲþ������Ϥ��ޤ���
- ��<A HREF="manual.ja_Tools.html#myisampack">14.7  <STRONG>MySQL</STRONG> �ΰ��̤��줿�ɤ߹������ѥơ��֥른���ͥ졼����( <CODE>myisampack</CODE> �� <CODE>pack_isam</CODE> )</A>����. �򻲾Ȥ��Ƥ���������
-���ξ�������������Ҥΰ�̣������ޤ���
+テーブルが <CODE>pack_isam</CODE> で圧縮されているなら、<CODE>myisamchk -d</CODE> は
+それぞれのテーブルコラムに関する追加情報を出力します。
+ 「<A HREF="manual.ja_Tools.html#myisampack">14.7  <STRONG>MySQL</STRONG> の圧縮された読み込み専用テーブルジェネレータ　( <CODE>myisampack</CODE> ・ <CODE>pack_isam</CODE> )</A>」節. を参照してください。
+この情報例と説明記述の意味があります。
 
 </P>
 
@@ -785,35 +785,35 @@ ISAM �����ΥС�����󡣸��ߤϾ�� 2 ��
 <H2><A NAME="Crash_recovery" HREF="manual.ja_toc.html#Crash_recovery">15.6  Using <CODE>myisamchk</CODE> for crash recovery</A></H2>
 
 <P>
-<STRONG>MySQL</STRONG> ���ǡ�����Ǽ�˻��Ѥ���ե���������ϡ�
-���ϰϤˤ錄�äƥƥ��Ȥ���ޤ����������ǡ����١����Υơ��֥뤬
-�˲�����뤫�⤷��ʤ���Ū����������ޤ�:
+<STRONG>MySQL</STRONG> がデータ格納に使用するファイル形式は、
+広範囲にわたってテストされました。が、データベースのテーブルが
+破壊されるかもしれない外的状況があります:
 
 </P>
 
 <UL>
 <LI>
 
-<CODE>mysqld</CODE> �ץ��������񤭹��ߺ���� killed ���줿���
+<CODE>mysqld</CODE> プロセスが書き込み再中に killed された場合
 <LI>
 
-ͽ�����̥���ԥ塼�������(�㤨���Ÿ����ڤ�줿���)
+予期せぬコンピュータの停止(例えば電源が切られた場合)
 <LI>
 
-�ϡ��ɥ��������顼
+ハードウェアエラー
 </UL>
 
 <P>
-����Ǥϡ�<STRONG>MySQL</STRONG> �Υǡ����ΰ���������������ˡ��Ҥ٤ޤ���
-�⤷�ơ��֥뤬�����������ˤʤ�ΤǤ���С�
-���ʤ��ϡ�������ͳ�򸫤Ĥ���褦��ߤ�٤��Ǥ�!
- ��<A HREF="manual.ja_Porting.html#Debugging_server">H.1  MySQL server �ΥǥХå�</A>���Ỳ��.
+本節では、<STRONG>MySQL</STRONG> のデータの扱い方、検査の方法を述べます。
+もしテーブルがたくさんダメになるのであれば、
+あなたは、この理由を見つけるよう試みるべきです!
+ 「<A HREF="manual.ja_Porting.html#Debugging_server">H.1  MySQL server のデバッグ</A>」節参照.
 
 </P>
 <P>
-�˲�����ν����򤹤��硢�ɥǡ����١�����Τ��줾��Υơ��֥� <CODE>tbl_name</CODE> �ϡ�
-�ǡ����١����ǥ��쥯�ȥ���ˤ��뻰�ĤΥե�����˰��פ���ɡ���������򤹤����
-�ȤƤ���פǤ���
+破壊からの修復をする場合、”データベース内のそれぞれのテーブル <CODE>tbl_name</CODE> は、
+データベースディレクトリ内にある三つのファイルに一致する”、これを理解する事は
+とても重要です：
 
 </P>
 <TABLE BORDER WIDTH="100%" NOSAVE >
@@ -828,32 +828,32 @@ ISAM �����ΥС�����󡣸��ߤϾ�� 2 ��
 </TABLE>
 
 <P>
-����黰�ĤΥե�������͡�����ˡ���˲���������������ޤ�����
-���ξ��Ǥ����꤬������䤹���Τϡ��ǡ����ե�����ȥ���ǥå����ե�����Ǥ���
+これら三つのファイルは様々な方法で破壊を受ける事がありますが、
+この場合最も問題が起こりやすいのは、データファイルとインデックスファイルです。
 
 </P>
 <P>
-<CODE>myisamchk</CODE> �� <TT>`.MYD'</TT> �ե�����(�ǡ���)�Υ��ԡ����԰�Ԥ����ʤ��ޤ���
-���ν��������κǸ�ˡ��Ť� <TT>`.MYD'</TT> �ե������ä����������ե�����򥪥ꥸ�ʥ��̾�����ѹ����ޤ���
-�⤷ <CODE>--quick</CODE> ���ץ�������Ѥ����ʤ顢<CODE>myisamchk</CODE> ��
- <TT>`.MYD'</TT> �ե�����ΰ���ե��������ޤ��󡣤��Τ���ꡢ<TT>`.MYD'</TT> �ե�����
-���������Ȳ��ꤷ�ƿ���������ǥå����ե������������ޤ���
-���λ� <TT>`.MYD'</TT> �ե�����Ϥ�����ޤ���
-���ξ�硢<CODE>myisamchk</CODE> �ϼ�ư�� <TT>`.MYD'</TT> �ե�����δְ㤤�򸡽Ф���
-��������ߤ���Τǡ������Ǥ���
+<CODE>myisamchk</CODE> は <TT>`.MYD'</TT> ファイル(データ)のコピーを一行一行おこないます。
+この修理過程の最後に、古い <TT>`.MYD'</TT> ファイルを消し、新しいファイルをオリジナルの名前に変更します。
+もし <CODE>--quick</CODE> オプションを使用したなら、<CODE>myisamchk</CODE> は
+ <TT>`.MYD'</TT> ファイルの一時ファイルを作りません。そのかわり、<TT>`.MYD'</TT> ファイル
+が正しいと仮定して新しいインデックスファイルだけを作ります。
+この時 <TT>`.MYD'</TT> ファイルはいじりません。
+この場合、<CODE>myisamchk</CODE> は自動で <TT>`.MYD'</TT> ファイルの間違いを検出して
+修復を中止するので、安全です。
 
 </P>
 <P>
-<CODE>myisamchk</CODE> ����� <CODE>--quick</CODE> ���ץ�������ꤹ�뤳�Ȥ�Ǥ��ޤ���
-���ξ�硢<CODE>myisamchk</CODE> �Ϥ����Ĥ��Υ��顼(�����ν�ʣ�Ȥ�)�Ǥ���ߤϤ��ޤ���
-������ <TT>`.MYD'</TT> �ե�������ѹ����ޤ���
+<CODE>myisamchk</CODE> に二つ <CODE>--quick</CODE> オプションを指定することもできます。
+この場合、<CODE>myisamchk</CODE> はいくつかのエラー(キーの重複とか)では中止はしません。
+かわりに <TT>`.MYD'</TT> ファイルを変更します。
 
 </P>
 <P>
-�̾�ν�����¹Ԥ��뤿��˥ǥ������Υ��ڡ����ζ�������������̵�����˸¤äơ�
- <CODE>--quick</CODE> �������꤬���Ω���ޤ���
-���ξ��,���ʤ��� <CODE>myisamchk</CODE> �����餻�����˥Хå����åפ�
-���ʤ��Ȥ�Ȥ�٤��Ǥ���
+通常の修理を実行するためにディスクのスペースの空きが少ししか無い場合に限って、
+ <CODE>--quick</CODE> の二回指定が役に立ちます。
+この場合,あなたは <CODE>myisamchk</CODE> を走らせる前にバックアップを
+少なくともとるべきです。
 
 </P>
 
@@ -861,20 +861,20 @@ ISAM �����ΥС�����󡣸��ߤϾ�� 2 ��
 <A NAME="IDX673"></A>
 
 
-<H3><A NAME="Check" HREF="manual.ja_toc.html#Check">15.6.1  �ơ��֥�Υ��顼�����å���ˡ</A></H3>
+<H3><A NAME="Check" HREF="manual.ja_toc.html#Check">15.6.1  テーブルのエラーチェック方法</A></H3>
 
 <P>
-�ơ��֥������å�����ˤ�,�ʲ��Υ��ޥ�ɤ���Ѥ��Ƥ�������:
+テーブルをチェックするには,以下のコマンドを使用してください:
 
 </P>
 <DL COMPACT>
 
 <DT><CODE>myisamchk tbl_name</CODE>
 <DD>
-����Ϥ��٤Ƥθ����99.99%�򸫤Ĥ��ޤ���
-���줬���Ĥ��뤳�Ȥ��Ǥ��ʤ�ʪ�ϡ��ǡ����ե�������˲�<STRONG>����</STRONG>�Ǥ�
-(��������ˤޤ�)���⤷�ơ��֥������å��������ʤ顢���ץ����ʤ���
- <CODE>myisamchk</CODE> �����餹����<CODE>-s</CODE> or <CODE>--silent</CODE> ���ץ�����Ĥ��ޤ���
+これはすべての誤りの99.99%を見つけます。
+これが見つけることができない物は、データファイルの破壊<STRONG>だけ</STRONG>です
+(これは非常にまれ)。もしテーブルをチェックしたいなら、オプションなしで
+ <CODE>myisamchk</CODE> を走らすか、<CODE>-s</CODE> or <CODE>--silent</CODE> オプションをつけます。
 
 <DT><CODE>myisamchk -m tbl_name</CODE>
 <DD>
@@ -885,28 +885,28 @@ in the index tree.
 
 <DT><CODE>myisamchk -e tbl_name</CODE>
 <DD>
-��������ƤΥǡ���������Ű��Ū�˥����å����ޤ���
-(<CODE>-e</CODE> �� ``extended check'' �ΰ�)��
-���ƤΥ����ˤĤ��ơ�����餬�����Ԥ������������ǧ���뤿��ˡ�
-�ɤ߹��ߥ����å���Ԥ��ޤ���
-����Ϥ�������Υ����������礭�ʥơ��֥�Ǥϡ��������֤�������ޤ���
-<CODE>myisamchk</CODE> ���̾�ǽ�Υ��顼�����Ĥ��ä������ǻߤޤ�ޤ���
-�⤷�������������ʤ顢<CODE>--verbose</CODE> (<CODE>-v</CODE>) ���ץ�����ä��ޤ���
-����� <CODE>myisamchk</CODE> �򥨥顼��20�ĽФ�ޤ�ư���³���ޤ���
-���̤˻��Ѥ�����ϡ�<CODE>myisamchk</CODE> �����ǽ�ʬ�Ǥ���(�ơ��֥�̾�ʳ��ΰ����ϰ���̵��)
+これは全てのデータを完璧に徹底的にチェックします。
+(<CODE>-e</CODE> は ``extended check'' の意)。
+全てのキーについて、それらがさす行が正しいかを確認するために、
+読み込みチェックを行います。
+これはたくさんのキーがある大きなテーブルでは、凄く時間がかかります。
+<CODE>myisamchk</CODE> は通常、最初のエラーが見つかった時点で止まります。
+もしより情報が得たいなら、<CODE>--verbose</CODE> (<CODE>-v</CODE>) オプションを加えます。
+これは <CODE>myisamchk</CODE> をエラーが20個出るまで動作させ続けます。
+普通に使用する場合は、<CODE>myisamchk</CODE> だけで十分です。(テーブル名以外の引数は一切無し)
 
 <DT><CODE>myisamchk -e -i tbl_name</CODE>
 <DD>
-���Υ��ޥ�ɤȻ��Ƥ��ޤ����� <CODE>-i</CODE> ���ץ����� <CODE>myisamchk</CODE> �ˤ����餫��
-���׾����Ф�����褦�ˤ��ޤ���
+前のコマンドと似ていますが、 <CODE>-i</CODE> オプションは <CODE>myisamchk</CODE> にいくらかの
+統計情報を出させるようにします。
 </DL>
 
 
 
-<H3><A NAME="Repair" HREF="manual.ja_toc.html#Repair">15.6.2  �ơ��֥�ν�����ˡ</A></H3>
+<H3><A NAME="Repair" HREF="manual.ja_toc.html#Repair">15.6.2  テーブルの修復方法</A></H3>
 
 <P>
-�ơ��֥��˲��������Ȥ��ơ������꤬ͽ���������Ǥ����ꡢ�ʲ��Τ褦�ʥ��顼���Ф��ꤷ�ޤ���
+テーブル破壊の兆しとして、クエリが予期せず中断したり、以下のようなエラーが出たりします：
 
 </P>
 
@@ -929,28 +929,28 @@ Record file is crashed
 </UL>
 
 <P>
-�����ξ�硢���ʤ��ϼ�ʬ�Υơ��֥�������ʤ���Фʤ�ޤ���
-<CODE>myisamchk</CODE> �ϤۤȤ�ɤ�����򸫤Ĥ��Ф��������ޤ���
+これらの場合、あなたは自分のテーブルを修理しなければなりません。
+<CODE>myisamchk</CODE> はほとんどの問題を見つけ出し修正します。
 
 </P>
 <P>
-���������ϰʲ��ǵ��Ҥ������4�Ĥ��ʳ���Ƨ�ߤޤ���
-�����Ϥ�����ˡ����ʤ��ϥǡ����١����ǥ��쥯�ȥ�� <CODE>cd</CODE> ����
-�ơ��֥�ե�����Υѡ��ߥå������ǧ���٤��Ǥ���
-�����ե������ <CODE>mysqld</CODE> ��¹Ԥ��Ƥ���Unix�桼�������ɤ߹��߲�ǽ
-�Ǥ���褦�ˤ��Ƥ�������(�����Τ���Τˤ��ʤ��˥ե�����Υ�����������ɬ��)��
-�⤷�ե�������ѹ��򤹤�ɬ�פ�����ʤ�С��ե�����ؤν񤭹��ߵ��Ĥ�ɬ�פǤ���
+修復過程は以下で記述する最大4つの段階を踏みます。
+これを始める前に、あなたはデータベースディレクトリに <CODE>cd</CODE> して
+テーブルファイルのパーミッションを確認すべきです。
+これらファイルは <CODE>mysqld</CODE> を実行しているUnixユーザーが読み込み可能
+であるようにしてください(検査のするのにあなたにファイルのアクセス権も必要)。
+もしファイルの変更をする必要があるならば、ファイルへの書き込み許可も必要です。
 
 </P>
 <P>
 If you are using <STRONG>MySQL</STRONG> 3.23.16 and above you can (and should) use the
 <CODE>CHECK</CODE> and <CODE>REPAIR</CODE> commands to check and repair <CODE>MyISAM</CODE>
-tables.  ��<A HREF="manual.ja_Reference.html#CHECK_TABLE">7.11  <CODE>CHECK TABLE</CODE> ��ʸ</A>���Ỳ��.  ��<A HREF="manual.ja_Reference.html#REPAIR_TABLE">7.12  <CODE>REPAIR TABLE</CODE> ��ʸ</A>���Ỳ��. 
+tables.  「<A HREF="manual.ja_Reference.html#CHECK_TABLE">7.11  <CODE>CHECK TABLE</CODE> 構文</A>」節参照.  「<A HREF="manual.ja_Reference.html#REPAIR_TABLE">7.12  <CODE>REPAIR TABLE</CODE> 構文</A>」節参照. 
 
 </P>
 <P>
 The manual section about table maintenence includes the options to
-<CODE>isamchk</CODE>/<CODE>myisamchk</CODE>.  ��<A HREF="manual.ja_Maintenance.html#Table_maintenance">15.1  �ơ��֥�Υ��ƥʥ󥹡�����å��夫��ν����Τ���� <CODE>myisamchk</CODE> ����</A>���Ỳ��.
+<CODE>isamchk</CODE>/<CODE>myisamchk</CODE>.  「<A HREF="manual.ja_Maintenance.html#Table_maintenance">15.1  テーブルのメンテナンス、クラッシュからの修復のための <CODE>myisamchk</CODE> 使用</A>」節参照.
 
 </P>
 <P>
@@ -967,13 +967,13 @@ all queries are stopped and all keys have been flushed to disk.
 
 </P>
 <P>
-<STRONG>Stage 1: �ơ��֥������å�����</STRONG>
+<STRONG>Stage 1: テーブルをチェックする</STRONG>
 
 </P>
 <P>
-<CODE>myisamchk *.MYI</CODE> (���֤������äƤ�褤�ʤ� <CODE>myisamchk -e *.MYI</CODE>)
-��¹Ԥ��ޤ���
-<CODE>-s</CODE> (silent) ���ץ��������פʾ���ν��Ϥ򤪤����ޤ���
+<CODE>myisamchk *.MYI</CODE> (時間がかかってもよいなら <CODE>myisamchk -e *.MYI</CODE>)
+を実行します。
+<CODE>-s</CODE> (silent) オプションは不要な情報の出力をおさえます。
 
 </P>
 <P>
@@ -982,75 +982,75 @@ If the mysqld server is done you should use the --update option to tell
 
 </P>
 <P>
-<CODE>myisamchk</CODE> �����顼���֤������ˤ������ơ��֥��������ɬ�פ�����ޤ���
-���ξ�硢Stage 2 �ؿʤߤޤ���
+<CODE>myisamchk</CODE> がエラーを返した場合にだけ、テーブルを修復する必要があります。
+この場合、Stage 2 へ進みます。
 
 </P>
 <P>
-�����å����˴�̯�ʥ��顼(<CODE>out of memory</CODE> ���顼�Τ褦��) ����������硢
-���뤤�� <CODE>myisamchk</CODE> ���������硢Stage 3 �˿ʤ�Ǥ���������
+チェック時に奇妙なエラー(<CODE>out of memory</CODE> エラーのような) が起きた場合、
+あるいは <CODE>myisamchk</CODE> が落ちた場合、Stage 3 に進んでください。
 
 </P>
 <P>
-<STRONG>Stage 2: ��ñ�ǰ����ʽ���</STRONG>
+<STRONG>Stage 2: 簡単で安全な修復</STRONG>
 
 </P>
 <P>
-�ޤ��ǽ�� <CODE>myisamchk -r -q tbl_name</CODE> ���ߤƤ�������
-(<CODE>-r -q</CODE> �� ``quick recovery mode''�ΰ�)��
-����ϥǡ����ե�����˿���ʤ��ǥ���ǥå����ե�����ν������ߤޤ���
-�⤷�ǡ����ե����뤬���Ƥȥǡ����ե�����������������Ǥκ����󥯥ݥ���Ȥ�
-�ޤ�Ǥ���ʤ顢�����ư��ƥơ��֥�������ޤ���
-�����塢���Υơ��֥�ν����˿ʤ�Ǥ���������
-���Ԥ������ϡ��ʲ��μ��ǻ�ߤƤ���������
+まず最初に <CODE>myisamchk -r -q tbl_name</CODE> を試みてください
+(<CODE>-r -q</CODE> は ``quick recovery mode''の意)。
+これはデータファイルに触れないでインデックスファイルの修理を試みます。
+もしデータファイルが全てとデータファイル中の正しい場所での削除リンクポイントを
+含んでいるなら、これは動作してテーブルを修復します。
+成功後、次のテーブルの修復に進んでください。
+失敗した場合は、以下の手順で試みてください：
 
 </P>
 
 <OL>
 <LI>
 
-³�������˥ǡ����ե������Хå����åפ��Ƥ���������
+続ける前にデータファイルをバックアップしてください。
 
 <LI>
 
-<CODE>myisamchk -r tbl_name</CODE> ����Ѥ��ޤ�(<CODE>-r</CODE> �� ``recovery mode''�ΰ�)��
-����������ʥ쥳���ɤȺ�����줿�쥳���ɤ�ǡ����ե����뤫��õ��
-����ǥå����ե�����(.MYI)��ƹ��ۤ��ޤ���
+<CODE>myisamchk -r tbl_name</CODE> を使用します(<CODE>-r</CODE> は ``recovery mode''の意)。
+これは不正なレコードと削除されたレコードをデータファイルから消去し、
+インデックスファイル(.MYI)を再構築します。
 
 <LI>
 
-�嵭�����Ԥ�����硢<CODE>myisamchk --safe-recover tbl_name</CODE> ����Ѥ��Ʋ�������
-Safe recovery �⡼�ɤϸŤ���ˡ����Ѥ��ƽ������ޤ���
-��������̤ν����⡼�ɤǤϹԤ�ʤ����򤤤��Ĥ���äƤ��ޤ���(�٤��Ǥ���)
+上記が失敗した場合、<CODE>myisamchk --safe-recover tbl_name</CODE> を使用して下さい。
+Safe recovery モードは古い方法を使用して修復します。
+これは普通の修復モードでは行わない操作をいくつかもっています。(遅いですが)
 </OL>
 
 <P>
-�����å��ޤ��Ͻ������ˡ�������­�Τ褦��̯�ʥ��顼���Ǥ���硢�ޤ��� 
-<CODE>myisamchk</CODE> ������å��夷�����ϡ�Stage 3 �˿ʤ�Ǥ���������
+チェックまたは修復時に、メモリ不足のような妙なエラーがでた場合、または 
+<CODE>myisamchk</CODE> がクラッシュした場合は、Stage 3 に進んでください。
 
 </P>
 <P>
-<STRONG>Stage 3: �񤷤�����</STRONG>
+<STRONG>Stage 3: 難しい修復</STRONG>
 
 </P>
 <P>
-����ǥå����ե�����(.MYI)�κǽ�� 16K �֥��å����˲����줿��硢
-�ޤ��������ʾ����ޤ��硢�ޤ��ϥ���ǥå����ե����뤬�ʤ����ˤ�����
-�ܽ����ʳ���Фޤ���
-���ξ�硢����������ǥå����ե�����ե�������������ɬ�פ�����ޤ���
-���Τ褦�ˤ��Ƥ�������:
+インデックスファイル(.MYI)の最初の 16K ブロックが破壊された場合、
+または不正な情報を含む場合、またはインデックスファイルがない場合にだけ、
+本修復段階を経ます。
+この場合、新しいインデックスファイルファイルを作成する必要があります。
+次のようにしてください:
 
 </P>
 
 <OL>
 <LI>
 
-�ǡ����ե����� .MYD �ե������ɤ����������˰�ư���ޤ���
+データファイル .MYD ファイルをどこか安全場所に移動します。
 
 <LI>
 
-���������Υǡ����ȥ���ǥå����ե�������뤿��ˡ�
-�ơ��֥�ǥ�������ץ��ե��������Ѥ��ޤ���
+新しい空のデータとインデックスファイルを作るために、
+テーブルディスクリプタファイルを使用します：
 
 
 <PRE>
@@ -1061,52 +1061,52 @@ mysql&#62; quit
 
 <LI>
 
-�Ť��ǡ����ե�����򿷤�����ä��ǡ����ե�����˥��ԡ����ޤ���
-(�Ť��ǡ����ե������ move ���ƤϤ����ޤ��󡨤ʤ��Ƭ�����꤬�����ޤ�)
+古いデータファイルを新しく作ったデータファイルにコピーします。
+(古いデータファイルを move してはいけません；なんら頭の問題が起きます)
 </OL>
 
 <P>
-Stage 2 ����äƤ��������� <CODE>myisamchk -r -q</CODE> �ϴ���ư��ޤ���
-(�����̵�¥롼�פˤϤʤ�ޤ���).
+Stage 2 に戻ってください。 <CODE>myisamchk -r -q</CODE> は既に動作します。
+(これは無限ループにはなりません).
 
 </P>
 <P>
-<STRONG>Stage 4: �ȤƤ��񤷤�����</STRONG>
+<STRONG>Stage 4: とても難しい修復</STRONG>
 
 </P>
 <P>
-����ϡ��ǥ�������ץ��ե�����(.frm)�⥯��å��夷�����ˤ���ȯ�����ޤ���
-�����ȯ�����뤳�ȤϤ���ޤ��󡣤ʤ��ʤ�ǥ�������ץ��ե������
-�ơ��֥뤬�������줿��˽񤫤�뤳�ȤϤʤ�����Ǥ���
+これは、ディスクリプタファイル(.frm)もクラッシュした場合にだけ発生します。
+これは発生することはありません。なぜならディスクリプタファイルは
+テーブルが生成された後に書かれることはないからです。
 
 </P>
 
 <OL>
 <LI>
 
-�ǥ�������ץ��ե������Хå����åפ���ꥹ�ȥ����ơ�Stage 3 ����äƤ���������
-����ǥå����ե�����Υꥹ�ȥ���Ǥ��ޤ��������� Stage 2 ����äƤ���������
-��Ԥξ�硢<CODE>myisamchk -r</CODE> �ǳ��Ϥ��٤��Ǥ���
+ディスクリプタファイルをバックアップからリストアして、Stage 3 に戻ってください。
+インデックスファイルのリストアもできます。そして Stage 2 に戻ってください。
+後者の場合、<CODE>myisamchk -r</CODE> で開始すべきです。
 
 <LI>
 
-�Хå����åפ���äƤ��ʤ��Ƥ⡢�ơ��֥뤬�ɤΤ褦�˺������줿�������Τ��Τä�
-����С�¾�Υǡ����١�����˥ơ��֥�Υ��ԡ����������ޤ���
-�������ǡ����ե��������������ۤɺ�ä��ǡ����١��������
-�ǥ�������ץ��ե�����ȥ���ǥå����ե�����򡢲��줿�ǡ����١������
-��ư���ޤ�������Ͽ������ǥ�������ץ��ե�����ȥ���ǥå����ե������
-Ϳ���뤳�Ȥˤʤ�ޤ������ǡ����ե�����Ϥ��Τޤ޻ĤäƤ��ޤ���
-Stage 2 �˿ʤߡ�����ǥå����ե�����ν�����ԤäƤ���������
+バックアップを持っていなくても、テーブルがどのように作成されたかを正確に知って
+いれば、他のデータベース内にテーブルのコピーを生成します。
+新しいデータファイルを削除し、先ほど作ったデータベースの中の
+ディスクリプタファイルとインデックスファイルを、壊れたデータベース内に
+移動します。これは新しいディスクリプタファイルとインデックスファイルを
+与えることになりますが、データファイルはそのまま残っています。
+Stage 2 に進み、インデックスファイルの修復を行ってください。
 </OL>
 
 
 
-<H3><A NAME="Optimization" HREF="manual.ja_toc.html#Optimization">15.6.3  �ơ��֥�κ�Ŭ��</A></H3>
+<H3><A NAME="Optimization" HREF="manual.ja_toc.html#Optimization">15.6.3  テーブルの最適化</A></H3>
 
 <P>
-���Ҳ����줿�쥳���ɤη��ȡ�
-�쥳���ɤκ���ȹ�������������̵�̤ʥ��ڡ������ӽ���
-�����Ԥ��ˤϡ������⡼��(recovery mode)�� <CODE>myisamchk</CODE> ��¹Ԥ��ޤ���
+断片化されたレコードの結合と、
+レコードの削除と更新から生じる無駄なスペースの排除、
+これら行うには、修復モード(recovery mode)で <CODE>myisamchk</CODE> を実行します：
 
 </P>
 
@@ -1115,41 +1115,41 @@ shell&#62; myisamchk -r tbl_name
 </PRE>
 
 <P>
-SQL <CODE>OPTIMIZE TABLE</CODE> �Ǥ�Ʊ�ͤ˥ơ��֥���Ŭ���Ǥ��ޤ���
-<CODE>OPTIMIZE TABLE</CODE> �ϴ�ñ�Ǥ����� <CODE>myisamchk</CODE> ������®���Ǥ���
+SQL <CODE>OPTIMIZE TABLE</CODE> でも同様にテーブルを最適化できます。
+<CODE>OPTIMIZE TABLE</CODE> は簡単ですが、 <CODE>myisamchk</CODE> の方が速いです。
 
 </P>
 
 <P>
-<CODE>myisamchk</CODE> �ˤϡ����ʤ����ơ��֥����ǽ����夵����Τ˻��Ѥ��뤳�Ȥ��Ǥ���
-¾��¿���Υ��ץ���󤬤���ޤ�:
+<CODE>myisamchk</CODE> には、あなたがテーブルの性能を向上させるのに使用することができる
+他の多くのオプションがあります:
 
 </P>
 <DL COMPACT>
 
 <DT><CODE>-S, --sort-index</CODE>
 <DD>
-����ǥå����ĥ꡼�֥��å��Υ����ȡ��߽�˥����Ȥ��ޤ���
-����ϥ�����(seek)���Ŭ��������������Ѥ����ơ��֥������(scan)��®�����ޤ���
+インデックスツリーブロックのソート。降順にソートします。
+これはシーク(seek)を最適化し、キーを使用したテーブルの走査(scan)を速くします。
 
 <DT><CODE>-R index_num, --sort-records=index_num</CODE>
 <DD>
-����ǥå����ˤ�륽���ȡ�����Ϥ��ʤ��Υǡ��������ɤ����֤���
-���Υ���ǥå�������Ѥ��� <CODE>SELECT</CODE> , <CODE>ORDER BY</CODE> ����®�����ޤ���
-(�ǽ�ˤ����¹Ԥ��ƥ����Ȥ���Ȥ��ϻ��֤��ȤƤ⤫����ޤ���)
-�ơ��֥�Υ���ǥå����ֹ�򸫤Ĥ��뤿��ˡ� <CODE>SHOW INDEX</CODE> ����Ѥ��ޤ���
-����� <CODE>myisamchk</CODE> ���Ԥ��Τ�Ʊ�ͤν�ǥơ��֥�Υ���ǥå�����ɽ�����ޤ���
-����ǥå����ֹ�� 1 ���鳫�Ϥ���ޤ���
+インデックスによるソート。これはあなたのデータをより良く配置し、
+このインデックスを使用した <CODE>SELECT</CODE> , <CODE>ORDER BY</CODE> 操作を速くします。
+(最初にこれを実行してソートするときは時間がとてもかかります！)
+テーブルのインデックス番号を見つけるために、 <CODE>SHOW INDEX</CODE> を使用します。
+これは <CODE>myisamchk</CODE> が行うのと同様の順でテーブルのインデックスを表示します。
+インデックス番号は 1 から開始されます。
 
 <DT><CODE>-a, --analyze</CODE>
 <DD>
-�ơ��֥���Υ������֤�ʬ�ϡ�
-���Υơ��֥뤫��쥳���ɤ��������ݤˡ�
-���(join)�Υѥե����ޥ󥹤���夵���ޤ���
+テーブル内のキー配置の分析。
+このテーブルからレコードを取得する際に、
+結合(join)のパフォーマンスを向上させます。
 </DL>
 
 <P>
-For a full description of the option see  ��<A HREF="manual.ja_Maintenance.html#myisamchk_syntax">15.2  <CODE>myisamchk</CODE> ��ư��ʸ</A>����.
+For a full description of the option see  「<A HREF="manual.ja_Maintenance.html#myisamchk_syntax">15.2  <CODE>myisamchk</CODE> 起動構文</A>」節.
 
 </P>
 
@@ -1157,52 +1157,52 @@ For a full description of the option see  ��<A HREF="manual.ja_Maintenance.html#
 <H2><A NAME="Log_files" HREF="manual.ja_toc.html#Log_files">15.7  Log file maintenance</A></H2>
 
 <P>
-<STRONG>MySQL</STRONG> ������ե�����ȤȤ�˻��Ѥ����硢
-���ʤ��ϡ������Ť������ե������ ��ࡼ��/�Хå����å� ����
- <STRONG>MySQL</STRONG> �˿������ե�����˥�������褦�˻ؼ��������Ȼפ����ȤǤ��礦��
- ��<A HREF="manual.ja_Common_problems.html#Update_log">21.3  ��������</A>���Ỳ��.
+<STRONG>MySQL</STRONG> をログファイルとともに使用する場合、
+あなたは、時々古いログファイルを リムーブ/バックアップ し、
+ <STRONG>MySQL</STRONG> に新しいファイルにログを取るように指示したいと思うことでしょう。
+ 「<A HREF="manual.ja_Common_problems.html#Update_log">21.3  更新ログ</A>」節参照.
 
 </P>
 <P>
-<CODE>Redhat</CODE> Linux �ˤ����Ƥϡ�<CODE>mysql-log-rotate</CODE> ������ץȤ�
-����˻��ѤǤ��ޤ��� �⤷ RPM �ǥ����ȥ�ӥ塼������ <STRONG>MySQL</STRONG> ��
-���󥹥ȡ��뤷���ʤ顢���Υ�����ץȤϼ�ư�ǥ��󥹥ȡ��뤵��Ƥ���Ϥ��Ǥ���
+<CODE>Redhat</CODE> Linux においては、<CODE>mysql-log-rotate</CODE> スクリプトを
+これに使用できます。 もし RPM ディストリビューションの <STRONG>MySQL</STRONG> を
+インストールしたなら、このスクリプトは自動でインストールされているはずです。
 
 </P>
 <P>
-¾�Υ����ƥ�Ǥϡ���ʬ���Ȥ�û��������ץȤ򥤥󥹥ȡ��뤷�ޤ���
-<CODE>cron</CODE> �ǥ����ե�����򰷤��褦�ˤ��ޤ���
+他のシステムでは、自分自身で短いスクリプトをインストールします。
+<CODE>cron</CODE> でログファイルを扱うようにします。
 
 </P>
 <P>
-<CODE>mysqladmin flush-logs</CODE> ���ޥ�ɤ� <CODE>FLUSH LOGS</CODE> SQLʸ�ǡ�
-<STRONG>MySQL</STRONG> �˿����������ե��������Ѥ����뤳�Ȥ�����ޤ���
-�⤷���ʤ��� <STRONG>MySQL</STRONG> 3.21 ����Ѥ��Ƥ���ʤ顢
- <CODE>mysqladmin refresh</CODE> ����Ѥ��ʤ��ƤϤʤ�ޤ���
+<CODE>mysqladmin flush-logs</CODE> コマンドか <CODE>FLUSH LOGS</CODE> SQL文で、
+<STRONG>MySQL</STRONG> に新しいログファイルを使用させることが出来ます。
+もしあなたが <STRONG>MySQL</STRONG> 3.21 を使用しているなら、
+ <CODE>mysqladmin refresh</CODE> を使用しなくてはなりません。
 
 </P>
 <P>
-�嵭�Υ��ޥ�ɤϡ��ʲ��Τ褦��ư��ޤ���
+上記のコマンドは、以下のように動作します：
 
 </P>
 
 <UL>
 <LI>
 
-�⤷�̾�Υ��� (<CODE>--log</CODE>) �����Ѥ���Ƥ���ʤ�С����Υ����ե������
-�����Ĥ��Ƥ���Ƥӳ����ޤ���
-(<TT>`mysql.log'</TT> ���ǥե���ȤΥ����ե�����).
+もし通常のログ (<CODE>--log</CODE>) が使用されているならば、このログファイルを
+一度閉じてから再び開きます。
+(<TT>`mysql.log'</TT> がデフォルトのログファイル).
 <LI>
 
-�⤷�������� (<CODE>--log-update</CODE>) ����Ѥ��Ƥ���ʤ顢
-�����������Ĥ��������������ե�����򳫤��ޤ������Τ�����
-�����ե�����ˤĤ��Ƥ����ֹ�������ޤ���
+もし更新ログ (<CODE>--log-update</CODE>) を使用しているなら、
+更新ログを閉じ、新しいログファイルを開きます。そのさい、
+ログファイルについている番号は増えます。
 </UL>
 
 <P>
-�⤷����������������Ѥ��Ƥ���ʤ顢���ʤ��ϡ������� flush ��������Ǥ褯�ơ�
-���λ����Хå����åפΤ���Ť����������ե�������ư���ޤ���
- �⤷���̤Υ�����ȤäƤ���С����ʤ��ϰʲ��Τ褦�ˤ��뤳�Ȥ��Ǥ��ޤ�: 
+もし更新ログだけを使用しているなら、あなたは、ログを flush するだけでよくて、
+その時、バックアップのため古い更新ログファイルを移動します。
+ もし普通のログを使っていれば、あなたは以下のようにすることができます: 
 
 </P>
 
@@ -1213,7 +1213,7 @@ shell&#62; mysqladmin flush-tables
 </PRE>
 
 <P>
-�������Ƥ����ơ�<TT>`mysql.old'</TT> ��Хå����åפ�������ޤ���.
+こうしておいて、<TT>`mysql.old'</TT> をバックアップし削除します。.
 
 </P>
 <P><HR><P>

@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="11705.html">[��]</a><a href="11707.html">[��]</a><a href="../list/11701-11800.html">[�ֹ�����]</a><a href="../thread/11701-11800.html">[����åɰ���]</a></p>
+<p class="button"><a href="11705.html">[前]</a><a href="11707.html">[次]</a><a href="../list/11701-11800.html">[番号順一覧]</a><a href="../thread/11701-11800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:11706
 </p>
@@ -13,24 +13,24 @@ mysql:11706
 <p>
 From: Kenta Hashimoto &lt;Kenta Hashimoto &lt;kem@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 07 Jul 2005 20:18:56 +0900<br>
-Subject: [mysql 11706] Re: ��ʸ������¾�����Ȥ߹�碌<br>
+Subject: [mysql 11706] Re: 全文検索と他条件の組み合わせ<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�������͡������͡����꤬�Ȥ��������ޤ���
+佐々木様、宇野様、ありがとうございます。
 
-�������Ƥ������Ȥ��Ƥ��ޤäƤ��ꡢ���ߤޤ���Ǥ�����
-�ޤ������ֻ����٤��ʤꡢ���ߤޤ���
+質問内容が漠然としてしまっており、すみませんでした。
+また、お返事が遅くなり、すみません。
 
-�ǡ������̤ϡ���13���Ԥǡ����̤�245MB�ۤɤǤ���
-MySQL�ΥС������ϡ�4.1.10a�ǡ�CentOS���ư�����Ƥ��ޤ���
+データの量は、約13万行で、容量は245MBほどです。
+MySQLのバージョンは、4.1.10aで、CentOS上で動かしています。
 
-�¹�®�٤Ȥ��Ƥϡ��ʲ��ΤȤ���Ǥ�����
-ñ�㲽�Τ���ˡ�CategoryB�ξ���ȴ�����ޤ�����
+実行速度としては、以下のとおりでした。
+単純化のために、CategoryBの条件は抜かしました。
 
-�㥯���꣱��
+＜クエリ１＞
 
 	SELECT
 		ID
@@ -38,15 +38,15 @@ MySQL�ΥС������ϡ�4.1.10a�ǡ�CentOS���ư�����Ƥ��ޤ���
 		Recipe
 	WHERE
 		MATCH( Title,Description )
-		AGAINST( '+&quot;���㤬����&quot;' IN BOOLEAN MODE )
+		AGAINST( '+&quot;じゃがいも&quot;' IN BOOLEAN MODE )
 		AND
 		CategoryA = 4
 	LIMIT
 		10
 
-�ξ�硢145ms
+の場合、145ms
 
-�㥯���ꣲ��
+＜クエリ２＞
 
 	SELECT
 		ID
@@ -54,13 +54,13 @@ MySQL�ΥС������ϡ�4.1.10a�ǡ�CentOS���ư�����Ƥ��ޤ���
 		Recipe
 	WHERE
 		MATCH( Title )
-		AGAINST( '+&quot;���㤬����&quot;' IN BOOLEAN MODE )
+		AGAINST( '+&quot;じゃがいも&quot;' IN BOOLEAN MODE )
 	LIMIT
 		10
 
-�ξ�硢1ms
+の場合、1ms
 
-�㥯���ꣳ��
+＜クエリ３＞
 
 	SELECT
 		ID
@@ -71,24 +71,24 @@ MySQL�ΥС������ϡ�4.1.10a�ǡ�CentOS���ư�����Ƥ��ޤ���
 	LIMIT
 		10
 
-�ξ�硢1ms�Ǥ���
+の場合、1msです。
 
 
-<span class="quote2">&gt;&gt;CagetoryA��CategoryB �ˤĤ��ơ�����ǥå�������ѤǤ��ʤ�</span>
-<span class="quote2">&gt;&gt;�Ǥ��뤳�Ȥ��������꤬�٤��������ȹͤ��Ƥ��ޤ���</span>
+<span class="quote2">&gt;&gt;CagetoryA、CategoryB について、インデックスを使用できない</span>
+<span class="quote2">&gt;&gt;でいることが、クエリが遅い原因だと考えています。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ���Τ����פ��ޤ�����</span>
+<span class="quote1">&gt; 何故そう思いました？</span>
 
-EXPLAIN��Ĥ���Ĵ�٤���̡�
-���Ѥ��Ƥ��륭��������ʸ�����Υ���ǥå������ä�����Ǥ���
-�ǡ���������Ĵ�٤뤦���ˡ���ĤΥ�����˻��ѤǤ��륤��ǥå�����
-��ĤΤߤ��Ȥ������Ȥ��狼�ꡢ�嵭�ν����Ǥϡ���ʸ�����Υ���ǥå���
-�Τߤ������Ѥ���Ƥ��ʤ��Ȥ������Ȥ��狼��ޤ�����
+EXPLAINをつけて調べた結果、
+使用しているキーが、全文検索のインデックスだったからです。
+で、いろいろ調べるうちに、一つのクエリに使用できるインデックスは
+一つのみだということがわかり、上記の書き方では、全文検索のインデックス
+のみしか使用されていないということがわかりました。
 
 
-���䤤��碌���Ѥ���������Ǥϡ�����٤��ʤäƤ��ޤ��ޤ�����
+副問い合わせを用いたクエリでは、より遅くなってしまいました。
 
-�㥯���ꣴ��
+＜クエリ４＞
 
 	SELECT
 		ID
@@ -96,7 +96,7 @@ EXPLAIN��Ĥ���Ĵ�٤���̡�
 		Recipe
 	WHERE
 		MATCH( Title )
-		AGAINST( '+&quot;���㤬����&quot;' IN BOOLEAN MODE )
+		AGAINST( '+&quot;じゃがいも&quot;' IN BOOLEAN MODE )
 		AND
 		ID IN (
 			SELECT
@@ -108,118 +108,118 @@ EXPLAIN��Ĥ���Ĵ�٤���̡�
 	LIMIT
 		10
 
-����ǡ�232ms������ޤ�����
-���䤤��碌��ʬ��դ���ʸ�����ˤ��Ƥߤ�ȡ�810ms������ޤ���
+これで、232msかかりました。
+副問い合わせ部分を逆に全文検索にしてみると、810msかかります。
 
-����ϡ����䤤��碌��ʬ�ˡ�LIMIT��Ĥ���ʤ�����ǤϤʤ�����
-�פ��ޤ���
-
-
-�ͤ����ΤǤ������⤷�����ơ�����®�٤ΰ㤤�ϡ�LIMIT�ˤ��
-���¤Τ����Ǥ��礦����
-�Ĥޤꡢ�嵭�Υ����꣱�Ǥϡ����Ĥ���쥷�Կ���
-���ʤ��ʤ뤿��ˡ�10���ܤΥ쥷�Ԥ����Ĥ���ޤǻ��֤������뤬��
-�����ꣲ�������ꣳ�Ǥϡ����Ĥ���쥷�Ԥ�¿�����ᡢ
-10���ܤΥ쥷�Ԥ������ˤߤĤ��ꡢ�������������Ǥ��ڤ���
-�Ȥ������ȤǤ��礦����
-
-�ºݡ������꣱�η��ǡ����¿���Υ쥷�Ԥ���������褦��
-�ͤǸ����������ϡ�6ms���٤ǺѤߤޤ�����
+これは、副問い合わせ部分に、LIMITをつけれないからではないかと
+思います。
 
 
-<span class="quote1">&gt; �Ϥ����व��ΰƣ��Τ褦�ˡ�</span>
-<span class="quote1">&gt; �� Category ��ʸ����Ȥ��Ʒ�礷���������ܤ����Ѱդ��ơ�</span>
-<span class="quote1">&gt; ���ι��ܤ˥���ǥå������������Ȥ������ͭ���Ǥ���</span>
-<span class="quote1">&gt; ����礻����ʬ��®���ʤ�Ȼפ��ޤ���</span>
-<span class="quote1">&gt; ���ξ�� FULLTEXT ����ʤ��� INDEX �����Ǥ��͡�</span>
+考えたのですが、もしかして、この速度の違いは、LIMITによる
+制限のせいでしょうか？
+つまり、上記のクエリ１では、見つかるレシピ数が
+少なくなるために、10個目のレシピが見つかるまで時間がかかるが、
+クエリ２、クエリ３では、見つかるレシピが多いため、
+10個目のレシピがすぐにみつかり、処理がそこで打ち切られる
+ということでしょうか？
 
-���䤤��碌��Ȥ��ȡ����䤤��碌��ʬ��LIMIT��
-������ʤ��Ȼפ��Τǡ����䤤��碌�ϻȤ�ʤ���ˡ��
-�ͤ����ۤ����褤���ȻפäƤ��ޤ���
+実際、クエリ１の形で、より多くのレシピが該当するような
+値で検索した場合は、6ms程度で済みました。
 
-�Ȥʤ�ȡ�
+
+<span class="quote1">&gt; はしけむさんの案１のように、</span>
+<span class="quote1">&gt; 全 Category を文字列として結合したキー項目を一つ用意して、</span>
+<span class="quote1">&gt; その項目にインデックスを作成するという手も有効です。</span>
+<span class="quote1">&gt; 副問合せの部分が速くなると思います。</span>
+<span class="quote1">&gt; この場合 FULLTEXT じゃなくて INDEX の方ですね。</span>
+
+副問い合わせを使うと、副問い合わせ部分にLIMITが
+かけれないと思うので、副問い合わせは使わない方法で
+考えたほうがよいかと思っています。
+
+となると、
 
 FULLTEXT( Title,Description,CategoryString )
 
-�Ȥ������ǡ���ʸ�����˴ޤ�Ƥ��ޤä��ۤ����������Ȼפ��ޤ�����
-���ξ��ˤϡ��⤷�����ơ֥����ǥ��ʥ�ƥ��͡פ����꤬
-�ФƤ��Ƥ��ޤ��ޤ��Ǥ��礦����
-����Ū�ˤϡ�
-��CategoryA4 CategoryB2�פʤɤΡ�Title��Description�ˤ�
-�̾�ޤޤ�ʤ�ñ���CategoryString����Ͽ���ơ���ʸ������
-�оݤˤ��褦���ȹͤ��Ƥ��ޤ���
+という形で、全文検索に含めてしまったほうがいいかと思いますが、
+この場合には、もしかして「カーディナリティ値」の問題が
+出てきてしまいますでしょうか。
+具体的には、
+「CategoryA4 CategoryB2」などの、TitleやDescriptionには
+通常含まれない単語を、CategoryStringに登録して、全文検索の
+対象にしようかと考えています。
 
 
 
 T.Sasaki wrote:
-<span class="quote1">&gt; �����ڤȤ����ޤ���</span>
+<span class="quote1">&gt; 佐々木といいます。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt;&gt;CagetoryA��CategoryB �ˤĤ��ơ�����ǥå�������ѤǤ��ʤ�</span>
-<span class="quote2">&gt;&gt;�Ǥ��뤳�Ȥ��������꤬�٤��������ȹͤ��Ƥ��ޤ���</span>
+<span class="quote2">&gt;&gt;CagetoryA、CategoryB について、インデックスを使用できない</span>
+<span class="quote2">&gt;&gt;でいることが、クエリが遅い原因だと考えています。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���Τ����פ��ޤ�����</span>
+<span class="quote1">&gt; 何故そう思いました？</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt;&gt;Category�ϡ�9���ढ�ꡢ���줾�졢2��8������ͤ�����ޤ���</span>
+<span class="quote2">&gt;&gt;Categoryは、9種類あり、それぞれ、2～8種類の値が入ります。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �쥳���ɿ���10���ʤ�� Category �Υ����ǥ��ʥ�ƥ��ͤ��㤹���ޤ��Τǡ�</span>
-<span class="quote1">&gt; FULLTEXT �ʳ��Υ���ǥå�����ʣ���ι��ܤ��鹽������Ƥ����ΤȲ��ꤷ�ޤ���</span>
-<span class="quote1">&gt; �ʰ�Ĥ���礻�ǻ��ѤǤ��륤��ǥå����ϰ�Ĥ����Ǥ������</span>
+<span class="quote1">&gt; レコード数が10万なら各 Category のカーディナリティ値が低すぎますので、</span>
+<span class="quote1">&gt; FULLTEXT 以外のインデックスは複数の項目から構成されているものと仮定します。</span>
+<span class="quote1">&gt; （一つの問合せで使用できるインデックスは一つだけですから）</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���ξ�ǡ����� SQL �����ǲ�褹��ʤ顦������</span>
+<span class="quote1">&gt; その上で、純粋に SQL だけで解決するなら・・・。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; SELECT ID FROM Recipe</span>
-<span class="quote1">&gt;  WHERE MATCH (Title, Description) AGAINST('+&quot;���㤬����&quot;' IN BOOLEAN MODE)</span>
+<span class="quote1">&gt;  WHERE MATCH (Title, Description) AGAINST('+&quot;じゃがいも&quot;' IN BOOLEAN MODE)</span>
 <span class="quote1">&gt;    AND ID IN (SELECT ID FROM Recipe WHERE CategoryA = 4 AND CategorB = 2);</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; MySQL �Υ��ץƥ��ޥ�������Ǥ�����</span>
-<span class="quote1">&gt; ����礻�����Ѥ����ξ���Υ���ǥå��������ѤǤ��ޤ���</span>
-<span class="quote1">&gt; ��MySQL 4.1 �ʾ��</span>
+<span class="quote1">&gt; MySQL のオプティマイザ次第ですが、</span>
+<span class="quote1">&gt; 副問合せを利用すれば両方のインデックスが活用できます。</span>
+<span class="quote1">&gt; （MySQL 4.1 以上）</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ϥ����व��ΰƣ��Τ褦�ˡ�</span>
-<span class="quote1">&gt; �� Category ��ʸ����Ȥ��Ʒ�礷���������ܤ����Ѱդ��ơ�</span>
-<span class="quote1">&gt; ���ι��ܤ˥���ǥå������������Ȥ������ͭ���Ǥ���</span>
-<span class="quote1">&gt; ����礻����ʬ��®���ʤ�Ȼפ��ޤ���</span>
-<span class="quote1">&gt; ���ξ�� FULLTEXT ����ʤ��� INDEX �����Ǥ��͡�</span>
+<span class="quote1">&gt; はしけむさんの案１のように、</span>
+<span class="quote1">&gt; 全 Category を文字列として結合したキー項目を一つ用意して、</span>
+<span class="quote1">&gt; その項目にインデックスを作成するという手も有効です。</span>
+<span class="quote1">&gt; 副問合せの部分が速くなると思います。</span>
+<span class="quote1">&gt; この場合 FULLTEXT じゃなくて INDEX の方ですね。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ޤ�����ʸ�������ȳ����쥳���ɤ�����ʿ��ˤʤ��ǽ�����⤤���ᡢ</span>
-<span class="quote1">&gt; LIMIT ��������Ѥ��Ƽ����쥳���ɿ��ξ�¤����¤���ɬ�פ�����Ǥ��礦��</span>
+<span class="quote1">&gt; また、全文検索だと該当レコードが膨大な数になる可能性が高いため、</span>
+<span class="quote1">&gt; LIMIT 句等を使用して取得レコード数の上限を制限する必要があるでしょう。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ȥꤢ��������ʸ�������̾�θ������ڤ�Υ���ơ��ġ��˸������֤��¬����</span>
-<span class="quote1">&gt; �٤����� SQL �� EXPLAIN ���ǥ����Ȥ򸫤Ĥġ������ϰ���˼��ޤ�褦��</span>
-<span class="quote1">&gt; �ǡ����١����Ķ���ޤ�Ĵ�����Ƥ����Τ��ɤ��ΤǤϤȹͤ��ޤ���</span>
-<span class="quote1">&gt; ���줫��嵭�Τ褦�ʷ��ǣ��Ĥ� SQL ���礷�ƤϤɤ��Ǥ��礦����</span>
+<span class="quote1">&gt; とりあえず、全文検索と通常の検索を切り離して、個々に検索時間を計測し、</span>
+<span class="quote1">&gt; 遅い方の SQL を EXPLAIN 等でコストを見つつ、許容範囲内に収まるよう、</span>
+<span class="quote1">&gt; データベース環境を含め調整していくのが良いのではと考えます。</span>
+<span class="quote1">&gt; それから上記のような形で２つの SQL を結合してはどうでしょうか。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ������δĶ��� senna ��MySQL�Х���ǥ��󥰤�</span>
-<span class="quote1">&gt; ̵����� MySQL 5.0 �����������ΤʤΤǡ��ͥ��ƥ��֤�</span>
-<span class="quote1">&gt; ��ʸ������ǽ�ȷ�̤��ۤʤ��ǽ��������ޤ���:-)</span>
+<span class="quote1">&gt; 尚、私の環境は senna のMySQLバインディングを</span>
+<span class="quote1">&gt; 無理やり MySQL 5.0 へ埋め込んだものなので、ネイティブの</span>
+<span class="quote1">&gt; 全文検索機能と結果が異なる可能性があります。:-)</span>
 
 </pre>
 </div>
-<p class="button"><a href="11705.html">[��]</a><a href="11707.html">[��]</a><a href="../list/11701-11800.html">[�ֹ�����]</a><a href="../thread/11701-11800.html">[����åɰ���]</a></p>
+<p class="button"><a href="11705.html">[前]</a><a href="11707.html">[次]</a><a href="../list/11701-11800.html">[番号順一覧]</a><a href="../thread/11701-11800.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="11693.html">  11693 2005-07-06 16:07 [Kenta Hashimoto &lt;kem] ��ʸ������¾�����Ȥ߹�碌            </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11694.html">  11694 2005-07-07 00:55 ��[UNO Shintaro &lt;uno@xx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11697.html">  11697 2005-07-07 09:58 ��[&quot;T.Sasaki&quot; &lt;papasan2]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="11706.html">  11706 2005-07-07 20:18 ����[Kenta Hashimoto &lt;kem]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11707.html">  11707 2005-07-07 20:47 ������[&quot;T.Sasaki&quot; &lt;papasan2]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11712.html">  11712 2005-07-07 21:39 ��������[Kenta Hashimoto &lt;kem]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11713.html">  11713 2005-07-07 21:58 ����������[&quot;T.Sasaki&quot; &lt;papasan2]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11714.html">  11714 2005-07-07 22:14 ������������[Kenta Hashimoto &lt;kem]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11715.html">  11715 2005-07-07 22:56 ��������������[&quot;T.Sasaki&quot; &lt;papasan2]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11716.html">  11716 2005-07-07 23:10 ����������������[Kenta Hashimoto &lt;kem]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11717.html">  11717 2005-07-07 23:17 ����������������[Kazuhiro Osawa &lt;ko@x]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11719.html">  11719 2005-07-08 00:14 ������������������[Kenta Hashimoto &lt;kem]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11720.html">  11720 2005-07-08 06:25 ������������������[&quot;T.Sasaki&quot; &lt;papasan2]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11734.html">  11734 2005-07-09 13:45 ��������������������[Kazuhiro Osawa &lt;ko@x]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11735.html">  11735 2005-07-09 20:31 ����������������������[&quot;T.Sasaki&quot; &lt;papasan2]                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11736.html">  11736 2005-07-12 15:33 ����������������������[&quot;Naoi Masaaki&quot; &lt;naoi] MySQL�Ǥκ�����ܿ��ˤĤ��ޤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11737.html">  11737 2005-07-12 16:33 ������������������������[Tetsuro IKEDA &lt;ikdtt]                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11739.html">  11739 2005-07-12 17:42 ��������������������������[&quot;Naoi Masaaki&quot; &lt;naoi]               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11738.html">  11738 2005-07-12 17:10 ������������������������[Hiroshi Moriyama &lt;mt]                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11740.html">  11740 2005-07-12 17:47 ��������������������������[&quot;Naoi Masaaki&quot; &lt;naoi]               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="11742.html">  11742 2005-07-13 20:08 ��������������������������[&quot;T.Sasaki&quot; &lt;papasan2]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11693.html">  11693 2005-07-06 16:07 [Kenta Hashimoto &lt;kem] 全文検索と他条件の組み合わせ            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11694.html">  11694 2005-07-07 00:55 ┣[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11697.html">  11697 2005-07-07 09:58 ┗[&quot;T.Sasaki&quot; &lt;papasan2]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="11706.html">  11706 2005-07-07 20:18 　┗[Kenta Hashimoto &lt;kem]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11707.html">  11707 2005-07-07 20:47 　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11712.html">  11712 2005-07-07 21:39 　　　┗[Kenta Hashimoto &lt;kem]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11713.html">  11713 2005-07-07 21:58 　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11714.html">  11714 2005-07-07 22:14 　　　　　┗[Kenta Hashimoto &lt;kem]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11715.html">  11715 2005-07-07 22:56 　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11716.html">  11716 2005-07-07 23:10 　　　　　　　┣[Kenta Hashimoto &lt;kem]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11717.html">  11717 2005-07-07 23:17 　　　　　　　┗[Kazuhiro Osawa &lt;ko@x]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11719.html">  11719 2005-07-08 00:14 　　　　　　　　┣[Kenta Hashimoto &lt;kem]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11720.html">  11720 2005-07-08 06:25 　　　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11734.html">  11734 2005-07-09 13:45 　　　　　　　　　┗[Kazuhiro Osawa &lt;ko@x]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11735.html">  11735 2005-07-09 20:31 　　　　　　　　　　┣[&quot;T.Sasaki&quot; &lt;papasan2]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11736.html">  11736 2005-07-12 15:33 　　　　　　　　　　┗[&quot;Naoi Masaaki&quot; &lt;naoi] MySQLでの最大項目数につきまして</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11737.html">  11737 2005-07-12 16:33 　　　　　　　　　　　┣[Tetsuro IKEDA &lt;ikdtt]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11739.html">  11739 2005-07-12 17:42 　　　　　　　　　　　┃┗[&quot;Naoi Masaaki&quot; &lt;naoi]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11738.html">  11738 2005-07-12 17:10 　　　　　　　　　　　┗[Hiroshi Moriyama &lt;mt]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11740.html">  11740 2005-07-12 17:47 　　　　　　　　　　　　┣[&quot;Naoi Masaaki&quot; &lt;naoi]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11742.html">  11742 2005-07-13 20:08 　　　　　　　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]               </a></span>
 </pre>
 </body>
 </html>

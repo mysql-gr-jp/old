@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="8666.html">[��]</a><a href="8668.html">[��]</a><a href="../list/8601-8700.html">[�ֹ�����]</a><a href="../thread/8601-8700.html">[����åɰ���]</a></p>
+<p class="button"><a href="8666.html">[前]</a><a href="8668.html">[次]</a><a href="../list/8601-8700.html">[番号順一覧]</a><a href="../thread/8601-8700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:8667
 </p>
@@ -13,24 +13,24 @@ mysql:8667
 <p>
 From: ML account &lt;ML account &lt;ml@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 28 Jan 2004 02:58:30 +0900<br>
-Subject: [mysql 08667] Re: ʣ���ե�����ɤ��Ф������ٽ���<br>
+Subject: [mysql 08667] Re: 複数フィールドに対する頻度集計<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-������ˤ��ϡ�
+　こんにちは。
 
-Kenichi-Ashida &lt;ashiken@xxxxxxxxxx&gt;�����
+Kenichi-Ashida &lt;ashiken@xxxxxxxxxx&gt;さんの
 &lt;200401271528.HID37607.LBJFIOT@xxxxxxxxxx&gt;
-&quot;<a href="08662.html">[mysql 08662]</a> ʣ���ե�����ɤ��Ф������ٽ���&quot;
+&quot;<a href="08662.html">[mysql 08662]</a> 複数フィールドに対する頻度集計&quot;
 
 
-<span class="quote1">&gt; ��������MySQL�鿴�ԤǤ�</span>
-<span class="quote1">&gt; ����ä�Ǻ��Ǥ��ޤ���</span>
+<span class="quote1">&gt; あしだ＠MySQL初心者です</span>
+<span class="quote1">&gt; ちょっと悩んでいます。</span>
 
-���ӥ塼�䥵�֥����꤬�Ȥ���С����ޡ��Ȥ��ɤ������̤ˤ��Ƥ��ñ�ʤΤǤ�
-���ɤ͡�
+　ビューやサブクエリが使えれば、スマートかどうかは別にしても簡単なのです
+けどね。
 
     CREATE TABLE table1 (
         id INT NOT NULL PRIMARY KEY,
@@ -39,8 +39,8 @@ Kenichi-Ashida &lt;ashiken@xxxxxxxxxx&gt;�����
         Field3 varchar(20)
     );
 
-���ͤʥơ��֥빽¤�ʤ顢���٥ƥ�ݥ��ơ��֥�˽Ф��Ƥ��齸�פ�����ˡ��
-���Ū��ñ�Ǥ���3.23�Ǥ�UNION���Ȥ��ʤ��Ȼפ��ޤ��Τǡ��٥�����ˡ�ǡ�
+の様なテーブル構造なら、一度テンポラリテーブルに出してから集計する方法が
+比較的簡単です。3.23ではUNION操作が使えないと思いますので、ベタな方法で。
 
     CREATE TABLE tmp000 (FldData varchar(20));
     
@@ -54,7 +54,7 @@ Kenichi-Ashida &lt;ashiken@xxxxxxxxxx&gt;�����
     WHERE FldData IS NOT NULL GROUP BY FldData 
     ORDER BY cnt DESC;
     
-���뤤�ϡ�
+あるいは、
 
     CREATE TABLE tmp000 (FldData varchar(20),cnt INT);
 
@@ -76,7 +76,7 @@ Kenichi-Ashida &lt;ashiken@xxxxxxxxxx&gt;�����
 
 
 
-��<a href="08565.html">[mysql 08565]</a>�Ǥ�Ҥ٤����ơ��֥�����������θ��������ƤǤ��礦��
+　<a href="08565.html">[mysql 08565]</a>でも述べた、テーブルの正規化を考慮する事も一案でしょう。
 
     CREATE TABLE table1 (id INT NOT NULL PRIMARY KEY);
     CREATE TABLE table1s (
@@ -85,12 +85,12 @@ Kenichi-Ashida &lt;ashiken@xxxxxxxxxx&gt;�����
         coldata VARCHAR(20)
     );
 
-�ʥơ��֥뤬���ä���硢
+なテーブルがあった場合、
 
 <span class="quote1">&gt; &lt;Table1&gt;</span>
 <span class="quote1">&gt; [ID] [Field1] [Field2] [Field3]</span>
 
-��ɽ�����륯����ϡ�
+の表を得るクエリは、
 
     SELECT table1.id AS ID, T1.coldata AS Field1, T2.coldata AS Field2, 
         T3.coldata AS Field3
@@ -100,7 +100,7 @@ Kenichi-Ashida &lt;ashiken@xxxxxxxxxx&gt;�����
     WHERE T1.colpos=1 AND T2.colpos=2 AND T3.colpos=3
     ORDER BY table1.id;
 
-�Ȥʤꡢ�ִ�˾���뽸�׷�̡פ����륯����ϡ�
+となり、「希望する集計結果」を得るクエリは、
 
     SELECT table1s.coldata, count(*) AS cnt
     FROM table1s,table1
@@ -108,32 +108,32 @@ Kenichi-Ashida &lt;ashiken@xxxxxxxxxx&gt;�����
     GROUP BY table1s.coldata
     ORDER BY cnt DESC
 
-���ͤʴ����ˤʤ�ޤ���
+の様な感じになります。
 
-��ɽ�����륯����Ƚ��פ����륯����ǡ��ɤ��餬�������٤�¿���Τ����ɤ���
-��������¹Ԥλ���Ū�����󤬤��Ĥ��Τ��ǡ�����������������ˡ�������ʤΤ���
-����Ȥ�ǽ�˽Ҥ٤��٥��ʥơ��֥�Ǥ�����������ʤΤ����Ѥ�ä����Ǥ�
-�礦��
+　表を得るクエリと集計を得るクエリで、どちらが使用頻度が多いのか、どちら
+がクエリ実行の時間的な制約がきついのかで、この正規化した方法が妥当なのか、
+それとも最初に述べたベタなテーブルでやる方が妥当なのかは変わって来るでし
+ょう。
 
-�ޤ�������������ˡ�Ǥϡ��ǡ�������/�ѹ����˰�������ݾڤ������(�ơ��֥�
-�Υ��å��ޤ��ϥȥ�󥶥������)��ɬ�פȤʤ���⤢��Ǥ��礦��
-
-
+また正規化した方法では、データ挿入/変更時に一貫性を保証する手段(テーブル
+のロックまたはトランザクション)が必要となる場合もあるでしょう。
 
 
-��������������ľ��������&lt;tomom@xxxxxxxxxx&gt;
-������������������������<a href="http://www.argus.ne.jp/~tomom/">http://www.argus.ne.jp/~tomom/</a>
+
+
+　　　　松枝知直　　　　&lt;tomom@xxxxxxxxxx&gt;
+　　　　　　　　　　　　<a href="http://www.argus.ne.jp/~tomom/">http://www.argus.ne.jp/~tomom/</a>
 
 
 
 </pre>
 </div>
-<p class="button"><a href="8666.html">[��]</a><a href="8668.html">[��]</a><a href="../list/8601-8700.html">[�ֹ�����]</a><a href="../thread/8601-8700.html">[����åɰ���]</a></p>
+<p class="button"><a href="8666.html">[前]</a><a href="8668.html">[次]</a><a href="../list/8601-8700.html">[番号順一覧]</a><a href="../thread/8601-8700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="8662.html">   8662 2004-01-27 15:28 [Kenichi-Ashida &lt;ashi] ʣ���ե�����ɤ��Ф������ٽ���          </a></span>
-<span class="current">-&gt;&nbsp;<a href="8667.html">   8667 2004-01-28 02:58 ��[ML account &lt;ml@xxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8668.html">   8668 2004-01-28 11:21 ����[Kenichi-Ashida &lt;ashi]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8669.html">   8669 2004-01-28 15:29 ������[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8662.html">   8662 2004-01-27 15:28 [Kenichi-Ashida &lt;ashi] 複数フィールドに対する頻度集計          </a></span>
+<span class="current">-&gt;&nbsp;<a href="8667.html">   8667 2004-01-28 02:58 ┗[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8668.html">   8668 2004-01-28 11:21 　┗[Kenichi-Ashida &lt;ashi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8669.html">   8669 2004-01-28 15:29 　　┗[ML account &lt;ml@xxxxx]                                   </a></span>
 </pre>
 </body>
 </html>

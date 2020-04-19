@@ -1,30 +1,30 @@
 <HTML>
 <HEAD>
 <META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html;CHARSET=x-ujis">
-<TITLE>���󥱡��ȥ����� -���ײ���-</TITLE>
+<TITLE>アンケートサイト -集計画面-</TITLE>
 </HEAD>
 
 <BODY BGCOLOR="#FFFFFF">
 
 <?
 	/********************************************************/
-	/* WEB�ǡ����١������� - PHP������ץ�                  */
-	/* ���󥱡��Ȥ򽸷פ���                                 */
+	/* WEBデータベース入門 - PHPスクリプト                  */
+	/* アンケートを集計する                                 */
 	
 	/********************/
-	/* ��Ͽ����         */
+	/* 登録総数         */
 	$result = mysql_db_query("questions", "select id from www_db");
 	$whole = mysql_numrows($result);
 
 	/********************/
-	/* ����             */
+	/* 性別             */
 	$result = mysql_db_query("questions", "select id from www_db where sex=1");
 	$male_count = mysql_numrows($result);
 	$result = mysql_db_query("questions", "select id from www_db where sex=2");
 	$female_count = mysql_numrows($result);
 
 	/********************/
-	/* ������           */
+	/* 職業別           */
 	$i = 0;
 	while( $i <= 5 ) {
 		$result = mysql_db_query("questions", "select id from www_db where ocupation=$i");
@@ -33,18 +33,18 @@
 	}
 
 	/********************/
-	/* ǯ����           */
+	/* 年齢別           */
 	for( $i=10; $i<=50; $i+=10 ) {
 		$result = mysql_db_query("questions","select id from www_db where how_old=$i");
 		$count = mysql_numrows($result);
 		for($n=0; $n<$count; $n+=2) {
-			$how_old_count[$i] = $how_old_count[$i] . "��";
+			$how_old_count[$i] = $how_old_count[$i] . "■";
 		}
 		$how_old_count[$i] = $how_old_count[$i] . "($count)";
 	}
 
 	/********************/
-	/* ������           */
+	/* 項目別           */
 	$result = mysql_db_query("questions",
 		"select avg(sample),avg(phpfi),avg(rdbms),avg(whole) from www_db" );
 	$avgs = mysql_fetch_array($result);
@@ -53,46 +53,46 @@
 
 <CENTER>
 <IMG SRC="gif/board.gif">
-<FONT SIZE=+2><B>���󥱡��Ƚ��ײ���</B></FONT>
+<FONT SIZE=+2><B>アンケート集計画面</B></FONT>
 <IMG SRC="gif/board.gif">
 </CENTER><P>
 
-���عⵡǽ���󥱡��ȥ����ȡ٤Υ��󥱡��Ȥν��׷�̤Ǥ���<P>
+　『高機能アンケートサイト』のアンケートの集計結果です。<P>
 
-������<BR>
-��<? echo $whole ?>��<BR>
+■総数<BR>
+　<? echo $whole ?>人<BR>
 <BR>
-������<BR>
-���ˡ�<? echo $male_count ?>������<? echo $female_count ?><BR>
+■性別<BR>
+　男：<? echo $male_count ?>　女：<? echo $female_count ?><BR>
 <BR>
-��������<BR>
+■職業別<BR>
 <TABLE BORDER=1>
-<TR BGCOLOR="EEEEEE"><TD>����</TD><TD>�Ϳ�</TD></TR>
-<TR><TD>����</TD><TD><? echo $ocupation_count[1] ?></TD></TR>
-<TR><TD>�ץ�����ޡ�</TD><TD><? echo $ocupation_count[2] ?></TD></TR>
-<TR><TD>�ͥåȥ�����󥸥˥�</TD><TD><? echo $ocupation_count[3] ?></TD></TR>
-<TR><TD>���ץꥱ������󥨥󥸥˥�</TD><TD><? echo $ocupation_count[4] ?></TD></TR>
-<TR><TD>�����ƥॢ�ʥꥹ��</TD><TD><? echo $ocupation_count[5] ?></TD></TR>
+<TR BGCOLOR="EEEEEE"><TD>職業</TD><TD>人数</TD></TR>
+<TR><TD>学生</TD><TD><? echo $ocupation_count[1] ?></TD></TR>
+<TR><TD>プログラマー</TD><TD><? echo $ocupation_count[2] ?></TD></TR>
+<TR><TD>ネットワークエンジニア</TD><TD><? echo $ocupation_count[3] ?></TD></TR>
+<TR><TD>アプリケーションエンジニア</TD><TD><? echo $ocupation_count[4] ?></TD></TR>
+<TR><TD>システムアナリスト</TD><TD><? echo $ocupation_count[5] ?></TD></TR>
 </TABLE><BR>
-��ǯ����<BR>
+■年齢別<BR>
 <TABLE>
-<TR><TD>10����</TD><TD><? echo $how_old_count[10] ?></TD></TR>
-<TR><TD>20����</TD><TD><? echo $how_old_count[20] ?></TD></TR>
-<TR><TD>30����</TD><TD><? echo $how_old_count[30] ?></TD></TR>
-<TR><TD>40����</TD><TD><? echo $how_old_count[40] ?></TD></TR>
-<TR><TD>50�аʾ�</TD><TD><? echo $how_old_count[50] ?></TD></TR>
+<TR><TD>10歳台</TD><TD><? echo $how_old_count[10] ?></TD></TR>
+<TR><TD>20歳台</TD><TD><? echo $how_old_count[20] ?></TD></TR>
+<TR><TD>30歳台</TD><TD><? echo $how_old_count[30] ?></TD></TR>
+<TR><TD>40歳台</TD><TD><? echo $how_old_count[40] ?></TD></TR>
+<TR><TD>50歳以上</TD><TD><? echo $how_old_count[50] ?></TD></TR>
 </TABLE><BR>
-��������ʿ��
+■項目別平均
 <TABLE BORDER=1>
-<TR BGCOLOR=EEEEEE><TD>����</TD><TD>ʿ��</TD></TR>
-<TR><TD>����ץ����</TD><TD><? echo $avgs["avg(sample)"] ?></TD></TR>
-<TR><TD>PHP/FI����</TD><TD><? echo $avgs["avg(phpfi)"] ?></TD></TR>
-<TR><TD>RDBMS����</TD><TD><? echo $avgs["avg(rdbms)"] ?></TD></TR>
-<TR><TD>����</TD><TD><? echo $avgs["avg(whole)"] ?></TD></TR>
+<TR BGCOLOR=EEEEEE><TD>項目</TD><TD>平均</TD></TR>
+<TR><TD>サンプル解説</TD><TD><? echo $avgs["avg(sample)"] ?></TD></TR>
+<TR><TD>PHP/FI解説</TD><TD><? echo $avgs["avg(phpfi)"] ?></TD></TR>
+<TR><TD>RDBMS解説</TD><TD><? echo $avgs["avg(rdbms)"] ?></TD></TR>
+<TR><TD>全体</TD><TD><? echo $avgs["avg(whole)"] ?></TD></TR>
 </TABLE><BR>
 <HR>
 <FONT SIZE=-1><I>
-���ʤ����Υڡ����ϡ�WWW�ǡ����١���������ѤΥ���ץ�ڡ����Ѥ˺�������ޤ�����<BR>
+　なおこのページは『WWWデータベース入門』用のサンプルページ用に作成されました。<BR>
 Copyright (C) Yoshimasa Takami, 1998<BR>
 </I></FONT>
 

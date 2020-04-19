@@ -5,46 +5,46 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="4211.html">[��]</a><a href="4213.html">[��]</a><a href="../list/4201-4300.html">[�ֹ�����]</a><a href="../thread/4201-4300.html">[����åɰ���]</a></p>
+<p class="button"><a href="4211.html">[前]</a><a href="4213.html">[次]</a><a href="../list/4201-4300.html">[番号順一覧]</a><a href="../thread/4201-4300.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:4212
 </p>
 <div class="header">
 <p>
-From: (��ƣ ��͵) &lt;&lt;endo_t@xxxxxxxxxx&gt;&gt;<br>
+From: (遠藤 俊裕) &lt;&lt;endo_t@xxxxxxxxxx&gt;&gt;<br>
 Date: Sun, 26 Aug 2001 20:41:36 +0900<br>
-Subject: [mysql 04212] Re: cron ���� myisamchk ��¹Ԥ���ȥ᡼�뤬��ʤ�<br>
+Subject: [mysql 04212] Re: cron から myisamchk を実行するとメールが来ない<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��ƣ�Ǥ���
+遠藤です。
 
-takeshi@xxxxxxxxxx ����Ͻ񤭤ޤ���:
-<span class="quote1">&gt;����ʳ��Υץ�����(sh script �ˤ�����Ƥ���)���ĤäƤ���Ϥ��Ǥ���</span>
+takeshi@xxxxxxxxxx さんは書きました:
+<span class="quote1">&gt;それ以外のプロセス(sh script にかかれている)が残っているはずです。</span>
 
-������^^; ����ϳ�ǧ�ѤߤǤ����ĤäƤ��ޤ���
-�������ԲĲ�ʤΤǤ���
-����� mysqladmin shutdown ���̥��å����Ǽ¹Ԥ��Ƥ�ˤ�ؤ�
-�餺�᡼�뤬���ΤǤ���^^;
+う～ん^^; それは確認済みです。残っていません。
+だから不可解なのです。
+それも mysqladmin shutdown を別セッションで実行してるにも関わ
+らずメールが来るのです。^^;
 
-��cron �����Ҥ� script ���¹Ԥ���롣
-��sh ���Ȥϵ�ư��λ���Ƥ��롣
-��sendmail �Υץ��������ԤäƤ��롣
-��terminal ��ư����mysqladmin shutdown ��¹Ԥ���� sendmail
-���Υץ��������ץ������ꥹ�Ȥ���ä��� cron ����Υ᡼�뤬��롣
+・cron で前述の script が実行される。
+・sh 自身は起動終了している。
+・sendmail のプロセスが待っている。
+・terminal を起動し、mysqladmin shutdown を実行すると sendmail
+　のプロセスがプロセスリストから消えて cron からのメールが来る。
 
-<span class="quote1">&gt;��Ρ�--with-mit-pthread �Τ������⤷��ޤ���</span>
+<span class="quote1">&gt;先の、--with-mit-pthread のせいかもしれません。</span>
 
-���Υ��ץ�����̵���ʤäƤ��ޤ���
-�Ȥ�������--with-mit-pthread=no �ˤ��� configure �򤷤ʤ������ܡ�^^;
+このオプションは無くなっています。
+というか、--with-mit-pthread=no にして configure をしないと駄目？^^;
 
-<span class="quote1">&gt;�����餯�����Υ�����Ϥޤ���λ���Ƥ��ʤ��ơ�sendmail�ؤΥѥ��פ��Ĥ����</span>
-<span class="quote1">&gt;�Ƥ��ʤ��ΤǤ��礦��</span>
+<span class="quote1">&gt;おそらく、このシェルはまだ終了していなくて、sendmailへのパイプが閉じられ</span>
+<span class="quote1">&gt;ていないのでしょう。</span>
 
-shell �Ϥ�äѤ꽪λ���Ƥ��ޤ���
-¾�� mysql ����ߤΥץ������ⵯư���Ƥ��ޤ���
+shell はやっぱり終了しています。
+他に mysql がらみのプロセスも起動していません。
 
 testDB# ps axw | grep send
  9540  ??  Is     0:00.07 /usr/sbin/sendmail -FCronDaemon -odi -oem -oi -t
@@ -63,31 +63,31 @@ testDB# ps axw | grep my
 10861  p0  S      0:00.10 /usr/local/libexec/mysqld --basedir=/usr/local \
 --datadir=/usr/local/var --user=root --pid-file=/usr/local
 
-����ʴ����Ǥ���
-���� shutdown ��� cron ����᡼�뤬��ޤ���
+こんな感じです。
+この shutdown 後に cron からメールが来ます。
 
-<span class="quote1">&gt;���뤤�Ϥ�ä�ñ����äǡ�</span>
-<span class="quote1">&gt;mysqladmin shutdown �� -p ���Ĥ��Ƥ��ơ������Ԥ����ä���...</span>
+<span class="quote1">&gt;あるいはもっと単純な話で、</span>
+<span class="quote1">&gt;mysqladmin shutdown に -p がついていて、入力待ちだったり...</span>
 
-���Ȥ���ȡ�myisamchk ���¹Ԥ���ʤ��褦�ʵ�������ΤǤ���������
-cron ����Υ᡼��Ǥϼ¹Ԥ���Ƥ���褦�Ǥ���
-����ϡ���Υ᡼��Υ������̤�Ǥ���
+だとすると、myisamchk が実行されないような気がするのですが。。。
+cron からのメールでは実行されているようです。
+これは、先のメールのログの通りです。
 
-��� -p �� root ��ư�����Ƥߤޤ��礦����
-�����ѥ���ɤ�̵���䡣�ʾС�
+試しに -p で root で動かしてみましょうか。
+あ、パスワードは無いや。（笑）
 
-�äƤ��������������Ĥ������ɡ�root ���¤�ư���Ƥ�ʤ���^^;
-�ޤ����䡣������
+っていうか、今気がついたけど、root 権限で動いてるなぁ。^^;
+まずいや。（爆）
 
 </pre>
 </div>
-<p class="button"><a href="4211.html">[��]</a><a href="4213.html">[��]</a><a href="../list/4201-4300.html">[�ֹ�����]</a><a href="../thread/4201-4300.html">[����åɰ���]</a></p>
+<p class="button"><a href="4211.html">[前]</a><a href="4213.html">[次]</a><a href="../list/4201-4300.html">[番号順一覧]</a><a href="../thread/4201-4300.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="4204.html">   4204 2001-08-26 13:00 [&lt;endo_t@xxxxxxxxxx&gt; ] cron ���� myisamchk ��¹Ԥ���ȥ᡼�뤬��ʤ�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="4210.html">   4210 2001-08-26 19:13 ��[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="4212.html">   4212 2001-08-26 20:41 ����[&lt;endo_t@xxxxxxxxxx&gt; ]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="4214.html">   4214 2001-08-26 20:52 ��[Yasuhiro Hayase &lt;hay]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="4219.html">   4219 2001-08-26 22:04 ����[&lt;endo_t@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4204.html">   4204 2001-08-26 13:00 [&lt;endo_t@xxxxxxxxxx&gt; ] cron から myisamchk を実行するとメールが来ない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4210.html">   4210 2001-08-26 19:13 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="4212.html">   4212 2001-08-26 20:41 ┃┗[&lt;endo_t@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4214.html">   4214 2001-08-26 20:52 ┗[Yasuhiro Hayase &lt;hay]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4219.html">   4219 2001-08-26 22:04 　┗[&lt;endo_t@xxxxxxxxxx&gt; ]                                     </a></span>
 </pre>
 </body>
 </html>

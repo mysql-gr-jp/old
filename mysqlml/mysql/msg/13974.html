@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13973.html">[��]</a><a href="13975.html">[��]</a><a href="../list/13901-14000.html">[�ֹ�����]</a><a href="../thread/13901-14000.html">[����åɰ���]</a></p>
+<p class="button"><a href="13973.html">[前]</a><a href="13975.html">[次]</a><a href="../list/13901-14000.html">[番号順一覧]</a><a href="../thread/13901-14000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13974
 </p>
@@ -13,97 +13,97 @@ mysql:13974
 <p>
 From: Hiroki Tamakoshi &lt;Hiroki Tamakoshi &lt;hiroki.tamakoshi@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 22 May 2007 14:54:17 +0900<br>
-Subject: [mysql 13974] Re: ��®�ʥǡ����ν񤭹�����ˡ<br>
+Subject: [mysql 13974] Re: 高速なデータの書き込み方法<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�̱ۤǤ���
+玉越です。
 
 On Tue, 22 May 2007 11:46:26 +0900
 HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt; wrote:
 
-<span class="quote1">&gt; ʿ�ͤǤ���</span>
+<span class="quote1">&gt; 平塚です。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; On Mon, 21 May 2007 10:26:30 +0900</span>
 <span class="quote1">&gt; Hiroki Tamakoshi &lt;hiroki.tamakoshi@xxxxxxxxxx&gt; wrote:</span>
 <span class="quote1">&gt; </span>
-<span class="quote3">&gt; &gt; &gt; I/O�⾯���ϽФƤ��ޤ�����������δĶ��ǤϤۤ�CPU�ͥå��Ǥ���</span>
+<span class="quote3">&gt; &gt; &gt; I/Oも少しは出ていますが、こちらの環境ではほぼCPUネックです。</span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; �Ȥ�����������ʬ���꤫�ͤޤ���������Ͻ񤭹��ߤλ��֤ǤϤʤ�CPU��������</span>
-<span class="quote2">&gt; &gt; �κ��Ǥ��礦����</span>
+<span class="quote2">&gt; &gt; という点が少し分かりかねますが、これは書き込みの時間ではなくCPU処理時間</span>
+<span class="quote2">&gt; &gt; の差でしょうか？</span>
 <span class="quote2">&gt; &gt; </span>
-<span class="quote2">&gt; &gt; ������Ǥϡ��񤭹��߻��֤��ؤɤ����Ƥ��ޤ���</span>
+<span class="quote2">&gt; &gt; こちらでは、書き込み時間が殆どを占めています。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; usr 99%��sys 1%��wait 0%��idle 0%�Ȥ���������I/O���֤ϤۤȤ�ɤʤ��Ǥ���</span>
-<span class="quote1">&gt; ������������Υƥ��ȥǡ����Ͽ���MB�Ⱦ����������⤢��Ȼפ��ޤ���</span>
+<span class="quote1">&gt; usr 99%、sys 1%、wait 0%、idle 0%という感じでI/O時間はほとんどないです。</span>
+<span class="quote1">&gt; ただ、こちらのテストデータは数十MBと小さいせいもあると思います。</span>
 
-������Ǥ����̾���֤�wait�������󡢥ǡ�����쵤�˽񤭹���Ȥ�äȾ徺��
-�ޤ���
-��load average��7�ʤɤˤʤ�ޤ���
+こちらですと通常状態でwaitが数十％、データを一気に書き込むともっと上昇し
+ます。
+（load averageが7などになります）
 
-<span class="quote1">&gt; ��ON DUPLICATE KEY��O(n^2)�ǻ��֤���������</span>
-<span class="quote1">&gt; �����ȥ졼����write through�ˤʤäƤ�������RAID 5����</span>
+<span class="quote1">&gt; ・ON DUPLICATE KEYがO(n^2)で時間がかかる点</span>
+<span class="quote1">&gt; ・ストレージがwrite throughになっていた点＆RAID 5な点</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; write back����å���ǲ�褹��Ȥ褤�ΤǤ�����</span>
-<span class="quote1">&gt; ¾�ˤ⸶��������Τ��⤷��ʤ��Ǥ��͡�</span>
+<span class="quote1">&gt; write backキャッシュで解決するとよいのですが、</span>
+<span class="quote1">&gt; 他にも原因があるのかもしれないですね。</span>
 
-write back����å���Τ������Ǿ�������®���ʤä��褦�Ǥ���
-���ȹͤ�����Τϡ�index�κƹ��ۤ˻��֤��ݤ��äƤ���ΤǤϤʤ����ȹͤ�
-�Ƥ��ޤ���
+write backキャッシュのおかげで少しだけ速くなったようです。
+あと考えられるのは、indexの再構築に時間が掛かっているのではないかと考え
+ています。
 
-�ơ��֥�Υ��������礭����Τ�15GB�ˤʤäƤ��ơ�Ⱦʬ��index�Ǥ���
-�ޥ������।��ǥå�����ȤäƤ���ΤǤ����������ǥ��ʥ�ƥ����礭����
-��äƤϥޥ������।��ǥå�������Ȥ��Υ����ν��֤˵����դ�������
-�褤�Ȥɤ����˽񤤤Ƥ���ޤ�����
+テーブルのサイズは大きいもので15GBになっていて、半分がindexです。
+マルチカラムインデックスを使っているのですが、カーディナリティの大きさに
+よってはマルチカラムインデックスを作るときのカラムの順番に気を付ける方が
+よいとどこかに書いてありました。
 
-�������ä����Ȥ�ط�����Ǥ��礦����
+そういったことも関係するでしょうか？
 
 
 --
-������ҥӡ��ӥåȡ��̱� �統
-�桼���ӥ�ƥ� ���󥵥륿���
+株式会社ビービット　玉越 大輝
+ユーザビリティ コンサルタント
 beBit,Inc. Tamakoshi Hiroki hiroki.tamakoshi@xxxxxxxxxx
 --------------------------------------------------------
-��105-0001 ����Թ���ץ���1-18-1 �ץ���10���ӥ�7F
+〒105-0001 東京都港区虎ノ門1-18-1 虎ノ門10森ビル7F
 TEL: 03-3509-7602 / FAX: 03-3509-7605
 URL: <a href="http://www.bebit.co.jp/">http://www.bebit.co.jp/</a>
 --------------------------------------------------------
-���������Τ餻������
-���ӡ��ӥåȿ������� �إ桼���濴�����֥�������ά��ȯ��
+◆◆◆お知らせ◆◆◆
+・ビービット新刊書籍 『ユーザ中心ウェブサイト戦略』発売
   <a href="http://www.bebit.co.jp/news/2006/book.html">http://www.bebit.co.jp/news/2006/book.html</a>
   <a href="http://www.amazon.co.jp/gp/product/4797333529/">http://www.amazon.co.jp/gp/product/4797333529/</a>
 
 
 </pre>
 </div>
-<p class="button"><a href="13973.html">[��]</a><a href="13975.html">[��]</a><a href="../list/13901-14000.html">[�ֹ�����]</a><a href="../thread/13901-14000.html">[����åɰ���]</a></p>
+<p class="button"><a href="13973.html">[前]</a><a href="13975.html">[次]</a><a href="../list/13901-14000.html">[番号順一覧]</a><a href="../thread/13901-14000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="13957.html">  13957 2007-05-17 21:01 [Hiroki Tamakoshi &lt;hi] ��®�ʥǡ����ν񤭹�����ˡ              </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13958.html">  13958 2007-05-17 23:20 ��[&quot;Yoshio Kawano&quot; &lt;kaw]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13959.html">  13959 2007-05-18 13:02 ����[Hiroki Tamakoshi &lt;hi]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13960.html">  13960 2007-05-18 13:33 ������[HIRATSUKA Sadao &lt;hir]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13971.html">  13971 2007-05-21 10:26 ��������[Hiroki Tamakoshi &lt;hi]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13973.html">  13973 2007-05-22 11:46 ����������[HIRATSUKA Sadao &lt;hir]                               </a></span>
-<span class="current">-&gt;&nbsp;<a href="13974.html">  13974 2007-05-22 14:54 ������������[Hiroki Tamakoshi &lt;hi]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14007.html">  14007 2007-05-25 11:08 ��������������[Hiroki Tamakoshi &lt;hi]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14008.html">  14008 2007-05-25 11:15 ����������������[&lt;ml@xxxxxxxxxx&gt;     ]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14009.html">  14009 2007-05-25 11:33 ������������������[Hiroki Tamakoshi &lt;hi]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14010.html">  14010 2007-05-25 14:10 ��������������������[&quot;���ܷ���&quot; &lt;kem@xxxx]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14022.html">  14022 2007-05-28 00:51 ����������������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14023.html">  14023 2007-05-28 12:17 ������������������[Hiroki Tamakoshi &lt;hi]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14024.html">  14024 2007-05-28 14:48 ��������������������[&quot;KIMURA, Meiji&quot; &lt;kim]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13961.html">  13961 2007-05-19 00:13 ������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13962.html">  13962 2007-05-19 11:05 ��������[��� ���� &lt;hide_s@xx] �ǡ����١�����RAID5���֤�       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13963.html">  13963 2007-05-19 12:13 ����������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13964.html">  13964 2007-05-19 12:41 ������������[��� ���� &lt;hide_s@xx]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13965.html">  13965 2007-05-19 13:15 ����������[kurokawa &lt;ml@xxxxxxx]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13966.html">  13966 2007-05-19 13:57 ������������[�ҤǤ��� &lt;hide_s@xxx]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13967.html">  13967 2007-05-19 14:14 ��������������[N.Toge &lt;toge@xxxxxxx]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13968.html">  13968 2007-05-19 15:10 ����������������[�ҤǤ��� &lt;hide_s@xxx]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13969.html">  13969 2007-05-20 06:58 ����������[Kenji Irie &lt;kenji@xx]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13970.html">  13970 2007-05-20 09:31 ������������[�ҤǤ��� &lt;hide_s@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13957.html">  13957 2007-05-17 21:01 [Hiroki Tamakoshi &lt;hi] 高速なデータの書き込み方法              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13958.html">  13958 2007-05-17 23:20 ┗[&quot;Yoshio Kawano&quot; &lt;kaw]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13959.html">  13959 2007-05-18 13:02 　┗[Hiroki Tamakoshi &lt;hi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13960.html">  13960 2007-05-18 13:33 　　┣[HIRATSUKA Sadao &lt;hir]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13971.html">  13971 2007-05-21 10:26 　　┃┗[Hiroki Tamakoshi &lt;hi]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13973.html">  13973 2007-05-22 11:46 　　┃　┗[HIRATSUKA Sadao &lt;hir]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="13974.html">  13974 2007-05-22 14:54 　　┃　　┗[Hiroki Tamakoshi &lt;hi]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14007.html">  14007 2007-05-25 11:08 　　┃　　　┗[Hiroki Tamakoshi &lt;hi]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14008.html">  14008 2007-05-25 11:15 　　┃　　　　┣[&lt;ml@xxxxxxxxxx&gt;     ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14009.html">  14009 2007-05-25 11:33 　　┃　　　　┃┗[Hiroki Tamakoshi &lt;hi]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14010.html">  14010 2007-05-25 14:10 　　┃　　　　┃　┗[&quot;橋本健太&quot; &lt;kem@xxxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14022.html">  14022 2007-05-28 00:51 　　┃　　　　┗[とみたまさひろ &lt;tomm]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14023.html">  14023 2007-05-28 12:17 　　┃　　　　　┗[Hiroki Tamakoshi &lt;hi]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14024.html">  14024 2007-05-28 14:48 　　┃　　　　　　┗[&quot;KIMURA, Meiji&quot; &lt;kim]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13961.html">  13961 2007-05-19 00:13 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13962.html">  13962 2007-05-19 11:05 　　　┗[坂井 英夫 &lt;hide_s@xx] データベースをRAID5に置く       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13963.html">  13963 2007-05-19 12:13 　　　　┣[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13964.html">  13964 2007-05-19 12:41 　　　　┃┗[坂井 英夫 &lt;hide_s@xx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13965.html">  13965 2007-05-19 13:15 　　　　┣[kurokawa &lt;ml@xxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13966.html">  13966 2007-05-19 13:57 　　　　┃┗[ひでさん &lt;hide_s@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13967.html">  13967 2007-05-19 14:14 　　　　┃　┗[N.Toge &lt;toge@xxxxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13968.html">  13968 2007-05-19 15:10 　　　　┃　　┗[ひでさん &lt;hide_s@xxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13969.html">  13969 2007-05-20 06:58 　　　　┗[Kenji Irie &lt;kenji@xx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13970.html">  13970 2007-05-20 09:31 　　　　　┗[ひでさん &lt;hide_s@xxx]                             </a></span>
 </pre>
 </body>
 </html>

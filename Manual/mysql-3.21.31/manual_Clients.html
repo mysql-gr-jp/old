@@ -3,156 +3,156 @@
   <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
      from manual.texi on 20 June 1998 -->
 
-  <TITLE>MySQL Reference Manual for version 3.21.31. - MySQL ���饤����ȥġ���� API</TITLE>
+  <TITLE>MySQL Reference Manual for version 3.21.31. - MySQL クライアントツールと API</TITLE>
   </HEAD>
   <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
 Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Common_problems.html">previous</A>, <A HREF="manual_Comparisons.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
 <P><HR><P>
 
 
-<H1><A NAME="Clients" HREF="manual_toc.html#Clients"><STRONG>MySQL</STRONG> ���饤����ȥġ���� API</A></H1>
+<H1><A NAME="Clients" HREF="manual_toc.html#Clients"><STRONG>MySQL</STRONG> クライアントツールと API</A></H1>
 
 
 
 <H2><A NAME="C" HREF="manual_toc.html#C"><STRONG>MySQL</STRONG> C API</A></H2>
 
 <P>
-<CODE>C</CODE> API �� <STRONG>MySQL</STRONG> �����ۤ���ޤ�������� 
-<CODE>libmysqlclient</CODE> �饤�֥��˴ޤޤ�ޤ����ǡ����١����ؤΥ��������� 
-<CODE>C</CODE> �ץ�����������ޤ���
+<CODE>C</CODE> API は <STRONG>MySQL</STRONG> で配布されます。それは 
+<CODE>libmysqlclient</CODE> ライブラリに含まれます。データベースへのアクセスに 
+<CODE>C</CODE> プログラムを許します。
 
 </P>
 <P>
-¾�Υ��饤����� API ��¿��(Java ���������)�ϡ����Υ饤�֥�����³�˻�
-�Ѥ��ޤ����������㤨�С�Ʊ���Ķ��ѿ�����ѤǤ��ޤ���
+他のクライアント API の多く(Java を除く全て)は、このライブラリを接続に使
+用します。そして例えば、同じ環境変数を使用できます。
 
 </P>
 <P>
-���饤����ȤϺ����̿��Хåե�������������ޤ�������ϼ�ưŪ�����ä����
-�祵����(�ǥե���Ȥ� 512kb)�Ǥ����Хåե����׵�˱��������ä���(������ 
-close �ޤǸ������ʤ�)�Τǡ���������ä����Ƥ�񸻤ϼ���ޤ��󡣤��Υ�
-���������å��ϼ�˴ְ�ä���������̿��ѥ��åȤΤ���Υ����å��Ǥ���
+クライアントは最大通信バッファサイズを持ちます。これは自動的に増加する最
+大サイズ(デフォルトは 512kb)です。バッファは要求に応じて増加する(しかし 
+close まで減少しない)ので、これを増加させても資源は取られません。このサ
+イズチェックは主に間違ったクエリと通信パケットのためのチェックです。
 
 </P>
 <P>
-�̿��Хåե��ϰ�Ĥ� SQL ���ơ��ȥ��Ȥȡ��֤����ǡ�����1�Ԥ�ޤ�Τ�
-��ʬ�礭���ʤ��ƤϤ����ޤ���(�������Ʊ���ˤǤϤ���ޤ���)���ƥ���åɤ�
-�̿��Хåե��ϡ�Ǥ�դιԤ䥯����Τ���˻��ꤵ�줿���¤ޤǡ�ưŪ�����礷
-�ޤ���
+通信バッファは一つの SQL ステートメントと、返されるデータの1行を含むのに
+十分大きくなくてはいけません(もちろん同時にではありません)。各スレッドの
+通信バッファは、任意の行やクエリのために指定された制限まで、動的に増大し
+ます。
 
 </P>
 <P>
-���� 16M �Υǡ�����ޤ� <CODE>BLOB</CODE> ����äƤ�����ϡ����ʤ��Ȥ� 16M 
-���̿��Хåե����¤ˤ��ʤ��ƤϤ����ޤ��� ��<A HREF="manual_Performance.html#MySQL parameters"><STRONG>MySQL</STRONG> �ΥХåե����������ѹ���ˡ</A>���Ỳ�� ��
+最大 16M のデータを含む <CODE>BLOB</CODE> を持っている場合は、少なくとも 16M 
+を通信バッファ制限にしなくてはいけません。 「<A HREF="manual_Performance.html#MySQL parameters"><STRONG>MySQL</STRONG> のバッファサイズの変更方法</A>」節参照 。
 
 </P>
 <P>
-MySQL �ϡ��������˳���³�Хåե��� <CODE>net_buffer_length</CODE> �˽̾�����
-����
+MySQL は、クエリ後に各接続バッファを <CODE>net_buffer_length</CODE> に縮小しま
+す。
 
 </P>
 <TABLE BORDER WIDTH="100%" NOSAVE >
 <TR><TD><STRONG>mysql_affected_rows</STRONG> </TD><TD>
-�Ǹ�� UPDATE, DELETE �ޤ��� INSERT �ˤ�äƱƶ����줿�Կ�����Ф��ޤ���
+最後の UPDATE, DELETE または INSERT によって影響された行数を取り出します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_close</STRONG> </TD><TD>
-��������³�򥯥��������ޤ���
+サーバ接続をクローズします。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_connect</STRONG> </TD><TD>
-<STRONG>MySQL</STRONG> �����Фؤ���³���Ω���ޤ���
+<STRONG>MySQL</STRONG> サーバへの接続を確立します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_create_db</STRONG> </TD><TD>
-�ǡ����١������������ޤ���
+データベースを生成します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_data_seek</STRONG> </TD><TD>
-�������̥��åȤ���Ǥ�դιԤ˥��������ޤ���
+クエリ結果セットから任意の行にシークします。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_drop_db</STRONG> </TD><TD>
-�ǡ����١������˴����ޤ���
+データベースを破棄します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_eof</STRONG> </TD><TD>
-�Ǹ�ιԤ��ɤޤ줿���ɤ�����Ƚ�ꤷ�ޤ���
+最後の行が読まれたかどうかを判定します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_escape_string</STRONG> </TD><TD>
-SQL ���ơ��ȥ��ȤΤ����ʸ����򥨥������פ��ޤ���
- ��<A HREF="manual_Syntax.html#Base Syntax">��ƥ�롣ʸ����ȿ��ͤ�ɤΤ褦�˽񤯤���</A>���Ỳ�� 
+SQL ステートメントのために文字列をエスケープします。
+ 「<A HREF="manual_Syntax.html#Base Syntax">リテラル。文字列と数値をどのように書くか？</A>」節参照 
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_error</STRONG> </TD><TD>
-�Ǹ�� <STRONG>MySQL</STRONG> �ؿ�����Υ��顼��å�������
+最後の <STRONG>MySQL</STRONG> 関数からのエラーメッセージ。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_fetch_field</STRONG> </TD><TD>
-�ơ��֥���ܤη��򸫤Ĥ��Ф��ޤ���
+テーブル項目の型を見つけ出します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_fetch_lengths</STRONG> </TD><TD>
-�������̥��å�������Ƥι��ܤ�Ĺ�����֤��ޤ���
+クエリ結果セット中の全ての項目の長さを返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_fetch_row</STRONG> </TD><TD>
-�������̤��� '����' �Ԥ���Ф��ޤ���
+クエリ結果から '次の' 行を取り出します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_field_seek</STRONG> </TD><TD>
-�����ֹ���ܾ�˹��ܥ���������֤��ޤ���
+項目番号項目上に項目カーソルを置きます。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_free_result</STRONG> </TD><TD>
-�������̤��Ǽ���뤿��˻��Ѥ��줿�����������ޤ���
+クエリ結果を格納するために使用されたメモリを解放します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_get_client_info</STRONG> </TD><TD>
-���ߤΥ��饤����ȥ饤�֥��ΥС�����������֤��ޤ���
+現在のクライアントライブラリのバージョン情報を返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_get_host_info</STRONG> </TD><TD>
-�����Хۥ��Ȥ�̾�����֤��ޤ���
+サーバホストの名前を返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_get_proto_info</STRONG> </TD><TD>
-��³�˻��Ѥ����ץ��ȥ���С����������ޤ���
+接続に使用されるプロトコルバージョンを得ます。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_get_server_info</STRONG> </TD><TD>
-�����ФΥС�������ֹ���֤��ޤ���
+サーバのバージョン番号を返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_insert_id</STRONG> </TD><TD>
-AUTO_INCREMENT ���ܤ��������줿 ID ���֤��ޤ���
+AUTO_INCREMENT 項目に生成された ID を返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_list_dbs</STRONG> </TD><TD>
-Ŭ�礹��ǡ����١���̾���֤��ޤ���
+適合するデータベース名を返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_list_fields</STRONG> </TD><TD>
-Ŭ�礹�����̾���֤��ޤ���
+適合する項目名を返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_list_processes</STRONG> </TD><TD>
-���ߤΥ����Х���åɤΥꥹ�Ȥ����ޤ���
+現在のサーバスレッドのリストを得ます。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_list_tables</STRONG> </TD><TD>
-Ŭ�礹��ơ��֥��̾�����֤��ޤ���
+適合するテーブルの名前を返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_num_fields</STRONG> </TD><TD>
-��̥��å���ι��ܤο����֤��ޤ���
+結果セット中の項目の数を返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_num_rows</STRONG> </TD><TD>
-��̥��å���ιԤο����֤��ޤ���
+結果セット中の行の数を返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_query</STRONG> </TD><TD>
-SQL �������¹Ԥ��ޤ���
+SQL クエリを実行します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_real_query</STRONG> </TD><TD>
-Ĺ�������ȼ�� SQL �������¹Ԥ��ޤ���
+長さ情報を伴う SQL クエリを実行します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_reload</STRONG> </TD><TD>
-�����ФΥ桼���ѡ��ߥå����ơ��֥��ƥ����ɤ��ޤ���
+サーバのユーザパーミッションテーブルを再ロードします。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_select_db</STRONG> </TD><TD>
-�ǡ����١�������³���ޤ���
+データベースに接続します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_shutdown</STRONG> </TD><TD>
-�ǡ����١��������Ф򥷥�åȥ����󤷤ޤ���
+データベースサーバをシャットダウンします。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_stat</STRONG> </TD><TD>
-ʸ����ǥ����о��֤��֤��ޤ���
+文字列でサーバ状態を返します。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_store_result</STRONG> </TD><TD>
-���饤����Ȥ˷�̥��åȤ��ɤ߹��ߤޤ���
+クライアントに結果セットを読み込みます。
 </TR NOSAVE>
 <TR><TD><STRONG>mysql_use_result</STRONG> </TD><TD>
-�ƹԤ�ưŪ�ʷ�̥��åȤ�Ϥ�ޤ�������� <CODE>mysql_store_result()</CODE> ��
-���ȤƤ⾯�ʤ��������Ѥ��ޤ����������Фˤ��¿���� strain ��Ϳ����
-����
+各行の動的な結果セットを始めます。これは <CODE>mysql_store_result()</CODE> よ
+りもとても少ないメモリを使用しますが、サーバにより多くの strain を与えま
+す。
 </TR>
 </TABLE>
 
@@ -162,224 +162,224 @@ SQL �������¹Ԥ��ޤ���
 <DD>
 <A NAME="IDX302"></A>
  
-�Ǹ�� UPDATE, DELETE �ޤ��� INSERT �ˤ�äƱƶ����줿�Կ�����Ф��ޤ���
+最後の UPDATE, DELETE または INSERT によって影響された行数を取り出します。
 <A NAME="IDX303"></A>
 <DT><CODE>void <STRONG>mysql_close</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-��������³�򥯥��������ޤ���
+サーバ接続をクローズします。
 <A NAME="IDX304"></A>
 <DT><CODE>MYSQL *<STRONG>mysql_connect</STRONG>(MYSQL *mysql, const char *host, const char *user, const char *passwd)</CODE>
 <DD>
-<STRONG>MySQL</STRONG> �����Фؤ���³���Ω���ޤ���
+<STRONG>MySQL</STRONG> サーバへの接続を確立します。
 <A NAME="IDX305"></A>
 <DT><CODE>int <STRONG>mysql_create_db</STRONG>(MYSQL *mysql, const char *db)</CODE>
 <DD>
-�ǡ����١������������ޤ���
+データベースを生成します。
 <A NAME="IDX306"></A>
 <DT><CODE>void <STRONG>mysql_data_seek</STRONG>(MYSQL_RES *res, uint offset)</CODE>
 <DD>
-�������̥��åȤ���Ǥ�դιԤ˥��������ޤ���
+クエリ結果セットから任意の行にシークします。
 <A NAME="IDX307"></A>
 <DT><CODE>int <STRONG>mysql_drop_db</STRONG>(MYSQL *mysql, const char *db)</CODE>
 <DD>
-�ǡ����١������˴����ޤ���
+データベースを破棄します。
 <A NAME="IDX308"></A>
 <DT><CODE>int <STRONG>mysql_eof</STRONG>(MYSQL_RES *)</CODE>
 <DD>
-�Ǹ�ιԤ��ɤޤ줿���ɤ�����Ƚ�ꤷ�ޤ���
+最後の行が読まれたかどうかを判定します。
 <A NAME="IDX309"></A>
 <DT><CODE>char *<STRONG>mysql_error</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-�Ǹ�� <STRONG>MySQL</STRONG> �ؿ�����Υ��顼��å�������
+最後の <STRONG>MySQL</STRONG> 関数からのエラーメッセージ。
 <A NAME="IDX310"></A>
 <DT><CODE>uint <STRONG>mysql_escape_string</STRONG>(char *to,char *from,uint length)</CODE>
 <DD>
-SQL ���ơ��ȥ��ȤΤ����ʸ����򥨥������פ��ޤ���
+SQL ステートメントのために文字列をエスケープします。
 <A NAME="IDX311"></A>
 <DT><CODE>MYSQL_FIELD *<STRONG>mysql_fetch_field</STRONG>(MYSQL_RES *handle)</CODE>
 <DD>
-�ơ��֥���ܤη��򸫤Ĥ��Ф��ޤ���
+テーブル項目の型を見つけ出します。
 
-��̤���Ф��ʤ��� <CODE>BLOB</CODE> ��Ĺ���򥯥��ꤹ��ȡ�<STRONG>MySQL</STRONG> �� 
-'default blob length' ���֤��ޤ�������� 8192 �Ǥ����ơ��֥�θ�����Ԥ�
-��������̤���Ф�����column_object-&#62;max_length �ϡ��ġ��Υ�����μº�
-�� max_length ��ޤߤޤ���
+結果を取り出さないで <CODE>BLOB</CODE> の長さをクエリすると、<STRONG>MySQL</STRONG> は 
+'default blob length' を返します。これは 8192 です。テーブルの検索を行っ
+た時。結果を取り出す時、column_object-&#62;max_length は、個々のクエリの実際
+の max_length を含みます。
 
-<STRONG>MySQL</STRONG> �� <CODE>BLOB</CODE> �κ���Ĺ���Τ�ʤ����ᡢ8192 ������������
-����ޤ�������Ϥ��Ĥ�����ե�����ǽ�ˤʤ�٤��Ǥ���
+<STRONG>MySQL</STRONG> は <CODE>BLOB</CODE> の最大長を知らないため、8192 サイズが選択
+されます。これはいつかコンフィグ可能になるべきです。
 
 <A NAME="IDX312"></A>
 <DT><CODE>unsigned int *<STRONG>mysql_fetch_lengths</STRONG>(MYSQL_RES *mysql)</CODE>
 <DD>
-�������̥��å�������Ƥι��ܤ�Ĺ�����֤��ޤ���
+クエリ結果セット中の全ての項目の長さを返します。
 <A NAME="IDX313"></A>
 <DT><CODE>MYSQL_ROW <STRONG>mysql_fetch_row</STRONG>(MYSQL_RES *mysql)</CODE>
 <DD>
-�������̤��� '����' �Ԥ���Ф��ޤ���
+クエリ結果から '次の' 行を取り出します。
 <A NAME="IDX314"></A>
 <DT><CODE>void <STRONG>mysql_field_seek</STRONG>(MYSQL_RES *result, int field)</CODE>
 <DD>
-�����ֹ���ܾ�˹��ܥ���������֤��ޤ���
+項目番号項目上に項目カーソルを置きます。
 <A NAME="IDX315"></A>
 <DT><CODE>void <STRONG>mysql_free_result</STRONG>(MYSQL_RES *result)</CODE>
 <DD>
-�������̤��Ǽ���뤿��˻��Ѥ��줿�����������ޤ���
+クエリ結果を格納するために使用されたメモリを解放します。
 <A NAME="IDX316"></A>
 <DT><CODE>char *<STRONG>mysql_get_client_info</STRONG>(void)</CODE>
 <DD>
-���ߤΥ��饤����ȥ饤�֥��ΥС�����������֤��ޤ���
+現在のクライアントライブラリのバージョン情報を返します。
 <A NAME="IDX317"></A>
 <DT><CODE>char *<STRONG>mysql_get_host_info</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-�����Хۥ��Ȥ�̾�����֤��ޤ���
+サーバホストの名前を返します。
 <A NAME="IDX318"></A>
 <DT><CODE>int <STRONG>mysql_get_proto_info</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-��³�˻��Ѥ����ץ��ȥ���С����������ޤ���
+接続に使用されるプロトコルバージョンを得ます。
 <A NAME="IDX319"></A>
 <DT><CODE>char *<STRONG>mysql_get_server_info</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-�����ФΥС�������ֹ���֤��ޤ���
+サーバのバージョン番号を返します。
 <A NAME="IDX320"></A>
 <DT><CODE>unsigned long <STRONG>mysql_insert_id</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-AUTO_INCREMENT ���ܤ��������줿 ID ���֤��ޤ���API �� unsigned long ����
-�����ᡢ����� <CODE>BIGINT</CODE> ���ܤǻ��ѤǤ��ޤ��󡣤��ξ�硢
-<CODE>LAST_INSERT_ID()</CODE> SQL �ؿ�����Ѥ���ɬ�פ�����ޤ���
+AUTO_INCREMENT 項目に生成された ID を返します。API は unsigned long を返
+すため、これを <CODE>BIGINT</CODE> 項目で使用できません。この場合、
+<CODE>LAST_INSERT_ID()</CODE> SQL 関数を使用する必要があります。
 <A NAME="IDX321"></A>
 <DT><CODE>MYSQL_RES *<STRONG>mysql_list_dbs</STRONG>(MYSQL *mysql, const char *wild)</CODE>
 <DD>
-Ŭ�礹��ǡ����١���̾���֤��ޤ���
+適合するデータベース名を返します。
 <A NAME="IDX322"></A>
 <DT><CODE>MYSQL_RES *<STRONG>mysql_list_fields</STRONG>(MYSQL *mysql, const char *table, const char *wild)</CODE>
 <DD>
-Ŭ�礹�����̾���֤��ޤ���
+適合する項目名を返します。
 <A NAME="IDX323"></A>
 <DT><CODE>MYSQL_RES *<STRONG>mysql_list_processes</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-���ߤΥ����Х���åɤΥꥹ�Ȥ����ޤ���
+現在のサーバスレッドのリストを得ます。
 <A NAME="IDX324"></A>
 <DT><CODE>MYSQL_RES *<STRONG>mysql_list_tables</STRONG>(MYSQL *mysql, const char *wild)</CODE>
 <DD>
-Ŭ�礹��ơ��֥��̾�����֤��ޤ���
+適合するテーブルの名前を返します。
 <A NAME="IDX325"></A>
 <DT><CODE>int <STRONG>mysql_num_fields</STRONG>(MYSQL_RES *result)</CODE>
 <DD>
-��̥��å���ι��ܤο����֤��ޤ���
+結果セット中の項目の数を返します。
 <A NAME="IDX326"></A>
 <DT><CODE>int <STRONG>mysql_num_rows</STRONG>(MYSQL_RES *result)</CODE>
 <DD>
-��̥��å���ιԤο����֤��ޤ���
+結果セット中の行の数を返します。
 <A NAME="IDX327"></A>
 <DT><CODE>int <STRONG>mysql_query</STRONG>(MYSQL *mysql, const char *query)</CODE>
 <DD>
-SQL �������¹Ԥ��ޤ���
+SQL クエリを実行します。
 <A NAME="IDX328"></A>
 <DT><CODE>int <STRONG>mysql_real_query</STRONG>(MYSQL *mysql, const char *query, uint length)</CODE>
 <DD>
-Ĺ�������ȼ�� SQL �������¹Ԥ��ޤ���
+長さ情報を伴う SQL クエリを実行します。
 <A NAME="IDX329"></A>
 <DT><CODE>int <STRONG>mysql_reload</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-�����ФΥ桼���ѡ��ߥå����ơ��֥��ƥ����ɤ��ޤ���
+サーバのユーザパーミッションテーブルを再ロードします。
 <A NAME="IDX330"></A>
 <DT><CODE>int <STRONG>mysql_select_db</STRONG>(MYSQL *mysql, const char *db)</CODE>
 <DD>
-�ǡ����١�������³���ޤ���
+データベースに接続します。
 <A NAME="IDX331"></A>
 <DT><CODE>int <STRONG>mysql_shutdown</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-�ǡ����١��������Ф򥷥�åȥ����󤷤ޤ���
+データベースサーバをシャットダウンします。
 <A NAME="IDX332"></A>
 <DT><CODE>char *<STRONG>mysql_stat</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-ʸ����ǥ����о��֤��֤��ޤ���
+文字列でサーバ状態を返します。
 <A NAME="IDX333"></A>
 <DT><CODE>MYSQL_RES *<STRONG>mysql_store_result</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-���饤����Ȥ˷�̥��åȤ��ɤ߹��ߤޤ���
+クライアントに結果セットを読み込みます。
 <A NAME="IDX334"></A>
 <DT><CODE>MYSQL_RES *<STRONG>mysql_use_result</STRONG>(MYSQL *mysql)</CODE>
 <DD>
-�ƹԤ�ưŪ�ʷ�̥��åȤ�Ϥ�ޤ���
+各行の動的な結果セットを始めます。
 </DL>
 
 
 
-<H3><A NAME="Query Results" HREF="manual_toc.html#Query Results"><CODE>mysql_query()</CODE> �������������������塢<CODE>mysql_store_result()</CODE> �� NULL ���֤���������Τϲ��Ρ�</A></H3>
+<H3><A NAME="Query Results" HREF="manual_toc.html#Query Results"><CODE>mysql_query()</CODE> が成功して復帰した後、<CODE>mysql_store_result()</CODE> が NULL を返す時があるのは何故？</A></H3>
 
 <P>
-����ϼ��ΰ�Ĥ��̣���ޤ�:
+これは次の一つを意味します:
 
 </P>
 
 <OL>
 <LI>
 
-Malloc �����Ԥ�����
+Malloc が失敗した。
 <LI>
 
-�ǡ������ɤ�ʤ��ä� (��³���Υ��顼)��
+データが読めなかった (接続時のエラー)。
 <LI>
 
-���ơ��ȥ��Ȥ��ǡ������֤��ʤ����ơ��ȥ��� (<CODE>INSERT</CODE> �ޤ��� 
-<CODE>UPDATE</CODE> �ޤ��� <CODE>DELETE</CODE>) ���ä���
+ステートメントがデータを返さないステートメント (<CODE>INSERT</CODE> または 
+<CODE>UPDATE</CODE> または <CODE>DELETE</CODE>) だった。
 </OL>
 
 <P>
-���ơ��ȥ��Ȥ�Ϳ����줿��̤���Ĥ��ɤ����ϡ�
-<CODE>mysql_num_fields(MYSQL *)</CODE> �� 0 �Ǥʤ����Ȥ�����å����뤳�Ȥǡ�
-��˥����å��Ǥ��ޤ������줬 0 �ʤ顢�Ǹ�Υ�������ͤ��֤��ʤ����ơ���
-���ȤǤ����㤨�� <CODE>INSERT</CODE> �� <CODE>DELETE</CODE> ��
+ステートメントが与えられた結果を持つかどうかは、
+<CODE>mysql_num_fields(MYSQL *)</CODE> が 0 でないことをチェックすることで、
+常にチェックできます。これが 0 なら、最後のクエリは値を返さないステート
+メントです。例えば <CODE>INSERT</CODE> や <CODE>DELETE</CODE> 。
 
 </P>
 <P>
-<CODE>mysql_error(MYSQL *)</CODE> �����Ǥʤ����ϥ��顼�Ǥ���
-
-</P>
-
-
-<H3><A NAME="Result values" HREF="manual_toc.html#Result values">�����꤫���������̤ϲ�����</A></H3>
-
-<P>
-<CODE>mysql_affected_rows(MYSQL *)</CODE> �ϡ�<CODE>INSERT</CODE>, <CODE>UPDATE</CODE> ��
-���� <CODE>DELETE</CODE> ��Ԥʤä����κǸ�Υ�����ǡ��ƶ����줿�Կ����֤���
-������������<CODE>WHERE</CODE> �᤬�ʤ� <CODE>DELETE</CODE> �����Ѥ���ơ��ơ��֥뤬
-�ڤ�ͤ��줿�����㳰�Ǥ�������ϤȤƤ�®���Ǥ��� ���ξ�硢�ƶ�����
-���Կ��� 0 �Ȥ����֤���ޤ���
-
-</P>
-<P>
-<CODE>AUTO_INCREMENT</CODE> ����ǥå�������ĥơ��֥�˹Ԥ�������������
-<CODE>mysql_insert_id(MYSQL *)</CODE> �ϺǸ�Υ������Ϳ����줿 ID ���֤��ޤ���
- ��<A HREF="manual_Clients.html#mysql_insert_id">�Ǹ���������줿�ԤΥ�ˡ��� ID ��ɤΤ褦�������뤫��</A>���Ỳ�� 
-
-</P>
-<P>
-�����Υ����ꡢ<CODE>LOAD DATA INFILE...</CODE> �� <CODE>INSERT INTO ... SELECT
-...</CODE>, <CODE>UPDATE</CODE> ���ɲäξ�����֤��ޤ������η�̤� 
-<CODE>mysql_info(MYSQL *)</CODE> ���֤���ޤ���<CODE>mysql_info()</CODE> ���ɲþ���
-���ʤ����� null �ݥ��󥿤��֤��ޤ���
+<CODE>mysql_error(MYSQL *)</CODE> が空でない場合はエラーです！
 
 </P>
 
 
-<H3><A NAME="mysql_insert_id" HREF="manual_toc.html#mysql_insert_id">�Ǹ���������줿�ԤΥ�ˡ��� ID ��ɤΤ褦�������뤫��</A></H3>
+<H3><A NAME="Result values" HREF="manual_toc.html#Result values">クエリから得られる結果は何か？</A></H3>
 
 <P>
-<CODE>AUTO_INCREMENT</CODE> ��������ĥ쥳���ɤ���������ȡ�
-<CODE>mysql_insert_id(MYSQL *)</CODE> ��Ϳ����줿 ID �������ޤ���
-
-</P>
-<P>
-�Ǹ���ͤϥ�������ˤ��Ǽ���졢<CODE>LAST_INSERT_ID()</CODE> �ؿ��Ǽ��Ф���
-����
+<CODE>mysql_affected_rows(MYSQL *)</CODE> は、<CODE>INSERT</CODE>, <CODE>UPDATE</CODE> ま
+たは <CODE>DELETE</CODE> を行なった時の最後のクエリで、影響された行数を返しま
+す。ただし、<CODE>WHERE</CODE> 節がない <CODE>DELETE</CODE> が使用されて、テーブルが
+切り詰められた場合は例外です。これはとても速いです！ この場合、影響され
+た行数は 0 として返されます。
 
 </P>
 <P>
-���Υ����ɤǡ�auto_increment ����ǥå��������Ѥ��줿���ɤ��������å���
-���ޤ�������ϡ������꤬ <CODE>auto_increment</CODE> ����ǥå�����ȼ�� 
-<CODE>INSERT</CODE> ���ɤ���������å��Ǥ��ޤ���
+<CODE>AUTO_INCREMENT</CODE> インデックスを持つテーブルに行を挿入した時、
+<CODE>mysql_insert_id(MYSQL *)</CODE> は最後のクエリで与えられた ID を返します。
+ 「<A HREF="manual_Clients.html#mysql_insert_id">最後に挿入された行のユニーク ID をどのように得られるか？</A>」節参照 
+
+</P>
+<P>
+一部のクエリ、<CODE>LOAD DATA INFILE...</CODE> と <CODE>INSERT INTO ... SELECT
+...</CODE>, <CODE>UPDATE</CODE> は追加の情報を返します。この結果は 
+<CODE>mysql_info(MYSQL *)</CODE> で返されます。<CODE>mysql_info()</CODE> は追加情報
+がない場合は null ポインタを返します。
+
+</P>
+
+
+<H3><A NAME="mysql_insert_id" HREF="manual_toc.html#mysql_insert_id">最後に挿入された行のユニーク ID をどのように得られるか？</A></H3>
+
+<P>
+<CODE>AUTO_INCREMENT</CODE> キーを持つレコードを挿入すると、
+<CODE>mysql_insert_id(MYSQL *)</CODE> で与えられた ID が得られます。
+
+</P>
+<P>
+最後の値はサーバ内にも格納され、<CODE>LAST_INSERT_ID()</CODE> 関数で取り出せま
+す。
+
+</P>
+<P>
+次のコードで、auto_increment インデックスが使用されたかどうかチェックで
+きます。これは、クエリが <CODE>auto_increment</CODE> インデックスを伴う 
+<CODE>INSERT</CODE> かどうかもチェックできます。
 
 </P>
 
@@ -391,10 +391,10 @@ if (mysql_error(MYSQL)[0] == 0 &#38;&
 </PRE>
 
 <P>
-<CODE>LAST_INSERT_ID()</CODE> ���֤� id �ϥ����Ф���³��˴�������ޤ���¾�Υ�
-�饤����Ȥˤ�äƤ��������ʤ뤳�ȤϤ���ޤ���¾�� auto_increment ���ܤ� 
-��ޥ��å��� (�� NULL �ޤ��� �� 0) �ǹ����������Ǥ⡢������ѹ������
-����
+<CODE>LAST_INSERT_ID()</CODE> が返す id はサーバで接続毎に管理されます。他のク
+ライアントによっておかしくなることはありません。他の auto_increment 項目を 
+非マジック値 (非 NULL または 非 0) で更新した場合でも、それは変更されま
+せん。
 
 </P>
 
@@ -402,31 +402,31 @@ if (mysql_error(MYSQL)[0] == 0 &#38;&
 <H3><A NAME="mysql_use_result" HREF="manual_toc.html#mysql_use_result">What is the difference between <CODE>mysql_use_result()</CODE> and <CODE>mysql_store_result()</CODE> modes?</A></H3>
 
 <P>
-<CODE>mysql_use_resulys</CODE> �ϥ����Ф���η�̤򡢰���ơ��֥���������Х�
-�ե��˳�Ǽ���뤳�Ȥʤ���ľ���ɤ߹��ߤޤ�������� 
-<CODE>mysql_store_result</CODE> ���⤤���餫®���ʤꡢ��꾯�ʤ���������
-���ޤ������饤�����¦�ǳƹԤ˹Ԥʤ�¿���ν����������硢�ޤ��ϥ桼���� 
-^S (stop scroll) ��Ԥʤ��褦�ʲ��̤˽��Ϥ�������ϡ�
-<CODE>mysql_use_results</CODE> ����Ѥ��٤��ǤϤ���ޤ��󡣤����Ԥʤ��ȡ�����
-�Фȥ������åפ���¾�Υ���åɤϻ�����Υơ��֥�򹹿��Ǥ��ʤ��ʤ�ޤ���
-<CODE>mysql_use_result</CODE> ���ѻ��� <CODE>mysql_data_seek</CODE>
-<CODE>mysql_num_rows</CODE> �λ��Ѥ�¾�Υ������ȯ�Ԥ��Ǥ��ޤ���
+<CODE>mysql_use_resulys</CODE> はサーバからの結果を、一時テーブルやローカルバッ
+ファに格納することなく、直接読み込みます。これは 
+<CODE>mysql_store_result</CODE> よりもいくらか速くなり、より少ないメモリを使用
+します。クライアント側で各行に行なう多くの処理がある場合、またはユーザが 
+^S (stop scroll) を行なうような画面に出力を送る場合は、
+<CODE>mysql_use_results</CODE> を使用すべきではありません。これを行なうと、サー
+バとタイアップし、他のスレッドは使用中のテーブルを更新できなくなります。
+<CODE>mysql_use_result</CODE> 使用時は <CODE>mysql_data_seek</CODE>
+<CODE>mysql_num_rows</CODE> の使用や他のクエリの発行ができません。
 
 </P>
 <P>
-<CODE>mysql_use_result</CODE> ���ѻ���NULL �ݥ��󥿤�����ޤ� 
-<CODE>mysql_fetch_row()</CODE> ��¹Ԥ���ɬ�פ�����ޤ��������Ǥʤ���м��Υ�
-��������Υ����꤫��η�̤����뤿��Ǥ��������Ԥ����Ȥ�˺�줿��硢C
-API �ϥ��顼��Ϳ���ޤ���
+<CODE>mysql_use_result</CODE> 使用時、NULL ポインタを得るまで 
+<CODE>mysql_fetch_row()</CODE> を実行する必要があります。そうでなければ次のク
+エリは前のクエリからの結果を得るためです。これを行うことを忘れた場合、C
+API はエラーを与えます！
 <CODE>Commands out of sync;  You can't run this command now</CODE>
 
 </P>
 
 
-<H3><A NAME="linking" HREF="manual_toc.html#linking">C API �ǤΥ�󥯤�����</A></H3>
+<H3><A NAME="linking" HREF="manual_toc.html#linking">C API でのリンクの問題</A></H3>
 
 <P>
-C API �ǥ�󥯤�����������Ĥ��Υ����ƥ��Ǥϼ��Υ��顼�ˤʤ�ޤ�:
+C API でリンクする時、いくつかのシステム上では次のエラーになります:
 
 </P>
 
@@ -440,51 +440,51 @@ ld: fatal: Symbol referencing errors. No output written to client
 </PRE>
 
 <P>
-����ϡ����ʤ��Υ����ƥ��Ǥϡ�����ѥ���/��󥯹ԤκǸ�ǡ�math �饤��
-��� (-lm) ��ޤ��ɬ�פ����뤳�Ȥ��̣���ޤ���
+これは、あなたのシステム上では、コンパイル/リンク行の最後で、math ライブ
+ラリ (-lm) を含める必要があることを意味します。
 
 </P>
 
 
-<H3><A NAME="threadsafe" HREF="manual_toc.html#threadsafe">����åɰ������饤����Ȥ�����ˡ</A></H3>
+<H3><A NAME="threadsafe" HREF="manual_toc.html#threadsafe">スレッド安全クライアントを作る方法</A></H3>
 
 <P>
-���饤����Ȥ� '�ۤȤ��' ����åɰ����Ǥ��������礭������� net.c (������
-�Ȥ����ɤ߹��ߤ򤹤륵�֥롼����) �������ߤ��Ф��ư����Ǥʤ����ȤǤ���
-����ϡ������Ф����Ĺ���ɤ߹��ߤ����ǤǤ���褦�ˡ����ȤΥ��顼������
-�����������Ȥ�����θ����Ǥ���
+クライアントは 'ほとんど' スレッド安全です。一番大きな問題は net.c (ソケッ
+トから読み込みをするサブルーチン) が割り込みに対して安全でないことです。
+これは、サーバからの長い読み込みを中断できるように、自身のアラームを持ち
+たいだろうという考慮からです。
 
 </P>
 <P>
-ɸ�९�饤����ȥ饤�֥��ϥ���åɥ��ץ����ǥ���ѥ��뤵��Ƥ��ޤ���
+標準クライアントライブラリはスレッドオプションでコンパイルされていません。
 
 </P>
 <P>
-����åɰ������饤����Ȥ����뤿��ˤϡ�<CODE>-lmysys</CODE>, <CODE>-lstring</CODE> 
-�� <CODE>-ldbug</CODE> �饤�֥��ȥ����Ф����Ѥ��� <CODE>net_serv.o</CODE> ����Ѥ�
-�ޤ���
+スレッド安全クライアントを得るためには、<CODE>-lmysys</CODE>, <CODE>-lstring</CODE> 
+と <CODE>-ldbug</CODE> ライブラリとサーバが使用する <CODE>net_serv.o</CODE> を使用し
+ます。
 
 </P>
 <P>
-����åɥ��饤����Ȥ���Ѥ������thr_alarm.c �롼������礤�˻��ѤǤ���
-�Ȼ�Ϲͤ��ޤ���mysys �롼�������Ѥ����硢�Ф��Ƥ����٤����ä���Ĥ�
-���Ȥ� my_init() ��ǽ�˸Ƥ֤��ȤǤ���
+スレッドクライアントを使用する時、thr_alarm.c ルーチンを大いに使用できる
+と私は考えます。mysys ルーチンを使用する場合、覚えておくべきたった一つの
+ことは my_init() を最初に呼ぶことです！
 
 </P>
 
 
-<H3><A NAME="Threadsafe client" HREF="manual_toc.html#Threadsafe client">����åɰ������饤����Ȥκ���</A></H3>
+<H3><A NAME="Threadsafe client" HREF="manual_toc.html#Threadsafe client">スレッド安全クライアントの作成</A></H3>
 
 <P>
-mysql_connect() ��������Ƥδؿ��ϸ��ߥ���åɰ����Ǥ���
-
-</P>
-<P>
-����åɰ��������뤿��ˤϼ���Ԥʤ��ޤ�:
+mysql_connect() を除く全ての関数は現在スレッド安全です。
 
 </P>
 <P>
-���饤����Ȥ򼡤Ǻƥ���ѥ���:
+スレッド安全を得るためには次を行ないます:
+
+</P>
+<P>
+クライアントを次で再コンパイル:
 
 </P>
 
@@ -493,24 +493,24 @@ CPPFLAGS=-DTHREAD_SAFE_CLIENT ./configure ...
 </PRE>
 
 <P>
-�����Ĥ��Υ��顼���Фޤ���ɸ�९�饤����ȤΥ�󥯻���̤�������ܥ�Τ�
-��Ǥ���pthread �饤�֥�꤬�ǥե���ȤǤϴޤ���Ƥ��ʤ��Τǡ�
+いくつかのエラーが出ます。標準クライアントのリンク時の未定義シンボルのた
+めです。pthread ライブラリがデフォルトでは含められていないので。
 
 </P>
 <P>
-��̤� libmysqld.a �饤�֥��ϥ���åɰ����Ǥ���
+結果の libmysqld.a ライブラリはスレッド安全です。
 
 </P>
 <P>
-2�ĤΥ���åɤ�Ʊ���ϥ�ɥ� (<CODE>mysql_connect()</CODE> ���֤����) ��Ʊ����
-���ѤǤ��ޤ���2�ĤΥ���åɤ���<CODE>mysql_store_result()</CODE> �Ǻ�������
-���ۤʤ� <CODE>MYSQL_RES</CODE> �ϥ�ɥ����ѤǤ���Ȥ��Ƥ�Ǥ���
+2つのスレッドは同じハンドル (<CODE>mysql_connect()</CODE> で返される) を同時に
+使用できません。2つのスレッドが、<CODE>mysql_store_result()</CODE> で作成され
+た異なる <CODE>MYSQL_RES</CODE> ハンドルを使用できるとしてもです。
 
 </P>
 <P>
-����åɥ��饤����Ȥ���Ѥ������thr_alarm.c �롼������礤�˻��ѤǤ���
-����mysys �롼�������Ѥ�����ˡ��Ф��Ƥ���ɬ�פ����뤳�Ȥϡ�
-my_init() ��ǽ�˸Ƥ֤��Ȥ����Ǥ���
+スレッドクライアントを使用する時、thr_alarm.c ルーチンを大いに使用できま
+す。mysys ルーチンを使用する場合に、覚えておく必要があることは、
+my_init() を最初に呼ぶことだけです！
 
 </P>
 

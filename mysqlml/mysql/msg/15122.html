@@ -5,84 +5,84 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15121.html">[��]</a><a href="15123.html">[��]</a><a href="../list/15101-15200.html">[�ֹ�����]</a><a href="../thread/15101-15200.html">[����åɰ���]</a></p>
+<p class="button"><a href="15121.html">[前]</a><a href="15123.html">[次]</a><a href="../list/15101-15200.html">[番号順一覧]</a><a href="../thread/15101-15200.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15122
 </p>
 <div class="header">
 <p>
-From: ���� &lt;���� &lt;admin@xxxxxxxxxx&gt;&gt;<br>
+From: ちさ &lt;ちさ &lt;admin@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 25 Dec 2009 01:59:20 +0900<br>
-Subject: [mysql 15122] Re: �Х��ʥ�ǡ����μ����ߤˤĤ���<br>
+Subject: [mysql 15122] Re: バイナリデータの取り込みについて<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-chisa@��������Ǥ���
+chisa@夜勤明けです。
 
-�����٤����Τ�MYSQL���龯������Ƥ��ޤ��Ǥ���������
+少し細かいのとMYSQLから少し外れてしまうですが・・・
 
-<span class="quote1">&gt; CString sPath1(&quot;G:\\file1.***&quot;); // �ɹ����Υե�����</span>
-<span class="quote1">&gt; CString sPath2(&quot;G:\\file2.***&quot;); // ��¸��Υե�����</span>
-<span class="quote1">&gt; char pD[100000];	 // �ե�������ɤ߽���</span>
-���ϡ��ɥ����ǥ��󥰤���ȸ�ǻ�̻פ����뤫�⡣
+<span class="quote1">&gt; CString sPath1(&quot;G:\\file1.***&quot;); // 読込元のファイル</span>
+<span class="quote1">&gt; CString sPath2(&quot;G:\\file2.***&quot;); // 保存先のファイル</span>
+<span class="quote1">&gt; char pD[100000];	 // ファイルの読み書き用</span>
+↑ハードコーディングすると後で死ぬ思いするかも。
 
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; // �ե�����μ���(�ɹ��⡼��)</span>
+<span class="quote1">&gt; // ファイルの取得(読込モード)</span>
 <span class="quote1">&gt; fopen_s(&amp;pStream, sPath1, &quot;rb&quot;);</span>
 <span class="quote1">&gt; int n = fread(pD, sizeof(char), sizeof(pD), pStream); fclose(pStream);</span>
-���ɤ߹��ߥե����륵������pD��Ķ������ʬ���ڤ�ΤƤ���衣
-��C���å��˽񤯤�
-��char *pD = NULL;
-��FILE *fp = NULL;
-  fopen��
-  if(!fp)���ǥ��顼����
+↑読み込みファイルサイズがpDを超えた部分は切り捨てられるよ。
+　Cチックに書くと
+　char *pD = NULL;
+　FILE *fp = NULL;
+  fopen節
+  if(!fp)～でエラー処理
   fseek(fp, 0L, SEEK_END);
   int Length = (int)ftell(fp);
   pD = (*char)malloc(sizeof(char) * Length);
-��if(pD == NULL)���ǥ��顼����
+　if(pD == NULL)～でエラー処理
   fseek(fp, 0L, SEEK_SET);
   fread(fp, Length, sizeof(char), fp);
   fclose(fp);
-����
+処理
  free(pD);
  pD = NULL;
-�Ȥ��ä�����ưŪ�˥�����ݤ��������褤�����ü�ޤ꤫�Ĥ����Ф����������
-���Ĵ�٤Ƥ͡�
+といった具合に動的にメモリ確保した方がよいかも（端折りかつうろ覚えだからちゃ
+んと調べてね）
 
-<span class="quote1">&gt; // char �ؤ��Ѵ�</span>
+<span class="quote1">&gt; // char への変換</span>
 <span class="quote1">&gt; pD == &quot;&quot;;</span>
-���ٹ�Фޤ���Ǥ�������
-����pD��&quot;&quot;��������������硢C/C++�ǥ�������Ѥ��ޤ���C����memset�Ȥ�������
-Ū���ʡ�
+↑警告出ませんでしたか？
+仮にpDに&quot;&quot;を代入したい場合、C/C++でコレは通用しません。Cだとmemsetとかが一般
+的かな。
 
 <span class="quote1">&gt; strcpy(pD, sSqlData);</span>
-�����ͤζĤ�Ȥ���\0�μ����ޤǤ������ԡ����Ƥ���ޤ���
-�Х��ʥ�ξ���C����memcpy���Ѥ���Τ�����Ū���ʡ�
+↑皆様の仰るとおり\0の手前までしかコピーしてくれません。
+バイナリの場合はCだとmemcpyを用いるのが一般的かな。
 
-Insertʸ��������Ƥ�����ʬ��ȴ���Ƥ��ޤ�����
-�������˥Х��ʥ�ե�����򥨥������פ���ɬ�פ�����ޤ���
-���ˤ�񤤤Ƥ���ޤ�����ʸ�����\0�ǽ�ü��Ƚ�ꤷ�Ƥ��ޤ���
-��������Ф����ФƤ���Τ�Ĵ�٤ƤߤƲ�������
+Insert文を作成している部分が抜けていますが、
+作成前にバイナリファイルをエスケープする必要があります。
+↑にも書いてありますが、文字列は\0で終端を判定しています。
+検索すればすぐ出てくるので調べてみて下さい。
 
-Select�ν�����ȴ���Ƥ���褦�Ǥ�����
-insert�Ȼ����褦������򤽤Τޤ�ʸ����Ȥ��ƥ��ԡ������\0��������äƤ����
-����
-������н�ˡ��ޥ˥奢��˵��ܤ���Ƥ���ΤǸ������ƤߤƲ�������
+Selectの処理も抜けているようですが、
+insertと似たように配列をそのまま文字列としてコピーすると\0迄しか取ってくれま
+せん。
+コレの対処法もマニュアルに記載されているので検索してみて下さい。
 
-C/C++��Ƭ���ɤ��������ʤΤǽ񤤤����Ȱʳ��¹Ԥ��Ƥ���ޤ���
-���顼�����⤷�Ƥ���ޤ�����������ޤ����ǰ�OS������Ƶ�ư���ʤ��ȸ�������
-�⤢�뤽���Ǥ���
-���ܤ�0���顼0�ٹ�ǥ���ѥ��뤬��λ���뤳�ȤǤ���
-���ä�ĺ��������������ʸ�ΤޤޤǤ������ǵ㤭�򸫤뤳�ȴְ㤤̵���ʤΤ�
-�����ٴ��ä򤷤ä�����夲����򤪴��᤹��Ǥ���
+C/C++は頭が良すぎる言語なので書いたこと以外実行してくれません。
+エラー処理もしてくれません。突然落ちます。最悪OSが壊れて起動しないと言うこと
+もあるそうです。
+基本は0エラー0警告でコンパイルが終了することです。
+送って頂いたソースが原文のままでしたら後で泣きを見ること間違い無しなので
+今一度基礎をしっかり作り上げる事をお勧めするです。
 
-̵���˥Х��ʥ�Ȥ��Ƴ�Ǽ����ɬ���������뤫�ͻ���;�ϤϤ���Ȼפ��ޤ���
-C/C++���ȥƥ����ȥ��󥳡��ǥ��󥰽�������Ǥ��δ�®�٤��Ѥ��ʤ��ȴ�����
-����
+無理にバイナリとして格納する必要性があるか考察の余地はあると思います。
+C/C++だとテキストエンコーディング処理挟んでも体感速度は変わらないと感じま
+す。
 
-�ʾ�
+以上
 
 
 --
@@ -93,17 +93,17 @@ Web:<a href="http://chisa.dtdns.net">http://chisa.dtdns.net</a>
 
 </pre>
 </div>
-<p class="button"><a href="15121.html">[��]</a><a href="15123.html">[��]</a><a href="../list/15101-15200.html">[�ֹ�����]</a><a href="../thread/15101-15200.html">[����åɰ���]</a></p>
+<p class="button"><a href="15121.html">[前]</a><a href="15123.html">[次]</a><a href="../list/15101-15200.html">[番号順一覧]</a><a href="../thread/15101-15200.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="15105.html">  15105 2009-12-14 19:00 [Honda Takayuki &lt;hond] ��ץꥱ������󥨥顼(server id was not set)</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15106.html">  15106 2009-12-14 20:26 ��[Honda Takayuki &lt;hond]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15115.html">  15115 2009-12-24 15:54 ����[��ꡡ���� &lt;iwasaki_] �Х��ʥ�ǡ����μ����ߤˤĤ���    </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15116.html">  15116 2009-12-24 16:01 ������[&lt;y-iida@xxxxxxxxxx&gt; ]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15117.html">  15117 2009-12-24 16:25 ������[��ꡡ���� &lt;iwasaki_]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15118.html">  15118 2009-12-24 17:17 ��������[&quot;Eigo Mori&quot; &lt;eigom@x]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15121.html">  15121 2009-12-24 19:45 ������[Yoshiaki Yanagimoto ]                                   </a></span>
-<span class="current">-&gt;&nbsp;<a href="15122.html">  15122 2009-12-25 01:59 ������[���� &lt;admin@xxxxxxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15123.html">  15123 2009-12-25 12:18 ��������[��ꡡ���� &lt;iwasaki_]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15105.html">  15105 2009-12-14 19:00 [Honda Takayuki &lt;hond] レプリケーションエラー(server id was not set)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15106.html">  15106 2009-12-14 20:26 ┗[Honda Takayuki &lt;hond]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15115.html">  15115 2009-12-24 15:54 　┗[岩崎　誠司 &lt;iwasaki_] バイナリデータの取り込みについて    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15116.html">  15116 2009-12-24 16:01 　　┣[&lt;y-iida@xxxxxxxxxx&gt; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15117.html">  15117 2009-12-24 16:25 　　┣[岩崎　誠司 &lt;iwasaki_]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15118.html">  15118 2009-12-24 17:17 　　┃┗[&quot;Eigo Mori&quot; &lt;eigom@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15121.html">  15121 2009-12-24 19:45 　　┣[Yoshiaki Yanagimoto ]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="15122.html">  15122 2009-12-25 01:59 　　┗[ちさ &lt;admin@xxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15123.html">  15123 2009-12-25 12:18 　　　┗[岩崎　誠司 &lt;iwasaki_]                                 </a></span>
 </pre>
 </body>
 </html>

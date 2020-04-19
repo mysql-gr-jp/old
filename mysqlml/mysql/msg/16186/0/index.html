@@ -1,37 +1,37 @@
-<div dir="ltr">����Ф�ϡ�yoku0825�Ȥ����ޤ���<div><br></div><div>�����ݤ���Τ������狼��ʤ��ΤǤ�����</div><div><br></div><div>&gt;<span style="font-size:14px">---��������---</span><br></div><span style="font-size:14px">&gt; ��VS2012�ǤΥǥХå����ˡ����ƥå׼¹ԤǤ�ȯ����</span><br style="font-size:14px"><span style="font-size:14px">&gt; ��File.Delete��INTO OUTFILE�δ֤ˡ�</span><u style="font-size:14px"></u><span style="font-size:14px">Sleep��5�ö�����ꤷ�Ƥ�ȯ������</span><span style="font-size:14px">��</span><div><br></div><div>����� �ե����뤬¸�ߤ��Ƥ���(?)�ˤ⹴��餺File.Exists��TRUE��ȴ���Ƥ���Τ�������Ȼפ��Τǡ�</div><div>���꡼�פ򶴤�Ȥ�����INTO OUTFILE��File.Delete(File.Exists)�δ֤������ΤǤϤϤʤ��Ǥ��礦����</div><div><br></div><div>1. �ե������¸�ߥ����å�</div><div>2. ¸�ߤ�����ä�<br></div><div>3. SELECT .. INTO OUTFILE ..</div><div>-- �����ǥ֥졼�� --</div><div>4. �ե������¸�ߥ����å�</div><div>5. ¸�ߤ�����ä�</div><div>6. SELECT .. INTO OUTFILE ..</div><div><br></div><div>�֥졼���������ˡ�OS���鸫�Ƥ�ե����뤬¸�ߤ���Τ�File.Exists��FALSE�ˤʤ�ΤǤ����</div><div>���֥������Ȥ�Ȥ��ޤ路�Ƥ��ʤ���(File.Delete�������Ȥ�File���֥������Ȥ������֤��Τ��Ȥ�)�Ȥ���</div><div>OS���鸫�ƥե����뤬�ޤ�¸�ߤ��ʤ��Τʤ顢mysqld�Υ����å��ʤɸ��Ƥߤ�Ȥ����Τ��⤷��ޤ���</div><div>5.0��5.6��select_export::prepare�γ���ᤤ�ʳ���create_file��Ƥ��(�ե����������Ԥ��ƺ��������)����Τǡ�</div><div>�������Ѥ��ʤ��褦�ʵ�������ΤǤ�������</div><div><br></div><div><br></div><div>yoku0825,</div><div><br></div></div><div class="gmail_extra"><br><div class="gmail_quote">2014ǯ12��12�� 14:22 ��߷ �� <span dir="ltr">&lt;<a href="mailto:atsushi.shizawa@seikodo.co.jp" target="_blank">atsushi.shizawa@seikodo.co.jp</a>&gt;</span>:<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">��߷�ȿ����ޤ���<br>
-������Ƥ�����ĺ���ޤ���<br>
+<div dir="ltr">こんばんは、yoku0825といいます。<div><br></div><div>原因ぽいものは全くわからないのですが、</div><div><br></div><div>&gt;<span style="font-size:14px">---検証内容---</span><br></div><span style="font-size:14px">&gt; ・VS2012でのデバッグ時に、ステップ実行でも発生。</span><br style="font-size:14px"><span style="font-size:14px">&gt; ・File.Delete→INTO OUTFILEの間に、</span><u style="font-size:14px"></u><span style="font-size:14px">Sleepを5秒挟んだりしても発生する</span><span style="font-size:14px">。</span><div><br></div><div>これは ファイルが存在している(?)にも拘わらずFile.ExistsがTRUEで抜けてくるのが問題だと思うので、</div><div>スリープを挟むとしたらINTO OUTFILEとFile.Delete(File.Exists)の間がいいのでははないでしょうか？</div><div><br></div><div>1. ファイルの存在チェック</div><div>2. 存在したら消す<br></div><div>3. SELECT .. INTO OUTFILE ..</div><div>-- ここでブレーク --</div><div>4. ファイルの存在チェック</div><div>5. 存在したら消す</div><div>6. SELECT .. INTO OUTFILE ..</div><div><br></div><div>ブレークした時に、OSから見てもファイルが存在するのにFile.ExistsがFALSEになるのであれば</div><div>オブジェクトを使いまわしていないか(File.DeleteしたあとのFileオブジェクトが何を返すのかとか)とか、</div><div>OSから見てファイルがまだ存在しないのなら、mysqldのスタックなど見てみるといいのかもしれません。</div><div>5.0も5.6もselect_export::prepareの割と早い段階でcreate_fileを呼んで(ファイルだけ先行して作成される)いるので、</div><div>そこは変わらないような気がするのですが。。</div><div><br></div><div><br></div><div>yoku0825,</div><div><br></div></div><div class="gmail_extra"><br><div class="gmail_quote">2014年12月12日 14:22 志澤 敦 <span dir="ltr">&lt;<a href="mailto:atsushi.shizawa@seikodo.co.jp" target="_blank">atsushi.shizawa@seikodo.co.jp</a>&gt;</span>:<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">志澤と申します。<br>
+初めて投稿させて頂きます。<br>
 <br>
-MySQLWindows�Υ������Ͼ��ʤ����Ȥ�פ��ޤ�����<br>
-�����������¤��ޤ����顢��ĺ����ȹ����Ǥ���<br>
+MySQLWindowsのケースは少ないかとも思いますが、<br>
+お心あたり御座いましたら、ご頂けると幸いです。<br>
 <br>
----�Ķ�---<br>
-OS ��Windows2012 Std(Memory24GB)<br>
-DB ��MySQL 5.6.21<br>
-Coccector ��Net 6.9.5<br>
-FrameWork ��.NET FrameWork 4.5<br>
-IDE ��VS2012 Pro<br>
+---環境---<br>
+OS ：Windows2012 Std(Memory24GB)<br>
+DB ：MySQL 5.6.21<br>
+Coccector ：Net 6.9.5<br>
+FrameWork ：.NET FrameWork 4.5<br>
+IDE ：VS2012 Pro<br>
 <br>
----����---<br>
-��Ʊ��ե�����ѥ��ˤ����ơ�INTO OUTFILE ��File.Delete���®�˹Ԥ��ȡ�<br>
-��IF(File.Exists==TRUE){File.<u></u>Delete}����ǽ������<br>
-SQLȯ�Ի���MySqlException��ȯ����<br>
+---事象---<br>
+・同一ファイルパスにおいて、INTO OUTFILE →File.Deleteを高速に行うと、<br>
+　IF(File.Exists==TRUE){File.<u></u>Delete}が機能せず、<br>
+SQL発行時にMySqlExceptionが発生。<br>
 <br>
-�����顼���Ƥϡ���1086��already exists��<br>
+・エラー内容は、「1086：already exists」<br>
 <br>
-�����κݡ�OS��ˤ�ե�����ϻĤäƤ��ꡢ<u></u>�̾�Υե�����Ȥ����ɤ߽񤭤��� �����֡�<br>
+・その際、OS上にもファイルは残っており、<u></u>通常のファイルとして読み書きが出 来る状態。<br>
 <br>
----��������---<br>
-��VS2012�ǤΥǥХå����ˡ����ƥå׼¹ԤǤ�ȯ����<br>
-��File.Delete��INTO OUTFILE�δ֤ˡ�<u></u>Sleep��5�ö�����ꤷ�Ƥ�ȯ�����롣<br>
-��Win2008R2�Ǥ�Ʊ�ͤ�ȯ����<br>
-��CentOS�Ǥ�Ʊ�ͤ�ȯ����<br>
-��MySQL5.5�Ǥ�Ʊ�ͤ�ȯ����<br>
---�㳰����--<br>
-��MySQL5.0�Ǥ�ȯ�����ʤ���<br>
+---検証内容---<br>
+・VS2012でのデバッグ時に、ステップ実行でも発生。<br>
+・File.Delete→INTO OUTFILEの間に、<u></u>Sleepを5秒挟んだりしても発生する。<br>
+・Win2008R2でも同様に発生。<br>
+・CentOSでも同様に発生。<br>
+・MySQL5.5でも同様に発生。<br>
+--例外事象--<br>
+・MySQL5.0では発生しない。<br>
 <br>
 <br>
-�ʾ�Ȥʤ�ޤ���<br>
-DB�Ȥ�����ꡢ<u></u>Connector��OSͳ��ʵ��⤷�Ƥ���ޤ�����<br>
-���������¤��ޤ����顢������������´���ꤤ�פ��ޤ���<br>
+以上となります。<br>
+DBというより、<u></u>ConnectorやOS由来な気もしておりますが、<br>
+何か情報御座いましたら、ご助言の程を何卒お願い致します。<br>
 <br>
 </blockquote></div></div>

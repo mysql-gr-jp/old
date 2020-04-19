@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="3518.html">[��]</a><a href="3520.html">[��]</a><a href="../list/3501-3600.html">[�ֹ�����]</a><a href="../thread/3501-3600.html">[����åɰ���]</a></p>
+<p class="button"><a href="3518.html">[前]</a><a href="3520.html">[次]</a><a href="../list/3501-3600.html">[番号順一覧]</a><a href="../thread/3501-3600.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:3519
 </p>
@@ -13,39 +13,39 @@ mysql:3519
 <p>
 From: Kengo Jinno &lt;Kengo Jinno &lt;kengo@xxxxxxxxxx&gt;&gt;<br>
 Date: Mon, 09 Apr 2001 11:53:47 +0900<br>
-Subject: [mysql 03519] Re: Borland �Ǥε�ư�ˤĤ���<br>
+Subject: [mysql 03519] Re: Borland での挙動について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-����Ǥ���
+神野です。
 
-Sun, 08 Apr 2001 20:33:44 +0900 ������
-&lt;28C0C015C403BF.hirofujita8523@xxxxxxxxxx&gt; ��
-&quot;<a href="03515.html">[mysql 03515]</a> Borland �Ǥε�ư�ˤĤ���&quot; �Υ᡼���
-hirofujita8523 &lt;hirofujita8523@xxxxxxxxxx&gt; ����Ͻ񤭤ޤ�����
+Sun, 08 Apr 2001 20:33:44 +0900 ごろに
+&lt;28C0C015C403BF.hirofujita8523@xxxxxxxxxx&gt; の
+&quot;<a href="03515.html">[mysql 03515]</a> Borland での挙動について&quot; のメールで
+hirofujita8523 &lt;hirofujita8523@xxxxxxxxxx&gt; さんは書きました。
 
-<span class="quote1">&gt; ����Borland �Ǥε�ư�Ǻ��äƤ��ޤ���</span>
-<span class="quote1">&gt; �ʲ��Υ�������¹Ԥ���ȡ�main() ��λ���˥���å��夷�Ƥ��ޤ��ޤ���</span>
+<span class="quote1">&gt; 今回、Borland での挙動で困っています。</span>
+<span class="quote1">&gt; 以下のソースを実行すると、main() 終了時にクラッシュしてしまいます。</span>
 
-�����
+問題の
 
-<span class="quote1">&gt;         mysql_data_seek(res, 0);        // ���ιԤ�ȴ���������ư���</span>
+<span class="quote1">&gt;         mysql_data_seek(res, 0);        // この行を抜けば正常に動作する</span>
 
-�Ǥ�����
+ですが、
 
-winclients-3.23.09a-sjis �� mysql.h
+winclients-3.23.09a-sjis の mysql.h
 void        STDCALL mysql_data_seek(MYSQL_RES *result,
                     my_ulonglong offset);
 
-winclients-3_22_28_sjis �� mysql.h
+winclients-3_22_28_sjis の mysql.h
 void        STDCALL mysql_data_seek(MYSQL_RES *result,unsigned int offset);
 
-���������Ƥ��ޤ���
-�裲�����η����㤦���Ȥ����դ��Ƥ���������
+と宣言されています。
+第２引数の型が違うことに注意してください。
 
-my_ulonglong �ϡ�
+my_ulonglong は、
 
 #if defined(NO_CLIENT_LONG_LONG)
 typedef unsigned long my_ulonglong;
@@ -55,53 +55,53 @@ typedef unsigned __int64 my_ulonglong;
 typedef unsigned long long my_ulonglong;
 #endif
 
-���������Ƥ��ޤ���(�ɤ����Ʊ��)
+と定義されています。(どちらも同じ)
 
-ƣ�Ĥ���Υ������Ǥϡ�
+藤田さんのソースでは、
 
 <span class="quote1">&gt; #define NO_CLIENT_LONG_LONG</span>
 <span class="quote1">&gt; #include &quot;mysql.h&quot;</span>
 
-�ʤäƤ���Τǡ�my_ulonglong �� unsigned long ��
-�Ĥޤꡢ32bit���ʤ������Ǥ���
+なっているので、my_ulonglong は unsigned long 、
+つまり、32bit符号なし整数です。
 
-��winclients-3.23.09a-sjis �ǥ���å��夹����ͳ
+■winclients-3.23.09a-sjis でクラッシュする理由
 
-winclients-3.23.09a-sjis �� mysql_data_seek() ���裲�����ϡ�
-64bit�������Ȥ��ƺ�������Ƥ����ΤȻפ��ޤ���
+winclients-3.23.09a-sjis の mysql_data_seek() の第２引数は、
+64bit整数だとして作成されているものと思われます。
 
-STDCALL(Pascal�ƤӽФ�)�Ǥ����顢�����å����Ѥޤ줿�����ϡ�
-�ƤӽФ��줿¦(mysql_data_seek())�ǲ������ޤ���
+STDCALL(Pascal呼び出し)ですから、スタックに積まれた引数は、
+呼び出された側(mysql_data_seek())で解放します。
 
-�ƤӽФ���¦���裲�����Ȥ���32bit(4byte)�����Ѥ�Ǥʤ��Τˡ�
-�ƤӽФ��줿¦��64bit(8byte)��������С��ޥ����Ǥ���
+呼び出した側は第２引数として32bit(4byte)しか積んでないのに、
+呼び出された側で64bit(8byte)解放すれば、マズいです。
 
-��winclients-3_22_28_sjis �ǥ���å��夷�ʤ���ͳ
+■winclients-3_22_28_sjis でクラッシュしない理由
 
-winclients-3_22_28_sjis �� mysql_data_seek() ���裲�����ϡ�
-32bit���ʤ������Ǥ���(����ϴְ㤤�ʤ�)
+winclients-3_22_28_sjis の mysql_data_seek() の第２引数は、
+32bit符号なし整数です。(これは間違いない)
 
-32bit(4byte)�Ѥ��32bit(4byte)�������Ƥ���ΤǤ����顢
-���ꤢ��ޤ���
+32bit(4byte)積んで32bit(4byte)解放しているのですから、
+問題ありません。
 
-��winclients-3_22_28_sjis �� mysql_num_fields()
+■winclients-3_22_28_sjis の mysql_num_fields()
 
-<span class="quote1">&gt; (2).MySQL-3.22-Win32ɾ���ǡ�3.22.16-gamma�ˤǡ�winclients-3_22_28_sjis</span>
-<span class="quote1">&gt; ���Τ�����Borland �Ǥϡ�(2) ������ư��ޤ���</span>
-<span class="quote1">&gt; ��������mysql_num_fields() �Ǥϡ���� 0 �����֤äƤ��ޤ���</span>
+<span class="quote1">&gt; (2).MySQL-3.22-Win32評価版（3.22.16-gamma）で、winclients-3_22_28_sjis</span>
+<span class="quote1">&gt; このうち、Borland では、(2) だけが動作します。</span>
+<span class="quote1">&gt; しかし、mysql_num_fields() では、常に 0 しか返ってきません。</span>
 
-<a href="03497.html">[mysql 03497]</a>�Ǥϡ�
+<a href="03497.html">[mysql 03497]</a>では、
 
-<span class="quote1">&gt; ���֤󡢥����С���������⿷������</span>
-<span class="quote1">&gt; ���ե�����ɿ���¾����ˡ���֤���</span>
-<span class="quote1">&gt; ��MYSQL_RES::field_count�˥��������äƤ��롣</span>
-<span class="quote1">&gt; �Ȥ��������ˤʤäƤ���ΤǤϤʤ����Ȼפ��ޤ���</span>
+<span class="quote1">&gt; たぶん、サーバーがこれよりも新しく、</span>
+<span class="quote1">&gt; ・フィールド数は他の方法で返す。</span>
+<span class="quote1">&gt; ・MYSQL_RES::field_countにゼロが入っている。</span>
+<span class="quote1">&gt; という実装になっているのではないかと思います。</span>
 
-�Ȥ������˽񤭤ޤ��������㤦���⤷��ޤ���
+という風に書きましたが、違うかもしれません。
 
-MYSQL_RES��������Ǥ⡢my_ulonglong�����Ȥ��Ƥ��ޤ���
+MYSQL_RES型の定義でも、my_ulonglong型が使われています。
 
-winclients-3_22_28_sjis �� mysql.h
+winclients-3_22_28_sjis の mysql.h
 
 typedef struct st_mysql_res {
   my_ulonglong row_count;
@@ -109,40 +109,40 @@ typedef struct st_mysql_res {
   ...
 } MYSQL_RES;
 
-�ȤʤäƤ��ޤ���
+となっています。
 
-libmysql¦��my_ulonglong��64bit�Ȥ�����¤�Τ��֤��Ƥ���Ȥ��ơ�
-ƣ�Ĥ���Υ�����¦��my_ulonglong��32bit�����ꤷ�ƹ�¤�Τ�
-�������������顢field_count�λ��Ȱ��֤�������ǽ��������ޤ���
+libmysql側がmy_ulonglongを64bitとした構造体を返しているとして、
+藤田さんのソース側でmy_ulonglongを32bitと想定して構造体に
+アクセスしたら、field_countの参照位置がズレる可能性があります。
 
-row_count�ξ��32bit������������֤򻲾Ȥ��Ƥ���С���˥����Ǥ�
-������������ޤ���
+row_countの上位32bitに相当する位置を参照していれば、常にゼロでも
+おかしくありません。
 
-���إ�פˤ��ȡ�bcc55�Υ��饤���Ȥϥǥե���Ȥ�4byte��
-��VC5�Υ��饤���Ȥϥǥե���Ȥ�8byte�Ǥ���
+＃ヘルプによると、bcc55のアライメントはデフォルトで4byte、
+＃VC5のアライメントはデフォルトで8byteです。
 
 
 
-�Ȥ����櫓�ǡ�
+というわけで、
 
-<span class="quote1">&gt; �ɤʤ������ξɾ��β�ä���Ѥ򶵤��Ƥ��������ʤ��Ǥ��礦����</span>
+<span class="quote1">&gt; どなたかこの症状の解消する術を教えていただけないでしょうか？</span>
 
-my_ulonglong ��64bit�����Ȥ���������Ƥ��Ф����ΤǤ�
-�ʤ��Ǥ��礦����
+my_ulonglong を64bit整数として定義してやればいいのでは
+ないでしょうか？
 
-bcc55�Υإå����ե�����򸫤�¤ꡢ__int64 �����ݡ��Ȥ����
-����褦�˻פ���ΤǤ���������
+bcc55のヘッダーファイルを見る限り、__int64 がサポートされて
+いるように思えるのですが・・・
 
 -- 
-������ &lt;kengo@xxxxxxxxxx&gt;
+神野健吾 &lt;kengo@xxxxxxxxxx&gt;
 
 </pre>
 </div>
-<p class="button"><a href="3518.html">[��]</a><a href="3520.html">[��]</a><a href="../list/3501-3600.html">[�ֹ�����]</a><a href="../thread/3501-3600.html">[����åɰ���]</a></p>
+<p class="button"><a href="3518.html">[前]</a><a href="3520.html">[次]</a><a href="../list/3501-3600.html">[番号順一覧]</a><a href="../thread/3501-3600.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="3515.html">   3515 2001-04-08 20:33 [hirofujita8523 &lt;hiro] Borland �Ǥε�ư�ˤĤ���                </a></span>
-<span class="current">-&gt;&nbsp;<a href="3519.html">   3519 2001-04-09 11:53 ��[Kengo Jinno &lt;kengo@x]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3537.html">   3537 2001-04-11 12:06 ����[hirofujita8523 &lt;hiro]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3515.html">   3515 2001-04-08 20:33 [hirofujita8523 &lt;hiro] Borland での挙動について                </a></span>
+<span class="current">-&gt;&nbsp;<a href="3519.html">   3519 2001-04-09 11:53 ┗[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3537.html">   3537 2001-04-11 12:06 　┗[hirofujita8523 &lt;hiro]                                     </a></span>
 </pre>
 </body>
 </html>

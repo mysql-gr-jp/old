@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="86.html">[��]</a><a href="88.html">[��]</a><a href="../list/1-100.html">[�ֹ�����]</a><a href="../thread/1-100.html">[����åɰ���]</a></p>
+<p class="button"><a href="86.html">[前]</a><a href="88.html">[次]</a><a href="../list/1-100.html">[番号順一覧]</a><a href="../thread/1-100.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:87
 </p>
@@ -20,81 +20,81 @@ Subject: [mysql 87] Re: UJIS &amp; SJIS<br>
 <div class="body">
 <pre>
 
-From: &quot;̱�� &quot; &lt;tommy@xxxxxxxxxx&gt;
+From: &quot;民斗 &quot; &lt;tommy@xxxxxxxxxx&gt;
 Subject: <a href="86.html">[mysql 86]</a> Re: UJIS &amp; SJIS
 Date: Mon, 16 Mar 1998 01:55:27 +0900
 Message-ID: &lt;199803151656.BAA27414@xxxxxxxxxx&gt;
 
-tommy&gt; SJIS �б��Υѥå���Ĥ��äƤߤޤ������ޥ���Х���ʸ��������Ū�˽���
-tommy&gt; �Ǥ�����Ȥߤ��äơ��������Ѥ��� SJIS �б����Ƥ��ޤ���
+tommy&gt; SJIS 対応のパッチをつくってみました。マルチバイト文字を汎用的に処理
+tommy&gt; できる仕組みを作って、それを使用して SJIS 対応しています。
 
-���Ĥ�ʤ��餹�Ф䤤�Ǥ��͡��������Ǥ���
+いつもながらすばやいですね！すごいです。
 
 
-tommy&gt; ������¦���б�����ΤǤ���С�1�ĤΥ����Ф�����³���륯�饤��������
-tommy&gt; ʸ�������ɤ�Ƚ�Ǥ�����ϡ��������ǥݡ����ֹ��ʸ�������ɤ���ꤷ�ơ�
-tommy&gt; UJIS �� SJIS ��2�ĥ����Ф�ư���ơ�SJIS �Ȥ�������(���饤�����)��
-tommy&gt; ���ä��Υݡ��ȤˤĤʤ��Ǥ͡٤Ȥ��������ɤ������Ǥ��͡�
+tommy&gt; サーバ側で対応するのであれば、1つのサーバが、接続するクライアント毎に
+tommy&gt; 文字コードを判断するよりは、引数等でポート番号と文字コードを指定して、
+tommy&gt; UJIS と SJIS の2つサーバを起動して『SJIS 使いたい人(クライアント)は
+tommy&gt; こっちのポートにつないでね』とした方が良さそうですね。
 tommy&gt; 
-tommy&gt; �ǡ�SJIS ������������ UJIS ���Ѵ����ơ�UJIS ��Ʊ���ǡ����١����򸫤뤳��
-tommy&gt; ���Ǥ��롣�ȡ�
+tommy&gt; で、SJIS の方は内部で UJIS に変換して、UJIS と同じデータベースを見ること
+tommy&gt; ができる。と。
 
-�ʤ�ۤɡ�port �Ѥ����⤢��ޤ����͡�
-
-
-
-tommy&gt; libmysqlclient ��Τɤ줬�ط�����Τ�Ĵ�٤Ƥޤ��󤬡�libmysql.c ���
-tommy&gt; mysql_escape_string() �Ͼ�Ҥ� MB �ѥå������ܸ��б�����Ϥ��Ǥ���
-
-����ä������Ƥߤޤ���
+なるほど、port 変える手もありましたね。
 
 
-tommy&gt; &gt; UNIX ����ǡ�SJIS �� MySQL �����ä������б�����ȯ�����ޤ�����
-tommy&gt; &gt; lib ���Ѥ��ơ�����ѥ��뤷ľ���Ϥ��κݤ��������ʤ����ȤǤ��礦����
+
+tommy&gt; libmysqlclient 中のどれが関係するのか調べてませんが、libmysql.c 中の
+tommy&gt; mysql_escape_string() は上述の MB パッチで日本語対応するはずです。
+
+ちょっと覗いてみます。
+
+
+tommy&gt; &gt; UNIX がわで、SJIS を MySQL が喋った場合の対応策が発生しますが。
+tommy&gt; &gt; lib を変えて、コンパイルし直しはこの際いた仕方ないことでしょうか。
 tommy&gt; 
-tommy&gt; ����ϡ����饤�����¦�� SJIS �� UJIS ���Ƥ���Τˡ������Ф��¤� SJIS ��
-tommy&gt; ���äƤ���Ȥ���������ͤ��Ƥ���ΤǤ��礦����
+tommy&gt; これは、クライアント側が SJIS → UJIS しているのに、サーバが実は SJIS を
+tommy&gt; 喋っているという状況を考えているのでしょうか。
 
-�����Ǥ���
+そうです。
 
-tommy&gt; �����ޤǹͤ��ʤ��Ƥ⤤���ΤǤϤʤ��Ǥ��礦�� (^^; 
-tommy&gt; �ر��Ѥ�����������ɤˤϵ���Ĥ��ޤ��礦�٤Ȥ������Ȥǡġ�
+tommy&gt; そこまで考えなくてもいいのではないでしょうか (^^; 
+tommy&gt; 『運用する漢字コードには気をつけましょう』ということで…。
 
-�������� UNIX �ʤ餢�����٤ޤǤϥ����ɤ򲿤Ȥ��Ǥ��ޤ�����
+たしかに UNIX ならある程度まではコードを何とかできますし。
 
 
-tommy&gt; &gt; ���������ɤ� host ���б�ɽ�ߤ����ʤΤ򡢻���Ū�˸��˹Ԥ�����褦�ʤΤ�
-tommy&gt; &gt; ��ܤä����Ǥ����͡�
-tommy&gt; &gt; host,user,db �ȤȤ�˥��˥��������ɤ߹����ư��롢����
+tommy&gt; &gt; 漢字コードと host の対応表みたいなのを、暫定的に見に行かせるようなのは
+tommy&gt; &gt; やぼったいですかね？
+tommy&gt; &gt; host,user,db とともにイニシャル時に読み込んで動作する、、。
 tommy&gt; 
-tommy&gt; �����ФϤ��Υơ��֥�����Ƥ˱����ơ�ưŪ��ʸ�������ɤ��Ѵ�����Ȥ���
-tommy&gt; ���ȤǤ���͡��������ܤä������ɤ����ϤȤ⤫������������ΤϷ빽
-tommy&gt; ���Ѥ���ġ�
+tommy&gt; サーバはそのテーブルの内容に応じて、動的に文字コードを変換するという
+tommy&gt; ことですよね。ん～、やぼったいかどうかはともかく、実装するのは結構
+tommy&gt; 大変かも…。
 
-�����󡢥ϥ���Ǥ����ġ�
-# �������Ѥʤ��ȤФ���ͤ��Ƥ���ʤ���&gt;��ʬ
+うーん、ハズレですか…。
+# 毎回毎回変なことばかり考えているなぁ…&gt;自分
 
 
 
-tommy&gt; ʸ�������ɤ��Ѵ������������Ļפ��Ф��ޤ�����ʸ���Ǥʤ��Х��ʥ�ǡ�����
-tommy&gt; �����Ǥ���
+tommy&gt; 文字コードの変換の問題点を一つ思い出しました。文字でないバイナリデータの
+tommy&gt; 扱いです。
 
-tommy&gt; ���ꥸ�ʥ�� &quot;set optoin character set&quot; �Ϥ����ޤǹͤ����ˡ������Ѵ�����
-tommy&gt; ����褦�Ǥ������ġ�
+tommy&gt; オリジナルの &quot;set optoin character set&quot; はそこまで考えずに、全部変換して
+tommy&gt; いるようでしたが…。
 
-(�����б����Ƥ��� charset �Ǥϲ�������ʤ���Ǥ����ͤ���?)
-���ܸ�� chrset ��⤷���Ѥ���ʤ�С�BLOB ���Ѵ����ʤ����Ƥ������������Ǥ��͡�
-BLOB �����餽�Τޤ������ޤ����Ƥ��Ȥǡ�
+(現在対応している charset では何も問題ないんですかねぇ…?)
+日本語で chrset をもし使用するならば、BLOB は変換しない、ていう方がいいですね。
+BLOB だからそのまんま入ります、てことで。
 
 =========================================
-        ¼�� ��  takeshi@xxxxxxxxxx
+        村上 毅  takeshi@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="86.html">[��]</a><a href="88.html">[��]</a><a href="../list/1-100.html">[�ֹ�����]</a><a href="../thread/1-100.html">[����åɰ���]</a></p>
+<p class="button"><a href="86.html">[前]</a><a href="88.html">[次]</a><a href="../list/1-100.html">[番号順一覧]</a><a href="../thread/1-100.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="86.html">     86 1998-03-16 01:55 [&quot;̱�� &quot; &lt;tommy@xxxxx] Re: UJIS &amp;amp; SJIS                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="87.html">     87 1998-03-19 12:35 ��[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="86.html">     86 1998-03-16 01:55 [&quot;民斗 &quot; &lt;tommy@xxxxx] Re: UJIS &amp;amp; SJIS                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="87.html">     87 1998-03-19 12:35 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
 </pre>
 </body>
 </html>

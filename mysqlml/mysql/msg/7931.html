@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="7930.html">[��]</a><a href="7932.html">[��]</a><a href="../list/7901-8000.html">[�ֹ�����]</a><a href="../thread/7901-8000.html">[����åɰ���]</a></p>
+<p class="button"><a href="7930.html">[前]</a><a href="7932.html">[次]</a><a href="../list/7901-8000.html">[番号順一覧]</a><a href="../thread/7901-8000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:7931
 </p>
@@ -13,66 +13,66 @@ mysql:7931
 <p>
 From: Shinya Kawaji &lt;Shinya Kawaji &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 21 Jun 2003 14:38:44 +0900<br>
-Subject: [mysql 07931] Re: SELECT ʸ�� Where ��ˤĤ���<br>
+Subject: [mysql 07931] Re: SELECT 文の Where 句について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���露���Ǥ���
+かわじ、です。
 
 
-<span class="quote1">&gt; ��®�Ǥ���������̾�ȥեꥬ��(���ѥ���)�Ȥ����ե�����ɤ���ĥơ��֥�</span>
-<span class="quote1">&gt; �����ä��Ȥ��ޤ���</span>
-<span class="quote1">&gt; ���Υơ��֥���Selectʸ��ȯ�Ԥ����㤨�С֥��ԡפǻϤޤ뾦�ʰ�����</span>
-<span class="quote1">&gt; �����������ΤǤ��������κݤ�Selectʸ�ε�����ˡ��Ƚ��ޤ���</span>
+<span class="quote1">&gt; 早速ですが、商品名とフリガナ(全角カナ)というフィールドを持つテーブル</span>
+<span class="quote1">&gt; があったとします。</span>
+<span class="quote1">&gt; このテーブルよりSelect文を発行して例えば「ア行」で始まる商品一覧を</span>
+<span class="quote1">&gt; 取得したいのですが、この際のSelect文の記述方法が判りません。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ǡ����١�����SQLServer�Ǥ��ȡ������ε��Ҥǽ���ޤ���</span>
+<span class="quote1">&gt; データベースがSQLServerですと、下記の記述で出来ます。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; Select ����̾ From TableName Where �եꥬ�� Like &quot;[��-��]%&quot;</span>
+<span class="quote1">&gt; Select 商品名 From TableName Where フリガナ Like &quot;[ア-オ]%&quot;</span>
 
 
-REGEXP ���Ȥ�����ɤ���Ǥ����ɤ͡�
+REGEXP が使えれば良いんですけどね。
 
-mysql&gt; select &quot;����&quot; REGEXP &quot;^[��-��]&quot;;
+mysql&gt; select &quot;アカ&quot; REGEXP &quot;^[ア-オ]&quot;;
 +--------------------------+
-<span class="quote1">| &quot;����&quot; REGEXP &quot;^[��-��]&quot; |</span>
+<span class="quote1">| &quot;アカ&quot; REGEXP &quot;^[ア-オ]&quot; |</span>
 +--------------------------+
 <span class="quote1">|                        1 |</span>
 +--------------------------+
 1 row in set (0.00 sec)
 
-mysql&gt; select &quot;����&quot; REGEXP &quot;^[��-��]&quot;;
+mysql&gt; select &quot;カオ&quot; REGEXP &quot;^[ア-オ]&quot;;
 +--------------------------+
-<span class="quote1">| &quot;����&quot; REGEXP &quot;^[��-��]&quot; |</span>
+<span class="quote1">| &quot;カオ&quot; REGEXP &quot;^[ア-オ]&quot; |</span>
 +--------------------------+
 <span class="quote1">|                        1 |</span>
 +--------------------------+
 1 row in set (0.00 sec)
 
 
-��λȤäƤ��� 3.23.52 �Ǥϡ��嵭�Τ褦�˸����ޤ���Ǥ����ʥ��԰ʳ���
-�������ʤ�ޥå�����ˡ�
+私の使っている 3.23.52 では、上記のように効きませんでした（ア行以外の
+カタカナもマッチする）。
 
-�ʲ����б����Ƥ��ʤ��ݤ��񤫤�Ƥ��ޤ������ǿ��ΥС������Ǥ⤽���Ǥ���
-�͡��ʤ��ߤޤ����Τ�ʤ��ơˡ�
+以下に対応していない旨が書かれていますが、最新のバージョンでもそうですか
+ね？（すみません、知らなくて）。
 <a href="http://www.tmtm.org/ja/mysql/japanese.html">http://www.tmtm.org/ja/mysql/japanese.html</a>
 
 
-����ޤ��������Ϥ���ޤ��󤬡������ˡֺǽ��ʸ���פ������ɤ��ΤǤ���С�
-�ʲ��Τ褦����ˡ�⤢��ޤ���
+あんまり汎用性はありませんが、本当に「最初の文字」だけで良いのであれば、
+以下のような方法もあります。
 
-mysql&gt; select ord(&quot;����&quot;) between ord(&quot;��&quot;) and ord(&quot;��&quot;);
+mysql&gt; select ord(&quot;アカ&quot;) between ord(&quot;ア&quot;) and ord(&quot;オ&quot;);
 +---------------------------------------------+
-<span class="quote1">| ord(&quot;����&quot;) between ord(&quot;��&quot;) and ord(&quot;��&quot;) |</span>
+<span class="quote1">| ord(&quot;アカ&quot;) between ord(&quot;ア&quot;) and ord(&quot;オ&quot;) |</span>
 +---------------------------------------------+
 <span class="quote1">|                                           1 |</span>
 +---------------------------------------------+
 1 row in set (0.00 sec)
 
-mysql&gt; select ord(&quot;����&quot;) between ord(&quot;��&quot;) and ord(&quot;��&quot;);
+mysql&gt; select ord(&quot;カオ&quot;) between ord(&quot;ア&quot;) and ord(&quot;オ&quot;);
 +---------------------------------------------+
-<span class="quote1">| ord(&quot;����&quot;) between ord(&quot;��&quot;) and ord(&quot;��&quot;) |</span>
+<span class="quote1">| ord(&quot;カオ&quot;) between ord(&quot;ア&quot;) and ord(&quot;オ&quot;) |</span>
 +---------------------------------------------+
 <span class="quote1">|                                           0 |</span>
 +---------------------------------------------+
@@ -82,11 +82,11 @@ mysql&gt; select ord(&quot;����&quot;) between ord(&quot;��&quot;) and ord(&quot
 
 </pre>
 </div>
-<p class="button"><a href="7930.html">[��]</a><a href="7932.html">[��]</a><a href="../list/7901-8000.html">[�ֹ�����]</a><a href="../thread/7901-8000.html">[����åɰ���]</a></p>
+<p class="button"><a href="7930.html">[前]</a><a href="7932.html">[次]</a><a href="../list/7901-8000.html">[番号順一覧]</a><a href="../thread/7901-8000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="7930.html">   7930 2003-06-21 13:59 [Masaomi Morofushi &lt;m] SELECT ʸ�� Where ��ˤĤ���            </a></span>
-<span class="current">-&gt;&nbsp;<a href="7931.html">   7931 2003-06-21 14:38 ��[Shinya Kawaji &lt;kawaj]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7933.html">   7933 2003-06-21 16:23 ��[&quot;Y.Mizushima&quot; &lt;herlo]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7930.html">   7930 2003-06-21 13:59 [Masaomi Morofushi &lt;m] SELECT 文の Where 句について            </a></span>
+<span class="current">-&gt;&nbsp;<a href="7931.html">   7931 2003-06-21 14:38 ┣[Shinya Kawaji &lt;kawaj]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7933.html">   7933 2003-06-21 16:23 ┗[&quot;Y.Mizushima&quot; &lt;herlo]                                       </a></span>
 </pre>
 </body>
 </html>

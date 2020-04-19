@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14074.html">[��]</a><a href="14076.html">[��]</a><a href="../list/14001-14100.html">[�ֹ�����]</a><a href="../thread/14001-14100.html">[����åɰ���]</a></p>
+<p class="button"><a href="14074.html">[前]</a><a href="14076.html">[次]</a><a href="../list/14001-14100.html">[番号順一覧]</a><a href="../thread/14001-14100.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14075
 </p>
@@ -13,62 +13,62 @@ mysql:14075
 <p>
 From: Katsuyuki Sakai &lt;Katsuyuki Sakai &lt;sakai@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 22 Jun 2007 17:06:15 +0900<br>
-Subject: [mysql 14075] [����]innodb_max_purge_lag�ˤĤ���<br>
+Subject: [mysql 14075] [再送]innodb_max_purge_lagについて<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ȿ����ޤ���
-��ۤɤ��Ѥʥ��󥳡��ǥ��󥰤ǥ᡼����������Ƥ��ޤ������������� 
-���ޤ���Ǥ�����
-ǰ�Τ�����������Ƥ��������ޤ���
+酒井と申します。
+先ほどは変なエンコーディングでメールを送信してしまい、申し訳ござ 
+いませんでした。
+念のため再送させていただきます。
 
 -----------------
 
-innodb_max_purge_lag�ˤĤ��ƶ����Ƥ�����������¸���ޤ���
+innodb_max_purge_lagについて教えていただきたく存じます。
 
-InnoDB��multi-versioned���ȥ졼�����󥸥�ʤΤǡ� 
-UPDATE��DELETE���ѹ����줿�Ԥ��ѹ���������θŤ�������ݻ� 
-���Ƥ������Ȼפ��ޤ��ʤ���ȥ�󥶥�������ѹ����Υǡ������ɤ� 
-ɬ�����������뤫�⤷��ʤ�����ˡ�
+InnoDBはmulti-versionedストレージエンジンなので、 
+UPDATEやDELETEで変更された行の変更される前の古い情報を保持 
+しておくかと思います（あるトランザクションが変更前のデータを読む 
+必要性ががあるかもしれないため）。
 
-innodb_max_purge_lag�Υǥե�����ͤ�0�ʤΤǡ�UPDATE�� 
-DELETE��MySQL��ľ���˥ѡ�������åɤ����餻�����Υ���å� 
-�ˤ�äƸŤ�����ϥѡ��������ΤǤ��礦�����ʤ������Ť�������� 
-��ɬ�פ�����ȥ�󥶥������¸�ߤ��ʤ��¤��
+innodb_max_purge_lagのデフォルト値は0なので、UPDATEや 
+DELETE後MySQLは直ちにパージスレッドを走らせ、そのスレッド 
+によって古い情報はパージされるのでしょうか？（ただし古い情報を読 
+む必要があるトランザクションが存在しない限り）
 
-�ޥ˥奢��ʤɤ��ɤ�ȡ��Ť�����ιԿ���purge_lag�Ȥ��� 
-purge_lag���ͤ�innodb_max_purge_lag���ͤ�Ķ������硢
-INSERT��UPDATE��DELETE�γ���((purge_lag/ 
-innodb_max_purge_lag)��10)-5�ߥ��ä����ٱ䤵�졢���δ֤� 
-�ѡ�������åɤ����롢���ɤ�ޤ���
+マニュアルなどを読むと、古い情報の行数をpurge_lagとし、 
+purge_lagの値がinnodb_max_purge_lagの値を超えた場合、
+INSERTとUPDATE、DELETEの各操作が((purge_lag/ 
+innodb_max_purge_lag)×10)-5ミリ秒だけ遅延され、その間に 
+パージスレッドが走る、と読めます。
 <a href="http://dev.mysql.com/doc/refman/5.0/en/innodb-parameters.html">http://dev.mysql.com/doc/refman/5.0/en/innodb-parameters.html</a>
 <a href="http://dev.mysql.com/doc/refman/5.0/en/innodb-multi-versioning.html">http://dev.mysql.com/doc/refman/5.0/en/innodb-multi-versioning.html</a>
 <a href="http://forums.mysql.com/read.php?22">http://forums.mysql.com/read.php?22</a>,122206,122800#msg-122800
 
-�ѡ������ˤ�tablespace�ʤɤؤΥǥ���������������ȼ���� 
-�ᡢ�ѡ������ܥȥ�ͥå��ˤʤ��ǽ��������ޤ���
-�ʤΤǡ�innodb_max_purge_lag�Υǥե������0�Ǥϥǥ� 
-�����������������ˤ˵����ƥܥȥ�ͥå��ˤʤ롢�Ȥ����ͤ��������� 
-���Ǥ��礦����
-�ޤ���innodb_max_purge_lag���ͤ�Ŭ�����䤷�ơ���ǤޤȤ�� 
-�ѡ������Ƥ�餦���Ȥǥѥե����ޥ󥹥��åפ�ޤ�Ȥ����ͤ��� 
-���������Ǥ��礦����
+パージ操作にはtablespaceなどへのディスクアクセスが伴うた 
+め、パージ操作がボトルネックになる可能性があります。
+なので、innodb_max_purge_lagのデフォルト値0ではディ 
+スクアクセスが頻繁に起きてボトルネックになる、という考え方は正し 
+いでしょうか？
+また、innodb_max_purge_lagの値を適宜増やして、後でまとめて 
+パージ操作してもらうことでパフォーマンスアップを図るという考え方 
+は正しいでしょうか？
 
-�������Τۤɡ�����������ꤤ�������ޤ���
+ご返答のほど、よろしくお願いいたします。
 
 --
-���
+酒井
 
 </pre>
 </div>
-<p class="button"><a href="14074.html">[��]</a><a href="14076.html">[��]</a><a href="../list/14001-14100.html">[�ֹ�����]</a><a href="../thread/14001-14100.html">[����åɰ���]</a></p>
+<p class="button"><a href="14074.html">[前]</a><a href="14076.html">[次]</a><a href="../list/14001-14100.html">[番号順一覧]</a><a href="../thread/14001-14100.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="14075.html">  14075 2007-06-22 17:06 [Katsuyuki Sakai &lt;sak] [����]innodb_max_purge_lag�ˤĤ���      </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14076.html">  14076 2007-06-22 17:16 ��[Yasufumi Kinoshita &lt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14077.html">  14077 2007-06-22 17:53 ����[&quot;Katsuyuki Sakai&quot; &lt;s]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14078.html">  14078 2007-06-22 18:04 ������[Yasufumi Kinoshita &lt;]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="14075.html">  14075 2007-06-22 17:06 [Katsuyuki Sakai &lt;sak] [再送]innodb_max_purge_lagについて      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14076.html">  14076 2007-06-22 17:16 ┗[Yasufumi Kinoshita &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14077.html">  14077 2007-06-22 17:53 　┗[&quot;Katsuyuki Sakai&quot; &lt;s]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14078.html">  14078 2007-06-22 18:04 　　┗[Yasufumi Kinoshita &lt;]                                   </a></span>
 </pre>
 </body>
 </html>

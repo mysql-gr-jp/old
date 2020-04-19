@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14868.html">[��]</a><a href="14870.html">[��]</a><a href="../list/14801-14900.html">[�ֹ�����]</a><a href="../thread/14801-14900.html">[����åɰ���]</a></p>
+<p class="button"><a href="14868.html">[前]</a><a href="14870.html">[次]</a><a href="../list/14801-14900.html">[番号順一覧]</a><a href="../thread/14801-14900.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14869
 </p>
@@ -13,13 +13,13 @@ mysql:14869
 <p>
 From: &quot;N.K.&quot; &lt;&quot;N.K.&quot; &lt;nakai.kanako@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 22 May 2009 01:44:52 +0900<br>
-Subject: [mysql 14869] Re: @�ѿ���ư��ˤĤ���<br>
+Subject: [mysql 14869] Re: @変数の動作について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��δĶ��Ǥ�1���ܤΥ�����⥻�å������³��ν��¹Ի��ϡ����Ԥ���Ƥ����̤����ʤ��ä��Ǥ���
+私の環境では1番目のクエリもセッション接続後の初回実行時は、期待されている結果が戻らなかったです。
 
 mysql&gt; select version();
 +------------------+
@@ -60,11 +60,11 @@ from T order by T.code;
 +-------+------+------+
 7 rows in set
 
-Ʊ�쥻�å�����2���ܼ¹Ի��˴��Ԥ����̤ˤʤäƤ���Τϡ�
-����¹ԤκǸ�˥��åȤ��Ƥ���&quot;c&quot;���ĤäƤ��뤫��Τ褦�Ǥ���
+同一セッションで2回目実行時に期待する結果になっているのは、
+前回実行の最後にセットしている&quot;c&quot;が残っているからのようです。
 
 
-�桼���ѿ�����Ѥ�������ˡ����������Ƚ��¹Ի��Ǥ���Ԥ���Ƥ����̤ˤϤʤ�ޤ�����
+ユーザ変数を使用される前に、初期化すると初回実行時でも期待されている結果にはなりました。
 
 mysql&gt; set @code=&quot;&quot;;select @code,if(T.code=@code,'same','new') as
 Mark,@code:=T.code as Code,M.name
@@ -87,11 +87,11 @@ Query OK, 0 rows affected
 
 
 
-2009/05/22 0:44 �Ƴ� &lt;akiro@xxxxxxxxxx&gt;:
-<span class="quote1">&gt; �Ƴ��Ȥ����ޤ���</span>
-<span class="quote1">&gt; @�ѿ���Ȥä�sqlʸ��ư��ˤĤ��ơ����Ť������Ȥ�񤭤ޤ���</span>
+2009/05/22 0:44 柴垣 &lt;akiro@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; 柴垣といいます。</span>
+<span class="quote1">&gt; @変数を使ったsql文の動作について、気づいたことを書きます。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �㤨�С����Τ褦�ʥơ��֥� T �����ä�</span>
+<span class="quote1">&gt; 例えば、下のようなテーブル T があって</span>
 <span class="quote1">&gt; +------+</span>
 <span class="quote2">&gt; | code |</span>
 <span class="quote1">&gt; +------+</span>
@@ -107,7 +107,7 @@ Query OK, 0 rows affected
 <span class="quote1">&gt; select if(T.code=@code,'same','new') as Mark,@code:=T.code as Code</span>
 <span class="quote1">&gt; from T order by T.code;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Ȥ��ƥ����Ȥ���ȡ����Τ褦�ʷ�̤��֤äƤ��ޤ���</span>
+<span class="quote1">&gt; としてソートすると、下のような結果が返ってきます。</span>
 <span class="quote1">&gt; +------+------+</span>
 <span class="quote2">&gt; | Mark | Code |</span>
 <span class="quote1">&gt; +------+------+</span>
@@ -119,10 +119,10 @@ Query OK, 0 rows affected
 <span class="quote2">&gt; | new  | c    |</span>
 <span class="quote2">&gt; | same | c    |</span>
 <span class="quote1">&gt; +------+------+</span>
-<span class="quote1">&gt; �����ޤǤϴ����̤�Ǥ���</span>
+<span class="quote1">&gt; ここまでは期待通りです。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Ȥ����������Τ褦���̤Υơ��֥� M ���Ѱդ��ơ�</span>
+<span class="quote1">&gt; ところが、下のような別のテーブル M を用意して、</span>
 <span class="quote1">&gt; +------+------+</span>
 <span class="quote2">&gt; | code | name |</span>
 <span class="quote1">&gt; +------+------+</span>
@@ -135,7 +135,7 @@ Query OK, 0 rows affected
 <span class="quote1">&gt; M.name</span>
 <span class="quote1">&gt; from T left join M on T.code=M.code order by T.code;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �Τ褦��name�ե�����ɤ��դ��ä��ƽ��Ϥ��褦�Ȥ���ȡ�</span>
+<span class="quote1">&gt; のようにnameフィールドを付け加えて出力しようとすると、</span>
 <span class="quote1">&gt; +------+------+------+</span>
 <span class="quote2">&gt; | Mark | Code | name |</span>
 <span class="quote1">&gt; +------+------+------+</span>
@@ -147,11 +147,11 @@ Query OK, 0 rows affected
 <span class="quote2">&gt; | new  | c    | COM  |</span>
 <span class="quote2">&gt; | new  | c    | COM  |</span>
 <span class="quote1">&gt; +------+------+------+</span>
-<span class="quote1">&gt; �ȤʤäƤ��ޤ��ޤ���</span>
+<span class="quote1">&gt; となってしまいます。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; ��from�פ���ʬ��fromT,M �Ƚ񤤤Ƥߤ��ꤹ�뤳�Ȥ���Ϥ��</span>
-<span class="quote1">&gt; ¿���ιԤ��餳�Υǡ������åȤ���Ф���Ƥ����������ɤ����Ȥ�</span>
-<span class="quote1">&gt; @code �ε�ư�ϰ�����򤷤��ΤǤ��������Ϥ�</span>
+<span class="quote1">&gt; 「from」の部分を、fromT,M と書いてみたりすることから始めて</span>
+<span class="quote1">&gt; 多くの行からこのデータセットが抽出されていく過程を追うことで</span>
+<span class="quote1">&gt; @code の挙動は一応理解したのですが、出力を</span>
 <span class="quote1">&gt; +------+------+------+</span>
 <span class="quote2">&gt; | Mark | Code | name |</span>
 <span class="quote1">&gt; +------+------+------+</span>
@@ -163,13 +163,13 @@ Query OK, 0 rows affected
 <span class="quote2">&gt; | new  | c    | COM  |</span>
 <span class="quote2">&gt; | same | c    | COM  |</span>
 <span class="quote1">&gt; +------+------+------+</span>
-<span class="quote1">&gt; �Ȥ��빩�פϤʤ���ΤǤ��礦����</span>
-<span class="quote1">&gt; �ʤ��ޤ���������ʤ����⤷��ʤ����Ƥǡ�����������ޤ��󡣡�</span>
+<span class="quote1">&gt; とする工夫はないものでしょうか。</span>
+<span class="quote1">&gt; （あまり一般性がないかもしれない内容で、申し訳ありません。）</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;  �Ƴ��� akiro@xxxxxxxxxx</span>
+<span class="quote1">&gt;  柴垣　 akiro@xxxxxxxxxx</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt; _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/</span>
 <span class="quote1">&gt;</span>
@@ -179,13 +179,13 @@ Query OK, 0 rows affected
 
 </pre>
 </div>
-<p class="button"><a href="14868.html">[��]</a><a href="14870.html">[��]</a><a href="../list/14801-14900.html">[�ֹ�����]</a><a href="../thread/14801-14900.html">[����åɰ���]</a></p>
+<p class="button"><a href="14868.html">[前]</a><a href="14870.html">[次]</a><a href="../list/14801-14900.html">[番号順一覧]</a><a href="../thread/14801-14900.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14868.html">  14868 2009-05-22 00:44 [�Ƴ� &lt;akiro@xxxxxxxx] @�ѿ���ư��ˤĤ���                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="14869.html">  14869 2009-05-22 01:44 ��[&quot;N.K.&quot; &lt;nakai.kanako]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14870.html">  14870 2009-05-22 09:16 ����[�Ƴ� &lt;akiro@xxxxxxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14871.html">  14871 2009-05-22 09:50 ������[&quot;N.K.&quot; &lt;nakai.kanako]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14872.html">  14872 2009-05-22 12:06 ��������[�Ƴ� &lt;akiro@xxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14868.html">  14868 2009-05-22 00:44 [柴垣 &lt;akiro@xxxxxxxx] @変数の動作について                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="14869.html">  14869 2009-05-22 01:44 ┗[&quot;N.K.&quot; &lt;nakai.kanako]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14870.html">  14870 2009-05-22 09:16 　┗[柴垣 &lt;akiro@xxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14871.html">  14871 2009-05-22 09:50 　　┗[&quot;N.K.&quot; &lt;nakai.kanako]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14872.html">  14872 2009-05-22 12:06 　　　┗[柴垣 &lt;akiro@xxxxxxxx]                                 </a></span>
 </pre>
 </body>
 </html>

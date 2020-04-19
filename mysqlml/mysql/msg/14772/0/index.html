@@ -1,31 +1,31 @@
-������ͤǤ���<br>���Ĥ⤪���äˤʤäƤ���ޤ���<br><br>���Υ᡼��μ���˴ؤ��뤳�ȤʤΤǤ�����<br><br>&gt;&gt; (2)ʣ���ΥΡ��ɤ��Ф��ƥ��饤����Ȥ��饯��������������Ȥ������ΤΥޥ���˥ơ��֥�ǡ��������椹��ΤǤ��礦����<br><div id=":156" class="ii gt">
-&gt;&gt; �ǡ����Ρ��ɤΥǡ����ϳƥΡ��ɤ�ʬ�����Ƥ���Ȥ���ǧ���ʤΤǣ���Υǡ����Ρ��ɤ˽��椹�뤳�ȤϤʤ��Τ��ȻפäƤ��ޤ���<br>
+お疲れ様です。<br>いつもお世話になっております。<br><br>前のメールの質問に関することなのですが、<br><br>&gt;&gt; (2)複数のノードに対してクライアントからクエリを送信したとき、１体のマシンにテーブルデータが集中するのでしょうか。<br><div id=":156" class="ii gt">
+&gt;&gt; データノードのデータは各ノードに分散しているという認識なので１台のデータノードに集中することはないのかと思っています。<br>
 <br>
-&gt;�祭���Υϥå����ͤˤ�ä�ʬ������ޤ������äơ��ϥå����ͤ��ۤʤ�Хơ��֥�ǡ�����<br>
-���椹�뤳�ȤϤ���ޤ���</div><br>����ϥå����͡ʤ��Ȥ����ͤ��ɣ��ɤʤɡˤΥơ��֥뤬����ޥ���˥ꥯ�����Ȥ����椷�Ƥ��ޤä���硢���Υޥ�����Ф�����٤��礭���ʤ뤫�Ȼפ��ޤ������ξ�硢�ǡ����Ρ��ɤ�<br>�������䤻�Хꥯ�����Ȥ��Ф���������֤ʤɤ���������뤫�ʤȻפ��ΤǤ�����ñ��˥ǡ����Ρ��ɤ����䤻�Ф褤�櫓�ǤϤʤ��Ǥ���͡�<br><br>�ʾ塢����������ꤤ���ޤ���<br><div class="gmail_quote">
+&gt;主キーのハッシュ値によって分散されます。従って、ハッシュ値が異なればテーブルデータが<br>
+集中することはありません。</div><br>あるハッシュ値（たとえば値が”１”など）のテーブルがあるマシンにリクエストが集中してしまった場合、そのマシンに対する負荷は大きくなるかと思います。この場合、データノードの<br>数を増やせばリクエストに対する処理時間などが改善されるかなと思うのですが、単純にデータノードを増やせばよいわけではないですよね？<br><br>以上、よろしくお願いします。<br><div class="gmail_quote">
 2009/03/10 22:03 Mikiya Okuno <span dir="ltr">&lt;<a href="mailto:Mikiya.Okuno@sun.com">Mikiya.Okuno@sun.com</a>&gt;</span>:<br><blockquote class="gmail_quote" style="border-left: 1px solid rgb(204, 204, 204); margin: 0pt 0pt 0pt 0.8ex; padding-left: 1ex;">
 <div class="im">On 10/03/2009, at 6:55 PM, Hiroyuki Ogawa wrote:<br>
 <br>
-&gt; �����äˤʤäƤ���ޤ���<br>
-&gt; ���������˺��Ƥ��ޤ�����<br>
+&gt; お世話になっております。<br>
+&gt; １点質問を忘れていました。<br>
 &gt;<br>
-&gt; &gt;�ǡ����Ρ��ɤ˴ؤ��Ƥϡ�<br>
-&gt; &gt;�Ǥ⥹�ڥå����㤤��Τ����Τ���ǽ������ĥ���ޤ���<br>
-&gt; ¾��SQL�Ρ��ɤ�����Ρ��ɤ˴ؤ��Ƥ����Τ���ǽ��<br>
-&gt; ����ĥ����Ȥ������ȤϤʤ��ȹͤ��Ƥ�����פǤ��礦����<br>
+&gt; &gt;データノードに関しては、<br>
+&gt; &gt;最もスペックが低いものに全体の性能が引っ張られます。<br>
+&gt; 他のSQLノードや管理ノードに関しては全体の性能が<br>
+&gt; 引っ張られるということはないと考えても大丈夫でしょうか。<br>
 <br>
-</div>�Ϥ����ä˴����Ρ��ɤ��㤤���ڥå��Υޥ�������ꤢ��ޤ���<br>
-SQL�Ρ��ɤ���Υꥯ�����Ȥ϶����˥ǡ����Ρ��ɤ�ʬ������ޤ��Τǡ�<br>
-SQL�Ρ��ɼ��Τ���ǽ�˥Х�ĥ������äƤ�OK�Ǥ���<br>
-�������ꡢSQL�Ρ��ɤؤ����ʬ��������ȥΡ��ɤ���ǽ�˹�碌�Ƥ��ɬ�פ������ޤ���<br>
+</div>はい。特に管理ノードは低いスペックのマシンで問題ありません。<br>
+SQLノードからのリクエストは均等にデータノードへ分散されますので、<br>
+SQLノード自体の性能にバラツキがあってもOKです。<br>
+その代わり、SQLノードへの負荷分散をちゃんとノードの性能に合わせてやる必要が生じます。<br>
 <div><div></div><div class="h5"><br>
 --<br>
-���� ����<br>
-MySQL���ݡ��ȥ��󥸥˥�<br>
-���󡦥ޥ����������ƥॺ�������<br>
+奥野 幹也<br>
+MySQLサポートエンジニア<br>
+サン・マイクロシステムズ株式会社<br>
 <a href="http://www-jp.mysql.com/" target="_blank">http://www-jp.mysql.com/</a><br>
 <br>
-MySQL�֥������󥵥��ȡ�Planet MySQL�����ܸ��ǥ����ץ�<br>
+MySQLブログ集約サイト「Planet MySQL」日本語版オープン！<br>
 <a href="http://jp.planetmysql.org/" target="_blank">http://jp.planetmysql.org/</a><br>
 <br>
 <br>

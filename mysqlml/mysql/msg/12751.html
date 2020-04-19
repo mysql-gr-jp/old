@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="12750.html">[��]</a><a href="12752.html">[��]</a><a href="../list/12701-12800.html">[�ֹ�����]</a><a href="../thread/12701-12800.html">[����åɰ���]</a></p>
+<p class="button"><a href="12750.html">[前]</a><a href="12752.html">[次]</a><a href="../list/12701-12800.html">[番号順一覧]</a><a href="../thread/12701-12800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:12751
 </p>
@@ -13,72 +13,72 @@ mysql:12751
 <p>
 From: baya &lt;baya &lt;bayapbayap@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 14 Feb 2006 20:55:15 +0900 (JST)<br>
-Subject: [mysql 12751] MySQL �ΥХå����åס������ˤĤ���<br>
+Subject: [mysql 12751] MySQL のバックアップ・復元について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�Ϥ���ޤ��ơ�
-���Ӥȿ����ޤ���
-�������ML�ؽ�����Ƥ�����ĺ���ޤ���
+はじめまして。
+大林と申します。
+こちらのMLへ初めて投稿させて頂きます。
 
-MySQL�ΥХå����åפˤĤ��Ƥμ���ʤΤǤ�����
-�������ML�β�������WEB��ꡢ�Хå����åפμ��Ȥ���
-��
+MySQLのバックアップについての質問なのですが、
+こちらのMLの過去ログやWEBより、バックアップの手順として
+は
 
 % mysqldump ---all-databases --flush-logs &gt; ***.sql
 
-��Ԥ����ե�Хå����åפȥХ��ʥ�����ˤơ�
-�ǡ�����������Ԥ������Ȼפ��ޤ���
+を行い、フルバックアップとバイナリログにて、
+データの復元を行う形かと思います。
 
-���κݤˡ�MySQL��ե���󥹥ޥ˥奢��ˤ�ʲ��Τ褦��
-���ܤ���Ƥ���褦�ˡ���--all-databases�פΥ��ץ�����
-���Ѥ�����硢
-�Х��ʥ�������ǡ����١�����dump���Ȥ�flush�������֤�
-�ʤ�ޤ���
-���Τ��ᡢ�Х��ʥ������dump���ޥ�ɤμ¹Ի���dump�����
-�ǡ����١����θĿ�ʬ�������������Ȥʤ�ޤ���
+その際に、MySQLリファレンスマニュアルにも以下のように
+記載されているように、「--all-databases」のオプションを
+使用した場合、
+バイナリログがデータベースのdumpごとにflushされる状態と
+なります。
+そのため、バイナリログがdumpコマンドの実行時にdumpされる
+データベースの個数分、作成される形となります。
 
 -----------------------------------------------
 -F, --flush-logs 
-����פ򳫻Ϥ������ˡ�MySQL ��������Υ����ե������ե�
-�å��夹�롣
-����: ���Υ��ץ����� --all-databases�ʤޤ��� -A�˥���
-�������Ȥ߹�碌�ƻ��Ѥ�����硢
-�����ϳƥǡ����١����Υ���פ��Ȥ˥ե�å��夵��롣 
+ダンプを開始する前に、MySQL サーバ内のログファイルをフラ
+ッシュする。
+注意: このオプションを --all-databases（または -A）オプ
+ションと組み合わせて使用した場合、
+ログは各データベースのダンプごとにフラッシュされる。 
 -------------------------------------------------
 
-�㤨��3�Ĥ�DB��dump������硢�Х��ʥ�����ե������
-��sv-bin.001�ס�sv-bin.002�ס�sv-bin.003�פΤ褦�ʷ���
-3�ĤΥХ��ʥ�ե����뤬�����������Ȥʤ�ޤ���
+例えば3つのDBをdumpした場合、バイナリログファイルは
+「sv-bin.001」「sv-bin.002」「sv-bin.003」のような形で
+3つのバイナリファイルが作成される形となります。
 
-���ξ�硢�Хå����å����Ƥ���������ݤˤϡ�dump�ե�����
-��ή�����ߤθ塢
-�嵭��3�ĤΥХ��ʥ�ե������ή������ɬ�פ�����Τ���
-�⤷����dump���κǸ�˽��Ϥ�����sv-bin.003�פΤߤ�
-ή��������ɤ��Τ����ɤ���ˤʤ�ޤ��Ǥ��礦����
+その場合、バックアップ内容を復元する際には、dumpファイル
+の流し込みの後、
+上記の3つのバイナリファイルを流しこむ必要があるのか、
+もしくはdump時の最後に出力される「sv-bin.003」のみを
+流し込めば良いのか、どちらになりますでしょうか。
 
-�ޤ���mysqldump �Υ��ץ��������ˤ�
+また、mysqldump のオプション設定にて
 
 % mysqldump ---all-databases --flush-logs
 --delete-master-logs &gt; ***.sql
 
-�Τ褦�ˡ�--delete-master-logs �ץ��ץ�������ꤷ����
-�硢
-�Ť��Х��ʥ�����ե����뤬������졢�Х��ʥ�����ե�����
-��
-1�Ĥ������Ϥ���ޤ��󤬡�������ΥХ��ʥ��������ۤɤ�3
-�ĤΥХ��ʥ���������Ƥ�Ʊ����ΤʤΤǤ��礦����
-����Ȥ��sv-bin.003�פΥ�����Ʊ����ΤʤΤǤ��礦����
+のように「--delete-master-logs 」オプションを指定した場
+合、
+古いバイナリログファイルが削除され、バイナリログファイル
+は
+1つしか出力されませんが、こちらのバイナリログは先ほどの3
+つのバイナリログの内容と同じものなのでしょうか？
+それとも「sv-bin.003」のログと同じものなのでしょうか。
 
-������β������⻲�Ȥ�����ĺ�����ΤǤ������������ä�
-���ܤϤʤ��褦�Ǥ����Τǡ��⤷��¸�Τ����������ޤ�����
-��
-������ĺ���ޤ����鹬���Ǥ���
+こちらの過去ログも参照させて頂いたのですが、そういった
+記載はないようでしたので、もしご存知の方がおられましたら
+、
+ご教授頂けましたら幸いです。
 <a href="10758.html">http://www.mysql.gr.jp/mysqlml/mysql/msg/10758</a>
 
-����������ꤤ�פ��ޤ���
+よろしくお願い致します。
 
 
 
@@ -89,6 +89,6 @@ MySQL�ΥХå����åפˤĤ��Ƥμ���ʤΤǤ�����
 
 </pre>
 </div>
-<p class="button"><a href="12750.html">[��]</a><a href="12752.html">[��]</a><a href="../list/12701-12800.html">[�ֹ�����]</a><a href="../thread/12701-12800.html">[����åɰ���]</a></p>
+<p class="button"><a href="12750.html">[前]</a><a href="12752.html">[次]</a><a href="../list/12701-12800.html">[番号順一覧]</a><a href="../thread/12701-12800.html">[スレッド一覧]</a></p>
 </body>
 </html>

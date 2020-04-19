@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="4932.html">[��]</a><a href="4934.html">[��]</a><a href="../list/4901-5000.html">[�ֹ�����]</a><a href="../thread/4901-5000.html">[����åɰ���]</a></p>
+<p class="button"><a href="4932.html">[前]</a><a href="4934.html">[次]</a><a href="../list/4901-5000.html">[番号順一覧]</a><a href="../thread/4901-5000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:4933
 </p>
@@ -13,81 +13,81 @@ mysql:4933
 <p>
 From: &lt;s1atirvine@xxxxxxxxxx&gt;<br>
 Date: Wed, 16 Jan 2002 13:43:13 +0900<br>
-Subject: [mysql 04933] ʣ���ơ��֥�ˤ�����ǡ����� insert ����ˡ<br>
+Subject: [mysql 04933] 複数テーブルにおけるデータの insert の方法<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-���ޤ��ơ����ܤȿ����ޤ�
+初めまして、坂本と申します
 
-[ʣ���ơ��֥�ˤ�����ǡ�����insert����ˡ�פ˴ؤ���
-����򤵤��Ƥ��������ޤ���
+[複数テーブルにおけるデータのinsertの方法」に関して
+質問をさせていただきます。
 
-������Ǥ������������Τۤɤ���������ꤤ�������ޤ���
+お手数ですが、ご教授のほどよろしくお願いいたします。
 
-Linux(RedHat 6.2J)�ˤ�
+Linux(RedHat 6.2J)にて
 mySQL-3.23.46  + PHP-3.0.18 + Apache-1.3.20
-����Ѥ���Web+DB�Ķ����ٶ���Ǥ���
+を使用し、Web+DB環境を勉強中です。
 
-ñ��ơ��֥�Ǥ�mySQL���ٶ��⽪��� �������ټ���Ū��ʪ�Ȥ��ơ�
-ʣ���ơ��֥�ǸܵҾ������ͭ���롢DB���ۤ��Ƥߤ褦�ȻפäƤ��ޤ���
+単一テーブルでのmySQLの勉強も終わり ある程度実践的な物として、
+複数テーブルで顧客情報を保有する、DBを構築してみようと思っています。
 
-�ơ��֥��߷פȤ��Ƥϡ�
+テーブル設計としては、
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- [�ܵҾ���ơ��֥�] �� �ܵ�ID(�祭��)�Ƚ���ʤɤθܵҤδ��ܾ���
-                       �ܵ�ID�� auto increment
- [���ʥơ��֥�] �� ����ID(�祭��)�Ⱦ���̾,ñ���ʤɤξ��ʤδ��ܾ���
- [��������ơ��֥�] �� ����ID(�祭��),�ܵ�ID,����ID,�����Ŀ� �ξ���
-�Σ���
+ [顧客情報テーブル] ： 顧客ID(主キー)と住所などの顧客の基本情報
+                       顧客IDは auto increment
+ [商品テーブル] ： 商品ID(主キー)と商品名,単価などの商品の基本情報
+ [受注情報テーブル] ： 受注ID(主キー),顧客ID,商品ID,受注個数 の情報
+の３つ
 
-��������[��������ơ��֥�]��
- �ܵҾ���ơ��֥� �� �ܵ�ID(�ơ��֥�μ祭��)
- ���ʥơ��֥� �� ����ID(�ơ��֥�μ祭��)
-�˥�󥯤��죳�ĤΥơ��֥�ϴ�Ϣ�Ť����Ƥ������
+ただし、[受注情報テーブル]は
+ 顧客情報テーブル の 顧客ID(テーブルの主キー)
+ 商品テーブル の 商品ID(テーブルの主キー)
+にリンクされ３つのテーブルは関連づけられている状態
 
-�ޤ�����ͤθܵҤ�ʣ���ξ��ʤ򥪡������������
-��������ơ��֥��
- �ܵ�ID | ����ID | �����Ŀ�
+また、一人の顧客が複数の商品をオーダーした場合
+受注情報テーブルは
+ 顧客ID | 商品ID | 受注個数
   0001  |  001   |    1
   0001  |  002   |    3
-�ȸ������ǡ�������Ͽ�����
+と言う形で、情報が登録される
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-�Ȥ��ä����ǡ��ơ��֥��߷פ�ͤ��Ƥ���ޤ���
+といった形で、テーブル設計を考えております。
 
-�ڼ����
-�嵭���ͤʾ����ˤ����ơ��ܵҤ���μ��������insert������
-�̾�ϡ�
-  �ޤ���[�ܵҾ���ơ��֥�]�˸ܵҾ������Ͽ���롣
-  ���ˡ�auto increment�ˤ���꿶��줿���ܵ�ID�򻲾Ȥ�
-  [��������ơ��֥�]����Ͽ����
-�Ȥ��ä�ή��ˤʤ�Ȼפ��ޤ���
+【質問】
+上記の様な状況において、顧客からの受注情報をinsertする場合
+通常は、
+  まずは[顧客情報テーブル]に顧客情報を登録する。
+  次に、auto incrementにより割り振られた、顧客IDを参照し
+  [受注情報テーブル]を登録する
+といった流れになると思います。
 
-���������ǿ͹ͤ��ǤϤ���ޤ���
- [�ܵҾ���ơ��֥�],[��������ơ��֥�]Ʊ���ˡ�
- insert�Ǥ�����ˡ��̵���Τ���������
-�Ȥ�פäƤ��ޤ���
+しかし、素人考えではありますが
+ [顧客情報テーブル],[受注情報テーブル]同時に、
+ insertできる方法は無いのだろうか？
+とも思っています。
 
-���������������������Ȥ��Ƥϡ�
-�֤��⤽�⡢�ơ��֥��߷פ��ְ�äƤ���衪��
-��Ʊ����insert�Ǥ���衪��
-���̡�����Ͽ����ʳ���ˡ�Ϥʤ��衪��
-�ʤɡ��Ǥ���ж���Ū��SQLʸ��ʻ���ƶ����Ƥ����������
-�Ȼפ��ޤ���
+ご教授いただきたい点としては、
+「そもそも、テーブル設計が間違っているよ！」
+「同時にinsertできるよ！」
+「別々に登録する以外方法はないよ！」
+など、できれば具体的なSQL文も併せて教えていただければ
+と思います。
 
-�ޤ��������ͤ�SQL�Υơ��֥��߷פ�Ԥ����
-ͭ�Ѥʽ��Ҥ�����ޤ�����С�����̾�򶵤��Ƥ�����������Ȼפ��ޤ���
-(̵��Web�Ǥ����ꤢ��ޤ���)
-# ��Ź�ˤơ�SQL���߷���ˡ�����פʤɤȸ���ʪ�򸫤Ƥߤ��ΤǤ���
-# �ɤ줬ͭ�Ѥ�ʪ��Ƚ�ǤĤ����ͤ�ʪ�Ǥ����Τ�
+また、この様なSQLのテーブル設計を行う上で
+有用な書籍がありましたらば、書籍名を教えていただけたらと思います。
+(無論Webでも問題ありません)
+# 書店にて「SQLの設計方法～～」などと言う物を見てみたのですが
+# どれが有用な物か判断つきかねた物でしたので
 
-�塢<a href="../../../index.html">http://www.mysql.gr.jp/</a> �Ρ�MySQL Books�פΥ�󥯤�
-��No such file.�פȤʤäƤ��ޤ��������ޤ�
+後、<a href="../../../index.html">http://www.mysql.gr.jp/</a> の「MySQL Books」のリンクが
+「No such file.」となっています、ご報告まで
 
-�ʾ塢���������ꤤ�������ޤ���
+以上、宜しくお願いいたします。
 
 - - - - - - - - - - - - - - - - - -
--  ���ܡ����� (Shiuichi SAKAMOTO)
+-  坂本　修一 (Shiuichi SAKAMOTO)
 -   s1atirvine@xxxxxxxxxx
 - - - - - - - - - - - - - - - - - -
 
@@ -98,11 +98,11 @@ Get your free @xxxxxxxxxx address at <a href="http://mail.yahoo.com">http://mail
 
 </pre>
 </div>
-<p class="button"><a href="4932.html">[��]</a><a href="4934.html">[��]</a><a href="../list/4901-5000.html">[�ֹ�����]</a><a href="../thread/4901-5000.html">[����åɰ���]</a></p>
+<p class="button"><a href="4932.html">[前]</a><a href="4934.html">[次]</a><a href="../list/4901-5000.html">[番号順一覧]</a><a href="../thread/4901-5000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="4933.html">   4933 2002-01-16 13:43 [&lt;s1atirvine@xxxxxxxx] ʣ���ơ��֥�ˤ�����ǡ����� insert ����ˡ</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="4937.html">   4937 2002-01-17 09:33 ��[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="4973.html">   4973 2002-01-18 15:07 ����[&lt;s1atirvine@xxxxxxxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="4933.html">   4933 2002-01-16 13:43 [&lt;s1atirvine@xxxxxxxx] 複数テーブルにおけるデータの insert の方法</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4937.html">   4937 2002-01-17 09:33 ┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4973.html">   4973 2002-01-18 15:07 　┗[&lt;s1atirvine@xxxxxxxx]                                     </a></span>
 </pre>
 </body>
 </html>

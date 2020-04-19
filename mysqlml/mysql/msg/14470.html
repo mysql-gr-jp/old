@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14469.html">[��]</a><a href="14471.html">[��]</a><a href="../list/14401-14500.html">[�ֹ�����]</a><a href="../thread/14401-14500.html">[����åɰ���]</a></p>
+<p class="button"><a href="14469.html">[前]</a><a href="14471.html">[次]</a><a href="../list/14401-14500.html">[番号順一覧]</a><a href="../thread/14401-14500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14470
 </p>
@@ -13,125 +13,125 @@ mysql:14470
 <p>
 From: g-kato &lt;g-kato &lt;g-kato@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 24 Apr 2008 19:48:06 +0900<br>
-Subject: [mysql 14470] Re: InnoDB�ΥۥåȥХå����å�<br>
+Subject: [mysql 14470] Re: InnoDBのホットバックアップ<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�����
+浅野さん
 
-�ʤ�ۤɡ�mysqldump�Ǥϸ��������Ǥ��͡�
+なるほど、mysqldumpでは厳しそうですね。
 
-<span class="quote1">&gt;  �Хå����å׻����ڤ�Υ���ƥ��󥹥��󥹤���ߤ��Ƥ���ե�����򥳥ԡ�����</span>
-<span class="quote1">&gt;  �ΤϤ����ΤǤ��������ԡ���˥ޥ������Σģ¤��Ф��Ƶ����ä��ѹ���Х��ʥ�</span>
-<span class="quote1">&gt;  ����������������Ȥ������Ȥ򤹤�ΤǤ���͡�</span>
-<span class="quote1">&gt;  ��ä����Ȥ��ʤ��Τǡ������κ�Ȥ���ư�ǤǤ���Τ����Ȥ������Ȥȡ��ɤ�</span>
-<span class="quote1">&gt;  �������������ޥ������Ȥ����������Ȥ�ʤ��ʤ�ΤǤϤʤ����Ȥ����԰¤�������</span>
+<span class="quote1">&gt;  バックアップ時に切り離してインスタンスを停止してからファイルをコピーする</span>
+<span class="quote1">&gt;  のはいいのですが、コピー中にマスターのＤＢに対して起こった変更をバイナリ</span>
+<span class="quote1">&gt;  ログから復元するということをするのですよね？</span>
+<span class="quote1">&gt;  やったことがないので、これらの作業が自動でできるのか？ということと、どこ</span>
+<span class="quote1">&gt;  かで整合性がマスターとの整合性がとれなくなるのではないかという不安が・・・</span>
 
-MySQL�Υ�ץꥱ�������Ϲ������Ƥ�ž���ϥХ��ʥ������
-�����ݥ��������Ѥ��ƥޥ������ȥ��졼�ִ֤Ǥ���ꤵ��ޤ���
-���졼�֤Ǥϥޥ�������������ѤߤΥ����ݥ������򵭲����Ƥ��ꡢ
-�Хå����å׽�λ���start slave����м�ư�Ǻ�Ʊ�����Ԥ��ޤ���
-�ܺ٤ˤĤ��Ƥϰʲ��Υޥ˥奢���������������
+MySQLのレプリケーションは更新内容の転送はバイナリログの
+ログポジションを用いてマスターとスレーブ間でやり取りされます。
+スレーブではマスターから受信済みのログポジションを記憶しており、
+バックアップ終了後にstart slaveすれば自動で最同期が行われます。
+詳細については以下のマニュアルをご覧ください。
 
 <a href="http://dev.mysql.com/doc/refman/5.0/en/replication.html">http://dev.mysql.com/doc/refman/5.0/en/replication.html</a>
 <a href="http://dev.mysql.com/doc/refman/5.1/ja/replication.html">http://dev.mysql.com/doc/refman/5.1/ja/replication.html</a>
 
-<span class="quote1">&gt;  myisamchk��InnoDB�ǤϤʤ��ΤǤ��礦����</span>
-<span class="quote1">&gt;  ����Ȥ⡢InnoDB�Ϲ�¤�塢������ɬ�פ��ʤ��Ȥ���</span>
+<span class="quote1">&gt;  myisamchkのInnoDB版はないのでしょうか？</span>
+<span class="quote1">&gt;  それとも、InnoDBは構造上、修復の必要がないとか？</span>
 
-InnoDB�Ǥ�InnoDB������˽������Ƥ�Ͽ���Ƥ��ꡢɬ�פ������
-���󥹥��󥹵�ư���˼�ư�ǥ���å���ꥫ�Х꤬�Ԥ��ޤ���
-�ޤ�����Ŭ���ˤ�ALTER TABLE����Ѥ��ޤ���
+InnoDBではInnoDBログ内に処理内容を記録しており、必要があれば
+インスタンス起動時に自動でクラッシュリカバリが行われます。
+また、最適化にはALTER TABLEを使用します。
 
-��­�Ǥ������䤬�ϥޤä�����1�Ĥ������������ޤ���
+蛇足ですが、私がハマった点を1つだけお伝えします。
 
-��ץꥱ�������������Ƥ����硢�ޥ������Ǽ¹Ԥ��줿��Τ�
-�Х��ʥ�����˽񤭹��ޤ졢���ξ��󤬥��졼�֤��Ϥ�ޤ�����
-MySQL�ΥХ���LOAD DATAʸ�ϲ����θ�ʤ��˼¹Ԥ����
-�Х��ʥ�����ؤΥ����󥰤�BUG�ˤ���ץꥱ���������ߤ���
-��礬����ޤ��Τǡ������ѤκݤˤϤ����դ��������ʥХ��ѥ�����ˡ�
+レプリケーションを構成している場合、マスターで実行されたものが
+バイナリログに書き込まれ、この情報がスレーブに渡りますが、
+MySQLのバグでLOAD DATA文は何も考慮なしに実行すると
+バイナリログへのロギングのBUGによりレプリケーションが停止する
+場合がありますので、ご使用の際にはご注意ください（バイパスあり）。
 
 <a href="http://bugs.mysql.com/bug.php?id=31543">http://bugs.mysql.com/bug.php?id=31543</a>
 
-������ˤ��Ƥ⡢�ޤ��ϥ�ץꥱ�������λ��Ȥߤ�ޥ˥奢���
-�����ɤ��������Τ��褤���Ȼפ��ޤ���
+いずれにしても、まずはレプリケーションの仕組みをマニュアルで
+ご一読いただくのがよいかと思います。
 
-�ʾ塢��ʸ�ˤƼ��餷�ޤ�����
+以上、乱文にて失礼しました。
 
 
-08/04/24 �� ���� ����&lt;asano@xxxxxxxxxx&gt; ����Ͻ񤭤ޤ���:
-<span class="quote1">&gt; ����Ǥ���</span>
+08/04/24 に 浅野 義幸&lt;asano@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; 浅野です。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote2">&gt;  &gt; �Ϥ���ޤ��ơ���ƣ�ȿ����ޤ���</span>
+<span class="quote2">&gt;  &gt; はじめまして。加藤と申します。</span>
 <span class="quote2">&gt;  &gt;</span>
-<span class="quote1">&gt;  �Ϥ���ޤ��ơ�</span>
+<span class="quote1">&gt;  はじめまして。</span>
 <span class="quote1">&gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote3">&gt;  &gt;&gt;  ��InnoDB�ۥåȥХå����åספȤ������եȤ��٥��Ȥʤ���Ȥϻפ��ΤǤ�����</span>
-<span class="quote3">&gt;  &gt;&gt;  ����򤫤����˹Ԥ������Ǥ���</span>
+<span class="quote3">&gt;  &gt;&gt;  「InnoDBホットバックアップ」というソフトがベストなんだとは思うのですが、</span>
+<span class="quote3">&gt;  &gt;&gt;  お金をかけずに行いたいです。</span>
 <span class="quote3">&gt;  &gt;&gt;</span>
 <span class="quote2">&gt;  &gt;</span>
-<span class="quote2">&gt;  &gt; ��ǯMySQL5.0.45��InnoDB Hotbackup�ǥ����Ȥ��ۤ����ΤǤ�����</span>
-<span class="quote2">&gt;  &gt; ���κݡ�����ʳ��ΥХå����åפ������򤤤��Ĥ���Ƥ���ޤ�����</span>
-<span class="quote2">&gt;  &gt; �ǡ����������ε��ϼ���Ǥ���������ۤ��礭�ʥ������Ǥʤ����</span>
-<span class="quote2">&gt;  &gt; mysqldump�ǤΥ���饤��Хå����åפ�Ƥ����ƤϤ������Ǥ��礦����</span>
+<span class="quote2">&gt;  &gt; 昨年MySQL5.0.45＋InnoDB Hotbackupでサイトを構築したのですが、</span>
+<span class="quote2">&gt;  &gt; この際、それ以外のバックアップの方式をいくつか検討しました。</span>
+<span class="quote2">&gt;  &gt; データサイズの規模次第ですが、それほど大きなサイズでなければ</span>
+<span class="quote2">&gt;  &gt; mysqldumpでのオンラインバックアップを検討されてはいかがでしょうか？</span>
 <span class="quote2">&gt;  &gt;</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; mysqldump�ǤΥХå����åפǤϥХå����åפ˿����֡��ꥫ�Х��5���֤ۤɤ�</span>
-<span class="quote1">&gt;  ���ꡢ�ȤƤ⸽��Ū�ǤϤ���ޤ���</span>
-<span class="quote1">&gt;  �ե�����򥳥ԡ���������ʤ顢5ʬ���٤Ǵ�λ�������ޤǤǤ����顢��������</span>
-<span class="quote1">&gt;  myisamchk�򤷤ơ�������30ʬ�ۤɤǥХå����åפ���λ���Ƥ��ꡢƱ�����餤</span>
-<span class="quote1">&gt;  �λ��֤Ǥʤ�Ȥ��ʤ�ʤ�����Ƥ���Ƥޤ���</span>
+<span class="quote1">&gt; mysqldumpでのバックアップではバックアップに数時間、リカバリに5時間ほどか</span>
+<span class="quote1">&gt;  かり、とても現実的ではありません。</span>
+<span class="quote1">&gt;  ファイルをコピーするだけなら、5分程度で完了し、今まででしたら、ここから</span>
+<span class="quote1">&gt;  myisamchkをして、全部で30分ほどでバックアップが完了しており、同じくらい</span>
+<span class="quote1">&gt;  の時間でなんとかならないか検討してます。</span>
 <span class="quote1">&gt;</span>
-<span class="quote2">&gt;  &gt; �ޤ������Ѳ�ǽ��;�ꥵ���Ф�����ΤǤ���Х�ץꥱ��������Ԥ���</span>
-<span class="quote2">&gt;  &gt; �Хå����å׻��ˤϥ��졼�֤��ڤ�Υ��OS���ޥ�ɤˤ�ꥪ�ե饤��Хå����åפ�</span>
-<span class="quote2">&gt;  &gt; ���Τ��褤�ΤǤϤʤ����Ȼפ��ޤ���</span>
+<span class="quote2">&gt;  &gt; また、使用可能な余剰サーバがあるのであればレプリケーションを行い、</span>
+<span class="quote2">&gt;  &gt; バックアップ時にはスレーブを切り離しOSコマンドによりオフラインバックアップを</span>
+<span class="quote2">&gt;  &gt; 取るのがよいのではないかと思います。</span>
 <span class="quote2">&gt;  &gt;</span>
-<span class="quote1">&gt;  ������ˡ�Ϥ����Ǥ��͡������С��Ϥʤ�Ȥ��ʤ�ޤ�����ץꥱ��������Ԥ�</span>
-<span class="quote1">&gt;  ���Ȥǡ���˥Хå����åפ�����Ȥ����¿��⤢��ޤ�����</span>
-<span class="quote1">&gt;  ������������ץꥱ�������äƤ�ä����Ȥʤ���Ǥ��ʡ�����</span>
-<span class="quote1">&gt;  �Хå����å׻����ڤ�Υ���ƥ��󥹥��󥹤���ߤ��Ƥ���ե�����򥳥ԡ�����</span>
-<span class="quote1">&gt;  �ΤϤ����ΤǤ��������ԡ���˥ޥ������Σģ¤��Ф��Ƶ����ä��ѹ���Х��ʥ�</span>
-<span class="quote1">&gt;  ����������������Ȥ������Ȥ򤹤�ΤǤ���͡�</span>
-<span class="quote1">&gt;  ��ä����Ȥ��ʤ��Τǡ������κ�Ȥ���ư�ǤǤ���Τ����Ȥ������Ȥȡ��ɤ�</span>
-<span class="quote1">&gt;  �������������ޥ������Ȥ����������Ȥ�ʤ��ʤ�ΤǤϤʤ����Ȥ����԰¤�������</span>
+<span class="quote1">&gt;  この方法はいいですね。サーバーはなんとかなります。レプリケーションを行う</span>
+<span class="quote1">&gt;  ことで、常にバックアップがあるという安心もありますし。</span>
+<span class="quote1">&gt;  ただ・・・レプリケーションってやったことないんです（＾＾；</span>
+<span class="quote1">&gt;  バックアップ時に切り離してインスタンスを停止してからファイルをコピーする</span>
+<span class="quote1">&gt;  のはいいのですが、コピー中にマスターのＤＢに対して起こった変更をバイナリ</span>
+<span class="quote1">&gt;  ログから復元するということをするのですよね？</span>
+<span class="quote1">&gt;  やったことがないので、これらの作業が自動でできるのか？ということと、どこ</span>
+<span class="quote1">&gt;  かで整合性がマスターとの整合性がとれなくなるのではないかという不安が・・・</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;  myisamchk��InnoDB�ǤϤʤ��ΤǤ��礦����</span>
-<span class="quote1">&gt;  ����Ȥ⡢InnoDB�Ϲ�¤�塢������ɬ�פ��ʤ��Ȥ���</span>
+<span class="quote1">&gt;  myisamchkのInnoDB版はないのでしょうか？</span>
+<span class="quote1">&gt;  それとも、InnoDBは構造上、修復の必要がないとか？</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;  ̵�ΤǤ��ߤޤ���m(_ _)m</span>
+<span class="quote1">&gt;  無知ですみませんm(_ _)m</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; �ݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡ�</span>
-<span class="quote1">&gt;  �����֥�å�������ҡ������ƥ೫ȯ���������ƥ೫ȯ��</span>
+<span class="quote1">&gt; －－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－</span>
+<span class="quote1">&gt;  アイブリッジ株式会社　システム開発部　システム開発室</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;  ��Ĺ���������</span>
+<span class="quote1">&gt;  室長　浅野義幸</span>
 <span class="quote1">&gt;  E-Mail:asano@xxxxxxxxxx</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt;  ��150-0002����ë���ë3-11-7��2�ߥͥ����ӥ�4F</span>
+<span class="quote1">&gt;  〒150-0002　渋谷区渋谷3-11-7第2ミネギシビル4F</span>
 <span class="quote1">&gt;  TEL:03-5468-0084 FAX:03-5468-0085</span>
-<span class="quote1">&gt;  �ݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡݡ�</span>
+<span class="quote1">&gt;  －－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－</span>
 <span class="quote1">&gt;</span>
 
 </pre>
 </div>
-<p class="button"><a href="14469.html">[��]</a><a href="14471.html">[��]</a><a href="../list/14401-14500.html">[�ֹ�����]</a><a href="../thread/14401-14500.html">[����åɰ���]</a></p>
+<p class="button"><a href="14469.html">[前]</a><a href="14471.html">[次]</a><a href="../list/14401-14500.html">[番号順一覧]</a><a href="../thread/14401-14500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14466.html">  14466 2008-04-24 16:40 [���� ���� &lt;asano@xxx] InnoDB�ΥۥåȥХå����å�              </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14467.html">  14467 2008-04-24 16:55 ��[g-kato &lt;g-kato@xxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14469.html">  14469 2008-04-24 19:06 ����[���� ���� &lt;asano@xxx]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="14470.html">  14470 2008-04-24 19:48 ������[g-kato &lt;g-kato@xxxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14471.html">  14471 2008-04-25 13:32 ��������[���� ���� &lt;asano@xxx]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14472.html">  14472 2008-04-25 14:23 ����������[g-kato &lt;g-kato@xxxxx]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14474.html">  14474 2008-04-25 15:20 ������������[���� ���� &lt;asano@xxx]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14476.html">  14476 2008-04-25 15:53 ��������������[g-kato &lt;g-kato@xxxxx]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14473.html">  14473 2008-04-25 14:38 ����������[Tomohiro 'Tomo-p' KA]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14475.html">  14475 2008-04-25 15:41 ������������[���� ���� &lt;asano@xxx]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14477.html">  14477 2008-04-25 16:16 ��������������[SASAKI Katuhiro &lt;sah]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14479.html">  14479 2008-04-28 11:41 ����������������[���� ���� &lt;asano@xxx]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14478.html">  14478 2008-04-25 16:50 ��������������[Tomohiro 'Tomo-p' KA]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14466.html">  14466 2008-04-24 16:40 [浅野 義幸 &lt;asano@xxx] InnoDBのホットバックアップ              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14467.html">  14467 2008-04-24 16:55 ┗[g-kato &lt;g-kato@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14469.html">  14469 2008-04-24 19:06 　┗[浅野 義幸 &lt;asano@xxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="14470.html">  14470 2008-04-24 19:48 　　┗[g-kato &lt;g-kato@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14471.html">  14471 2008-04-25 13:32 　　　┗[浅野 義幸 &lt;asano@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14472.html">  14472 2008-04-25 14:23 　　　　┣[g-kato &lt;g-kato@xxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14474.html">  14474 2008-04-25 15:20 　　　　┃┗[浅野 義幸 &lt;asano@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14476.html">  14476 2008-04-25 15:53 　　　　┃　┗[g-kato &lt;g-kato@xxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14473.html">  14473 2008-04-25 14:38 　　　　┗[Tomohiro 'Tomo-p' KA]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14475.html">  14475 2008-04-25 15:41 　　　　　┗[浅野 義幸 &lt;asano@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14477.html">  14477 2008-04-25 16:16 　　　　　　┣[SASAKI Katuhiro &lt;sah]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14479.html">  14479 2008-04-28 11:41 　　　　　　┃┗[浅野 義幸 &lt;asano@xxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14478.html">  14478 2008-04-25 16:50 　　　　　　┗[Tomohiro 'Tomo-p' KA]                           </a></span>
 </pre>
 </body>
 </html>

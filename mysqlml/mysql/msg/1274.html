@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="1273.html">[��]</a><a href="1275.html">[��]</a><a href="../list/1201-1300.html">[�ֹ�����]</a><a href="../thread/1201-1300.html">[����åɰ���]</a></p>
+<p class="button"><a href="1273.html">[前]</a><a href="1275.html">[次]</a><a href="../list/1201-1300.html">[番号順一覧]</a><a href="../thread/1201-1300.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:1274
 </p>
@@ -13,26 +13,26 @@ mysql:1274
 <p>
 From: egashira &lt;egashira &lt;egashira@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 12 Oct 1999 11:47:15 +0900<br>
-Subject: [mysql 01274] Re: ��Ͽ����Ʊ���쥳���ɤ��ͤ�Ȥ��ɤ���ˡ����ޤ�����<br>
+Subject: [mysql 01274] Re: 登録時に同じレコードの値を使う良い方法ありますか？<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-������
+松本様
 
-<span class="quote1">&gt; �����ǹ�Ƭ����˼���ʤ�Ǥ������ե�����򥢥åץ����ɤ������</span>
-<span class="quote1">&gt; �ե�����̾�ϡ����������Τ褦�˼�������DB�ˤޤ���Ͽ���Ƥ���</span>
-<span class="quote1">&gt; �ե�����򥢥åץ����ɤ��Ƥޤ��Ǥ��礦����</span>
-<span class="quote1">&gt; �Ǥ���С����֤Τ�����ե����륢�åץ����ɤ�DB��Ͽ������</span>
-<span class="quote1">&gt; �Ԥ碌�����ΤǤ������������٤Τ�����ʤ���ˡ�ϻפ��Ĥ��ޤ���ǡ���</span>
+<span class="quote1">&gt; そこで江頭さんに質問なんですが、ファイルをアップロードする時の</span>
+<span class="quote1">&gt; ファイル名は、下記１．のように取得し、DBにまず登録してから</span>
+<span class="quote1">&gt; ファイルをアップロードしてますでしょうか？</span>
+<span class="quote1">&gt; できれば、時間のかかるファイルアップロードをDB登録より先に</span>
+<span class="quote1">&gt; 行わせたいのですが、さらに負荷のかからない方法は思いつきませんで。。</span>
 
-��Υ������Ȥ���äȰۤʤ�ΤǼ�ư���Ӥ�����ޤ���
-�����餯���٤ˤ�äƤ��ޤä��ۤ����ɤ��Ȼפ��ޤ���
+私のケースとちょっと異なるので実動実績がありませんが
+おそらく一度にやってしまったほうが良いと思います。
 
-�ޤ�FORM�ǥե�����򥢥åץ����ɤ��롣
-(���ꥹ����ץ�=uptest.php3)
-(���ꥢ�åץ����ɥե�����=test.gif)
+まずFORMでファイルをアップロードする。
+(想定スクリプト=uptest.php3)
+(想定アップロードファイル=test.gif)
 
 &lt;FORM ENCTYPE=&quot;multipart/form-data&quot; ACTION=&quot;uptest.php3&quot; METHOD=POST&gt;
 &lt;INPUT TYPE=&quot;hidden&quot; name=&quot;MAX_FILE_SIZE&quot; value=&quot;1000&quot;&gt;
@@ -40,49 +40,49 @@ Send this file: &lt;INPUT NAME=&quot;userfile&quot; TYPE=&quot;file&quot;&gt;
 &lt;INPUT TYPE=&quot;submit&quot; VALUE=&quot;Send File&quot;&gt;
 &lt;/FORM&gt;
 
-�¹Ը��uptest.php3�Ǽ�����ä��ѿ��ϼ��Τ褦�ˤʤ�ޤ���
+実行後のuptest.php3で受け取った変数は次のようになります。
 
 $userfile : /tmp/php00305aaa
 $userfile_name : test.gif
 $userfile_size : 801
 $userfile_type : image/gif
 
-$userfile�Ȥ����Τϥ��åץ����ɤ��줿�ե�����ΰ��(�ǥ��쥯�ȥ��)�ե�����
-�Ǥ���
+$userfileというのはアップロードされたファイルの一時(ディレクトリと)ファイル
+です。
 
-uptest.php3�Ǥϼ��Τ��Ȥ�Ԥ��ޤ���
+uptest.php3では次のことを行います。
 
-1.$userfile_name��$userfile_type�����ĥ�Ҥ�������롣
-  (gif or jpg ����ʳ��ϥ��顼�������)
-2.mysql��insert���롣
-3.mysql_insert_id()��id��������롣
-4.id + ��ĥ�Ҥǥե�����̾����Ω
-5.����ե�����(/tmp/php00305aaa)��4.����Ω�Ƥ��ե�����̾�ǽ���Υǥ��쥯�ȥ�
-�إ��ԡ�
-6.ɬ�פ�����Хѡ��ߥå���������ѹ�����
+1.$userfile_nameか$userfile_typeから拡張子を取得する。
+  (gif or jpg これ以外はエラー制御処理)
+2.mysqlへinsertする。
+3.mysql_insert_id()でidを取得する。
+4.id + 拡張子でファイル名を組立
+5.一時ファイル(/tmp/php00305aaa)を4.で組立てたファイル名で所定のディレクトリ
+へコピー
+6.必要があればパーミッション等の変更処理
 
-&lt;����&gt;
-����ե������uptest.php3�����ͭ���Ǥ���������ץȽ�λ���ϼ�ư�Ǻ�������
-����
+&lt;注意&gt;
+一時ファイルはuptest.php3内だけ有効です。スクリプト終了時は自動で削除されま
+す。
 
-MAX_FILE_SIZE�Ϥ� PHP3.ini��Apache .conf�ǻ��ꤵ�줿�ե����륵��������礯��
-���ʤ������Ǥ���
+MAX_FILE_SIZEはに PHP3.iniやApache .confで指定されたファイルサイズより大くで
+きないそうです。
 
 ------------------------------------------------
-��Ƭ���� egashira@xxxxxxxxxx
+江頭正敏 egashira@xxxxxxxxxx
 ------------------------------------------------
 
 
 
 </pre>
 </div>
-<p class="button"><a href="1273.html">[��]</a><a href="1275.html">[��]</a><a href="../list/1201-1300.html">[�ֹ�����]</a><a href="../thread/1201-1300.html">[����åɰ���]</a></p>
+<p class="button"><a href="1273.html">[前]</a><a href="1275.html">[次]</a><a href="../list/1201-1300.html">[番号順一覧]</a><a href="../thread/1201-1300.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="1264.html">   1264 1999-10-08 01:30 [kouichi matsumoto &lt;m] ��Ͽ����Ʊ���쥳���ɤ��ͤ�Ȥ��ɤ���ˡ����ޤ�����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1265.html">   1265 1999-10-08 10:33 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1266.html">   1266 1999-10-07 22:41 ��[egashira &lt;egashira@x]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="1273.html">   1273 1999-10-12 03:28 ����[kouichi matsumoto &lt;m]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="1274.html">   1274 1999-10-12 11:47 ������[egashira &lt;egashira@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1264.html">   1264 1999-10-08 01:30 [kouichi matsumoto &lt;m] 登録時に同じレコードの値を使う良い方法ありますか？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1265.html">   1265 1999-10-08 10:33 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1266.html">   1266 1999-10-07 22:41 ┗[egashira &lt;egashira@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1273.html">   1273 1999-10-12 03:28 　┗[kouichi matsumoto &lt;m]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="1274.html">   1274 1999-10-12 11:47 　　┗[egashira &lt;egashira@x]                                   </a></span>
 </pre>
 </body>
 </html>

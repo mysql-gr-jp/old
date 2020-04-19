@@ -5,45 +5,45 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15476.html">[��]</a><a href="15478.html">[��]</a><a href="../list/15401-15500.html">[�ֹ�����]</a><a href="../thread/15401-15500.html">[����åɰ���]</a></p>
+<p class="button"><a href="15476.html">[前]</a><a href="15478.html">[次]</a><a href="../list/15401-15500.html">[番号順一覧]</a><a href="../thread/15401-15500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15477
 </p>
 <div class="header">
 <p>
-From: ���� �� &lt;���� �� &lt;akimoto@xxxxxxxxxx&gt;&gt;<br>
+From: 秋元 訓 &lt;秋元 訓 &lt;akimoto@xxxxxxxxxx&gt;&gt;<br>
 Date: Fri, 14 Jan 2011 12:11:40 +0900<br>
-Subject: [mysql 15477] ALTER TABLE ENGINE��¹Ը�������������Ѳ��ˤĤ��Ƽ���<br>
+Subject: [mysql 15477] ALTER TABLE ENGINEを実行後の内部処理の変化について質問<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�Ϥ���ޤ��ơ������ȿ����ޤ���
+はじめまして、秋元と申します。
 
-MySQL(InnoDB)�ܥ����ץ󥽡�����SugarCRM����Ѥ��Ƥ��ꡢ
-���ƥʥ󥹤Ȥ��Ƽ��Υ��ޥ�ɤ�mysql��Ǽ¹Ԥ����ꡢ��ü�˽������Ť���
-��ޤ�����
+MySQL(InnoDB)＋オープンソースのSugarCRMを使用しており、
+メンテナンスとして次のコマンドをmysql上で実行した所、極端に処理が重くな
+りました。
 
  &gt; ALTER TABLE accounts ENGINE = 'InnoDB';
- (DB������ƤΥơ��֥���Ф��¹�)
+ (DB内の全てのテーブルに対し実行)
 
 
-Ĵ�٤Ƥߤ�ȥƥ�ݥ��ե�����(/tmp/��4.2GB����MyISAM�ե�����)����������
-���Ƥ��ޤ�����
-show processlist�ʤɤ�������SQL�������õ���Ф���EXPLAIN��ݤ��Ƥߤ���
-�������ȥ��Ƹ�Ǥ�EXPLAIN�η�̤˼��������������������ޤ�����
-��Extra����ʬ�ˡ�Using temporary; Using filesort ���դ��ͤˤʤä�
-���о�table�ν��֤�1���ܤ�2���ܤ������ؤ�äƤ���
-�����Ѥ���Ƥ���key���ۤʤäƤ���
+調べてみるとテンポラリファイル(/tmp/に4.2GB程のMyISAMファイル)を都度生成
+していました。
+show processlistなどより問題のSQLクエリを探し出し、EXPLAINを掛けてみた所
+メンテ前とメンテ後ではEXPLAINの結果に次の相違点がある事が解りました。
+・Extraの部分に、Using temporary; Using filesort が付く様になった
+・対象tableの順番が1番目と2番目が入れ替わっている
+・使用されているkeyが異なっている
 
-ALTER TABLE����ݤ���ȡ�MySQL�����������ν��֤�ƥ�ݥ��ơ��֥�����
-����/���ʤ��ʤɡ��Ѥ��ʪ�ʤΤǤ��礦����
+ALTER TABLE～を掛けると、MySQLの内部処理の順番やテンポラリテーブルを使用
+する/しないなど、変わる物なのでしょうか？
 
 
 
----EXPLAIN�η�̤ΰ١��Ԥ�Ĺ���ʤäƤ���ޤ�---
-��������EXPLAIN���
+---EXPLAINの結果の為、行が長くなっております---
+■メンテ前EXPLAIN結果
 +----+--------------------+------------------+--------+---------------------------------------------------------------------------------+-----------------------+---------+---------------------------------------+-------+-------------+
 <span class="quote1">| id | select_type        | table            | type   | possible_keys                                                                   | key                   | key_len | ref                                   | rows  | Extra       |</span>
 +----+--------------------+------------------+--------+---------------------------------------------------------------------------------+-----------------------+---------+---------------------------------------+-------+-------------+
@@ -58,7 +58,7 @@ ALTER TABLE����ݤ���ȡ�MySQL�����������ν��֤�ƥ�ݥ��ơ��֥�����
 +----+--------------------+------------------+--------+---------------------------------------------------------------------------------+-----------------------+---------+---------------------------------------+-------+-------------+
 8 rows in set (0.13 sec)
 
-�����Ƹ�EXPLAIN���
+■メンテ後EXPLAIN結果
 +----+--------------------+------------------+--------+---------------------------------------------------------------------------------+----------------------+---------+--------------------------------------------+------+----------------------------------------------+
 <span class="quote1">| id | select_type        | table            | type   | possible_keys                                                                   | key                  | key_len | ref                                        | rows | Extra                                        |</span>
 +----+--------------------+------------------+--------+---------------------------------------------------------------------------------+----------------------+---------+--------------------------------------------+------+----------------------------------------------+
@@ -74,22 +74,22 @@ ALTER TABLE����ݤ���ȡ�MySQL�����������ν��֤�ƥ�ݥ��ơ��֥�����
 
 
 
-���Ķ�
+■環境
 MySQL:5.1.3
-       InnoDB�μ¥ǡ����϶�ͭ�ե�����(ibdata1)���¸��
+       InnoDBの実データは共有ファイル(ibdata1)内に存在
 PHP:5.2.9
 OS:CentOS5.3 32bit
-Ϣ�Ȥ��Ƥ��륢�ץꡧSugarCRM
+連携しているアプリ：SugarCRM
 
 
-�ʾ塢���������ꤤ�פ��ޤ���
+以上、宜しくお願い致します。
 
 -----
-���� ��  akimoto@xxxxxxxxxx
+秋元 訓  akimoto@xxxxxxxxxx
 
 
 </pre>
 </div>
-<p class="button"><a href="15476.html">[��]</a><a href="15478.html">[��]</a><a href="../list/15401-15500.html">[�ֹ�����]</a><a href="../thread/15401-15500.html">[����åɰ���]</a></p>
+<p class="button"><a href="15476.html">[前]</a><a href="15478.html">[次]</a><a href="../list/15401-15500.html">[番号順一覧]</a><a href="../thread/15401-15500.html">[スレッド一覧]</a></p>
 </body>
 </html>

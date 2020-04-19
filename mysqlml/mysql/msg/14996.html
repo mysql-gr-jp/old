@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14995.html">[��]</a><a href="14997.html">[��]</a><a href="../list/14901-15000.html">[�ֹ�����]</a><a href="../thread/14901-15000.html">[����åɰ���]</a></p>
+<p class="button"><a href="14995.html">[前]</a><a href="14997.html">[次]</a><a href="../list/14901-15000.html">[番号順一覧]</a><a href="../thread/14901-15000.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14996
 </p>
@@ -13,36 +13,36 @@ mysql:14996
 <p>
 From: &lt;shin-1@xxxxxxxxxx&gt;<br>
 Date: Wed, 22 Jul 2009 19:30:53 +0900<br>
-Subject: [mysql 14996] Re: ʸ������������ץǡ����εߺ�<br>
+Subject: [mysql 14996] Re: 文字化けたダンプデータの救済<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
 
-���θ塢�����äȲ�褷�ޤ�����
-���Ρ�����utf8�����줷����blog�����Τޤ����ꤷ���Τ�������ä��褦�Ǥ���
+あの後、さくっと解決しました！
+あの「全てutf8で統一した」blog記事のまま設定したのも問題だったようです。
 
-�ʲ�����������ޤȤ�ޤ���
+以下、全行程をまとめます。
 
-�ޤ���������4.1��mysqldump��ʸ���������Ƥ��ޤä�����ץե������
-1.���ݤ�UTF8�Ȥ��ƶ���Ū�˳����ʷٹ𤬽ФƤ�̵���
-2.���ݤ�̾����Ĥ�����¸�ǡֲ�ʸ�פ����򤷤���¸
-3.���ٳ����ȸ���DB��ʸ�������ɤǳ�����Τǡ�DEFAULT CHARSET=����ʬ��
-�������˾����CHARSET�˽񤭴�����
+まず前準備、4.1のmysqldumpで文字化けしてしまったダンプファイルを
+1.秀丸でUTF8として強制的に開く（警告が出ても無視）
+2.秀丸で名前をつけて保存で「欧文」を選択して保存
+3.再度開くと元のDBの文字コードで開けるので、DEFAULT CHARSET=の部分を
+　本来希望するCHARSETに書き換える
 
-���󡢥���ץե�����db_sjis.dump�ϡ�ʸ��������Shift_JIS����¸���Ƥ�����
-DEFAULT CHARSET=sjis�˽񤭴����Ѥߡ�
+今回、ダンプファイルdb_sjis.dumpは、文字コードShift_JISで保存しておいて
+DEFAULT CHARSET=sjisに書き換え済み。
 
-my.cnf�Ϥ�����ȥ����Х��饤����ȴ֤�ʸ���������Ѵ������褦��
-�ʢ�DB�ˤ�SJIS��¸�ǡ����ޥ������ü������ɽ����EUC�Ȥ��������
+my.cnfはきちんとサーバクライアント間で文字コード変換されるように
+（※DBにはSJIS保存で、コマンド操作する端末画面表示はEUCという設定）
 [mysqld]
-default-character-set=sjis ������ϱ��ѥݥꥷ���˹�碌������
-# skip-character-set-client-handshake ���Ѵ��������ΤǤ���ϻ��ꤷ�ʤ�
+default-character-set=sjis ←これは運用ポリシーに合わせて設定
+# skip-character-set-client-handshake ←変換したいのでこれは指定しない
 [mysql]
-default-character-set=ujis  ��mysql���ޥ�ɤ�¹Ԥ��륷������̤�EUC�ʤΤǡ�
+default-character-set=ujis  ←mysqlコマンドを実行するシェル画面はEUCなので。
 
-���ξ��֤�mysql���ޥ�ɲ��̤Ǥ�
+この状態でmysqlコマンド画面では
 <span class="quote1">&gt; show variables like &quot;char%&quot;;</span>
 +--------------------------+-----------------------------------------+
 <span class="quote1">| Variable_name            | Value                                   |</span>
@@ -55,36 +55,36 @@ default-character-set=ujis  ��mysql���ޥ�ɤ�¹Ԥ��륷������̤�EUC�ʤΤǡ�
 <span class="quote1">| character_set_system     | utf8                                    |</span>
 <span class="quote1">| character_sets_dir       | /usr/local/mysql4/share/mysql/charsets/ |</span>
 +--------------------------+-----------------------------------------+
-���ξ��֤ǡ����̤�ujis�ǽ��������Τǡ�������ܸ�ǡ�����insert�����
-����������ܸ줬���ꡢselect��ʸ����������ɽ������ޤ���
+この状態で、画面はujisで処理されるので、手で日本語データをinsertすると
+きちんと日本語が入り、selectで文字化けせず表示されます。
 
-���褤�����ץǡ�����������
+いよいよダンプデータの投入。
 
-<span class="quote1">&gt; set NAMES sjis; ��¹Ԥ��Ƥ���</span>
-<span class="quote1">&gt; source /home/test/db_sjis.dump �Ȥ��ޤ�����������Ǥϼ���</span>
-�ɤ��⡢set NAMES��source���ޥ�ɤ���ޤǤϱƶ����Ƥ���ʤ��褦�Ǥ���
+<span class="quote1">&gt; set NAMES sjis; を実行してから</span>
+<span class="quote1">&gt; source /home/test/db_sjis.dump とやりましたが、これでは失敗</span>
+どうも、set NAMESはsourceコマンドの中までは影響してくれないようです。
 
-db_sjis.dump �ե��������Ƭ��SQLʸ��ľ����set NAMES sjis; ��1�Խ񤤤�
-���顢����source���ޥ�ɤ�¹Ԥ������������ޤ�����
+db_sjis.dump ファイルの先頭のSQL文の直前にset NAMES sjis; を1行書いて
+から、再度sourceコマンドを実行したら成功しました。
 
-PHP������ץȤ�internal_encoding=SJIS�ˤ��Ƥ⡢internal_encoding=EUC
-�ˤ��Ƥ⡢�ɤ���Ǥ�MySQL������ܸ�ǡ��������������PHP�����������ɤ�
-�Ѵ�����ơ����ܸ�ǡ������ɤ߽Ф���ޤ�����
+PHPスクリプトをinternal_encoding=SJISにしても、internal_encoding=EUC
+にしても、どちらでもMySQL上の日本語データが、きちんとPHPの内部コードに
+変換されて、日本語データが読み出されました。
 
-�ʾ塪����������
+以上！大成功！！
 
 
 </pre>
 </div>
-<p class="button"><a href="14995.html">[��]</a><a href="14997.html">[��]</a><a href="../list/14901-15000.html">[�ֹ�����]</a><a href="../thread/14901-15000.html">[����åɰ���]</a></p>
+<p class="button"><a href="14995.html">[前]</a><a href="14997.html">[次]</a><a href="../list/14901-15000.html">[番号順一覧]</a><a href="../thread/14901-15000.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14988.html">  14988 2009-07-22 01:38 [&lt;shin-1@xxxxxxxxxx&gt; ] ʸ������������ץǡ����εߺ�            </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14989.html">  14989 2009-07-22 12:17 ��[Yoshiaki Yanagimoto ]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14990.html">  14990 2009-07-22 14:17 ��[���� &lt;zon1966@xxxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14992.html">  14992 2009-07-22 14:53 ����[&lt;shin-1@xxxxxxxxxx&gt; ]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14994.html">  14994 2009-07-22 18:24 ������[&quot;N.K.&quot; &lt;nakai.kanako]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14995.html">  14995 2009-07-22 18:53 ��������[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
-<span class="current">-&gt;&nbsp;<a href="14996.html">  14996 2009-07-22 19:30 ��������[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14988.html">  14988 2009-07-22 01:38 [&lt;shin-1@xxxxxxxxxx&gt; ] 文字化けたダンプデータの救済            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14989.html">  14989 2009-07-22 12:17 ┣[Yoshiaki Yanagimoto ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14990.html">  14990 2009-07-22 14:17 ┗[たけ &lt;zon1966@xxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14992.html">  14992 2009-07-22 14:53 　┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14994.html">  14994 2009-07-22 18:24 　　┗[&quot;N.K.&quot; &lt;nakai.kanako]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14995.html">  14995 2009-07-22 18:53 　　　┣[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="14996.html">  14996 2009-07-22 19:30 　　　┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
 </pre>
 </body>
 </html>

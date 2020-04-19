@@ -5,35 +5,35 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="8465.html">[��]</a><a href="8467.html">[��]</a><a href="../list/8401-8500.html">[�ֹ�����]</a><a href="../thread/8401-8500.html">[����åɰ���]</a></p>
+<p class="button"><a href="8465.html">[前]</a><a href="8467.html">[次]</a><a href="../list/8401-8500.html">[番号順一覧]</a><a href="../thread/8401-8500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:8466
 </p>
 <div class="header">
 <p>
-From: &quot;����&quot; &lt;&quot;����&quot; &lt;eguchi@xxxxxxxxxx&gt;&gt;<br>
+From: &quot;江口&quot; &lt;&quot;江口&quot; &lt;eguchi@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 10 Dec 2003 14:40:19 +0900<br>
-Subject: [mysql 08466] innoDB �ι���¾���å��ˤĤ���<br>
+Subject: [mysql 08466] innoDB の行排他ロックについて<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�Ϥ���ޤ��ơ������ȿ����ޤ�������������ꤤ���ޤ���
+はじめまして、江口と申します。よろしくお願いします。
 
-�ʲ��λ����¸�Τ����������ޤ���������涵��ĺ�������פ��ޤ���
-����������ꤤ���ޤ���
+以下の事例をご存知の方がおられましたら是非御教授頂きたく思います。
+よろしくお願いします。
 
-MySQL�����̥ǡ��������ɽ���Ф���������ǰ����쥳���ɤ򹹿�
-���ʤ����̤ν�����¾�Υ쥳���ɤ򹹿����뤳�Ȥ��¸���ǽ��
-�ɤ�����Ĵ����ԤäƤ��ꡢOracle�Ǥγ�ȯ��Ԥä��и�����
-�����ν����ǹԤ���¾���å���ݤ���ɬ�פ�����ȻפäƤ��ޤ���
+MySQLで大量データを持つ表に対しある処理で一部レコードを更新
+しながら別の処理で他のレコードを更新することが実現可能か
+どうかの調査を行っており、Oracleでの開発を行った経験から
+双方の処理で行の排他ロックを掛ける必要があると思っています。
 
-���������ʲ��οޤ��ͤ����򤷤��԰ʳ��ι���¾���å���Ԥ���
-�Ȥ��Ƥ���å��Ԥ���ȯ�����Ƥ��ޤ��ޤ���
-�ơ��֥���å��������äƤ��뤫���ͤǤ���
+しかし、以下の図の様に選択した行以外の行排他ロックを行おう
+としてもロック待ちが発生してしまいます。
+テーブルロックがかかっているかの様です。
 
- ������    ������������  ��������
+ 処理１    　　　　　　  　処理２
 1 mysql&gt; set autocommit=0;
   Query OK, 0 rows affected (0.00 sec)
   (mysql&gt; set transaction isolation level READ COMMITTED;)
@@ -59,14 +59,14 @@ COMMITTED;)
    1 row in set (0.00 sec)
 5                       mysql&gt; select * from tableA  where keyno = 2 for
 update;
-                             �������ǥ��å�����Ԥ��Ȥʤ롣
+                             ↑ここでロック解除待ちとなる。
 
-��set transaction isolation level�ϥ��åȤ��Ƥ⤷�ʤ��Ƥ�Ʊ�����ݤ�ȯ������
-����
+※set transaction isolation levelはセットしてもしなくても同じ現象が発生しま
+す。
 
 
-���Ϥ����μ��Ϥ���ޤ��󤬤��ΤȤ���InnoDB ��˥��ν��Ϸ�̤�
-�ʲ����ͤʤ�ΤǤ���
+解析する知識はありませんがこのときのInnoDB モニタの出力結果は
+以下の様なものでした
 
 mysql&gt; show innodb status\G
 *************************** 1. row ***************************
@@ -160,20 +160,20 @@ Number of rows inserted 0, updated 0, deleted 0, read 48
 END OF INNODB MONITOR OUTPUT
 ============================
 
-�����褦�ʻ��㤬�ʤ���õ�����Ȥ�����<a href="http://lists.mysql.com/bugs/14769">http://lists.mysql.com/bugs/14769</a>
-�ˤۤ�Ʊ�����ݤ�����ޤ������������ǤϤ���ϥޥ˥奢��˵��Ҥ��줿ͽ������
-�������񤤤Ǥ��������������ޤ���
+似たような事例がないか探したところ　<a href="http://lists.mysql.com/bugs/14769">http://lists.mysql.com/bugs/14769</a>
+にほぼ同じ現象がありましたが、ここではこれはマニュアルに記述された予期され
+た振る舞いであると説明があります。
 
-���줬���ͤʤΤ�
-�ʤ��Ȥ�����MySQL�ǤϹ���¾���å��Ϥɤ��ͤ˼¸�����Ф褤�Τ�����
-�ޤ��ϴĶ����������ݤ˸��꤬���ä��Τ�
-�ʹ��ۤ����Ķ��˸��꤬�����ǽ�����礤�ˤ���ޤ���
-��rpm�����������ɤ��Ƥ����̾磻�󥹥ȡ��뤷�������ξ��֤Ǥ���
-��MySQL���μ��ϥͥåȾ�λ������ɤ߻Ϥ����̣�����Ȥ����Ȥ����Ǥ�����
-Ƚ�Ǥ��Ĥ����ˤ���ޤ���
+これが仕様なのか
+（だとしたらMySQLでは行排他ロックはどの様に実現すればよいのか？）
+または環境を作成する際に誤りがあったのか
+（構築した環境に誤りがある可能性は大いにあります。
+　rpmをダウンロードしてきて通常インストールしただけの状態です。
+　MySQLの知識はネット上の資料を読み始めて正味数日というところです。）
+判断がつかずにおります。
 
-�Ķ��ϡ�mysqlbug�ν��Ϸ�̤���ȴ�褷�Ƥߤޤ�����
-�ʲ��ΤȤ���Ǥ����ʸ��ˤ����Τ��ޤ��֤��ޤ�������
+環境は、mysqlbugの出力結果から抜粋してみましたが
+以下のとおりです。（見にくいので折り返しました。）
 Server version          4.0.16-Max
 C compiler:    2.95.3
 C++ compiler:  2.95.3
@@ -181,13 +181,13 @@ System: Linux 2.4.18-3 #1 Thu Apr 18 07:37:53 EDT 2002 i686 unknown
 gcc version 2.96 20000731 (Red Hat Linux 7.3 2.96-113)
 Compilation info: CC='gcc'  CFLAGS='-O2 -mcpu=i486
  -fno-strength-reduce'  CXX='g++'  CXXFLAGS='-O2 \
-��-mcpu=i486 -fno-strength-reduce -felide-constructors
-�� -fno-exceptions -fno-rtti      \
+　-mcpu=i486 -fno-strength-reduce -felide-constructors
+　 -fno-exceptions -fno-rtti      \
      '  LDFLAGS=''  ASFLAGS=''
 LIBC:
-lrwxrwxrwx    1 root     root           13  6�� 19 16:38 /lib/libc.so.6 -&gt;
+lrwxrwxrwx    1 root     root           13  6月 19 16:38 /lib/libc.so.6 -&gt;
 libc-2.2.5.so
--rwxr-xr-x    2 root     root      1260480  3��  6  2003 /lib/libc-2.2.5.so
+-rwxr-xr-x    2 root     root      1260480  3月  6  2003 /lib/libc-2.2.5.so
 
 Configure command: ./configure '--disable-shared'
  '--with-mysqld-ldflags=-all-static' '--with-clien\
@@ -209,30 +209,30 @@ ment=Official MySQL RPM' 'CC='
  'CXX='
 
 
-������ˤ��Ƥ⡢���̥ǡ��������ɽ���Ф���������ǰ����쥳���ɤ�
-�������ʤ����̤ν�����¾�쥳���ɤ򹹿�����ɬ�פ�������ɤΤ褦��
-��ˡ�Ǽ¸���ǽ����¸�Τ��������������ޤ���������涵��ĺ�������פ��ޤ���
+いずれにしても、大量データを持つ表に対しある処理で一部レコードを
+更新しながら別の処理で他レコードを更新する必要がある場合どのような
+方法で実現可能かご存知の方が方がおられましたら是非御教授頂きたく思います。
 
-�ʾ塢����������ꤤ�������ޤ���
+以上、よろしくお願いいたします。
 
-*************************** �ʳ��ˣ£ã� ******************************
-*���ȥ����ƥ��������󥷥��ƥ��� ����������ͺ��   mailto:eguchi@xxxxxxxxxx
+*************************** （株）ＢＣＣ ******************************
+*産業システム本部第二システム部 江口　登美雄　   mailto:eguchi@xxxxxxxxxx
 *
 ************* tel:092-711-5846  fax:092-711-5805 **********************
-��7/22��������ֹ桢�ƣ����ֹ椬�Ѥ��ޤ�����
+＊7/22より電話番号、ＦＡＸ番号が変わりました。
 
 
 </pre>
 </div>
-<p class="button"><a href="8465.html">[��]</a><a href="8467.html">[��]</a><a href="../list/8401-8500.html">[�ֹ�����]</a><a href="../thread/8401-8500.html">[����åɰ���]</a></p>
+<p class="button"><a href="8465.html">[前]</a><a href="8467.html">[次]</a><a href="../list/8401-8500.html">[番号順一覧]</a><a href="../thread/8401-8500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="8466.html">   8466 2003-12-10 14:40 [&quot;����&quot; &lt;eguchi@xxxxx] innoDB �ι���¾���å��ˤĤ���           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8467.html">   8467 2003-12-10 18:28 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8468.html">   8468 2003-12-10 18:58 ����[&quot;����&quot; &lt;eguchi@xxxxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8471.html">   8471 2003-12-10 19:10 ������[&quot;����&quot; &lt;eguchi@xxxxx]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8469.html">   8469 2003-12-10 19:08 ����[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8472.html">   8472 2003-12-10 19:22 ������[&quot;HIROSE, Masaaki&quot; &lt;h]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="8483.html">   8483 2003-12-11 15:28 ������[&quot;����&quot; &lt;eguchi@xxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="8466.html">   8466 2003-12-10 14:40 [&quot;江口&quot; &lt;eguchi@xxxxx] innoDB の行排他ロックについて           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8467.html">   8467 2003-12-10 18:28 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8468.html">   8468 2003-12-10 18:58 　┣[&quot;江口&quot; &lt;eguchi@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8471.html">   8471 2003-12-10 19:10 　┃┗[&quot;江口&quot; &lt;eguchi@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8469.html">   8469 2003-12-10 19:08 　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8472.html">   8472 2003-12-10 19:22 　　┣[&quot;HIROSE, Masaaki&quot; &lt;h]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8483.html">   8483 2003-12-11 15:28 　　┗[&quot;江口&quot; &lt;eguchi@xxxxx]                                   </a></span>
 </pre>
 </body>
 </html>

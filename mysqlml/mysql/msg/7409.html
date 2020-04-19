@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="7408.html">[��]</a><a href="7410.html">[��]</a><a href="../list/7401-7500.html">[�ֹ�����]</a><a href="../thread/7401-7500.html">[����åɰ���]</a></p>
+<p class="button"><a href="7408.html">[前]</a><a href="7410.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:7409
 </p>
@@ -13,27 +13,27 @@ mysql:7409
 <p>
 From: &quot;Kondo Tatsuya&quot; &lt;&quot;Kondo Tatsuya&quot; &lt;konet@xxxxxxxxxx&gt;&gt;<br>
 Date: Mon, 7 Apr 2003 05:12:41 +0900<br>
-Subject: [mysql 07409] ���ͷ��ε����ϰϤ�ۤ������ʾ��ν�����ˡ<br>
+Subject: [mysql 07409] 数値型の許容範囲を越えそうな場合の処理方法<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��ƣ�ȸ����ޤ���
-����ä�Ĺʸ�ˤʤäƤ��ޤ��ޤ���������������ꤤ�������ޤ���
+近藤と言います。
+ちょっと長文になってしまいましたがよろしくお願いいたします。
 
 CREATE TABLE date_tb
 (date_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
  date_name CHAR(255) NOT NULL , PRIMARY KEY (date_id))
 
-�Ȥ�����硢date_id�ˤϡ�18446744073709551615�ޤǳ�Ǽ�����Ȼפ��ΤǤ�����
-�ǡ���������ʾ������ˤʤꡢdate_id�˳�Ǽ���������ϰϤ�ۤ��Ƥ��ޤ�����
-�������硢�ߤʤ���ʤ�ɤΤ褦�ˤ��Ƥ�����ΤǤ��礦����
+とした場合、date_idには、18446744073709551615まで格納出来ると思うのですが、
+データがそれ以上に膨大になり、date_idに格納出来る許容範囲を越えてしまう恐れ
+がある場合、みなさんならどのようにしておられるのでしょうか？
 
-����λ�Υ������Ǥϡ��Ť��ǡ����Ͼ����ˤ��ۤȤ�ɤ���ʤ��ʤ�Τǡ�
-���פʥǡ�����DELETE���ơ������Ѥ��褦�Ȼפä��ΤǤ�����
+今回の私のケースでは、古いデータは状況によりほとんどいらなくなるので、
+不要なデータはDELETEして、再利用しようと思ったのですが、
 
-�㤨�С�DELETE FROM date_tb WHERE date_id = 4  �Ȥ��ơ�
+例えば、DELETE FROM date_tb WHERE date_id = 4  として、
 
 date_id | date_name
 ------+----------
@@ -43,64 +43,64 @@ date_id | date_name
       5  |  test5
       6  |  test6
 
-�Ȥʤä���硢���� date_id �� 4 �����Ѥ������ΤǤ���������ϲ�ǽ�ʤΤǤ��礦����
+となった場合、再度 date_id に 4 を利用したいのですが、これは可能なのでしょうか？
 
-�ǡ��ºݤˤ�äƤߤޤ�����
-��Ŭ�����������פʤΤ��ʡ��Ȼפäơ�
+で、実際にやってみました。
+最適化すれば大丈夫なのかな？と思って、
 
 DELETE FROM date_tb WHERE date_id = 4
 OPTIMIZE TABLE date_tb
 INSERT date_tb SET date_name = 'testtest'
 
-��̥���Ǥ�����
+結果ダメでした。
 
-���١�AUTO_INCREMENT���������Ƥ��ޤä��顢�����DELETE����
-��Ŭ�����褦�������̤�INSERT������硢���٤�Ʊ���ǡ����򰷤��ޤ���
+一度、AUTO_INCREMENTで生成してしまったら、それをDELETEし、
+最適化しようが、普通にINSERTした場合、二度と同じデータを扱いません。
 
-# ���������ȸ��������������ʤΤǤ�����������
-# ����Ū�� date_id ����ꤹ��в�ǽ�Ǥ�����
-# ����ʤζ��������ƽ���ޤ���
+# 当たり前と言えば当たり前なのですが・・・。
+# 明示的に date_id を指定すれば可能ですが、
+# そんなの恐ろしくて出来ません。
 
-�⤦���Ĺͤ����Τϡ�REPLACE��Ȥä���ˡ�Ǥ���
-���եե�����ɤȡ��ǡ�����ɬ�פ����פ���Ƚ�̤���ե�����ɤ��������
-�ǡ��������ס���������դθŤ��쥳���ɤ�date_id���������
-REPLACE�Ǿ�񤭤�����ˡ�Ǥ���
+もう１つ考えたのは、REPLACEを使った方法です。
+日付フィールドと、データが必要か不要かを判別するフィールドを作成し、
+データが不要、尚且つ日付の古いレコードのdate_idを取得し、
+REPLACEで上書きする方法です。
 
-����������Ψ�������������ޤ���
-�����ȤƤĤ�ʤ���ñ����ˡ������ޤ��Ǥ��礦����
+しかし、効率が悪い気がします。
+何かとてつもなく簡単な方法がありますでしょうか？
 
-Ĺʸ�ˤʤäƤ��ޤ��ޤ���������λ����������
-����������ꤤ�������ޤ���
+長文になってしまいましたが、ご了承下さい。
+よろしくお願いいたします。
 
 
 
 
 </pre>
 </div>
-<p class="button"><a href="7408.html">[��]</a><a href="7410.html">[��]</a><a href="../list/7401-7500.html">[�ֹ�����]</a><a href="../thread/7401-7500.html">[����åɰ���]</a></p>
+<p class="button"><a href="7408.html">[前]</a><a href="7410.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="7409.html">   7409 2003-04-07 05:12 [&quot;Kondo Tatsuya&quot; &lt;kon] ���ͷ��ε����ϰϤ�ۤ������ʾ��ν�����ˡ</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7410.html">   7410 2003-04-07 07:58 ��[MORIGUCHI Hirokazu &lt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7427.html">   7427 2003-04-09 01:11 ����[&quot;Kondo Tatsuya&quot; &lt;kon]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7429.html">   7429 2003-04-09 10:02 ������[&quot;JUNSIK LIM&quot; &lt;koniwe] UNION �Τ褦�ʤ�Ρ�              </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7430.html">   7430 2003-04-09 10:52 ��������[Shinya Kawaji &lt;kawaj]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7497.html">   7497 2003-04-16 13:51 ����������[&quot;janreno&quot; &lt;janreno@x] auto_increment �ǥ쥳���ɤ�̵���ξ���� 1 ����Ϥ᤿����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7499.html">   7499 2003-04-16 15:20 ������������[GUSTAV &lt;beatle@xxxxx] Re: auto_increment �ǥ쥳���ɤ�̵���ξ���� 1</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7500.html">   7500 2003-04-16 15:35 ��������������[Isao Tanaka &lt;isao@xx]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7502.html">   7502 2003-04-16 17:00 ����������������[&lt;lavlav@xxxxxxxxxx&gt; ]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7505.html">   7505 2003-04-16 18:40 ����������������[&quot;janreno&quot; &lt;janreno@x]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7506.html">   7506 2003-04-16 18:57 ������������������[Isao Tanaka &lt;isao@xx]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7508.html">   7508 2003-04-16 19:05 ������������������[GUSTAV &lt;beatle@xxxxx]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7515.html">   7515 2003-04-17 01:16 ������������������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7518.html">   7518 2003-04-17 01:44 ��������������������[&quot;Kondo Tatsuya&quot; &lt;kon]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7519.html">   7519 2003-04-17 10:15 ������������������[takeyuki miyagawa &lt;m]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7525.html">   7525 2003-04-17 16:20 ��������������������[&quot;janreno&quot; &lt;janreno@x]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7526.html">   7526 2003-04-17 16:57 ����������������������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7528.html">   7528 2003-04-17 17:35 ������������������������[&quot;janreno&quot; &lt;janreno@x]                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7531.html">   7531 2003-04-17 18:20 ��������������������������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7428.html">   7428 2003-04-09 01:26 ����[&quot;Kondo Tatsuya&quot; &lt;kon]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7434.html">   7434 2003-04-10 01:16 ������[&quot;Kondo Tatsuya&quot; &lt;kon]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7411.html">   7411 2003-04-07 12:32 ��[Shinya Kawaji &lt;kawaj]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="7409.html">   7409 2003-04-07 05:12 [&quot;Kondo Tatsuya&quot; &lt;kon] 数値型の許容範囲を越えそうな場合の処理方法</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7410.html">   7410 2003-04-07 07:58 ┣[MORIGUCHI Hirokazu &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7427.html">   7427 2003-04-09 01:11 ┃┣[&quot;Kondo Tatsuya&quot; &lt;kon]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7429.html">   7429 2003-04-09 10:02 ┃┃┗[&quot;JUNSIK LIM&quot; &lt;koniwe] UNION のようなもの？              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7430.html">   7430 2003-04-09 10:52 ┃┃　┗[Shinya Kawaji &lt;kawaj]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7497.html">   7497 2003-04-16 13:51 ┃┃　　┗[&quot;janreno&quot; &lt;janreno@x] auto_increment でレコードの無しの場合常に 1 から始めたい。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7499.html">   7499 2003-04-16 15:20 ┃┃　　　┗[GUSTAV &lt;beatle@xxxxx] Re: auto_increment でレコードの無しの場合常に 1</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7500.html">   7500 2003-04-16 15:35 ┃┃　　　　┗[Isao Tanaka &lt;isao@xx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7502.html">   7502 2003-04-16 17:00 ┃┃　　　　　┣[&lt;lavlav@xxxxxxxxxx&gt; ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7505.html">   7505 2003-04-16 18:40 ┃┃　　　　　┗[&quot;janreno&quot; &lt;janreno@x]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7506.html">   7506 2003-04-16 18:57 ┃┃　　　　　　┣[Isao Tanaka &lt;isao@xx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7508.html">   7508 2003-04-16 19:05 ┃┃　　　　　　┣[GUSTAV &lt;beatle@xxxxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7515.html">   7515 2003-04-17 01:16 ┃┃　　　　　　┣[とみたまさひろ &lt;tomm]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7518.html">   7518 2003-04-17 01:44 ┃┃　　　　　　┃┗[&quot;Kondo Tatsuya&quot; &lt;kon]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7519.html">   7519 2003-04-17 10:15 ┃┃　　　　　　┗[takeyuki miyagawa &lt;m]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7525.html">   7525 2003-04-17 16:20 ┃┃　　　　　　　┗[&quot;janreno&quot; &lt;janreno@x]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7526.html">   7526 2003-04-17 16:57 ┃┃　　　　　　　　┗[とみたまさひろ &lt;tomm]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7528.html">   7528 2003-04-17 17:35 ┃┃　　　　　　　　　┗[&quot;janreno&quot; &lt;janreno@x]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7531.html">   7531 2003-04-17 18:20 ┃┃　　　　　　　　　　┗[とみたまさひろ &lt;tomm]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7428.html">   7428 2003-04-09 01:26 ┃┗[&quot;Kondo Tatsuya&quot; &lt;kon]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7434.html">   7434 2003-04-10 01:16 ┃　┗[&quot;Kondo Tatsuya&quot; &lt;kon]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7411.html">   7411 2003-04-07 12:32 ┗[Shinya Kawaji &lt;kawaj]                                       </a></span>
 </pre>
 </body>
 </html>

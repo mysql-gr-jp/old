@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="14412.html">[��]</a><a href="14414.html">[��]</a><a href="../list/14401-14500.html">[�ֹ�����]</a><a href="../thread/14401-14500.html">[����åɰ���]</a></p>
+<p class="button"><a href="14412.html">[前]</a><a href="14414.html">[次]</a><a href="../list/14401-14500.html">[番号順一覧]</a><a href="../thread/14401-14500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:14413
 </p>
@@ -13,18 +13,18 @@ mysql:14413
 <p>
 From: Toshio HIGUCHI &lt;Toshio HIGUCHI &lt;higuchi_toshio@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 13 Mar 2008 11:05:35 +0900<br>
-Subject: [mysql 14413] Re: ʣ���Υǡ����١����ؤ��䤤��碌<br>
+Subject: [mysql 14413] Re: 複数のデータベースへの問い合わせ<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-�����ȿ����ޤ��������äˤʤäƤ��ޤ���
+樋口と申します。お世話になっています。
 
-MySQL 4.1 �ϤǤ� MERGE �ơ��֥�ˤĤ����ؾ褵���Ƥ���������
-��� MERGE �ơ��֥���ۤ��Ƥ���ΤǤ�����
-Ʊ�ͤΥ��顼��å����������Ϥ���Ƥ��ޤ���
-�ߤ礦�Ĥ����ͤϲ�褵��ޤ����Ǥ��礦����
+MySQL 4.1 系での MERGE テーブルについて便乗させてください。
+私も MERGE テーブルを構築しているのですが、
+同様のエラーメッセージが出力されています。
+みょうつぞの様は解決されましたでしょうか？
 
 <span class="quote1">&gt; mysql&gt; select * from myo.total;</span>
 <span class="quote1">&gt; ERROR 1016 (HY000): Can't open file: 'total.MRG' (errno: 143)</span>
@@ -34,62 +34,62 @@ MySQL 4.1 �ϤǤ� MERGE �ơ��֥�ˤĤ����ؾ褵���Ƥ���������
 <span class="quote1">&gt; Query OK, 0 rows affected (0.03 sec)</span>
 
 
-��ξ����ϡ��ʲ��Τ褦�ˤʤäƤ��ޤ���
-�ְ㤤�λ�Ŧ���ηäʤɤ򤤤��������鹬���Ǥ���
+私の状況は、以下のようになっています。
+間違いの指摘、知恵などをいただけたら幸いです。
 
-�����ǡ����η����¿�����ᡢʣ��(11��)�Υơ��֥��ʬ�䤷��
-��Ͽ���ޤ������ʳ�4�������١�����44�������١�
-�����������ϤҤȤĤΥơ��֥�Ȥ��Ƹ�������������
-MERGE �ơ��֥��Ȥ����ʲ��Τ褦�˥ơ��֥뷲����ꤷ�ޤ�����
+扱うデータの件数が多いため、複数(11個)のテーブルに分割して
+登録しました。（各4億件程度、総計44億件程度）
+ただ、検索はひとつのテーブルとして検索したいため
+MERGE テーブルを使い、以下のようにテーブル群を指定しました。
 create  table if not exists tab (
-��Ĺ���ʤ뤿���ά��
+【長くなるため省略】
 )
 type=merge union=(
 tab_00,tab_01,tab_02,tab_03,tab_04,
 tab_05,tab_06,tab_07,tab_08,tab_09,
 tab_10);
 
-MERGE �ơ��֥� tab ���Ф� select ��¹Ԥ����
-�ʲ��Τ褦�ʥ��顼��ȯ������ΤǤ���
+MERGE テーブル tab に対し select を実行すると
+以下のようなエラーが発生するのです。
 <span class="quote1">&gt; ERROR 1016: ^GCan't open file: 'tab.MRG' (errno: 143)</span>
 
-���ᤷ�ˡ�tab_09 �򳰤��ȡ�̵�� select ���������ޤ�����
-tab_09 ������Ƥ���Τ��Ȥ�פ���
-tab_08 �򳰤���tab_09 �ȴޤ�� MERGE �ơ��֥���ۤ�
-����Ȥ�����select ���������ޤ�����
-��tab_00 ���� tab_10 �ϲ���Ƥ��ʤ��Ȼפ��ޤ���
+ためしに、tab_09 を外すと、無事 select が成功しました。
+tab_09 が壊れているのかとも思い、
+tab_08 を外し、tab_09 と含んだ MERGE テーブルを構築し
+試したところ、select が成功しました。
+（tab_00 から tab_10 は壊れていないと思われます）
 
-��ˡ��ǡ�������ξ��ʤ��ơ��֥��12�ĺ�����
-MERGE �ơ��֥��������Ƥߤ��Ȥ�����select ��
-���顼��ȯ�����뤳�ȤϤ���ޤ���Ǥ�����
-��MERGE �ơ��֥�ǰ�����ơ��֥���ξ�¤ˤ�ã���Ƥ��ʤ���
+試しに、データ件数の少ないテーブルを12個作成し
+MERGE テーブルを作成してみたところ、select で
+エラーが発生することはありませんでした。
+（MERGE テーブルで扱えるテーブル数の上限には達していない）
 
-10�ơ��֥�Ǥϡ���4,000,000,000��Ȥʤꡢ
-11�ơ��֥�Ǥϡ���4,400,000,000��Ȥʤ�ޤ���
-�⤷������� MySQL ���������Ȥ��Ǥ���ǡ�������ξ�¤�
-ã�����ȹͤ��������褤�ΤǤ��礦����
+10テーブルでは、約4,000,000,000件となり、
+11テーブルでは、約4,400,000,000件となります。
+もしかすると MySQL が扱うことができるデータ件数の上限に
+達したと考えた方がよいのでしょうか？
 
-����������ꤤ���ޤ���
+よろしくお願いします。
 -- 
-����ƥå��������֡�����ɡ����Υࡦ����ե��ޥƥ������������
-����  ����
-���� : 03-5665-5141
+インテック・ウェブ・アンド・ゲノム・インフォマティクス株式会社
+樋口  俊夫
+電話 : 03-5665-5141
 FAX  : 03-5665-5004
 E-mail: higuchi_toshio@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="14412.html">[��]</a><a href="14414.html">[��]</a><a href="../list/14401-14500.html">[�ֹ�����]</a><a href="../thread/14401-14500.html">[����åɰ���]</a></p>
+<p class="button"><a href="14412.html">[前]</a><a href="14414.html">[次]</a><a href="../list/14401-14500.html">[番号順一覧]</a><a href="../thread/14401-14500.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="14407.html">  14407 2008-03-07 17:04 [&quot;Myotsuzono, Hiroshi] ʣ���Υǡ����١����ؤ��䤤��碌        </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14408.html">  14408 2008-03-07 18:25 ��[SUGAWARA Hajime &lt;sug]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14409.html">  14409 2008-03-08 00:47 ����[&quot;Myotsuzono, Hiroshi]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="14413.html">  14413 2008-03-13 11:05 ������[Toshio HIGUCHI &lt;higu]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14415.html">  14415 2008-03-13 12:13 ��������[SUGAWARA Hajime &lt;sug]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14416.html">  14416 2008-03-13 13:01 ����������[Toshio HIGUCHI &lt;higu]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14417.html">  14417 2008-03-13 22:00 ������������[SUGAWARA Hajime &lt;sug]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14418.html">  14418 2008-03-14 10:19 ��������������[&quot;Myotsuzono, Hiroshi] Re: ʣ���Υǡ����١����ؤ��䤤��碌�ʤ����</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="14419.html">  14419 2008-03-14 15:45 ��������������[Toshio HIGUCHI &lt;higu]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14407.html">  14407 2008-03-07 17:04 [&quot;Myotsuzono, Hiroshi] 複数のデータベースへの問い合わせ        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14408.html">  14408 2008-03-07 18:25 ┗[SUGAWARA Hajime &lt;sug]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14409.html">  14409 2008-03-08 00:47 　┗[&quot;Myotsuzono, Hiroshi]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="14413.html">  14413 2008-03-13 11:05 　　┗[Toshio HIGUCHI &lt;higu]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14415.html">  14415 2008-03-13 12:13 　　　┗[SUGAWARA Hajime &lt;sug]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14416.html">  14416 2008-03-13 13:01 　　　　┗[Toshio HIGUCHI &lt;higu]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14417.html">  14417 2008-03-13 22:00 　　　　　┗[SUGAWARA Hajime &lt;sug]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14418.html">  14418 2008-03-14 10:19 　　　　　　┣[&quot;Myotsuzono, Hiroshi] Re: 複数のデータベースへの問い合わせ（お礼）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14419.html">  14419 2008-03-14 15:45 　　　　　　┗[Toshio HIGUCHI &lt;higu]                           </a></span>
 </pre>
 </body>
 </html>
