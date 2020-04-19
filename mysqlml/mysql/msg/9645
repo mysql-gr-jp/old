@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9645</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9644">[前]</a><a href="9646">[次]</a><a href="../list/9601-9700">[番号順一覧]</a><a href="../thread/9601-9700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9645
+</p>
+<div class="header">
+<p>
+From: Murayama Toshikiyo &lt;Murayama Toshikiyo &lt;murayama@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 15 Jun 2004 10:24:54 +0900<br>
+Subject: [mysql 09645] Re: Insert 毎に接続・切断を繰り返すと不特定な場所でエラーが発生する。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+村山＠NETGENEです．
+
+<span class="quote1">&gt; あまりエラー内容と関係がないかもしれないのですが一応気になったのは</span>
+
+中略
+
+<span class="quote1">&gt; Javaにおいてループ内で変数を宣言してしまうと、そのたびに新たなメモリ領域が確</span>
+<span class="quote1">&gt; 保されてしまうはずので、この場合ですとこのStringBufferでかなりメモリが食われ</span>
+<span class="quote1">&gt; ているんじゃないかと思います。</span>
+たしかにその可能性はあります．
+
+<span class="quote1">&gt; 一応、ブロックから抜ければ次のガーベジコレクションの対象にはなりますが、明示</span>
+<span class="quote1">&gt; 的にGCをしない限りいつメモリから開放されるかはJVM任せになってしまいます。</span>
+この場合に明示的にSystem.gc()を呼び出すのは誤りです．
+<a href="http://www.netgene.co.jp/java/technicalTerms.html#GCSystemGc">http://www.netgene.co.jp/java/technicalTerms.html#GCSystemGc</a>
+
+<span class="quote1">&gt; なので私だったらここは</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;     StringBuffer buf = null;</span>
+<span class="quote1">&gt;     String ip = null;</span>
+<span class="quote1">&gt;     for (int i = 0; i &lt; 256; i++) {</span>
+<span class="quote1">&gt;       for (int j = 0; j &lt; 256; j++) {</span>
+<span class="quote1">&gt;         for (int k = 0; k &lt; 256; k++) {</span>
+<span class="quote1">&gt;           for (int l = 0; l &lt; 256; l++) {</span>
+<span class="quote1">&gt;             buf = new StringBuffer();</span>
+<span class="quote1">&gt;             buf.append(i).append(COMMA).append(j).append(COMMA);</span>
+<span class="quote1">&gt;             buf.append(k).append(COMMA).append(l);</span>
+<span class="quote1">&gt;             ip = buf.toString();</span>
+<span class="quote1">&gt;             System.out.println(&quot;ip = &quot; + ip);</span>
+<span class="quote1">&gt;             insert(ip);</span>
+<span class="quote1">&gt;           }</span>
+<span class="quote1">&gt;           showStatus();</span>
+<span class="quote1">&gt;         }</span>
+<span class="quote1">&gt;       }</span>
+<span class="quote1">&gt;     }</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; という風に実装するほうがいいのではないかなー、と。</span>
+
+Javaで問題になるとすれば
+
+<span class="quote1">&gt;     StringBuffer buf = null;</span>
+
+の方ではなく，むしろ
+
+<span class="quote1">&gt;             buf = new StringBuffer();</span>
+
+の方です．ループから出すとすればこちらの方を出すべきです．
+
+前者はローカル変数領域やオペランドスタックに一ワード確保するだけで，
+再利用も容易です．(そもそもGCで回収されるわけでもない．)
+<a href="http://www.netgene.co.jp/java/docs/javaPressVol15.html#2_2">http://www.netgene.co.jp/java/docs/javaPressVol15.html#2_2</a>
+
+後者はStringBufferインスタンスをヒープ領域に確保します．回収は通常GCが
+使われます．
+<a href="http://www.netgene.co.jp/java/docs/javaPressVol17.html#2">http://www.netgene.co.jp/java/docs/javaPressVol17.html#2</a>
+
+ただし後者の場合でも世代別GCの若い世代のGCで回収されるので，効率はかなり
+いいはずです．また実行時最適化により，より効率の良いコードが生成されている
+可能性もあります．通常はあまり気にする必要はないでしょう．
+＃これはJavaの最適化に関する決り文句です．この言葉で締めくくれば，
+＃ほとんどの場合は問題ありません．(^^;
+
+-- 
+村山敏清 株式会社ネットジーン 〒164-0001 
+東京都中野区中野3-33-3 インツ中野ビル 5F
+E-mail:murayama@xxxxxxxxxx 
+TEL:(03)5328-3670 FAX:(03)5328-3673
+<a href="http://www.netgene.co.jp/">http://www.netgene.co.jp/</a>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="9644">[前]</a><a href="9646">[次]</a><a href="../list/9601-9700">[番号順一覧]</a><a href="../thread/9601-9700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9640">   9640 2004-06-14 20:23 [&quot;Kageyama Takahiro&quot; ] Insert 毎に接続・切断を繰り返すと不特定な場所でエラーが発生する。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9641">   9641 2004-06-14 20:59 ┣[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9642">   9642 2004-06-14 21:31 ┣[&quot;Haruki Nakayama&quot; &lt;h]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="9645">   9645 2004-06-15 10:24 ┃┗[Murayama Toshikiyo &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9643">   9643 2004-06-14 23:42 ┣[&lt;oouchi@xxxxxxxxxx&gt; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9644">   9644 2004-06-15 00:01 ┃┗[&lt;oouchi@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9651">   9651 2004-06-15 18:21 ┗[&lt;yasuyuki@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9652">   9652 2004-06-15 19:00 　┣[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9654">   9654 2004-06-15 19:29 　┃┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9658">   9658 2004-06-16 01:47 　┃　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9655">   9655 2004-06-15 19:42 　┗[seiji takegata &lt;take]                                     </a></span>
+</pre>
+</body>
+</html>

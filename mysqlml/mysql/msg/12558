@@ -1,0 +1,84 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12558</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="12557">[前]</a><a href="12559">[次]</a><a href="../list/12501-12600">[番号順一覧]</a><a href="../thread/12501-12600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12558
+</p>
+<div class="header">
+<p>
+From: Shuhei Tomita &lt;Shuhei Tomita &lt;tomita@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 12 Dec 2005 20:02:31 +0900<br>
+Subject: [mysql 12558] federated-table作成時にForeign data src error : ': 1159 : '<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+冨田と申します。
+
+mysql-5.0.16で、federated-tableを試しているのですが、試しに単一データベー
+ス内で作成してみようと、テーブルをcreateすると、
+<span class="quote1">&gt;ERROR 1434: Can't create federated table. Foreign data src error : ':</span>
+<span class="quote1">&gt;1159 : '</span>
+というエラーメッセージが表示されて、createできません。
+（別port番号で起動させた別mysqlプロセスとの間ではcreateできます）
+
+何かちょっとしたで問題で引っかかってるような気がするのですが、どなたかこ
+の問題についてご存じの方おられますか？
+
+環境:Redhat EnterpriseLinux ES3.0 (x86)
+     Mysql-5.0.16(MySQL AB提供のバイナリを使用)
+
+1.データベースfetest内で、
+
+create table test_table (
+        id int not null ,
+        val char(255),
+        primary key (id)
+)
+
+を作ってから
+
+2.同じデータベースfetest内で、
+
+create table test_table2 (
+        id int not null ,
+        val char(255),
+        primary key (id)
+)
+ENGINE=FEDERATED
+CONNECTION='mysql://fetest:fetest@localhost:3306/fetest/test_table' ;
+
+とすると、30秒ぐらい掛かって、
+
+ERROR 1434: Can't create federated table. Foreign data src error : ': 1159 : '
+
+※connection文字列が間違っていると、ERROR 1429: Unable to connect to foreign data source
+※で、エラーだったので間違っていないと思います。
+
+
+
+create中にshow processlistしてみると、スレッドが二つ走っていて、
+
+Command	| Time | State          | Info
+Query   | 25   | creating table | create table test_table2 (...........
+Query   | 25   | Opening tables | SELECT *  FROM `test_table` WHERE  1=0
+
+となっていて、なんじゃこりゃーと思ったのですが……
+
+………………………………………………………………………………………………
+		冨田 修平(Shuhei Tomita) tomita@xxxxxxxxxx
+………………………………………………………………………………………………
+
+
+</pre>
+</div>
+<p class="button"><a href="12557">[前]</a><a href="12559">[次]</a><a href="../list/12501-12600">[番号順一覧]</a><a href="../thread/12501-12600">[スレッド一覧]</a></p>
+</body>
+</html>

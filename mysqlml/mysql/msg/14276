@@ -1,0 +1,128 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14276</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14275">[前]</a><a href="14277">[次]</a><a href="../list/14201-14300">[番号順一覧]</a><a href="../thread/14201-14300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14276
+</p>
+<div class="header">
+<p>
+From: HIRATSUKA Sadao &lt;HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 30 Oct 2007 15:50:05 +0900<br>
+Subject: [mysql 14276] Re: MySQL 5.0.45 (win32) NULLがあるときのdate()<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+平塚です。
+
+類似バグが見当たらなかったので、
+MySQL Bugsに報告しておきました。
+
+<a href="http://bugs.mysql.com/bug.php?id=31933">http://bugs.mysql.com/bug.php?id=31933</a>
+
+time()では発生しないので、ソースを見比べてみると
+どうやら確かにdate()の処理がバグってる気がします。
+
+そのうち直ると思いますが、
+とりあえず今のバージョンで回避するには↓こんな感じでしょうか。
+
+where date(ifnull(c1, '1000-01-01')) = '2007-01-01'
+
+
+よろしくお願いいたします。
+
+
+
+On Tue, 30 Oct 2007 13:46:04 +0900
+HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; 平塚です。こんにちは。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; On Tue, 30 Oct 2007 01:56:38 +0900</span>
+<span class="quote1">&gt; Kazuhiro Yoshida &lt;moriq@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; datetime型のカラム (at) に NULL があるとき、</span>
+<span class="quote2">&gt; &gt; 条件節の date() がうまく動かないみたいです。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 再現しますでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 手元にあった</span>
+<span class="quote1">&gt; ・Windows 5.0.45</span>
+<span class="quote1">&gt; ・Linux 5.0.46</span>
+<span class="quote1">&gt; で再現しました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ◆再現する例</span>
+<span class="quote1">&gt; mysql&gt; create table test (c1 datetime);</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; insert into test values (null);</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select * from test where date(c1) = '2007-01-01';</span>
+<span class="quote1">&gt; Empty set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; insert into test values ('2007-01-01 10:00:00');</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.01 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select * from test where date(c1) = '2007-01-01';</span>
+<span class="quote1">&gt; Empty set (0.00 sec) ★</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select * from test;</span>
+<span class="quote1">&gt; +---------------------+</span>
+<span class="quote2">&gt; | c1                  |</span>
+<span class="quote1">&gt; +---------------------+</span>
+<span class="quote2">&gt; | NULL                |</span>
+<span class="quote2">&gt; | 2007-01-01 10:00:00 |</span>
+<span class="quote1">&gt; +---------------------+</span>
+<span class="quote1">&gt; 2 rows in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ◆再現しない例</span>
+<span class="quote1">&gt; mysql&gt; create table test (c1 datetime);</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.04 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; insert into test values ('2007-01-01 10:00:00');</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; insert into test values (null);</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.01 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select * from test where date(c1) = '2007-01-01';</span>
+<span class="quote1">&gt; +---------------------+</span>
+<span class="quote2">&gt; | c1                  |</span>
+<span class="quote1">&gt; +---------------------+</span>
+<span class="quote2">&gt; | 2007-01-01 10:00:00 |</span>
+<span class="quote1">&gt; +---------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 条件の評価時にnullにあたるとそこでやめちゃうみたいですね。</span>
+<span class="quote1">&gt; これはまずいですね。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; 平塚貞夫 hiratsuka.sadao@xxxxxxxxxx</span>
+
+-- 
+平塚貞夫 hiratsuka.sadao@xxxxxxxxxx
+
+
+</pre>
+</div>
+<p class="button"><a href="14275">[前]</a><a href="14277">[次]</a><a href="../list/14201-14300">[番号順一覧]</a><a href="../thread/14201-14300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14274">  14274 2007-10-30 01:56 [Kazuhiro Yoshida &lt;mo] MySQL 5.0.45 (win32) NULLがあるときのdate()</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14275">  14275 2007-10-30 13:46 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14276">  14276 2007-10-30 15:50 　┣[HIRATSUKA Sadao &lt;hir]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14278">  14278 2007-10-30 16:57 　┃┗[Kazuhiro Yoshida &lt;mo]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14279">  14279 2007-10-30 17:22 　┃　┗[HIRATSUKA Sadao &lt;hir]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14280">  14280 2007-10-30 17:56 　┃　　┗[&quot;tarou kawauso&quot; &lt;kaw]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14277">  14277 2007-10-30 16:55 　┗[&quot;Yasuda, Hiroyuki&quot; &lt;]                                     </a></span>
+</pre>
+</body>
+</html>

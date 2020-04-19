@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16567</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16566">[前]</a><a href="16568">[次]</a><a href="../list/16501-16600">[番号順一覧]</a><a href="../thread/16501-16600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16567
+</p>
+<div class="header">
+<p>
+From: 落合 司郎 &lt;落合 司郎 &lt;s.ochiai@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 4 Mar 2020 11:48:53 +0900<br>
+Subject: [mysql 16567] LOAD DATA INFILEでdefault値がないというエラー（Field 'SHAPE' doesn't have a default value）<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+いつもお世話になります。
+
+WKT形式で記述されたGeometryデータを含むCSVファイルをLOAD DATA 
+INFILEでテーブルに取り込もうとしています。
+Geometryデータを取り込むGeometryフィールドにはSPATIAL KEYを設定したいため、NOT 
+NULL制約をつける必要があり、取り込み先のテーブルを以下のようにGeometryフィールドをNOT 
+NULL、default値を設定しないで定義しました。
+
+#エラーが発生したときのテーブル
+# geometry型（NOT NULL）を含むテーブル定義
+drop tables if exists mesh05439;
+CREATE TABLE `mesh05439` (
+   `OGR_FID` int(11) NOT NULL AUTO_INCREMENT,
+   `SHAPE` geometry NOT NULL,
+   `key_code` text,
+   `mesh1_id` text,
+   `mesh2_id` text,
+   `mesh3_id` text,
+   `mesh4_id` text,
+   `mesh5_id` text,
+   `obj_id` text,
+   PRIMARY KEY `OGR_FID` (`OGR_FID`),
+   SPATIAL KEY `SHAPE` (`SHAPE`)
+) ENGINE=InnoDB;
+
+下記に示すLOAD DATA 
+INFILEを実行すると、CSVファイルのすべてのレコードにデータに値があっても、default値がないというエラーが発生しました。
+なお、LOAD DATA 
+INFILEで取り込むCSVファイルはtextファイルでなければならないので、CSVファイルのGeometryデータはWKTフォーマットの文字列としています。
+LOAD DATA 
+INFILEではGeometryデータをワーク変数を割り当て、SET構文でST_GeometryFromText()でGeometryフィールドに値をセットしています。
+
+#実行したLOAD DATA INFILE
+# LOAD DATA 
+INFILEで取り込むCSVファイルはtextファイルでなければならないので、
+# CSVファイルではGeometryデータはWKTフォーマットの文字列とし、LOAD DATA 
+INFILEではワーク変数を割り当て、
+# SET構文でST_GeometryFromText()でGeometryフィールドに値をセットします。
+
+LOAD DATA LOCAL INFILE 'C:******/MESH05439.csv' INTO TABLE mesh05439
+FIELDS TERMINATED BY ',' ENCLOSED BY '&quot;' LINES TERMINATED BY '\r\n' 
+IGNORE 1 LINES
+(@wkt_tmp, key_code, mesh1_id, mesh2_id, mesh3_id, mesh4_id, mesh5_id, 
+obj_id) SET SHAPE=ST_GeometryFromText(@wkt_tmp,2451);
+
+# 発生したエラー
+Error Code: 1364. Field 'SHAPE' doesn't have a default value
+
+
+そこで、止む無く下記のようにGeometryフィールドをdefault NULLとし、SPATIAL 
+KEYも設定せずにテーブルを定義し、上記のLOAD DATA 
+INFILEを実行すると、エラーは発生しません。
+
+drop tables if exists mesh05439;
+CREATE TABLE `mesh05439` (
+   `OGR_FID` int(11) NOT NULL AUTO_INCREMENT,
+   `SHAPE` geometry default NULL,
+   `key_code` text,
+   `mesh1_id` text,
+   `mesh2_id` text,
+   `mesh3_id` text,
+   `mesh4_id` text,
+   `mesh5_id` text,
+   `obj_id` text,
+   PRIMARY KEY `OGR_FID` (`OGR_FID`)
+) ENGINE=InnoDB;
+
+GeometryフィールドにはSPATIAL KEYを設定したいので、取り込んだ後に、ALTER TABLEでGeometryフィールドをNOT 
+NULLに、また、SPATIAL KEYを追加する手順としています。
+
+ALTER TABLE `mesh05439`
+CHANGE COLUMN `SHAPE` `SHAPE` GEOMETRY NOT NULL ,
+ADD SPATIAL KEY `SHAPE` (`SHAPE`);
+
+
+ところで、LOAD DATA INFILEでワーク変数を割り当て、SET構文でテーブルのNOT 
+NULLで定義されたフィールドに値を設定することは、Geometry型以外のフィールドならばSpatial 
+Functionを含まない計算式なら問題なくできます。
+
+LOAD DATA INFILEのSET構文でSpatial 
+Functionを使う場合にバグがあるのではないでしょうか？
+
+実行環境：
+OS:Windows 8.0 64ビット
+MySQL:Ver.8.0.12　GPL版
+Workbench:Ver.6.3.9
+
+
+</pre>
+</div>
+<p class="button"><a href="16566">[前]</a><a href="16568">[次]</a><a href="../list/16501-16600">[番号順一覧]</a><a href="../thread/16501-16600">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="16567">  16567 2020-03-04 11:48 [落合 司郎 &lt;s.ochiai@] LOAD DATA INFILEでdefault値がないというエラー（Field 'SHAPE' doesn't have a default value）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16570">  16570 2020-03-08 12:07 ┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16567] LOAD DATA INFILEでdefault値がないというエラー（Field 'SHAPE' doesn't have a default value）</a></span>
+</pre>
+</body>
+</html>

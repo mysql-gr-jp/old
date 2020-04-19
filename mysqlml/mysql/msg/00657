@@ -1,0 +1,82 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:657</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="656">[前]</a><a href="658">[次]</a><a href="../list/601-700">[番号順一覧]</a><a href="../thread/601-700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:657
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Thu, 28 Jan 1999 19:55:28 +0900<br>
+Subject: [mysql 00657] Re: mysql_reload<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+毅です。
+
+takeshi&gt; 3.22.14 のマニュアルで C API の説明が違うことに気づきました。
+
+しつれいしました。違うのではなくて、
+&quot;refresh が無い&quot; の間違いです。
+mysql_reload は mysql_refresh(a,REFRESH_GRANT) で再定義されてました。
+
+takeshi&gt; で、民斗さんの mysql-ruby-2.1.1 に対するパッチを添付します
+
+こちらが正解のパッチです。
+
+
+--- mysql.c.orig        Sun Jan 24 15:04:28 1999
++++ mysql.c     Thu Jan 28 19:53:20 1999
+@@ -256,6 +256,7 @@
+     return TRUE;
+ }
+ 
++#if MYSQL_VERSION_ID &lt; 32100
+ /*     reload()        */
+ static VALUE reload(VALUE obj)
+ {
+@@ -264,6 +265,21 @@
+        mysql_raise(m);
+     return TRUE;
+ }
++#endif
++#if MYSQL_VERSION_ID &gt;= 32100
++/*      refresh()        */
++static VALUE reload(VALUE obj)
++{
++   refresh(obj,REFRESH_GRANT);
++}
++static VALUE refresh(VALUE obj, VALUE a)
++{
++    MYSQL* m = GetHandler(obj);
++    if (mysql_refresh(m, a) != 0)
++        mysql_raise(m);
++    return TRUE;
++}
++#endif
+ 
+ /*     select_db(db)   */
+ static VALUE select_db(VALUE obj, VALUE db)
+@@ -624,6 +640,9 @@
+     rb_define_method(cMysql, &quot;ping&quot;, ping, 0);
+     rb_define_method(cMysql, &quot;query&quot;, query, 1);
+     rb_define_method(cMysql, &quot;reload&quot;, reload, 0);
++#if MYSQL_VERSION_ID &gt;= 32100
++    rb_define_method(cMysql, &quot;refresh&quot;, refresh, 1);
++#endif
+     rb_define_method(cMysql, &quot;select_db&quot;, select_db, 1);
+     rb_define_method(cMysql, &quot;shutdown&quot;, my_shutdown, 0);
+     rb_define_method(cMysql, &quot;stat&quot;, my_stat, 0);
+
+</pre>
+</div>
+<p class="button"><a href="656">[前]</a><a href="658">[次]</a><a href="../list/601-700">[番号順一覧]</a><a href="../thread/601-700">[スレッド一覧]</a></p>
+</body>
+</html>

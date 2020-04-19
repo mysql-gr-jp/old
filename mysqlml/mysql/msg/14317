@@ -1,0 +1,140 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14317</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14316">[前]</a><a href="14318">[次]</a><a href="../list/14301-14400">[番号順一覧]</a><a href="../thread/14301-14400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14317
+</p>
+<div class="header">
+<p>
+From: chuuken kenkou &lt;chuuken kenkou &lt;ken_ken_1962@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 30 Nov 2007 20:53:23 +0900<br>
+Subject: [mysql 14317] Re: グループごとに、グループ内での条件を満たす行のみを取り出す方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+忠犬です。
+
+a_time2-a_time1の値を持つ列を、最初から作っておけないのでしょうか？
+
+多くのRDBMSで、減算等を行うと、その列にインデクスが定義されていても使ってくれません。MySQLも、同様だったと思います。
+
+a_time2-a_time1の値を持つ列を作れば、（a_group,新規の列）で構成されるインデクスがあれば使ってくれると思います。
+
+
+<span class="quote1">&gt; Date: Fri, 30 Nov 2007 20:19:17 +0900</span>
+<span class="quote1">&gt; From: hiroki.tamakoshi@xxxxxxxxxx</span>
+<span class="quote1">&gt; Subject: <a href="14316">[mysql 14316]</a> グループごとに、グループ内での条件を満たす行のみを取り出す方法</span>
+<span class="quote1">&gt; To: ml@xxxxxxxxxx</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; こんにちは、株式会社ビービットの玉越です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 一つ苦心していることがありまして、うまい方法が思い浮かばないので質問させて下さい。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■今こんなテーブル test があるとします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; a_group a_amount a_time1 a_time2</span>
+<span class="quote1">&gt; 1 100 1 10</span>
+<span class="quote1">&gt; 1 200 4 6</span>
+<span class="quote1">&gt; 1 300 10 20</span>
+<span class="quote1">&gt; 2 10 4 5</span>
+<span class="quote1">&gt; 2 20 4 6</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■このテーブルから、a_groupごとに、a_time2-a_time1が最小の行を取り出したいと思っています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 結果は下記を期待しています。</span>
+<span class="quote1">&gt; a_group a_amount a_time1 a_time2</span>
+<span class="quote1">&gt; 1 200 4 6</span>
+<span class="quote1">&gt; 2 10 4 5</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■SQLは下記のようになります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; SELECT</span>
+<span class="quote1">&gt; a_group, a_amount, a_time1, a_time2</span>
+<span class="quote1">&gt; FROM</span>
+<span class="quote1">&gt; test</span>
+<span class="quote1">&gt; WHERE ( a_group, a_time2 - a_time1 ) IN (</span>
+<span class="quote1">&gt; SELECT</span>
+<span class="quote1">&gt; a_group, MIN( a_time2 - a_time1 )</span>
+<span class="quote1">&gt; FROM</span>
+<span class="quote1">&gt; test</span>
+<span class="quote1">&gt; GROUP BY</span>
+<span class="quote1">&gt; a_group</span>
+<span class="quote1">&gt; )</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■SQLの気持ち</span>
+<span class="quote1">&gt; ・グループごとにa_time2 - a_time1の最小値を求める</span>
+<span class="quote1">&gt; ・a_time2 - a_time1が合致する行を取り出す</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 集合演算なのでこれが素直な方法と思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■現在行いたいことはもっと複雑なことです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 上記ではtestはすでにあるテーブルですが、実際には複数のテーブルを結合して、様々な条件で絞ったテーブルに対して行いたいと思っています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; SELECT</span>
+<span class="quote1">&gt; a_group, a_amount, a_time1, a_time2</span>
+<span class="quote1">&gt; FROM</span>
+<span class="quote1">&gt; test1, test2, test3, test4, test5, test6, ...</span>
+<span class="quote1">&gt; WHERE</span>
+<span class="quote1">&gt; test1.id = test2.test_id</span>
+<span class="quote1">&gt; AND とかなんとか</span>
+<span class="quote1">&gt; AND ...</span>
+<span class="quote1">&gt; AND ( a_group, a_time2 - a_time1 ) IN (</span>
+<span class="quote1">&gt; SELECT</span>
+<span class="quote1">&gt; a_group, MIN( a_time2 - a_time1 )</span>
+<span class="quote1">&gt; FROM</span>
+<span class="quote1">&gt; test1, test2, test3, test4, test5, test6, ...</span>
+<span class="quote1">&gt; WHERE</span>
+<span class="quote1">&gt; test1.id = test2.test_id</span>
+<span class="quote1">&gt; AND とかなんとか</span>
+<span class="quote1">&gt; AND ...</span>
+<span class="quote1">&gt; GROUP BY</span>
+<span class="quote1">&gt; a_group</span>
+<span class="quote1">&gt; )</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; テーブルの大きさにもよるでしょうが、数十分待っても返事がありません。</span>
+<span class="quote1">&gt; これでは、GROUP BYなどせずに全部持ってきてから自前で加工する方が速いです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 上記のSQLの気持ち悪いところは、同じ条件を2回書いているところです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 何かうまい方法はありますでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; ------------------------------------------------------</span>
+<span class="quote1">&gt; 　　ビービットはチームマイナス6％に参画しています</span>
+<span class="quote1">&gt; ------------------------------------------------------</span>
+<span class="quote1">&gt; 株式会社ビービット　玉越 大輝</span>
+<span class="quote1">&gt; ユーザビリティ コンサルタント</span>
+<span class="quote1">&gt; beBit,Inc. Tamakoshi Hiroki hiroki.tamakoshi@xxxxxxxxxx</span>
+<span class="quote1">&gt; --------------------------------------------------------</span>
+<span class="quote1">&gt; 〒105-0001 東京都港区虎ノ門1-18-1 虎ノ門10森ビル7F</span>
+<span class="quote1">&gt; TEL: 03-3509-7602 / FAX: 03-3509-7605</span>
+<span class="quote1">&gt; URL: <a href="http://www.bebit.co.jp/">http://www.bebit.co.jp/</a></span>
+<span class="quote1">&gt; --------------------------------------------------------</span>
+<span class="quote1">&gt;</span>
+
+_________________________________________________________________
+「MSN クリスマス特集」今年は、最高の愛あふれるクリスマスにしませんか。
+<a href="http://event.jp.msn.com/xmas2007/">http://event.jp.msn.com/xmas2007/</a>
+
+</pre>
+</div>
+<p class="button"><a href="14316">[前]</a><a href="14318">[次]</a><a href="../list/14301-14400">[番号順一覧]</a><a href="../thread/14301-14400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14316">  14316 2007-11-30 20:19 [&quot;玉越大輝&quot; &lt;hiroki.t] グループごとに、グループ内での条件を満たす行のみを取り出す方法</a></span>
+<span class="current">-&gt;&nbsp;<a href="14317">  14317 2007-11-30 20:53 ┗[chuuken kenkou &lt;ken_]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14318">  14318 2007-11-30 21:36 　┗[HIRATSUKA Sadao &lt;hir]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14319">  14319 2007-11-30 22:02 　　┣[HIRATSUKA Sadao &lt;hir]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14323">  14323 2007-12-03 14:35 　　┗[&quot;玉越大輝&quot; &lt;hiroki.t]                                   </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9734</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9733">[前]</a><a href="9735">[次]</a><a href="../list/9701-9800">[番号順一覧]</a><a href="../thread/9701-9800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9734
+</p>
+<div class="header">
+<p>
+From: Hirofumi Fujiwara &lt;Hirofumi Fujiwara &lt;fuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 01 Jul 2004 19:23:11 +0900 (JST)<br>
+Subject: [mysql 09734] Re: 4.1 と UTF-8<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+藤原です。
+
+<span class="quote1">&gt; 村上です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 次のテーマに入りましょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Unicode のグリフィスとマッピングの問題です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 〜 や 全角の - (でしたっけ)、は、</span>
+<span class="quote1">&gt; いろんな環境(Java, MS, など)で文字の形とコードの割り当てが違うので</span>
+<span class="quote1">&gt; SJIS, EUC, UTF 間で自動変換がかかったら</span>
+<span class="quote1">&gt; どうなるものかわかったものではないです。</span>
+
+  SJIS--&gt;UTF8--&gt;UJIS
+  SJIS---------&gt;UJIS
+で変換結果が異なってきます。だから、変換の組み合わせ順序まで影響します。
+
+<span class="quote1">&gt; UTFがらみの自動変換を使った場合にだけ起こる現象ですが、</span>
+<span class="quote1">&gt; 1. それでも MySQL に考慮して欲しい</span>
+<span class="quote1">&gt; 2. 考慮する必要なし</span>
+<span class="quote1">&gt; のどちらでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # UTF 使わないという解はここでは考えません</span>
+
+  現状なら、コード変換が発生しないように工夫するのが一番賢い方法ではな
+  いかと思っています。
+
+  でも、どうしても、アプリケーションとDBとで文字コードが違うことは発生
+  するので、どこかの段階で変換は必要になることがあります。
+
+  Unihan Databaseというのがあって、色々調べるのに使えます。
+    <a href="http://www.unicode.org/cgi-bin/GetUnihanData.pl">http://www.unicode.org/cgi-bin/GetUnihanData.pl</a>
+  しかし、記号類に関しては、納得できないことが多々ありますね。
+
+<span class="quote1">&gt; 仮に考慮するとすると、その方法ですが、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; a1. utf の亜流を作る</span>
+<span class="quote1">&gt; <a href="9507">http://www.mysql.gr.jp/mysqlml/mysql/msg/9507</a></span>
+<span class="quote1">&gt; Solaris の iconv_ja のように</span>
+<span class="quote1">&gt; UTF-8</span>
+<span class="quote1">&gt; UTF-8-Java</span>
+<span class="quote1">&gt; UTF-8-ms932</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; どのみち、UTF と言っても単に対応する文字コードが増えただけだし、</span>
+<span class="quote1">&gt; 実社会では使われているコードに食い違いがあるのだから、</span>
+<span class="quote1">&gt; いっそUTF亜流を作った方が楽。</span>
+
+  このあたりを増やすとなると、stringsの下にある
+
+ctype-big5.c    ctype-gb2312.c  ctype-sjis.c    ctype-utf8.c
+ctype-bin.c     ctype-gbk.c     ctype-tis620.c  ctype-win1250ch.c
+ctype-czech.c   ctype-latin1.c  ctype-uca.c     ctype.c
+ctype-euc_kr.c  ctype-mb.c      ctype-ucs2.c
+ctype-extra.c   ctype-simple.c  ctype-ujis.c
+
+というのに手を入れる、場合によったら新しいのを追加するということでしょ
+うか？
+でも、そこまでは、やりたくないですね。
+
+<span class="quote1">&gt; a2. UTF の亜流は作らないで、なんとか違う方法で頑張る。</span>
+<span class="quote1">&gt; 実現方法は不明。</span>
+<span class="quote1">&gt; COLLAION でも使う？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # マッピングの違いだけなら、collation でもよさそうな気がしてきた…</span>
+
+  COLLAIONで済むならいいのですが。
+
+  ところで、MySQLのアーキテクチャに関するドキュメントとかあるのでしょ
+  うか？
+  string関係だけでもあれば、ずいぶん助かります。
+
+------------------------------------------------------------------
+株式会社 タイムインターメディア       藤原 博文 fuji@xxxxxxxxxx
+本社 160-0002 東京都新宿区坂町26-27 ＩＰＢビル    TEL 03-5362-9009
+URL  <a href="http://www.timedia.co.jp/">http://www.timedia.co.jp/</a>                    FAX 03-5362-9008
+地図 <a href="http://www.timedia.co.jp/company/map/">http://www.timedia.co.jp/company/map/</a>     新宿線曙橋駅徒歩5分
+------------------------------------------------------------------
+♪  Puzzle Japan  <a href="http://www.puzzle.jp/">http://www.puzzle.jp/</a>  毎日新作パズルで遊ぼう ♪
+------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="9733">[前]</a><a href="9735">[次]</a><a href="../list/9701-9800">[番号順一覧]</a><a href="../thread/9701-9800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9539">   9539 2004-06-07 13:23 [&quot;Ryuichiro Munechika] MySQLの問題点(PostgreSQLカンファレンスにて)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9540">   9540 2004-06-07 13:40 ┣[Hidekazu Ikeda &lt;hike]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9542">   9542 2004-06-07 17:01 ┃┗[&quot;Ryuichiro Munechika]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9543">   9543 2004-06-07 17:08 ┃　┣[&lt;yasuyuki@xxxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9544">   9544 2004-06-07 17:38 ┃　┃┗[&quot;Ryuichiro Munechika]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9545">   9545 2004-06-07 18:09 ┃　┃　┗[&lt;yasuyuki@xxxxxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9553">   9553 2004-06-07 21:22 ┃　┃　　┣[&quot;Ryuichiro Munechika]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9555">   9555 2004-06-07 22:02 ┃　┃　　┗[UNO Shintaro &lt;uno@xx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9546">   9546 2004-06-07 18:55 ┃　┗[Hidekazu Ikeda &lt;hike]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9552">   9552 2004-06-07 21:19 ┃　　┗[&quot;Ryuichiro Munechika]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9549">   9549 2004-06-07 20:46 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9551">   9551 2004-06-07 21:16 ┃┗[&quot;Ryuichiro Munechika]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9563">   9563 2004-06-07 23:44 ┃　┗[Sumito_Oda &lt;oda@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9554">   9554 2004-06-07 21:26 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9557">   9557 2004-06-07 22:12 ┃┣[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9558">   9558 2004-06-07 22:22 ┃┣[&quot;TAKT Co.,ltd.&quot; &lt;t@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9562">   9562 2004-06-07 23:38 ┃┃┗[&lt;takeshi@xxxxxxxxxx&gt;] Re: MySQL 4.1.2 の日本語の扱い(Re: MySQLの問題点)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9579">   9579 2004-06-09 08:32 ┃┃　┣[Yukihiro KAWADA &lt;kaw]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9626">   9626 2004-06-13 18:18 ┃┃　┣[Hirofumi Fujiwara &lt;f] Re: MySQL 4.1.2 の日本語の扱い  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9688">   9688 2004-06-18 10:02 ┃┃　┗[&lt;takeshi@xxxxxxxxxx&gt;] MySQL 4.1.2 の char と日本語 (Re: MySQL 4.1.2 の日本語の扱い)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9700">   9700 2004-06-23 09:47 ┃┃　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9702">   9702 2004-06-23 10:39 ┃┃　　　┗[Hirofumi Fujiwara &lt;f] Re: MySQL 4.1.2 の char と日本語</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9703">   9703 2004-06-23 10:57 ┃┃　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9720">   9720 2004-06-29 18:27 ┃┃　　　　　┗[Hirofumi Fujiwara &lt;f]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9729">   9729 2004-07-01 11:40 ┃┃　　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9733">   9733 2004-07-01 16:24 ┃┃　　　　　　┃┗[Hirofumi Fujiwara &lt;f]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9730">   9730 2004-07-01 12:47 ┃┃　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;] 4.1 と UTF-8 (Re: MySQL 4.1.2 の char  と日本語)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9732">   9732 2004-07-01 15:04 ┃┃　　　　　　　┣[IWAMURO Motonori &lt;vm]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9735">   9735 2004-07-01 19:48 ┃┃　　　　　　　┃┗[Hirofumi Fujiwara &lt;f] Re: 4.1 と UTF-8  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9758">   9758 2004-07-02 22:26 ┃┃　　　　　　　┃　┣[&lt;takeshi@xxxxxxxxxx&gt;]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9760">   9760 2004-07-02 22:39 ┃┃　　　　　　　┃　┃┗[&quot;Ryuichiro Munechika]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9768">   9768 2004-07-03 18:06 ┃┃　　　　　　　┃　┃　┗[Hirofumi Fujiwara &lt;f]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9764">   9764 2004-07-03 06:24 ┃┃　　　　　　　┃　┗[Shuichi Tamagawa &lt;sh]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9774">   9774 2004-07-05 11:59 ┃┃　　　　　　　┃　　┗[Hirofumi Fujiwara &lt;f]               </a></span>
+<span class="current">-&gt;&nbsp;<a href="9734">   9734 2004-07-01 19:23 ┃┃　　　　　　　┣[Hirofumi Fujiwara &lt;f] Re: 4.1 と UTF-8    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9757">   9757 2004-07-02 21:19 ┃┃　　　　　　　┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9769">   9769 2004-07-03 19:27 ┃┃　　　　　　　┃　┗[Hirofumi Fujiwara &lt;f]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9806">   9806 2004-07-10 14:04 ┃┃　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9828">   9828 2004-07-12 17:19 ┃┃　　　　　　　　┣[Hirofumi Fujiwara &lt;f] Re: 4.1 と UTF-8  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9843">   9843 2004-07-13 15:31 ┃┃　　　　　　　　┗[Shuichi Tamagawa &lt;sh]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9865">   9865 2004-07-15 15:55 ┃┃　　　　　　　　　┗[Hirofumi Fujiwara &lt;f] Re: 4.1 と UTF-8</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9868">   9868 2004-07-16 03:52 ┃┃　　　　　　　　　　┗[Shuichi Tamagawa &lt;sh]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9559">   9559 2004-06-07 22:46 ┃┣[&quot;Ryuichiro Munechika]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9569">   9569 2004-06-08 09:40 ┃┃┣[Hidekazu Ikeda &lt;hike]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9577">   9577 2004-06-08 22:48 ┃┃┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9627">   9627 2004-06-13 22:02 ┃┃　┗[Hirofumi Fujiwara &lt;f]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9591">   9591 2004-06-10 22:47 ┃┗[Jun Moriya &lt;jmoriya@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9565">   9565 2004-06-08 08:59 ┗[yoshi &lt;yosihisa@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9566">   9566 2004-06-08 09:11 　┗[Hidekazu Ikeda &lt;hike]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9568">   9568 2004-06-08 09:32 　　┗[yoshi &lt;yosihisa@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9570">   9570 2004-06-08 09:47 　　　┗[Hidekazu Ikeda &lt;hike]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9571">   9571 2004-06-08 10:26 　　　　┗[yasuyuki &lt;yasuyuki@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9572">   9572 2004-06-08 10:37 　　　　　┗[Hidekazu Ikeda &lt;hike]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9574">   9574 2004-06-08 11:58 　　　　　　┗[えんどう &lt;yasuyuki@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9575">   9575 2004-06-08 15:22 　　　　　　　┣[&quot;Ryuichiro Munechika]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9613">   9613 2004-06-12 22:10 　　　　　　　┃┗[とみたまさひろ &lt;tomm]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9576">   9576 2004-06-08 20:19 　　　　　　　┗[Hidekazu Ikeda &lt;hike]                         </a></span>
+</pre>
+</body>
+</html>

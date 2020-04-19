@@ -1,0 +1,139 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4955</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="4954">[前]</a><a href="4956">[次]</a><a href="../list/4901-5000">[番号順一覧]</a><a href="../thread/4901-5000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4955
+</p>
+<div class="header">
+<p>
+From: 前田 剛 &lt;前田 剛 &lt;maeda@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 18 Jan 2002 01:50:11 +0900<br>
+Subject: [mysql 04955] sjis サーバの BLOB 項目に画像を登録 ( たぶん解決)<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+　前田＠ワコムアイティと申します。
+　3ヶ月ほど前からMySQLを使い始めました。どうぞよろしくお願いいた
+します。
+
+
+　MySQL 3.23.47のsjisサーバのBLOB項目に画像を登録しようとしてここ
+数日試行錯誤していましたが、libmysql.dllを修正することによりなん
+とかうまく行きました。
+
+　過去ログではこの問題への対応方法が見つかりませんでしたので、一
+応報告しておきます。
+　テストした範囲ではうまくいっているようですが、おかしな点があり
+ましたらご指摘下さるようお願いいたします。
+
+
+【開発環境】
+Borland Delphi 6 Professional(UpdatePack 1)のdbExpressを利用。
+
+※dbExpressは、MySQLに接続するためにlibmysql.dllを使用します。
+
+
+【発生していた問題】
+　sjisサーバのBLOB項目に特定のバイトパターンを含む画像を登録しよ
+うとすると、データが化けるか登録に失敗してしまう。使用していた
+libmysql.dllはsjis対応版。
+
+例：
+(元のパターン) 95 5C 27 →  (登録される内容) 95 5C 27 ... OK
+(元のパターン) 95 27    →  (登録される内容) 95 5C 27 ... ???
+
+
+【原因】
+　クライアント側でescape処理したものが、サーバ側ではマルチバイト
+文字として誤認識され、結果としてunescapeされない状態でテーブルが
+登録されてしまう（または登録に失敗する）。
+
+　うまく説明できませんので、過去ログで<a href="03156">[mysql 03156]</a>から始まるスレッ
+ドの議論をご覧下さい。
+
+<a href="../../msg.cgi?ml=mysql&amp;id=3156">http://www.mysql.gr.jp/mysqlml/msg.cgi?ml=mysql&amp;id=3156</a>
+
+
+【解決方法】
+　MySQL 3.23.47のソースを取得し、libmysql.cの
+mysql_sub_escape_string関数を以下のように修正してビルドした
+libmysql.dllを使用することにより解決しました。
+
+　やっている内容は、
+
+    マルチバイト文字の１バイト目として認識される文字の後に 00, 0A, 0D,
+    1A, 22, 27, 5C のいずれかが来るような場合には、その両方を
+    escapeする。
+
+ということです。これにより、クライアント側でescapeしたのにサーバ
+側でマルチバイト文字として誤認識されてしまうことを防ぐことが出来
+ます。
+　サーバは5Cの直後が'n', 't', 'r', 'b', '0', 'Z', '_', '%'のいず
+れでもない場合は、5Cを取り除く処理のみを行います（sql\sql_lex.cpp
+277行）。
+
+
+
+[libmysql\libmysql.c 2437行より修正・追加]
+
+    } else if (use_mb_flag &amp;&amp; my_ismbhead(charset_info, *from) &amp;&amp; 
+      (from + 1) != end) {
+      char ch_after = *(from + 1);
+      if (ch_after == '\0' || ch_after == '\r' || ch_after == '\n' ||
+        ch_after == '\032' || ch_after == '&quot;' || ch_after == '\'') {
+        *to++= '\\';
+        *to++= *from;
+        continue;
+      }
+    }
+
+
+
+　さらに、strings\ctype.cの28行目を次のように修正し、
+default_charset_infoがsjisの情報をポイントするようにしました。
+
+CHARSET_INFO *default_charset_info = &amp;compiled_charsets[6];
+
+　これは、DelphiのdbExpressからmysql_escape_stringが呼ばれた際に、sjis
+に対応したescape処理を行わせるためです。
+
+
+
+[例]
+元のパターン：              &lt;95 5C&gt; 27
+クライアントでのescape後：  &lt;95 5C&gt; 5C 27
+サーバ側でのunescape後：    &lt;95 5C&gt; 27
+
+元のパターン：              95 27
+クライアントでのescape後：  5C 95 5C 27
+サーバ側でのunescape後：    95 27
+
+※ &lt;&gt;で囲んだ部分はマルチバイト文字として認識される部分。
+
+
+_________________________________________________________________
+前田　剛（まえだ　ごう） &lt;maeda@xxxxxxxxxx&gt;
+株式会社ワコムアイティ　プロジェクト開発部
+<a href="http://www.wacom-it.co.jp/">http://www.wacom-it.co.jp/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="4954">[前]</a><a href="4956">[次]</a><a href="../list/4901-5000">[番号順一覧]</a><a href="../thread/4901-5000">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="4955">   4955 2002-01-18 01:50 [前田 剛 &lt;maeda@xxxxx] sjis サーバの BLOB 項目に画像を登録 ( たぶん解決)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4956">   4956 2002-01-18 02:25 ┣[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4957">   4957 2002-01-18 02:48 ┃┣[&quot;TAKAHASHI, Tomohiro]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5002">   5002 2002-01-21 21:25 ┃┗[前田 剛 &lt;maeda@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5003">   5003 2002-01-21 21:39 ┃　┗[&quot;TAKAHASHI, Tomohiro]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5335">   5335 2002-04-10 23:30 ┗[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
+</pre>
+</body>
+</html>

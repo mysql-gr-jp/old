@@ -1,0 +1,128 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2551</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2550">[前]</a><a href="2552">[次]</a><a href="../list/2501-2600">[番号順一覧]</a><a href="../thread/2501-2600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2551
+</p>
+<div class="header">
+<p>
+From: &quot;ADDY&quot; &lt;&quot;ADDY&quot; &lt;addy@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 3 Oct 2000 22:49:27 +0900<br>
+Subject: [mysql 02551] 複数同時アクセス数に対しての対処方法についての質問<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+ＭＬの皆様、はじめまして。
+今まではＲＯでしたが、初めて質問させていただきます。
+
+カウンター用途でＣＧＩを作成しています。バナーが表示されるとユーザー情
+報を取得したり、カウントしたりして、データベースに書き込むようなＣＧＩ
+です。
+問題がありまして…。
+現在はテスト稼動しているだけなのですが、既に、異常な複数同時アクセス数
+（５００〜１０００／１分、又はそれ以上を予想しています。）
+
+動作環境です。
+3.23.24-beta (source version)
+Linux RedHat 6.2
+
+ＭｙＳＱＬを使用する前は、ＰｏｓｔｇｒｅＳＱＬでも試してみたのですが、
+こちらは、全く駄目でした。同時アクセス数が多い為に、デーモンが直ぐに死
+んでしまうのです。ＭｙＳＱＬは優秀なマルチスレッドシステムだと聞きまし
+た。ＭｙＳＱＬの場合はデーモンは死なずに生きていますが、下記のような
+メッセージがエラーログにありますし、アクセスが異常に遅くなっています。
+
+00/10/03 22:03:08 &gt;&gt; Can't create UNIX socket (23)
+00/10/03 22:03:08 &gt;&gt; error occured::database connect
+
+ソケットの上限ってあるのでしょうか？又、上限を変更したい場合はどのよう
+にすればよいのでしょう。おまけに、mysqladminやmysqlなどを含めたＬＩＮ
+ＵＸのコマンドでさえ、
+Too many open files in system
+なんて言われてしまうあり様です。
+
+$ mysqladmin -u root -p status
+Enter password:
+Uptime: 581  Threads: 11  Questions: 6586  Slow queries: 0  Opens: 33
+Flush tables: 1  Open tables: 29 Queries per second avg: 11.336
+
+my.confファイルでは、
+max_connection=10K、table_cache=1024に設定してあります。
+table_cache=1024に変更してからは、下記データのConnectionsやUptimeの数
+値が低くなりました。マシーンのスペックによっても、上限ももちろんあると
+思うのですが、どの程度まであげていいものなのでしょうか。
+
+同時アクセス数がスムーズに行われるように、他に何をどうしたらよいのか、
+ご指導くださいませ。
+アクセス数が多すぎるので、カウンターの部分をテキストベースにしてあと
+で、データベースに書き込むような事も考慮いたしましたが、やはりデータ
+ベース使用を諦めたくないのです。皆様の知恵と知識を拝借したく、宜しくお
+願いいたします。
+
+<span class="quote2">&gt;&gt; mysqladmin -u root -p extended-status</span>
++--------------------------+----------+
+<span class="quote1">| Variable_name            | Value    |</span>
++--------------------------+----------+
+<span class="quote1">| Aborted_clients          | 2        |</span>
+<span class="quote1">| Aborted_connects         | 1        |</span>
+<span class="quote1">| Bytes_received           | 375498   |</span>
+<span class="quote1">| Bytes_sent               | 141912   |</span>
+<span class="quote1">| Connections              | 763      |</span>
+<span class="quote1">| Created_tmp_disk_tables  | 0        |</span>
+<span class="quote1">| Created_tmp_tables       | 0        |</span>
+<span class="quote1">| Delayed_insert_threads   | 0        |</span>
+<span class="quote1">| Delayed_writes           | 0        |</span>
+<span class="quote1">| Delayed_errors           | 0        |</span>
+<span class="quote1">| Flush_commands           | 1        |</span>
+<span class="quote1">| Handler_delete           | 0        |</span>
+<span class="quote1">| Handler_read_first       | 1        |</span>
+<span class="quote1">| Handler_read_key         | 0        |</span>
+<span class="quote1">| Handler_read_next        | 0        |</span>
+<span class="quote1">| Handler_read_prev        | 0        |</span>
+<span class="quote1">| Handler_read_rnd         | 0        |</span>
+<span class="quote1">| Handler_read_rnd_next    | 58378808 |</span>
+<span class="quote1">| Handler_update           | 722      |</span>
+<span class="quote1">| Handler_write            | 371      |</span>
+<span class="quote1">| Key_blocks_used          | 0        |</span>
+<span class="quote1">| Key_read_requests        | 0        |</span>
+<span class="quote1">| Key_reads                | 0        |</span>
+<span class="quote1">| Key_write_requests       | 0        |</span>
+<span class="quote1">| Key_writes               | 0        |</span>
+<span class="quote1">| Max_used_connections     | 18       |</span>
+<span class="quote1">| Not_flushed_key_blocks   | 0        |</span>
+<span class="quote1">| Not_flushed_delayed_rows | 0        |</span>
+<span class="quote1">| Open_tables              | 28       |</span>
+<span class="quote1">| Open_files               | 33       |</span>
+<span class="quote1">| Open_streams             | 0        |</span>
+<span class="quote1">| Opened_tables            | 32       |</span>
+<span class="quote1">| Questions                | 3145     |</span>
+<span class="quote1">| Slow_launch_threads      | 61       |</span>
+<span class="quote1">| Slow_queries             | 0        |</span>
+<span class="quote1">| Slave_running            | OFF      |</span>
+<span class="quote1">| Threads_cached           | 0        |</span>
+<span class="quote1">| Threads_connected        | 12       |</span>
+<span class="quote1">| Threads_running          | 10       |</span>
+<span class="quote1">| Uptime                   | 278      |</span>
++--------------------------+----------+
+
+たかはし、
+
+
+</pre>
+</div>
+<p class="button"><a href="2550">[前]</a><a href="2552">[次]</a><a href="../list/2501-2600">[番号順一覧]</a><a href="../thread/2501-2600">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="2551">   2551 2000-10-03 22:49 [&quot;ADDY&quot; &lt;addy@xxxxxxx] 複数同時アクセス数に対しての対処方法についての質問</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2552">   2552 2000-10-04 20:57 ┣[Tomohiro Takahashi &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2554">   2554 2000-10-05 01:25 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2556">   2556 2000-10-05 13:31 　┗[Bansoukou &lt;bansoukou]                                     </a></span>
+</pre>
+</body>
+</html>

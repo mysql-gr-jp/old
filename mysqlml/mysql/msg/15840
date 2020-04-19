@@ -1,0 +1,196 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15840</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15839">[前]</a><a href="15841">[次]</a><a href="../list/15801-15900">[番号順一覧]</a><a href="../thread/15801-15900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15840
+</p>
+<div class="header">
+<p>
+From: HAYASHI Kentaro &lt;HAYASHI Kentaro &lt;hayashi@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 29 Sep 2012 18:22:08 +0900<br>
+Subject: [mysql 15840] [ANN] mroonga 2.07<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+林です。
+
+今日は肉の日ですね。
+
+mroonga 2.07をリリースしました。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-07">http://mroonga.github.com/ja/docs/news.html#release-2-07</a>
+
+mroongaはMySQL 5.1/5.5/5.6、MariaDB 5.3/5.5で利用できる全文検
+索・位置情報検索可能なストレージエンジンです。mroongaは
+Tritonnの後継プロジェクトです。
+
+ドキュメント:
+  <a href="http://mroonga.github.com/ja/">http://mroonga.github.com/ja/</a>
+インストールガイド:
+  <a href="http://mroonga.github.com/ja/docs/install.html">http://mroonga.github.com/ja/docs/install.html</a>
+
+今回のリリースと前回のリリースでは、データベースの互換性があります。
+そのため、データベースの再構築は不要です。
+
+ただし、以前のバージョンからアップグレードする場合には、
+アップグレード手順に注意が必要です。
+現在お使いのバージョンごとのアップグレード手順を参照してください。
+
+1.20より前のバージョンからアップグレードする場合は以下にある
+手順を使ってください。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-1-20">http://mroonga.github.com/ja/docs/news.html#release-1-20</a>
+
+1.20からアップグレードする場合は以下にある手順を使ってくださ
+い。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-00">http://mroonga.github.com/ja/docs/news.html#release-2-00</a>
+
+2.00か2.01からアップグレードする場合は、以下の手順でパッケージ
+署名用の新しい鍵をインポートしてください。
+
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-02">http://mroonga.github.com/ja/docs/news.html#release-2-02</a>
+
+2.00以降でストレージモードにてマルチカラムインデックスを
+使っている場合は以下の手順でインデックスを作り直して
+ください。
+
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-03">http://mroonga.github.com/ja/docs/news.html#release-2-03</a>
+
+2.04以降でストレージモードにてSETカラムもしくは要素数が256より
+少ないENUMを使用している場合は、以下の手順でデータベースを
+再作成してください。
+
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-05">http://mroonga.github.com/ja/docs/news.html#release-2-05</a>
+
+今回のリリースの主なトピックは以下の通りです。
+
+  * スニペット関数のサポート
+  * MeCab向けにAppArmorの設定を追加
+
+他にもDATETIME型でオーバーフローしてしまう不具合を修正していますので、
+該当される方はアップグレードをお勧めします。
+
+○ スニペット関数のサポート
+
+mroongaの前身であるTritonnプロジェクトではsnippet UDFなる
+文書中のキーワード周辺のテキストを抽出する機能を提供していました。
+
+今回のリリースではsnippet UDFと同様の機能を提供するmroonga_snippet
+関数を実験的にサポートしました。
+あくまで実験的なので今後予告なく変更する可能性があることに注意してください。
+
+mroonga_snippet関数は以下のような構文で使用します。
+
+  SELECT mroonga_snippet(文書, snippetの長さの最大バイト数, snippetの最大個数, 文書の文字コード,
+    先頭の空白の無視, エスケープの有無, snippetの開始テキスト, snippetの終了テキスト, 
+    単語1, 単語1の前につけるテキスト, 単語1の後につけるテキスト,
+    単語2, 単語2の前につけるテキスト, 単語2の後につけるテキスト, ...);
+
+どんな風に使えるのかを実際の例で説明します。
+題材は「fulltextというキーワード含む文書を検索し、その文書にキーワード
+として'MySQL'や'search'もあれば、該当部分にタグをつけて抽出する」です。
+
+上記を実現するにはmroonga_snippet関数とMATCH ... AGAINST構文を使います。
+
+以下にスキーマ定義と、サンプルデータ、実行結果を示します。
+
+実行例で使用するスキーマ定義はこちら:
+
+  CREATE TABLE `snippet_test` (
+    `id` int(11) NOT NULL,
+    `text` text,
+    PRIMARY KEY (`id`),
+    FULLTEXT KEY `text` (`text`)
+  ) ENGINE=mroonga DEFAULT CHARSET=utf8
+
+実行例で使用するサンプルデータはこちら:
+
+  insert into snippet_test (id, text) \
+    values (1, 'An open-source fulltext search engine and column store.');
+  insert into snippet_test (id, text) \
+    values (2, 'An open-source storage engine for fast fulltext search with MySQL.');
+  insert into snippet_test (id, text) \
+    values (3, 'Tritonn is a patched version of MySQL that supports better fulltext search function with Senna.');
+
+実行結果はこちら:
+
+  mysql&gt; select * from snippet_test;
+  +----+-------------------------------------------------------------------------------------------------+
+  | id | text                                                                                            |
+  +----+-------------------------------------------------------------------------------------------------+
+  |  1 | An open-source fulltext search engine and column store.                                         |
+  |  2 | An open-source storage engine for fast fulltext search with MySQL.                              |
+  |  3 | Tritonn is a patched version of MySQL that supports better fulltext search function with Senna. |
+  +----+-------------------------------------------------------------------------------------------------+
+  3 rows in set (0.00 sec)
+
+  mysql&gt; select id, mroonga_snippet(text, 8, 2, 'ascii_general_ci', 1, 1, '...', '...&lt;br&gt;', \
+           'fulltext', '&lt;span class=&quot;w1&quot;&gt;', '&lt;/span&gt;', \
+           'MySQL', '&lt;span class=&quot;w2&quot;&gt;', '&lt;/span&gt;', \
+           'search', '&lt;span calss=&quot;w3&quot;&gt;', '&lt;/span&gt;') \
+           from snippet_test where match(text) against ('fulltext');
+
+  +----+-------------------------------------------------------------------------------------+
+  | id | (...クエリを省略...)                                                                 |
+  +----+-------------------------------------------------------------------------------------+
+  |  1 | ...&lt;span class=&quot;w1&quot;&gt;fulltext&lt;/span&gt;...&lt;br&gt;... &lt;span calss=&quot;w3&quot;&gt;search&lt;/span&gt; ...&lt;br&gt;|
+  |  2 | ...&lt;span class=&quot;w1&quot;&gt;fulltext&lt;/span&gt;...&lt;br&gt;... &lt;span calss=&quot;w3&quot;&gt;search&lt;/span&gt; ...&lt;br&gt;|
+  |  3 | ...f &lt;span class=&quot;w2&quot;&gt;MySQL&lt;/span&gt; ...&lt;br&gt;...&lt;span class=&quot;w1&quot;&gt;fulltext&lt;/span&gt;...&lt;br&gt;|
+  +----+-------------------------------------------------------------------------------------+
+  3 rows in set (0.00 sec)
+
+上記実行例からわかるように、MATCH ... AGAINST 構文と一緒に使うことで、'fulltext'というキーワードを含む文書で、
+'MySQL'や'search'というキーワードも含んでいる部分を抽出することができます。
+
+mroonga_snippet関数の詳細については以下を参照してください。
+
+  <a href="http://mroonga.github.com/ja/docs/userguide/storage.html#how-to-get-snippet-keyword-in-context">http://mroonga.github.com/ja/docs/userguide/storage.html#how-to-get-snippet-keyword-in-context</a>
+
+○ MeCab向けにAppArmorの設定を追加
+
+これまでMeCabの辞書についてはAppArmorの設定がないため、
+実際には、Ubuntuで導入されたAppArmorが有効な環境ではMySQLへアクセス制限がかかり、
+MeCabの辞書が読み込めないことがありました。
+
+従来は個別にAppArmorの設定を環境に応じて行う必要がありましたが、
+それでは不便なのでMeCab向けのAppArmorの設定ファイルを追加しました。
+
+○ 変更点
+
+2.06からの変更点は以下の通りです。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-07">http://mroonga.github.com/ja/docs/news.html#release-2-07</a>
+
+改良
+^^^^
+
+    * [deb] MeCab向けにAppArmorの設定を有効にした。 [@Qurageさんが報告]
+    * [ストレージモード][実験的] mroonga_snippet()関数を追加。 [#1442]
+
+修正
+^^^^
+
+    * [rpm] groonga_required_version を修正。 [groonga-dev,01033] [wingさんが報告]
+    * datetime型として保持できる値の範囲が狭く、意図しない値が設定される問題を修正。
+      [groonga-dev,01035] [#1476] [中谷宗嵩さんが報告]
+
+感謝
+^^^^
+
+    * @Qurageさん
+    * wingさん
+    * 中谷宗嵩さん
+
+-- 
+HAYASHI Kentaro &lt;hayashi@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="15839">[前]</a><a href="15841">[次]</a><a href="../list/15801-15900">[番号順一覧]</a><a href="../thread/15801-15900">[スレッド一覧]</a></p>
+</body>
+</html>

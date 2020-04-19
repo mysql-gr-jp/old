@@ -1,0 +1,139 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15009</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15008">[前]</a><a href="15010">[次]</a><a href="../list/15001-15100">[番号順一覧]</a><a href="../thread/15001-15100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15009
+</p>
+<div class="header">
+<p>
+From: Mikiya Okuno &lt;Mikiya Okuno &lt;Mikiya.Okuno@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 03 Sep 2009 22:35:56 +0900<br>
+Subject: [mysql 15009] Re: 検索処理を早くするには？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+岡田様、
+
+こんばんは。
+
+On 03/09/2009, at 8:35 PM, Takayuki Okada wrote:
+
+<span class="quote1">&gt; お世話になります。</span>
+<span class="quote1">&gt; 岡田と申します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 非常に漠然とした質問になり、すみません。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; DB2からMySQLへ移行し、性能を測ってみたところ、</span>
+<span class="quote1">&gt; 全件検索が非常に遅くなりました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; explainで確認すると、一応、PKは使用しているようですが、</span>
+<span class="quote1">&gt; 件数が多くなると、やはり遅くなります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 何かよいチューニング方法はないでしょうか？</span>
+<span class="quote1">&gt; インデックスは条件句が複数となるため、</span>
+<span class="quote1">&gt; それごとに作成したくはないと思ってますので、</span>
+<span class="quote1">&gt; パラメータで改善できればベストです。</span>
+<span class="quote1">&gt; また、アプローチに関してもご教示いただければ、幸いです。</span>
+<span class="quote1">&gt; ＃Enterpriseシルバーなので、チューニングはサポートに</span>
+<span class="quote1">&gt; 聞けないので、本ＭＬに投稿させていただきました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ちなみに、バージョンは5.1.31で、</span>
+<span class="quote1">&gt; 対象のテーブルはエンジンはInnoDBで作成しております。</span>
+
+Platinum買ってください・・・と言いたい気持ちを抑えて、以下ちょっと 
+だけ
+チューニングの指針などについて述べてみたいと思います。
+
+要件が全件検索ということなので、この場合EXPLAINはあまり役に 
+立たないと思います。
+もし、テーブルの全件に対して結果行が極端に少なければ、インデックス 
+または
+パーティショニングを使った方が良いのは間違い有りませんので、まずは 
+インデックスや
+パーティショニングによって効率化が出来るかどうかを検討してみてくだ 
+さい。
+
+返される結果がテーブルの半数程度というように、あまり絞り込みが行わ 
+れない場合は
+インデックスは利用しない方がいいでしょう。その場合は次の点に気を配 
+ると良いと思います。
+・できるだけデータをInnoDBバッファプールにのせる。（100% 
+メモリ上にあれば最速です。）
+・ファイルシステムまわりをチューニングする。
+
+100%メモリ上にデータが乗ってる状態で、さらにSELECTを速くした 
+い場合には、
+速いCPU・メモリバスが必要です。
+
+ファイルシステムまわりのチューニングに関しては、ファイルシステムの 
+種類によって
+チューニングの方法が異なります。InnoDBをext3上で利用す 
+る場合、cfqスケジューラと
+相性がよくないことが知られていますので、まずはdeadline等に変 
+更しましょう。
+xfsを利用するという手もあります。Solaris/ZFSの場合には、レ 
+コードサイズを16KBに
+したり、プリフェッチを無効化したりすると幸せになれます。
+
+I/Oをとことん高速化するのであれば、思い切ってRAWデバイス上で 
+利用することも検討してみて下さい。
+↓マニュアルです。
+<a href="http://dev.mysql.com/doc/refman/5.1/en/innodb-raw-devices.html">http://dev.mysql.com/doc/refman/5.1/en/innodb-raw-devices.html</a>
+
+後は、速いディスクを利用しましょう。MySQLも他のDBと同 
+様、ディスクの性能は大事です。
+今月号のDB Magazineに
+
+SSDによるRDBMSの高速化を徹底検証！そのアーキテクチャと利用効 
+果を探る／松信嘉範
+
+というマニアックな記事が載っているので参考になると思います。
+
+さらに高速化を狙うのであれば、最近リリースされたばかりのMySQL  
+5.1.38を利用するという手があります。
+このバージョンにはInnoDB Plugin 1.0.4が同梱されており、デ 
+フォルトのInnoDBにくらべて
+I/O性能が大幅に強化されています。設定方法などについてはこちらを参 
+照してください。
+<a href="http://dev.mysql.com/doc/refman/5.1/en/news-5-1-38.html">http://dev.mysql.com/doc/refman/5.1/en/news-5-1-38.html</a>
+
+効果のほどは↓のページなどをご覧下さい。
+<a href="http://opendatabaselife.blogspot.com/2009/08/innodb-plugin-104-innodb.html">http://opendatabaselife.blogspot.com/2009/08/innodb-plugin-104-innodb.html</a>
+
+※上記の記事ではグループコミットによる更新性能について語られていま 
+すが、I/Oスレッドが
+　多重化されているのでReadも速くなります。（速いディスクの性 
+能を活かせるようになります。）
+
+ただし、InnoDB Plugin 1.0.4はまだ正式版ではなく、β扱いなの 
+でその点はご了承頂いた
+上でご利用下さい。
+
+では。
+--
+Mikiya Okuno, MySQL Support Engineer
+Sun Microsystems KK, Tokyo, Japan
+<a href="http://www-jp.mysql.com/">http://www-jp.mysql.com/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="15008">[前]</a><a href="15010">[次]</a><a href="../list/15001-15100">[番号順一覧]</a><a href="../thread/15001-15100">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15008">  15008 2009-09-03 20:35 [Takayuki Okada &lt;okad] 検索処理を早くするには？                </a></span>
+<span class="current">-&gt;&nbsp;<a href="15009">  15009 2009-09-03 22:35 ┣[Mikiya Okuno &lt;Mikiya]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15012">  15012 2009-09-06 17:14 ┗[Takayuki Okada &lt;okad]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15013">  15013 2009-09-06 21:16 　┣[遠藤 俊裕 &lt;endo@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15030">  15030 2009-09-28 07:20 　┃┗[&quot;takehara infonet&quot; &lt;] ＣＳＶのＩＭＰＯＲＴ              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15014">@ 15014 2009-09-07 05:01 　┣[Miyata Masaki &lt;catlo]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15021">  15021 2009-09-08 15:34 　┗[Takayuki Okada &lt;okad]                                     </a></span>
+</pre>
+</body>
+</html>

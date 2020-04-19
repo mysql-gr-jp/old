@@ -1,0 +1,161 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14152</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14151">[前]</a><a href="14153">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14152
+</p>
+<div class="header">
+<p>
+From: &quot;Tetsuro IKEDA&quot; &lt;&quot;Tetsuro IKEDA&quot; &lt;ikdttr@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 1 Aug 2007 12:04:48 +0900<br>
+Subject: [mysql 14152] Re: MySQLが落ちる<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+いけだです。
+
+そうですね、回避策・対応策ですが、さらに以下の
+バグレポートを見つけました。
+
+<a href="http://bugs.mysql.com/bug.php?id=3139">http://bugs.mysql.com/bug.php?id=3139</a>
+
+これによると、
+
+1. パラメータチューニングは効果なし。
+
+innodb_file_io_threads=20 or 8 or 4(初期値)で問題発生。
+
+2. 他のマシンで同じMySQL環境を作って試したら再現せず
+
+「ibdata1を作りなおしたら上手くいくかも」の投稿の後、
+続報がないのでうまくいったのかもしれない。
+
+3. ストレージにSANを使用している場合、Command Queueのサイズが
+小さすぎると処理に失敗するという報告がいくつかあった。
+
+とのことです。
+
+07/08/01 に 兵頭&lt;kz.hyodo@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; こんにちは、兵頭です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; いけだ様、ありがとうございます。</span>
+<span class="quote1">&gt; ということは、MySQL側だけの問題ではなさそうですね。</span>
+<span class="quote1">&gt; 原因が同じかどうかは不明ですが、MySQL設定側で大量の非同期I/O要求</span>
+<span class="quote1">&gt; を行った場合の処置について考える必要があるかと思っていますが、</span>
+<span class="quote1">&gt; いかがでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 何度も申し訳ありませんが、宜しくお願いします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 兵頭</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; いけだです。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 手がかりはERROR_OPERATION_ABORTED(=995)のみということですね。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 軽くぐぐったら以下のスレッドを見つけました。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; <a href="http://lists.mysql.com/mysql/180043">http://lists.mysql.com/mysql/180043</a></span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; Windowsのバグかもと言っています。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; このERROR_OPERATION_ABORTEDは、大量の非同期I/O要求を</span>
+<span class="quote2">&gt; &gt; Windowsに対して発行した際に、処理されずに滞留したリクエストを、</span>
+<span class="quote2">&gt; &gt; CancelIO関数でキャンセルした後に、GetLastError関数で調べると</span>
+<span class="quote2">&gt; &gt; 得られるエラーとのことです。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; で、InnoDBではCancelIO関数なんて呼んで無いよと。</span>
+<span class="quote2">&gt; &gt; 確かに、ver4.0.26をgrepしてもCancelIO関数は呼ばれてません。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 07/08/01 に 兵頭&lt;kz.hyodo@xxxxxxxxxx&gt; さんは書きました:</span>
+<span class="quote3">&gt; &gt;&gt; こんにちは、兵頭です。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; いけださんよりご指摘の点ですが、</span>
+<span class="quote3">&gt; &gt;&gt; 自分なりに調べた結果ですが、具体的には何も分かっていません。</span>
+<span class="quote3">&gt; &gt;&gt; こんな状態で質問をするのも大変失礼かと思ったのですが、急を要しておりまして</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 投稿させていただいた次第であります。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; ログの直前の部分は下記のとおりです。</span>
+<span class="quote3">&gt; &gt;&gt; *****************************************************************</span>
+<span class="quote3">&gt; &gt;&gt; 070731  3:00:00 MySql: Normal shutdown</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 070731  3:00:01  InnoDB: Starting shutdown...</span>
+<span class="quote3">&gt; &gt;&gt; 070731  3:00:02  InnoDB: Shutdown completed</span>
+<span class="quote3">&gt; &gt;&gt; 070731  3:00:02 MySql: Shutdown Complete</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 070731  3:21:44  InnoDB: Started</span>
+<span class="quote3">&gt; &gt;&gt; MySql: ready for connections.</span>
+<span class="quote3">&gt; &gt;&gt; Version: '4.0.26-nt'  socket: ''  port: 3306  Official MySQL binary</span>
+<span class="quote3">&gt; &gt;&gt; *******************************************************************</span>
+<span class="quote3">&gt; &gt;&gt; 以上のログが毎日残っています。</span>
+<span class="quote3">&gt; &gt;&gt; 毎日AM3:00にバッチ処理にてサービスを停止してオフラインバックアップを行っています。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; Windows Error Code 995　についてありがとうございます。</span>
+<span class="quote3">&gt; &gt;&gt; まだよく理解していませんが、調べてみます。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 兵頭</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; ----- Original Message -----</span>
+<span class="quote3">&gt; &gt;&gt; From: &quot;Tetsuro IKEDA&quot; &lt;ikdttr@xxxxxxxxxx&gt;</span>
+<span class="quote3">&gt; &gt;&gt; To: &lt;ml@xxxxxxxxxx&gt;</span>
+<span class="quote3">&gt; &gt;&gt; Sent: Wednesday, August 01, 2007 9:46 AM</span>
+<span class="quote3">&gt; &gt;&gt; Subject: <a href="14147">[mysql 14147]</a> Re: MySQLが落ちる</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt; &gt; いけだです。</span>
+<span class="quote4">&gt; &gt;&gt; &gt;</span>
+<span class="quote4">&gt; &gt;&gt; &gt; 以下のログですが、14:29:38以前の分も見せてもらえませんか？</span>
+<span class="quote4">&gt; &gt;&gt; &gt; 単に「正常起動しましたよー」というようなログしかなく、</span>
+<span class="quote4">&gt; &gt;&gt; &gt; つぎはもう14:29:38の出力、ということならそれはそれでいいですが。</span>
+<span class="quote4">&gt; &gt;&gt; &gt;</span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt; MySQLのエラーログは下記のとおりです。</span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt; *****************************************************</span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt; 070731 14:29:38  InnoDB: Operating system error number 995 in a file</span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt; operation.</span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt; InnoDB: See <a href="http://dev.mysql.com/doc/mysql/en/InnoDB.html">http://dev.mysql.com/doc/mysql/en/InnoDB.html</a></span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt; InnoDB: for installation help.</span>
+<span class="quote4">&gt; &gt;&gt; &gt; 〜中略〜</span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt; 自分なりにいろいろと手を尽くして調べてみたのですが、明確な原因が見つからず</span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt;</span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt; 困っています。</span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt; どなたか、お分かりになるかたらおられましたらご教授願います。</span>
+<span class="quote5">&gt; &gt;&gt; &gt;&gt; 宜しくお願いいします。</span>
+<span class="quote4">&gt; &gt;&gt; &gt;</span>
+<span class="quote4">&gt; &gt;&gt; &gt; 何を調べて、どこまでは分かったのか追記していただいたほうが</span>
+<span class="quote4">&gt; &gt;&gt; &gt; MLの皆さんも答えやすいと思います。</span>
+<span class="quote4">&gt; &gt;&gt; &gt;</span>
+<span class="quote4">&gt; &gt;&gt; &gt; とりあえず、Windows Error Code 995は以下のようですが。</span>
+<span class="quote4">&gt; &gt;&gt; &gt;</span>
+<span class="quote4">&gt; &gt;&gt; &gt; The I/O operation has been aborted because of either a thread</span>
+<span class="quote4">&gt; &gt;&gt; &gt; exit or an application request.</span>
+<span class="quote4">&gt; &gt;&gt; &gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="14151">[前]</a><a href="14153">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14146">  14146 2007-08-01 02:55 [兵頭 &lt;kz.hyodo@xxxxx] MySQLが落ちる                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14147">  14147 2007-08-01 09:46 ┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14148">  14148 2007-08-01 10:11 　┗[兵頭 &lt;kz.hyodo@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14149">  14149 2007-08-01 10:55 　　┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14150">  14150 2007-08-01 11:25 　　　┗[兵頭 &lt;kz.hyodo@xxxxx]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="14152">  14152 2007-08-01 12:04 　　　　┣[&quot;Tetsuro IKEDA&quot; &lt;ikd]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14154">  14154 2007-08-01 14:07 　　　　┃┗[兵頭 &lt;kz.hyodo@xxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14153">  14153 2007-08-01 12:39 　　　　┗[Yasufumi Kinoshita &lt;]                               </a></span>
+</pre>
+</body>
+</html>

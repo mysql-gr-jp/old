@@ -1,0 +1,77 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:396</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="395">[前]</a><a href="397">[次]</a><a href="../list/301-400">[番号順一覧]</a><a href="../thread/301-400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:396
+</p>
+<div class="header">
+<p>
+From: 民斗 &lt;民斗 &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 22 Nov 1998 00:59:04 +0900<br>
+Subject: [mysql 396] MySQL SJIS Bug (Re: MS-ACCESS から  MySQL を使う )<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+[Subject: <a href="388">[mysql 388]</a> Re: MS-ACCESS から MySQL を使う]
+[Date: Fri, 20 Nov 1998 13:58:35 +0900  From:民斗]
+
+<span class="quote1">&gt; ちょっと過去のメールを読み返してみたら、<a href="187">[mysql 187]</a> で tamon さんが</span>
+<span class="quote1">&gt; <a href="http://www.alles.or.jp/~tamon/myodbc.zip">http://www.alles.or.jp/~tamon/myodbc.zip</a></span>
+<span class="quote1">&gt; に ShiftJIS 対応の MyODBC を置いたというのがありましたね。</span>
+
+というわけで、MyODBC の SJIS 対応は行なう必要がなくなったので、
+MyODBC 内部で SJIS←→EUC 対応ができないかな〜と思って、ソースを
+読んでみたんですが、あちこちいじらないといけなくて結構面倒なような
+のであきらめました。
+
+まあそれはおいといて、その作業中に MySQL 本体の SJIS 対応のバグを
+見つけてしまいました。あるバイトが SJIS の１バイト目に適合すると、
+次のバイトがなんであれ SJIS と判断してしまいます。
+
+実際には問題になることはほとんどないと思いますが、まあ縁起物なので
+パッチをつけておきます。
+
+ついでに EUC のマクロも少しいじって安全にしました。これもやはり
+縁起物という程度です。
+
+--
+民斗 &lt;tommy@xxxxxxxxxx&gt;
+
+--- include/m_ctype.h.in.orig	Sat Oct 17 18:38:12 1998
++++ include/m_ctype.h.in	Sun Nov 22 00:41:15 1998
+@@ -105,5 +105,5 @@
+ #define ismbchar(p, end)	((*(uchar*)(p)&lt;0x80)? 0:\
+-	isujis(*(p)) &amp;&amp; end-(p)&gt;1 &amp;&amp; isujis(*((p)+1))? 2:\
+-	isujis_ss2(*(p)) &amp;&amp; end-(p)&gt;1 &amp;&amp; iskata(*((p)+1))? 2:\
+-	isujis_ss3(*(p)) &amp;&amp; end-(p)&gt;2 &amp;&amp; isujis(*((p)+1)) &amp;&amp; isujis(*((p)+2))? 3:\
++	isujis(*(p)) &amp;&amp; (end)-(p)&gt;1 &amp;&amp; isujis(*((p)+1))? 2:\
++	isujis_ss2(*(p)) &amp;&amp; (end)-(p)&gt;1 &amp;&amp; iskata(*((p)+1))? 2:\
++	isujis_ss3(*(p)) &amp;&amp; (end)-(p)&gt;2 &amp;&amp; isujis(*((p)+1)) &amp;&amp; isujis(*((p)+2))? 3:\
+ 	0)
+@@ -120,3 +120,3 @@
+ #define issjistail(c)	((0x40&lt;=(uchar)(c) &amp;&amp; (uchar)(c)&lt;=0x7e) || (0x80&lt;=(uchar)(c) &amp;&amp; (uchar)(c)&lt;=0xfc))
+-#define ismbchar(p, end)	(issjishead(*(p)) &amp;&amp; end-(p)&gt;1 &amp;&amp; issjistail(*(p))? 2: 0)
++#define ismbchar(p, end)	(issjishead(*(p)) &amp;&amp; (end)-(p)&gt;1 &amp;&amp; issjistail(*((p)+1))? 2: 0)
+ #define ismbhead(c)	issjishead(c)
+
+</pre>
+</div>
+<p class="button"><a href="395">[前]</a><a href="397">[次]</a><a href="../list/301-400">[番号順一覧]</a><a href="../thread/301-400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="383">    383 1998-11-20 05:17 [民斗 &lt;tommy@xxxxxxxx] MS-ACCESS から  MySQL  を使う           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="384">    384 1998-11-20 06:19 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="386">    386 1998-11-20 13:32 　┣[Seiji tateyama &lt;tate]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="388">    388 1998-11-20 13:58 　┗[民斗 &lt;tommy@xxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="394">    394 1998-11-21 10:48 　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="396">    396 1998-11-22 00:59 　　┗[民斗 &lt;tommy@xxxxxxxx] MySQL SJIS Bug (Re: MS-ACCESS から  MySQL を使う )</a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14134</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14133">[前]</a><a href="14135">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14134
+</p>
+<div class="header">
+<p>
+From: goungoun &lt;goungoun &lt;gounx2@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 24 Jul 2007 22:07:11 +0900<br>
+Subject: [mysql 14134] Re: MyODBC 接続による 0x5c の問題は最新ドライバで解決済み？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。
+
+On Tue, 24 Jul 2007 17:15:48 +0900 (JST)
+&lt;ska_king2005@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; 過去ログに、MyODBCで0x5cの文字が存在すると「\」が付加さ</span>
+<span class="quote1">&gt; れ、</span>
+<span class="quote1">&gt; 末尾に存在すると「'」がエスケープされてしまい、</span>
+<span class="quote1">&gt; シンタックスエラー等を引き起こす問題がありました。</span>
+<span class="quote1">&gt; 実際にMyODBC3.51.12を使用し、クエリログを採取した結果、</span>
+<span class="quote1">&gt; 問題となっているクエリが出力されていました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; なにげなく、MyODBC3.51.17に切り替えて実行した結果、</span>
+<span class="quote1">&gt; クエリログにも0x5c文字がエスケープされずに出力され、</span>
+<span class="quote1">&gt; クエリも問題なく実行できました。</span>
+
+# 見られてるような気もしますが。。。
+
+<a href="13924">http://www.mysql.gr.jp/mysqlml/mysql/msg/13924</a>
+の頃調べた限りでは、
+mysql-connector-odbc-3.51.14-win32.msi
+でも正常に動作してました。
+
+# クライアントのmy.cnfで
+# default-character-set=cp932
+# してますか？
+# 詳しくは上記のUrl先やその周辺を探ってみてください。
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; チェンジログを一通り読んでみた結果、この辺の修正で直った</span>
+<span class="quote1">&gt; ように</span>
+<span class="quote1">&gt; 見えるのですが、何か情報をお持ちの方はいらっしゃいますで</span>
+<span class="quote1">&gt; しょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; #E.3.13. Changes in Connector/ODBC 3.51.17 (14 July 2007)</span>
+<span class="quote1">&gt; より引用</span>
+<span class="quote1">&gt; #</span>
+<span class="quote1">&gt; #The driver was using mysql_odbc_escape_string(),</span>
+<span class="quote1">&gt; #which does not handle the NO_BACKSLASH_ESCAPES SQL mode. </span>
+<span class="quote1">&gt; #Now it uses mysql_real_escape_string(), which does.</span>
+<span class="quote1">&gt; (Bug#9498) </span>
+<span class="quote1">&gt; </span>
+
+これは、
+5.0.3以降でサーバ側に NO_BACKSLASH_ESCAPES というのが追加
+されたが、MyODBC側はこれに対応していなかったので修正した
+ってことでは？
+したがって、cp932の0x5c問題とは無関係だと思いますよ。
+
+ただ、間接的には直ったように見えるような気がします。
+というのも、NO_BACKSLASH_ESCAPESは、
+エスケープを無効にするオプションのようなので、
+結果的に解決しているように見えるのではないかな？
+
+もっとも、NO_BACKSLASH_ESCAPESしていると
+副作用（？）として、改行を含む文字列をinsertしようと
+&quot;aaa\nbbb&quot; なんて指定しても、期待通りの
+動作はしなくなるんでしょうね。
+
+
+-- 
+goungoun &lt;gounx2@xxxxxxxxxx&gt;
+<a href="http://goungoun.dip.jp/app/">http://goungoun.dip.jp/app/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="14133">[前]</a><a href="14135">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14132">  14132 2007-07-24 17:15 [&lt;ska_king2005@xxxxxx] MyODBC 接続による 0x5c の問題は最新ドライバで解決済み？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14133">  14133 2007-07-24 20:40 ┣[&lt;ska_king2005@xxxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14134">  14134 2007-07-24 22:07 ┗[goungoun &lt;gounx2@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14135">  14135 2007-07-25 10:42 　┗[&lt;ska_king2005@xxxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7564</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="7563">[前]</a><a href="7565">[次]</a><a href="../list/7501-7600">[番号順一覧]</a><a href="../thread/7501-7600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7564
+</p>
+<div class="header">
+<p>
+From: tamura &lt;tamura &lt;zai91210@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 20 Apr 2003 01:24:55 +0900<br>
+Subject: [mysql 07564] Re: timestamp 型で、 between の利用は可か<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+田村です、毎度。
+
+ihandmanさん、齋藤＠横浜さんありがとうございます。
+ひとつ（後述）を除いて、うまく出来ました（感謝）。
+
+&lt;INPUT type=&quot;text&quot; name=&quot;year1&quot; size=&quot;4&quot; value=&quot;&lt;?php echo $year ?&gt;&quot;&gt;年
+&lt;INPUT type=&quot;text&quot; name=&quot;month1&quot; size=&quot;2&quot; value=&quot;&lt;?php echo $month ?&gt;&quot;&gt;月
+&lt;INPUT type=&quot;text&quot; name=&quot;day1&quot; size=&quot;2&quot; value=&quot;&lt;?php echo $day ?&gt;&quot;&gt;日
+〜
+&lt;INPUT type=&quot;text&quot; name=&quot;year2&quot; size=&quot;4&quot; value=&quot;&lt;?php echo $year ?&gt;&quot;&gt;年
+&lt;INPUT type=&quot;text&quot; name=&quot;month2&quot; size=&quot;2&quot; value=&quot;&lt;?php echo $month ?&gt;&quot;&gt;月
+&lt;INPUT type=&quot;text&quot; name=&quot;day2&quot; size=&quot;2&quot; value=&quot;&lt;?php echo $day ?&gt;&quot;&gt;日
+
+から、$ymd1、$ymd2を作っています。
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 単に $ymd1,$ymd2は普通の文字列で、sales_dateが timestamp型で</span>
+<span class="quote1">&gt; 型が違っているからbetweenの比較がうまくいかないと言っているん</span>
+<span class="quote1">&gt; だと思います。解決策としては、下記のように型を合わせて比較</span>
+<span class="quote1">&gt; すればうまくいくと思います。</span>
+
+　はい、まず、すべてtimestamp型にそろえて
+
+$ymd1=$year1.$month1.$day1.&quot;000000&quot;;
+$ymd2=$year2.$month2.$day2.&quot;235959&quot;;
+
+sales_date between $date1 and $date2;
+
+で、うまくいきました。
+
+　順序が逆になりますが、
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 2) DATE_FORMAT(sales_date,'%Y%m%d%H%i%s') between '$ymd1' and '$ymd2'</span>
+
+も、
+
+$ymd1=$year1.&quot;/&quot;.$month1.&quot;/&quot;.$day1;
+$ymd2=$year2.&quot;/&quot;.$month2.&quot;/&quot;.$day2;
+
+DATE_FORMAT(sales_date,'%Y/%m/%d') between '$ymd1' and '$ymd2';
+
+で、成功しました。
+
+　しかし、
+
+<span class="quote1">&gt; 1) sales_date between TO_DAYS($ymd1) and TO_DAYS($ymd2)</span>
+
+の方法は、
+
+$ymd1=$year1.$month1.$day1.&quot;000000&quot;;
+$ymd2=$year2.$month2.$day2.&quot;235959&quot;;
+や、
+$ymd1=$year1.&quot;/&quot;.$month1.&quot;/&quot;.$day1;
+$ymd2=$year2.&quot;/&quot;.$month2.&quot;/&quot;.$day2;
+
+など試しましたが
+
+sales_date between TO_DAYS($ymd1) and TO_DAYS($ymd2)
+
+が、うまくいきません。TO_DAYS()関数が理解できません。
+
+もう少し、よろしくご教授お願いいたします。
+
+-- 
+tamura &lt;zai91210@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="7563">[前]</a><a href="7565">[次]</a><a href="../list/7501-7600">[番号順一覧]</a><a href="../thread/7501-7600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7557">   7557 2003-04-19 02:26 [tamura &lt;zai91210@xxx] timestamp 型で、 between の利用は可か   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7558">   7558 2003-04-19 13:00 ┗[ihandman &lt;ihandman@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7559">   7559 2003-04-19 17:34 　┗[SAITO Masaru &lt;daisai]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7560">   7560 2003-04-19 20:22 　　┣[ihandman &lt;ihandman@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7563">   7563 2003-04-20 00:19 　　┣[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7565">   7565 2003-04-20 01:36 　　┃┗[tamura &lt;zai91210@xxx]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="7564">   7564 2003-04-20 01:24 　　┗[tamura &lt;zai91210@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7571">   7571 2003-04-21 01:02 　　　┗[tamura &lt;zai91210@xxx] Re: timestamp 型で、 between の利用は可か（自己レス）</a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6419</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6418">[前]</a><a href="6420">[次]</a><a href="../list/6401-6500">[番号順一覧]</a><a href="../thread/6401-6500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6419
+</p>
+<div class="header">
+<p>
+From: &lt;enim2@xxxxxxxxxx&gt;<br>
+Date: Fri, 11 Oct 2002 16:00:50 +0900<br>
+Subject: [mysql 06419] Re: 期間で入力された情報からの日付毎の情報を取得したい<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+Enimです。
+
+私はつい最近MySQLを使用し始めたばっかりで
+Microsoft SQL Severを6年ほど使っていた知識しか
+ないのでもしかしたら的外れかもしれません。
+
+まずUNIONやサブクエリーが使えれば一発解決のようなきがするのですが、
+確かMySQLはUNION対応がVer4からなんですよね？
+サブクエリーは未対応？
+
+で、それに変わる方法として
+SELECT文を動的に作成するというのはどうでしょうか？
+指定された期間が
+2002/10/04〜2002/10/07
+ならば
+
+SELECT
+ '2002-10-04' as date1
+,COUNT(IF(sch_start&lt;='2002-10-04' AND sch_end&gt;='2002-10-04',1,0) as cnt1
+,'2002-10-05' as date2
+,COUNT(IF(sch_start&lt;='2002-10-05' AND sch_end&gt;='2002-10-05',1,0) as cnt2
+,'2002-10-06' as date3
+,COUNT(IF(sch_start&lt;='2002-10-06' AND sch_end&gt;='2002-10-06',1,0) as cnt3
+,'2002-10-07' as date4
+,COUNT(IF(sch_start&lt;='2002-10-07' AND sch_end&gt;='2002-10-07',1,0) as cnt4
+FROM tbl_sch
+
+と言う風に1行で動的な複数列をとってくるものです.
+
+しかし、私はPHPを使ったことがないので
+このような動的なSQLを作れるのかどうかが分かりませんし、
+列数を最大いくつまでサポートできるのかも分かりません。
+
+Hidenori HAMANO &lt;hamano@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; はまのです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; あわせて返答をさせていただきます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Fri, 11 Oct 2002 13:33:09 +0900 に</span>
+<span class="quote1">&gt; IWASAKI Dai さんは書きました ：</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ※テーブルのフィールド名など変更しました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; いわさきです。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; At Fri, 11 Oct 2002 12:49:37 +0900,</span>
+<span class="quote2">&gt; &gt; Hidenori HAMANO wrote:</span>
+<span class="quote2">&gt; &gt; 期間で入力されたテーブル　: tbl_sch</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt;  sch_start  | sch_end    | sch_data</span>
+<span class="quote2">&gt; &gt; ------------+------------+------</span>
+<span class="quote2">&gt; &gt;  2002-10-07 | 2002-10-10 | 1</span>
+<span class="quote2">&gt; &gt;  2002-10-01 | 2002-10-04 | 1</span>
+<span class="quote2">&gt; &gt;  2002-09-25 | 2002-10-05 | 1</span>
+<span class="quote2">&gt; &gt;  2002-09-18 | 2002-09-20 | 1</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 日付毎に抽出したいデータ(RecordSet)</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt;  sch_date   | data_umu</span>
+<span class="quote2">&gt; &gt; ------------+---------------</span>
+<span class="quote2">&gt; &gt;  2002-10-04 | 1</span>
+<span class="quote2">&gt; &gt;  2002-10-05 | 1</span>
+<span class="quote2">&gt; &gt;  2002-10-06 | 0</span>
+<span class="quote2">&gt; &gt;  2002-10-07 | 1</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; たしかにややこしいですが、次のような条件でどうでしょう？</span>
+<span class="quote2">&gt; &gt; 指定する期間 d1 から d2 として、</span>
+<span class="quote2">&gt; &gt; SELECT data FROM table </span>
+<span class="quote2">&gt; &gt;   WHERE ( d1 BETWEEN start AND end ) OR ( d2 BETWEEN start AND end );</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これは、以下のようなSQLになる、ということでよいのでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;  SELECT data FROM tbl_sch</span>
+<span class="quote1">&gt;    WHERE ( d1 BETWEEN sch_start AND sch_end ) OR ( d2 BETWEEN sch_start AND sch_end );</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 試してみたのですが、この場合だと日付毎のレコードセットは取得できないような</span>
+<span class="quote1">&gt; 気がするのですが・・・。</span>
+<span class="quote1">&gt; 上のほうを修正したのですが、あくまでも、各日付毎にデータの入った</span>
+<span class="quote1">&gt; レコードセットを取得できれば、と考えています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Fri, 11 Oct 2002 13:15:36 +0900 に</span>
+<span class="quote1">&gt; HARADA Nobuyuki さんは書きました ：</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; 原田と申します。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; パッと思いつくところでは、</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt;  date       | data</span>
+<span class="quote2">&gt; &gt; ------------+------</span>
+<span class="quote2">&gt; &gt;  ...        | ...</span>
+<span class="quote2">&gt; &gt;  2002-10-01 | 0</span>
+<span class="quote2">&gt; &gt;  2002-10-02 | 0</span>
+<span class="quote2">&gt; &gt;  2002-10-03 | 0</span>
+<span class="quote2">&gt; &gt;  2002-10-04 | 0</span>
+<span class="quote2">&gt; &gt;  2002-10-05 | 0</span>
+<span class="quote2">&gt; &gt;  2002-10-06 | 0</span>
+<span class="quote2">&gt; &gt;  2002-10-07 | 0</span>
+<span class="quote2">&gt; &gt;  ...        | ...</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; といったテーブルを予め作成しておいて、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; やはり、このような形になってしまうのでしょうか・・。</span>
+<span class="quote1">&gt; この場合、上の期間テーブルをあらかじめ準備しておく必要があるため、</span>
+<span class="quote1">&gt; 定期的なフィールドの拡張が必要になってしまう為、多少パフォーマンスが</span>
+<span class="quote1">&gt; 落ちても、期間テーブルを、必要な分だけ一時テーブルとして作成して</span>
+<span class="quote1">&gt; やれないかな、と考えたのがスタートでした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 全てDB上でやってしまえば、phpなどから実行するよりも早くなるのでは、</span>
+<span class="quote1">&gt; という考えがあった為です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; とりあえず、php側から、ループにて必要な期間分のデータを取得するよう</span>
+<span class="quote1">&gt; 作成しておき、こちらの方向についても引き続き考えてみようと思います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -----------------------------</span>
+<span class="quote1">&gt; 株式会社　インテグラル</span>
+<span class="quote1">&gt; システム開発部　浜野　英哲</span>
+<span class="quote1">&gt; E-mail : hamano@xxxxxxxxxx</span>
+<span class="quote1">&gt; URL : <a href="http://www.integral.jp/">http://www.integral.jp/</a></span>
+<span class="quote1">&gt;       <a href="http://www.tsukuba.com/">http://www.tsukuba.com/</a> (つくばPiazza)</span>
+
+
+-------------------------------------------------------
+　Name:　　　Enim
+　Home(PC):　<a href="http://game6.ncs.gr.jp/~enim/">http://game6.ncs.gr.jp/~enim/</a>
+　Home(i): 　<a href="http://game6.ncs.gr.jp/~enim/i/">http://game6.ncs.gr.jp/~enim/i/</a>
+　Mail:　　　enim2@xxxxxxxxxx
+-------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="6418">[前]</a><a href="6420">[次]</a><a href="../list/6401-6500">[番号順一覧]</a><a href="../thread/6401-6500">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="6409">   6409 2002-10-11 11:18 [Hidenori HAMANO &lt;ham] 期間で入力された情報からの日付毎の情報を取得したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6410">   6410 2002-10-11 11:46 ┣[IWASAKI Dai &lt;dai@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6412">   6412 2002-10-11 12:49 ┃┗[Hidenori HAMANO &lt;ham]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6413">   6413 2002-10-11 13:15 ┃　┣[HARADA Nobuyuki &lt;har]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6415">   6415 2002-10-11 14:11 ┃　┃┗[Hidenori HAMANO &lt;ham]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6416">   6416 2002-10-11 14:37 ┃　┃　┣[IWASAKI Dai &lt;dai@xxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6418">   6418 2002-10-11 15:36 ┃　┃　┣[HARADA Nobuyuki &lt;har]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="6419">   6419 2002-10-11 16:00 ┃　┃　┗[&lt;enim2@xxxxxxxxxx&gt;  ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6414">   6414 2002-10-11 13:33 ┃　┣[IWASAKI Dai &lt;dai@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6417">   6417 2002-10-11 14:15 ┃　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6420">   6420 2002-10-11 16:27 ┗[Hidenori HAMANO &lt;ham] Re: 解決）期間で入力された情報からの日付毎の情報を取得したい</a></span>
+</pre>
+</body>
+</html>

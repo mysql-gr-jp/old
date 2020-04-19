@@ -1,0 +1,73 @@
+diff -ru mysql-4.1.8.orig/strings/ctype-sjis.c mysql-4.1.8/strings/ctype-sjis.c
+--- mysql-4.1.8.orig/strings/ctype-sjis.c	2004-12-14 21:40:36.000000000 +0900
++++ mysql-4.1.8/strings/ctype-sjis.c	2004-12-20 11:37:51.000000000 +0900
+@@ -4579,25 +4579,14 @@
+       "char" can be unsigned by default
+       on some platforms.
+     */
+-    if (((int8)b[0]) >= 0)
+-    {
+-      /* Single byte ascii character */
+-      b++;
+-    }
+-    else  if (issjishead((uchar)*b) && (e-b)>1 && issjistail((uchar)b[1]))
++    if (issjishead((uchar)*b) && (e-b)>1 && issjistail((uchar)b[1]))
+     {
+       /* Double byte character */
+       b+= 2;
+     }
+-    else if (((uchar)*b) >= 0xA1 && ((uchar)*b) <= 0xDF)
+-    {
+-      /* Half width kana */
+-      b++;
+-    }
+     else
+     {
+-      /* Wrong byte sequence */
+-      break;
++      b++;
+     }
+   }
+   return b - b0;
+diff -ru mysql-4.1.8.orig/strings/ctype-ujis.c mysql-4.1.8/strings/ctype-ujis.c
+--- mysql-4.1.8.orig/strings/ctype-ujis.c	2004-12-14 21:40:39.000000000 +0900
++++ mysql-4.1.8/strings/ctype-ujis.c	2004-12-20 11:53:57.000000000 +0900
+@@ -8259,34 +8259,11 @@
+   
+   for ( ; pos && b < (uchar*) end; pos--, b++)
+   {
+-    char *chbeg;
+-    uint ch= *b;
+-    
+-    if (ch <= 0x7F)                 /* one byte */
+-      continue;
+-    
+-    chbeg= (char *) b++;
+-    if (b >= (uchar *) end)         /* need more bytes */
+-      return chbeg - beg;           /* unexpected EOL  */ 
+-    
+-    if (ch == 0x8E)                 /* [x8E][xA0-xDF] */
+-    {
+-      if (*b >= 0xA0 && *b <= 0xDF)
+-        continue;
+-      return chbeg - beg;           /* invalid sequence */
++    uint mblen;
++    if ((mblen = ismbchar_ujis(cs, b, end)) == 0) {
++      mblen = 1;
+     }
+-    
+-    if (ch == 0x8F)                 /* [x8F][xA1-xFE][xA1-xFE] */
+-    {
+-      ch= *b++;
+-      if (b >= (uchar*) end)
+-        return chbeg - beg;         /* unexpected EOL */
+-    }
+-    
+-    if (ch >= 0xA1 && ch <= 0xFE &&
+-        *b >= 0xA1 && *b <= 0xFE)   /* [xA1-xFE][xA1-xFE] */
+-      continue;
+-    return chbeg - beg;             /* invalid sequence */
++    b += mblen;
+   }
+   return b - (uchar *) beg;
+ }

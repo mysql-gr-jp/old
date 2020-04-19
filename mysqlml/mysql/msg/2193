@@ -1,0 +1,73 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2193</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2192">[前]</a><a href="2194">[次]</a><a href="../list/2101-2200">[番号順一覧]</a><a href="../thread/2101-2200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2193
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Tue, 13 Jun 2000 09:57:23 +0900<br>
+Subject: [mysql 02193] Re: Delete と Insert がひどく遅い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+とみたさんの示された、間違った SELECT クエリに対する振る舞いが
+レコード数によって違うバグを修正するパッチです。
+3.23.19 のソースに入る予定です。
+
+*** /my/monty/master/mysql-3.23.15-alpha/sql/sql_select.cc	Sat May  6 18:21:49 2000
+--- ./sql_select.cc	Mon Jun 12 17:00:11 2000
+***************
+*** 1104,1110 ****
+        stat[0].key_dependent|=used_tables;
+        if (value-&gt;const_item())
+  	stat[0].const_keys |= field-&gt;key_start;
+!       if (!eq_func)
+  	return;
+      }
+    }
+--- 1096,1109 ----
+        stat[0].key_dependent|=used_tables;
+        if (value-&gt;const_item())
+  	stat[0].const_keys |= field-&gt;key_start;
+!       /*
+! 	We can't reliable use and indexes when comparing a string index to a
+! 	number. cmp_type() is checked to allow compare of dates to numbers
+!       */
+!       if (!eq_func ||
+! 	  field-&gt;result_type() == STRING_RESULT &amp;&amp;
+! 	  value-&gt;result_type() != STRING_RESULT &amp;&amp;
+! 	  field-&gt;cmp_type() != value-&gt;result_type())
+  	return;
+      }
+    }
+
+</pre>
+</div>
+<p class="button"><a href="2192">[前]</a><a href="2194">[次]</a><a href="../list/2101-2200">[番号順一覧]</a><a href="../thread/2101-2200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2178">   2178 2000-06-09 20:20 [hironobus &lt;hironobus] Delete と Insert がひどく遅い           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2179">   2179 2000-06-10 01:36 ┣[&quot;Y. Tsutsui&quot; &lt;tutui@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2180">   2180 2000-06-10 03:55 ┣[Yasuhiro Hayase &lt;hay]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2184">   2184 2000-06-10 16:21 ┃┗[&quot;MINOHATA Norio&quot; &lt;mi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2185">   2185 2000-06-10 17:03 ┃　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2186">   2186 2000-06-10 17:52 ┃　　┗[&quot;MINOHATA Norio&quot; &lt;mi]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2187">   2187 2000-06-10 18:13 ┃　　　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2191">   2191 2000-06-11 23:31 ┃　　　　┗[とみたまさひろ &lt;tomm]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2192">   2192 2000-06-12 19:32 ┃　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="2193">   2193 2000-06-13 09:57 ┃　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2181">   2181 2000-06-10 10:37 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2182">   2182 2000-06-10 12:21 ┃┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2183">   2183 2000-06-10 14:07 ┃　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2189">   2189 2000-06-10 21:22 ┗[Hironobu SUZUKI &lt;hir] Re: Delete とＵＰＤＡＴＥがひどく遅い </a></span>
+</pre>
+</body>
+</html>

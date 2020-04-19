@@ -1,0 +1,596 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.texi on 20 June 1998 -->
+
+  <TITLE>MySQL Reference Manual for version 3.21.31. - MySQL はどのように標準互換か？</TITLE>
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Installing.html">previous</A>, <A HREF="manual_Privilege_system.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Compatibility" HREF="manual_toc.html#Compatibility"><STRONG>MySQL</STRONG> はどのように標準互換か？</A></H1>
+
+
+
+<H2><A NAME="Extensions to ANSI" HREF="manual_toc.html#Extensions to ANSI"><STRONG>MySQL</STRONG> の ANSI SQL92 に対する拡張</A></H2>
+
+<P>
+次は便利な <STRONG>MySQL</STRONG> の拡張です。他の SQL データベースにはおそらく
+見られません。これを使用した場合、そのコードは他の SQL サーバに移行でき
+なくなるので注意してください。
+
+</P>
+
+<UL>
+<LI>
+
+項目型 <CODE>MEDIUMINT</CODE>, <CODE>SET</CODE>, <CODE>ENUM</CODE> そして様々な
+<CODE>BLOB</CODE> と <CODE>TEXT</CODE> 型。
+
+<LI>
+
+項目属性 <CODE>AUTO_INCREMENT</CODE>, <CODE>BINARY</CODE>, <CODE>UNSIGNED</CODE> そして 
+<CODE>ZEROFILL</CODE>。
+
+<LI>
+
+全ての文字列比較はデフォルトでは ISO-8859-1 Latin1 に従ったケースで、ケー
+ス非依存です。これを好まない場合は、<CODE>BINARY</CODE> 属性であなたの文字列を
+宣言すべきです。
+
+<LI>
+
+<STRONG>MySQL</STRONG> は全てのテーブルをファイル名にマップし、<STRONG>MySQL</STRONG> で
+はテーブルのバックアップ, リネーム, 移動, 削除そしてコピーに標準システム
+ツールを使用できます。これは、ケース依存のファイル名を持つオペレーティン
+グシステム(多くの UNIX システムのような)の上では、<STRONG>MySQL</STRONG> にテー
+ブルの名前がケース依存にするようにさせます。テーブル名を覚えておく問題が
+ある場合、全てを小文字で作成してください。
+
+<LI>
+
+数値項目上での LIKE が許されます。
+
+<LI>
+
+<CODE>SELECT</CODE> ステートメント内の <CODE>INTO OUTFILE</CODE> と 
+<CODE>STRAIGHT_JOIN</CODE> の使用。 「<A HREF="manual_Syntax.html#Select">SELECT 構文</A>」節参照 。
+
+<LI>
+
+どのようにテーブルが結合されるかの詳細を得るための <CODE>EXPLAIN SELECT</CODE>。
+
+<LI>
+
+インデックス名、項目の一部のインデックス、そして <CODE>CREATE TABLE</CODE> ス
+テートメント内の <CODE>INDEX</CODE> または <CODE>KEY</CODE> の使用。 「<A HREF="manual_Syntax.html#Create table">CREATE TABLE 構文</A>」節参照 
+
+<LI>
+
+<CODE>ALTER TABLE</CODE> ステートメント内の <CODE>DROP column</CODE> または 
+<CODE>CHANGE column</CODE> の使用。 「<A HREF="manual_Syntax.html#Alter table">ALTER TABLE 構文</A>」節参照 。
+
+<LI>
+
+<CODE>LOAD DATA INFILE</CODE> の使用。この構文は多くの場合で ORACLE の 
+<CODE>LOAD DATA INFILE</CODE> と互換があります。 「<A HREF="manual_Syntax.html#Load">LOAD DATA INFILE 構文</A>」節参照 。
+
+<LI>
+
+文字列を括るための <CODE>'</CODE> の代わりの <CODE>"</CODE> の使用。
+
+<LI>
+
+エスケープ <CODE>\</CODE> 文字の使用。
+
+<LI>
+
+<CODE>SET OPTION</CODE> ステートメント。 「<A HREF="manual_Syntax.html#Set option">SET OPTION 構文</A>」節参照 
+
+<LI>
+
+<CODE>GROUP BY</CODE> 部に全ての項目を持つ必要はありません。
+ 「<A HREF="manual_Syntax.html#Group by functions"><CODE>GROUP BY</CODE> 節の関数</A>」節参照 
+
+<LI>
+
+異なる SQL 環境から来たユーザに対し、より簡単にするため、mysql は多くの
+関数の多くの別名をサポートしています。例えば、全ての文字列関数は ANSI
+SQL と ODBC 構文の両方をサポートします。
+
+<LI>
+
+<CODE>||</CODE> と <CODE>&#38;&</CODE> 演算子は <STRONG>MySQL</STRONG> では <CODE>OR</CODE> と 
+<CODE>AND</CODE> の同義語です。C プログラム言語に似ています。さらに、<CODE>|</CODE> 
+と <CODE>&#38;</CODE> はビット単位の <CODE>OR</CODE> と <CODE>AND</CODE> を表します。この良い
+構文のため、<STRONG>MySQL</STRONG> は ANSI SQL の文字列結合演算子 <CODE>||</CODE> をサ
+ポートしません。<CODE>CONCAT()</CODE> を代わりに使用する必要があります。
+<CODE>CONCAT()</CODE> は任意の数の引数を使用できるので、<CODE>||</CODE> 演算子の使用
+を <STRONG>MySQL</STRONG> に変換するのは簡単です。
+
+<LI>
+
+次の関数またはコマンドの使用:
+
+<UL>
+
+<LI>
+
+<CODE>CREATE DATABASE</CODE> または <CODE>DROP DATABASE</CODE>。
+ 「<A HREF="manual_Syntax.html#Create database">Create database 構文</A>」節参照 
+
+<LI>
+
+mod() の代わりの <CODE>%</CODE>。 <CODE>%</CODE> は C プログラマーと PostgreSQL との
+互換のためにサポートされます。
+
+<LI>
+
+項目ステートメントでの <CODE>=</CODE>, <CODE>&#60;&#62;</CODE>, <CODE>&#60;=</CODE> ,<CODE>&#60;</CODE>,
+<CODE>&#62;=</CODE>, <CODE>&#62;</CODE>, <CODE>AND</CODE>, <CODE>OR</CODE>, または <CODE>LIKE</CODE>
+
+<LI>
+
+<CODE>LAST_INSERT_ID</CODE>.
+ 「<A HREF="manual_Clients.html#mysql_insert_id">最後に挿入された行のユニーク ID をどのように得られるか？</A>」節参照 
+
+<LI>
+
+<CODE>REGEXP</CODE> または <CODE>NOT REGEXP</CODE>。
+
+<LI>
+
+1つまたは2以上の引数での <CODE>CONCAT()</CODE> または <CODE>CHAR()</CODE>。
+<STRONG>MySQL</STRONG> では、この関数は任意の数の引数を取れます。
+
+<LI>
+
+<CODE>BIT_COUNT()</CODE>, <CODE>ELT()</CODE>, <CODE>FROM_DAYS()</CODE>, <CODE>FORMAT()</CODE>,
+<CODE>IF()</CODE>, <CODE>PASSWORD()</CODE>, <CODE>ENCRYPT()</CODE>,
+<CODE>PERIOD_ADD()</CODE>, <CODE>PERIOD_DIFF()</CODE>, <CODE>TO_DAYS()</CODE>,
+または <CODE>WEEKDAY()</CODE>。
+
+<LI>
+
+サブ文字列の整形のために <CODE>TRIM</CODE> を使用できます。ANSI SQL は一文字の
+削除だけをサポートします。
+
+<LI>
+
+<CODE>STD()</CODE>, <CODE>BIT_OR</CODE> そして <CODE>BIT_AND</CODE> グループ関数。
+
+<LI>
+
+グループ関数としてだけではなく、通常の関数としての <CODE>MIN()</CODE> または 
+<CODE>MAX()</CODE> の使用。
+
+<LI>
+
+<CODE>DELETE</CODE> + <CODE>INSERT</CODE> の代わりの <CODE>REPLACE</CODE> の使用。
+ 「<A HREF="manual_Syntax.html#Replace">REPLACE 項目</A>」節参照 
+</UL>
+
+</UL>
+
+
+
+<H2><A NAME="Missing functions" HREF="manual_toc.html#Missing functions"><STRONG>MySQL</STRONG> に無い機能</A></H2>
+
+<P>
+次の機能が <STRONG>MySQL</STRONG> の現在のバージョンにはありません。新しい拡張の
+優先度については、次を参考にしてください:
+<a HREF="http://www.tcx.se/Manual_split/manual_Todo.html"> The
+<STRONG>MySQL</STRONG> Todo list</a>. これはこのマニュアル中の Todo リストの最新バー
+ジョンです。 「<A HREF="manual_Todo.html#Todo">List of things we want to add to <STRONG>MySQL</STRONG> in the future (The TODO).</A>」節参照 。
+
+</P>
+
+
+
+<H3><A NAME="Missing Sub-selects" HREF="manual_toc.html#Missing Sub-selects">Sub-selects</A></H3>
+
+<P>
+次は <STRONG>MySQL</STRONG> では働きません:
+
+</P>
+
+<PRE>
+SELECT * from table WHERE id IN (SELECT id from table2)
+</PRE>
+
+<P>
+MySQL は <CODE>INSERT ... SELECT...</CODE> と <CODE>REPLACE ... SELECT...</CODE> だ
+けをサポートします。独立した sub-selects はおそらく 3.22.0 で有効になり
+ます。しかし今は他の文脈内で関数 <CODE>IN()</CODE> を使用できます。
+
+</P>
+
+
+<H3><A NAME="Missing SELECT INTO TABLE" HREF="manual_toc.html#Missing SELECT INTO TABLE">SELECT INTO TABLE</A></H3>
+
+<P>
+MySQL はまだ <CODE>SELECT ... INTO TABLE....</CODE> をサポートしません。現
+在の MySQL は <CODE>SELECT ... INTO OUTFILE...</CODE> だけをサポートします。
+これは基本的に同じことです。
+
+</P>
+
+
+<H3><A NAME="Missing Transactions" HREF="manual_toc.html#Missing Transactions">トランザクション</A></H3>
+
+<P>
+トランザクションはサポートされません。<STRONG>MySQL</STRONG> は間もなく、アトミッ
+クオペレーション(atomic operations)をサポートします。これはトランザクショ
+ンに似ていますが、ロールバックはありません。アトミックオペレーションでは、
+insert/select/whatever コマンドの束を作成できます。そして、他のスレッド
+が邪魔しないことが保証されます。この文脈では、通常ロールバックは必要では
+ありません。現在、<CODE>LOCK TABLES/UNLOCK TABLES</CODE> コマンドの助けでこれ
+を行なうことができます。 「<A HREF="manual_Syntax.html#Lock tables"><CODE>LOCK TABLES</CODE> 構文</A>」節参照 
+
+</P>
+
+
+<H3><A NAME="Missing Triggers" HREF="manual_toc.html#Missing Triggers">トリガ</A></H3>
+<P>
+トリガはサポートされません。計画されている更新言語はストアドプロシジャを
+操作できますが、トリガは除きます。トリガは通常、それが必要とされない時の
+全てのクエリについても、全てをあまりにも遅くします。
+
+</P>
+
+
+<H3><A NAME="Missing Foreign Keys" HREF="manual_toc.html#Missing Foreign Keys">Foreign Keys</A></H3>
+<P>
+<STRONG>MySQL</STRONG> 内での <CODE>FOREIGN KEY</CODE> 構文は、他の SQL ベンダの 
+<CODE>CREATE TABLE</CODE> コマンドとの互換のためだけに存在します: これは何も行
+ないません。<CODE>ON DELETE ..</CODE> がない <CODE>FOREIGN KEY</CODE> 構文は、目的の
+作成のために主に使われます。いくつかの ODBC アプリケーションは、自動的に 
+<CODE>WHERE</CODE> 節を提供するために、これを使用しますが、しかしこれは通常簡
+単に無効にできます。<CODE>FOREIGN KEY</CODE> は時々強制チェックとして使用され
+ます。しかし、テーブルに正しい順で行が挿入される場合、このチェックは実際
+には不要です。いくつかのアプリケーションがそれが存在することを要求するた
+め <STRONG>MySQL</STRONG> はこれらのコマンドだけをサポートします（しかし働きませ
+ん！）。
+
+</P>
+<P>
+<STRONG>MySQL</STRONG> では、<CODE>FOREIGN KEY</CODE> を持つテーブルからレコードを削除する時
+に approative <CODE>DELETE</CODE> ステートメントをアプリケーションに追加するこ
+とで、<CODE>ON DELETE ...</CODE> が実装されていないという問題を回避できます。
+実際には、これは速く(いくつかの場合はより速く)そして <CODE>FOREIGN KEY</CODE> 
+の使用よりもさらに可搬性があります。
+
+</P>
+<P>
+Foreign key は人生をとても困難にするものです。なぜなら、foreign key 定義
+はデータベースに置く必要があり、それの実装は、移動,コピーそして削除され
+得るファイルの使用の全ての '良いアプローチ' は破棄されることを意味します。
+
+</P>
+<P>
+近い将来、少なくとも情報が救われ、そして mysqldump と ODBC によって取り
+出されるように、我々は <CODE>FOREIGN KEY</CODE> を拡張します。
+
+</P>
+
+
+
+<H4><A NAME="Broken Foreign KEY" HREF="manual_toc.html#Broken Foreign KEY">Some reasons NOT to use FOREIGN KEYS</A></H4>
+
+<P>
+There are so many problems with the <CODE>FOREIGN KEY</CODE>s that we don't
+know where to start.
+
+</P>
+
+<UL>
+<LI>
+
+The speed impact will be terrible when <CODE>INSERTING</CODE> and
+<CODE>UPDATING</CODE> records and in this case almost all <CODE>FOREIGN KEY</CODE>
+checks are useless because one usually inserts records in the right
+tables in the right order.
+<LI>
+
+There will also be a need to hold locks on many more tables when
+updating one because the side effects can cascade trough the hole
+database. It's MUCH faster to first delete records from one table and
+subsequently delete them from the other tables.
+<LI>
+
+One can't restore a table anymore by doing a full delete from
+the table and then restoring all records (from a new source or from a backup).
+<LI>
+
+If you have foreign keys you can't dump and restore tables without doing
+this in a very specific order.
+<LI>
+
+It's very easy to do 'allowed' circular definitions that make the
+tables impossible to recreate with a single create statement, even if
+the definition works and is usable.
+</UL>
+
+<P>
+The only nice aspect of foreign key is that it gives ODBC and some other
+client programs the ability to see how a table is connected and use this
+to show connection diagrams and to help building applicatons.
+
+</P>
+<P>
+<STRONG>MySQL</STRONG> will soon store the <CODE>FOREIGN KEY</CODE> definitions so that
+a client can ask and receive an answer how the original connection was
+made. The current <CODE>.frm</CODE> file format does not have any place for it.
+
+</P>
+
+
+<H3><A NAME="Missing Views" HREF="manual_toc.html#Missing Views">ビュー</A></H3>
+
+<P>
+<STRONG>MySQL</STRONG> はビューをサポートしません。しかしこれは TODO にあります。
+
+</P>
+
+
+<H3><A NAME="Missing comments" HREF="manual_toc.html#Missing comments">コメント開始としての --</A></H3>
+
+<P>
+他のいくつかの SQL データベースは、<CODE>--</CODE> をコメントの開始とします。
+<STRONG>MySQL</STRONG> は <CODE>#</CODE> をコメント開始文字とします。<CODE>mysql</CODE> コマ
+ンドラインツールが <CODE>--</CODE> で始まる全ての行を削除したとしてもです。
+<STRONG>MySQL</STRONG> では C コメントスタイル <CODE>/* これはコメント */</CODE> も使
+用できます。
+ 「<A HREF="manual_Syntax.html#Comments">Comment 構文</A>」節参照 
+
+</P>
+<P>
+<STRONG>MySQL</STRONG> はこの退化したコメントスタイルをサポートしません。なぜな
+ら、次のコードのようなものを使って自動的に生成される SQL クエリで、多く
+の問題を持つためです:
+
+</P>
+
+<PRE>
+UPDATE table_name SET credit=credit-!payment!
+</PRE>
+
+<P>
+これは !payment! の代わりに、自動的に支払の値を挿入します。
+
+</P>
+<P>
+'payment' が負の場合に何が起きると思いますか？
+
+</P>
+<P>
+1--1 は正しい SQL なので、我々は '--' をコメント開始と見なすことはひどい
+ことだと思います。
+
+</P>
+<P>
+SQL プログラムのテキストファイルが <CODE>--</CODE> コメントを含んでいる場合、
+次を使用すべきです:
+
+</P>
+
+<PRE>
+replace " --" " #" &#60; text-file-with-funny-comments.sql | mysql database.
+
+instead of the normal
+
+mysql database &#60; text-file-with-funny-comments.sql
+</PRE>
+
+<P>
+次の方法でも、コマンドファイル中の <CODE>--</CODE> を <CODE>#</CODE> コメントに変更
+できます:
+
+</P>
+
+<PRE>
+replace " --" " #" -- text-file-with-funny-comments.sql
+</PRE>
+
+<P>
+それらを戻すには:
+
+</P>
+
+<PRE>
+replace " #" " --" -- text-file-with-funny-comments.sql
+</PRE>
+
+
+
+<H2><A NAME="Standards" HREF="manual_toc.html#Standards"><STRONG>MySQL</STRONG> が準拠している標準</A></H2>
+
+<P>
+Entry level SQL92. ODBC level 0-2.
+
+</P>
+
+
+<H2><A NAME="Compatibility functions" HREF="manual_toc.html#Compatibility functions">互換のためだけに存在している機能</A></H2>
+
+
+<UL>
+<LI>
+
+<CODE>GRANT</CODE>。 「<A HREF="manual_Syntax.html#Grant">GRANT 構文(互換関数)</A>」節参照 。これは常に成功します。MySQL 特権テーブルを使
+用すべきです。 「<A HREF="manual_Privilege_system.html#Privileges">特権システムがどのように働くか？</A>」節参照 
+<LI>
+
+<CODE>CREATE INDEX</CODE>。 「<A HREF="manual_Syntax.html#Create Index">CREATE INDEX 構文(互換関数)</A>」節参照 。これは常に成功します。
+<CODE>CREATE TABLE</CODE> でインデックスを作成すべきです。 「<A HREF="manual_Syntax.html#Create table">CREATE TABLE 構文</A>」節参照 。
+<CODE>ALTER TABLE</CODE> も使用できます。 「<A HREF="manual_Syntax.html#Alter table">ALTER TABLE 構文</A>」節参照 。
+<LI>
+
+<CODE>DROP INDEX</CODE>。 「<A HREF="manual_Syntax.html#Drop Index">DROP INDEX 構文(互換関数)</A>」節参照 。これは常に成功します。インデックス
+の破棄には <CODE>ALTER TABLE</CODE> を使用できます。 「<A HREF="manual_Syntax.html#Alter table">ALTER TABLE 構文</A>」節参照 。
+</UL>
+
+
+
+<H2><A NAME="BLOB Limitations" HREF="manual_toc.html#BLOB Limitations"><CODE>BLOB</CODE> と <CODE>TEXT</CODE> 型の制限</A></H2>
+
+<P>
+<CODE>BLOB</CODE> または <CODE>TEXT</CODE> 上で <CODE>GROUP BY</CODE> または <CODE>ORDER
+BY</CODE> したい場合は、項目を固定長オブジェクトにする必要があります。これを行
+なう標準的な方法は、<CODE>SUBSTRING</CODE> 関数です。これをしない場合、ソート
+時には最初の <CODE>max_sort_length</CODE> (default=1024) だけが対象です。
+
+</P>
+
+<PRE>
+SELECT comment from table order by substring(comment,20);
+</PRE>
+
+
+
+<H2><A NAME="Commit-rollback" HREF="manual_toc.html#Commit-rollback">COMMIT-ROLLBACK なしでうまくやる方法</A></H2>
+
+<P>
+<STRONG>MySQL</STRONG> は COMMIT-ROLLBACK をサポートしません。COMMIT-ROLLBACK で
+の問題は、それを効率的に操作するために、<STRONG>MySQL</STRONG> が現在使用してい
+るものとは完全に異なったテーブルの形式が要求されることです。
+<STRONG>MySQL</STRONG> は、自動的にテーブルをクリーンアップする拡張スレッドも必
+要とし、ディスク使用量はさらに大きくなります。これは <STRONG>MySQL</STRONG> を現
+在の 2〜4 倍遅くしてしまいます。<STRONG>MySQL</STRONG> が既存の他の全ての SQL デー
+タベースよりもこんなに速い(概して少なくとも 2〜3 倍速い)理由の一つは、
+COMMIT-ROLLBACK が欠けていることです。
+
+</P>
+<P>
+今、我々は SQL サーバ言語(ストアドプロシジャのようなもの)の実装にさらに
+賛成です。これで、本当に COMMIT-ROLLBACK を必要とするのはめったにありま
+せん。これはさらに良い性能も与えるでしょう。
+
+</P>
+<P>
+トランザクションを必要とするループは、通常は <CODE>LOCK TABLES</CODE> の助けで
+コード化でき、そして fly 上でレコードの更新時にはカーソルは必要としませ
+ん。
+
+</P>
+<P>
+TODO 上にトランザクションとカーソルがありますが、全く優先されていません。
+それが実装される場合は、<CODE>CREATE TABLE</CODE> のオプションとしてです。これ
+は COMMIT-ROLLBACK はそのテーブルだけで働き、そのテーブルだけが遅くなるということを
+意味します。
+
+</P>
+<P>
+我々 TcX で本当に必要としているのは、100% 標準のデータベースではなくて、
+本当に速いデータベースです。速度低下なしでそれらを実装する方法を見つけた
+ときには、我々はそれを行なうでしょう。今は行なうべきさらに重要なことが多
+くあります。今の我々の優先度については TODO をチェックしてください。高レ
+ベルのサポートを持つ顧客はこれを変えることができ、再び優先順位づけが行な
+われます。
+
+</P>
+<P>
+現在の問題は実際には <CODE>ROLLBACK</CODE> です。<CODE>ROLLBACK</CODE> なしでも 
+<CODE>LOCK TABLES</CODE> で行なうことができます。<CODE>ROLLBACK</CODE> をサポートす
+るためには、更新される全ての古いレコードを格納し、<CODE>ROLLBACK</CODE> が発行
+された場合に開始位置に全てを戻すように、<STRONG>MySQL</STRONG> を変更しなければ
+なりません。単純な場合には、これを行なうには難しくありません(現在の 
+isamlog をこれに使用します)。しかし、<CODE>ALTER/DROP/CREATE TABLE</CODE> で 
+<CODE>ROLLBACK</CODE> をしたい場合、すべてを実装するのは困難です。
+
+</P>
+<P>
+<CODE>ROLLBACK</CODE> の使用の回避のために、次を行なうことができます:
+
+</P>
+
+<OL>
+<LI>
+
+<CODE>LOCK TABLES ...</CODE>
+<LI>
+
+条件のテスト。
+<LI>
+
+全て OK なら更新。
+<LI>
+
+<CODE>UNLOCK TABLES</CODE>
+</OL>
+
+<P>
+これは普通は速いですが、常にではありません。これが処理できないのは、誰か
+がプロセスを kill する場合だけです。
+
+</P>
+<P>
+1回のオペレーション中で何かを更新する関数も使用できます。全ての関連した
+更新、そして/または、実際に変更された項目だけの更新により、とても能率的
+なアプリケーションを得られます。
+
+</P>
+<P>
+例えば、いくつかの顧客情報で更新を行なっている時、我々は変更された顧客デー
+タだけを更新し、変更されていないデータだけをテストします。また、変更され
+たデータに依存するデータがオリジナルの行内で変更されます。変更のテストは 
+<CODE>UPDATE</CODE> ステートメント内の <CODE>WHERE</CODE> 節で行われます。レコードが
+更新されなかった時は、我々はクライアントにメッセージ: "Some of the data
+you have changed has been changed by another user" を与え、そしてそれか
+ら古い行と新しい行をウィンドウ内で表示します。ユーザは顧客レコードのどち
+らのバージョンを使用すべきかを決定できます。
+
+</P>
+<P>
+これは 'column locking' に似たものを我々に与えますが、実際には十分です。
+なぜなら、我々は関連情報を持つ項目だけを更新するからです。これは、典型的な
+更新ステートメントが次のように見えるということを意味します:
+
+</P>
+
+<PRE>
+UPDATE tablename SET pay_back=pay_back+'relative change'
+
+UPDATE customer set customer_date='current_date', address='new address',
+phone='new phone', money_he_owes_us=money_he_owes+'new_money' where
+customer_id=id and address='old address' and phone='old phone';
+</PRE>
+
+<P>
+見ての通り、これはとても能率的で、他のクライアントが 'money_he_owes_us' 
+または 'pay_back' の量を変更したとしても、これは働きます。
+
+</P>
+<P>
+多くの場合、ユーザは <CODE>ROLLBACK</CODE> そして/または <CODE>LOCK TABLES</CODE> が
+いくつかのテーブルでユニークな識別子を管理することを望みます。
+<CODE>AUTO_INCREMENT</CODE> 項目と <STRONG>MySQL</STRONG> API 関数 
+<CODE>mysql_insert_id</CODE> の使用によって、これはさらに能率的に処理できます。
+ 「<A HREF="manual_Clients.html#mysql_insert_id">最後に挿入された行のユニーク ID をどのように得られるか？</A>」節参照 
+
+</P>
+<P>
+TcX では、我々はいつでもその回りでコード可能なので、我々は行レベルロック
+を必要としていません。本当に行ロックを必要とする場合があることは知ってい
+ます。しかしこれは非常に少ないです。行レベルロックを望むのなら、次のよう
+にして行なえます:
+
+</P>
+
+<PRE>
+UPDATE table_name SET row_flag=1 WHERE id=ID;
+</PRE>
+
+<P>
+行が見つかり、オリジナルドキュメント内で row_flag が 1 でない場合、MySQL 
+は <CODE>affected rows</CODE> = 1 を返します。TODO 上に、アプリケーションレベ
+ルロックを実装したい人のための <CODE>GET_LOCK</CODE> と <CODE>RELEASE_LOCK</CODE> が
+あります。
+
+</P>
+<P><HR><P>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Installing.html">previous</A>, <A HREF="manual_Privilege_system.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

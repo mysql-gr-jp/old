@@ -1,0 +1,124 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5888</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="5887">[前]</a><a href="5889">[次]</a><a href="../list/5801-5900">[番号順一覧]</a><a href="../thread/5801-5900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5888
+</p>
+<div class="header">
+<p>
+From: &quot;Cold Winter&quot; &lt;&quot;Cold Winter&quot; &lt;coldwinter@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 31 Jul 2002 17:52:07 +0900<br>
+Subject: [mysql 05888] Re: Java からの利用で一部の日本語が文字化け<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+HDM さん，さらに追加することがありました。
+
+<span class="quote1">&gt; ただ、この対応をしてもなお</span>
+<span class="quote1">&gt; データが「ファイル一覧を表示する」という文字列を登録すると、</span>
+<span class="quote1">&gt; 相変わらずDBには「ファイル一覧を侮ヲする（ヲは半角）」が登録されて</span>
+<span class="quote1">&gt; しまいました。</span>
+<span class="quote1">&gt; 同様に、「表記」が「赴L」に化けてしまいます・・・。</span>
+
+…実際に SQL 文を実行する際の Java の Statement を確認してみてください。
+もし Statement で実行しているのであれば，PreparedStatement を使うと
+文字化けが回避できるかもしれません（↓みたいな感じ）。
+
+
+PreparedStatement prpStmt
+  = new PreparedStatement(&quot;insert into table1 values(?, ?, ?)&quot;);
+strMojiretsu1 = &quot;ファイル一覧を表示する&quot;;
+intKazu2 = 0;
+intKazu3 = 0;
+try
+{
+    prpStmt.setString(1, strMojiretsu1);
+    prpStmt.setInt(2, intKazu2);
+    prpStmt.setInt(3, intKazu3);
+    prpStmt.execute();
+}
+catch (Exception ee)
+{
+    /* エラー処理 */
+}
+
+
+<span class="quote1">&gt; URLの指定の部分で</span>
+<span class="quote1">&gt; ?useUnicode=true&amp;characterEncoding=Shift_JIS</span>
+<span class="quote1">&gt; を追加してみたところ、SQL文の変換が不要になりました。</span>
+<span class="quote1">&gt; ありがとうございます。勉強になりました。</span>
+
+
+…お役に立ちましたでしょうか(^-^ )。
+
+
+----- Original Message ----- 
+From: &quot;TANAKA Hidemune&quot; &lt;tanaka-h@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Wednesday, July 31, 2002 5:28 PM
+Subject: <a href="05887">[mysql 05887]</a> Re: Java からの利用で一部の日本語が文字化け
+
+
+<span class="quote1">&gt; Cold Winterさん、お返事ありがとうございます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote3">&gt; &gt; &gt; 日本語文字列のうち一部の文字（「表」という文字など）のみ</span>
+<span class="quote3">&gt; &gt; &gt; 文字化けを起こすという現象が発生しました。</span>
+<span class="quote2">&gt; &gt; …「文字化け全般への対処」として，JDBC でデータベースに接続</span>
+<span class="quote2">&gt; &gt; するときの接続文字列を確認してみてください。</span>
+<span class="quote2">&gt; &gt; jdbc:mysql://server/database?useUnicode=true&amp;characterEncoding=EUC_JP</span>
+<span class="quote2">&gt; &gt; 「useUnicode=〜」以下を記述すると（エンコードは任意のもの），</span>
+<span class="quote2">&gt; &gt; そもそも SQL文の変換を行わずに処理できるようになる場合があ</span>
+<span class="quote2">&gt; &gt; ります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; URLの指定の部分で</span>
+<span class="quote1">&gt; ?useUnicode=true&amp;characterEncoding=Shift_JIS</span>
+<span class="quote1">&gt; を追加してみたところ、SQL文の変換が不要になりました。</span>
+<span class="quote1">&gt; ありがとうございます。勉強になりました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ただ、この対応をしてもなお</span>
+<span class="quote1">&gt; データが「ファイル一覧を表示する」という文字列を登録すると、</span>
+<span class="quote1">&gt; 相変わらずDBには「ファイル一覧を侮ヲする（ヲは半角）」が登録されて</span>
+<span class="quote1">&gt; しまいました。</span>
+<span class="quote1">&gt; 同様に、「表記」が「赴L」に化けてしまいます・・・。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 回避方法をご存知の方いらっしゃいましたら</span>
+<span class="quote1">&gt; ご教示ください。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; よろしくお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ========================================</span>
+<span class="quote1">&gt; 田中　秀宗(Tanaka Hidemune)</span>
+<span class="quote1">&gt; 朝日システム株式会社　公共システム部</span>
+<span class="quote1">&gt; 〒960-8154 福島市伏拝字台田１−２</span>
+<span class="quote1">&gt; Tel 024-539-8894(ダイヤルイン)</span>
+<span class="quote1">&gt; Fax 024-539-8799</span>
+<span class="quote1">&gt; ========================================</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+</pre>
+</div>
+<p class="button"><a href="5887">[前]</a><a href="5889">[次]</a><a href="../list/5801-5900">[番号順一覧]</a><a href="../thread/5801-5900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="5885">   5885 2002-07-31 16:48 [&quot;TANAKA Hidemune&quot; &lt;t] Java からの利用で一部の日本語が文字化け </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5886">   5886 2002-07-31 17:07 ┣[&quot;Cold Winter&quot; &lt;coldw]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5887">   5887 2002-07-31 17:28 ┃┗[&quot;TANAKA Hidemune&quot; &lt;t]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="5888">   5888 2002-07-31 17:52 ┃　┣[&quot;Cold Winter&quot; &lt;coldw]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5889">   5889 2002-07-31 17:56 ┃　┃┗[&quot;Cold Winter&quot; &lt;coldw]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5892">   5892 2002-07-31 18:24 ┃　┗[&quot;Hiroaki,Sakuma&quot; &lt;sa]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5893">   5893 2002-07-31 22:28 ┃　　┗[&quot;TAKAHASHI, Tomohiro]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5891">   5891 2002-07-31 18:12 ┣[HAMAI Kyoichi &lt;k-ham]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5900">   5900 2002-08-01 08:47 ┗[&quot;kosugi&quot; &lt;kosugi@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5901">   5901 2002-08-01 09:42 　┗[&quot;TANAKA Hidemune&quot; &lt;t]                                     </a></span>
+</pre>
+</body>
+</html>

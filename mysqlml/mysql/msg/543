@@ -1,0 +1,91 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:543</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="542">[前]</a><a href="544">[次]</a><a href="../list/501-600">[番号順一覧]</a><a href="../thread/501-600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:543
+</p>
+<div class="header">
+<p>
+From: Tatsuya Ina &lt;Tatsuya Ina &lt;ina@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 13 Jan 1999 20:27:42 GMT<br>
+Subject: [mysql 543] Re:MySQL speed<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+伊奈＠セイコーエプソン です。
+
+
+3.21.33bから3.22.14b-gammaに変えてみましたが、結果は10sec程
+早くなった程度です。
+
+それよりも小岩様のテーブル定義と自分のテーブル定義を見比べてみて
+明らかに自分の方がデータ量が大きいことに気づきました。
+小岩様のレコードサイズは31byte(intは4byteですよね)に対して、私の
+レコードサイズは188byte(smallintは2byteですよね)で、約6倍の大きさ
+があります。
+
+そこで小岩様のテーブル定義で約500万件のダミーデータを作ってみました。
+その結果between句では
+
+mysql&gt; select count(*) from koiwa_tab where age between 3 and 6;
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|  1960980 |</span>
++----------+
+1 row in set (43.87 sec)
+
+となり、またインデックスをはったフィールドのlike検索では
+
+mysql&gt; select count(*) from koiwa_tab where slip_no like '10%'
+    -&gt; ;
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|   111111 |</span>
++----------+
+1 row in set (4.29 sec)
+
+mysql&gt; select count(*) from koiwa_tab where slip_no like '%321%'
+    -&gt; ;
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|    29572 |</span>
++----------+
+1 row in set (44.89 sec)
+
+となり、小岩さんの結果と大きくは変わらない結果が得られました。
+小岩さんのディスクが Urtra Wide SCSIなのに対して、こちらのはUrtra SCSI
+であることを考えると、部分文字列はインデックスを使わないようなので、
+まあ、妥当かなと考えています。
+
+
+と、いうことは、私の環境(小岩さんのダミーでない)のスピードは、
+チューニングで若干はスピードアップするにしても、まあ、この程度
+ということなのでしょうか？
+
+
+
+</pre>
+</div>
+<p class="button"><a href="542">[前]</a><a href="544">[次]</a><a href="../list/501-600">[番号順一覧]</a><a href="../thread/501-600">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="543">    543 1999-01-14 05:27 [Tatsuya Ina &lt;ina@xxx] Re:MySQL speed                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="545">    545 1999-01-13 22:48 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="550">    550 1999-01-14 11:16 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="552">    552 1999-01-14 23:21 　┗[Tatsuya Ina &lt;ina@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="553">    553 1999-01-14 19:02 　　┗[民斗 &lt;tommy@xxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="554">    554 1999-01-15 00:32 　　　┗[Shogo Hamamoto &lt;KHC0]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="555">    555 1999-01-15 12:39 　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10708</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10707">[前]</a><a href="10709">[次]</a><a href="../list/10701-10800">[番号順一覧]</a><a href="../thread/10701-10800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10708
+</p>
+<div class="header">
+<p>
+From: &quot;zen kishimoto&quot; &lt;&quot;zen kishimoto&quot; &lt;zen@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 20 Dec 2004 14:17:17 -0800<br>
+Subject: [mysql 10708] MySQL 4.1.8がリリースされました.<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+MySQL 4.1.8がリリースされました。<a href="http://dev.mysql.com/downloads/">http://dev.mysql.com/downloads/</a>と
+ミラーサイトから、さまざまなプラットフォーム用のバイナリーとソース
+をダウンロードできます。全てのミラーサイトがアップデート
+されている訳ではありませんので、もしこの版が見つからない場合
+は後でチェックするか他のサイトをお試しください。
+
+これは現在のプロダクション・リリースのバグ修正版です。
+
+それぞれのバグの詳細はバグ・データベース<a href="http://bugs.mysql.com/">http://bugs.mysql.com/</a>
+を参照してください。
+
+ 4.1.8での変更:
+
+   追加および変更された機能
+
+     * ALTER DATABASEについて、データベースの名前はデフォルトのデータベース
+に変更を適用する際省くことができる。
+     * コンシステント・リードのトランスアクションを開始するため
+にSTART TRANSACTION にCONSISTENT SNAPSHOTクローズを追加。
+     * mysqldumpに --order-by-primaryを追加し、ダンプファイルのそれぞれ
+のテーブルのデータをソート。InnoDBテーブルにロードされるMyISAMテーブル
+をダンプする際に有益。このオプションがあるMyISAM テーブルをダンプすると
+オプションがないときよりかなり遅い。
+     * InnoDB: innodb_status_file=1がセットされていないと、
+SHOW INNODB STATUS情報を定期的にテンポラリーファイルに書かない。
+     * InnoDB: ALTER　TABLEを実行する際、10,000行がコピーされる
+毎にコミットする。このために、アボートされたALTER　TABLEまたは
+OPTIMIZE TABLEから回復するのがかなり早くなる。
+     * FULLTEXT インデクスのブロックサイズが2048から1024に変更された。
+     * mysqlbinlogに --disable-log-bin オプションを追加。
+このオプションを使うと、mysqlbinlogが生成するステートメント用
+のバイナリのロギングをオフにできる。つまり、
+mysqlbinlog --disable-log-bin &lt;file_name&gt; | mysql はMySQL
+のサーバーのバイナリログに何も書き込まない。
+     * mysqldumpの --master-data オプションは
+コメントなしかコメント付きのCHANGE　MASTER TO ステートメントを
+生成するのに引数を１か２か取る。デフォルトはバックワード・コンパチの
+ために１。
+     * mysqldump --single-transaction --master-data はInnoDBの
+オンライン（ブロックしない）ダンプを取り、対応するバイナリーログ
+のコーディネートをレポートする。このためバックアップをpoint-in-time
+リカバリー、ロール・フォーワードまたはリプリケーション・スレーブ
+生成に適するようになる。mysqldump Database Backup　Programの
+8.8章を参照。
+     * mysqldump に --lock-all-tables オプションを追加してグローバルのリードロック 
+
+を取得することで全てのテーブルをロック。
+     * mysqldumpに --hex-blob オプションを追加して16進法を使用している
+バイナリーストリング列ダンプできるように。
+     * mysql_hex_string() C API 関数を追加。これはストリング
+を16進法でエンコードする。
+     * ログでMySQLはBinlog Dumpのリクエストでログのポジションを
+プリント。
+     * MySQL Cluster特有のコンフィギュレーションをセットするため
+の`my.cnf'に [mysql_cluster] セクションを追加。ndb-connectstring 変数
+はここに移動。
+     * ロールバックを行っている接続はSHOW PROCESSLISTのStateコラム
+に&quot;Rolling back&quot;と表示。
+     * mysqlbinlogはLOAD DATA INFILEの前に有益なコメント付き
+のラインを表示 (thread id,　timestamp, server id, など)
+--short-formが使われていないのであれば、これは他のクエリに
+対してと同様。
+     * ndb_mgmd のディフォルト・ポートは
+1186に変更 (2200から) 。これはIANAによってMySQL Clusterに正式
+にアサインされました。
+     * 新しいndb_mgmのコマンド PURGE STALE SESSIONS。ノードがアイディ
+をアロケートできるのに出来ないときのワークアランドとして使用。
+     * ndb_mgmでの新しいコマンド, CONNECT.
+     * ndb エキュスターブルは変更されてMySQLのコマンドラインの
+オプションをパースする機能を使用。変更に関しては16.4.5
+章のMySQL Cluster Processe用のコマンド・オプションを参照。
+     * 上記に続き、全てのコマンドラインのオプションを
+`my.cnf' に指定。名前はエクスキュータブルの名前、[ndbd]など。
+       [ndb_mgmd], [ndb_mgm], [ndb_restore] etc.
+      [ndbd]
+      ndb-connectstring=myhost.domain.com:1234
+      [ndb_mgm]
+      ndb-connectstring=myhost.domain.com:1234
+     * `my.cnfに[mysql_cluster] セクションを追加。mysqldを含む
+全てのクラスターのエキスターブルは.このセクションをパース。例えば
+ndb-connectstring。一度だけ指定すればよい。
+     * ノードのアロケーションとディアロケーションの際クラスターのログ
+情報イベントを追加。
+     * 版のミスマッチの結果で接続拒否のクラスターログ情報イベント
+を追加。
+     * ポート番号を指定しなくても良いようにconnectstring シンタクスを
+拡張。例：ndb-connectstring|connect-string=myhost1,myhost2,myhost3
+は正しいconnectstring で接続はディフォルトのポート1186で起こる。
+     * 対応するmysqlエラーコードにマップできる
+エラーコードようにクリアーのndb エラーメッセージも提供されている。
+これはndbストレッジエンジンに関連するエラーが起こった後
+SHOW WARNINGSを実行することで得られる。
+     * リードの性能（特にblobに）に関して性能を改善[NDB ストレッジエンジンで] 
+
+     * ndb_force_sendとndb_use_exact_countという変数を追加
+して性能もチューニングを行う。リストようにmysqlクライアントで'ndb%'
+ように表示。setコマンドで変数を変更。
+     * ndb_use_transactionsと ndb_autoincrement_prefetch_szの
+オプションをセットする変数を追加。
+
+   修理されたバグ
+
+     * InnoDB: MySQL 5.0.3またはそれ以降で生成されたテーブルをオープンできない。 
+
+       (バグ番号　#7089)
+     * 外側のクエリによるテンポラリーのテーブルを使い、WHERE　クローズ
+にサブクエリを置くとき、サブクエリから外のクエリに列を名前で
+誤って参照するバグを修正。(バグ番号　#7079)
+     * InnoDB: stderrでSHOW INNODB STATUS情報を表示しているとき
+にrewind() を呼ばない。
+     * 悪意のあるユーザがパケットを加工する（クライアントのライブラリー
+に手を入れることで）ことでサーバーをクラッシュすることを可能に
+する認証のバグを修理。(バグ番号 #7187)
+     * ストリング関数LEFTがクラッシュするバグを修理。これは
+この関数がGROUP BYフィールドとして使われるエクスプレッションで
+一部の時に起こる。 (バグ番号　#7101)
+     * テーブルレベルか列レベルで特権が存在する際、
+暗示的に（つまりtime_zone変数をセットするか。CONVERT_TZ()関数を
+使用した場合）システム・タイムゾーンのデスクリプション・テーブル
+にアクセスしようとすると特権を要求される。(バグ番号 #6765)
+     * mysql_stmt_data_seek(stmt,0)はカウンタをリワインドし、
+クライント側でバッファーされた行を再びフェッチすることができる。
+ (バグ番号　#6996)
+     * SHOW CREATE TABLEコマンドでの不十分な特権のチェックを修理。
+(バグ番号#7043)
+     * 複数バイトの文字セットを使う列でMATCH... AGAINSTで起こる
+メモリーの破壊（そしてクラッシュ）を修理。 (Bug　 #6269)
+     * ALL/SOMEサブクエリでNULL処理を修理(バグ番号 #6247)
+     * サブクエリのある複雑なクエリの実行を修理 (バグ番号 #6406,バグ番号
+       #6841)
+     * 最初の実行の際に内部構造の初期化を修理。 (バグ番号 #6517)
+     * MySQL 5.0からフルテキストのインターフェースをポート。
+(バグ番号  #6523)
+     * サブクエリで空の結果が出たときのNULL の値の処理を修理。
+       (バグ番号 #6806)
+     * レコードの挿入が一部失敗した際PrCREATE TABLE .. SELECT
+クエリをバイナリログに追加するのを阻止。(バグ番号 #6682)
+     * INSERT ... SELECT は在りえない &quot;column truncated&quot;警告を
+発する。(バグ番号 #6284)
+     * １つしか行のないHEAPテーブルであるクエリで
+&quot;Record has changed since last read in table&quot; というエラーメッセージを
+修理。(バグ番号 #6748)
+     * mysqld_safe は大抵の場合 --no-defaults, --defaults-file,
+または--defaults-extra-file を無視してきた。これらのアーギュメントは
+考慮されるようになった。そのためインストレーションによっては
+どのオプションが mysqldに渡されるか変更があるかもしれない。
+     * サーバーは4.0のテーブルでCHAR BINARY と VARCHAR BINARY列
+をBINARYとVARBINARYデータタイプを持つと誤って理解していた。
+修理後は列の文字セットのバイナリーのコレーションを持つCHARとVARCHAR
+と理解。 (これは4.1で生成される新しいテーブルでCHAR BINARYと
+VARCHAR BINARYが処理されるのと同様。）
+     * ユニークなフルテキスト・インデクスがあるテーブルに複数
+行の挿入を行うREPLACE or INSERT ... ON DUPLICATE KEY UPDATE
+ステートメントからありもしない&quot;duplicate key&quot; エラーメッセージ
+を修理。(バグ番号 #6784)
+     * 続くクエリから誤った結果が返還されるSETとDOステートメント
+でのサブクエリの実行のバグを修正。 (バグ番号 #6462)
+     * サーバーが間違った年の日時の値を受け入れるバグを修理。
+ストリングとしてパスされた日時のチェックと同様、MYSQL_TIME
+ストラクチャーでパスされた日時の値のチェックを行う。(バグ番号　6266)
+     * FULLTEXTインデクスのあるテーブルへのINSERTに関するバグ
+を修正。稀に、長さの異なったワードが同じと決定されると
+テーブルがコラプトする。これはあるコレーションでは起こりえる。
+例えばutf8_general_ciまたはlatin1_german2_ci. (バグ番号 #6265)
+     * InnoDB: フォーリン・キーのパーサーがクオートを理解できるように
+修理。（バグ番号　#6340)
+     * InnoDB: INSERT IGNOREを使用して一度に数行を挿入するのに
+INSERT IGNORE を使い、最初の挿入が2重のキー・コリジョンのため
+無視された場合、リプリケーション・スレーブのInnoDBはマスターより
+１つ大きい値を AUTO_INCREMENTにアサイン。これは
+MySQLのリプリケーションを正しく動作させない。(バグ番号 #6287)
+     * InnoDB: バグを修理: InnoDB はinnodb_data_file_pathｓで
+autoextend:max:2000Mのmax仕様を無視。このバグ
+は4.1.1で挿入された。
+     * InnoDB: バグを修理: innodb_locks_unsafe_for_binlog はまだnext-key
+ロックキングを使用(バグ番号 #6747). InnoDBはサーチのタプルがレコードに
+完全にマッチした際next-keyロッキングを使用した。この不必要な next-key
+ロッキングはinnodb_locks_unsafe_for_binlogオプションが使用された
+際は取り除かれた。
+     * InnoDB: ２つのハングを修理: FOREIGN KEY 制約はテーブルと
+データベースの名前をケースによらなくした。 RENAME TABLE t TO T は
+フォーリン・キーの制約があれば、無限ループでハング。他の存在
+する名前と同じのフォーリンキーの制約がある名前を生成するために
+ALTER TABLE か RENAME TABLEで試すと、dictionary mutexでハングする。
+(バグ番号　#3478)
+     * STMT_ATTR_UPDATE_MAX_LENGTHがpreparedステートメントにセットされて
+いるとき、mysql_stmt_store_result()は数字の列ようにfield-&gt;max_lengthを
+アップデートする。(Bug#6096)
+     * Prepared ステートメントは整数をストリングに変換する際
+zerofillを処理できる。
+     * mysql_stmt_bind_result()なしで、mysql_stmt_store_result()が
+呼ばれた場合に起こるクラッシュを修理。
+     * SELECT * FROM t1 NATURAL JOIN t2....を使用するときにprepared
+ステートメントで起こるクラッシュを修理。
+     * SELECT ...PROCEDUREを使用するときにprepared ステートメントで
+のクラッシュを修理。
+     * サブクエリを使用するときにprepared ステートメントで
+のクラッシュを修理。
+     * preparedステートメントと使用するとGROUP_CONCAT(...ORDER BY)
+は正しくないソートをする。テーブルが生成された時、CREATE TABLE created_table
+はシグナルを発さない。これは他のスレッドの DROP TABLE created_tableを永遠
+に待たせることになる。
+     * preparedステートメントを実行する際、サーバー警告はリセットされる。
+     * IDの比較の性能をアップ (多くのテーブルまたは列が指定されていれば).
+     * OPTIMIZE TABLE, REPAIR TABLE, と ANALYZE TABLEはバイナリログ
+にエラーコードなしにリプリケートされる。(バグ番号　#5551)
+     * LOAD DATA INFILE はreplicate-rewrite-dbオプションと正しく動作。
+(バグ番号 #6353)
+     * スレーブI/Oスレッドが停止されて開始されたときのみにクラッシュ
+するバグを修理。 (バグ番号 #6148)
+     * CREATE/ALTER/DROP DATABASEステートメントのセマンティクス
+を変更したので、--binlog-do-db と--binlog-ignore-dbを使用した
+際CREATE DATABASEのリプリケーションが可能となる。(バグ番号　#6391)
+     * 接続につきオープンなトランスアクションがあるが
+トランスアクション・テーブルにアップデートがないとき
+（例えば、SELECT FOR　UPDATEを実行してトランスアクションでないアップデート
+を実行したとき）そのアップデートは自動的にトランスアクションをコミット
+する。 (InnoDB　の行レベルのロックなどを解除する。)(バグ番号 #5714)
+     * ネットワークの問題で接続が中断され、ロールバックが起こるとき
+ネットワークのエラーコードはBEGIN・ROLLBACKバイナリーログに書き込まれる。
+そのため不必要にスレーブが停止する。 (バグ番号 #6522)
+     * BEGIN (またはSET AUTOCOMMIT=0), FLUSH TABLES WITH READ
+LOCK, トランスアクション・アップデート, COMMIT, FLUSH TABLES WITH READ LOCK
+の順番は接続を永久に保ち、またサーバーもハングする。これは
+例えばinnobackupスクリプトを数回実行する際に起こる。(バグ番号 #6732)
+     * mysqlbinlogはテンポラリーのテーブルに挿入するLOAD DATA INFILEステートメント
+の前にSET PSEUDO_THREAD_ID ステートメントをプリントしない。それで
+バックアップをリストーした後でローリング・フォワードすると問題
+が発生することがある。(バグ番号　#6671)
+     * (バグ番号 #6919) ステタス8ノードのクラスタでも2ノードしか示さない。
+     * (バグ番号 #6871) DBD 実行が失敗。エラー番号　897 ndbcluster
+から'Unknown error code'
+     * (バグ番号 #6791) config.iniが正しく
+セットされていないとSegmentation ファールト
+     * (バグ番号 #6775) 多くのmysqlクライアントを実行するとaccで
+落ちる。
+     * (バグ番号 #6696) ndb_mgm のコマンドラインのオプション
+と実際の動作が違う。
+     * (バグ番号 #6684) ndb_restore は誤ったコマンドがきても
+エラーメッセージを発さない。
+     * (バグ番号 #6677) ndb_mgmはALL　CLUSTERLOGでクラッシュ。
+     * (バグ番号 #6538) インデクス付きの空のテーブルにmax()
+を適用するとエラーコードは変換される。
+     * (バグ番号 #6451) テーブル生成に失敗すると除去不可能な
+&quot;ghost&quot; テーブルが生成される。
+     * (バグ番号 #6435) left joinでおかしな動作
+     * (バグ番号 #6426) long pkでアップデートすると動作しない。
+     * (バグ番号 #6398) プリマリー・キーでのアップデートがフェイル
+     * (バグ番号 #6354) mysqlはNDBがコンパイルされていなくても
+--ndbcluster オプションでエラーを発さない。
+     * (バグ番号 #6331) INSERT IGNORE .. SELECT はこの後の挿入
+を許さなくなる。
+     * (バグ番号 #6288) データ・インポートでクラスターのノード
+がクラッシュ。
+     * (バグ番号 #6031) データベースをドロップするのにDROP DATABASE
+を２回実行する必要がある。
+     * (バグ番号 #6020) LOCK TABLE + delete はエラー 208を変換
+     * (バグ番号 #6018) REPLACEはBLOBsとNDB には正しく動作しない。
+     * (バグ番号 #6016) blobsと異なったデータベースはクラッシュが起こる。
+     * (バグ番号 #5973) 異なったデータベースに属するndbテーブルが
+show tablesで表示される。
+     * (バグ番号 #5872) ndbテーブルからblob付きでALTER TABLEで
+myisamに変換するとフェイル。
+     * (バグ番号 #5844) mysql-test-run でフェールするとNDBプロセスが
+残る。
+     * (バグ番号 #5824) ndb_mgmでHELP テキストがおかしくなる。
+     * (バグ番号 #5786) リストアーの後でDuplicateキーエラー
+     * (バグ番号 #5785) 同時のアップデートの際ロックがタイムアウト
+     * (バグ番号 #5782) LIMITをndbテーブルと使用すると原因不明のエラー
+     * (バグ番号 #5756) ndb_mgmからRESTART ノードはフェイル。
+     * 報告されていない[NDB]バグを修理
+
+-- 
+Joerg Bruehe, シニア・プロダクション・エンジニア
+MySQL AB, www.mysql.com
+ドイツ、ベルリン市
+---------------------
+Zen Kishimoto                        zen@xxxxxxxxxx
+IP Devices, Inc.                       (408) 567-9391
+2175 De La Cruz Blvd., Suite 10  (801) 720-8847 (FAX)
+Santa Clara, CA 95050
+
+
+
+</pre>
+</div>
+<p class="button"><a href="10707">[前]</a><a href="10709">[次]</a><a href="../list/10701-10800">[番号順一覧]</a><a href="../thread/10701-10800">[スレッド一覧]</a></p>
+</body>
+</html>

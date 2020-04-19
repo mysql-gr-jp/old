@@ -1,0 +1,138 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13851</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13850">[前]</a><a href="13852">[次]</a><a href="../list/13801-13900">[番号順一覧]</a><a href="../thread/13801-13900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13851
+</p>
+<div class="header">
+<p>
+From: nic sak &lt;nic sak &lt;sa9lovex@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 30 Mar 2007 16:14:09 +0900 (JST)<br>
+Subject: [mysql 13851] Re: utf-8 での日本語ソート<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+YuGo 様
+   
+ 
+ 頂いたSQLを実行したところ、私のPCでもYuGo様と同様のソート順にて表示されました。問題はMySQLのソートにあるのではなく、使用しているフレームワークのutf8の設定方法にあるようです。(使用しているフレームワークがutf8に対応したこと、utf8で正常に格納・表示ができるのでMySQLの設定によるものだと思い込んでおり
+ました。)
+   
+  もう一度、フレームワークの設定を見直します。
+   
+  大変ありがとうございました。
+
+YuGo &lt;yu.gotou@xxxxxxxxxx&gt; wrote:
+  佐々木どの。
+
+参考までにわたしの使っているMySQLではこう並びます。
+
+
+実行したsql
+mysql&gt;CREATE TABLE collation_test ( id int PRIMARY KEY AUTO_INCREMENT,
+string character varying(2));
+mysql&gt;INSERT INTO collation_test (string) VALUES
+('0'),('1'),('2'),('a'),('b'),('c'),('０'),('１'),('２'),('Ｎ'),('Ｑ'),
+('あ'),('い'),('ん'),('イ'),('出'),('塁'),('新'),('[');
+mysql&gt;SELECT * FROM collation_test ORDER BY string ASC ;
+
+0 1 2 a b c [ あ い ん イ 出 塁 新 ０ １ ２ Ｎ Ｑ
+
+
+環境
+MySQL version 5.0.27-community-nt
+OS WinXP SP2
+collation utf8_general_ci
+
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; YuGo様、市川様ご回答ありがとうございます。</span>
+<span class="quote1">&gt; ご返事が遅れ誠に申し訳ありません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote3">&gt; &gt;&gt;YuGo様</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ○utf8-genaral_ci</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以下のSQLの結果</span>
+<span class="quote1">&gt; mysql&gt;SHOW VARIABLES LIKE 'collation%' ;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; utf8-genaral_ciとなっております。</span>
+<span class="quote1">&gt; +----------------------+-----------------+</span>
+<span class="quote2">&gt; | Variable_name | Value |</span>
+<span class="quote1">&gt; +----------------------+-----------------+</span>
+<span class="quote2">&gt; | collation_connection | utf8_general_ci |</span>
+<span class="quote2">&gt; | collation_database | utf8_general_ci |</span>
+<span class="quote2">&gt; | collation_server | utf8_general_ci |</span>
+<span class="quote1">&gt; +----------------------+-----------------+</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ○ソートした結果</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 次の文字を一文字づつカラムに格納し、昇順でソートしました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 半角数 0 1 2</span>
+<span class="quote1">&gt; 半角英 a b c</span>
+<span class="quote1">&gt; 全角数 ０ １ ２</span>
+<span class="quote1">&gt; 全角英 N Q</span>
+<span class="quote1">&gt; ひらがな あ い ん</span>
+<span class="quote1">&gt; カタカナ イ</span>
+<span class="quote1">&gt; 漢字 出塁新</span>
+<span class="quote1">&gt; 記号 [</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [ 結果 ]</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 012aあい塁イん出bc０１２NQ[新</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt;市川様</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 漢字が入るとまずいのでしょうか？</span>
+<span class="quote1">&gt; 漢字は含まれますが数字、英語、日本語（ひらかな）、記号、漢字がそれぞれ</span>
+<span class="quote1">&gt; 分離されていれば漢字を50音順で並べるという無茶を言うつもりはありません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; また、collationはどのようにして設定するのでしょうか。</span>
+<span class="quote1">&gt; SQL文のorder byに追加するようにして使用するのでしょうか。</span>
+<span class="quote1">&gt; （検索したのですが見つからなかったもので。）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; --------------------------------------------</span>
+<span class="quote1">&gt; sasaki namabu</span>
+<span class="quote1">&gt; sa9lovex@xxxxxxxxxx</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ---------------------------------</span>
+<span class="quote1">&gt; [10th Anniversary] Check Out the Special Final Sale</span>
+<span class="quote1">&gt; </span>
+
+
+ 
+
+ 
+---------------------------------
+[10th Anniversary] Check Out the Special Final Sale
+
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="http://www.mysql.gr.jp/mysqlml/mysql/msg/13851/0/"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="13850">[前]</a><a href="13852">[次]</a><a href="../list/13801-13900">[番号順一覧]</a><a href="../thread/13801-13900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13825">@ 13825 2007-03-26 16:29 [nic sak &lt;sa9lovex@xx] utf-8 での日本語ソート                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13828">  13828 2007-03-26 17:11 ┣[YuGo &lt;yu.gotou@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13829">  13829 2007-03-26 17:38 ┗[ICHIKAWA SHIN &lt;sichi]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13835">@ 13835 2007-03-27 20:57 　┗[nic sak &lt;sa9lovex@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13840">  13840 2007-03-28 08:49 　　┗[YuGo &lt;yu.gotou@xxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="13851">@ 13851 2007-03-30 16:14 　　　┗[nic sak &lt;sa9lovex@xx]                                 </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3496</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="3495">[前]</a><a href="3497">[次]</a><a href="../list/3401-3500">[番号順一覧]</a><a href="../thread/3401-3500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3496
+</p>
+<div class="header">
+<p>
+From: &quot;hirofujita8523&quot; &lt;&quot;hirofujita8523&quot; &lt;hirofujita8523@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 6 Apr 2001 11:04:55 +0900<br>
+Subject: [mysql 03496] 日本語版での開発について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+ はじめまして藤田と申します。
+今回仕事でメインに使っていく安価なDBを探していまして、
+Win2Kならどちらも動くことから、MySQLとPostgreSQLが候補に上がっています。
+ 私としてはシンプルで高速なMySQLを使いたいのですが、今の開発環境で上手く
+動かすことができません。
+
+環境はサーバーとクライアントは同じで、
+  Win98SE
+  MySQL-3.22-Win32日本語バージョン評価版
+  Borland C++ 5.01
+
+  A.winclients-3.23.09a-sjis.zip（SJIS）
+  B.winclients-3_22_28_sjis.zip（SJIS）
+  C.winclients-3.23.14.zip（英語版）
+で試しました。
+
+挙動としては、
+  A.コンパイルできない。
+    Error: Unresolved external '_mysql_num_fields' referenced from module
+test.cpp
+  B.コンパイルはできるが、mysql_num_fields() で、0 が返ってくる。
+  C.正常に動作。
+　
+ソースは以下です。
+
+#include &lt;windows.h&gt;
+#include &lt;stdio.h&gt;
+#define NO_CLIENT_LONG_LONG
+#include &quot;mysql.h&quot;
+
+int main() {
+  MYSQL *p = mysql_init(NULL);
+  p = mysql_real_connect(p, NULL, NULL, NULL, NULL, 0, NULL, 0);
+  mysql_select_db(p, &quot;my&quot;);
+  mysql_query(p, &quot;create table (user id int, name varchar(32));&quot;);
+  mysql_query(p, &quot;insert into user values (1, 'aa');&quot;);
+  mysql_query(p, &quot;insert into user values (2, 'bb');&quot;);
+  mysql_query(p, &quot;select * from user;&quot;);
+  MYSQL_RES *res = mysql_store_result(p);
+  printf(&quot;%d&quot;, mysql_num_fields(res));
+  mysql_free_result(res);
+  mysql_close(p);
+  return 0;
+}
+
+以上を
+implib -c libmySQL.lib libmySQL.dll
+ でライブラリを作っておき
+bcc32 test.cpp libmysql.lib
+ でmakeしています。
+
+ この状況では英語版を使うしかなくなってしまうのですが、
+  SJSを使うと、検索が狂うのと、文字構成バイト中のコードが特殊文字として
+ 解釈されてしまうでしょうし、
+  EUCに変換してMySQLを使用すると、検索の狂いと、
+ 半角カナの場合は２バイトになるはずなので、DBに登録する文字列の長さが変わっ
+て
+ しまうと思うのです。
+
+ よって、やはりできたら日本語版を使いたいのです。
+ 何かしらの情報をいただけたら幸いです。
+
+ 長くなりましたが、よろしくお願いします。
+
+
+__________________________________________________
+Do You Yahoo!?
+インスタントメッセージを送ろう！ Yahoo!メッセンジャー
+<a href="http://messenger.yahoo.co.jp/">http://messenger.yahoo.co.jp/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="3495">[前]</a><a href="3497">[次]</a><a href="../list/3401-3500">[番号順一覧]</a><a href="../thread/3401-3500">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="3496">   3496 2001-04-06 11:04 [&quot;hirofujita8523&quot; &lt;hi] 日本語版での開発について                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3497">   3497 2001-04-06 13:13 ┗[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3506">   3506 2001-04-06 19:31 　┗[&quot;hirofujita8523&quot; &lt;hi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3507">   3507 2001-04-06 20:08 　　┗[Kengo Jinno &lt;kengo@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3509">   3509 2001-04-07 06:15 　　　┗[&quot;hirofujita8523&quot; &lt;hi]                                 </a></span>
+</pre>
+</body>
+</html>

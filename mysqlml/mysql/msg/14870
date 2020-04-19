@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14870</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14869">[前]</a><a href="14871">[次]</a><a href="../list/14801-14900">[番号順一覧]</a><a href="../thread/14801-14900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14870
+</p>
+<div class="header">
+<p>
+From: 柴垣 &lt;柴垣 &lt;akiro@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 22 May 2009 09:16:27 +0900<br>
+Subject: [mysql 14870] Re: @変数の動作について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+NKさん、返信ありがとうございます。
+
+
+<span class="quote1">&gt; 同一セッションで2回目実行時に期待する結果になっているのは、</span>
+<span class="quote1">&gt; 前回実行の最後にセットしている&quot;c&quot;が残っているからのようです。</span>
+
+
+当初から、mysql&gt; set @code='x'; 等はその都度実行していたのですが、
+投稿時には抜け落ちてしまっていました。申し訳ありませんでした。
+
+　メールのコードを私の環境で実行したのですが、やはり以下のように
+なります。送っていただいた結果と比較すると、@code の値が違います。
+抽出と並べ替えの順番が違っているのでしょうか。
+
+
+set @code=&quot;&quot;;
+select @code,if(T.code=@code,'same','new') as
+Mark,@code:=T.code as Code,M.name
+from T left join M on T.code=M.code order by T.code;
++-------+------+------+------+
+<span class="quote1">| @code | Mark | Code | name |</span>
++-------+------+------+------+
+<span class="quote2">|       | new  | a    | ASM  |</span>
+<span class="quote1">| b     | new  | a    | ASM  |</span>
+<span class="quote1">| b     | new  | a    | ASM  |</span>
+<span class="quote1">| a     | new  | b    | BAS  |</span>
+<span class="quote1">| c     | new  | b    | BAS  |</span>
+<span class="quote1">| a     | new  | c    | COM  |</span>
+<span class="quote1">| a     | new  | c    | COM  |</span>
++-------+------+------+------+
+7 rows in set (0.00 sec)
+
+
+こちらの環境は、WindowsXP 
+mysql  Ver 14.12 Distrib 5.0.45, for Win32 (ia32)
+Server version:5.0.45-community-nt MySQL Community Edition (GPL)
+です。
+
+
+<span class="quote1">&gt; ユーザ変数を使用される前に、初期化すると初回実行時でも期待されて</span>
+<span class="quote1">&gt; いる結果にはなりました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; set @code=&quot;&quot;;select @code,if(T.code=@code,'same','new') as</span>
+<span class="quote1">&gt; Mark,@code:=T.code as Code,M.name</span>
+<span class="quote1">&gt; from T left join M on T.code=M.code order by T.code;</span>
+<span class="quote1">&gt; Query OK, 0 rows affected</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; +-------+------+------+------+</span>
+<span class="quote2">&gt; | @code | Mark | Code | name |</span>
+<span class="quote1">&gt; +-------+------+------+------+</span>
+<span class="quote3">&gt; |       | new  | a    | ASM  |</span>
+<span class="quote2">&gt; | a     | same | a    | ASM  |</span>
+<span class="quote2">&gt; | a     | same | a    | ASM  |</span>
+<span class="quote2">&gt; | a     | new  | b    | BAS  |</span>
+<span class="quote2">&gt; | b     | same | b    | BAS  |</span>
+<span class="quote2">&gt; | b     | new  | c    | COM  |</span>
+<span class="quote2">&gt; | c     | same | c    | COM  |</span>
+<span class="quote1">&gt; +-------+------+------+------+</span>
+<span class="quote1">&gt; 7 rows in set</span>
+
+_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+ 柴垣　 akiro@xxxxxxxxxx
+
+_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+
+
+</pre>
+</div>
+<p class="button"><a href="14869">[前]</a><a href="14871">[次]</a><a href="../list/14801-14900">[番号順一覧]</a><a href="../thread/14801-14900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14868">  14868 2009-05-22 00:44 [柴垣 &lt;akiro@xxxxxxxx] @変数の動作について                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14869">  14869 2009-05-22 01:44 ┗[&quot;N.K.&quot; &lt;nakai.kanako]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14870">  14870 2009-05-22 09:16 　┗[柴垣 &lt;akiro@xxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14871">  14871 2009-05-22 09:50 　　┗[&quot;N.K.&quot; &lt;nakai.kanako]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14872">  14872 2009-05-22 12:06 　　　┗[柴垣 &lt;akiro@xxxxxxxx]                                 </a></span>
+</pre>
+</body>
+</html>

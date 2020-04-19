@@ -1,0 +1,85 @@
+--- ./config.h.in.orig	2004-11-26 18:56:24.000000000 +0900
++++ ./config.h.in	2004-11-27 07:53:50.000000000 +0900
+@@ -838,6 +838,9 @@
+ /* Machine type name, eg sun10 */
+ #undef MACHINE_TYPE
+ 
++/* Define the client default charset name */
++#undef MYSQL_CLIENT_DEFAULT_CHARSET_NAME
++
+ /* Define the default charset name */
+ #undef MYSQL_DEFAULT_CHARSET_NAME
+ 
+--- ./configure.in.orig	2004-11-26 18:13:05.000000000 +0900
++++ ./configure.in	2004-11-27 07:52:28.000000000 +0900
+@@ -2440,6 +2440,7 @@
+ DEFAULT_CHARSET=latin1
+ CHARSETS_AVAILABLE="CHARSETS_AVAILABLE0 CHARSETS_AVAILABLE1 CHARSETS_AVAILABLE2 CHARSETS_AVAILABLE3 CHARSETS_AVAILABLE4 CHARSETS_AVAILABLE5"
+ CHARSETS_COMPLEX="big5 cp1250 euckr gb2312 gbk latin1 latin2 sjis tis620 ucs2 ujis utf8"
++DEFAULT_CLIENT_CHARSET=binary
+ 
+ AC_DIVERT_POP
+ 
+@@ -2455,6 +2456,18 @@
+    [default_charset="$withval"],
+    [default_charset="$DEFAULT_CHARSET"])
+ 
++AC_ARG_WITH(client-charset,
++   [  --with-client-charset=CHARSET
++                          Default client character set, use one of:
++			  CHARSETS_AVAILABLE0
++                          CHARSETS_AVAILABLE1
++                          CHARSETS_AVAILABLE2
++                          CHARSETS_AVAILABLE3
++                          CHARSETS_AVAILABLE4
++                          CHARSETS_AVAILABLE5],
++   [default_client_charset="$withval"],
++   [default_client_charset="$default_charset"])
++
+ AC_ARG_WITH(collation,
+    [  --with-collation=COLLATION
+                           Default collation],
+@@ -2810,6 +2823,8 @@
+ 
+ AC_DEFINE_UNQUOTED([MYSQL_DEFAULT_CHARSET_NAME], ["$default_charset"],
+                    [Define the default charset name])
++AC_DEFINE_UNQUOTED([MYSQL_CLIENT_DEFAULT_CHARSET_NAME], ["$default_client_charset"],
++                   [Define the client default charset name])
+ AC_DEFINE_UNQUOTED([MYSQL_DEFAULT_COLLATION_NAME], ["$default_collation"],
+                    [Define the default charset name])
+ 
+--- ./include/my_global.h.orig	2004-11-16 18:33:49.000000000 +0900
++++ ./include/my_global.h	2004-11-27 07:51:17.000000000 +0900
+@@ -1190,6 +1190,10 @@
+ #define MYSQL_UNIVERSAL_CLIENT_CHARSET MYSQL_DEFAULT_CHARSET_NAME
+ #endif
+ 
++#ifndef MYSQL_CLIENT_DEFAULT_CHARSET_NAME
++#define MYSQL_CLIENT_DEFAULT_CHARSET_NAME MYSQL_DEFAULT_CHARSET_NAME
++#endif
++
+ #if defined(EMBEDDED_LIBRARY) && !defined(HAVE_EMBEDDED_PRIVILEGE_CONTROL)
+ #define NO_EMBEDDED_ACCESS_CHECKS
+ #endif
+--- ./client/mysqldump.c.orig	2005-01-07 12:42:51.000000000 +0900
++++ ./client/mysqldump.c	2005-01-12 09:45:17.000000000 +0900
+@@ -112,7 +112,7 @@
+   it is the default value which assigned at the very beginning of main().
+ */
+ static const char *mysql_universal_client_charset=
+-  MYSQL_UNIVERSAL_CLIENT_CHARSET;
++  MYSQL_CLIENT_DEFAULT_CHARSET_NAME;
+ static char *default_charset;
+ static CHARSET_INFO *charset_info= &my_charset_latin1;
+ const char *default_dbug_option="d:t:o,/tmp/mysqldump.trace";
+--- ./sql-common/client.c.orig	2005-01-12 10:28:05.000000000 +0900
++++ ./sql-common/client.c	2005-01-12 09:43:00.000000000 +0900
+@@ -1871,7 +1855,7 @@
+   /* Set character set */
+   if (!mysql->options.charset_name &&
+       !(mysql->options.charset_name= 
+-       my_strdup(MYSQL_DEFAULT_CHARSET_NAME,MYF(MY_WME))))
++       my_strdup(MYSQL_CLIENT_DEFAULT_CHARSET_NAME,MYF(MY_WME))))
+     goto error;
+   
+   {

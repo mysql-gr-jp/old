@@ -1,0 +1,163 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16225</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16224">[Á°]</a><a href="16226">[¼¡]</a><a href="../list/16201-16300">[ÈÖ¹æ½ç°ìÍ÷]</a><a href="../thread/16201-16300">[¥¹¥ì¥Ã¥É°ìÍ÷]</a></p>
+<p class="id">
+mysql:16225
+</p>
+<div class="header">
+<p>
+From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 9 Apr 2015 01:13:40 +0900<br>
+Subject: [mysql 16225] Re: [mysql 16224] ÂçÎÌ¤Ê¥Ç¡¼¥¿¤Î°·¤¤¤Ë¤Ä¤¤¤Æ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+¤³¤ó¤Ð¤ó¤Ï¡¢yoku0825¤È¤¤¤¤¤Þ¤¹¡£
+
+¤Ñ¤Ã¤È»×¤¤¤Ä¤¯¤È¤³¤í¤ò¤Ä¤é¤Ä¤é¤È¡£¡£
+
+MySQL¤Ï¹¥¤­¤ËºÆµ¯Æ°¤Ç¤­¤ë¡¢¥Ç¡¼¥¿¥í¡¼¥É¤Ï½é´ü¥Ç¡¼¥¿¤Î¥í¡¼¥É¤À¤±¤Ç¡¢¤½¤Î¸å¤Ï¥Ð¥ë¥¯¥í¡¼¥É¤µ¤ì¤ë¤³¤È¤Ï¤Ê¤¤¡¢¤È²¾Äê¤·¤Æ¤ÎÏÃ¤Ç¤¹¡£
+
+
+## ¤¢¤È¤Ç¤â¤È¤ËÌá¤¹¤â¤Î
+* skip-innodb-doublewrite # ¥í¡¼¥ÉÃæ¤Ë¥¯¥é¥Ã¥·¥å¤·¤¿¤é¤ä¤êÄ¾¤¹
+* innodb-flush-log-trx-commit= 0 # Æ±¾å
+* innodb-log-buffer-size= 256M # ¤â¤¦¤Á¤ç¤Ã¤ÈÂç¤­¤¯¤Æ¤â¤¤¤¤¤«¤â
+* innodb-log-file-size= 2G, innodb-log-files-in-group= 4 ¤¯¤é¤¤ #¥í¥°¥Õ¥¡¥¤¥ëÂç¤­¤á
+* innodb-sort-buffer-size= 64M # ALTER TABLEÍÑ
+* innodb-adaptive-hash-index= 0 # I/O¥Ð¥¦¥ó¥É¤Ê¤é¤³¤ì¤ÇÎÉ¤¤¤«¤È
+
+## ÍÍ»Ò¤ò¸«¤Ê¤¬¤é
+* innodb-io-capacity= innodb-io-capacity-max #
+I/O¤¬Í·¤ó¤Ç¤¤¤ë¤è¤¦¤Ç¤¢¤ì¤ÐÁý¤ä¤¹(HDD1¶Ì¤Ê¤é¥Ç¥Õ¥©¥ë¥È¤Î¤Þ¤Þ¤Ç¤â¤¤¤¤¤«¤È)
+
+## ¸ú²Ì¤¬¤¢¤ë¤«¤Ï¤ï¤«¤é¤Ê¤¤¤Ç¤¹¤¬
+* innodb-autoextend-increment= 256M # .ibd¥Õ¥¡¥¤¥ë¤Î³ÈÄ¥Ã±°Ì,
+innodb-file-per-table= 0¤Î»þ¤Ëibdata1¤òÂç¤­¤á¤Ë½é´ü²½¤¹¤ë¤Î¤ÈÆ±¤¸¹Í¤¨
+
+¤ÇMySQL¤òµ¯Æ°¤·¤Æ¡¢
+* ¥»¥«¥ó¥À¥ê¡¼¥­¡¼¤Ï¤Ä¤±¤Ê¤¤¤ÇCREATE TABLE
+* LOAD DATA INFILE (handlersocket¤È¤«»È¤Ã¤Æ¤ß¤ë¤Î¤â¤è¤µ¤½¤¦¤ÊÍ½´¶¤¬¤·¤Þ¤¹)
+* ALTER TABLE serial_mst ADD KEY .. (serial_code);
+¤³¤³¤Ç¥Ñ¥é¥á¡¼¥¿¡¼¤òÌá¤·¤ÆºÆµ¯Æ°¡¢¤È¤ï¤¿¤·¤Ê¤é¤³¤¦¤ä¤ê¤Þ¤¹¡£
+
+Á°¤Ë¤ä¤Ã¤¿»þ¤Îµ­»ö¤¬½Ð¤Æ¤­¤Þ¤·¤¿¡Ê¤â¤È¤â¤È¤ÎÌÜÅª¤Ï°ã¤¤¤Þ¤·¤¿¤¬¥Ð¥ë¥¯¥í¡¼¥É¤ÎÂ®ÅÙÈæ³Ó¤ß¤¿¤¤¤Ë¤Ê¤Ã¤Æ¤ë¡Ë
+
+Æü¡¹¤Î³Ð½ñ: MySQL¥¤¥ó¥¹¥¿¥ó¥¹´Ö¤Ç¥Æ¡¼¥Ö¥ë¤ò°Ü¹Ô¤¹¤ëÅê¤²¸¯¤ê¥Ù¥ó¥Á¥Þ¡¼¥¯
+<a href="http://yoku0825.blogspot.jp/2013/11/mysql.html">http://yoku0825.blogspot.jp/2013/11/mysql.html</a>
+
+
+
+¤½¤ÎÂ¾¡¢¼êÁ°Ì£Á¹¤Ê¤â¤Î¤â´Þ¤á¤Æ¤´»²¹Í¤Þ¤Ç¤Ë¡£¡£
+
+´Á(¥ª¥È¥³)¤Î¥³¥ó¥Ô¥å¡¼¥¿Æ»: ¤¿¤Ã¤¿3ÉÃ¤ÇInnoDB¤Î¥Ç¡¼¥¿¥í¡¼¥Ç¥£¥ó¥°¤¬²÷Å¬¤Ë¤Ê¤ë¥é¥¤¥Õ¥Ï¥Ã¥¯
+<a href="http://nippondanji.blogspot.jp/2010/03/innodb.html">http://nippondanji.blogspot.jp/2010/03/innodb.html</a>
+
+MySQL 5.6¤Ë¤ª¤±¤ëÂçÎÌ¥Ç¡¼¥¿¥í¡¼¥É»þ¤Î¹ÍÎ¸ÅÀ - SH2¤ÎÆüµ­
+<a href="http://d.hatena.ne.jp/sh2/20131007">http://d.hatena.ne.jp/sh2/20131007</a>
+
+Ë»¤·¤¤¿Í¤Î¤¿¤á¤Î MySQL 5.7.6 DMR ¤Ë¤ª¤±¤ë InnoDB Flushing ¤ÎÊÑ¹¹ÅÀ¤Ë¤Ä¤¤¤Æ | GREE Engineers' Blog
+<a href="http://labs.gree.jp/blog/2015/03/13735/">http://labs.gree.jp/blog/2015/03/13735/</a>
+
+Æü¡¹¤Î³Ð½ñ: MySQL 5.6.4¤Ç¼ÂÁõ¤µ¤ì¤¿innodb-sort-buffer-size¤ÎÃÍ
+<a href="http://yoku0825.blogspot.jp/2014/05/mysql-564innodb-sort-buffer-size.html">http://yoku0825.blogspot.jp/2014/05/mysql-564innodb-sort-buffer-size.html</a>
+
+
+
+yoku0825,
+
+2015Ç¯4·î8Æü 21:39 Æó¸«¡¡½¤¹¯[£Ä£Î£Ð¥Ç¥¸¥¿¥ë¥³¥à] &lt;futami-n2@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; Æó¸«¤È¿½¤·¤Þ¤¹¡¢¤ªÀ¤ÏÃ¤Ë¤Ê¤Ã¤Æ¤ª¤ê¤Þ¤¹</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; µ×¤·¤Ö¤ê¤ÎÅê¹Æ¤È¤Ê¤ê¤Þ¤¹¡Ê2009Ç¯°ÊÍè¡©¡Ë</span>
+<span class="quote1">&gt; ¤Á¤ç¤Ã¤È³§ÍÍ¤Î¤´°Õ¸«¤ò»Ç¤¤¤¿¤¤¤Î¤Ç¤¹¤¬¡¦¡¦¡¦</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ²¼µ­¤ÎÍÍ¤Ê´Ä¶­¤Ë¤Æ</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt;Red Hat Enterprise 5.6</span>
+<span class="quote2">&gt;&gt;MySQL 5.6</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;create table serial_mst (</span>
+<span class="quote2">&gt;&gt; serial_code     varchar(16) not null,</span>
+<span class="quote2">&gt;&gt; serial_seq       bigint(16) unsigned zerofill auto_increment not null,</span>
+<span class="quote2">&gt;&gt; update_date  timestamp,</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; primary key ( serial_seq ),</span>
+<span class="quote2">&gt;&gt; index idxserial_mst_serial_code ( serial_code )</span>
+<span class="quote2">&gt;&gt;) TYPE = InnoDB;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ¥·¥ê¥¢¥ë¥³¡¼¥É¤ò500Ëü·ïËè¤ËLOAD DATA¤·¤Æ¤ª¤ê¤Þ¤¹</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ¥á¥â¥ê¤Ï8G¤¢¤êMySQL¤Ç5G»ÈÍÑ¤·¤Æ¤¤¤ë¤È¤Î»ö¤Ç¤¹</span>
+<span class="quote1">&gt; ¡¡¡ô¥µ¡¼¥ÐÀßÄê¤Î¥Á¡¼¥à¤ËÊ¹¤¤¤¿¾ðÊó¤Ç¤¹¡¢Û£Ëæ¤Ç¤¹¤ß¤Þ¤»¤ó</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 3²¯¤È¤«4²¯¥³¡¼¥É¤¯¤é¤¤Æþ¤ì¤ë¤Ä¤â¤ê¤Ê¤Î¤Ç¤¹¤¬</span>
+<span class="quote1">&gt; ·ï¿ô¤¬Áý¤¨¤ë¤´¤È¤ËÅÐÏ¿¤¬½ù¡¹¤ËÃÙ¤¯¤Ê¤ê</span>
+<span class="quote1">&gt; £±²¯3000Ëü·ï±Û¤¨¤¿ÊÕ¤ê¤«¤é¶ËÃ¼¤ËÃÙ¤¯¤Ê¤Ã¤Æ¤­¤Þ¤¹</span>
+<span class="quote1">&gt;       0¡¡¢Í  500Ëü¡¡1Ê¬13ÉÃ</span>
+<span class="quote1">&gt; 3000Ëü¢Í3500Ëü¡¡2Ê¬57ÉÃ</span>
+<span class="quote1">&gt; 9000Ëü¢Í9500Ëü¡¡4Ê¬48ÉÃ</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 11500Ëü¢Í12000Ëü¡¡10Ê¬11ÉÃ</span>
+<span class="quote1">&gt; 12500Ëü¢Í13000Ëü¡¡37Ê¬18ÉÃ</span>
+<span class="quote1">&gt; 13500Ëü¢Í14000Ëü¡¡73Ê¬</span>
+<span class="quote1">&gt; 14500Ëü¢Í15000Ëü¡¡96Ê¬</span>
+<span class="quote1">&gt; 15500Ëü¢Í16000Ëü¡¡112Ê¬</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 19500Ëü¢Í20000Ëü¡¡157Ê¬</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ¥×¥é¥¤¥Þ¥ê¥­¡¼¤òserial_code¢Íserial_seq¤ËÊÑ¹¹¤·¤¿»ö¤Ç</span>
+<span class="quote1">&gt; ¥È¡¼¥¿¥ë¤ÎÅÐÏ¿»þ´Ö¤¬</span>
+<span class="quote1">&gt; 2²¯·ï¤Ç75»þ´Ö¢Í30»þ´Ö¤ËÂ¿¾¯Áá¤¯¤Ê¤ê¤Þ¤·¤¿</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ¥á¥â¥ê¤òÁý¤ä¤¹»ö¤Ç</span>
+<span class="quote1">&gt; £±²¯3000Ëü·ï¤ÎÃÙ±ä¥Ý¥¤¥ó¥È¤òÃÙ¤é¤»¤ë»ö¤Ï½ÐÍè¤½¤¦¤Ç¤¹¤¬</span>
+<span class="quote1">&gt; ¡ÊÎã¤¨¤Ð¥á¥â¥ê¤òÇÜ¤ËÁý¤ä¤·¤ÆMySQL¤ò10G¤Ë¤¹¤ì¤Ð2²¯6000Ëü¶á¤¯¤Ë¤Ê¤ë¤È»×¤ï</span>
+<span class="quote1">&gt; ¤ì¤ë¡Ë</span>
+<span class="quote1">&gt; ²¿¤«Â¾¤ËÎÉ¤¤ÊýË¡¤ÏÌµ¤¤¤Ç¤·¤ç¤¦¤«¡©</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ¤Þ¤À»î¤·¤ÆÌµ¤¤¤Ç¤¹¤¬¡¢</span>
+<span class="quote1">&gt; Index¤òÌµ¸ú¤Ë¤·¤Æ£³¡Á£´²¯¥Ç¡¼¥¿¤òºîÀ®¸åIndex¤òÅ½¤ë¤È¤«</span>
+<span class="quote1">&gt; ¡Ê¤½¤Î¾ì¹çIndex¤ÎÀ¸À®¤Ë¤â¤ÎÀ¨¤¯»þ´Ö¤¬³Ý¤«¤ë¤È¤«¤Ï¤Á¤ç¤Ã¤ÈÉÝ¤¤¤Î¤Ç¤¹¤¬¡Ë</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ²¿¤«ÎÉ¤¤ÊýË¡¤ò¤´Â¸ÃÎ¤Ç¤·¤¿¤é¤ª¶µ¤¨Äº¤±¤ë¤ÈÍ­¤êÆñ¤¤¤Ç¤¹</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; µ¹¤·¤¯¤ª´ê¤¤Ã×¤·¤Þ¤¹</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ¢¨Éô½ðÌ¾¤¬ÊÑ¤ï¤ê¤Þ¤·¤¿</span>
+<span class="quote1">&gt; -------------------------------------------------------</span>
+<span class="quote1">&gt;   DNP DIGITALCOM</span>
+<span class="quote1">&gt; ¡¡¥·¥¹¥Æ¥à¥½¥ê¥å¡¼¥·¥ç¥óËÜÉô</span>
+<span class="quote1">&gt;   Âè£±¥·¥¹¥Æ¥à³«È¯¼¼¡¡Âè£²¥°¥ë¡¼¥×</span>
+<span class="quote1">&gt; ¡¡¡¡¡¡Æó¸«¡¡½¤¹¯</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;   ¢©141-8001</span>
+<span class="quote1">&gt;     ÉÊÀî¶èÀ¾¸ÞÈ¿ÅÄ3-5-20 £Ä£Î£Ð¸ÞÈ¿ÅÄ¥Ó¥ë5£Æ</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     TEL 03-6431-6324 ÆâÀþ 6324</span>
+<span class="quote1">&gt;     FAX 03-6431-6193</span>
+<span class="quote1">&gt; ¡¡  Mail: Futami-N2@xxxxxxxxxx</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="16224">[Á°]</a><a href="16226">[¼¡]</a><a href="../list/16201-16300">[ÈÖ¹æ½ç°ìÍ÷]</a><a href="../thread/16201-16300">[¥¹¥ì¥Ã¥É°ìÍ÷]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16224">  16224 2015-04-08 21:39 [Æó¸«¡¡½¤¹¯[£Ä£Î£Ð¥Ç¥] ÂçÎÌ¤Ê¥Ç¡¼¥¿¤Î°·¤¤¤Ë¤Ä¤¤¤Æ              </a></span>
+<span class="current">-&gt;&nbsp;<a href="16225">  16225 2015-04-09 01:13 ¨²[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16224] ÂçÎÌ¤Ê¥Ç¡¼¥¿¤Î°·¤¤¤Ë¤Ä¤¤¤Æ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16226">  16226 2015-04-09 01:49 ¨­¨±[&quot;yoku ts.&quot; &lt;yoku0825]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16227">  16227 2015-04-10 12:20 ¨±[HIRATSUKA Sadao &lt;sh2]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14083</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14082">[前]</a><a href="14084">[次]</a><a href="../list/14001-14100">[番号順一覧]</a><a href="../thread/14001-14100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14083
+</p>
+<div class="header">
+<p>
+From: 兵頭 &lt;兵頭 &lt;kz.hyodo@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 2 Jul 2007 15:27:52 +0900<br>
+Subject: [mysql 14083] 既存テーブルにカラム追加でサービス停止<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、兵頭です。
+既存のテーブルに新しいカラムを追加するＳＱＬ文をphpmyadmin上から
+実行すると、１，２分ほどしてから以下のメッセージを出力してサービスが停止します。 
+
+「SHOW TABLE STATUS LIKE 'テーブルA'
+#2003-サーバが応答しません。」
+
+OS:windows2003
+MySQL：4.0.26
+
+全てのテーブルについてエラーになるわけではなく、一部のテーブルのみ現象が発生します。
+現象がおきているのをテーブルA,テーブルBとすると、
+テーブルAはレコード件数は９０万件弱ですが、カラム数が２００以上あります。
+テーブルBはレコード件数が７００万件近くあります。
+
+カラムの追加は３つあり、一つのSQL文で３つを追加しようとしています。
+全てのカラムは既存の最後に追加します。
+データ型は全てINT(20)です。
+以下はエラーログです。
+
+***  Windows2003　アプリログ　************************************************
+エラー発生アプリケーション mysqld-nt.exe、
+バージョン 0.0.0.0、
+エラー発生モジュール mysqld-nt.exe、
+バージョン 0.0.0.0、
+エラー発生アドレス 0x00173539
+
+***  mysqlエラーログ　　*******【】内は適当に置き換えています*********************
+=====================================
+070702 10:25:12 INNODB MONITOR OUTPUT
+=====================================
+Per second averages calculated from the last 16 seconds
+----------
+SEMAPHORES
+----------
+OS WAIT ARRAY INFO: reservation count 14700, signal count 14621
+Mutex spin waits 46050, rounds 242751, OS waits 2178
+RW-shared spins 9815, OS waits 4912; RW-excl spins 7452, OS waits 6393
+------------
+TRANSACTIONS
+------------
+Trx id counter 0 292124530
+Purge done for trx's n:o &lt; 0 292124528 undo n:o &lt; 0 0
+Total number of lock structs in row lock hash table 155868
+LIST OF TRANSACTIONS FOR EACH SESSION:
+---TRANSACTION 0 292124472, ACTIVE 137 sec, OS thread id 2344 inserting, 
+thread declared inside InnoDB 141
+mysql tables in use 2, locked 3
+155871 lock struct(s), heap size 7515456, undo log entries 820591
+MySQL thread id 555, query id 151994 【サーバ名】.【ドメイン名】.local 【IPアドレス】　user copy to tmp table
+ALTER TABLE `【テーブルA】` ADD `【追加カラム１】` INT( 20 ) NOT NULL ,
+
+ADD `【追加カラム２】` INT( 20 ) NOT NULL ,
+
+ADD `【追加カラム３】` INT( 20 ) NOT NULL
+--------
+FILE I/O
+--------
+I/O thread 0 state: wait Windows aio (insert buffer thread)
+I/O thread 1 state: wait Windows aio (log thread)
+I/O thread 2 state: wait Windows aio (read thread)
+I/O thread 3 state: wait Windows aio (write thread)
+Pending normal aio reads: 0, aio writes: 0,
+ ibuf aio reads: 0, log i/o's: 0, sync i/o's: 0
+Pending flushes (fsync) log: 0; buffer pool: 0
+140455 OS file reads, 135743 OS file writes, 8784 OS fsyncs
+993.19 reads/s, 16384 avg bytes/read, 1093.12 writes/s, 115.62 fsyncs/s
+-------------------------------------
+INSERT BUFFER AND ADAPTIVE HASH INDEX
+-------------------------------------
+Ibuf for space 0: size 194, free list len 109, seg size 304,
+593652 inserts, 546301 merged recs, 7604 merges
+Hash table size 34679, used cells 1, node heap has 1 buffer(s)
+3625.21 hash searches/s, 9780.83 non-hash searches/s
+---
+LOG
+---
+Log sequence number 4 3450941386
+Log flushed up to   4 3450941368
+Last checkpoint at  4 3449305499
+0 pending log writes, 0 pending chkp writes
+5792 log i/o's done, 41.87 log i/o's/second
+----------------------
+BUFFER POOL AND MEMORY
+----------------------
+Total memory allocated 14116366; in additional pool allocated 1045760
+Buffer pool size   512
+Free buffers       32
+Database pages     21
+Modified db pages  5
+Pending reads 1
+Pending writes: LRU 0, flush list 0, single page 0
+Pages read 140317, created 60891, written 126051
+993.56 reads/s, 132.24 creates/s, 1012.37 writes/s
+Buffer pool hit rate 982 / 1000
+--------------
+ROW OPERATIONS
+--------------
+1 queries inside InnoDB, 0 queries in queue
+Main thread id 2692, state: sleeping
+Number of rows inserted 935034, updated 53, deleted 0, read 2159111
+1819.95 inserts/s, 0.00 updates/s, 0.00 deletes/s, 3142.43 reads/s
+----------------------------
+END OF INNODB MONITOR OUTPUT
+============================
+070702 10:53:20  InnoDB: Database was not shut down normally.
+InnoDB: Starting recovery from log files...
+InnoDB: Starting log scan based on checkpoint at
+InnoDB: log sequence number 4 3453608225
+InnoDB: Doing recovery: scanned up to log sequence number 4 3455236442
+InnoDB: 1 transaction(s) which must be rolled back or cleaned up
+InnoDB: in total 824486 row operations to undo
+InnoDB: Trx id counter is 0 292124928
+070702 10:53:20  InnoDB: Starting an apply batch of log records to the 
+database...
+InnoDB: Progress in percents: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 
+19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 
+44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 
+69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 
+94 95 96 97 98 99
+InnoDB: Apply batch completed
+InnoDB: Starting rollback of uncommitted transactions
+InnoDB: Rolling back trx with id 0 292124472, 824486 rows to undo
+InnoDB: Progress in percents: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 
+19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 
+44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 
+69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 
+94 95 96 97 98 99 100
+InnoDB: Rolling back of trx id 0 292124472 completed
+InnoDB: Rollback of uncommitted transactions completed
+070702 10:55:14  InnoDB: Flushing modified pages from the buffer pool...
+070702 10:55:14  InnoDB: Started
+MySql: ready for connections.
+Version: '4.0.26-nt'  socket: ''  port: 3306  Official MySQL binary
+070702 12:03:19 MySql: Normal shutdown
+
+070702 12:03:28 MySql: Forcing close of thread 1  user: 'ODBC'
+*******************************************************************************
+
+
+どなたかお分かりになる方、おられましたらご教授お願いします。
+
+兵頭
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="14082">[前]</a><a href="14084">[次]</a><a href="../list/14001-14100">[番号順一覧]</a><a href="../thread/14001-14100">[スレッド一覧]</a></p>
+</body>
+</html>

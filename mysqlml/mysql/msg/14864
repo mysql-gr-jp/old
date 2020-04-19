@@ -1,0 +1,78 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14864</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14863">[前]</a><a href="14865">[次]</a><a href="../list/14801-14900">[番号順一覧]</a><a href="../thread/14801-14900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14864
+</p>
+<div class="header">
+<p>
+From: Takayuki Okada &lt;Takayuki Okada &lt;okada.takayuki@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 21 May 2009 10:28:56 +0900<br>
+Subject: [mysql 14864] Re: DBD::mysqlのmake testでエラーが発生<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<span class="quote1">&gt;こんにちは。池田です。</span>
+ご返信ありがとうございます。
+
+<span class="quote1">&gt;mysql_sqlstate関数はMySQL 4.1.1で追加されたAPIのようですね。</span>
+<span class="quote1">&gt;<a href="http://dev.mysql.com/doc/refman/4.1/ja/mysql-sqlstate.html">http://dev.mysql.com/doc/refman/4.1/ja/mysql-sqlstate.html</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;エラーを見るとテスト実行時のldエラーのようですし、</span>
+<span class="quote1">&gt;単にlibmysqlclient.soのバージョンが古いだけだったりしませんか？</span>
+ご指摘のとおりのようです。
+
+さきほど、lddコマンドで、mysql.soが使うライブラリを確認したところ、
+libmysqlclient.so.12 =&gt; /usr/sfw/lib/libmysqlclient.so.12
+：
+と、バンドルされているライブラリ(/usr/sfw/lib)を参照しているようです。
+
+また、今回、MySQL5.1をインストールしてますが、5.1では、〜.so.12ではなくて、
+〜.so.16しか存在してませんが、それを使わせるには、makefile時にどのような
+オプション指定をすべきでしょうか？
+
+■makefile時の引数
+-----
+perl Makefile.PL  --cflags=&quot;-I/opt/mysql/mysql/include&quot; --libs=&quot;-L/opt/mysql/mysql/lib -lmysqlclient -lz -lposix4 -lresolv -lsocket -lnsl -lm -L/usr/sfw/lib/gcc/sparc-sun-solaris2.10/3.4.3 -lgcc&quot;
+
+■環境変数
+-----
+LD_LIBRARY_PATH=/opt/mysql/mysql/lib:/usr/openwin/lib
+PATH=/opt/mysql/mysql/bin:/usr/sfw/bin:/usr/sbin:/usr/bin:/usr/ccs/bin:/usr/openwin/bin:/usr/dt/bin:/usr/platform/SUNW,SPARC-Enterprise-T1000/sbin:/opt/sun/bin:/opt/SUNWvts/bin
+
+■libmysqlclient.so.*のfind結果
+-----
+/usr/lib/libmysqlclient.so★
+/usr/sfw/lib/libmysqlclient.so
+/usr/sfw/lib/libmysqlclient.so.12
+/usr/sfw/lib/libmysqlclient.so.12.0.0
+/lib/libmysqlclient.so★
+/opt/mysql/mysql/lib/libmysqlclient.so☆
+/opt/mysql/mysql/lib/libmysqlclient.so.16
+/opt/mysql/mysql/lib/libmysqlclient.so.16.0.0
+
+★は、/opt/mysql/mysql/lib/libmysqlclient.so.16をコピーしてます。
+☆を、使わせるべきではないかと思ってます。
+
+</pre>
+</div>
+<p class="button"><a href="14863">[前]</a><a href="14865">[次]</a><a href="../list/14801-14900">[番号順一覧]</a><a href="../thread/14801-14900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14859">  14859 2009-05-20 17:27 [Takayuki Okada &lt;okad] DBD::mysqlのmake testでエラーが発生     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14860">  14860 2009-05-20 18:27 ┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14862">  14862 2009-05-21 09:01 　┗[Takayuki Okada &lt;okad]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14863">  14863 2009-05-21 09:58 　　┗[Tetsuro IKEDA &lt;ikdtt]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="14864">  14864 2009-05-21 10:28 　　　┗[Takayuki Okada &lt;okad]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14865">  14865 2009-05-21 11:07 　　　　┗[Tetsuro IKEDA &lt;ikdtt]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14866">  14866 2009-05-21 12:12 　　　　　┗[Takayuki Okada &lt;okad]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14867">  14867 2009-05-21 18:51 　　　　　　┗[Takayuki Okada &lt;okad]                           </a></span>
+</pre>
+</body>
+</html>

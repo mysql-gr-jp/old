@@ -1,0 +1,164 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1577</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1576">[前]</a><a href="1578">[次]</a><a href="../list/1501-1600">[番号順一覧]</a><a href="../thread/1501-1600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1577
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Mon, 14 Feb 2000 16:34:24 +0900<br>
+Subject: [mysql 01577] Re: mysql-ruby のインストール<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Mon, 14 Feb 2000 15:00:08 +0900,
+N.Yoshida &lt;yosh_no@xxxxxxxxxx&gt; wrote:
+
+<span class="quote2">&gt; &gt;shell$ ruby</span>
+<span class="quote2">&gt; &gt; は起動するか</span>
+<span class="quote2">&gt; &gt;shell$ ruby -e &quot;require 'socket'&quot;</span>
+<span class="quote2">&gt; &gt; は起動するか</span>
+<span class="quote2">&gt; &gt;socket.so と mysql.so が同じ ld-linux.so を見ているか</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;これらがクリアされているのに、</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;shell$ ruby -e &quot;require 'mysql'&quot;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;が動かないなら、原因は、</span>
+<span class="quote2">&gt; &gt;  mysql.so を作成したとき、指定するライブラリが足りなかった</span>
+<span class="quote2">&gt; &gt;  mysql.so が必要としているライブラリが見つからなかった</span>
+<span class="quote2">&gt; &gt;  libmysqlclient.so へのパスが通っていない</span>
+<span class="quote2">&gt; &gt;  コンパイルに使用した gcc がわるい</span>
+<span class="quote2">&gt; &gt;ぐらいしかないと思います</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   村上さんのコメントに従いやってみました。以下のようになりました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -----------------------------------------------------------------------------</span>
+<span class="quote1">&gt; fz000785:~# ruby</span>
+<span class="quote1">&gt; printf &quot;test(%s)\n&quot;,&quot;TestString&quot;</span>
+<span class="quote1">&gt; test(TestString)                       ◆ruby単体は動作している</span>
+<span class="quote1">&gt; fz000785:~# ruby -e &quot;require 'socket'&quot; ◆socketモジュールも動作しているようだ</span>
+<span class="quote1">&gt; fz000785:~# ruby -e &quot;require 'mysql'&quot;  ◆mysqlモジュールは駄目らしい</span>
+<span class="quote1">&gt; /tmp/rba07173:1:in `require': File not found - /usr/local/lib/ruby/1.4/i586-linu</span>
+<span class="quote1">&gt; x/mysql.so (LoadError)</span>
+<span class="quote1">&gt;         from /tmp/rba07173:1</span>
+<span class="quote1">&gt; -----------------------------------------------------------------------------</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   私自身よくわかっていないのですが、lddではsocket.soが認識されていないようなのに</span>
+<span class="quote1">&gt; rubyからはロードできているように思われるのが不思議です。</span>
+
+MySQL や ruby 本体をコンパイルしたのも同じマシン、同じ環境ですよね？
+それ以降に、なにか別途インストールしたとか、機械を移したとかはないですよね？
+
+ldd can't exec は、たとえば、libc6 のマシン上で作ったものを
+libc5 のましんで ldd すると、でるのですが
+(libc6には、ld-linux.so.2 があるけれど、通常のlibc5+ldsoには
+ ld-linux.so.1しかない)
+
+同じ環境で ruby と socket.so はコンパイルできて動くなら、
+ここは ldd の問題はほっておいて、
+(rubyがコンパイルできて動いているから. 気持ち悪いですが)
+mysql.so のコンパイルの問題を考えてみます
+
+
+<span class="quote1">&gt; mysql.soの方は lddでも</span>
+<span class="quote1">&gt; rubyからでも正しく認識されていないようです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   村上さんの指摘のなかで、ひとつ気になる点があります。(次行)</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt;  libmysqlclient.so へのパスが通っていない</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   これ(libmysqlclient.so)が私のlinux(/lib,/usr/lib,/usr/local/lib)には無いよう</span>
+<span class="quote1">&gt; に思われます。これが最も怪しい。このライブラリはどのようにすればインストールさ</span>
+<span class="quote1">&gt; れるのか教えてください。</span>
+
+最初から無いのであれば、libmysqlclient.a しかないです。
+(MySQL の default では、ライブラリは、/usr/local/lib/mysql/ にインストール)
+MySQL の configure 時に、libmysqlclient.a だけを作るようになったのかもしれません。
+このばあい、.so は不要です。 gcc はリンクに、libmysqlclient.a を使用します
+
+
+もし、MySQL のソースが残っているなら、
+そのソースの config.status ファイルや client/Makefile に、
+ライブラリの指定があるはずです
+例えば、
+
+s%@CLIENT_LIBS@%-lm   -lz %g
+
+や
+
+CLIENT_LIBS = -lm -lz
+LIBS = -lm -lz
+
+のように。
+
+ここに追加されているライブラリは、-lmysqlclient の後にかならず
+追加してコンパイルしなくてはなりません。
+
+ただし gcc-2.7.2.3 か、gcc-2.95 以上 を使用します。
+
+gcc-2.7.2.x の場合は、-lmysqlclient とともに、
+  /usr/lib/gcc-lib/2.7.2.3/libgcc.a
+のように、libgcc.a を念のため追加指定します。
+(libgcc.a のパスは、
+  gcc -print-libgcc-file-name
+で得られると思います)
+
+# これらのことは、ruby だけでなく、perl やその他クライアントプログラム
+# 全てに適用します
+
+
+例えば、私の libc5 linux マシンだと、
+gcc -o radiusd radiusd.o ....\
+ -L/usr/local/lib/mysql -lmysqlclient -lm -lz
+
+ちなみに libc6 linux マシンだと、
+ -L/usr/local/lib/mysql -lmysqlclient -lm -lz -lcrypt -lnsl
+
+solaris マシンだと(zlibを自分で別途、マシンに入れている)、
+ -L/usr/local/lib/mysql -lmysqlclient -L/usr/local/lib -lz -lm -lnsl -lsocket
+
+gcc-2.7.2 + libc5 linux だと、
+gcc ..... \
+ /usr/lib/gcc-lib/2.7.2.3/libgcc.a /usr/local/lib/mysql/libmysqlclient.a -lm -lz
+
+
+
+# ライブラリの指定をやりなおしてコンパイルし直して、それでだめなら、
+# ゼロからシステムをインストールし直しがすっきりするかも?...(^^;;;
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="1576">[前]</a><a href="1578">[次]</a><a href="../list/1501-1600">[番号順一覧]</a><a href="../thread/1501-1600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1562">   1562 2000-02-10 10:06 [&quot;N.Yoshida&quot; &lt;yosh_no] mysql-ruby のインストール               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1563">   1563 2000-02-10 12:22 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1564">   1564 2000-02-10 13:01 　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1565">   1565 2000-02-10 14:25 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1570">   1570 2000-02-14 11:06 　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1571">   1571 2000-02-14 11:29 　　　　┣[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1572">   1572 2000-02-14 12:50 　　　　┃┗[&quot;N.Yoshida&quot; &lt;yosh_no]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1573">   1573 2000-02-14 13:08 　　　　┃　┗[とみたまさひろ &lt;tomm]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1574">   1574 2000-02-14 13:43 　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1575">   1575 2000-02-14 13:54 　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1576">   1576 2000-02-14 15:00 　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="1577">   1577 2000-02-14 16:34 　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1578">   1578 2000-02-15 10:06 　　　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1579">   1579 2000-02-15 10:16 　　　　　　　　┗[とみたまさひろ &lt;tomm]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1580">   1580 2000-02-15 10:45 　　　　　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1581">   1581 2000-02-15 11:20 　　　　　　　　　　┣[とみたまさひろ &lt;tomm]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1584">   1584 2000-02-15 13:23 　　　　　　　　　　┗[UENO Kazuaki &lt;kazu@x]                   </a></span>
+</pre>
+</body>
+</html>

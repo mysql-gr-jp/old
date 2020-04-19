@@ -1,0 +1,207 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14194</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14193">[前]</a><a href="14195">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14194
+</p>
+<div class="header">
+<p>
+From: &quot;F.Y&quot; &lt;&quot;F.Y&quot; &lt;fumi_sby@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 11 Sep 2007 22:46:40 +0900 (JST)<br>
+Subject: [mysql 14194] Re: mysqld で out of memory が多発<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+tls8ってことはapacheは1.3.27-41あたりかな?
+WebサーバとMySQLサーバは同一ハードかな?
+いずれにしてもなつかしす。
+Apache→PHP/Perl→MySQLのどこかでメモリーリークっぽいことが起きてて…と
+いう太古の昔のかすかな記憶があるようなないような。
+可能であれば /etc/httpd/conf/httpd.conf などで MaxRequestsPerChild を30
+とか10とか5とかにしてみたらどうかな。
+
+--- 山本 孝一 &lt;yamamoto@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; 長文です。お許しください。</span>
+<span class="quote1">&gt; 【問題点】</span>
+<span class="quote1">&gt; 　月に２度くらいの頻度でmysqldでout of</span>
+<span class="quote1">&gt; memoryが短時間に多発してサーバが反応しなくなる。</span>
+<span class="quote1">&gt; 【環境】</span>
+<span class="quote1">&gt; 　Turbo Linux Sever 8</span>
+<span class="quote1">&gt; 　Mysql 3.23.58-log</span>
+<span class="quote1">&gt; 　Memory 512MB</span>
+<span class="quote1">&gt; 【状況】</span>
+<span class="quote1">&gt; 　Movable</span>
+<span class="quote1">&gt; Typeを利用するためにMySQLを利用しています。利用当初は問題なかったの</span>
+<span class="quote1">&gt; ですが、今年の３月頃から月に２度くらいの頻度でmysqldでout of</span>
+<span class="quote1">&gt; memoryが発生して</span>
+<span class="quote1">&gt; サーバを操作できなくなります。原因かもしれないと思われるのは、２月初</span>
+旬にMTを
+<span class="quote1">&gt; MT3.32-ja→MT3.34にバージョンアップしたことかもしれません。現在はMT3.35</span>
+ですが、
+<span class="quote1">&gt; 状況は同じです。当初はメモリー不足かと思って256MB→512MBをしましたが</span>
+、頻度が
+<span class="quote1">&gt; 少し減った程度です。</span>
+<span class="quote1">&gt; 　どうしたらout of</span>
+<span class="quote1">&gt; memoryを出させなくできるでしょうか？ご存じの方、教えていた</span>
+<span class="quote1">&gt; だけたら幸いです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 【資料】</span>
+<span class="quote1">&gt; [root@ns etc]# mysqladmin -u XXXXXX -p version</span>
+<span class="quote1">&gt; Enter password:</span>
+<span class="quote1">&gt; mysqladmin Ver 8.23 Distrib 3.23.58, for pc-linux on i686</span>
+<span class="quote1">&gt; Copyright (C) 2000 MySQL AB &amp; MySQL Finland AB &amp; TCX DataKonsult AB</span>
+<span class="quote1">&gt; This software comes with ABSOLUTELY NO WARRANTY. This is free</span>
+<span class="quote1">&gt; software,</span>
+<span class="quote1">&gt; and you are welcome to modify and redistribute it under the GPL</span>
+<span class="quote1">&gt; license</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Server version 3.23.58-log</span>
+<span class="quote1">&gt; Protocol version 10</span>
+<span class="quote1">&gt; Connection Localhost via UNIX socket</span>
+<span class="quote1">&gt; UNIX socket /var/lib/mysql/mysql.sock</span>
+<span class="quote1">&gt; Uptime: 4 hours 52 min 30 sec</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Threads: 1 Questions: 10354 Slow queries: 0 Opens: 25 Flush tables:</span>
+<span class="quote1">&gt; 1 Open tables: 19 Queries per second avg: 0.590</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [root@ns etc]# cat my.cnf</span>
+<span class="quote1">&gt; # Example mysql config file for medium systems.</span>
+<span class="quote1">&gt; #</span>
+<span class="quote1">&gt; # This is for a system with little memory (32M - 64M) where MySQL</span>
+<span class="quote1">&gt; plays</span>
+<span class="quote1">&gt; # a important part and systems up to 128M very MySQL is used</span>
+<span class="quote1">&gt; together with</span>
+<span class="quote1">&gt; # other programs (like a web server)</span>
+<span class="quote1">&gt; #</span>
+<span class="quote1">&gt; # You can copy this file to</span>
+<span class="quote1">&gt; # /etc/my.cnf to set global options,</span>
+<span class="quote1">&gt; # mysql-data-dir/my.cnf to set server-specific options (in this</span>
+<span class="quote1">&gt; # installation this directory is /var/lib/mysql) or</span>
+<span class="quote1">&gt; # ~/.my.cnf to set user-specific options.</span>
+<span class="quote1">&gt; #</span>
+<span class="quote1">&gt; # One can in this file use all long options that the program</span>
+<span class="quote1">&gt; supports.</span>
+<span class="quote1">&gt; # If you want to know which options a program support, run the</span>
+<span class="quote1">&gt; program</span>
+<span class="quote1">&gt; # with --help option.</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # The following options will be passed to all MySQL clients</span>
+<span class="quote1">&gt; [client]</span>
+<span class="quote1">&gt; #password = your_password</span>
+<span class="quote1">&gt; port = 3306</span>
+<span class="quote1">&gt; socket = /var/lib/mysql/mysql.sock</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # Here follows entries for some specific programs</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # The MySQL server</span>
+<span class="quote1">&gt; [mysqld]</span>
+<span class="quote1">&gt; datadir = /var/lib/mysql</span>
+<span class="quote1">&gt; port = 3306</span>
+<span class="quote1">&gt; socket = /var/lib/mysql/mysql.sock</span>
+<span class="quote1">&gt; skip-locking</span>
+<span class="quote1">&gt; skip-innodb</span>
+<span class="quote1">&gt; set-variable = key_buffer=16M</span>
+<span class="quote1">&gt; set-variable = max_allowed_packet=1M</span>
+<span class="quote1">&gt; set-variable = table_cache=64</span>
+<span class="quote1">&gt; set-variable = sort_buffer=512K</span>
+<span class="quote1">&gt; set-variable = net_buffer_length=8K</span>
+<span class="quote1">&gt; set-variable = myisam_sort_buffer_size=8M</span>
+<span class="quote1">&gt; log-bin</span>
+<span class="quote1">&gt; server-id = 1</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # language</span>
+<span class="quote1">&gt; #language=/usr/share/mysql/japanese</span>
+<span class="quote1">&gt; #language=/usr/share/mysql/korean</span>
+<span class="quote1">&gt; #language=/usr/share/mysql/czech</span>
+<span class="quote1">&gt; #default-character-set=euc</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # Point the following paths to different dedicated disks</span>
+<span class="quote1">&gt; #tmpdir = /tmp/</span>
+<span class="quote1">&gt; #log-update = /path-to-dedicated-directory/hostname</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # Uncomment the following if you are using BDB tables</span>
+<span class="quote1">&gt; #set-variable = bdb_cache_size=4M</span>
+<span class="quote1">&gt; #set-variable = bdb_max_lock=10000</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # Uncomment the following if you are using Innobase tables</span>
+<span class="quote1">&gt; #innodb_data_file_path = ibdata1:400M</span>
+<span class="quote1">&gt; #innodb_data_home_dir = /var/lib/mysql/</span>
+<span class="quote1">&gt; #innodb_log_group_home_dir = /var/lib/mysql/</span>
+<span class="quote1">&gt; #innodb_log_arch_dir = /var/lib/mysql/</span>
+<span class="quote1">&gt; #set-variable = innodb_mirrored_log_groups=1</span>
+<span class="quote1">&gt; #set-variable = innodb_log_files_in_group=3</span>
+<span class="quote1">&gt; #set-variable = innodb_log_file_size=5M</span>
+<span class="quote1">&gt; #set-variable = innodb_log_buffer_size=8M</span>
+<span class="quote1">&gt; #innodb_flush_log_at_trx_commit=1</span>
+<span class="quote1">&gt; #innodb_log_archive=0</span>
+<span class="quote1">&gt; #set-variable = innodb_buffer_pool_size=16M</span>
+<span class="quote1">&gt; #set-variable = innodb_additional_mem_pool_size=2M</span>
+<span class="quote1">&gt; #set-variable = innodb_file_io_threads=4</span>
+<span class="quote1">&gt; #set-variable = innodb_lock_wait_timeout=50</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [mysqldump]</span>
+<span class="quote1">&gt; quick</span>
+<span class="quote1">&gt; set-variable = max_allowed_packet=16M</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [mysql]</span>
+<span class="quote1">&gt; no-auto-rehash</span>
+<span class="quote1">&gt; # Remove the next comment character if you are not familiar with</span>
+<span class="quote1">&gt; SQL</span>
+<span class="quote1">&gt; #safe-updates</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [isamchk]</span>
+<span class="quote1">&gt; set-variable = key_buffer=20M</span>
+<span class="quote1">&gt; set-variable = sort_buffer=20M</span>
+<span class="quote1">&gt; set-variable = read_buffer=2M</span>
+<span class="quote1">&gt; set-variable = write_buffer=2M</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [myisamchk]</span>
+<span class="quote1">&gt; set-variable = key_buffer=20M</span>
+<span class="quote1">&gt; set-variable = sort_buffer=20M</span>
+<span class="quote1">&gt; set-variable = read_buffer=2M</span>
+<span class="quote1">&gt; set-variable = write_buffer=2M</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [mysqlhotcopy]</span>
+<span class="quote1">&gt; interactive-timeout</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [mysql.server]</span>
+<span class="quote1">&gt; user=mysql</span>
+<span class="quote1">&gt; basedir=/var/lib</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [safe_mysqld]</span>
+<span class="quote1">&gt; err-log=/var/log/mysqld.log</span>
+<span class="quote1">&gt; pid-file=/var/run/mysqld/mysqld.pid</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; // 山本孝一             //</span>
+<span class="quote1">&gt; // yamamoto@xxxxxxxxxx //</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+--------------------------------------
+Easy + Joy + Powerful = Yahoo! Bookmarks x Toolbar
+<a href="http://pr.mail.yahoo.co.jp/toolbar/">http://pr.mail.yahoo.co.jp/toolbar/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="14193">[前]</a><a href="14195">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14193">  14193 2007-09-11 21:55 [山本 孝一 &lt;yamamoto@] mysqldでout of memoryが多発             </a></span>
+<span class="current">-&gt;&nbsp;<a href="14194">  14194 2007-09-11 22:46 ┣[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14202">  14202 2007-09-14 10:41 ┗[Katsutoshi Nakatomi ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14203">  14203 2007-09-14 13:03 　┗[山本 孝一 &lt;yamamoto@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14204">  14204 2007-09-14 14:31 　　┗[Katsutoshi Nakatomi ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14205">  14205 2007-09-14 15:21 　　　┗[山本 孝一 &lt;yamamoto@]                                 </a></span>
+</pre>
+</body>
+</html>

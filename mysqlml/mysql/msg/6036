@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6036</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6035">[前]</a><a href="6037">[次]</a><a href="../list/6001-6100">[番号順一覧]</a><a href="../thread/6001-6100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6036
+</p>
+<div class="header">
+<p>
+From: &quot;KAWAI,Takanori&quot; &lt;&quot;KAWAI,Takanori&quot; &lt;GCD00051@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 29 Aug 2002 20:20:28 +0900<br>
+Subject: [mysql 06036] Re: コマンドラインとブラウザー<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+川合孝典です。
+
+なんとなくユーザのような気もしますが、それについては
+他の方から既にメールが来ているようなので、そちらを
+ご覧になっていただくということで。
+
+----- Original Message -----
+From: &quot;tk&quot; &lt;tk@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Thursday, August 29, 2002 7:06 PM
+Subject: <a href="06029">[mysql 06029]</a> Re: コマンドラインとブラウザー
+
+
+<span class="quote1">&gt; 佐久間さん、川合さん、田中さん</span>
+<span class="quote1">&gt; さっそくの回答ありがとうございます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; HTTPヘッダー、perlのパス等は、OKです。</span>
+<span class="quote1">&gt; 同じディレクトリに、MySQLの部分を削除したperlファイルをUPしたところ、</span>
+<span class="quote1">&gt; ブラウザで問題なく表示されました。</span>
+（以下略）
+エラーログは確認されましたか？まずは最初にどこがコケているかを
+特定したほうがいいとは思います。
+CGI::Carpを使うのが簡単だと思います。標準で入っているはずですし。
+そうでもなければ下記の例のようにevalで囲んで、そのエラーを
+見てみては？
+＃状況からすると、connectエラーになっている可能性が高いと
+＃思いますが、念のため
+
+[例]
+#!/usr/bin/perl
+use strict;
+#use CGI::Carp qw(fatalsToBrowser); #とりあえずコメントアウトしてある
+use DBI;
+my $sMsg='';
+eval {
+        my $hDb = DBI-&gt;connect('dbi:mysql:test', 'root', '',
+        {PrintError=&gt; 0, AutoCommit=&gt;1, RaiseError=&gt;1})
+        or die 'CONNECT ERROR';
+        my $hSt = $hDb-&gt;prepare(&quot;SELECT * FROM GAZOU_NAIYOU1&quot;);
+        $hSt-&gt;execute();
+        my $raCol = $hSt-&gt;{NAME};
+        $sMsg = join(&quot;\t&quot;, @$raCol) .&quot;&lt;BR&gt;\n&quot;;
+        my $raDt;
+        while($raDt = $hSt-&gt;fetchrow_arrayref()) {
+            $sMsg .= join(&quot;\t&quot;, @$raDt) . &quot;&lt;BR&gt;\n&quot;;
+        }
+        $hSt-&gt;finish;
+        $hDb-&gt;disconnect;
+};
+$sMsg=$@ if($@);
+print&lt;&lt;EOD;
+Content-Type: text/html
+
+&lt;HTML&gt;
+&lt;BODY&gt;
+$sMsg
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+EOD
+
+===================================================
+川合 孝典 (Hippo2000)
+   DBI日本語メーリングリスト管理人、Kansai.pm所属
+   kwitknr@xxxxxxxxxx GCD00051@xxxxxxxxxx
+   <a href="http://member.nifty.ne.jp/hippo2000">http://member.nifty.ne.jp/hippo2000</a>、<a href="http://www.hippo2000.info/">http://www.hippo2000.info/</a>
+「MySQL&amp;Perl Webアプリケーション開発」の発売中
+   <a href="http://member.nifty.ne.jp/hippo2000/mysqlperl.htm">http://member.nifty.ne.jp/hippo2000/mysqlperl.htm</a>
+===================================================
+
+
+</pre>
+</div>
+<p class="button"><a href="6035">[前]</a><a href="6037">[次]</a><a href="../list/6001-6100">[番号順一覧]</a><a href="../thread/6001-6100">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="6024">   6024 2002-08-29 18:08 [tk &lt;tk@xxxxxxxxxx&gt;  ] コマンドラインとブラウザー              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6025">   6025 2002-08-29 18:19 ┣[&quot;Hiroaki,Sakuma&quot; &lt;sa]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6026">   6026 2002-08-29 18:26 ┣[&quot;altana&quot; &lt;altana@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6027">   6027 2002-08-29 18:21 ┣[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6028">   6028 2002-08-29 18:23 ┗[遠藤 俊裕 &lt;endo_t@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6029">   6029 2002-08-29 19:06 　┗[tk &lt;tk@xxxxxxxxxx&gt;  ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6031">   6031 2002-08-29 19:22 　　┣[Torii &lt;torii@xxxxxxx] ADO で集計関数                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6032">   6032 2002-08-29 19:43 　　┃┣[Noriyuki Sakimura &lt;s]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6033">   6033 2002-08-29 19:51 　　┃┃┗[崎村 典行 &lt;sakimura@]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6034">   6034 2002-08-29 19:58 　　┃┣[Shingo Yamagai &lt;yama]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6038">   6038 2002-08-29 21:17 　　┃┗[&quot;Nobuhiro Shimura&quot; &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6041">   6041 2002-08-30 08:16 　　┃　┗[Torii &lt;torii@xxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6035">   6035 2002-08-29 20:04 　　┣[&quot;altana&quot; &lt;altana@xxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="6036">   6036 2002-08-29 20:20 　　┣[&quot;KAWAI,Takanori&quot; &lt;GC]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6037">   6037 2002-08-29 21:12 　　┣[遠藤 俊裕 &lt;endo_t@xx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6042">   6042 2002-08-30 11:27 　　┃┗[tk &lt;tk@xxxxxxxxxx&gt;  ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6046">   6046 2002-08-30 15:19 　　┃　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6044">   6044 2002-08-30 13:31 　　┗[&quot;Hiroaki,Sakuma&quot; &lt;sa]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6045">   6045 2002-08-30 14:48 　　　┗[遠藤 俊裕 &lt;endo_t@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6047">   6047 2002-08-31 12:40 　　　　┗[&quot;Hiroaki,Sakuma&quot; &lt;sa]                               </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8278</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8277">[前]</a><a href="8279">[次]</a><a href="../list/8201-8300">[番号順一覧]</a><a href="../thread/8201-8300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8278
+</p>
+<div class="header">
+<p>
+From: UNO Shintaro &lt;UNO Shintaro &lt;uno@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 15 Oct 2003 23:31:31 +0900<br>
+Subject: [mysql 08278] Re: ランキングをつける方法？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<span class="quote2">&gt;&gt; 私の場合ランキングというと、「上位30商品を表示」というようなイメージがあり</span>
+<span class="quote2">&gt;&gt; ました。</span>
+<span class="quote2">&gt;&gt; こういった場合だと、「LIMIT 30」をSELECT文の最後につければ実現できるのでは</span>
+<span class="quote2">&gt;&gt; ？ということではないかと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;そうですね、「ランキング」という言葉でなく、「順位づけ」という表現にしておけ</span>
+<span class="quote1">&gt;ば誤解がなかったですね。僕の表現ミスです、ごめんなさい。</span>
+
+なるほどー。私も誤解しちゃいました！すみません。
+話が大体理解できたので私なりにざくっと作ってみたら
+下記のような感じです。
+野村さんのおっしゃる「ごりごり」がこれだったら、
+これ以上はすぐには思いつきません…。
+
+
+入力:
+  uriage_table (sku, uriage, その他)
+    ... 同じskuに対して複数の売り上げが存在すると仮定。
+
+出力:
+  ranking_table (sku, uriage, ranking)
+    ... skuがプライマリキー。skuごとの総売上とランクが入る。
+
+作業用:
+  work_table (sku, uriage)
+    ... skuがプライマリキー。skuごとの総売上を一旦ここに貯める。
+        uriageにインデックスを張っておくといいかも。
+
+処理:
+
+DELETE FROM work_table;
+
+INSERT INTO work_table (sku, uriage)
+SELECT sku, SUM(uriage)
+FROM uriage_table
+GROUP BY sku;
+
+DELETE FROM ranking_table;
+
+INSERT INTO ranking_table (sku, uriage, ranking)
+SELECT sku, uriage, 1 FROM work_table;
+
+REPLACE INTO ranking_table
+SELECT a.sku,a.uriage,COUNT(*)+1
+FROM work_table a, work_table b
+WHERE a.uriage &lt; b.uriage
+GROUP BY a.sku,a.uriage;
+
+-- 
+UNO Shintaro, 宇野 信太郎
+mailto:uno@xxxxxxxxxx
+<a href="http://www.venus.dti.ne.jp/~uno/">http://www.venus.dti.ne.jp/~uno/</a>
+
+</pre>
+</div>
+<p class="button"><a href="8277">[前]</a><a href="8279">[次]</a><a href="../list/8201-8300">[番号順一覧]</a><a href="../thread/8201-8300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8272">   8272 2003-10-15 20:47 [TORU NOMURA &lt;toru200] ランキングをつける方法？                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8273">   8273 2003-10-15 21:51 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8274">   8274 2003-10-15 22:16 　┗[TORU NOMURA &lt;toru200]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8275">   8275 2003-10-15 22:40 　　┣[&quot;HIGUCHI Koichi&quot; &lt;ko]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8276">   8276 2003-10-15 23:09 　　┃┗[TORU NOMURA &lt;toru200]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8277">   8277 2003-10-15 23:20 　　┃　┣[mohri &lt;mohri@xxxxxxx]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="8278">   8278 2003-10-15 23:31 　　┃　┗[UNO Shintaro &lt;uno@xx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8279">   8279 2003-10-15 23:34 　　┃　　┗[UNO Shintaro &lt;uno@xx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8281">   8281 2003-10-16 03:32 　　┗[seiji takegata &lt;take]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8282">   8282 2003-10-16 19:56 　　　┗[TORU NOMURA &lt;toru200]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8292">   8292 2003-10-18 04:26 　　　　┗[seiji takegata &lt;take]                               </a></span>
+</pre>
+</body>
+</html>

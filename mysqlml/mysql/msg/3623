@@ -1,0 +1,104 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3623</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="3622">[前]</a><a href="3624">[次]</a><a href="../list/3601-3700">[番号順一覧]</a><a href="../thread/3601-3700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3623
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Thu, 10 May 2001 00:39:30 +0900<br>
+Subject: [mysql 03623] Re: REPLACE 関数の問題<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Wed, 09 May 2001 17:44:52 +0900,
+Akihiko Shinohara wrote:
+
+<span class="quote1">&gt; どうも、REPLACE関数がうまく動かないようです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; | mysql&gt; select replace('abcd','a','b');</span>
+<span class="quote2">&gt; | +-------------------------+</span>
+<span class="quote3">&gt; | | replace('abcd','a','b') |</span>
+<span class="quote2">&gt; | +-------------------------+</span>
+<span class="quote3">&gt; | | bbcd                    |</span>
+<span class="quote2">&gt; | +-------------------------+</span>
+<span class="quote2">&gt; | 1 row in set (0.00 sec)</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; | mysql&gt; select replace('abcd','a','ab');</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これを実行すると、サーバからレスポンスが得られません。</span>
+<span class="quote1">&gt; サーバ内で無限ループに陥っている感じです。</span>
+
+MultiBytes の場合おこるようです。とりあえずのパッチです
+
+diff -ru mysql-3.23.37.orig/sql/item_strfunc.cc mysql-3.23.37/sql/item_strfunc.cc
+--- mysql-3.23.37.orig/sql/item_strfunc.cc	Wed Apr 18 17:45:53 2001
++++ mysql-3.23.37/sql/item_strfunc.cc	Thu May 10 00:35:26 2001
+@@ -393,12 +393,14 @@
+ String *Item_func_replace::val_str(String *str)
+ {
+   String *res,*res2,*res3;
+-  int offset=0;
++  int offset;
+   uint from_length,to_length;
+   bool alloced=0;
+ #ifdef USE_MB
+   const char *ptr,*end,*strend,*search,*search_end;
+   register uint32 l;
++  bool binary_str = (args[0]-&gt;binary || args[1]-&gt;binary ||
++		     !use_mb(default_charset_info));
+ #endif
+ 
+   null_value=0;
+@@ -415,7 +417,8 @@
+   if ((offset=res-&gt;strstr(*res2)) &lt; 0)
+     return res;
+ #else
+-  if (!use_mb(default_charset_info) &amp;&amp; (offset=res-&gt;strstr(*res2)) &lt; 0)
++  offset=0;
++  if (binary_str &amp;&amp; (offset=res-&gt;strstr(*res2)) &lt; 0)
+     return res;
+ #endif
+   if (!(res3=args[2]-&gt;val_str(&amp;tmp_value2)))
+@@ -424,7 +427,7 @@
+   to_length=   res3-&gt;length();
+ 
+ #ifdef USE_MB
+-  if (use_mb(default_charset_info))
++  if (!binary_str)
+   {
+     search=res2-&gt;ptr();
+     search_end=search+from_length;
+@@ -449,6 +452,7 @@
+             res=copy_if_not_alloced(str,res,res-&gt;length()+to_length);
+           }
+           res-&gt;replace((uint) offset,from_length,*res3);
++	  offset+=(int) to_length;
+           goto redo;
+         }
+ skipp:
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+ Soft Agency Co., Ltd. TEL +81-48-661-1527
+ PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
+
+</pre>
+</div>
+<p class="button"><a href="3622">[前]</a><a href="3624">[次]</a><a href="../list/3601-3700">[番号順一覧]</a><a href="../thread/3601-3700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3619">   3619 2001-05-09 17:44 [Akihiko Shinohara &lt;s] REPLACE 関数の問題                      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3620">   3620 2001-05-09 18:21 ┣[Seiji Tateyama &lt;tate]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="3623">   3623 2001-05-10 00:39 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3624">   3624 2001-05-10 10:44 　┗[Akihiko Shinohara &lt;s]                                     </a></span>
+</pre>
+</body>
+</html>

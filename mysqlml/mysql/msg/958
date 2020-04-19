@@ -1,0 +1,109 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:958</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="957">[前]</a><a href="959">[次]</a><a href="../list/901-1000">[番号順一覧]</a><a href="../thread/901-1000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:958
+</p>
+<div class="header">
+<p>
+From: Takashi YAMAMOTO &lt;Takashi YAMAMOTO &lt;yamamoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 10 Jun 1999 11:03:25 +0900<br>
+Subject: [mysql 00958] Re: [Q] 分割列による SELECT のスピード比較<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+山本です。
+
+
+民斗&gt;&gt; 【SELECT-1】
+民斗&gt;&gt;  select * from pat1 where key01 like 'XXX%' or key01 like 'XXX%' or key03 like 'XXX%'
+民斗&gt;
+民斗&gt;２番目の like は key02 ですよね。
+
+おっと、失礼しました。
+
+
+民斗&gt;昔、&quot;or&quot; 演算子は遅いと聞いたことがあります。
+
+言われてみれば、そういう話を聞いたことが私もあります。
+
+
+民斗&gt;つまり、
+民斗&gt;	select * from pat1 where key01 like 'XXX%' or key02 like 'XXX%' or key03 like 
+'XXX%'
+民斗&gt;とするより
+民斗&gt;	select * from pat1 where key01 like 'XXX%';
+民斗&gt;	select * from pat1 where key02 like 'XXX%';
+民斗&gt;	select * from pat1 where key03 like 'XXX%';
+民斗&gt;と３回の select のトータル時間の方が速いという…。
+
+で、やってみると
+
+■ORで連結
+　　35sec
+■単独で３回SELECT
+　　0.5sec x 3
+
+という結果でした。
+
+単独で３回SELECTの場合、３つの結果をマージしていく処理が必要ではありますが、
+こっちのが結局早いのかもしれませんね。
+
+
+民斗&gt;あと、インデックステーブルがあまりにも大きいと、ディスク I/O のオーバー
+民斗&gt;ヘッドのせいで、インデックスを使わない方が速いこともあるのかもしれません。
+
+試したのは２０万件で、ISMファイルは34430976バイトありました。
+
+また、
+
+■OR連結の場合のEXPLAINの結果
++---------+------+-------------------+------+---------+------+--------+------------+
+<span class="quote1">| table   | type | possible_keys     | key  | key_len | ref  | rows   | Extra      |</span>
++---------+------+-------------------+------+---------+------+--------+------------+
+<span class="quote1">| keytbls | ALL  | key01,key02,key03 | NULL |    NULL | NULL | 195744 | where used |</span>
++---------+------+-------------------+------+---------+------+--------+------------+
+
+■単独で３回のEXPLAINの結果
++---------+-------+---------------+-------+---------+------+------+-------+
+<span class="quote1">| table   | type  | possible_keys | key   | key_len | ref  | rows | Extra |</span>
++---------+-------+---------------+-------+---------+------+------+-------+
+<span class="quote1">| keytbls | range | key01         | key01 |    NULL | NULL |    1 |       |</span>
++---------+-------+---------------+-------+---------+------+------+-------+
+
+でした。
+
+
+やっぱり、OR は 3.22 でも遅いのかしら、、、、
+
+
++======&lt; Internet-Mail: yamamoto@xxxxxxxxxx &gt;=====+
+      Takashi YAMAMOTO      |       山本  高志
+      Recruit Co.,Ltd.      |    （株）リクルート
+   Datacast Business Div.   |  プロジェクト推進グループ
++=============&lt; URL: <a href="http://www.isize.com/">http://www.isize.com/</a> &gt;=============+
+
+</pre>
+</div>
+<p class="button"><a href="957">[前]</a><a href="959">[次]</a><a href="../list/901-1000">[番号順一覧]</a><a href="../thread/901-1000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="955">    955 1999-06-10 00:26 [Takashi YAMAMOTO &lt;ya] [Q] 分割列による SELECT のスピード比較  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="956">    956 1999-06-10 09:25 ┣[KATSURO Tomokazu &lt;to]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="957">    957 1999-06-10 10:47 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="958">    958 1999-06-10 11:03 　┗[Takashi YAMAMOTO &lt;ya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="959">    959 1999-06-10 11:12 　　┣[&lt;endo@xxxxxxxxxx&gt;   ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="960">    960 1999-06-10 13:01 　　┃┗[民斗 &lt;tommy@xxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="963">    963 1999-06-10 13:16 　　┃　┗[&lt;endo@xxxxxxxxxx&gt;   ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="961">    961 1999-06-10 13:17 　　┣[民斗 &lt;tommy@xxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="962">    962 1999-06-10 13:26 　　┗[&quot;MINOHATA Norio&quot; &lt;mi]                                   </a></span>
+</pre>
+</body>
+</html>

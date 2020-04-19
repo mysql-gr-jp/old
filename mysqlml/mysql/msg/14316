@@ -1,0 +1,120 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14316</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14315">[前]</a><a href="14317">[次]</a><a href="../list/14301-14400">[番号順一覧]</a><a href="../thread/14301-14400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14316
+</p>
+<div class="header">
+<p>
+From: &quot;玉越大輝&quot; &lt;&quot;玉越大輝&quot; &lt;hiroki.tamakoshi@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 30 Nov 2007 20:19:17 +0900<br>
+Subject: [mysql 14316] グループごとに、グループ内での条件を満たす行のみを取り出す方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、株式会社ビービットの玉越です。
+
+一つ苦心していることがありまして、うまい方法が思い浮かばないので質問させて下さい。
+
+■今こんなテーブル test があるとします。
+
+a_group a_amount a_time1 a_time2
+1       100      1       10
+1       200      4       6
+1       300      10      20
+2       10       4       5
+2       20       4       6
+
+■このテーブルから、a_groupごとに、a_time2-a_time1が最小の行を取り出したいと思っています。
+
+結果は下記を期待しています。
+a_group a_amount a_time1 a_time2
+1       200      4       6
+2       10       4       5
+
+■SQLは下記のようになります。
+
+SELECT
+ a_group, a_amount, a_time1, a_time2
+FROM
+ test
+WHERE ( a_group, a_time2 - a_time1 ) IN (
+  SELECT
+   a_group, MIN( a_time2 - a_time1 )
+  FROM
+   test
+  GROUP BY
+   a_group
+  )
+
+■SQLの気持ち
+・グループごとにa_time2 - a_time1の最小値を求める
+・a_time2 - a_time1が合致する行を取り出す
+
+集合演算なのでこれが素直な方法と思います。
+
+■現在行いたいことはもっと複雑なことです。
+
+上記ではtestはすでにあるテーブルですが、実際には複数のテーブルを結合して、様々な条件で絞ったテーブルに対して行いたいと思っています。
+
+SELECT
+ a_group, a_amount, a_time1, a_time2
+FROM
+ test1, test2, test3, test4, test5, test6, ...
+WHERE
+ test1.id = test2.test_id
+ AND とかなんとか
+ AND ...
+ AND ( a_group, a_time2 - a_time1 ) IN (
+  SELECT
+   a_group, MIN( a_time2 - a_time1 )
+  FROM
+   test1, test2, test3, test4, test5, test6, ...
+  WHERE
+   test1.id = test2.test_id
+   AND とかなんとか
+   AND ...
+  GROUP BY
+   a_group
+  )
+
+テーブルの大きさにもよるでしょうが、数十分待っても返事がありません。
+これでは、GROUP BYなどせずに全部持ってきてから自前で加工する方が速いです。
+
+上記のSQLの気持ち悪いところは、同じ条件を2回書いているところです。
+
+何かうまい方法はありますでしょうか？
+
+
+-- 
+------------------------------------------------------
+　　ビービットはチームマイナス6％に参画しています
+------------------------------------------------------
+株式会社ビービット　玉越 大輝
+ユーザビリティ コンサルタント
+beBit,Inc. Tamakoshi Hiroki hiroki.tamakoshi@xxxxxxxxxx
+--------------------------------------------------------
+〒105-0001 東京都港区虎ノ門1-18-1 虎ノ門10森ビル7F
+TEL: 03-3509-7602 / FAX: 03-3509-7605
+URL: <a href="http://www.bebit.co.jp/">http://www.bebit.co.jp/</a>
+--------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="14315">[前]</a><a href="14317">[次]</a><a href="../list/14301-14400">[番号順一覧]</a><a href="../thread/14301-14400">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="14316">  14316 2007-11-30 20:19 [&quot;玉越大輝&quot; &lt;hiroki.t] グループごとに、グループ内での条件を満たす行のみを取り出す方法</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14317">  14317 2007-11-30 20:53 ┗[chuuken kenkou &lt;ken_]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14318">  14318 2007-11-30 21:36 　┗[HIRATSUKA Sadao &lt;hir]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14319">  14319 2007-11-30 22:02 　　┣[HIRATSUKA Sadao &lt;hir]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14323">  14323 2007-12-03 14:35 　　┗[&quot;玉越大輝&quot; &lt;hiroki.t]                                   </a></span>
+</pre>
+</body>
+</html>

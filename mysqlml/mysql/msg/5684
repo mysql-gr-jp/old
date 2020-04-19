@@ -1,0 +1,104 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5684</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="5683">[前]</a><a href="5685">[次]</a><a href="../list/5601-5700">[番号順一覧]</a><a href="../thread/5601-5700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5684
+</p>
+<div class="header">
+<p>
+From: Masakatsu Etou &lt;Masakatsu Etou &lt;a1@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 01 Jul 2002 15:43:04 +0900<br>
+Subject: [mysql 05684] Re: 外部から接続時のアドレス逆引きについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+江藤です。
+
+自分でも確認の意味で、もう一度きちんと検証して結果を出してみました。
+
+まず、dti.ne.jp 内にsshサーバを起動し、att.ne.jp  OCN網内 からsshログ
+インしてみました。（名前とIPアドレスは一応書き換えています）
+
+---------------------------------------------------------------------
+dti.ne.jp内のhosts.allowのsshフィールドに .att.ne.jp だけを追加。
+(hosts.deny は ALL: ALL です)
+
+結果：(syslogのmessages)
+Jul  1 15:17:45 sql sshd[633]: Accepted password for etou from 165.76.?.? port
+63412 ssh2
+Jul  1 15:19:45 sql sshd[650]: refused connect from hoge.in-ocn.ne.jp
+
+最初のAcceptedは、att.ne.jpからのログイン、次のrefusedはOCN網内からの
+ログインです。
+
+---------------------------------------------------------------------
+dti.ne.jp内のhosts.allowのsshフィールドに .in-ocn.ne.jp だけを追加。
+
+結果：
+Jul  1 15:21:10 sql sshd[655]: Accepted password for etou from 218.44.?.? port
+2507 ssh2
+Jul  1 15:21:57 sql sshd[672]: refused connect from 6.hoge.att.ne.jp
+
+最初のAcceptedがOCN網内からのログイン、次のrefusedがatt.ne.jpからの
+ログインです。
+
+ここまでで、逆引きは問題なくできていると思います。
+
+
+次に、dti.ne.jp内で動いているMySQLサーバのuserテーブルのHostフィールドに
+'%.att.ne.jp' と '%.in-ocn.ne.jp' を持つユーザを登録します。
+
+---------------------------------------------------------------------
+att.ne.jp内マシンから mysql -u etou -p -h hoge.dti.ne.jp を実行
+
+結果：
+ERROR 1130: Host '165.76.?.?' is not allowed to connect to this MySQL
+server
+
+---------------------------------------------------------------------
+in-ocn.ne.jp内マシンから mysql -u etou -p -h hoge.dti.ne.jp を実行
+
+結果：
+  問題なくログイン
+
+
+という状況です。
+
+この時のホスト名は、att.ne.jp側が 6.hoge.att.ne.jp
+in-ocn.ne.jp側が hoge.in-ocn.ne.jp となっています。（しています）
+
+
+ということで、ホスト名が数字のみで構成／開始されている場合に、意図し
+ない動作になってしまうようです・・・
+
+# 見づらくてすみません。
+
+
+-- 
+Masakatsu Etou &lt;a1@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="5683">[前]</a><a href="5685">[次]</a><a href="../list/5601-5700">[番号順一覧]</a><a href="../thread/5601-5700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="5679">   5679 2002-07-01 14:06 [Masakatsu Etou &lt;a1@x] 外部から接続時のアドレス逆引きについて  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5680">   5680 2002-07-01 14:28 ┣[遠藤 俊裕 &lt;endo_t@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5682">   5682 2002-07-01 15:02 ┃┗[Masakatsu Etou &lt;a1@x]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="5684">   5684 2002-07-01 15:43 ┃　┗[Masakatsu Etou &lt;a1@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5681">   5681 2002-07-01 14:39 ┣[Tomohiro 'Tomo-p' KA]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5683">   5683 2002-07-01 15:07 ┃┗[Masakatsu Etou &lt;a1@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5687">   5687 2002-07-02 00:41 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5736">   5736 2002-07-06 18:10 ┃┗[Masakatsu Etou &lt;a1@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5689">   5689 2002-07-02 09:58 ┗[&quot;kaji&quot; &lt;kaji@xxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5737">   5737 2002-07-06 18:10 　┗[Masakatsu Etou &lt;a1@x]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6715</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6714">[前]</a><a href="6716">[次]</a><a href="../list/6701-6800">[番号順一覧]</a><a href="../thread/6701-6800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6715
+</p>
+<div class="header">
+<p>
+From: &quot;E-Mail&quot; &lt;&quot;E-Mail&quot; &lt;tyunn@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 14 Dec 2002 11:59:48 +0900<br>
+Subject: [mysql 06715] Re: : 排他処理<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。白石です。
+
+<span class="quote2">&gt; &gt; MyISAM型のテーブルに対して、更新処理（update,delete、insert）を</span>
+<span class="quote2">&gt; &gt; 行っている間他のユーザが同テーブルを参照のみできるようにする</span>
+<span class="quote2">&gt; &gt; といったことを行うことはできるでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 単一の更新処理であれば、特にロックする必要はないでしょうから、やりたい</span>
+<span class="quote1">&gt; ことは、「複数の更新処理を行なう間、他のスレッドから更新処理をさせたく</span>
+<span class="quote1">&gt; ない」ということでしょうか。</span>
+
+　　単一の可能性は高いが、複数の更新処理要求が同時にある場合は
+　　ゼロとはいえないので、言われるような処理を想定しています。
+
+
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; WRITE LOCK は、他のスレッドからの検索処理もできなくなっちゃうから、ダ</span>
+<span class="quote1">&gt; メですよね。</span>
+<span class="quote1">&gt;　略</span>
+<span class="quote1">&gt; 更新処理が INSERT だけであれば、これでも良いかもしれないですね。DELETE</span>
+<span class="quote1">&gt; や UPDATE がある場合は、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; SELECT GET_LOCK(&quot;lock&quot;, 10000);</span>
+<span class="quote1">&gt; CREATE TEMPORARY TABLE insert_table SELECT * FROM real_table;</span>
+<span class="quote1">&gt; ...更新処理...</span>
+<span class="quote1">&gt; RENAME TABLE real_table TO backup_table, insert_table TO real_table;</span>
+<span class="quote1">&gt; DROP TABLE insert_table;</span>
+<span class="quote1">&gt; SELECT_RELEASE_LOCK(&quot;lock&quot;);</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; というのはどうでしょうか。試してませんが… (^^;</span>
+
+この処理時（GET_LOCK後更新処理時）に新しいGET_LOCK要求（GET_LOCK実行）
+があったときは、最初のLOCKは開放されるので、最初のこの更新処理はどのように
+なるのでしょうか？（ちょっと心配しすぎ？）
+
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="6714">[前]</a><a href="6716">[次]</a><a href="../list/6701-6800">[番号順一覧]</a><a href="../thread/6701-6800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="6678">   6678 2002-12-10 02:33 [&quot;E-Mail&quot; &lt;tyunn@xxxx] 排他処理                                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6679">   6679 2002-12-10 03:11 ┣[Sumito_Oda &lt;oda@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6680">   6680 2002-12-10 10:52 ┃┗[&quot;E-Mail&quot; &lt;tyunn@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6681">   6681 2002-12-10 11:35 ┃　┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6682">   6682 2002-12-10 12:01 ┃　　┗[&quot;E-Mail&quot; &lt;tyunn@xxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6683">   6683 2002-12-10 13:15 ┃　　　┗[SUGAWARA Hajime &lt;sug]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6692">   6692 2002-12-11 09:06 ┃　　　　┗[&quot;E-Mail&quot; &lt;tyunn@xxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6694">   6694 2002-12-11 12:03 ┃　　　　　┗[SUGAWARA Hajime &lt;sug]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6701">   6701 2002-12-12 07:10 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="6715">   6715 2002-12-14 11:59 　┗[&quot;E-Mail&quot; &lt;tyunn@xxxx] Re: : 排他処理                      </a></span>
+</pre>
+</body>
+</html>

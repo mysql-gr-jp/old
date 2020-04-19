@@ -1,0 +1,86 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6329</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6328">[前]</a><a href="6330">[次]</a><a href="../list/6301-6400">[番号順一覧]</a><a href="../thread/6301-6400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6329
+</p>
+<div class="header">
+<p>
+From: &quot;Tatsuya Kondo&quot; &lt;&quot;Tatsuya Kondo&quot; &lt;konet@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 7 Oct 2002 01:05:00 +0900<br>
+Subject: [mysql 06329] SELECT での SQL エラー<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちわ。
+近藤＠千葉と申します。
+
+CREATE TABLE date (
+  user_id smallint(6) NOT NULL auto_increment,
+  address char(40) NOT NULL default '',
+  domain char(15) NOT NULL default '',
+  key smallint(5) NOT NULL default ''
+);
+
+INSERT date SET address = 'konet', domain = 'zc.wakwak.com', key = 1234;
+
+<a href="http://www.xxx.com/test.php?key=1234&amp;address=konet&amp;domain=zc.wakwak.com">http://www.xxx.com/test.php?key=1234&amp;address=konet&amp;domain=zc.wakwak.com</a>
+
+と、アクセスすると、SQLクリエの部分で失敗してしまいます。
+
+----- test.php ------------------------
+&lt;?php
+if (!$dbHandle = mysql_connect(&quot;localhost&quot;,&quot;xxxxx&quot;,&quot;xxxxxxxx&quot;)) { echo '接続エラー'; exit; }
+$sql = &quot;SELECT user_id,key FROM date WHERE address = '$_GET[address]'
+ AND domain = '$_GET[domain]' AND key = $_GET[key]&quot;;　　　　　　# １行で書いてます
+if (!$rs = mysql_db_query(xxx,$sql)) { echo 'クリエ発行エラー'; exit; }
+$row = mysql_fetch_array($rs);
+echo 'user_id=' . $row[0] . '&lt;BR&gt;';
+echo 'key=' . $row[1] . '&lt;BR&gt;';
+mysql_close($dbHandle);
+?&gt;
+-------------------------------------
+
+なお、
+
+$sql = &quot;SELECT user_id,key FROM date WHERE address = '$_GET[address]'
+ AND domain = '$_GET[domain]' AND key = $_GET[key]&quot;;　　　　　　# １行で書いてます
+
+を、
+
+$sql = &quot;SELECT user_id,key FROM date WHERE address = '$_GET[address]'
+ AND domain = '$_GET[domain]';　　　　　　# １行で書いてます
+
+と、すると、問題なく処理されます。
+
+key = $_GET[key]
+を外すと処理出来ると言う事は、全然理解出来ません。
+WHEREの文法の間違いでもないと思いますし…。
+どこがおかしいのか検討も付かず、MLにてご質問しました。
+よろしくお願いいたします。
+
+
+</pre>
+</div>
+<p class="button"><a href="6328">[前]</a><a href="6330">[次]</a><a href="../list/6301-6400">[番号順一覧]</a><a href="../thread/6301-6400">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="6329">   6329 2002-10-07 01:05 [&quot;Tatsuya Kondo&quot; &lt;kon] SELECT での SQL エラー                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6330">   6330 2002-10-07 01:26 ┣[&quot;吉中年瑞&quot; &lt;tosibe@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6331">   6331 2002-10-07 01:28 ┃┗[&quot;Tatsuya Kondo&quot; &lt;kon]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6332">   6332 2002-10-07 03:35 ┣[&quot;MIYATSU Kazunari&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6333">   6333 2002-10-07 03:52 ┃┣[&quot;Tatsuya Kondo&quot; &lt;kon]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6334">   6334 2002-10-07 04:10 ┃┃┣[Tomohiro 'Tomo-p' KA]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6336">   6336 2002-10-07 04:20 ┃┃┃┗[&quot;Tatsuya Kondo&quot; &lt;kon]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6337">   6337 2002-10-07 04:31 ┃┃┗[Sumito_Oda &lt;oda@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6338">   6338 2002-10-07 04:52 ┃┗[Sumito_Oda &lt;oda@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6335">   6335 2002-10-07 04:15 ┗[Sumito_Oda &lt;oda@xxxx]                                       </a></span>
+</pre>
+</body>
+</html>

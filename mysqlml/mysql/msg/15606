@@ -1,0 +1,87 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15606</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15605">[前]</a><a href="15607">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15606
+</p>
+<div class="header">
+<p>
+From: HIRATSUKA Sadao &lt;HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 02 Aug 2011 16:30:23 +0900<br>
+Subject: [mysql 15606] Re: Indexをつけるとと、update のwhere 句マッチしない [Ver.4.1.23]<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、平塚です。
+
+On Tue, 2 Aug 2011 13:26:57 +0900
+野副　勝己 &lt;nozoe@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; 	OS: Redhat ES4.5</span>
+<span class="quote1">&gt; 	MySQL: Ver. 4.1.23</span>
+
+<span class="quote1">&gt;   `mac_id_no` varchar(8) NOT NULL DEFAULT '',</span>
+<span class="quote1">&gt;   KEY `mac_id_no` (`mac_id_no`)</span>
+<span class="quote1">&gt; ) ENGINE=InnoDB AUTO_INCREMENT=15000 DEFAULT CHARSET=utf8</span>
+
+以下のバグにヒットしているように見えます。
+
+Bug #28878
+InnoDB tables with UTF8 character set and indexes cause wrong result for DML
+<a href="http://bugs.mysql.com/bug.php?id=28878">http://bugs.mysql.com/bug.php?id=28878</a>
+
+もしUTF-8が必須でなければ、mac_id_no のみ
+別のキャラクタセットにしてみるのはいかがでしょうか。
+
+<span class="quote1">| Welcome to the MySQL monitor.  Commands end with ; or \g.</span>
+<span class="quote1">| Your MySQL connection id is 1 to server version: 4.1.22-community-max-nt</span>
+<span class="quote1">|</span>
+<span class="quote1">| mysql&gt; alter table test modify c2 varchar(10) character set latin1;</span>
+<span class="quote1">| Query OK, 0 rows affected (0.22 sec)</span>
+<span class="quote1">| Records: 0  Duplicates: 0  Warnings: 0</span>
+<span class="quote1">| </span>
+<span class="quote1">| mysql&gt; show create table test\G</span>
+<span class="quote1">| *************************** 1. row ***************************</span>
+<span class="quote1">|        Table: test</span>
+<span class="quote1">| Create Table: CREATE TABLE `test` (</span>
+<span class="quote1">|   `c1` int(11) NOT NULL default '0',</span>
+<span class="quote1">|   `c2` varchar(10) character set latin1 default NULL,</span>
+<span class="quote1">|   PRIMARY KEY  (`c1`)</span>
+<span class="quote1">| ) ENGINE=InnoDB DEFAULT CHARSET=utf8</span>
+<span class="quote1">| 1 row in set (0.00 sec)</span>
+
+また、別のバグレポートですと、
+
+Bug #31395
+equality match in a where clause against an utf8 field fails
+<a href="http://bugs.mysql.com/bug.php?id=31395">http://bugs.mysql.com/bug.php?id=31395</a>
+
+・like検索にすると回避できる
+・4.1.22では発生しない
+
+という情報があります。
+
+-- 
+平塚貞夫 hiratsuka.sadao@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15605">[前]</a><a href="15607">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15605">  15605 2011-08-02 13:26 [野副　勝己 &lt;nozoe@xx] Indexをつけるとと、update のwhere 句マッチしない [Ver.4.1.23]</a></span>
+<span class="current">-&gt;&nbsp;<a href="15606">  15606 2011-08-02 16:30 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15607">  15607 2011-08-02 17:35 　┗[野副　勝己 &lt;nozoe@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15608">  15608 2011-08-02 20:30 　　┗[HIRATSUKA Sadao &lt;hir]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15609">  15609 2011-08-03 10:46 　　　┗[野副　勝己 &lt;nozoe@xx]                                 </a></span>
+</pre>
+</body>
+</html>

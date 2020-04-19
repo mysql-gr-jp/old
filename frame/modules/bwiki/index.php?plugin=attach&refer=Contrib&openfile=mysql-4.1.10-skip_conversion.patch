@@ -1,0 +1,52 @@
+diff -ruN mysql-4.1.10.orig/sql/sql_string.cc mysql-4.1.10/sql/sql_string.cc
+--- mysql-4.1.10.orig/sql/sql_string.cc	2005-02-13 05:37:32.000000000 +0900
++++ mysql-4.1.10/sql/sql_string.cc	2005-02-22 10:16:34.000000000 +0900
+@@ -250,13 +250,17 @@
+       (e.g. for UCS-2) must be done
+ */
+ 
++extern my_bool opt_skip_conversion;
+ bool String::needs_conversion(uint32 arg_length,
+ 			      CHARSET_INFO *from_cs,
+ 			      CHARSET_INFO *to_cs,
+ 			      uint32 *offset)
+ {
++  if (opt_skip_conversion) { return FALSE; }
+   *offset= 0;
+-  if ((to_cs == &my_charset_bin) || 
++  if ( (strncasecmp(to_cs->csname, "binary", 6) == 0) ||
++       (strncasecmp(from_cs->csname, "binary", 6) == 0) ||
++      (to_cs == &my_charset_bin) || 
+       (to_cs == from_cs) ||
+       my_charset_same(from_cs, to_cs) ||
+       ((from_cs == &my_charset_bin) &&
+diff -ruN mysql-4.1.10.orig/sql/mysqld.cc mysql-4.1.10/sql/mysqld.cc
+--- mysql-4.1.10.orig/sql/mysqld.cc	2005-02-13 05:37:30.000000000 +0900
++++ mysql-4.1.10/sql/mysqld.cc	2005-02-22 10:16:34.000000000 +0900
+@@ -266,6 +266,7 @@
+ 
+ 
+ /* Global variables */
++my_bool opt_skip_conversion = 0;
+ 
+ bool opt_log, opt_update_log, opt_bin_log, opt_slow_log;
+ bool opt_error_log= IF_WIN(1,0);
+@@ -4122,7 +4123,8 @@
+   OPT_TIME_FORMAT,
+   OPT_DATETIME_FORMAT,
+   OPT_LOG_QUERIES_NOT_USING_INDEXES,
+-  OPT_DEFAULT_TIME_ZONE
++  OPT_DEFAULT_TIME_ZONE,
++  OPT_SKIP_CONVERSION
+ };
+ 
+ 
+@@ -4130,6 +4132,8 @@
+ 
+ struct my_option my_long_options[] =
+ {
++  {"skip-conversion", OPT_SKIP_CONVERSION,  "Don't convert strings.",
++   (gptr*) &opt_skip_conversion, (gptr*) &opt_skip_conversion, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
+   {"help", '?', "Display this help and exit.", 
+    (gptr*) &opt_help, (gptr*) &opt_help, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0,
+    0, 0},

@@ -1,0 +1,62 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10703</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10702">[前]</a><a href="10704">[次]</a><a href="../list/10701-10800">[番号順一覧]</a><a href="../thread/10701-10800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10703
+</p>
+<div class="header">
+<p>
+From: Hideki SUNADA &lt;Hideki SUNADA &lt;hideki@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 20 Dec 2004 09:23:52 +0900<br>
+Subject: [mysql 10703] Re: SELECTの速度が遅い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+mysqlに限らず、データベースはindexを元にselectする時は
+高速に動作するはずです。
+
+下記のクエリーにexplainを入れると、mysqlが実際にselect時にインデッ
+クスを使用したかどうかが分かります。
+
+explain select b.id, b.name from messages as a, users as b where
+a.target=b.id and b.sid=53 and a.isread='f' group by b.id order
+by b.id
+
+レコード件数にもよると思いますが、
+インデックスを使用せずにレコードを数万件なめる必要がある場合は
+当然時間がかかると思いますので、インデックスを使用するようにクエ
+リーを書き換えればいいのではないかと思いますが…。外していたらご
+めんなさい。
+
+それと・・mysqlは一つのクエリーに対して、テーブル毎に1つのインデッ
+クスしか使用しないはずです。
+
+On Mon, 20 Dec 2004 05:56:25 +0900
+mattun &lt;mattun@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; DBの中で、message、user、二つのテーブルに対して以下ような感じSELECTしています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; select b.id, b.name from messages as a, users as b where a.target=b.id  </span>
+<span class="quote1">&gt; and b.sid=53 and a.isread='f' group by b.id order by b.id</span>
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="10702">[前]</a><a href="10704">[次]</a><a href="../list/10701-10800">[番号順一覧]</a><a href="../thread/10701-10800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="10702">  10702 2004-12-20 05:56 [mattun &lt;mattun@xxxxx] SELECTの速度が遅い                      </a></span>
+<span class="current">-&gt;&nbsp;<a href="10703">  10703 2004-12-20 09:23 ┣[Hideki SUNADA &lt;hidek]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10704">  10704 2004-12-20 10:03 ┣[SUGAWARA Hajime &lt;sug]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10705">  10705 2004-12-20 10:22 ┗[al-kamil &lt;al-kamil@x]                                       </a></span>
+</pre>
+</body>
+</html>

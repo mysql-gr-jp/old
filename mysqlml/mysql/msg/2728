@@ -1,0 +1,83 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2728</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2727">[前]</a><a href="2729">[次]</a><a href="../list/2701-2800">[番号順一覧]</a><a href="../thread/2701-2800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2728
+</p>
+<div class="header">
+<p>
+From: Shin-ichi Tsurunaga &lt;Shin-ichi Tsurunaga &lt;ml-shin@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 21 Nov 2000 15:44:23 +0900<br>
+Subject: [mysql 02728] Re: PHP3+MySQL での Access denied for user<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+IKEUCHI, Naoki さんは書きました:
+<span class="quote1">&gt;池内と申します</span>
+<span class="quote1">&gt;ラピッドサイトのビジネスプランでホスティングしているのですが、</span>
+<span class="quote1">&gt;<a href="http://www.rapidsite.co.jp/">http://www.rapidsite.co.jp/</a></span>
+<span class="quote1">&gt;PHP3+MySQLの組み合わせで作ったコードで、以下のエラーが発生します。</span>
+.......
+<span class="quote1">&gt;32:  $sql = &quot;INSERT INTO t_recruit2 (name,kana,email) VALUES ('$name','$kana','$email')&quot;;</span>
+<span class="quote1">&gt;33:  mysql_connect(&quot;localhost&quot;,&quot;ユーザーID&quot;,&quot;パスワード&quot;);</span>
+<span class="quote1">&gt;34:  $result = mysql_db_query(&quot;ユーザーID&quot; , $sql );</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;実行すると以下のエラーが返ります。</span>
+
+特権参照の問題でしょうか？
+下記は今書いている原稿からの抜粋です。
+
+------------------ここから--------------------------------
+
+MySQLが稼働しているサーバー上でJavaアプリケーションを動作させると下記
+のようなエラーを表示し正しく動作しない場合があります。
+java.sql.SQLException: Invalid authorization specification: Access denied for user: 'test@xxxxxxxxxx' (Using password: 
+YES) 
+(＊&quot;test&quot;はユーザー名　&quot;hostnaem.foo.co.jp&quot;はJavaアプリケーションを
+動作させたマシーンのFQDN)
+これはMySQLのセキュリティーを管理している特権データベース&quot;mysql&quot;中の
+&quot;user&quot;テーブル中に下記の項目を含むためです。
+Host			| User
+----------------------------------
+localhost		| (なし)
+hostname.foo.co.jp	| (なし)
+
+この場合今回設定した
+Host			| User
+----------------------------------
+%			| test
+より、先に優先評価されるため&quot;Access denied&quot;となります。これを回避するに
+は、MySQLが稼働しているサーバーと、Javaアプリケーションを実行するマ
+シーンを別々に用意するか、ローカルマシーンからのアクセスを許可するように
+項目を追加します。
+	shell# mysql -u root -p mysql
+	mysql&gt; INSERT INTO user (Host,User,Password) values ('localhost','test',password('test2000'));
+	mysql&gt; INSERT INTO user (Host,User,Password) values ('hostname.foo.co.jp','test',password('test2000'));
+	mysql&gt; QUIT
+	shell# mysqladmin reload
+--------------------ここまで-------------------------------
+
+おかしな所があったらご指摘下さい。今なら修正できると思います。
+
+
+----
+Shin-ichi Tsurunaga  shin@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="2727">[前]</a><a href="2729">[次]</a><a href="../list/2701-2800">[番号順一覧]</a><a href="../thread/2701-2800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2725">   2725 2000-11-21 10:58 [&quot;IKEUCHI, Naoki&quot; &lt;ce] PHP3+MySQL での Access denied for user  </a></span>
+<span class="current">-&gt;&nbsp;<a href="2728">   2728 2000-11-21 15:44 ┗[Shin-ichi Tsurunaga ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2729">   2729 2000-11-22 07:37 　┗[&quot;IKEUCHI, Naoki&quot; &lt;ce]                                     </a></span>
+</pre>
+</body>
+</html>

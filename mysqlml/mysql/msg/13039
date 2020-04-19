@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13039</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13038">[前]</a><a href="13040">[次]</a><a href="../list/13001-13100">[番号順一覧]</a><a href="../thread/13001-13100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13039
+</p>
+<div class="header">
+<p>
+From: &quot;F.Y&quot; &lt;&quot;F.Y&quot; &lt;fumi_sby@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 1 Jun 2006 21:20:18 +0900 (JST)<br>
+Subject: [mysql 13039] Re: UNION クエリで躓いています<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+UNIONの問題なんてないように見えるけどね。
+要は、namaeで絞りたい、順番つけたいってことじゃないの?
+なら単純化するとこんな感じ。
+
+set @r1=0;
+select scode, namae, min(p4), min(p9), min(p13), @r1:=(@r1+1) as rank
+from table
+group by scode, namae
+order by scode, namae desc;
+
+4P, 9P, 13Pの選択基準がわからんけど。
+
+--- &quot;rishiri.info&quot; &lt;mail@xxxxxxxxxx&gt; からのメッセージ：
+<span class="quote1">&gt; こんにちは、rishiri.infoと申します。</span>
+<span class="quote1">&gt; 過去ログ等みているのですが</span>
+<span class="quote1">&gt; どうしてもわからないのでよろしくお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; このような結果を出すにはどうすればよいでしょうか？</span>
+<span class="quote1">&gt; +-----+-------+--------+-------+-------+------+</span>
+<span class="quote2">&gt; | scode | namae   | 4P          | 9P         | 13P       | rank   </span>
+<span class="quote2">&gt; |</span>
+<span class="quote1">&gt; +-----+-------+--------+-------+-------+------+</span>
+<span class="quote2">&gt; |     3   |  hoge     | 07:10:00 | 08:51:00 | 09:11:00 |     1    |</span>
+<span class="quote2">&gt; |     1   |  fuga      | 07:55:00 | 10:55:00 | 16:55:00 |     2   </span>
+<span class="quote2">&gt; |</span>
+<span class="quote1">&gt; +-----+-------+--------+-------+-------+------+</span>
+<span class="quote1">&gt; 現在下記のような</span>
+<span class="quote1">&gt; UNIONクエリを使ってみているのですが</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; SELECT sensyu.scode As scode,sensyu.namae As namae, kiroku.ktime As</span>
+<span class="quote1">&gt; 4P,</span>
+<span class="quote1">&gt; kiroku.ktime As 9P , kiroku.ktime As 13P</span>
+<span class="quote1">&gt; FROM kiroku,sensyu,kukan</span>
+<span class="quote1">&gt; WHERE kiroku.kcode = 4 AND kiroku.scode = sensyu.scode AND</span>
+<span class="quote1">&gt; kukan.kcode =</span>
+<span class="quote1">&gt; kiroku.kcode</span>
+<span class="quote1">&gt; UNION ALL</span>
+<span class="quote1">&gt; SELECT sensyu.scode As scode,sensyu.namae As namae, kiroku1.ktime</span>
+<span class="quote1">&gt; As 4P,</span>
+<span class="quote1">&gt; kiroku1.ktime As 9P , kiroku1.ktime As 13P</span>
+<span class="quote1">&gt; FROM kiroku As kiroku1, sensyu,kukan</span>
+<span class="quote1">&gt; WHERE kiroku1.kcode = 9 AND kiroku1.scode = sensyu.scode AND</span>
+<span class="quote1">&gt; kukan.kcode =</span>
+<span class="quote1">&gt; kiroku1.kcode</span>
+<span class="quote1">&gt; UNION ALL</span>
+<span class="quote1">&gt; SELECT sensyu.scode As scode,sensyu.namae As namae, kiroku2.ktime</span>
+<span class="quote1">&gt; As 4P,</span>
+<span class="quote1">&gt; kiroku2.ktime As 9P , kiroku2.ktime As 13P</span>
+<span class="quote1">&gt; FROM kiroku As kiroku2,sensyu,kukan</span>
+<span class="quote1">&gt; WHERE kiroku2.kcode = 13 AND kiroku2.scode = sensyu.scode AND</span>
+<span class="quote1">&gt; kukan.kcode =</span>
+<span class="quote1">&gt; kiroku2.kcode</span>
+<span class="quote1">&gt; ORDER BY scode DESC;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; +-----+------+-------- +------ +--------+</span>
+<span class="quote2">&gt; | scode | namae  | 4P          | 9P        | 13P        |</span>
+<span class="quote1">&gt; +-----+--- ---+------ -+-------+--------+</span>
+<span class="quote2">&gt; |     3   |  hoge    | 07:10:00 | 07:10:00 | 07:10:00 |</span>
+<span class="quote2">&gt; |     3   |  hoge    | 09:11:00 | 09:11:00 | 09:11:00 |</span>
+<span class="quote2">&gt; |     3   |  hoge    | 08:51:00 | 08:51:00 | 08:51:00 |</span>
+<span class="quote2">&gt; |     1   | fuga    　| 07:55:00 | 07:55:00 | 07:55:00 |</span>
+<span class="quote2">&gt; |     1   | fuga      | 16:55:00 | 16:55:00 | 16:55:00 |</span>
+<span class="quote2">&gt; |     1   | fuga      | 10:55:00 | 10:55:00 | 10:55:00 |</span>
+<span class="quote1">&gt; +-----+----- -+---- ---+-------+--------+</span>
+<span class="quote1">&gt; 6 rows in set (0.02 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; という結果になってしまいます。</span>
+<span class="quote1">&gt; rank(順位)に関してはACCESSのようにDcount等が使えないため方法がわかり</span>
+ません。
+<span class="quote1">&gt; オートナンバーフィールドの追加・削除という方法になるのでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; あわせて御教授お願いいたします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; No virus found in this outgoing message.</span>
+<span class="quote1">&gt; Checked by AVG Free Edition.</span>
+<span class="quote1">&gt; Version: 7.1.394 / Virus Database: 268.8.0/353 - Release Date:</span>
+<span class="quote1">&gt; 2006/05/31</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+--------------------------------------
+Let's start Yahoo! Auction  -  Free Campaign Now!
+<a href="http://pr.mail.yahoo.co.jp/auction/">http://pr.mail.yahoo.co.jp/auction/</a>
+
+</pre>
+</div>
+<p class="button"><a href="13038">[前]</a><a href="13040">[次]</a><a href="../list/13001-13100">[番号順一覧]</a><a href="../thread/13001-13100">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13038">  13038 2006-06-01 20:26 [&quot;rishiri.info&quot; &lt;mail] UNIONクエリで躓いています               </a></span>
+<span class="current">-&gt;&nbsp;<a href="13039">  13039 2006-06-01 21:20 ┗[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13040">  13040 2006-06-01 21:45 　┗[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13041">  13041 2006-06-01 22:45 　　┗[&quot;rishiri.info&quot; &lt;mail]                                   </a></span>
+</pre>
+</body>
+</html>

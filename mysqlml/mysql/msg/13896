@@ -1,0 +1,126 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13896</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13895">[前]</a><a href="13897">[次]</a><a href="../list/13801-13900">[番号順一覧]</a><a href="../thread/13801-13900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13896
+</p>
+<div class="header">
+<p>
+From: Tetsuro IKEDA &lt;Tetsuro IKEDA &lt;te.ikeda@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 24 Apr 2007 18:32:01 +0900<br>
+Subject: [mysql 13896] Re: ＴＥＭＰフォルダ内のファイルサイズ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+池田です。
+
+Explainによると、
+
+(1) TABLE_Aからインデックスcodeをフルスキャンしつつ200万行超の
+　　レコードをcolumn_A_9、column_A_6の値による絞込みをしつつ抽出。
+(2) 抽出結果に対して、TABLE_Bと結合。
+(3) さらにTABLE_Cと結合。
+(4) さらにTABLE_Dと結合。
+
+という感じで処理しているようです。
+
+(1)の処理が重いですね。
+
+column_A_6とcolumn_A_9にインデックスは付与されていますか？
+
+MySQL 5.0以上であればindex_merge機能が入っていますので、
+index_mergeによって読み取り行数を大幅に減らすことが可能
+かもしれません。
+
+MySQL 4.1以下の場合には、マルチカラムインデックスなどで
+逃げられないかどうかを検討してみましょう。
+
+とはいえ、、、、
+
+1.5GBのテーブルに30GBの一時テーブル、というのは大きすぎな気がします。
+テーブルが壊れていたりはしませんか？
+CHECK TABLE、REPAIR TABLEなどで確認してみましょう。
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 池田様</span>
+<span class="quote2">&gt; &gt;ちなみにどんなクエリなんでしょうか？</span>
+<span class="quote2">&gt; &gt;EXPLAIN付きで示していただきたく。</span>
+<span class="quote1">&gt; SQL文をそのままはまずいので、テーブル、カラム名を変えています。</span>
+<span class="quote1">&gt; TABLE_Aが基本となっており、ＴＡＢＬＥ＿Ｂをの値を参照しています。</span>
+<span class="quote1">&gt; TABLE_DはTABLE_Cを参照して、TABLE_Dを参照しています。</span>
+<span class="quote1">&gt; 上記の内容に加え指定した月から現在までのデータを抽出しています。</span>
+<span class="quote1">&gt; 30万件単位で行っています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; SELECT</span>
+<span class="quote1">&gt; TABLE_A.id,TABLE_A.code,</span>
+<span class="quote1">&gt; TABLE_A.column_A_1,TABLE_A.column_A_2,TABLE_A.column_A_3,</span>
+<span class="quote1">&gt; TABLE_A.column_A_4,TABLE_A.column_A_5,TABLE_B.column_B_1,</span>
+<span class="quote1">&gt; TABLE_A.column_A_7,TABLE_A.column_A_8,TABLE_A.column_A_9,</span>
+<span class="quote1">&gt; TABLE_D.column_C_10,TABLE_A.column_A_11,TABLE_A.column_A_12,</span>
+<span class="quote1">&gt; TABLE_A.column_A_13,TABLE_A.column_A_14</span>
+<span class="quote1">&gt; FROM</span>
+<span class="quote1">&gt; TABLE_A,TABLE_B,TABLE_C,TABLE_D</span>
+<span class="quote1">&gt; WHERE</span>
+<span class="quote1">&gt; TABLE_A.column_A_6 = TABLE_B.id AND</span>
+<span class="quote1">&gt; TABLE_A.column_A_9 = '0' AND</span>
+<span class="quote1">&gt; TABLE_A.code = TABLE_D.code AND</span>
+<span class="quote1">&gt; TABLE_C.column_C_1 = TABLE_D.id AND</span>
+<span class="quote1">&gt; TABLE_A.column_A_6 &gt; '2006-12-00'</span>
+<span class="quote1">&gt; ORDER BY</span>
+<span class="quote1">&gt; TABLE_A.code</span>
+<span class="quote1">&gt; LIMIT 0,300000</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ＥＸＰＬＡＩＮ文</span>
+<span class="quote2">&gt; |table        |  type   |  possible_keys       |  key          |  key_len  | </span>
+<span class="quote1">&gt; ref                            |  rows        |  Extra         |</span>
+<span class="quote2">&gt; |-------------------------------------------------------------------------------------------------------------------</span>
+<span class="quote2">&gt; |TABLE_A  |  index  |  code                   |  code        |  20       | </span>
+<span class="quote1">&gt; NULL                          |  2458926  |  Using where   |</span>
+<span class="quote2">&gt; |TABLE_B  |  eq_ref |  PRIMARY            |  PRIMARY  |  4        | </span>
+<span class="quote1">&gt; TABLE_A.column_A_6       |  1          |                |</span>
+<span class="quote2">&gt; |TABLE_C  |  ref   　 |  code,column_C_1  |  code         |  20       | </span>
+<span class="quote1">&gt; TABLE_A.code              |  1          |                |</span>
+<span class="quote2">&gt; |TABLE_D  |  eq_ref |  PRIMARY            |  PRIMARY  |  4        | </span>
+<span class="quote1">&gt; TABLE_C.column_C_1       |  1          |                |</span>
+<span class="quote1">&gt; --------------------------------------------------------------------------------------------------------------------</span>
+<span class="quote1">&gt; 以上です。</span>
+<span class="quote1">&gt; 宜しくお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 兵頭 </span>
+<span class="quote1">&gt; </span>
+
+-----------------------------------------
+Tetsuro IKEDA, te.ikeda at jpta.scs.co.jp
+Kachidoki, Tokyo, Jpan
+<a href="http://www.scs.co.jp/mysql/">http://www.scs.co.jp/mysql/</a>
+-----------------------------------------
+
+
+</pre>
+</div>
+<p class="button"><a href="13895">[前]</a><a href="13897">[次]</a><a href="../list/13801-13900">[番号順一覧]</a><a href="../thread/13801-13900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13878">  13878 2007-04-23 15:00 [兵頭 &lt;hyodo@xxxxxxxx] ＴＥＭＰフォルダ内のファイルサイズ      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13879">  13879 2007-04-23 15:19 ┣[YuGo &lt;yu.gotou@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13880">  13880 2007-04-23 15:24 ┃┗[兵頭 &lt;hyodo@xxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13881">  13881 2007-04-23 17:12 ┃　┣[YuGo &lt;yu.gotou@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13882">  13882 2007-04-23 17:18 ┃　┗[YuGo &lt;yu.gotou@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13884">  13884 2007-04-23 21:32 ┃　　┗[兵頭 &lt;hyodo@xxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13887">  13887 2007-04-24 09:54 ┗[Tetsuro IKEDA &lt;te.ik]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13888">  13888 2007-04-24 11:38 　┗[YuGo &lt;yu.gotou@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13892">  13892 2007-04-24 13:57 　　┗[日本情報電信）兵頭 &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13893">  13893 2007-04-24 14:24 　　　┣[Tetsuro IKEDA &lt;te.ik]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13894">  13894 2007-04-24 14:56 　　　┣[YuGo &lt;yu.gotou@xxxxx]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="13896">  13896 2007-04-24 18:32 　　　┗[Tetsuro IKEDA &lt;te.ik]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13900">  13900 2007-04-25 00:07 　　　　┗[兵頭 &lt;hyodo@xxxxxxxx]                               </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13533</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13532">[前]</a><a href="13534">[次]</a><a href="../list/13501-13600">[番号順一覧]</a><a href="../thread/13501-13600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13533
+</p>
+<div class="header">
+<p>
+From: &lt;atakahashi@xxxxxxxxxx&gt;<br>
+Date: Tue, 21 Nov 2006 11:30:58 +0900<br>
+Subject: [mysql 13533] ado VB でのauto_incrementのフィールドのINSERT構文<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+お世話になります。MySQL初心者のもので、下記の
+投稿をしたものです。
+
+auto_incrementの自動採番ですが、ＩＮＳＥＲＴ
+文で明示しなければ、自動的に採番されました。
+つまり、自己解決しました、、、
+
+初心者的な質問で申し訳ございません、、
+
+
+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+**+*+*+*+*+*
+　 株式会社モリタ　ネットワーク開発部１課
+　 高橋　昭夫
+　 TEL:03-3836-1397　(内線521)
+　 FAX:03-3836-1394
+　 Mail:atakahashi@xxxxxxxxxx
+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+**+*+*+*+*+*
+----- 転送者:  akio takahashi/morita 転送日: 2006/11/21 11:26 -----
+                                                                                                                                       
+                      atakahashi@morita                                                                                                
+                      .com                     宛先:     ml@xxxxxxxxxx                                                                
+                                               cc:       aaakiotakahasi@xxxxxxxxxx                                                    
+                      2006/11/17 15:19         件名:     <a href="13516">[mysql 13516]</a> ado VB でのauto_incrementのフィールドのINSERT構文               
+                      ml へ返信してくだ                                                                                                
+                      さい                                                                                                             
+                                                                                                                                       
+                                                                                                                                       
+
+
+
+
+お世話になります。MySQL初心者のもので、投稿します。
+
+ADO　VBで開発を行っておりますが、auto_incrementがついているフィールドに対し
+てどのように
+レコード追加していいか分かりません。どなたか知ってらっしゃる方は教えて下さ
+い。
+初心者な質問で申し訳ございません、、、、
+
+
+ソース
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+Sub CSV取込処理_Click()
+    Dim myrec As ADODB.Recordset
+    Set myrec = New ADODB.Recordset
+    Dim cn As ADODB.Connection
+    Dim cnt As String
+    Dim sql As String
+
+
+
+    Dim i As Integer
+    Dim myFileName
+
+    cnt = &quot;Provider=MSDASQL.1;Data Source=new_nyukin2&quot;
+
+    On Error GoTo Error1
+
+    ' ダイアログを表示
+    myFileName = Application.GetOpenFilename( _
+               FileFilter:=&quot;CSV ファイル(*.CSV), *.CSV&quot;, _
+               Title:=&quot;ファイルを選択して下さい&quot;, MultiSelect:=False)
+
+
+    If myFileName = False Then
+        Exit Sub
+    End If
+
+    Workbooks.Open myFileName
+
+    Cells.Select
+    Selection.Copy
+    Workbooks.Add
+    Cells.Select
+    ActiveSheet.Paste
+
+    i = 1
+
+    Do Until Cells(i + 1, 1) = &quot;&quot;
+        Cells(i, 7) = myFileName
+        Cells(i, 8).Select
+        ActiveCell.FormulaR1C1 = &quot;=LEFT(RIGHT(RC[-1],8),4)&quot;
+        i = i + 1
+    Loop
+
+    Columns(&quot;H:H&quot;).Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Columns(&quot;I:I&quot;).Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone,
+SkipBlanks _
+        :=False, Transpose:=False
+    Columns(&quot;G:H&quot;).Select
+    Application.CutCopyMode = False
+    Selection.Delete Shift:=xlToLeft
+
+
+    Set cn = CreateObject(&quot;ADODB.Connection&quot;)
+    cn.Open cnt
+    cn.BeginTrans
+    MsgBox Cells(3, 1)
+
+    sql = &quot;insert into 67ds.u_import(pkid , syohinmei) values(1,&quot; &amp;
+Cells(3, 1) &amp; &quot;);&quot;
+    cn.Execute (sql)
+    cn.CommitTrans
+    cn.Close
+
+    Exit Sub
+
+Error1:
+    MsgBox &quot;エラーが発生しました。&quot;
+    Exit Sub
+End Sub
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+
+
+テーブル
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+CREATE TABLE `u_import` (
+  `pkid` int(7) NOT NULL auto_increment,
+  `hiduke` date default NULL,
+  `jancode` varchar(13) default NULL,
+  `sum_suryo` smallint(7) default NULL,
+  `sum_kingaku` smallint(13) default NULL,
+  `syohinmei` varchar(13) default NULL,
+  PRIMARY KEY  (`pkid`),
+  KEY `pkid` (`pkid`)
+) TYPE=InnoDB
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="13532">[前]</a><a href="13534">[次]</a><a href="../list/13501-13600">[番号順一覧]</a><a href="../thread/13501-13600">[スレッド一覧]</a></p>
+</body>
+</html>

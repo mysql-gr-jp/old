@@ -1,0 +1,74 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10711</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10710">[前]</a><a href="10712">[次]</a><a href="../list/10701-10800">[番号順一覧]</a><a href="../thread/10701-10800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10711
+</p>
+<div class="header">
+<p>
+From: mattun &lt;mattun &lt;mattun@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 21 Dec 2004 15:10:49 +0900<br>
+Subject: [mysql 10711] Re: SELECTの速度が遅い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+松丸です。
+
+<span class="quote1">&gt;   SELECT u.id, u.name</span>
+<span class="quote1">&gt;   FROM message as m LEFT JOIN user as u on</span>
+<span class="quote1">&gt;       m.target = u.id</span>
+<span class="quote1">&gt;   WHERE u.sid = 53</span>
+<span class="quote1">&gt;   AND m.isread = 'f'</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; では、だめでしょうか？</span>
+
+試しましたが、同じく時間がかかりましたです。
+
+<span class="quote1">&gt; ちなみに、一番最後のgroup by b.id order by b.idを取り除いても</span>
+<span class="quote1">&gt; 結果出力は遅いのでしょうか?</span>
+
+同じく遅くなりました。
+
+あれから、「実践ハイパフォーマンスMYSQL」という本を買いまして、インデックスとはなんぞやみたいのを、
+勉強し直しました。また、このクエリが何をしたいのかというのをひたすら考え（このプログラム自体は、以前の
+担当の方が作ったもので、僕は途中でまるなげで引き継いだ感じです。）あぁだこうだぁやりまくりました。
+
+結果、
+
+select b.id, b.name from messages as a, users as b where a.target=b.id 
+and b.sid=53 and a.isread='f' group by b.id order by b.id
+
+の中で、messagesテーブルに含まれているカラム、targetとisreadの複合インデックスを作成したところ、selectのスピードが、
+0.1秒まで縮みました。
+
+
+いやぁ、もう感無量でした。DBはすごい性能をひめてますね。自己レスになりましたが、みなさまの助言をいただくことでかなり
+役立たせていただきました。ありがとうござます。
+
+また、ご質問させていただきます。
+
+ありがとうございました。
+
+松丸　頒泰
+mattun@xxxxxxxxxx
+<a href="http://www.meganebu.com">http://www.meganebu.com</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="10710">[前]</a><a href="10712">[次]</a><a href="../list/10701-10800">[番号順一覧]</a><a href="../thread/10701-10800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="10706">  10706 2004-12-20 18:27 [mattun &lt;mattun@xxxxx] Re: SELECTの速度が遅い                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10707">  10707 2004-12-20 19:36 ┣[al-kamil &lt;al-kamil@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10709">  10709 2004-12-21 10:44 ┗[Hideki SUNADA &lt;hidek]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="10711">  10711 2004-12-21 15:10 　┗[mattun &lt;mattun@xxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

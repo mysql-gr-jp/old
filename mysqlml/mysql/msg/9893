@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9893</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9892">[前]</a><a href="9894">[次]</a><a href="../list/9801-9900">[番号順一覧]</a><a href="../thread/9801-9900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9893
+</p>
+<div class="header">
+<p>
+From: Hirofumi Fujiwara &lt;Hirofumi Fujiwara &lt;fuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 22 Jul 2004 11:53:54 +0900 (JST)<br>
+Subject: [mysql 09893] 参照制約での日本語カラム名の使用<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+藤原です。
+
+<a href="http://dev.mysql.com/doc/mysql/ja/InnoDB_foreign_key_constraints.html">http://dev.mysql.com/doc/mysql/ja/InnoDB_foreign_key_constraints.html</a>
+  FOREIGN KEY 制約 に関して、カラム名(index_col_nameの部分)に漢字(以下
+の例はujis)を使うと、以下のようにエラーになります。
+
+  TEST1, TEST2 は、英字 `A` でテストした場合で、OKになります。
+  TEST3, TEST4 は、UJISの `あ` でテストした場合で、エラーになってしま
+  います。
+
+  カラム名に、ASCII以外を使うとエラーになるようです。
+
+  その他にも、カラム名にASCII以外を使うとエラーになるケースとかありま
+  すでしょうか？
+
+========================================================================
+mysql&gt; CREATE TABLE TEST1
+    -&gt; (A smallint not null,UNIQUE INDEX IX_TEST1(A)) type=InnoDB;
+Query OK, 0 rows affected, 1 warning (0.05 sec)
+ 
+mysql&gt; CREATE TABLE TEST2
+    -&gt; (A smallint not null,UNIQUE INDEX IX_TEST2(A)) type=InnoDB;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+ 
+mysql&gt; ALTER TABLE TEST1 ADD CONSTRAINT FK_TEST1 FOREIGN KEY(A)
+    -&gt;  REFERENCES TEST2(A);
+Query OK, 0 rows affected (0.08 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+ 
+mysql&gt; show create table TEST1;
++-------+---------------------------------------------------------
+<span class="quote1">| Table | Create Table</span>
++-------+---------------------------------------------------------
+<span class="quote1">| TEST1 | CREATE TABLE `TEST1` (</span>
+  `A` smallint(6) NOT NULL default '0',
+  UNIQUE KEY `IX_TEST1` (`A`),
+  CONSTRAINT `FK_TEST1` FOREIGN KEY (`A`) REFERENCES `TEST2` (`A`)
+) ENGINE=InnoDB DEFAULT CHARSET=ujis |
++-------+---------------------------------------------------------
+1 row in set (0.00 sec)
+
+mysql&gt; CREATE TABLE TEST3
+    -&gt; (あ smallint not null,UNIQUE INDEX IX_TEST3(あ)) type=InnoDB;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+ 
+mysql&gt; CREATE TABLE TEST4
+    -&gt; (あ smallint not null,UNIQUE INDEX IX_TEST4(あ)) type=InnoDB;
+Query OK, 0 rows affected, 1 warning (0.08 sec)
+ 
+mysql&gt; ALTER TABLE TEST3 ADD CONSTRAINT FK_TEST3 FOREIGN KEY(あ)
+    -&gt;  REFERENCES TEST4(あ);
+ERROR 1005 (HY000): Can't create table './test/#sql-7b21_4.frm' (errno: 150)
+mysql&gt; show create table TEST3;
++-------+---------------------------------------------------------
+<span class="quote1">| Table | Create Table</span>
++-------+---------------------------------------------------------
+<span class="quote1">| TEST3 | CREATE TABLE `TEST3` (</span>
+  `あ` smallint(6) NOT NULL default '0',
+  UNIQUE KEY `IX_TEST3` (`あ`)
+) ENGINE=InnoDB DEFAULT CHARSET=ujis |
++-------+---------------------------------------------------------
+1 row in set (0.00 sec)
+========================================================================
+
+------------------------------------------------------------------
+株式会社 タイムインターメディア       藤原 博文 fuji@xxxxxxxxxx
+本社 160-0002 東京都新宿区坂町26-27 ＩＰＢビル    TEL 03-5362-9009
+URL  <a href="http://www.timedia.co.jp/">http://www.timedia.co.jp/</a>                    FAX 03-5362-9008
+地図 <a href="http://www.timedia.co.jp/company/map/">http://www.timedia.co.jp/company/map/</a>     新宿線曙橋駅徒歩5分
+------------------------------------------------------------------
+♪  Puzzle Japan  <a href="http://www.puzzle.jp/">http://www.puzzle.jp/</a>  毎日新作パズルで遊ぼう ♪
+------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="9892">[前]</a><a href="9894">[次]</a><a href="../list/9801-9900">[番号順一覧]</a><a href="../thread/9801-9900">[スレッド一覧]</a></p>
+</body>
+</html>

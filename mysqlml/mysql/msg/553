@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:553</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="552">[前]</a><a href="554">[次]</a><a href="../list/501-600">[番号順一覧]</a><a href="../thread/501-600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:553
+</p>
+<div class="header">
+<p>
+From: 民斗 &lt;民斗 &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 14 Jan 1999 19:02:00 +0900<br>
+Subject: [mysql 553] Re:MySQL speed<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+民斗です。
+
+[Subject: <a href="552">[mysql 552]</a> Re:MySQL speed]
+[Date: Thu, 14 Jan 1999 14:21:24 GMT  From:Tatsuya Ina]
+
+<span class="quote1">&gt; LinuxのtopコマンドでCPUとMemoryの使用率とかみてみると、</span>
+<span class="quote1">&gt; like文の検索時も、between時の検索時もCPU,Memoryとも使用率は数%程度に</span>
+<span class="quote1">&gt; 留まっています。その間、HDDのアクセスランプは点灯しっぱなしです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これってMySQLが十分にメモリーを使っていないということでしょうか？</span>
+<span class="quote1">&gt; それともデータが多きすぎて、MySQLのバッファーには取り込みきれず、</span>
+<span class="quote1">&gt; ディスクへアクセスしにいくということでしょうか。</span>
+
+仮に MySQL 内部バッファが有効に使われるとしても、mysqld 起動後はじめて
+使用するテーブルの場合は、ディスクから読む処理に時間がかかるのは仕方
+ないと思います。
+
+<span class="quote1">&gt; 同じ検索をすぐ繰り返すと、2回目は、HDDへのアクセスはほとんどなく、10倍くらい</span>
+<span class="quote1">&gt; 速くなります。2回目はCPU使用率は95%程度になりますが、MySQLの使用するメモリー</span>
+<span class="quote1">&gt; はあまりかわりません。これはOSのディスクキャッシュでバッファリングされている</span>
+<span class="quote1">&gt; からでしょうかね。</span>
+
+ん〜、これだけでは、MySQL のバッファが使われているのか OS のバッファが
+使われているのかちょっとわかりませんが…。
+
+その後、MySQL は一切いじらずに、他の機能で大量にファイルを読み込むような
+処理をした後に、再度同じクエリを試してみるってのはどうでしょう？
+
+それでも速いままなら MySQL のバッファが使われているってことでしょうし、
+最初と同じくらいの速度なら、OS のバッファが使われてたということでしょう。
+
+# あ、でも swap があると話がややこしくなるか…。
+
+
+ところで、like とか between でなくて、= 演算子を使って試してみました。
+
+mysql&gt; select count(*) from TABLE1 where word=&quot;hoge&quot;;
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|        2 |</span>
++----------+
+1 row in set (0.17 sec)
+
+mysql&gt; select count(*) from TABLE1 where word=&quot;sunos&quot;;
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|      776 |</span>
++----------+
+1 row in set (2.26 sec)
+
+mysql&gt; select count(*) from TABLE1 where word=&quot;2&quot;;
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|    15990 |</span>
++----------+
+1 row in set (12.57 sec)
+
+どうもこの結果を見るに、インデックステーブル中から特定の値を見つける
+のは速いけど、同じ値の行が複数ある場合、それらを走査するのに時間が
+かかってるような感じです。
+
+つまり、ある値について検索する場合、その値を含む行が多ければ多いほど
+インデックスの効果は薄れるということかもしれません。
+
+# そういえば DBMS のインデックスはそういうもんだという話をどっかで
+# 読んだような気もする…。
+--
+民斗 &lt;tommy@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="552">[前]</a><a href="554">[次]</a><a href="../list/501-600">[番号順一覧]</a><a href="../thread/501-600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="543">    543 1999-01-14 05:27 [Tatsuya Ina &lt;ina@xxx] Re:MySQL speed                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="545">    545 1999-01-13 22:48 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="550">    550 1999-01-14 11:16 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="552">    552 1999-01-14 23:21 　┗[Tatsuya Ina &lt;ina@xxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="553">    553 1999-01-14 19:02 　　┗[民斗 &lt;tommy@xxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="554">    554 1999-01-15 00:32 　　　┗[Shogo Hamamoto &lt;KHC0]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="555">    555 1999-01-15 12:39 　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+</pre>
+</body>
+</html>

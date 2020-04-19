@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10193</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10192">[前]</a><a href="10194">[次]</a><a href="../list/10101-10200">[番号順一覧]</a><a href="../thread/10101-10200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10193
+</p>
+<div class="header">
+<p>
+From: &quot;Takashi Yamashita&quot; &lt;&quot;Takashi Yamashita&quot; &lt;takasi@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 17 Sep 2004 13:31:12 +0900<br>
+Subject: [mysql 10193] Re: replace()関数の処理<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+お世話になっております。
+
+<span class="quote1">&gt; 「書き換えられた後に再びselectクエリが実行される」ということは</span>
+<span class="quote1">&gt; ありません！　ここのselectクエリの対象になるのはreplaceされる</span>
+<span class="quote1">&gt; 前のデータだけです。</span>
+<span class="quote1">&gt; ですから、replace(replace(replace(....)))のような式を記述するとか、</span>
+<span class="quote1">&gt; replace文あるいはupdate文を複数回実行するとか、置き換えをSQL以外で</span>
+<span class="quote1">&gt; 行なうとか、そういった方法になると思います。</span>
+
+分かりました。
+私が作成したクエリでは、
+再帰的にreplace文を呼び出すような処理にはならないのですね。
+というより、再帰的にreplace文を呼び出すようなクエリは、
+存在しないということですね。
+
+そうしましたら従来通り、以下のphpコードで置換処理を行うことにします。
+=========================================================
+$hResult=mysql_query(&quot;select field_from, field_to from tbl_rep&quot;);
+while($row=mysql_fetch_array($hResult)) {
+    mysql_query(
+        sprintf(&quot;update tbl_a set field_n=replace(field_n,'%s','%s')&quot;,
+            $row[field_from], $row[field_to]);
+}
+mysql_free_result($hResult);
+=========================================================
+
+非常に勉強になりました。
+ありがとうございました。＞片寄様、宇野様
+
+それからダメもとですが、
+recursive_replaceみたいなsqlステートメントがあると、
+上記コードがsql一行で書けるので非常に助かると思うのですが、
+どうでしょうか？
+
+宜しくお願いします。
+
+-------------------------------------------------------------
+山下高司
+takasi@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="10192">[前]</a><a href="10194">[次]</a><a href="../list/10101-10200">[番号順一覧]</a><a href="../thread/10101-10200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="10172">  10172 2004-09-16 10:19 [&quot;Takashi Yamashita&quot; ] replace()関数の処理                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10173">  10173 2004-09-16 11:07 ┗[&quot;片寄白王&quot; &lt;katayose]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10174">  10174 2004-09-16 11:31 　┗[&quot;Takashi Yamashita&quot; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10179">  10179 2004-09-16 18:06 　　┣[&quot;片寄白王&quot; &lt;katayose]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10180">  10180 2004-09-16 19:21 　　┗[&quot;Takashi Yamashita&quot; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10181">  10181 2004-09-16 20:28 　　　┗[UNO Shintaro &lt;uno@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10184">  10184 2004-09-16 21:53 　　　　┗[&quot;Takashi Yamashita&quot; ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10192">  10192 2004-09-17 12:18 　　　　　┗[UNO Shintaro &lt;uno@xx]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="10193">  10193 2004-09-17 13:31 　　　　　　┗[&quot;Takashi Yamashita&quot; ]                           </a></span>
+</pre>
+</body>
+</html>

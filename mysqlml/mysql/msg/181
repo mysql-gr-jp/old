@@ -1,0 +1,205 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:181</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="180">[前]</a><a href="182">[次]</a><a href="../list/101-200">[番号順一覧]</a><a href="../thread/101-200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:181
+</p>
+<div class="header">
+<p>
+From: 民斗 &lt;民斗 &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 17 Jun 1998 14:24:19 +0900<br>
+Subject: [mysql 181] MySQL-3.21.31 and 3.22.1-alpha<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+本家の ML にリリース情報が流れてない（と思う…）ので気が付かなかったん
+ですが、いつの間にか MySQL-3.21.31 と 3.22.1-alpha というのが出てました。
+
+変更点をドキュメントから引用します。
+
+3.22 でかなり変わったようですが、私が気になった点をいくつかピックアップ
+してみます。
+
+・異なるデータベース間のテーブルを同時に扱えるようになった。
+・一般ユーザがパスワードを簡単に変更できるようになった。
+・x86 Linux ではいくつかの文字列関数がアセンブラで書かれて高速になった。
+・テーブルに項目を追加する時に、項目の位置を指定できるようになった。
+
+--
+民斗 &lt;tommy@xxxxxxxxxx&gt;
+
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+Changes in release 3.21.31
+--------------------------
+
+   * Fixed a sign extension problem for the type 'tiny' on IRIX.
+
+   * Fixed problem with left(&quot;constant_string&quot;,function).
+
+   * Fixed problem with find_in_set().
+
+   * LEFT JOIN core dumped if the second table is used with a constant
+     WHERE/ON expression with uniquely identifies one record.
+
+   * Fixed problems with date_format() and wrong dates.  date_format()
+     now ignores '%' to make it possible to extend it more easily in
+     the future.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+Changes in release 3.22.0
+-------------------------
+
+   * New (backward compatible) connect protocol that allows one to
+     specify the database to use when connecting to get much faster
+     onnections to a specific database.
+
+            mysql_real_connect() call is changed to:
+          
+            mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
+                             const char *passwd, const char *db,
+                             uint port, const char *unix_socket,uint client_flag
+)
+
+   * Each connection is handled by it's own thread, instead by the
+     master accept() thread.  This fixes permanently the telnet bug
+     that was a topic on the mail list some time ago.
+
+   * All TCP/IP connections are now checked with backward resolving of
+     the hostname to get better security. mysqld has now a local
+     hostname resolve cache so connections should actually be faster
+     than before even with this feature.
+
+   * A site will automaticly be blocked from future connections if one
+     repeatedly connects with a 'improper header' (like when one uses
+     telnet)
+
+   * One can now reference to tables in different databases with:
+     table@database or database.table.  This makes it possible to give
+     a users read access to some tables and write access to others by
+     simple keeping them in different databases!
+
+   * If mysqld is started as root, it can now change to be run as
+     another user with the new -user option.
+
+   * Added cacheing of users &amp; access rights (for faster access rights
+     checking)
+
+   * Normal users (not anonymous ones) can change ones password with
+     mysqladmin password 'new_password'.  This uses crypted passwords
+     that are not logged in the normal mysql log!
+
+   * All important string functions are now coded in assembler for x86
+     Linux machines.  This gives a speedup of 10% in many cases.
+
+   * For tables that have many columns the column names are now hashed
+     for much faster column name lookup (this will speed up some
+     benchmark tests a lot!)
+
+   * Some benchmarks are changed for get better individual timing.
+     (Some loops was so short that a specific test took &lt; 2 seconds. The
+     loops has been changed to take about 20 seconds to make it easier
+     to compare different databases. 1 &lt;-&gt; 2  before is now 11 &lt;-&gt; 24
+     which is much better)
+
+   * Re-arranged select code to handle some very specific queries
+     involving group functions (like COUNT(*)) without a GROUP BY but
+     with HAVING. The following now works.
+
+     SELECT count(*) as C from TABLE HAVING C &gt; 1
+
+   * Changed the protocol for field functions to be faster and avoid
+     some mallocs().
+
+   * Added flag -T32 to mysqld for running all queries under the main
+     thread.  This makes it possible to debug mysqld under Linux with
+     gdb!
+
+   * Added optimization of 'not_null_column IS NULL' (needed for some
+     Access queries)
+
+   * Allow one to use STRAIGHT_JOIN between two tables to force the
+     optimizer to join them in a specific order.
+
+   * String functions now return VARCHAR() instead of CHAR() and the
+     column type is now VARCHAR() for fields saved as VARCHAR().  This
+     should make the MyODBC driver better, but may break some old MySQL
+     clients that doesn't handle FIELD_TYPE_VARCHAR identical as
+     FIELD_TYPE_CHAR.
+
+   * CREATE INDEX and DROP INDEX are now implemented trough ALTER TABLE.
+     CREATE TABLE is still the recommended (fast) way to create indexes.
+
+   * Added option wait_timeout to mysqld.
+
+   * Added time column to 'mysqladmin processes' to show how long a
+     query has taken or how long a thread has sleeped.
+
+   * Lots of new varibles to 'show variables' and some new to 'show
+     status'
+
+   * Added new type: YEAR. YEAR is stored on 1 byte with range 0,
+     1901-2155.
+
+   * Added new DATE type that is stored on 3 bytes instead of 4. All new
+     tables will created with the new date type if one doesn't use
+     -old-protocol.
+
+   * Fixed bug in record caches;  One could get 'Error from table
+     handler: #' on some OS from some queries.
+
+   * New configure option for x86 machines (tested on Linux + gcc):
+     -enable-assembler.  This will enable assembler functions for the
+     most important string functions for more speed!
+
+Changes in release 3.22.1
+-------------------------
+
+   * Added new C-API function: mysql_ping().
+
+   * Added new API functions: mysql_init() and mysql_options().  One
+     MUST now call mysql_init() before one calls mysql_real_connect().
+     One doesn't have to call mysql_init() if one only uses
+     mysql_connect().
+
+   * Added mysql_option(..,MYSQL_OPT_CONNECT_TIMEOUT) so one can set a
+     timeout for connecting to a server.
+
+   * Added -timeout argument to mysqladmin (as a test of
+     mysql_options()).
+
+   * Added options AFTER column and FIRST to ALTER TABLE ... ADD
+     columns.  This makes is possible to add a new column at some
+     specific location in an old table.
+
+   * WEEK() now takes an optional argument to allow handling of weeks
+     when week starts on Monday (Some European countries), or Sunday.
+     The default WEEK() assumes week start on Sunday().
+
+   * TIME columns wasn't stored properly (bug in MySQL 3.22.0).
+
+   * UPDATE now returns a update information about how many rows was
+     matched, updated and if one got any 'warnings' when doing the
+     update.
+
+   * Fixed wrong result from 'format(-100,2)'.
+
+   * enum() and set() columns was compared binary; Changed to be case
+     insensitive.
+
+
+</pre>
+</div>
+<p class="button"><a href="180">[前]</a><a href="182">[次]</a><a href="../list/101-200">[番号順一覧]</a><a href="../thread/101-200">[スレッド一覧]</a></p>
+</body>
+</html>

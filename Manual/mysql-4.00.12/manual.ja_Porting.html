@@ -1,0 +1,1188 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.ja.texi on 4 March 2004 -->
+
+  <TITLE>MySQL Reference Manual for version 4.0.12. - E  他のシステムへの移植について</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
+  </HEAD>
+  <BODY BGCOLOR=silver TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_News.html">previous</A>, <A HREF="manual.ja_Environment_variables.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Porting" HREF="manual.ja_toc.html#Porting">E  他のシステムへの移植について</A></H1>
+
+<P>
+<A NAME="IDX1857"></A>
+
+</P>
+<P>
+This appendix will help you port MySQL to other operationg systems.
+Do check the list of currently supported operating systems first.
+ 「<A HREF="manual.ja_Installing.html#Which_OS">2.2.5  MySQL がサポートする OS</A>」節参照.
+If you have created a new port of MySQL, please let us know so that
+we can list it here and on our web site (<a HREF="http://www.mysql.com/">http://www.mysql.com/</a>),
+recommending it to other users.
+
+</P>
+<P>
+Note: If you create a new port of MySQL, you are free to copy and
+distribute it under the GPL license, but it does not make you a
+copyright holder of MySQL.
+
+</P>
+<P>
+移植先のシステムには POSIX 仕様のスレッドライブラリが必要となります。
+我々は Solaris 2.5 では Sun PThreads (2.4以前でサポートされていたネイティブthreadは良くなかった)を、
+Linux では Xavier Leroy, <a HREF="mailto:Xavier.Leroy@inria.fr">Xavier.Leroy@inria.fr</a> による LinuxThreads を使っています。
+
+</P>
+<P>
+良いネイティブスレッドを持たない新種の Unix に移植する場合、
+多分もっとも大変な作業は MIT-pthreads を導入する部分です。
+<TT>`mit-pthreads/README'</TT> と <a HREF="http://www.humanfactor.com/pthreads/">http://www.humanfactor.com/pthreads/</a>をご覧下さい。
+
+</P>
+<P>
+MySQL の配布ファイルには MIT の Provenzano's Pthreads パッチ済みバージョン
+(<a HREF="http://www.mit.edu:8001/people/proven/pthreads.html">http://www.mit.edu:8001/people/proven/pthreads.html</a>をご覧下さい。) が含まれています。
+これは POSIX 仕様の Threads を持たない OS に使用可能と思われます。
+
+</P>
+<P>
+もう1つのユーザレベル thread パッケージ、FSU Pthreads も使用可能と思われます
+ (<a HREF="http://www.informatik.hu-berlin.de/~mueller/pthreads.html">http://www.informatik.hu-berlin.de/~mueller/pthreads.html</a>をご覧下さい。)。
+これはSCOへの移植に使用可能です。
+
+</P>
+<P>
+そういった問題に関するテストやサンプルのプログラムを作成する場合には <TT>`mysys'</TT> ディレクトリの
+<TT>`thr_lock.c'</TT> と <TT>`thr_alarm.c'</TT> 等のプログラムをご覧下さい。
+
+</P>
+<P>
+移植にはサーバー、クライアントともに C++ コンパイラを必要とします
+(ちなみに我々は<CODE>gcc</CODE>を使っています。SPARCWorks(C++)は試しました。)。
+Irix <CODE>cc</CODE>も使用できることが確かめられています。
+
+</P>
+<P>
+クライアントしか必要無い場合は<CODE>./configure --without-server</CODE>とコンパイルしてください。
+
+</P>
+<P>
+サーバのみコンパイルする方法は今のところありません。必要性が生じるまでは今のままです。
+
+</P>
+<P>
+<TT>`Makefile'</TT> か コンフィギャスクリプトに何らかの変更をする必要が生じたなら
+Automake と Autoconf を使わなくてはいけません。
+ちなみに、我々は <CODE>automake-1.2</CODE> と <CODE>autoconf-2.12</CODE> を使っています。
+
+</P>
+<P>
+変更の手順は全て基本的なファイルからやり直す必要があります。
+
+</P>
+
+<PRE>
+/bin/rm */.deps/*.P
+/bin/rm -f config.cache
+aclocal
+autoheader
+aclocal
+automake
+autoconf
+./configure --with-debug=full --prefix='your installation directory'
+
+# 上記手順によって生成されるmakefileファイル群はGNU make 3.75以上
+# (以下、gmakeと記述します。)を必要とします。
+gmake clean all install init-db
+</PRE>
+
+<P>
+新しい移植で問題が発生すればデバッグの必要が生じる場合もあります。
+
+</P>
+<P>
+ 「<A HREF="manual.ja_Porting.html#Debugging_server">E.1  MySQL server のデバッグ</A>」節参照.
+
+</P>
+<P>
+<STRONG>Note</STRONG>: <CODE>mysqld</CODE>のデバッグを開始する前に<CODE>mysys/thr_alarm</CODE>と<CODE>mysys/thr_clock</CODE>が動くかどうかチェックしてください。これにより貴方のインストールしたthread環境の動作可能性が多少でもあるのかどうかを確かめることができます。
+
+</P>
+
+
+
+<H2><A NAME="Debugging_server" HREF="manual.ja_toc.html#Debugging_server">E.1  MySQL server のデバッグ</A></H2>
+
+<P>
+<A NAME="IDX1858"></A>
+<A NAME="IDX1859"></A>
+<A NAME="IDX1860"></A>
+
+</P>
+<P>
+もしあなたが MySQL のとても新しいある機能を使っている場合、
+ <CODE>--skip-new</CODE> (これは全く新しい、潜在的に危険な機能を無効にします)
+または  <CODE>--safe-mode</CODE> (これは問題を生じさせるかもしれない多くの最適化を無効にします)
+オプションで <CODE>mysqld</CODE> を実行させることができます。
+ 「<A HREF="manual.ja_Problems.html#Crashing">A.4.1  What To Do If MySQL Keeps Crashing</A>」節参照.
+
+</P>
+<P>
+もし <CODE>mysqld</CODE> が起動しないようなら、 <TT>`my.cnf'</TT> が無いかチェックしてください。
+<TT>`my.cnf'</TT> の引数は <CODE>mysqld --print-defaults</CODE> でチェックできます。
+また <CODE>mysqld --no-defaults ...</CODE> で起動することにより、
+ <TT>`my.cnf'</TT> を無視することが可能です。
+
+</P>
+<P>
+もし <CODE>mysqld</CODE> が CPU や メモリー を食い始めたり、``ハング'' したりするなら、
+ <CODE>mysqladmin processlist status</CODE> を使用して誰かが多くの時間のかかる
+クエリを実行しているか確かめることが出来ます。
+パフォーマンスの問題や新しいクライアントが接続できないときの問題と
+もしあなたが考えるなら、
+いくつかのウインドウで <CODE>mysqladmin -i10 processlist status</CODE> を
+実行するのはよい考えでしょう。 
+
+</P>
+<P>
+<CODE>mysqladmin debug</CODE> コマンドは使用中のロック、使用しているメモり、
+クエリの使用の情報を、mysql ログファイルにいくつかダンプします
+これはいくつかの問題解決に役立ちます。 このコマンドは、 MySQL を
+デバッグ可能でコンパイルしていなくても、いくつかの役立つ情報も提供します。
+
+</P>
+<P>
+いくつかのテーブルでだんだん遅くなる問題であるなら、 <CODE>OPTIMIZE TABLE</CODE> か
+<CODE>myisamchk</CODE> でテーブルを修復し、最適化を試みるべきです。
+遅いクエリは、 <CODE>EXPLAIN</CODE> でもチェックできます。
+ 「<A HREF="manual.ja_MySQL_Database_Administration.html#MySQL_Database_Administration">4  データベース管理</A>」節参照. You should also
+check the slow queries with <CODE>EXPLAIN</CODE>.
+
+</P>
+<P>
+このマニュアルの OS 固有の問題 の節も読むべきです。
+ 「<A HREF="manual.ja_Installing.html#Operating_System_Specific_Notes">2.6  Operating System Specific Notes</A>」節参照.
+
+</P>
+
+
+
+<H3><A NAME="Compiling_for_debugging" HREF="manual.ja_toc.html#Compiling_for_debugging">E.1.1  Compiling MySQL for Debugging</A></H3>
+
+<P>
+もしあるとても特殊な問題があれば、あなたは、いつも MySQL を
+デバッグするよう試みることができます。 これを行うには、 MySQL を
+ <CODE>--with-debug</CODE> オプションか <CODE>--with-debug=full</CODE> オプション付きで
+configure しなくてはなりません。
+MySQL がデバッギングを有効にしてコンパイルされているかを
+知るには、 <CODE>mysqld --help</CODE> とします。 もし <CODE>--debug</CODE> フラグが
+リストされていればデバッグが有効です。 <CODE>mysqladmin ver</CODE> も
+<CODE>mysqld</CODE> のバージョンをリストできます。 この場合は
+ <CODE>mysql ... --debug</CODE> と、バージョン番号に表示されるでしょう。
+
+</P>
+<P>
+gcc か egcs の場合、推奨する configure のラインは：
+
+</P>
+
+<PRE>
+CC=gcc CFLAGS="-O2" CXX=gcc CXXFLAGS="-O2 -felide-constructors \
+   -fno-exceptions -fno-rtti" ./configure --prefix=/usr/local/mysql \
+   --with-debug --with-extra-charsets=complex
+</PRE>
+
+<P>
+This will avoid problems with the <CODE>libstdc++</CODE> library and with C++
+exceptions (many compilers have problems with C++ exceptions in threaded
+code) and compile a MySQL version with support for all character sets.
+
+</P>
+<P>
+If you suspect a memory overrun error, you can configure MySQL
+with <CODE>--with-debug=full</CODE>, which will install a memory allocation
+(<CODE>SAFEMALLOC</CODE>) checker. Running with <CODE>SAFEMALLOC</CODE> is however
+quite slow, so if you get performance problems you should start
+<CODE>mysqld</CODE> with the <CODE>--skip-safemalloc</CODE> option. This will
+disable the memory overrun checks for each call to <CODE>malloc</CODE> and
+<CODE>free</CODE>.
+
+</P>
+<P>
+If <CODE>mysqld</CODE> stops crashing when you compile it with
+<CODE>--with-debug</CODE>, you have probably found a compiler bug or a timing
+bug within MySQL.  In this case you can try to add <CODE>-g</CODE> to
+the <CODE>CFLAGS</CODE> and <CODE>CXXFLAGS</CODE> variables above and not use
+<CODE>--with-debug</CODE>. If <CODE>mysqld</CODE> now dies, you can at least attach
+to it with <CODE>gdb</CODE> or use <CODE>gdb</CODE> on the core file to find out
+what happened.
+
+</P>
+<P>
+MySQL をデバッグで configure すると、自動で多くの安全な検査関数が
+enable になります。 これは  <CODE>mysqld</CODE> の状態をモニターできます。
+もしそれら関数がなにか ``予期せぬこと'' を発見したら、それらを
+<CODE>stderr</CODE> に書き出します。 これは <CODE>safe_mysqld</CODE> が受け取って error ログに
+書き出します！ このことはどういうことかというと、 MySQL に予期せぬことが
+起きた場合、まず最初にすべきことは、 MySQL をデバッグ有効にして
+configure することです！ （次に、もちろん、 <a HREF="mailto:mysql@lists.mysql.com">mysql@lists.mysql.com</a> に
+メールを送り、help を聞くことです。 全てのバグレポート、MySQL のバージョンに
+関連する質問は、 <CODE>mysqlbug</CODE> スクリプトを使用してください！）
+
+</P>
+<P>
+In the Windows MySQL distribution, <CODE>mysqld.exe</CODE> is by
+default compiled with support for trace files.
+
+</P>
+
+
+
+<H3><A NAME="Making_trace_files" HREF="manual.ja_toc.html#Making_trace_files">E.1.2  Creating Trace Files</A></H3>
+
+<P>
+If the <CODE>mysqld</CODE> server doesn't start or if you can cause the
+<CODE>mysqld</CODE> server to crash quickly, you can try to create a trace
+file to find the problem.
+
+</P>
+<P>
+To do this you have to have a <CODE>mysqld</CODE> that is compiled for debugging.
+You can check this by executing <CODE>mysqld -V</CODE>.  If the version number
+ends with <CODE>-debug</CODE>, it's compiled with support for trace files.
+
+</P>
+<P>
+Start the <CODE>mysqld</CODE> server with a trace log in <TT>`/tmp/mysqld.trace'</TT>
+(or <TT>`C:\mysqld.trace'</TT> on Windows):
+
+</P>
+<P>
+<CODE>mysqld --debug</CODE>
+
+</P>
+<P>
+On Windows you should also use the <CODE>--standalone</CODE> flag to not start
+<CODE>mysqld</CODE> as a service:
+
+</P>
+<P>
+In a DOS window do:
+
+</P>
+
+<PRE>
+mysqld --debug --standalone
+</PRE>
+
+<P>
+After this you can use the <CODE>mysql.exe</CODE> command-line tool in a
+second DOS window to reproduce the problem. You can take down the above
+<CODE>mysqld</CODE> server with <CODE>mysqladmin shutdown</CODE>.
+
+</P>
+<P>
+Note that the trace file will get <STRONG>very big</STRONG>!
+If you want to have a smaller trace file, you can use something like:
+
+</P>
+<P>
+<CODE>mysqld --debug=d,info,error,query,general,where:O,/tmp/mysqld.trace</CODE>
+
+</P>
+<P>
+which only prints information with the most interesting tags in
+<TT>`/tmp/mysqld.trace'</TT>.
+
+</P>
+<P>
+If you make a bug report about this, please only send the lines from the
+trace file to the appropriate mailing list where something seems to go
+wrong! If you can't locate the wrong place, you can ftp the trace file,
+together with a full bug report, to
+<a HREF="ftp://support.mysql.com/pub/mysql/secret/">ftp://support.mysql.com/pub/mysql/secret/</a> so that a MySQL
+developer can take a look a this.
+
+</P>
+<P>
+The trace file is made with the <STRONG>DBUG</STRONG> package by Fred Fish.
+ 「<A HREF="manual.ja_Porting.html#The_DBUG_package">E.3  The DBUG Package</A>」節参照.
+
+</P>
+
+
+
+<H3><A NAME="Using_gdb_on_mysqld" HREF="manual.ja_toc.html#Using_gdb_on_mysqld">E.1.3  Debugging mysqld under gdb</A></H3>
+
+<P>
+<A NAME="IDX1861"></A>
+
+</P>
+<P>
+ほとんどのシステムでは、もし <CODE>mysqld</CODE> がクラッシュするなら、
+ <CODE>gdb</CODE> から <CODE>mysqld</CODE> を起動させて多くの情報を得ることが可能です。
+
+</P>
+<P>
+Linux 上でのいくつかの <CODE>gdb</CODE> バージョンでは、
+ <CODE>mysqld</CODE> スレッドのデバッグを可能にする場合、
+ <CODE>run --one-thread</CODE> を使用しなくてはなりません。
+この場合、一度にただ一つのactiveなスレッドだけを持つことになります。
+ We recommend you
+to upgrade to gdb 5.1 ASAP as thread debugging works much better with this
+version!
+
+</P>
+<P>
+When running <CODE>mysqld</CODE> under gdb, you should disable the stack trace
+with <CODE>--skip-stack-trace</CODE> to be able to catch segfaults within gdb.
+
+</P>
+<P>
+It's very hard to debug MySQL under <CODE>gdb</CODE> if you do a lot of
+new connections the whole time as <CODE>gdb</CODE> doesn't free the memory for
+old threads.  You can avoid this problem by starting <CODE>mysqld</CODE> with
+<CODE>-O thread_cache_size= 'max_connections +1'</CODE>.  In most cases just
+using <CODE>-O thread_cache_size=5'</CODE> will help a lot!
+
+</P>
+<P>
+If you want to get a core dump on Linux if <CODE>mysqld</CODE> dies with a
+SIGSEGV signal, you can start <CODE>mysqld</CODE> with the <CODE>--core-file</CODE> option.
+This core file can be used to make a backtrace that may help you
+find out why <CODE>mysqld</CODE> died:
+
+</P>
+
+<PRE>
+shell&#62; gdb mysqld core
+gdb&#62;   backtrace full
+gdb&#62;   exit
+</PRE>
+
+<P>
+ 「<A HREF="manual.ja_Problems.html#Crashing">A.4.1  What To Do If MySQL Keeps Crashing</A>」節参照.
+
+</P>
+<P>
+もし Linux 上で gdb 4.17.x を使用しているなら、 <TT>`.gdb'</TT> ファイルを
+いかにしたがって、カレントのディレクトリーにインストールすべきです：
+
+</P>
+
+<PRE>
+set print sevenbit off
+handle SIGUSR1 nostop noprint
+handle SIGUSR2 nostop noprint
+handle SIGWAITING nostop noprint
+handle SIGLWP nostop noprint
+handle SIGPIPE nostop
+handle SIGALRM nostop
+handle SIGHUP nostop
+handle SIGTERM nostop noprint
+</PRE>
+
+<P>
+If you have problems debugging threads with gdb, you should download
+gdb 5.x and try this instead. The new gdb version has very improved
+thread handling!
+
+</P>
+<P>
+以下は mysqld のデバッグ例です：
+
+</P>
+
+<PRE>
+shell&#62; gdb /usr/local/libexec/mysqld
+gdb&#62; run
+...
+backtrace full # mysqld がクラッシュした際、これを行います
+</PRE>
+
+<P>
+上記の出力を、 <CODE>mysqlbug</CODE> で作成したメールに含み、
+そして <CODE>mysql@lists.mysql.com</CODE>. に送ってください。
+
+</P>
+<P>
+もし <CODE>mysqld</CODE> がハングするなら、
+ <CODE>strace</CODE> や <CODE>/usr/proc/bin/pstack</CODE> のような
+システムツールを使用して <CODE>mysqld</CODE> がどこでハングしているか
+調べることができます。
+
+</P>
+
+<PRE>
+strace /tmp/log libexec/mysqld
+</PRE>
+
+<P>
+<A NAME="IDX1862"></A>
+<A NAME="IDX1863"></A>
+<A NAME="IDX1864"></A>
+<A NAME="IDX1865"></A>
+もし Perl <CODE>DBI</CODE> を使用しているなら、
+ <CODE>trace</CODE> メソッド、あるいは<CODE>DBI_TRACE</CODE> 環境変数で
+デバッグ情報を有効にできます。
+ 「<A HREF="manual.ja_Clients.html#Perl_DBI_Class">8.2.2  The <CODE>DBI</CODE> Interface</A>」節参照.
+
+</P>
+
+
+
+<H3><A NAME="Using_stack_trace" HREF="manual.ja_toc.html#Using_stack_trace">E.1.4  Using a Stack Trace</A></H3>
+
+<P>
+On some operating systems, the error log will contain a stack trace if
+<CODE>mysqld</CODE> dies unexpectedly. You can use this to find out where (and
+maybe why) <CODE>mysqld</CODE> died.  「<A HREF="manual.ja_MySQL_Database_Administration.html#Error_log">4.9.1  The Error Log</A>」節参照.  To get a stack trace,
+you must not compile <CODE>mysqld</CODE> with the <CODE>-fomit-frame-pointer</CODE>
+option to gcc.  「<A HREF="manual.ja_Porting.html#Compiling_for_debugging">E.1.1  Compiling MySQL for Debugging</A>」節参照.
+
+</P>
+<P>
+If the error file contains something like the following:
+
+</P>
+
+<PRE>
+mysqld got signal 11;
+The manual section 'Debugging a MySQL server' tells you how to use a
+stack trace and/or the core file to produce a readable backtrace that may
+help in finding out why mysqld died
+Attemping backtrace. You can use the following information to find out
+where mysqld died.  If you see no messages after this, something went
+terribly wrong
+stack range sanity check, ok, backtrace follows
+0x40077552
+0x81281a0
+0x8128f47
+0x8127be0
+0x8127995
+0x8104947
+0x80ff28f
+0x810131b
+0x80ee4bc
+0x80c3c91
+0x80c6b43
+0x80c1fd9
+0x80c1686
+</PRE>
+
+<P>
+you can find where <CODE>mysqld</CODE> died by doing the following:
+
+</P>
+
+<OL>
+<LI>
+
+Copy the above numbers to a file, for example <TT>`mysqld.stack'</TT>.
+
+<LI>
+
+Make a symbol file for the <CODE>mysqld</CODE> server:
+
+<PRE>
+nm -n libexec/mysqld &#62; /tmp/mysqld.sym
+</PRE>
+
+Note that many MySQL binary distributions comes with the above
+file, named <CODE>mysqld.sym.gz</CODE>.  In this case you must unpack this by
+doing:
+
+<PRE>
+gunzip &#60; bin/mysqld.sym.gz &#62; /tmp/mysqld.sym
+</PRE>
+
+<LI>
+
+Execute <CODE>resolve_stack_dump -s /tmp/mysqld.sym -n mysqld.stack</CODE>.
+
+This will print out where <CODE>mysqld</CODE> died. If this doesn't help you
+find out why <CODE>mysqld</CODE> died, you should make a bug report and include
+the output from the above commend with the bug report.
+
+Note however that in most cases it will not help us to just have a stack
+trace to find the reason for the problem.  To be able to locate the bug
+or provide a workaround, we would in most cases need to know the query
+that killed <CODE>mysqld</CODE> and preferable a test case so that we can
+repeat the problem!   「<A HREF="manual.ja_Introduction.html#Bug_reports">1.6.1.3  バグや問題を報告する方法</A>」節参照.
+</OL>
+
+
+
+<H3><A NAME="Using_log_files" HREF="manual.ja_toc.html#Using_log_files">E.1.5  Using Log Files to Find Cause of Errors in mysqld</A></H3>
+
+<P>
+<CODE>--log</CODE>を使用して<CODE>mysqld</CODE>を起動する際は、事前に<CODE>myisamchk</CODE>
+を使用して全てのテーブルをチェックするようにしてください。
+ 「<A HREF="manual.ja_MySQL_Database_Administration.html#MySQL_Database_Administration">4  データベース管理</A>」節参照.
+
+</P>
+<P>
+もし <CODE>mysqld</CODE> が死んだりハングしたりするなら、 <CODE>mysqld</CODE> を
+<CODE>--log</CODE> で起動すべきです。 再び <CODE>mysqld</CODE> が死んだら、
+あなたはログファイル中の、 <CODE>mysqld</CODE> を kill するクエリをチェックします。
+
+</P>
+<P>
+If you are using <CODE>--log</CODE> without a file name, the log is stored in
+the database directory as 'hostname'.log In most cases it's the last
+query in the log file that killed <CODE>mysqld</CODE>, but if possible you
+should verify this by restarting <CODE>mysqld</CODE> and executing the found
+query from the <CODE>mysql</CODE> command-line tools. If this works, you
+should also test all complicated queries that didn't complete.
+
+</P>
+<P>
+<CODE>mysqld</CODE> が適切にインデックスを使用するのに時間がとてもかかる全ての <CODE>SELECT</CODE> 文を
+ <CODE>EXPLAIN</CODE> で実行することを試みます。
+ 「<A HREF="manual.ja_MySQL_Optimisation.html#EXPLAIN">5.2.1  <CODE>EXPLAIN</CODE> 構文 (<CODE>SELECT</CODE>についての情報を得る)</A>」節参照.
+
+</P>
+<P>
+You can find the queries that take a long time to execute by starting
+<CODE>mysqld</CODE> with <CODE>--log-slow-queries</CODE>.  「<A HREF="manual.ja_MySQL_Database_Administration.html#Slow_query_log">4.9.5  The Slow Query Log (3.23.28以上)</A>」節参照.
+
+</P>
+<P>
+もしエラーログファイル(通常 <TT>`hostname.err'</TT> という名前)中に
+<CODE>mysqld restarted</CODE> という文があるなら、
+<CODE>mysqld</CODE> を失敗させるクエリを見つけます。
+もしこれが起きるなら、<CODE>myisamchk</CODE> ( 「<A HREF="manual.ja_MySQL_Database_Administration.html#MySQL_Database_Administration">4  データベース管理</A>」節参照) で
+全てのテーブルをチェックし、MySQL ログファイルにあるそのクエリをテストすべきです。
+もしそのようなクエリをみつけたなら、まず最初に最新の MySQL にアップグレード
+してみてください。 もしそれでもだめで、かつ <CODE>mysql</CODE> メーリングリストの
+アーカイブにもなにも見つけることが出来なかったなら、 <a HREF="mailto:mysql@lists.mysql.com">mysql@lists.mysql.com</a> に
+バグレポートを出すべきです。 メーリングリストのアーカイブへのリンクは
+<a HREF="http://www.mysql.com/">http://www.mysql.com/</a>.
+
+</P>
+<P>
+If you have started <CODE>mysqld</CODE> with <CODE>myisam-recover</CODE>,
+MySQL will automatically check and try to repair <CODE>MyISAM</CODE>
+tables if they are marked as 'not closed properly' or 'crashed'.  If
+this happens, MySQL will write an entry in the
+<CODE>hostname.err</CODE> file <CODE>'Warning: Checking table ...'</CODE> which is
+followed by <CODE>Warning: Repairing table</CODE> if the table needs to be
+repaired.  If you get a lot of these errors, without <CODE>mysqld</CODE> having
+died unexpectedly just before, then something is wrong and needs to
+be investigated further.  「<A HREF="manual.ja_MySQL_Database_Administration.html#Command-line_options">4.1.1  <CODE>mysqld</CODE> コマンド行オプション</A>」節参照.
+
+</P>
+<P>
+It's of course not a good sign if <CODE>mysqld</CODE> did died unexpectedly,
+but in this case one shouldn't investigate the <CODE>Checking table...</CODE>
+messages but instead try to find out why <CODE>mysqld</CODE> died.
+
+</P>
+
+
+
+<H3><A NAME="Reproduceable_test_case" HREF="manual.ja_toc.html#Reproduceable_test_case">E.1.6  Making a Test Case When You Experience Table Corruption</A></H3>
+
+<P>
+もし不正なテーブルをえたり、 <CODE>mysqld</CODE> が常にいくつかの update コマンドで
+失敗するなら、以下のようにしてこのバグの再現をテストします：
+
+</P>
+
+<UL>
+<LI>
+
+Take down the MySQL daemon (with <CODE>mysqladmin shutdown</CODE>).
+<LI>
+
+Make a backup of the tables (to guard against the very unlikely case that
+the repair will do something bad).
+<LI>
+
+<CODE>myisamchk -s database/*.MYI</CODE> で全テーブルをチェック. 
+<CODE>myisamchk -r database/table.MYI</CODE> で悪いテーブルを修正。
+<LI>
+
+Make a second backup of the tables.
+<LI>
+
+Remove (or move away) any old log files from the MySQL data
+directory if you need more space.
+<LI>
+
+Start <CODE>mysqld</CODE> with <CODE>--log-bin</CODE>.  「<A HREF="manual.ja_MySQL_Database_Administration.html#Binary_log">4.9.4  The Binary Update Log バイナリ更新ログ (3.23.15以上)</A>」節参照.
+If you want to find a query that crashes <CODE>mysqld</CODE>, you should use
+<CODE>--log --log-bin</CODE>.
+<LI>
+
+壊れたテーブルを得た時、<CODE>mysqld server</CODE> を停止。
+<LI>
+
+バックアップをリストア
+<LI>
+
+<CODE>mysqld</CODE> server を <CODE>--log-bin</CODE> <STRONG>なしで</STRONG> 起動。
+<LI>
+
+Re-execute the commands with <CODE>mysqlbinlog update-log-file | mysql</CODE>.
+The update log is saved in the MySQL database directory with
+the name <CODE>hostname-bin.#</CODE>.
+<LI>
+
+If the tables are corrupted again or you can get <CODE>mysqld</CODE> to die with the
+above command, you have found reproducible bug that should be easy to
+fix! FTP the tables and the binary log to
+<a HREF="ftp://support.mysql.com/pub/mysql/secret/">ftp://support.mysql.com/pub/mysql/secret/</a> and send a mail to
+<a HREF="mailto:bugs@lists.mysql.com">bugs@lists.mysql.com</a> or (if you are a support customer) to
+<a HREF="mailto:support@mysql.com">support@mysql.com</a> about the problem and the MySQL team
+will fix it as soon as possible.
+</UL>
+
+<P>
+You can also use the script <CODE>mysql_find_rows</CODE> to just execute some of the
+update statements if you want to narrow down the problem.
+
+</P>
+
+
+
+<H2><A NAME="Debugging_client" HREF="manual.ja_toc.html#Debugging_client">E.2  Debugging a MySQL client</A></H2>
+
+<P>
+<A NAME="IDX1866"></A>
+<A NAME="IDX1867"></A>
+
+</P>
+<P>
+To be able to debug a MySQL client with the integrated debug package,
+you should configure MySQL with <CODE>--with-debug</CODE> or
+<CODE>--with-debug=full</CODE>.   「<A HREF="manual.ja_Installing.html#configure_options">2.3.3  典型的な <CODE>configure</CODE> オプション</A>」節参照.
+
+</P>
+<P>
+<A NAME="IDX1868"></A>
+<A NAME="IDX1869"></A>
+Before running a client, you should set the <CODE>MYSQL_DEBUG</CODE> environment
+variable:
+
+</P>
+
+<PRE>
+shell&#62; MYSQL_DEBUG=d:t:O,/tmp/client.trace
+shell&#62; export MYSQL_DEBUG
+</PRE>
+
+<P>
+This causes clients to generate a trace file in <TT>`/tmp/client.trace'</TT>.
+
+</P>
+<P>
+If you have problems with your own client code, you should attempt to
+connect to the server and run your query using a client that is known to
+work.  Do this by running <CODE>mysql</CODE> in debugging mode (assuming you
+have compiled MySQL with debugging on):
+
+</P>
+
+<PRE>
+shell&#62; mysql --debug=d:t:O,/tmp/client.trace
+</PRE>
+
+<P>
+This will provide useful information in case you mail a bug report.
+ 「<A HREF="manual.ja_Introduction.html#Bug_reports">1.6.1.3  バグや問題を報告する方法</A>」節参照.
+
+</P>
+<P>
+If your client crashes at some 'legal' looking code, you should check
+that your <TT>`mysql.h'</TT> include file matches your mysql library file.
+A very common mistake is to use an old <TT>`mysql.h'</TT> file from an old
+MySQL installation with new MySQL library.
+
+</P>
+
+
+
+<H2><A NAME="The_DBUG_package" HREF="manual.ja_toc.html#The_DBUG_package">E.3  The DBUG Package</A></H2>
+
+<P>
+<A NAME="IDX1870"></A>
+
+</P>
+<P>
+The MySQL server and most MySQL clients are compiled
+with the DBUG package originally made by Fred Fish.  When one has configured
+MySQL for debugging, this package makes it possible to get a trace
+file of what the program is debugging.  「<A HREF="manual.ja_Porting.html#Making_trace_files">E.1.2  Creating Trace Files</A>」節参照.
+
+</P>
+<P>
+One uses the debug package by invoking the program with the
+<CODE>--debug="..."</CODE> or the <CODE>-#...</CODE> option.
+
+</P>
+<P>
+Most MySQL programs has a default debug string that will be
+used if you don't specify an option to <CODE>--debug</CODE>.  The default
+trace file is usually <CODE>/tmp/programname.trace</CODE> on Unix and
+<CODE>\programname.trace</CODE> on Windows.
+
+</P>
+<P>
+The debug control string is a sequence of colon separated fields
+as follows:
+
+</P>
+
+<PRE>
+&#60;field_1&#62;:&#60;field_2&#62;:...:&#60;field_N&#62;
+</PRE>
+
+<P>
+Each field consists of a mandatory flag character followed by
+an optional "," and comma-separated list of modifiers:
+
+</P>
+
+<PRE>
+flag[,modifier,modifier,...,modifier]
+</PRE>
+
+<P>
+The currently recognised flag characters are:
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>Flag</STRONG> </TD><TD> <STRONG>Description</STRONG>
+</TR NOSAVE>
+<TR><TD>d </TD><TD> Enable output from DBUG_&#60;N&#62; macros for the current state. May be followed by a list of keywords which selects output only for the DBUG macros with that keyword. An empty list of keywords implies output for all macros.
+</TR NOSAVE>
+<TR><TD>D </TD><TD> Delay after each debugger output line. The argument is the number of tenths of seconds to delay, subject to machine capabilities. That is, <CODE>-#D,20</CODE> is delay two seconds.
+</TR NOSAVE>
+<TR><TD>f </TD><TD> Limit debugging and/or tracing, and profiling to the list of named functions.  Note that a null list will disable all functions.	The appropriate "d" or "t" flags must still be given, this flag only limits their actions if they are enabled.
+</TR NOSAVE>
+<TR><TD>F </TD><TD> Identify the source file name for each line of debug or trace output.
+</TR NOSAVE>
+<TR><TD>i </TD><TD> Identify the process with the pid or thread id for each line of debug or trace output.
+</TR NOSAVE>
+<TR><TD>g </TD><TD> Enable profiling.  Create a file called 'dbugmon.out' containing information that can be used to profile the program.  May be followed by a list of keywords that select profiling only for the functions in that list.  A null list implies that all functions are considered.
+</TR NOSAVE>
+<TR><TD>L </TD><TD> Identify the source file line number for each line of debug or trace output.
+</TR NOSAVE>
+<TR><TD>n </TD><TD> Print the current function nesting depth for each line of debug or trace output.
+</TR NOSAVE>
+<TR><TD>N </TD><TD> Number each line of dbug output.
+</TR NOSAVE>
+<TR><TD>o </TD><TD> Redirect the debugger output stream to the specified file.  The default output is stderr.
+</TR NOSAVE>
+<TR><TD>O </TD><TD> As <CODE>O</CODE> but the file is really flushed between each write. When needed the file is closed and reopened between each write.
+</TR NOSAVE>
+<TR><TD>p </TD><TD> Limit debugger actions to specified processes. A process must be identified with the DBUG_PROCESS macro and match one in the list for debugger actions to occur.
+</TR NOSAVE>
+<TR><TD>P </TD><TD> Print the current process name for each line of debug or trace output.
+</TR NOSAVE>
+<TR><TD>r </TD><TD> When pushing a new state, do not inherit the previous state's function nesting level. Useful when the output is to start at the left margin.
+</TR NOSAVE>
+<TR><TD>S </TD><TD> Do function _sanity(_file_,_line_) at each debugged function until _sanity() returns something that differs from 0. (Mostly used with safemalloc to find memory leaks)
+</TR NOSAVE>
+<TR><TD>t </TD><TD> Enable function call/exit trace lines. May be followed by a list (containing only one modifier) giving a numeric maximum trace level, beyond which no output will occur for either debugging or tracing macros.  The default is a compile time option.
+</TR>
+</TABLE>
+
+<P>
+Some examples of debug control strings which might appear on a shell
+command-line (the "-#" is typically used to introduce a control string
+to an application program) are:
+
+</P>
+
+<PRE>
+-#d:t
+-#d:f,main,subr1:F:L:t,20
+-#d,input,output,files:n
+-#d:t:i:O,\\mysqld.trace
+</PRE>
+
+<P>
+In MySQL, common tags to print (with the <CODE>d</CODE> option) are:
+<CODE>enter</CODE>,<CODE>exit</CODE>,<CODE>error</CODE>,<CODE>warning</CODE>,<CODE>info</CODE> and
+<CODE>loop</CODE>.
+
+</P>
+
+
+
+<H2><A NAME="Locking_methods" HREF="manual.ja_toc.html#Locking_methods">E.4  Locking methods</A></H2>
+
+<P>
+<A NAME="IDX1871"></A>
+<A NAME="IDX1872"></A>
+
+</P>
+<P>
+Currently MySQL only supports table locking for
+<CODE>ISAM</CODE>/<CODE>MyISAM</CODE> and <CODE>HEAP</CODE> tables,
+page-level locking for <CODE>BDB</CODE> tables and
+row-level locking for <CODE>InnoDB</CODE> tables.
+ 「<A HREF="manual.ja_MySQL_Optimisation.html#Internal_locking">5.3.1  MySQL はどのようにテーブルをロックするか</A>」節参照.
+With <CODE>MyISAM</CODE> tables one can freely mix <CODE>INSERT</CODE> and
+<CODE>SELECT</CODE> without locks, if the <CODE>INSERT</CODE>s are non-conflicting
+(i.e. whenever they append to the end of the table file rather than
+filling freespace from deleted rows/data).
+
+</P>
+<P>
+Starting in version 3.23.33, you can analyse the table lock contention
+on your system by checking <CODE>Table_locks_waited</CODE> and
+<CODE>Table_locks_immediate</CODE> environment variables.
+
+</P>
+<P>
+To decide if you want to use a table type with row-level locking,
+you will want to look at what the application does and what the
+select/update pattern of the data is.
+
+</P>
+<P>
+Pros for row locking:
+
+</P>
+
+<UL>
+<LI>
+
+Fewer lock conflicts when accessing different rows in many threads.
+<LI>
+
+Fewer changes for rollbacks.
+<LI>
+
+Makes it possible to lock a single row a long time.
+</UL>
+
+<P>
+Cons:
+
+</P>
+
+<UL>
+<LI>
+
+Takes more memory than page level or table locks.
+<LI>
+
+Is slower than page level or table locks when used on a big part of the table,
+because one has to do many more locks.
+<LI>
+
+Is definitely much worse than other locks if you do often do <CODE>GROUP
+BY</CODE> on a large part of the data or if one has to often scan the whole table.
+<LI>
+
+With higher level locks one can also more easily support locks of
+different types to tune the application as the lock overhead is less
+notable as for row level locks.
+</UL>
+
+<P>
+Table locks are superior to page level / row level locks in the
+following cases:
+
+</P>
+
+<UL>
+<LI>
+
+Mostly reads
+<LI>
+
+Read and updates on strict keys; this is where one updates or deletes
+a row that can be fetched with one key read:
+
+<PRE>
+UPDATE table_name SET column=value WHERE unique_key#
+DELETE FROM table_name WHERE unique_key=#
+</PRE>
+
+<LI>
+
+<CODE>SELECT</CODE> combined with <CODE>INSERT</CODE> (and very few <CODE>UPDATE</CODE>s
+and <CODE>DELETE</CODE>s).
+<LI>
+
+Many scans / <CODE>GROUP BY</CODE> on the whole table without any writers.
+</UL>
+
+<P>
+Other options than row / page level locking:
+
+</P>
+<P>
+Versioning (like we use in MySQL for concurrent inserts) where
+you can have one writer at the same time as many readers.  This means
+that the database/table supports different views for the data depending
+on when one started to access it. Other names for this are time travel,
+copy on write or copy on demand.
+
+</P>
+<P>
+Copy on demand is in many case much better than page or row level
+locking; the worst case does, however, use much more memory than
+when using normal locks.
+
+</P>
+<P>
+Instead of using row level locks one can use application level locks
+(like get_lock/release_lock in MySQL).  This works of course
+only in well-behaved applications.
+
+</P>
+<P>
+In many cases one can do an educated guess which locking type is best
+for the application, but generally it's very hard to say that a given
+lock type is better than another; everything depends on the application
+and different part of the application may require different lock types.
+
+</P>
+<P>
+Here are some tips about locking in MySQL:
+
+</P>
+<P>
+Most web applications do lots of selects, very few
+deletes, updates mainly on keys, and inserts in some specific tables.
+The base MySQL setup is very well tuned for this.
+
+</P>
+<P>
+Concurrent users are not a problem if one doesn't mix updates with selects
+that need to examine many rows in the same table.
+
+</P>
+<P>
+If one mixes inserts and deletes on the same table then <CODE>INSERT DELAYED</CODE>
+may be of great help.
+
+</P>
+<P>
+One can also use <CODE>LOCK TABLES</CODE> to speed up things (many updates within
+a single lock is much faster than updates without locks).  Splitting
+thing to different tables will also help.
+
+</P>
+<P>
+If you get speed problems with the table locks in MySQL, you
+may be able to solve these by converting some of your tables to <CODE>InnoDB</CODE>
+or <CODE>BDB</CODE> tables.
+ 「<A HREF="manual.ja_Table_types.html#InnoDB">7.5  <CODE>InnoDB</CODE> テーブル (3.23.6以上)</A>」節参照.  「<A HREF="manual.ja_Table_types.html#BDB">7.6  <CODE>BDB</CODE> or <CODE>BerkeleyDB</CODE> Tables</A>」節参照.
+
+</P>
+<P>
+The optimisation section in the manual covers a lot of different aspects of
+how to tune applications.  「<A HREF="manual.ja_MySQL_Optimisation.html#Tips">5.2.12  最適化に関するその他の助言</A>」節参照.
+
+</P>
+
+
+
+<H2><A NAME="RTS-threads" HREF="manual.ja_toc.html#RTS-threads">E.5  Comments about RTS threads</A></H2>
+
+<P>
+<A NAME="IDX1873"></A>
+<A NAME="IDX1874"></A>
+
+</P>
+<P>
+I have tried to use the RTS thread packages with MySQL but
+stumbled on the following problems:
+
+</P>
+<P>
+They use an old version of a lot of POSIX calls and it is very tedious to
+make wrappers for all functions. I am inclined to think that it would
+be easier to change the thread libraries to the newest POSIX
+specification.
+
+</P>
+<P>
+Some wrappers are already written. See <TT>`mysys/my_pthread.c'</TT> for more info.
+
+</P>
+<P>
+At least the following should be changed:
+
+</P>
+<P>
+<CODE>pthread_get_specific</CODE> should use one argument.
+<CODE>sigwait</CODE> should take two arguments.
+A lot of functions (at least <CODE>pthread_cond_wait</CODE>,
+<CODE>pthread_cond_timedwait</CODE>)
+should return the error code on error. Now they return -1 and set <CODE>errno</CODE>.
+
+</P>
+<P>
+Another problem is that user-level threads use the <CODE>ALRM</CODE> signal and this
+aborts a lot of functions (<CODE>read</CODE>, <CODE>write</CODE>, <CODE>open</CODE>...).
+MySQL should do a retry on interrupt on all of these but it is
+not that easy to verify it.
+
+</P>
+<P>
+The biggest unsolved problem is the following:
+
+</P>
+<P>
+To get thread-level alarms I changed <TT>`mysys/thr_alarm.c'</TT> to wait between
+alarms with <CODE>pthread_cond_timedwait()</CODE>, but this aborts with error
+<CODE>EINTR</CODE>.  I tried to debug the thread library as to why this happens,
+but couldn't find any easy solution.
+
+</P>
+<P>
+If someone wants to try MySQL with RTS threads I suggest the
+following:
+
+</P>
+
+<UL>
+<LI>
+
+Change functions MySQL uses from the thread library to POSIX.
+This shouldn't take that long.
+<LI>
+
+Compile all libraries with the <CODE>-DHAVE_rts_threads</CODE>.
+<LI>
+
+Compile <CODE>thr_alarm</CODE>.
+<LI>
+
+If there are some small differences in the implementation, they may be fixed
+by changing <TT>`my_pthread.h'</TT> and <TT>`my_pthread.c'</TT>.
+<LI>
+
+Run <CODE>thr_alarm</CODE>. If it runs without any ``warning'', ``error'' or aborted
+messages, you are on the right track. Here is a successful run on
+Solaris:
+
+<PRE>
+Main thread: 1
+Thread 0 (5) started
+Thread: 5  Waiting
+process_alarm
+Thread 1 (6) started
+Thread: 6  Waiting
+process_alarm
+process_alarm
+thread_alarm
+Thread: 6  Slept for 1 (1) sec
+Thread: 6  Waiting
+process_alarm
+process_alarm
+thread_alarm
+Thread: 6  Slept for 2 (2) sec
+Thread: 6  Simulation of no alarm needed
+Thread: 6  Slept for 0 (3) sec
+Thread: 6  Waiting
+process_alarm
+process_alarm
+thread_alarm
+Thread: 6  Slept for 4 (4) sec
+Thread: 6  Waiting
+process_alarm
+thread_alarm
+Thread: 5  Slept for 10 (10) sec
+Thread: 5  Waiting
+process_alarm
+process_alarm
+thread_alarm
+Thread: 6  Slept for 5 (5) sec
+Thread: 6  Waiting
+process_alarm
+process_alarm
+
+...
+thread_alarm
+Thread: 5  Slept for 0 (1) sec
+end
+</PRE>
+
+</UL>
+
+
+
+<H2><A NAME="Thread_packages" HREF="manual.ja_toc.html#Thread_packages">E.6  スレッドパッケージ間の違いは何？</A></H2>
+
+<P>
+<A NAME="IDX1875"></A>
+
+</P>
+<P>
+MySQL は使用されるスレッドパッケージに非常に依存しています。
+そのため、MySQL に良いプラットフォームを選択する時には、
+スレッドパッケージが非常に重要です。 
+
+</P>
+<P>
+少なくとも3つのタイプのスレッドパッケージがあります：
+
+</P>
+
+<UL>
+<LI>
+
+シングルプロセス内のユーザスレッド。
+スレッド切替えはアラームで管理され、
+スレッドライブラリはロックを伴う非スレッド安全関数のすべてを管理します。 
+動作中スレッドがデータを待つ必要がある場合、read, write そして select は、
+通常、他のスレッドに切替えるスレッド固有の select で管理されます。
+もしユーザ・スレッドパッケージが標準ライブラリ (FreeBSD と BSDI スレッド) に
+統合されているなら、スレッドパッケージのオーバーヘッドは、全ての非安全コールを
+マップしなければならないスレッドパッケージ(MIT-スレッド, FSU-スレッド, RTS スレ
+ッド)
+よりも少なくなります。
+他の環境(例えば SCO)では、全てのシステムコールはスレッド安全なので、
+マッピングはとても簡単に行なわれます(SCO 上の FSU-スレッド)。
+Downside: 全てのマップされるコールは少し時間がかかり、全ての状況を
+処理可能にすることは、とても困難です。
+通常、スレッドパッケージによって処理できないシステムコールがいくつかあります
+(MIT-スレッドとソケットのように)。 スレッドスケジューリングは常に最
+適というわけではあ りません。 
+<LI>
+
+別プロセスのユーザスレッド。
+スレッド切替えはカーネルによって行なわれ、全てのデータはスレッド間で共有されます。
+スレッドパッケージは、スレッ ド間のデータ共有を許可するために標準スレッドコール
+を管理します。
+LinuxThreads はこの方法を使用しています。
+Downside: 多くのプロセス。スレッド生成は遅いです。
+もし一つのスレッドが死ぬと、残りは通常ハングして残り、再起動前に それら全て
+を kill する必要があります。スレッド切替えはいくらか高価(expensive)です。
+<LI>
+
+カーネルスレッド。
+スレッド切替えはスレッドライブラリかカーネルによって処理され、
+とても速いです。 全ては一つのプロセス内で行なわれますが、
+いくつかのシステムでは、<CODE>ps</CODE> が異なったスレッドを示します。
+もし一つのスレッドがアボートした場合、プロセス全体がアボートします。
+多くのシステムコールはスレッド安全で、オーバーヘッドはとても少ないです。
+Solaris, HP-UX, AIX そして OSF1 がカーネルスレッドを持っています。 
+</UL>
+
+<P>
+いくつかのシステムでは、カーネルスレッドは、システムライブラリ内で、
+ユーザレベルスレッドの統合によって管理されます。
+この場合、スレッド切替えはスレッドライブラリによってだけ行なわれ、
+カーネルは実際には 'thread aware' ではありません。 
+
+</P>
+
+<P><HR><P>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_News.html">previous</A>, <A HREF="manual.ja_Environment_variables.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

@@ -1,0 +1,166 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:535</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="534">[前]</a><a href="536">[次]</a><a href="../list/501-600">[番号順一覧]</a><a href="../thread/501-600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:535
+</p>
+<div class="header">
+<p>
+From: Tatsuya Ina &lt;Tatsuya Ina &lt;ina@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 13 Jan 1999 16:34:33 GMT<br>
+Subject: [mysql 535] Re: mMySQL speed<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+伊奈＠セイコーエプソン です。
+
+みなさん、さっそくアドバイスありがとうございます。
+
+<span class="quote1">&gt; 民斗です。</span>
+
+民斗様のドキュメント類にはお世話になりました。あれがなかったら、こんなに
+早くテスト環境を構築できませんでした。本当にありがとうございました。
+
+<span class="quote1">&gt; まず、MySQL のバージョンは 3.22.xx にした方がいいと思います。</span>
+
+3.22.xxはperlのDBIモジュールが含まれていないため、contribから取ってきて
+やってみたのですが、コンパイルは通るのですが、起動するとエラーが起きてしまい、
+それから追求してませんでした。もう一度トライしてみます。
+
+<span class="quote1">&gt; lotno が、大文字小文字を区別しなくても良くて、日本語も入らないなら、</span>
+<span class="quote1">&gt; BINARY 属性をつけた方が若干速くなるかもしれません。</span>
+
+そうなんですか。これもやってみようと思います。
+
+<span class="quote1">&gt; 日付は 'yyyy/mm/dd' ではなくて 'yyyy-mm-dd' の方がいいと思います。</span>
+<span class="quote1">&gt; 速度にはほとんど影響しないとは思いますが…。</span>
+
+ああ、これはtypoで、実際は'yyyy-mm-dd'でやっています。すいません。
+
+<span class="quote1">&gt; メモリが 128M もついているのなら、もっと大きくしてもいいように</span>
+<span class="quote1">&gt; 思います。</span>
+
+実はMLに投稿したあと、key-buffer=32m sort-buffer=32m record_buffer=32mとかやって
+みましたが、やはり大差ありませんでした。
+
+<span class="quote1">&gt;小岩です。</span>
+<span class="quote1">&gt;ちょうど私もとある実験のために500万件のダミーデータを作ってこれからテストに</span>
+<span class="quote1">&gt;入るところだったんです。</span>
+<span class="quote1">&gt;mysql&gt; select count(*) from sample;</span>
+<span class="quote1">&gt;+----------+</span>
+<span class="quote2">&gt;| count(*) |</span>
+<span class="quote1">&gt;+----------+</span>
+<span class="quote2">&gt;|  5000000 |</span>
+<span class="quote1">&gt;+----------+</span>
+<span class="quote1">&gt;1 row in set (0.02 sec)</span>
+
+こちらでもwhere句をつけなければ、
+
+mysql&gt; select count(*) from Test_all_tab;
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|  4847180 |</span>
++----------+
+1 row in set (0.05 sec)
+
+となり、この部分は結果が一致しますね。しかし
+
+<span class="quote1">&gt;これと同様に、全くインデックスをはっていないフィールドを対象にしてbetweenで</span>
+<span class="quote1">&gt;検索かけてみますと</span>
+<span class="quote1">&gt;mysql&gt; select count(*) from sample where age between '10' and '30';</span>
+<span class="quote1">&gt;+----------+</span>
+<span class="quote2">&gt;| count(*) |</span>
+<span class="quote1">&gt;+----------+</span>
+<span class="quote2">&gt;|  1105283 |</span>
+<span class="quote1">&gt;+----------+</span>
+<span class="quote1">&gt;1 row in set (55.09 sec)</span>
+<span class="quote1">&gt;となります。ちなみにMMX Pentium 200MHzのLinuxBoxです。</span>
+
+これについては、私の方でもインデックスをはっていないsmallint型のフィールドを対象に
+betweenで検索をかけてみると
+
+mysql&gt; select count(*) from Test_all_tab where pc_no between 10 and 20;
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|   474330 |</span>
++----------+
+1 row in set (3 min 23.04 sec)
+
+となり、やはりかなり遅いですね。
+
+<span class="quote1">&gt;毅です</span>
+
+村上様の会社のWebでMySQLのサポートを開始するというのを見て、工場
+データの検索システムをMySQLでやろうと思いました。
+
+<span class="quote1">&gt;A.コンパイル時の最適化としては</span>
+<span class="quote1">&gt;-static -O6 などを使用します。(manual 4章)</span>
+<span class="quote1">&gt;3.22 の方が、速度は少し速いはずです</span>
+
+コンパイル時は
+./configure
+make
+make install
+しかしていないので、これにもトライしてみます。
+
+<span class="quote1">&gt;B.select 文は、</span>
+<span class="quote1">&gt;  mysql&gt; explain select ........</span>
+<span class="quote1">&gt;とすると、そのselect 文がいかに処理されるかわかります(manual 7章)</span>
+<span class="quote1">&gt;この結果より、テーブルやクエリの最適化の指標が得られると思います。</span>
+
+そうなんですか。これは知りませんでした。勉強不足でした。
+
+<span class="quote1">&gt;C.起動オプションは</span>
+<span class="quote1">&gt;mysqld --help</span>
+<span class="quote1">&gt;でオプションの値が参照できますが、</span>
+<span class="quote1">&gt;あまり極端に変更しすぎると、Linux のファイルディスクリプターの制限に</span>
+<span class="quote1">&gt;引っかかるかもしれません。</span>
+<span class="quote1">&gt;ここらあたりのパラメターは、試行錯誤になります。</span>
+<span class="quote1">&gt;指標としては、パラメターを変えて、ソースに付属の bench mark suit</span>
+<span class="quote1">&gt;を実行すると、得られると思います。</span>
+
+これも知りませんでした。パラメータの最適化はこのようにやるのですか。
+
+
+まだまだやることはたくさんあることがわかりました。
+これから、頂いたアドバイスをトライしてみます。
+結果を報告するのに、時間がかかるかと思いますが、またよろしくお願いします。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="534">[前]</a><a href="536">[次]</a><a href="../list/501-600">[番号順一覧]</a><a href="../thread/501-600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="531">    531 1999-01-13 23:48 [Tatsuya Ina &lt;ina@xxx] mMySQL speed                            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="532">    532 1999-01-13 15:31 ┣[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="535">    535 1999-01-14 01:34 ┃┣[Tatsuya Ina &lt;ina@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="538">    538 1999-01-13 16:53 ┃┗[民斗 &lt;tommy@xxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="534">    534 1999-01-13 15:44 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="541">    541 1999-01-13 17:39 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="546">    546 1999-01-14 08:58 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+</pre>
+</body>
+</html>

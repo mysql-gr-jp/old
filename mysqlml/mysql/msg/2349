@@ -1,0 +1,177 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2349</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2348">[前]</a><a href="2350">[次]</a><a href="../list/2301-2400">[番号順一覧]</a><a href="../thread/2301-2400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2349
+</p>
+<div class="header">
+<p>
+From: &quot;MIYATSU Kazunari&quot; &lt;&quot;MIYATSU Kazunari&quot; &lt;mid@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 5 Aug 2000 11:52:13 +0900<br>
+Subject: [mysql 02349] Re: php で写真 GIF  を出力するには<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+当方でも確認してみました。ACCESS97でOLEオブジェクトとしてリンクできましたが、確
+かに記録されるバイナリは一致しませんでした。
+何か加工されているのは確かそうです。
+
+で、サンプルの方ですがなんとか見られるようにしただけですので、動くかどーかわかり
+ません。
+動かなかったら、php3.iniのテンポラリ、ファイル最大長の設定も確認してください。
+--------SND.php3-------------------------------------------------------------
+&lt;?
+$conn=mysql_connect(&quot;localhost&quot;);
+if(!mysql_select_db(&quot;StdArchive&quot;,$conn)){echo (&quot;Cannot select database.\n&quot;);}
+$result = mysql_query(&quot;select * from stddoc where(ID=$FileID)&quot;);
+if($row =@mysql_fetch_object($result)){
+ header(&quot;Content-type: $row-&gt;MIME&quot;);
+
+ header(&quot;Content-Disposition: Filename=$row-&gt;Filename&quot;);
+// header(&quot;Content-Disposition: inline; filename=$row-&gt;Filename&quot;);
+// header(&quot;Content-Disposition: attachment; filename=$row-&gt;Filename&quot;);
+// header(&quot;Content-Disposition: extension-token; Filename=$row-&gt;Filename&quot;);
+
+ echo $row-&gt;Dbinary;
+}else{
+ echo &quot;&lt;HTML&gt;\n&lt;HEAD&gt;&lt;TITLE&gt;File not Found&lt;/TITLE&gt;&lt;/HEAD&gt;\n&quot;;
+ echo &quot;&lt;BODY&gt;\nFile Not Found.&lt;BR&gt;&quot;;
+ echo &quot;Please Check Link or Argument and Reload.&lt;BR&gt;&quot;;
+ echo &quot;&lt;HR&gt;Standard Document Archive.&lt;BR&gt;&quot;;
+ echo &quot;&lt;/BODY&gt;\n&lt;/HTML&gt;&quot;;
+};
+?&gt;
+-----------------------------------------------------------------------------
+サーバー-&gt;ブラウザ転送用&quot;SND.php3&quot;
+引数は&quot;FileID&quot;,レコードセット内のIDに合致したDBinaryの内容をMIMEフィールドの形式
+ヘッダを付けて送信
+
+--------RCV.php3-------------------------------------------------------------
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=x-euc-jp&quot;&gt;
+&lt;TITLE&gt;UPLOAD&lt;/TITLE&gt;
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+&lt;?
+ echo &quot;Upload file Information.&lt;BR&gt;\n&quot;;
+ echo &quot;&lt;TABLE BORDER=1&gt;\n&quot;;
+ echo &quot;&lt;TR&gt;&lt;TD&gt;Server temporaly file name&lt;/TD&gt;&lt;TD&gt;$userfile &lt;/TD&gt;&lt;/TR&gt;\n&quot;;
+ echo &quot;&lt;TR&gt;&lt;TD&gt;Uploaded file name&lt;/TD&gt;&lt;TD&gt;$userfile_name &lt;/TD&gt;&lt;/TR&gt;\n&quot;;
+ echo &quot;&lt;TR&gt;&lt;TD&gt;Uploaded file Size&lt;/TD&gt;&lt;TD&gt;$userfile_size &lt;/TD&gt;&lt;/TR&gt;\n&quot;;
+ echo &quot;&lt;TR&gt;&lt;TD&gt;MIME file type&lt;/TD&gt;&lt;TD&gt;$userfile_type &lt;/TD&gt;&lt;/TR&gt;\n&quot;;
+ echo &quot;&lt;/TABLE&gt;\n&quot;;
+ echo &quot;&lt;HR&gt;&quot;;
+$conn=mysql_connect(&quot;localhost&quot;);
+if(!mysql_select_db(&quot;StdArchive&quot;,$conn)){echo (&quot;Cannot select database.\n&quot;);}
+
+if($userfile==&quot;none&quot; or $userfile==''){
+ echo &quot;It was not uploaded.&lt;BR&gt;&lt;HR&gt;&quot;;
+}else{
+ $fp=fopen($userfile,&quot;r&quot;);
+ $Binary=addslashes(fread($fp, filesize($userfile)));
+ fclose ($fp);
+ unlink($userfile);
+ $query=&quot;insert into stddoc
+values('','$userfile_type','$userfile_name','$Binary')&quot;;
+ if(mysql_query($query)){
+  echo(&quot;Write data sucessfully.&lt;BR&gt;&quot;);
+ }else{
+  echo(&quot;Write data Failure.&lt;BR&gt;&quot;);
+ };
+ echo (&quot;&lt;HR&gt;&lt;BR&gt;&quot;);
+};
+?&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+-----------------------------------------------------------------------------
+ブラウザ-&gt;サーバ転送用&quot;RCV.php3&quot;
+Upload.htmlから呼び出されるサーバ側受信スクリプト
+$Binary変数に&quot;\&quot;(バックスラッシュ)問題回避処理(addshashes)をして内容を収納
+テンポラリ削除後、MySQLにサイズ、タイプを含めてレコードを追加
+$userfile_****は自動で付いてくるので参照だけ
+
+フィールド構成
+ ID                int   インデックス(not null,auto increment)
+ MIME              varchar MIMEタイプ
+ Filename          varchar ファイル名
+ Dbinary           longbolb バイナリ本体
+
+--------Upload.html----------------------------------------------------------
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;title&gt;Document Upload FORM&lt;/title&gt;
+&lt;/HEAD&gt;
+&lt;BODY bgcolor=&quot;#FFFFFF&quot; text=&quot;#000000&quot;&gt;
+&lt;p&gt;Documet Upload FORM.&lt;/p&gt;
+&lt;table width=&quot;75%&quot; border=&quot;0&quot; align=&quot;center&quot;&gt;
+ &lt;tr bgcolor=&quot;#999999&quot;&gt;
+  &lt;td&gt;
+   &lt;table width=&quot;100%&quot; border=&quot;0&quot;&gt;
+    &lt;tr bgcolor=&quot;#FFFFFF&quot;&gt;
+     &lt;td&gt;
+     ファイルアップロード
+     &lt;table width=&quot;75%&quot; border=&quot;0&quot; align=&quot;center&quot;&gt;
+      &lt;tr bgcolor=&quot;#0000ff&quot;&gt;
+       &lt;td&gt;
+       &lt;table width=&quot;100%&quot; border=&quot;0&quot;&gt;
+        &lt;tr bgcolor=&quot;#FFFFFF&quot;&gt;
+         &lt;td colspan=&quot;2&quot;&gt;ファイル情報の設定&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr bgcolor=&quot;#FFFFFF&quot;&gt;
+         &lt;td&gt;Filename&lt;/td&gt;
+         &lt;td&gt;Action&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr bgcolor=&quot;#FFFFFF&quot;&gt;
+         &lt;form enctype=&quot;multipart/form-data&quot; action=&quot;RCV.php3&quot; method=POST&gt;
+          &lt;td&gt;
+           &lt;input type=&quot;hidden&quot; name=&quot;MAX_FILE_SIZE&quot; value=&quot;2097152&quot;&gt;
+           &lt;input name=&quot;userfile&quot; type=&quot;file&quot;&gt;
+          &lt;/td&gt;
+          &lt;td&gt;
+           &lt;input type=&quot;submit&quot; name=&quot;Submit&quot; value=&quot;送信&quot;&gt;
+          &lt;/td&gt;
+         &lt;/form&gt;
+        &lt;/tr&gt;
+       &lt;/table&gt;
+       &lt;/td&gt;
+      &lt;/tr&gt;
+     &lt;/table&gt;
+     &lt;/td&gt;
+    &lt;/tr&gt;
+   &lt;/table&gt;
+  &lt;/td&gt;
+ &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+-----------------------------------------------------------------------------
+ファイルアップロード用UI&quot;Upload.html&quot;
+ファイル名を設定後、送信ボタンでRCV.php3を呼び出す
+
+
+
+</pre>
+</div>
+<p class="button"><a href="2348">[前]</a><a href="2350">[次]</a><a href="../list/2301-2400">[番号順一覧]</a><a href="../thread/2301-2400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2328">   2328 2000-08-01 19:33 [楠吉彦  &lt;moredebu@xx] php で写真 GIF を出力するには           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2331">   2331 2000-08-01 20:38 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2339">   2339 2000-08-02 13:12 ┗[&quot;MIYATSU Kazunari&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2340">   2340 2000-08-02 18:07 　┗[楠吉彦  &lt;moredebu@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2341">   2341 2000-08-02 18:36 　　┗[&quot;MIYATSU Kazunari&quot; &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2342">   2342 2000-08-02 18:45 　　　┗[&quot;MIYATSU Kazunari&quot; &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2343">   2343 2000-08-02 20:35 　　　　┣[楠吉彦  &lt;moredebu@xx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2347">   2347 2000-08-04 18:42 　　　　┗[楠吉彦  &lt;moredebu@xx]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="2349">   2349 2000-08-05 11:52 　　　　　┗[&quot;MIYATSU Kazunari&quot; &lt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2350">   2350 2000-08-05 16:26 　　　　　　┗[楠吉彦  &lt;moredebu@xx]                           </a></span>
+</pre>
+</body>
+</html>

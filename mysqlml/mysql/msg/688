@@ -1,0 +1,66 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:688</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="687">[前]</a><a href="689">[次]</a><a href="../list/601-700">[番号順一覧]</a><a href="../thread/601-700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:688
+</p>
+<div class="header">
+<p>
+From: &quot;Satoshi Tatsuoka&quot; &lt;&quot;Satoshi Tatsuoka&quot; &lt;satoshi@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 13 Feb 1999 19:21:09 +0900<br>
+Subject: [mysql 00688] RE:  プレースホルダーを使った execute で Out of memory<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+立岡です。
+
+<span class="quote1">&gt;はじめまして。奥田と申します。</span>
+
+こんにちは。
+
+<span class="quote1">&gt;現在、PerlのDBIインタフェースを使用して、典型的なパターンのテストをし</span>
+<span class="quote1">&gt;ております。そこで、プレースホルダーを使ったSelect〜executeを8000回近く</span>
+<span class="quote1">&gt;繰り返すと、Out of memory なるエラーでPerlスクリプトが挫折してしまう、</span>
+<span class="quote1">&gt;という現象に出くわしました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;テストしたスクリプトと、テーブル定義は、以下のとおりです。</span>
+<span class="quote1">&gt;          $state  =  &quot;SELECT USRYAK from USER where USUSER = ?&quot;;</span>
+<span class="quote1">&gt;          $USERh  =  $dbh-&gt;prepare($state) || die $dbh-&gt;errstr;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;          for ($i = 0; $i &lt;= 900000; $i++) {</span>
+<span class="quote1">&gt;              $USERCD = sprintf(&quot;%08.8d&quot;, $i);</span>
+<span class="quote1">&gt;              $USERh-&gt;execute('00003810') || die $USERh-&gt;errstr, &quot;i=$i&quot;;</span>
+<span class="quote1">&gt;#1            $USERh-&gt;execute($USERCD) || die $USERh-&gt;errstr, &quot;i=$i&quot;;</span>
+<span class="quote1">&gt;              $USERh-&gt;bind_col(1, \$USRYAK);</span>
+<span class="quote1">&gt;              while($USERh-&gt;fetchrow_arrayref()) {</span>
+<span class="quote1">&gt;                  print &quot;USERCD=($USERCD) USRYAK=($USRYAK)\n&quot;;</span>
+<span class="quote1">&gt;              }</span>
+<span class="quote1">&gt;          }</span>
+
+DBIは良く知らないのですが、結果が開放されていないのではないかと思います。
+free_resultのようなコマンドがwhile文の終了後に必要だと思います。
+DBIだと
+$USERh-&gt;finish
+とかそんな感じじゃないかとおもいます。（推測）
+でもprepareしたものまで忘れなければいいのですが．．．
+
+Satoshi Tatsuoka
+satoshi@xxxxxxxxxx
+
+
+</pre>
+</div>
+<p class="button"><a href="687">[前]</a><a href="689">[次]</a><a href="../list/601-700">[番号順一覧]</a><a href="../thread/601-700">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="688">    688 1999-02-13 19:21 [&quot;Satoshi Tatsuoka&quot; &lt;] RE:  プレースホルダーを使った execute で Out of memory</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="690">    690 1999-02-13 20:34 ┗[奥田  典子 &lt;okud_no@]                                       </a></span>
+</pre>
+</body>
+</html>

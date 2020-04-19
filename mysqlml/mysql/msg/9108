@@ -1,0 +1,106 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9108</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9107">[前]</a><a href="9109">[次]</a><a href="../list/9101-9200">[番号順一覧]</a><a href="../thread/9101-9200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9108
+</p>
+<div class="header">
+<p>
+From: &lt;kuyo@xxxxxxxxxx&gt;<br>
+Date: Tue, 30 Mar 2004 22:44:18 +0900<br>
+Subject: [mysql 09108] Re: mysql3.23 on FreeBSD のレプリカにて異常な CPU 使用時間の問題<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして。
+山本と申します。
+
+mysql.com に掲載されているドキュメントでは FreeBSD での注意点として、
+特定の状況で CPU 使用率が 100% になることがあるとありますね。
+
+  <a href="http://www.mysql.com/doc/ja/FreeBSD.html">http://www.mysql.com/doc/ja/FreeBSD.html</a>
+
+この例では gethostbyname() にて発生するとありますが、松本さんの
+場合では gettimeofday() が大量に呼び出されているとの事なので、
+この関数もスレッドセーフでは無いのかもしれません。
+
+FreeBSD は詳しくなく推測の回答ですが、参考になれば幸いです。
+
+----
+Hideki Yamamoto
+kuyo@xxxxxxxxxx
+
+
+At 30 Mar 2004 17:23:03 +0900,
+MATSUMOTO wrote:
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 松本と申します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; FreeBSD 4.8-RELEASE-p13を利用してmysqlのレプリカ構成で利用しております。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; マスタ側マシン</span>
+<span class="quote1">&gt; FreeBSD4.8-RELEASE-p13</span>
+<span class="quote1">&gt; mysql3.23.58</span>
+<span class="quote1">&gt; (portsからインストール　 WITH_CHARSET=ujis WITH_XCHARSET=allを指定)</span>
+<span class="quote1">&gt; スレーブ側マシン</span>
+<span class="quote1">&gt; FreeBSD4.8-RELEASE-p13</span>
+<span class="quote1">&gt; mysql3.23.58</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以上の構成にてmysqlを利用しているのですが、スレーブ側マシンにてほぼ100%のCPU時間をmysqldが使ってしまっています。（SMPなマシンですので、vmstatでは50%と表示されておりますがFreeBSDのスレッドでは１つのCPUしかつかえないのでほぼ100%のCPU時間を使っていると思います。）</span>
+<span class="quote1">&gt; スレーブ側は秒間10程度のクエリーを処理しておりますがとても100%のCPU時間を使うとは思えません。</span>
+<span class="quote1">&gt; この問題について、どなたか情報をお持ちの方いらっしゃらないでしょうか。確認する点だけでも分かればアドバイスいただけないでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以下に調べた事を書いております。ログには特にメッセージは表示されておりませんでした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; vmstatで確認したところ非常に多くのシステムコールが多く呼ばれている事が分かりました。trussコマンドでシステムコールを表示させた結果を添付いたします。</span>
+<span class="quote1">&gt; # vmstat 1</span>
+<span class="quote1">&gt; procs memory page disks faults cpu</span>
+<span class="quote1">&gt; r b w avm fre flt re pi po fr sr aa0 md0 in sy cs us sy id</span>
+<span class="quote1">&gt; 1 3 0 1081124 1392800 6 0 0 0 55 0 0 0 214 272 164 1 36 63</span>
+<span class="quote1">&gt; 1 3 0 1081124 1392796 5 0 0 0 0 0 0 0 267 303610 23 0 52 48</span>
+<span class="quote1">&gt; 1 3 0 1081124 1392796 3 0 0 0 0 0 0 0 241 304534 23 0 51 49</span>
+<span class="quote1">&gt; 1 3 0 1081124 1392796 3 0 0 0 0 0 0 0 250 304072 19 0 51 49</span>
+<span class="quote1">&gt; 1 3 0 1081124 1392796 3 0 0 0 0 0 0 0 281 302945 20 0 51 49</span>
+<span class="quote1">&gt; 1 3 0 1081124 1392796 3 0 0 0 0 0 0 0 237 304570 22 0 51 49</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # truss -p 8660</span>
+<span class="quote1">&gt; poll(0x840c000,0x4,0x152e) = 1 (0x1)</span>
+<span class="quote1">&gt; gettimeofday(0x8396828,0x0) = 0 (0x0)</span>
+<span class="quote1">&gt; poll(0x840c000,0x4,0x152e) = 1 (0x1)</span>
+<span class="quote1">&gt; gettimeofday(0x8396828,0x0) = 0 (0x0)</span>
+<span class="quote1">&gt; poll(0x840c000,0x4,0x152d) = 1 (0x1)</span>
+<span class="quote1">&gt; gettimeofday(0x8396828,0x0) = 0 (0x0)</span>
+<span class="quote1">&gt; poll(0x840c000,0x4,0x152d) = 1 (0x1)</span>
+<span class="quote1">&gt; gettimeofday(0x8396828,0x0) = 0 (0x0)</span>
+<span class="quote1">&gt; poll(0x840c000,0x4,0x152c) = 1 (0x1)</span>
+<span class="quote1">&gt; gettimeofday(0x8396828,0x0) = 0 (0x0)</span>
+<span class="quote1">&gt; poll(0x840c000,0x4,0x152c) = 1 (0x1)</span>
+<span class="quote1">&gt; gettimeofday(0x8396828,0x0) = 0 (0x0)</span>
+<span class="quote1">&gt; poll(0x840c000,0x4,0x152b) = 1 (0x1)</span>
+<span class="quote1">&gt; gettimeofday(0x8396828,0x0) = 0 (0x0)</span>
+<span class="quote1">&gt; poll(0x840c000,0x4,0x152b) = 1 (0x1)</span>
+<span class="quote1">&gt; gettimeofday(0x8396828,0x0) = 0 (0x0)</span>
+<span class="quote1">&gt; poll(0x840c000,0x4,0x152a) = 1 (0x1)</span>
+<span class="quote1">&gt; gettimeofday(0x8396828,0x0) = 0 (0x0)</span>
+<span class="quote1">&gt; poll(0x840c000,0x4,0x152a) = 1 (0x1)</span>
+<span class="quote1">&gt; gettimeofday(0x8396828,0x0) = 0 (0x0) </span>
+
+</pre>
+</div>
+<p class="button"><a href="9107">[前]</a><a href="9109">[次]</a><a href="../list/9101-9200">[番号順一覧]</a><a href="../thread/9101-9200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9107">   9107 2004-03-30 17:23 [MATSUMOTO &lt;xmatsu4@x] mysql3.23 on FreeBSD のレプリカにて異常な CPU 使用時間の問題</a></span>
+<span class="current">-&gt;&nbsp;<a href="9108">   9108 2004-03-30 22:44 ┗[&lt;kuyo@xxxxxxxxxx&gt;   ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9109">   9109 2004-03-31 10:10 　┗[MATSUMOTO &lt;xmatsu4@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9311">   9311 2004-05-02 10:01 　　┗[MATSUMOTO &lt;xmatsu4@x]                                   </a></span>
+</pre>
+</body>
+</html>

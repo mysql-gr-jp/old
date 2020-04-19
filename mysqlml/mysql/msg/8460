@@ -1,0 +1,102 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8460</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8459">[前]</a><a href="8461">[次]</a><a href="../list/8401-8500">[番号順一覧]</a><a href="../thread/8401-8500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8460
+</p>
+<div class="header">
+<p>
+From: &quot;ta ma&quot; &lt;&quot;ta ma&quot; &lt;chihuahuatyan2@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 09 Dec 2003 16:52:22 +0900<br>
+Subject: [mysql 08460] Re: MySQL はどのように LIMIT  を最適化するか？について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+CHIWAKOです
+<span class="quote1">&gt; --------------------</span>
+<span class="quote1">&gt; 5.2.8 MySQL はどのように LIMIT を最適化するか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ・もし LIMIT # を ORDER BY と共に使用するなら, MySQL は最初の # 行を見つけ</span>
+た
+<span class="quote1">&gt; らすぐに、全テーブルのソートは行わずに、ソートを終わらせます。 </span>
+<span class="quote1">&gt; --------------------</span>
+
+日本語の解釈がなかなかできなくて、かわじさんの説明で納得しました。
+現実には経験から意図したとおり日付順で指定件数だけ取り出せます。
+ただ今まで偶然取り出す順番（UPDATEされなければ大体INSERT順でしょうか？）と
+ソートがたまたまあっていて、実は私の勘違いだったのかと思ってしまいました。
+ソート法まで考えてませんでしたが、もしはじめに順番の低い方から見つけていく
+ソート法が取られているなら、最後までやらずに終えてよし。という意味ですね？
+
+
+せっかくなので、実際にテーブルを作って確かめてみました。
+バージョンは4.0.14
+OSはwin2000で、配布されていたバイナリ版を解凍したものです。
+
+全データ
+mysql&gt; select bno,date1 from test;
++------+---------------------+
+<span class="quote1">| bno  | date1               |</span>
++------+---------------------+
+<span class="quote1">|    1 | 2003-12-09 17:29:55 |</span>
+<span class="quote1">|    2 | 2003-12-09 18:31:32 |</span>
+<span class="quote1">|    3 | 2003-12-09 19:31:32 |</span>
+<span class="quote1">|    4 | 2003-12-09 18:31:32 |</span>
+<span class="quote1">|    5 | 2003-12-10 02:31:32 |</span>
+<span class="quote1">|    6 | 2003-12-10 01:31:32 |</span>
+<span class="quote1">|    7 | 2003-12-09 22:31:32 |</span>
+<span class="quote1">|    8 | 2003-12-10 12:31:32 |</span>
+<span class="quote1">|    9 | 2003-12-10 07:31:32 |</span>
+<span class="quote1">|   10 | 2003-12-10 23:31:32 |</span>
+<span class="quote1">|   11 | 2003-12-10 06:31:32 |</span>
+<span class="quote1">|   12 | 2003-12-10 13:31:33 |</span>
++------+---------------------+
+12 rows in set (0.05 sec)
+
+オフセット5番目から5件日付の順で
+mysql&gt; select bno,date1 from test order by date1 limit 5,5 ;
++------+---------------------+
+<span class="quote1">| bno  | date1               |</span>
++------+---------------------+
+<span class="quote1">|    6 | 2003-12-10 01:31:32 |</span>
+<span class="quote1">|    5 | 2003-12-10 02:31:32 |</span>
+<span class="quote1">|   11 | 2003-12-10 06:31:32 |</span>
+<span class="quote1">|    9 | 2003-12-10 07:31:32 |</span>
+<span class="quote1">|    8 | 2003-12-10 12:31:32 |</span>
++------+---------------------+
+5 rows in set (0.02 sec)
+
+オフセット5番目から5件（ソート無し）
+mysql&gt; select bno,date1 from test limit 5,5 ;
++------+---------------------+
+<span class="quote1">| bno  | date1               |</span>
++------+---------------------+
+<span class="quote1">|    6 | 2003-12-10 01:31:32 |</span>
+<span class="quote1">|    7 | 2003-12-09 22:31:32 |</span>
+<span class="quote1">|    8 | 2003-12-10 12:31:32 |</span>
+<span class="quote1">|    9 | 2003-12-10 07:31:32 |</span>
+<span class="quote1">|   10 | 2003-12-10 23:31:32 |</span>
++------+---------------------+
+5 rows in set (0.00 sec)
+
+ありがとうございました
+Regards
+--CHIWAKO
+
+_________________________________________________________________
+友達と24時間ホットライン「MSN メッセンジャー」、今すぐダウンロード！  
+<a href="http://messenger.msn.co.jp">http://messenger.msn.co.jp</a> 
+
+
+</pre>
+</div>
+<p class="button"><a href="8459">[前]</a><a href="8461">[次]</a><a href="../list/8401-8500">[番号順一覧]</a><a href="../thread/8401-8500">[スレッド一覧]</a></p>
+</body>
+</html>

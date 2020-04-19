@@ -1,0 +1,90 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14996</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14995">[前]</a><a href="14997">[次]</a><a href="../list/14901-15000">[番号順一覧]</a><a href="../thread/14901-15000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14996
+</p>
+<div class="header">
+<p>
+From: &lt;shin-1@xxxxxxxxxx&gt;<br>
+Date: Wed, 22 Jul 2009 19:30:53 +0900<br>
+Subject: [mysql 14996] Re: 文字化けたダンプデータの救済<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+あの後、さくっと解決しました！
+あの「全てutf8で統一した」blog記事のまま設定したのも問題だったようです。
+
+以下、全行程をまとめます。
+
+まず前準備、4.1のmysqldumpで文字化けしてしまったダンプファイルを
+1.秀丸でUTF8として強制的に開く（警告が出ても無視）
+2.秀丸で名前をつけて保存で「欧文」を選択して保存
+3.再度開くと元のDBの文字コードで開けるので、DEFAULT CHARSET=の部分を
+　本来希望するCHARSETに書き換える
+
+今回、ダンプファイルdb_sjis.dumpは、文字コードShift_JISで保存しておいて
+DEFAULT CHARSET=sjisに書き換え済み。
+
+my.cnfはきちんとサーバクライアント間で文字コード変換されるように
+（※DBにはSJIS保存で、コマンド操作する端末画面表示はEUCという設定）
+[mysqld]
+default-character-set=sjis ←これは運用ポリシーに合わせて設定
+# skip-character-set-client-handshake ←変換したいのでこれは指定しない
+[mysql]
+default-character-set=ujis  ←mysqlコマンドを実行するシェル画面はEUCなので。
+
+この状態でmysqlコマンド画面では
+<span class="quote1">&gt; show variables like &quot;char%&quot;;</span>
++--------------------------+-----------------------------------------+
+<span class="quote1">| Variable_name            | Value                                   |</span>
++--------------------------+-----------------------------------------+
+<span class="quote1">| character_set_client     | ujis                                    |</span>
+<span class="quote1">| character_set_connection | ujis                                    |</span>
+<span class="quote1">| character_set_database   | sjis                                    |</span>
+<span class="quote1">| character_set_results    | ujis                                    |</span>
+<span class="quote1">| character_set_server     | sjis                                    |</span>
+<span class="quote1">| character_set_system     | utf8                                    |</span>
+<span class="quote1">| character_sets_dir       | /usr/local/mysql4/share/mysql/charsets/ |</span>
++--------------------------+-----------------------------------------+
+この状態で、画面はujisで処理されるので、手で日本語データをinsertすると
+きちんと日本語が入り、selectで文字化けせず表示されます。
+
+いよいよダンプデータの投入。
+
+<span class="quote1">&gt; set NAMES sjis; を実行してから</span>
+<span class="quote1">&gt; source /home/test/db_sjis.dump とやりましたが、これでは失敗</span>
+どうも、set NAMESはsourceコマンドの中までは影響してくれないようです。
+
+db_sjis.dump ファイルの先頭のSQL文の直前にset NAMES sjis; を1行書いて
+から、再度sourceコマンドを実行したら成功しました。
+
+PHPスクリプトをinternal_encoding=SJISにしても、internal_encoding=EUC
+にしても、どちらでもMySQL上の日本語データが、きちんとPHPの内部コードに
+変換されて、日本語データが読み出されました。
+
+以上！大成功！！
+
+
+</pre>
+</div>
+<p class="button"><a href="14995">[前]</a><a href="14997">[次]</a><a href="../list/14901-15000">[番号順一覧]</a><a href="../thread/14901-15000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14988">  14988 2009-07-22 01:38 [&lt;shin-1@xxxxxxxxxx&gt; ] 文字化けたダンプデータの救済            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14989">  14989 2009-07-22 12:17 ┣[Yoshiaki Yanagimoto ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14990">  14990 2009-07-22 14:17 ┗[たけ &lt;zon1966@xxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14992">  14992 2009-07-22 14:53 　┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14994">  14994 2009-07-22 18:24 　　┗[&quot;N.K.&quot; &lt;nakai.kanako]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14995">  14995 2009-07-22 18:53 　　　┣[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="14996">  14996 2009-07-22 19:30 　　　┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
+</pre>
+</body>
+</html>

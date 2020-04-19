@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11951</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11950">[前]</a><a href="11952">[次]</a><a href="../list/11901-12000">[番号順一覧]</a><a href="../thread/11901-12000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11951
+</p>
+<div class="header">
+<p>
+From: jiao congmian &lt;jiao congmian &lt;melmajiao@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 13 Aug 2005 10:24:30 +0900 (JST)<br>
+Subject: [mysql 11951] Re: HEAP テーブルへのあいまい検索の速度<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちはJIAOです。
+いろいろご意見ありがとうございました。
+
+それについて検証した事やコメントを書かせていただきます。
+
+
+「カーネルを物理メモりにロード」
+HEAPテーブルへのあいまい検索速度にはあまり差は無かったで
+す。
+（でもやり忘れていたのでやっておきました。他で良い影響が
+ありそうです。）
+
+「Serial ATA RAID にする」
+RAIDは試していません。同一機で違うHDDでも試していません
+。
+でもメイン機のHDDはSerialでサブ機の２倍ほど早いのですが
+、HEAPテーブルへのあいまい検索速度はCPUの能力に依存して
+いてHDD速度は関係ないように見えます。
+理屈でもHEAPテーブルはメモリ上のテーブルですからHDDは関
+係なさそうです。
+またHEAPへの検索中にHDDアクセスのランプは点灯しません。
+
+「VBのバージョン・ADOとDAO」
+HEAPテーブルへのあいまい検索をかけている瞬間をタスクマネ
+ージャーで見ていると、VB（で作成したEXE）はMYSQLが結果を
+返してくれるのを待っているだけで、MYSQL（mysqd-nt.exe）
+だけが頑張っている状態になります。
+MYSQLが順番に検索対象文字列に検索文字列が含まれていない
+かを探す部分に時間を要していると思われ、結果を作成するの
+に時間を要しているのではなさそうに思います。（でも後者な
+らDAOにすると効果あるかも？後日試すかも知れませんがDAOは
+経験少ないので・・・）
+
+「Mysqlの全文検索機能・N-Gram」
+N-Gramという言葉は初めて知りました。
+でも独自にそれに似た試みは行いました。
+２文字に分けたり、１文字にしたり、それをコードで格納した
+り・・・
+それを完全一致で検索したり、MATCH()で検索したり・・・
+でもHEAP＋LIKEに比べて、時間でも勝てませんし、正確さでも
+勝てませんでした。
+（半年以上前の事で少々あやふやですが）
+
+インデックスになじまない最大の理由は会社名の一部検索が多
+いからです。
+『松下電器産業』が対象文字列の場合。
+『松下』でヒット
+『器』でヒット
+『松下　and　産業』でヒット
+『下松』はヒットしない
+『松下産業』はヒットしない
+という具合にしたいのです。
+文字数で文節を分けても、日本語辞書で文節を分けてもうまく
+行きません。
+やっぱりあいまい検索になっちゃいます。
+
+
+やはり、HEAPテーブルへのあいまい検索速度を早くするにはCPU
+を早くするのが一番のように思えます。
+で、最近のCPUとMYSQLの性能の関係はどうなんでしょう。
+最近のCPUは６４ビットで２つのコアとなっています。
+
+まず３２ビットから６４ビットCPUに変更して、OSもMYSQLも６
+４ビットに対応した場合。
+同一クロック当たりの処理量は理論上２倍となる、と考えて良
+いのでしょうか？
+（６４ビットCPUのメリットをネットや本で見ても「倍速にな
+る」といった説明を見ませんでした。）
+
+またCPUが２つのコアを持っていた場合。
+MYSQLは両方のコアを使用して１つのクエリを倍速で実行する
+、のでしょうか？
+（私の環境ではHTを有効にするとMYSQLは２つのCPUを使ってい
+るように見えます。）
+
+
+__________________________________
+Save the earth
+<a href="http://pr.mail.yahoo.co.jp/ondanka/">http://pr.mail.yahoo.co.jp/ondanka/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="11950">[前]</a><a href="11952">[次]</a><a href="../list/11901-12000">[番号順一覧]</a><a href="../thread/11901-12000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11912">  11912 2005-08-06 18:11 [jiao congmian &lt;melma] HEAP テーブルへのあいまい検索の速度     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11913">  11913 2005-08-06 21:32 ┣[深海水草 &lt;VYG01106@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11914">  11914 2005-08-08 09:25 ┗[&quot;Ryousuke Wayama&quot; &lt;w]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11915">  11915 2005-08-08 11:32 　┗[川合孝典 &lt;gcd00051@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11919">  11919 2005-08-08 19:11 　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="11951">  11951 2005-08-13 10:24 　　　┗[jiao congmian &lt;melma]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11952">  11952 2005-08-13 17:08 　　　　┗[深海水草 &lt;VYG01106@x]                               </a></span>
+</pre>
+</body>
+</html>

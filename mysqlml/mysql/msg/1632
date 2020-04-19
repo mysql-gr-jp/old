@@ -1,0 +1,439 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1632</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1631">[前]</a><a href="1633">[次]</a><a href="../list/1601-1700">[番号順一覧]</a><a href="../thread/1601-1700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1632
+</p>
+<div class="header">
+<p>
+From: &quot;N.Yoshida&quot; &lt;&quot;N.Yoshida&quot; &lt;yosh_no@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 23 Feb 2000 16:45:27 +0900<br>
+Subject: [mysql 01632] Re: How to run mySQL<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<span class="quote1">&gt;おかゆきおです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;　ＳＱＬＲｕｂｙをインストールしてみたのですが、</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;ruby-1.4.2.lzh を C:\ で展開するだけ。</span>
+<span class="quote2">&gt;&gt;mysql.dll も含んでいるので手間いらず。</span>
+<span class="quote2">&gt;&gt;もし動かなかったら、自分でなんとかしてください :-P</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt;　いろいろやってみまして、なんとか動かそうとしています。</span>
+<span class="quote1">&gt;　そこで、質問させていただきたいのですが、</span>
+<span class="quote1">&gt;　</span>
+<span class="quote1">&gt;　Rubyが起動する状態にして、</span>
+<span class="quote1">&gt;　いろいろな、＊＊＊。ｒｂ　ファイルを、\ruby　にコピーして</span>
+<span class="quote1">&gt;試したら、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;requier  というファイルがなくて、ロードできないというエラーになります。</span>
+<span class="quote1">&gt;　このファイルが、ないのはなぜでしょうか？　</span>
+
+  吉田です。
+  Windows用のruby/mysql/gtk+の環境整備まわりを村上さんのドキュメントをもとに
+整理しなおしてみました。ちょっと長いですが参考までにどうぞ。
+
+
+------(はじまり)--------------------------------------------------------------
+
+◆◆Windows用 RubyMysqlAdmin,MySQL-Rubyのインストール            000/02/08 吉田
+
+  ┌────────────────────────────────────┐
+  │ruby-1_4_2.lzh                      <a href="http://www.softagency.co.jp/">http://www.softagency.co.jp/</a>        │
+  │ruby-gtk-022.lzh                    <a href="http://www.softagency.co.jp/">http://www.softagency.co.jp/</a>        │
+  │rubymysqladmin-19999924.tgz         <a href="http://www.softagency.co.jp/">http://www.softagency.co.jp/</a>        │
+  └────────────────────────────────────┘
+
+■MySQL-Ruby、ruby-gtk のインストール
+                                                                    
+   [プログラムの関連]
+  ┌────────────────────────────────────┐
+  │                                                                        │
+  │  ┌────┐  ┌────┐  ┌────┐  ┌────┐  ┌────┐  │
+  │  │        │  │        │  │        │  │        │  │        │  │
+  │  │        │→│ruby-gtk│→│  ruby  │→│mysql   │→│ MySQL  │  │
+  │  │        │  │        │  │        │  │  -ruby │  │        │  │
+  │  └┬──┬┘  │        │  │        │  │        │  │        │  │
+  │    └──┘    └────┘  └────┘  └────┘  └────┘  │
+  │                     ↑            ↑            ↑                     │
+  │                     │            │            │                     │
+  │                ┌──────────────────┐                │
+  │                │                                    │                │
+  │                │           RubyMysqlAdmin           │                │
+  │                │                                    │                │
+  │                └──────────────────┘                │
+  │                                                                        │
+  └────────────────────────────────────┘
+
+ 1)Rubyのインストール
+
+  ・上記のrubyはmysql-rubyが含まれており、以下のように展開する。
+
+  ・gimpパッケージをインストールする場合には、ライブラリの版数によって動作に影
+    響があるため、gtk関連のdllは ruby.exeのディレクトリに置くのがよい。
+
+  ┌────────────────────────────────────┐
+  │c:\usr─local┬bin┬ruby.exe                                            │
+  │             │   ├rubynw.dll                                          │
+  │             │ ┌│──────┐                                      │
+  │             │ │├........    │←────────────────┐  │
+  │             │ │└........    │                                  │  │
+  │             │ └───────┘                                  │  │
+  │             ├man                                                  │  │
+  │             └lib┬ruby─1.4┬i386-mswin32┬mysql.dll              │  │
+  │                  │         │            ├socket.dll             │  │
+  │                  └......   │            ├win32api.dll           │  │
+  │                      ↑     ├irb─....   ├..........             │  │
+  │                      │     ├net─....                            │  │
+  │                      │     │                                     │  │
+  │                      │     ├base64.rb                            │  │
+  │                      │     ├cgi.rb                               │  │
+  │                      │     ├......                               │  │
+  │                      │     └......                               │  │
+  │                      │                                            │  │
+  │                      └───────────────────┐    │  │
+  │                                                              │    │  │
+  └───────────────────────────────│──│─┘
+                                                                  │    │
+ 2)ruby-gtkのインストール                                         │    │
+                                                                  │    │
+  ・ruby-gtk-022.lzhを展開し以下に示すようにコピーする。          │    │
+    (コピー後、c:\ruby-gtk-022ディレクトリは消してよい)           │    │
+                                                                  │    │
+  ┌───────────────────────────────│──│─┐
+  │                                      ┌────┐            │    │  │
+  │c:\ruby-gtk-0.22┬gimp_dll─┬windows ─┬im.pal│─→        │    │  │
+  │                │          │        │└im.rc │c:\windows  │    │  │
+  │              ┌│────┐│        └────┘へコピー    │    │  │
+  │              │├gtk.dll ├─────────────────┘    │  │
+  │              └│────┘│                                      │  │
+  │                │        ┌│─────────┐                  │  │
+  │                │        │├gdk_imlib.dll     │                  │  │
+  │                └gtk.lib │├gdk-1.3.dll       │                  │  │
+  │                          │├gimp-1.1.dll      │─────────┘  │
+  │                          │├gimpui-1.1.dll    │                      │
+  │                          │├............      │                      │
+  │                          │├............      │                      │
+  │                          │├                  │                      │
+  │                          │└imlib-tiff.dll    │                      │
+  │                          └──────────┘                      │
+  │                                                                        │
+  └────────────────────────────────────┘
+
+ 3)ruby.exeのディレクトリをPATH環境変数に設定する。
+
+  ・NT 4.0の場合: コントロールパネルの「システム」→「環境」
+    95、98の場合: autoexec.batのPATH変数
+
+   [PATH環境変数の例]
+  ┌────────────────────────────────────┐
+  │c:\win32app\jperl\bin\MSWin32-x86-object;c:\win32app\jperl\bin;c:\bat;次│
+  │c:\etc;%SystemRoot%\system32;%SystemRoot%;C:\OASYS\PBIN;c:\usr\local\bin│
+  │                                                        ◆最後尾に追加  │
+  └────────────────────────────────────┘
+
+■RubyMysqlAdminのインストール
+
+ 1)rubymysqladmin-19990924.tgzを展開する
+
+  ┌────────────────────────────────────┐
+  │c:\rubymysqladmin┬altercreate.rb                                       │
+  │                 ├brousetblwin.rb                                      │
+  │                 ├...............                                      │
+  │                 ├rubymysqladmin      スクリプト本体                   │
+  │                 └rubymysqladmin.rc                                    │
+  └────────────────────────────────────┘
+
+ 2)全てのスクリプトモジュールについて、EUC文字コード(JISもあり)からSJISコードに
+   変換する。
+
+   -nkfでコード変換 (例えば、nkf32.exe -s 変換前のファイル &gt; 変換後のファイル)
+
+ 3)スクリプト本体の rubymysqladminのコード設定を以下のように変更する。
+
+  ┌────────────────────────────────────┐
+  │#!/usr/bin/ruby                                                         │
+  │# .rb ファイルをインストールした先を指定します                          │
+  │$LOAD_PATH &lt;&lt; &quot;c:/usr/local/lib/1.4/i386-mswin32&quot;  ◆mysql.dllの格納先  │
+  │# $initscript=&quot;/usr/local/share/mysql/mysql.server&quot;                     │
+  │$initscript=&quot;/etc/init.d/mysql&quot;                                         │
+  │logo=&quot;logo.xpm&quot;                                                         │
+  │require 'kconv'                                                         │
+  │require 'gtk'                                                           │
+  │require 'mysql'                                                         │
+  │require 'kanji'                                                         │
+  │require 'mymysql'                                                       │
+  │Gtk::RC.parse(&quot;rubymysqladmin.rc&quot;)                                      │
+  │#defstyle = Gtk::Widget::get_default_style()                            │
+  │#$mystyle = defstyle.copy                                               │
+  │# font = Gdk::Font::fontset_load(myfont)                                │
+  │# $mystyle.set_font(font)                                               │
+  │# Gtk::Widget::push_style($mystyle)                                     │
+  │##########                                                              │
+  │$KCODE='E' ; $userkanji='E';  ◆→ $KCODE='S' ; $userkanji='S';に変更   │
+  │$dbserver='localhost'; $dbuser=''; $dbport=3306;$dbpass='';$dbkanji='N';│
+  │ $current_db=nil; $current_table=nil;                                   │
+  │$my=nil; $myres=nil;                                                    │
+  │                                                                        │
+  │##########                                                              │
+  │#--------------                                                         │
+  │require 'style'                                                         │
+  │.....................................                                   │
+  └────────────────────────────────────┘
+
+ 4)リソースファイル rubymysqladmin.rcのフォント設定を以下のように変更する。
+
+  ┌────────────────────────────────────┐
+  │# font の変更を行う際はここをかえます。                                 │
+  │# 12ドッとなら -misc-fixed-medium-r-normal--12-120-*-*-*-*-jisx0208.1983│
+  │-* とか                                                                 │
+  │                                                                        │
+  │style &quot;defaultfont&quot; = &quot;default&quot;                                         │
+  │{                                                                       │
+  │# fontset = &quot;-adobe-helvetica-medium-r-normal--14-120-*-*-*-*-*-*,-misc-│
+  │fixed-medium-r-normal--14-120-*-*-*-*-jisx0208.1983-*&quot;  ◆変更前        │
+  │font = &quot;-unknown-*-*-r-normal-*-*-90-*-*-*-*-windows-shiftjis&quot;  ◆変更後│
+  │}                                                          (9ポフォント)│
+  │class &quot;GtkWidget&quot; style &quot;defaultfont&quot;                                   │
+  │#widget_class &quot;*&quot; style &quot;default&quot;                                       │
+  └────────────────────────────────────┘
+
+■RubyMysqlAdminの実行方法
+
+   &gt; ruby rubymysqladmin (cr)
+
+
+■MySQL/DBのアクセス
+
+ ・スクリプトファイルが Cドライブ以外にある場合、mysqlモジュールを探せず、ロー
+   ドに失敗する。
+   →$LOAD_PATH変数にmysql.dllのインストール先ディレクトリを追加することで解決
+
+
+■サンプルスクリプト
+
+  ┌────────────────────────────────────┐
+  │#サンプルプログラム                                                     │
+  │require 'mysql'                                                         │
+  │                                                                        │
+  │#-----------------------------------------------------------------------│
+  │# DB名をリストアップ         list_dbsメソッドを使用                     │
+  │# host=&quot;vhost&quot;                                                          │
+  │  host=&quot;fz002178&quot;                                                       │
+  │  user=&quot;root&quot;                                                           │
+  │  pass=&quot;&quot;                                                               │
+  │  m=Mysql.new(host,user,pass)                                           │
+  │  printf &quot;-----&lt;list_dbs&gt;--------\n&quot;                                    │
+  │  m.list_dbs.each do |db|                    #データベース名を配列で得る│
+  │    printf &quot;*(%-s)\n&quot;,db                                                │
+  │  end                                                                   │
+  │                                                                        │
+  │#-----------------------------------------------------------------------│
+  │#テーブル名をリストアップ    list_tablesメソッドを使用                  │
+  │  db=&quot;bics&quot;                                                             │
+  │  m=Mysql.new(host,user,pass,db)                                        │
+  │  printf &quot;-----&lt;list_tables&gt;--------\n&quot;                                 │
+  │  m.list_tables.each do |tbl|                 #テーブル名を配列で得る   │
+  │    printf &quot;+(%-s)&quot;,tbl                                                 │
+  │  end                                                                   │
+  │  printf &quot;\n&quot;                                                           │
+  │                                                                        │
+  │#-----------------------------------------------------------------------│
+  │#フィールド名をリストアップ  fetch_fieldsメソッドを使用                 │
+  │  db=&quot;bics&quot;                                                             │
+  │  tbl=&quot;USG&quot;                                                             │
+  │  m=Mysql.new(host,user,pass,db)                                        │
+  │  printf &quot;-----&lt;list_fields&gt;--------\n&quot;                                 │
+  │  m.list_fields(tbl).fetch_fields.each do |f|#MysqlFieldオブジェクト配列│
+  │    printf &quot;-(%-s)&quot;,f.name                   #フィールド名              │
+  │  end                                                                   │
+  │  printf &quot;\n&quot;                                                           │
+  │                                                                        │
+  │#-----------------------------------------------------------------------│
+  │# DB名をリストアップ         fetch_fieldsメソッドを使用                 │
+  │# host=&quot;vhost&quot;                                                          │
+  │  user=&quot;root&quot;                                                           │
+  │  pass=&quot;&quot;                                                               │
+  │  db=&quot;eqpd&quot;                                                             │
+  │  m=Mysql.new(host,user,pass,db)                                        │
+  │  sql=&quot;select f00,f01,f02,f03,f04,f05,f06 from eqp&quot; \                   │
+  │       + &quot; where f05 like \'9688%\'&quot; \                                  │
+  │       + &quot; and f00=f01&quot;                       #行の継続: \の直後に改行  │
+  │  rc=m.query(sql)                                                       │
+  │  flds=rc.fetch_fields.filter do |f| f.name end #フィールド名を得る     │
+  │  printf &quot;-----&lt;fetch_fields&gt;--------\n&quot;                                │
+  │  printf &quot;field name=(%s)\n&quot;,flds.join(&quot; &quot;)                             │
+  │                                                                        │
+  │#-----------------------------------------------------------------------│
+  │# 検索レコードを出力         fetch_hashメソッドを使用                   │
+  │# host=&quot;vhost&quot;                                                          │
+  │  user=&quot;root&quot;                                                           │
+  │  pass=&quot;&quot;                                                               │
+  │  db=&quot;eqpd&quot;                                                             │
+  │  m=Mysql.new(host,user,pass,db)                                        │
+  │  sql=&quot;select f00,f01,f02,f03,f04,f05,f06,f07,f08 from eqp&quot; \           │
+  │       + &quot; where f08 like \'吉田%\'&quot; \                                  │
+  │       + &quot; and f00=f01&quot;                                                 │
+  │#      + &quot; where f05 like \'9688%\'&quot; \                                  │
+  │  rc=m.query(sql)                                                       │
+  │  printf &quot;-----&lt;fetch_hash&gt;--------\n&quot;                                  │
+  │  while row=rc.fetch_hash                                               │
+  │    printf &quot;%-8.8s&quot;,row[&quot;f00&quot;]                                          │
+  │    printf &quot; %-8.8s&quot;,row[&quot;f01&quot;]                                         │
+  │    printf &quot; %-12.12s&quot;,row[&quot;f02&quot;]                                       │
+  │    printf &quot; %-12.12s&quot;,row[&quot;f03&quot;]                                       │
+  │#   printf &quot; %-8.8s&quot;,row[&quot;f04&quot;]                                         │
+  │    printf &quot; %-6.6s&quot;,row[&quot;f05&quot;]                                         │
+  │    printf &quot; %-10.10s&quot;,row[&quot;f06&quot;]                                       │
+  │    printf &quot; %-6.6s&quot;,row[&quot;f07&quot;]                                         │
+  │    printf &quot; %-10.10s&quot;,row[&quot;f08&quot;]                                       │
+  │    printf &quot;\n&quot;                                                         │
+  │  end                                                                   │
+  │                                                                        │
+  │#-----------------------------------------------------------------------│
+  │# 検索レコードを出力         イテレータを使用                           │
+  │# host=&quot;vhost&quot;                                                          │
+  │  user=&quot;root&quot;                                                           │
+  │  pass=&quot;&quot;                                                               │
+  │  db=&quot;eqpd&quot;                                                             │
+  │  m=Mysql.new(host,user,pass,db)                                        │
+  │  sql=&quot;select f00,f01,f02,f03,f04,f05,f06,f07,f08 from eqp&quot; \           │
+  │       + &quot; where f05 like \'9688%\'&quot; \                                  │
+  │       + &quot; and f00=f01&quot;                                                 │
+  │  rc=m.query(sql)                                                       │
+  │  printf &quot;-----&lt;MysqlRes.each_hash&gt;------\n&quot;                            │
+  │  rc.each_hash do |row|                                                 │
+  │    printf &quot;%-8.8s&quot;,row[&quot;f00&quot;]                                          │
+  │    printf &quot; %-8.8s&quot;,row[&quot;f01&quot;]                                         │
+  │    printf &quot; %-12.12s&quot;,row[&quot;f02&quot;]                                       │
+  │    printf &quot; %-12.12s&quot;,row[&quot;f03&quot;]                                       │
+  │#   printf &quot; %-8.8s&quot;,row[&quot;f04&quot;]                                         │
+  │    printf &quot; %-6.6s&quot;,row[&quot;f05&quot;]                                         │
+  │    printf &quot; %-10.10s&quot;,row[&quot;f06&quot;]                                       │
+  │    printf &quot; %-6.6s&quot;,row[&quot;f07&quot;]                                         │
+  │    printf &quot; %-10.10s&quot;,row[&quot;f08&quot;]                                       │
+  │    printf &quot;\n&quot;                                                         │
+  │  end                                                                   │
+  │                                                                        │
+  │#-----------------------------------------------------------------------│
+  │# 検索レコードを出力         fetch_rowメソッドを使用                    │
+  │# host=&quot;vhost&quot;                                                          │
+  │  user=&quot;root&quot;                                                           │
+  │  pass=&quot;&quot;                                                               │
+  │  db=&quot;eqpd&quot;                                                             │
+  │  m=Mysql.new(host,user,pass,db)                                        │
+  │  sql=&quot;select f00,f01,f02,f03,f04,f05,f06,f07,f08 from eqp&quot; \           │
+  │       + &quot; where f05 like \'9688%\'&quot; \                                  │
+  │       + &quot; and f00=f01&quot;                                                 │
+  │  rc=m.query(sql)                                                       │
+  │  printf &quot;-----&lt;fetch_row&gt;--------\n&quot;                                   │
+  │  while row=rc.fetch_row                      #1行を得る                │
+  │    printf &quot;%-8.8s&quot;,row[0]                                              │
+  │    printf &quot; %-8.8s&quot;,row[1]                                             │
+  │    printf &quot; %-12.12s&quot;,row[2]                                           │
+  │    printf &quot; %-12.12s&quot;,row[3]                                           │
+  │#   printf &quot; %-8.8s&quot;,row[4]                                             │
+  │    printf &quot; %-6.6s&quot;,row[5]                                             │
+  │    printf &quot; %-10.10s&quot;,row[6]                                           │
+  │    printf &quot; %-6.6s&quot;,row[7]                                             │
+  │    printf &quot; %-10.10s&quot;,row[8]                                           │
+  │    printf &quot;\n&quot;                                                         │
+  │  end                                                                   │
+  │                                                                        │
+  │#-----------------------------------------------------------------------│
+  │# 検索レコードを出力         イテレータを使用                           │
+  │# host=&quot;vhost&quot;                                                          │
+  │  user=&quot;root&quot;                                                           │
+  │  pass=&quot;&quot;                                                               │
+  │  db=&quot;eqpd&quot;                                                             │
+  │  m=Mysql.new(host,user,pass,db)                                        │
+  │  sql=&quot;select f00,f01,f02,f03,f04,f05,f06,f07,f08 from eqp&quot; \           │
+  │       + &quot; where f05 like \'9688%\'&quot; \                                  │
+  │       + &quot; and f00=f01&quot;                                                 │
+  │  rc=m.query(sql)                                                       │
+  │  printf &quot;-----&lt;MysqlRes.each&gt;------\n&quot;                                 │
+  │  rc.each do |row|                                                      │
+  │    printf &quot;%-8.8s&quot;,row[0]                                              │
+  │    printf &quot; %-8.8s&quot;,row[1]                                             │
+  │    printf &quot; %-12.12s&quot;,row[2]                                           │
+  │    printf &quot; %-12.12s&quot;,row[3]                                           │
+  │#   printf &quot; %-8.8s&quot;,row[4]                                             │
+  │    printf &quot; %-6.6s&quot;,row[5]                                             │
+  │    printf &quot; %-10.10s&quot;,row[6]                                           │
+  │    printf &quot; %-6.6s&quot;,row[7]                                             │
+  │    printf &quot; %-10.10s&quot;,row[8]                                           │
+  │    printf &quot;\n&quot;                                                         │
+  │  end                                                                   │
+  └────────────────────────────────────┘
+------(おわり)----------------------------------------------------------------
+
+-------------------------------------------------------------------------
+  吉田 伸次(N.Yoshida) E-mail:yosh_no@xxxxxxxxxx
+                       nifty :TCN00171@xxxxxxxxxx
+-------------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="1631">[前]</a><a href="1633">[次]</a><a href="../list/1601-1700">[番号順一覧]</a><a href="../thread/1601-1700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1585">   1585 2000-02-15 16:56 [とみたまさひろ &lt;tomm] ML log on web                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1586">   1586 2000-02-15 17:06 ┣[&quot;N.Yoshida&quot; &lt;yosh_no]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1587">   1587 2000-02-15 17:16 ┣[Y. Tsutsui &lt;tutui@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1589">   1589 2000-02-15 20:11 ┣[&lt;endot@xxxxxxxxxx&gt;  ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1609">   1609 2000-02-21 16:43 ┃┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1610">   1610 2000-02-21 17:03 ┃　┗[&quot;Hiroshi Ozeki&quot; &lt;oze]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1611">   1611 2000-02-21 17:10 ┃　　┗[Kenji Kiyota &lt;kenji-]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1612">   1612 2000-02-21 17:20 ┃　　　┗[&quot;Hiroshi Ozeki&quot; &lt;oze]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1613">   1613 2000-02-21 17:58 ┃　　　　┗[Kenji Kiyota &lt;kenji-]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1614">   1614 2000-02-21 18:06 ┃　　　　　┗[&quot;Hiroshi Ozeki&quot; &lt;oze]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1615">   1615 2000-02-21 18:13 ┃　　　　　　┣[Tom Mishima &lt;tmishim]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1617">   1617 2000-02-21 19:49 ┃　　　　　　┃┗[&quot;Hiroshi Ozeki&quot; &lt;oze]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1634">   1634 2000-02-24 13:08 ┃　　　　　　┃　┗[Tamon Nomura &lt;tamon@]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1651">   1651 2000-03-03 02:10 ┃　　　　　　┃　　┗[とみたまさひろ &lt;tomm]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1652">   1652 2000-03-03 08:27 ┃　　　　　　┃　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1653">   1653 2000-03-03 10:39 ┃　　　　　　┃　　　　┣[Y. Tsutsui &lt;tutui@xx]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1655">   1655 2000-03-03 12:01 ┃　　　　　　┃　　　　┃┣[&lt;takeshi@xxxxxxxxxx&gt;]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1656">   1656 2000-03-03 12:11 ┃　　　　　　┃　　　　┃┃┣[&quot;Tomoyuki Asakawa&quot; &lt;]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1658">   1658 2000-03-03 12:18 ┃　　　　　　┃　　　　┃┃┗[とみたまさひろ &lt;tomm]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1657">   1657 2000-03-03 12:15 ┃　　　　　　┃　　　　┃┗[とみたまさひろ &lt;tomm] Japanese MySQL User Group (Re:  Re: ML log on web)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1664">   1664 2000-03-03 14:54 ┃　　　　　　┃　　　　┃　┗[Y. Tsutsui &lt;tutui@xx]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1667">   1667 2000-03-03 15:42 ┃　　　　　　┃　　　　┃　　┣[&lt;takeshi@xxxxxxxxxx&gt;]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1670">   1670 2000-03-03 15:58 ┃　　　　　　┃　　　　┃　　┃┗[Y. Tsutsui &lt;tutui@xx]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1673">   1673 2000-03-03 16:29 ┃　　　　　　┃　　　　┃　　┃　┣[&lt;takeshi@xxxxxxxxxx&gt;] Re: Japanese MySQL User Group</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1674">   1674 2000-03-03 16:34 ┃　　　　　　┃　　　　┃　　┃　┗[Seiji Tateyama &lt;tate]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1676">   1676 2000-03-03 16:53 ┃　　　　　　┃　　　　┃　　┗[Tamon Nomura &lt;tamon@]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1678">   1678 2000-03-03 17:46 ┃　　　　　　┃　　　　┃　　　┗[&quot;Tomoyuki Asakawa&quot; &lt;]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1661">   1661 2000-03-03 14:30 ┃　　　　　　┃　　　　┗[Seiji Tateyama &lt;tate]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1663">   1663 2000-03-03 14:49 ┃　　　　　　┃　　　　　┗[TOMITA Masahiro &lt;tom]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1665">   1665 2000-03-03 14:55 ┃　　　　　　┃　　　　　　┗[Seiji Tateyama &lt;tate]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1669">   1669 2000-03-03 14:58 ┃　　　　　　┃　　　　　　　┗[Y. Tsutsui &lt;tutui@xx]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1671">   1671 2000-03-03 16:10 ┃　　　　　　┃　　　　　　　　┗[とみたまさひろ &lt;tomm]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1672">   1672 2000-03-03 16:28 ┃　　　　　　┃　　　　　　　　　┗[Seiji Tateyama &lt;tate]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1616">   1616 2000-02-21 18:22 ┃　　　　　　┗[Kenji Kiyota &lt;kenji-]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1591">   1591 2000-02-16 09:24 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1593">   1593 2000-02-16 10:30 　┣[とみたまさひろ &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1600">   1600 2000-02-17 02:51 　┃┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1605">   1605 2000-02-18 00:02 　┃　┗[tateyan &lt;tateyan@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1606">   1606 2000-02-20 03:29 　┃　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1623">   1623 2000-02-22 10:39 　┃　　　┗[とみたまさひろ &lt;tomm]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1635">   1635 2000-02-25 01:13 　┃　　　　┗[とみたまさひろ &lt;tomm]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1599">   1599 2000-02-16 23:35 　┗[&quot;okaukio+mls&quot; &lt;jtz40]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1601">   1601 2000-02-17 12:25 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1603">   1603 2000-02-17 15:38 　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1630">   1630 2000-02-23 09:00 　　　　┗[&quot;okaukio+mls&quot; &lt;jtz40] How to run mySQL              </a></span>
+<span class="current">-&gt;&nbsp;<a href="1632">   1632 2000-02-23 16:45 　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1633">   1633 2000-02-24 01:15 　　　　　　┣[&quot;okaukio+mls&quot; &lt;jtz40]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1636">   1636 2000-02-25 08:14 　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1637">   1637 2000-02-25 09:24 　　　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1638">   1638 2000-02-25 10:57 　　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                       </a></span>
+</pre>
+</body>
+</html>

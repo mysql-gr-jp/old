@@ -1,0 +1,84 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8896</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8895">[前]</a><a href="8897">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8896
+</p>
+<div class="header">
+<p>
+From: &quot;Ebihara, Yuichiro&quot; &lt;&quot;Ebihara, Yuichiro&quot; &lt;Yuichiro.Ebihara@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 3 Mar 2004 10:59:25 +0900<br>
+Subject: [mysql 08896] RE:  整数フィールドの次の空きを探す sql は<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+MySQL MLの皆さん、
+初めましてこんにちは、海老原と申します。
+
+最近のバージョンで使えるらしい副問い合わせって、どの程度まで
+いけるんでしょう?
+実機で試してないので、単なるヒント程度に捉えてもらいたいのですが、
+
+<span class="quote1">&gt; たとえば、1、3、4、5、8、9、といったような、順番には並んでいるが</span>
+<span class="quote1">&gt; 値に跳びのあるフィールドを持つテーブルがあって、ある数字から</span>
+<span class="quote1">&gt; 次のあいている数字を探す、というものです。昇順では２ならば６、</span>
+<span class="quote1">&gt; ６ならば７、７ならば１０をみつけるもの。降順では１０ならば７、</span>
+<span class="quote1">&gt; ７ならば６、６ならば２、２ならば０、０ならば該当なし、</span>
+<span class="quote1">&gt; といった検索です。</span>
+
+昇順
+SELECT min(a.id + 1)
+FROM t_seq a
+WHERE a.id &gt;= [基準値]
+  AND not exists (SELECT 'X' FROM t_seq b WHERE b.id = a.id + 1)
+
+降順
+SELECT max(a.id - 1)
+FROM t_seq a
+WHERE a.id &lt;= [基準値]
+  AND not exists (SELECT 'X' FROM t_seq b WHERE b.id = a.id - 1)
+;
+
+ただしこれだと昇順で6ならば7、降順で7ならば6ができません。
+
+その条件も満たそうとすると、さらにトリッキーになって、MySQLで
+実行できるかどうかがさらに怪しくなりますが、
+
+昇順
+SELECT min(a.id + 1)
+FROM (
+	SELECT id FROM t_seq WHERE id &gt;= [基準値]
+	UNION ALL
+	SELECT [基準値]) a
+WHERE not exists (SELECT 'X' FROM t_seq b WHERE b.id = a.id + 1);
+
+降順
+SELECT max(a.id - 1)
+FROM (
+	SELECT id FROM t_seq WHERE id &lt;= [基準値]
+	UNION ALL
+	SELECT [基準値]) a
+WHERE not exists (SELECT 'X' FROM t_seq b WHERE b.id = a.id - 1);
+
+手元にある某RDBではうまくいくので、理論的には合ってると思いますが、
+ご参考まで。
+
+今後もちょくちょく出入りさせていただこうと思いますので、皆さま
+どうぞよろしくお願いします。
+
+--
+海老原 雄一郎 / EBIHARA Yuichiro
+E-mail: Yuichiro.Ebihara@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="8895">[前]</a><a href="8897">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+</body>
+</html>

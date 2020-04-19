@@ -1,0 +1,78 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7166</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="7165">[前]</a><a href="7167">[次]</a><a href="../list/7101-7200">[番号順一覧]</a><a href="../thread/7101-7200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7166
+</p>
+<div class="header">
+<p>
+From: Yasunari Imado &lt;Yasunari Imado &lt;sjv@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 13 Mar 2003 15:43:14 +0900<br>
+Subject: [mysql 07166] Re: ENCODE 関数の暗号化が失敗する<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+イマドです。
+<span class="quote2">&gt; &gt; 暗号化するレコード数は42個あるのですが必ず1個が失敗してしまいます。</span>
+<span class="quote2">&gt; &gt; SQL文は</span>
+<span class="quote2">&gt; &gt;     SELECT ENCODE('$crypt_str[$i]', '$encrypt_key')</span>
+<span class="quote2">&gt; &gt; としています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; $iの数字は、1 〜 42となっていませんか？</span>
+<span class="quote1">&gt; (0 〜 41 だとOKだと思います。)</span>
+
+for文中で処理しているのですが
+    for($i = 0; $i &lt; count($crypt_str); $i++)
+となっていますので大丈夫です。
+失敗するのは途中のレコード(3番目とか22番目など)が多いです。
+
+配列 $crypt_str はMySQLからレコードを取り出すwhile文中で
+
+while($pass_array = mysql_fetch_array($db_read_result)){
+.....
+  $crypt_str[] = $pass_array['passwd'];
+.....
+}
+
+のように記述しています。
+
+前のメールで書き忘れましたが開発環境はSuSELinux8.1です。
+失敗したレコードをコマンドラインの操作で試していますが
+正常に暗号化されます。
+PHPスクリプトに問題がありそうならそちらのMLで聞いてみたいと思います。
+
+----------------------------------------
+
+ SELECT ENCODE('$crypt_str[$i]', '$encrypt_key')
+
+$encrypt_key は`特定`の $crypt_str[$i] を失敗させてしまうのですが
+これがポイントではないでしょうか?
+$encrypt_key を変更すると別の $crypt_str[$i] が失敗します。
+
+
+-- 
+=================================================^=====
+Yasunari Imado
+	sjv@xxxxxxxxxx    (PGP Key ID: 2582B3D6)
+
+[SSJV]   <a href="http://ssjv.kir.jp/">http://ssjv.kir.jp/</a>
+=================================================^=====
+
+
+</pre>
+</div>
+<p class="button"><a href="7165">[前]</a><a href="7167">[次]</a><a href="../list/7101-7200">[番号順一覧]</a><a href="../thread/7101-7200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7164">   7164 2003-03-13 14:32 [Yasunari Imado &lt;sjv@] ENCODE 関数の暗号化が失敗する           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7165">   7165 2003-03-13 14:37 ┗[Tom Mishima &lt;tmishim]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="7166">   7166 2003-03-13 15:43 　┗[Yasunari Imado &lt;sjv@]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11301</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11300">[前]</a><a href="11302">[次]</a><a href="../list/11301-11400">[番号順一覧]</a><a href="../thread/11301-11400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11301
+</p>
+<div class="header">
+<p>
+From: HORI &lt;HORI &lt;john.smith@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 01 Apr 2005 20:35:08 +0900<br>
+Subject: [mysql 11301] Re: turbolinux10のmysql5はありあまか？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+堀です。
+川合孝典 wrote:
+
+<span class="quote1">&gt;川合孝典です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;メッセージにあるとおりなのでは？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;</span>
+川合さんこの前はどうもありがとう御座いました。
+今回のこのエラーはこの前教えてもらったスクリプトを
+そのまま使ってます。多分スクリプト上は問題ないとおもいます。
+debianのMySQL5.0.2では動きますがturbolinux10のMySQL5.0.3
+では下の様なエラーになってしまいます。
+カーネルの事はあまり詳しく無いのですが、Linux2.4とLinux2.6の
+違いの為にこの現象に遭遇しちゃったのかな？とか思っています。
+2.4と2.6じゃ同じbinaryは使えないんですよね？
+
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt;[hori@localhost hori]$ ./sp.pl 　　&lt;- turbolinux10　１回目</span>
+<span class="quote2">&gt;&gt;DBD::mysql::db do failed: RETURN is only allowed in a FUNCTION at</span>
+<span class="quote2">&gt;&gt;./sp.pl line 27.</span>
+<span class="quote2">&gt;&gt;    </span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt;RETURNはFUNCTIONでしか許されていません。</span>
+<span class="quote1">&gt;#PROCEDUREでRETURNを書いているとか</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt;[hori@localhost hori]$ ./sp.pl 　　&lt;- turbolinux10　２回目</span>
+<span class="quote2">&gt;&gt;DBD::mysql::db do failed: PROCEDURE simpleproc already exists at ./sp.pl</span>
+<span class="quote2">&gt;&gt;line 11.</span>
+<span class="quote2">&gt;&gt;    </span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt;PROCEDURE simpleprocは既にあります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;っていうことで、MySQL自体が問題というわけではないでしょう。</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;</span>
+教えて頂いたほぼそのままですがスクリプトを張り付けときます。
+
+#!/usr/bin/perl
+use strict;
+use DBI;
+my $hDb = DBI-&gt;connect('dbi:mysql:database=test', 'root', '',
+{RaiseError =&gt; 1, PrintError=&gt; 0, AutoCommit =&gt; 1});
+# 先に削除
+eval {$hDb-&gt;do('DROP PROCEDURE simpleproc');};
+eval {$hDb-&gt;do('DROP FUNCTION hello');};
+# プロシージャ、ファンクションを作成
+eval {
+$hDb-&gt;do(
+'CREATE PROCEDURE simpleproc (OUT param1 INT)
+BEGIN
+SELECT COUNT(*) INTO param1 FROM t;
+SET param1 = param1 + 10;
+END');
+$hDb-&gt;do(
+q{CREATE FUNCTION hello (s VARCHAR(20))
+RETURNS VARCHAR(50)
+BEGIN
+RETURN CONCAT('やぁ', s , '調子どう？');
+END});
+};
+die $@ if($@);
+
+# 1. simpleprocを実行して戻り値をSELECT
+$hDb-&gt;do('call simpleproc(@rtnVal)');
+my $iVal = $hDb-&gt;selectrow_array('SELECT @rtnVal');
+print &quot;戻り値:&quot; . $iVal . &quot;\n&quot;;
+
+# 2.
+my $hSt = $hDb-&gt;prepare(q{SELECT hello(?)});
+$hSt-&gt;execute('堀さん');
+while (my $raRes = $hSt-&gt;fetchrow_arrayref()) {
+print join(',', @$raRes) . &quot;\n&quot;;
+}
+
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="11300">[前]</a><a href="11302">[次]</a><a href="../list/11301-11400">[番号順一覧]</a><a href="../thread/11301-11400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11294">  11294 2005-03-31 21:33 [HORI &lt;john.smith@xxx] turbolinux10のmysql5はありあまか？      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11295">  11295 2005-03-31 22:11 ┣[&quot;Ryuichiro Munechika]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11296">  11296 2005-03-31 22:50 ┃┗[HORI &lt;john.smith@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11298">  11298 2005-04-01 07:01 ┃　┗[&quot;Ryuichiro Munechika]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11299">  11299 2005-04-01 09:21 ┃　　┗[&quot;HORI&quot; &lt;john.smith@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11300">  11300 2005-04-01 19:12 ┃　　　┗[川合孝典 &lt;gcd00051@x]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="11301">  11301 2005-04-01 20:35 ┃　　　　┗[HORI &lt;john.smith@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11305">  11305 2005-04-02 16:34 ┃　　　　　┗[&quot;Ryuichiro Munechika]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11306">  11306 2005-04-02 18:08 ┃　　　　　　┗[HORI &lt;john.smith@xxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11312">  11312 2005-04-06 08:15 ┃　　　　　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11315">  11315 2005-04-07 01:39 ┃　　　　　　　　┗[HORI &lt;john.smith@xxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11318">  11318 2005-04-07 07:09 ┃　　　　　　　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11319">  11319 2005-04-08 15:51 ┃　　　　　　　　　　┗[HORI &lt;john.smith@xxx]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11320">  11320 2005-04-09 10:42 ┗[HORI &lt;john.smith@xxx]                                       </a></span>
+</pre>
+</body>
+</html>

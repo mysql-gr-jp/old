@@ -1,0 +1,122 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2002</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2001">[前]</a><a href="2003">[次]</a><a href="../list/2001-2100">[番号順一覧]</a><a href="../thread/2001-2100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2002
+</p>
+<div class="header">
+<p>
+From: (moeru) &lt;&lt;moeru@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 11 May 2000 20:07:05 +0900<br>
+Subject: [mysql 02002] 正規化と高速化<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+
+こんにちは
+
+
+正規化について質問させてください。
+まだ、確実に正規化の意味がつかめてないのだと思います。。
+
+
+
+以下のようなテーブルを作りました。
+
+CREATE TABLE users (
+	userid INT NOT NULL AUTO_INCREMENT,
+	username VARCHAR(20) NOT NULL,
+	password VARCHAR(20),
+	email VARCHAR(50) NOT NULL,
+	PRIMARY KEY (userid),
+	UNIQUE (username),  
+	UNIQUE (email),
+);
+
+CREATE TABLE items (
+	itemid int(20) NOT NULL AUTO_INCREMENT,
+	username VARCHAR(20) NOT NULL,
+	title tinytext,
+	date timestamp(14),
+	description text,
+	PRIMARY KEY (itemid),
+	INDEX (title),
+	INDEX (date),
+	INDEX (username),  
+),
+
+
+うちの場合、よく使われる(読み込まれる)のは、itemsテーブルだと思うのです。
+
+itemsテーブルに	INDEX (username),  を作ったのは
+ユーザーごとの出品アイテムを高速に表示させるためです。。
+
+と考えたのですが。。。
+
+
+MySQLの場合、以下のようにusersテーブルとitemsテーブルをリレーションして
+usersテーブルの情報（usernameやemail）をもらってきたほうが高速なのでしょうか？
+
+以下では、INDEX (username)は、リレーションしてるから必要ないと思って
+はずしました。。
+
+CREATE TABLE items (
+	itemid int(20) NOT NULL AUTO_INCREMENT,
+	userid INT NOT NULL,
+	title tinytext,
+	date timestamp(14),
+	description text,
+	PRIMARY KEY (itemid),
+	INDEX (title),
+	INDEX (date),
+),
+
+＊	itemsテーブルでは、userid INT NOT NULL,
+　　のAUTO_INCREMENTは必要ないと思って取りました。。これは正解ですか？
+
+
+
+正規化によって、検索を高速化するためには
+それぞれのテーブルにだぶりのフィールドが無い(ＩＤ以外皆無に)すると理解して良いのでしょうか？
+
+
+例え、フィールドが他のテーブルとダブっても、
+目的によっては、一つのテーブルに必要な情報が入ってる方が高速
+とかいう場合もあるのかどうかも知りたいです。。
+
+
+
+アドバイス宜しくお願いしますm(__)m
+
+
+モエル
+ぐるぐるオークション
+<a href="http://www.pileup.com/auction/">http://www.pileup.com/auction/</a>
+＊新しいサイト(ぐるぐる)構築の為の仲間募集中です(^^)
+
+</pre>
+</div>
+<p class="button"><a href="2001">[前]</a><a href="2003">[次]</a><a href="../list/2001-2100">[番号順一覧]</a><a href="../thread/2001-2100">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1999">   1999 2000-05-11 18:09 [Kakiuchi Atsuko &lt;m00] 自動起動開始するには？                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2000">   2000 2000-05-11 18:41 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2001">   2001 2000-05-11 19:21 ┗[Ko Tanikawa &lt;tanikaw]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="2002">   2002 2000-05-11 20:07 　┗[&lt;moeru@xxxxxxxxxx&gt;  ] 正規化と高速化                      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2004">   2004 2000-05-11 21:06 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2005">   2005 2000-05-11 23:46 　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2006">   2006 2000-05-12 09:30 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2008">   2008 2000-05-12 18:55 　　　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2009">   2009 2000-05-12 19:10 　　　　　　┗[とみたまさひろ &lt;tomm]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2010">   2010 2000-05-12 19:36 　　　　　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2011">   2011 2000-05-12 19:54 　　　　　　　　┗[とみたまさひろ &lt;tomm]                       </a></span>
+</pre>
+</body>
+</html>

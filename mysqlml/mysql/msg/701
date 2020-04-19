@@ -1,0 +1,100 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:701</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="700">[前]</a><a href="702">[次]</a><a href="../list/701-800">[番号順一覧]</a><a href="../thread/701-800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:701
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Wed, 17 Feb 1999 18:46:35 +0900<br>
+Subject: [mysql 00701] Re: MySQL speed<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+毅です
+
+1月にでました 500万件のデータですが、
+いろいろやっているうちに速くなりましたので
+ご報告
+
+対処としては、
+1. 'lotno' を cahr binary
+2. key_buffer=32M 指定
+3. isamchk
+4. datetime -&gt; date
+です
+
+以下に結果を示します。
+一つのselect に対して、連続して数回実行しています
+ので、一番最初のselectよりも2,3回目の方がキャッシュで速くなっています
+
+1.'lotno' を cahr binary にすると
+mysql&gt; select count(*) from Dummy_all_tab where lotno like 'D1510%';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|   717505 |</span>
++----------+
+ 1 row in set (1 min 50.87 sec)
+ 1 row in set (33.23 sec)
+ 1 row in set (18.51 sec)
+ 1 row in set (18.50 sec)
+
+ mysql&gt; select count(*) from Dummy_all_tab where stop_day between \
+ '1998-11-14 00:00:00' and '1998-12-14 23:59:59';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|  1118730 |</span>
++----------+
+ 1 row in set (1 min 26.63 sec)
+ 1 row in set (30.59 sec)
+ 1 row in set (7.10 sec)
+ 1 row in set (7.05 sec)
+
+
+2 &amp; 3.  key_buffer=32M 指定 + isamchk で修復
+
+mysql&gt; select count(*) from Dummy_all_tab where lotno like 'D1510%';
+1 row in set (30.93 sec)
+1 row in set (30.19 sec)
+1 row in set (30.19 sec)
+
+mysql&gt; select count(*) from Dummy_all_tab where stop_day between \
+'1998-11-14 00:00:00' and '1998-12-14 23:59:59';
+ 1 row in set (8.56 sec)
+ 1 row in set (6.85 sec)
+ 1 row in set (6.85 sec)
+
+
+4. DATETIME -&gt; DATE
+mysql&gt; select count(*) from Dummy_all_tab where lotno like 'D1510%';
+1 row in set (21.77 sec)
+1 row in set (18.45 sec)
+1 row in set (19.25 sec)
+
+mysql&gt; select count(*) from Dummy_all_tab where stop_day between \
+'1998-11-14 00:00:00' and '1998-12-14 23:59:59';
+1 row in set (5.76 sec)
+1 row in set (4.73 sec)
+1 row in set (4.73 sec)
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+ PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
+ [ <a href="http://www.softagency.co.jp/mysql/">http://www.softagency.co.jp/mysql/</a> ]
+ [ MySQL ML: mysql-guide@xxxxxxxxxx ]
+
+</pre>
+</div>
+<p class="button"><a href="700">[前]</a><a href="702">[次]</a><a href="../list/701-800">[番号順一覧]</a><a href="../thread/701-800">[スレッド一覧]</a></p>
+</body>
+</html>

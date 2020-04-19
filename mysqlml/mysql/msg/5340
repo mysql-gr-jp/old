@@ -1,0 +1,97 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5340</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="5339">[前]</a><a href="5341">[次]</a><a href="../list/5301-5400">[番号順一覧]</a><a href="../thread/5301-5400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5340
+</p>
+<div class="header">
+<p>
+From: Koji Yamamoto &lt;Koji Yamamoto &lt;yamamoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 12 Apr 2002 21:05:40 +0900<br>
+Subject: [mysql 05340] サブクエリ使えない場合<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、山本＠大阪と申します。
+SQL自体は最近始めたばかりです。
+MySQL ではサブクエリが使えなくて、非常に難儀しているのですが、
+以下の場合で、意図したデータの取得が出来なくて悩んでいます。
+
+
+mysql&gt; select * from ko;
++------+----------+
+<span class="quote1">| num  | name     |</span>
++------+----------+
+<span class="quote1">|    1 | 関西太郎 |</span>
+<span class="quote1">|    2 | 東海一郎 |</span>
+<span class="quote1">|    3 | 関東花子 |</span>
+<span class="quote1">|    4 | 中部三郎 |</span>
+<span class="quote1">|    5 | 沖縄三平 |</span>
++------+----------+
+5 rows in set (0.03 sec)
+
+
+mysql&gt; select * from kb;
++------+--------+------------+-------+-------+-------+-------+
+<span class="quote1">| num  | ko_num | val        | price | buy_y | buy_m | buy_d |</span>
++------+--------+------------+-------+-------+-------+-------+
+<span class="quote1">|    1 |      1 | ダイヤ     | 100   | 2002  | 03    | 24    |</span>
+<span class="quote1">|    2 |      1 | パール     | 400   | 2002  | 04    | 03    |</span>
+<span class="quote1">|    3 |      2 | 銀         | 320   | 2002  | 03    | 12    |</span>
+<span class="quote1">|    4 |      2 | 金         | 520   | 2002  | 03    | 31    |</span>
+<span class="quote1">|    5 |      3 | 金銀パール | 1000  | 2002  | 03    | 19    |</span>
+<span class="quote1">|    6 |      5 | 砂金       | 10    | 2002  | 03    | 24    |</span>
++------+--------+------------+-------+-------+-------+-------+
+6 rows in set (0.01 sec)
+
+という２つのテーブルがあります。
+kbテーブルの ko_num というのは、ko テーブルの num のことです。
+ここで、「koテーブルにいる客の最近購入したもの」を取得したいのです。
+
+CONCAT関数で、buy_y、buy_m、buy_d を結合し、MAX関数で最大値を
+取得してから、group by でいけるかと思ったのですが、
+
+select ko.num,ko.name,kb.ko_num,kb.val,kb.price,MAX(CONCAT(kb.buy_y,kb.buy_m,kb.buy_d)) from ko,kb where ko.num = kb.ko_num group by
+kb.ko_num;
++------+----------+--------+------------+-------+-----------------------------------------+
+<span class="quote1">| num  | name     | ko_num | val        | price | MAX(CONCAT(kb.buy_y,kb.buy_m,kb.buy_d)) |</span>
++------+----------+--------+------------+-------+-----------------------------------------+
+<span class="quote1">|    1 | 関西太郎 |      1 | ダイヤ     | 100   | 20020403                                |</span>
+<span class="quote1">|    2 | 東海一郎 |      2 | 銀         | 320   | 20020331                                |</span>
+<span class="quote1">|    3 | 関東花子 |      3 | 金銀パール | 1000  | 20020319                                |</span>
+<span class="quote1">|    5 | 沖縄三平 |      5 | 砂金       | 10    | 20020324                                |</span>
++------+----------+--------+------------+-------+-----------------------------------------+
+
+日付だけが MAX 値でいいのですが、 val、price は最新のものを
+取ってこれません。
+
+サブクエリが使えれば、すぐ取ってこれそうなのですが、
+MySQL は未対応のようなので、ほかに何か方法があるでしょうか？
+
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+山本浩二
+yamamoto@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="5339">[前]</a><a href="5341">[次]</a><a href="../list/5301-5400">[番号順一覧]</a><a href="../thread/5301-5400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="5327">   5327 2002-04-07 20:07 [&quot;kazuhito okada&quot; &lt;ma] はじめまして。                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5328">   5328 2002-04-07 20:04 ┗[Hidetoshi OKAWA &lt;hid]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5329">   5329 2002-04-08 21:28 　┣[&quot;kazuhito okada&quot; &lt;ma] ありがとうございます。              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5338">   5338 2002-04-12 05:22 　┗[&quot;kazuhito okada&quot; &lt;ma]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5339">   5339 2002-04-12 16:18 　　┗[&quot;M.Hori&quot; &lt;hori.masat] MySQL の Windows2000 へのインストール (Was Re: はじめまして。)</a></span>
+<span class="current">-&gt;&nbsp;<a href="5340">   5340 2002-04-12 21:05 　　　┗[Koji Yamamoto &lt;yamam] サブクエリ使えない場合          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5341">   5341 2002-04-12 22:08 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5342">   5342 2002-04-13 14:27 　　　　　┗[Koji Yamamoto &lt;yamam]                             </a></span>
+</pre>
+</body>
+</html>

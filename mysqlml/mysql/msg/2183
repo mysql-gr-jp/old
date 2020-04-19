@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2183</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2182">[前]</a><a href="2184">[次]</a><a href="../list/2101-2200">[番号順一覧]</a><a href="../thread/2101-2200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2183
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Sat, 10 Jun 2000 14:07:35 +0900<br>
+Subject: [mysql 02183] Re: Delete と Insert がひどく遅い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Sat, 10 Jun 2000 12:21:29 +0900,
+Y. Tsutsui &lt;tutui@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 堤井です。</span>
+
+&lt;cut&gt;
+
+<span class="quote2">&gt; &gt; 3.22 の ISAM テーブルより、3.23 で採用されている MyISAM の方が</span>
+<span class="quote2">&gt; &gt; パフォーマンスもすこし良くなっているはずです</span>
+<span class="quote2">&gt; &gt; 3.23 でテーブルを作り直してみる価値もあります</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これなんですけど、体感してる人っています？確かに早くなってるん</span>
+<span class="quote1">&gt; でしょうが、例えば 0.2 秒が 0.18 秒になっても分からないし。</span>
+<span class="quote1">&gt; で、私は面倒なので昔の ISAM のままつかってます。</span>
+
+大量のデータを SELECT DISTINCT する場合はかなり違います
+試してみてください.
+
+
+<span class="quote1">&gt; あと、もっと遅いマシンでも試してしまいました。以前コンパイルに</span>
+<span class="quote1">&gt; 挑戦、と書いてその後報告してなかった Macintosh LC475 版です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; cpu 68040 25MHz, 36M Memory, NetBSD 1.4.2 です。</span>
+<span class="quote1">&gt; configure に、１時間くらい、make に５時間くらいかかりました。</span>
+<span class="quote1">&gt; --with-low-memory をつけないと config は出来ませんでした。</span>
+
+凄いマシンでうごいてますね！
+
+
+<span class="quote1">&gt; Welcome to the MySQL monitor.  Commands end with ; or \g.</span>
+<span class="quote1">&gt; Your MySQL connection id is 6 to server version: 3.22.32</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Type 'help' for help.</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select count(id) from testtable;</span>
+<span class="quote1">&gt; +-----------+</span>
+<span class="quote2">&gt; | count(id) |</span>
+<span class="quote1">&gt; +-----------+</span>
+<span class="quote2">&gt; |   1000000 |</span>
+<span class="quote1">&gt; +-----------+</span>
+<span class="quote1">&gt; 1 row in set (0.19 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select * from testtable where id=&quot;000001000001&quot;;</span>
+<span class="quote1">&gt; +--------------+--------+--------+</span>
+<span class="quote2">&gt; | id           | regist | cancel |</span>
+<span class="quote1">&gt; +--------------+--------+--------+</span>
+<span class="quote2">&gt; | 000001000001 | NULL   | NULL   |</span>
+<span class="quote1">&gt; +--------------+--------+--------+</span>
+<span class="quote1">&gt; 1 row in set (0.41 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; update testtable set regist=1000000000</span>
+<span class="quote1">&gt;  where id=&quot;000001999999&quot;;</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.19 sec)</span>
+<span class="quote1">&gt; Rows matched: 1  Changed: 1  Warnings: 0</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; delete from testtable where id=&quot;000001500000&quot;;</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.39 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; というわけで、こんなマシンでも１００万件のデータベースが実用的に</span>
+<span class="quote1">&gt; 使えます。update, delete も select より高速です。</span>
+
+すばらしい。
+LC475 は narrow scsi でしたっけ.
+古い narrow scsi disk でこの結果なら...
+
+<span class="quote1">&gt; ところで、NetBSD on SPARC や NetBSD on mac68k とかで</span>
+<span class="quote1">&gt; 動いた場合 Tcx に報告するのが義務ってもんでしょうか？＞村上さん</span>
+
+義務ではないですが、かれらもきっと喜ぶでしょう
+もし特別な C flag や configure オプションがあれば報告して頂けると
+たすかります
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="2182">[前]</a><a href="2184">[次]</a><a href="../list/2101-2200">[番号順一覧]</a><a href="../thread/2101-2200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2178">   2178 2000-06-09 20:20 [hironobus &lt;hironobus] Delete と Insert がひどく遅い           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2179">   2179 2000-06-10 01:36 ┣[&quot;Y. Tsutsui&quot; &lt;tutui@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2180">   2180 2000-06-10 03:55 ┣[Yasuhiro Hayase &lt;hay]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2184">   2184 2000-06-10 16:21 ┃┗[&quot;MINOHATA Norio&quot; &lt;mi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2185">   2185 2000-06-10 17:03 ┃　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2186">   2186 2000-06-10 17:52 ┃　　┗[&quot;MINOHATA Norio&quot; &lt;mi]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2187">   2187 2000-06-10 18:13 ┃　　　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2191">   2191 2000-06-11 23:31 ┃　　　　┗[とみたまさひろ &lt;tomm]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2192">   2192 2000-06-12 19:32 ┃　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2193">   2193 2000-06-13 09:57 ┃　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2181">   2181 2000-06-10 10:37 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2182">   2182 2000-06-10 12:21 ┃┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="2183">   2183 2000-06-10 14:07 ┃　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2189">   2189 2000-06-10 21:22 ┗[Hironobu SUZUKI &lt;hir] Re: Delete とＵＰＤＡＴＥがひどく遅い </a></span>
+</pre>
+</body>
+</html>

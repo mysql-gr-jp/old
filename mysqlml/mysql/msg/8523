@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8523</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8522">[前]</a><a href="8524">[次]</a><a href="../list/8501-8600">[番号順一覧]</a><a href="../thread/8501-8600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8523
+</p>
+<div class="header">
+<p>
+From: &quot;Kawaji, Shinya&quot; &lt;&quot;Kawaji, Shinya&quot; &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 17 Dec 2003 12:38:36 +0900<br>
+Subject: [mysql 08523] Re: MySQL でユニークキー<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+かわじ、です。
+
+
+<span class="quote1">&gt; 設計したときは掲示板だったのですが、それは</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ・掲示板が複数作成できる</span>
+<span class="quote1">&gt; ・各掲示板の中にはスレッドが複数入る</span>
+<span class="quote1">&gt; ・各スレッドの中には複数の書き込みが入る</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; というもので、平たく言えば 2ch のようなイメージです。</span>
+
+以下、考え方の一つとして。
+
+上記の 3層の構造を、一つの primary key で賄うのではなくて、
+3つのテーブルの primary key に分ける方法もあります。
+
+例えば、ですが、
+
+create table bbs (
+  bbs_id int unsigned not null auto_increment,
+  title text,
+  primary key (bbs_id)
+);
+
+
+create table thread (
+  bbs_id int unsigned not null,
+  thread_id int unsigned not null auto_increment,
+  title text,
+  unique key (bbs_id,thread_id)
+);
+
+create table mes (
+  bbs_id int unsigned not null,
+  thread_id int unsigned not null,
+  mes_id int unsigned not null auto_increment,
+  title text,
+  body text,
+  unique key (bbs_id, thread_id, mes_id)
+);
+
+とすれば、理論的には、掲示板の数(bbs_id) * スレッドの数(thread_id) *
+投稿の数(mes_id) の数だけ、投稿を受け付けられることになります。
+
+2ch タイプでしたら、スレッドごとに投稿数を 1000 とかに制限するのが
+普通でしょうから、insert 前（もしくは後）にチェックすれば、
+primary key が溢れることは無くなります（掲示板の数とスレッドの数を含め、
+適切にチェックしていれば）。
+
+
+上記のテーブル構造では、bbs_id が 8 で、その bbs の thread_id が 13 に
+投稿があった場合、insert 文は
+
+insert mes values (
+  8,
+  13,
+  NULL,
+  '投稿のタイトル',
+  '投稿の本文'
+);
+
+等となります。
+
+
+</pre>
+</div>
+<p class="button"><a href="8522">[前]</a><a href="8524">[次]</a><a href="../list/8501-8600">[番号順一覧]</a><a href="../thread/8501-8600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8475">   8475 2003-12-11 10:08 [&quot;tonegawa&quot; &lt;tonegawa] rowid のようなもの                      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8476">   8476 2003-12-11 11:44 ┗[OHTSUKA Ko-hei &lt;tech]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8477">   8477 2003-12-11 12:03 　┣[&lt;ataka@xxxxxxxxxx&gt;  ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8479">   8479 2003-12-11 12:28 　┃┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8480">   8480 2003-12-11 12:42 　┃　┗[&lt;ataka@xxxxxxxxxx&gt;  ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8516">   8516 2003-12-17 07:19 　┃　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8518">   8518 2003-12-17 11:23 　┃　　　┣[&quot;Jun Akita&quot; &lt;j-akita] MySQL でユニークキー (Re: rowid のようなもの)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8519">   8519 2003-12-17 11:39 　┃　　　┃┣[&quot;Kawaji, Shinya&quot; &lt;ka]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8521">   8521 2003-12-17 12:10 　┃　　　┃┃┗[&quot;Jun Akita&quot; &lt;j-akita] Re: MySQL でユニークキー</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8522">   8522 2003-12-17 12:35 　┃　　　┃┃　┣[SUGAWARA Hajime &lt;sug]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8526">   8526 2003-12-17 14:41 　┃　　　┃┃　┃┗[&quot;Jun Akita&quot; &lt;j-akita]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8527">   8527 2003-12-17 18:34 　┃　　　┃┃　┃　┣[ML account &lt;ml@xxxxx]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8530">   8530 2003-12-17 21:21 　┃　　　┃┃　┃　┃┗[&quot;Jun Akita&quot; &lt;j-akita]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8529">   8529 2003-12-17 20:30 　┃　　　┃┃　┃　┗[SUGAWARA Hajime &lt;sug]                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="8523">   8523 2003-12-17 12:38 　┃　　　┃┃　┣[&quot;Kawaji, Shinya&quot; &lt;ka]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8524">   8524 2003-12-17 12:38 　┃　　　┃┃　┣[ML account &lt;ml@xxxxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8525">   8525 2003-12-17 12:41 　┃　　　┃┃　┗[takuma watanabe &lt;tak]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8520">   8520 2003-12-17 11:40 　┃　　　┃┗[SUGAWARA Hajime &lt;sug]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8532">   8532 2003-12-18 01:46 　┃　　　┗[&quot;zen kishimoto&quot; &lt;zen] オープンソース DB の質は商用ソフトの「 6 倍優れる」</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8478">   8478 2003-12-11 12:28 　┗[&quot;tonegawa&quot; &lt;tonegawa]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8481">   8481 2003-12-11 12:43 　　┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8482">   8482 2003-12-11 14:04 　　　┗[&quot;tonegawa&quot; &lt;tonegawa]                                 </a></span>
+</pre>
+</body>
+</html>

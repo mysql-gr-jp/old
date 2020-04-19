@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7962</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="7961">[前]</a><a href="7963">[次]</a><a href="../list/7901-8000">[番号順一覧]</a><a href="../thread/7901-8000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7962
+</p>
+<div class="header">
+<p>
+From: &quot;n_kubo1026@xxxxxxxxxx&quot; &lt;&quot;n_kubo1026@xxxxxxxxxx&quot; &lt;n_kubo1026@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 27 Jun 2003 10:13:40 +0900<br>
+Subject: [mysql 07962] Re: データベースの最適化　 access  の vba より可能か<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+On Thu, 26 Jun 2003 23:06:00 +0900
+A.K.I. &lt;aki@xxxxxxxxxx&gt; さんwrote:
+レスありがとうございます
+
+<span class="quote1">&gt; この辺でしょうか？vbaでというより単にSQL文として</span>
+<span class="quote1">&gt; OPTIMIZE TABLE tablename</span>
+<span class="quote1">&gt; を実行してやれば最適化できるようです。</span>
+実は　パススルークエリは作成したことがないのでどのようにコマンドを実行さ
+せたらいいか研究する必要があります
+ご存じでしたらお教え下さい
+
+<span class="quote1">&gt; それほど頻繁に最適化</span>
+<span class="quote1">&gt; する必要はなさそうなので、たとえば業務時間外にcronでmyisamchk</span>
+<span class="quote1">&gt; を走らせる、とかのほうがいいような気がします</span>
+そうなんですか　アクセスの場合データが４０万件程度のテーブルに日々５千件
+程度のデータをオフコンよりテキストファイルにてインポートするのですが、定
+期的な最適化をしないと検索スピードが上がらなかったのとファイルがすぐに６
+０Ｍ程度に膨れ上がったので定期実行をしていました。（検索を中心にする仕組
+みです。入力はほぼありません。オフコンの検索では使用しにくいのでアクセス
+で柔軟に検索するシステムをくんでいます。）
+mysqlではあまり必要無いようなのですね
+
+<span class="quote1">&gt; ちょっと不明な点が多いので、あとは</span>
+<span class="quote1">&gt; サーバ側のOS、MySQLのバージョン、MySQLの文字コード</span>
+<span class="quote1">&gt; クライアント側のmyodbcのバージョン、予定している台数</span>
+サーバ側のOSはwinnt4.0ワークステーションを考えています
+実験用にはｍWIN98のローカルマシンで実験をしています
+mysqlのバージョンは ３．２３．５４です
+文字コードは　s-jisです　ini ファイルで設定しています
+        winmysqladmin 1.4で設定完了しました
+クライアント側のmyodbc は2.50.39とデータソースアドミニストレータに表示が
+あります
+
+検討しているネットワーク環境は、winNT4.0×２台とwin９８×３台＋NT4.0サー
+バー×１台のネットワークでの使用です。
+ただNT4.0サーバーへのインストールは許可されていないので、ファイルの置き
+場所的な使い方しかできませんので除外しなければいけないのです。
+
+今はアクセス９７を使用して、ファイルの共有で運用しています。（ファイルを
+置くだけなのでサーバの空きスペースにmdbファイルをおいています）
+アクセスファイルはデータ部分とプログラム部分を分離してリンクファイルとし
+ています。
+その中で、大量のデータを持つファイルは、検索スピードの関係から、検索する
+マシンそれぞれにデータmdbをvbaで強制的に各マシンにコピーをして全てのマシ
+ンの検索用データmdbファイルの同期をとるようにしています。各検索用マシン
+に同じ内容のファイルが存在する状態となっています。これはハードディスクの
+無駄遣い状態ですが我慢していました。
+
+そこで、今後はデータmdbを使用する代わりに１台のNT4.0ワークステーションに
+mysql をインストールして他のマシンからMYODBCで接続し、アクセスのプログラ
+ム部分にリンクを張り利用したらいいのではないかと考えています。
+
+ODBCでリンクを張ればほぼ今まで使用していたアクセスのレポートやフォームが
+再利用でき、重複させていたデータが１台のマシン上に収まると思っています。
+
+また、複数のアクセスのファイルを個別で作成してきたため、同じマスタを複数
+のｍｄｂで管理していたりしています。
+この複数のマスタも１台のマシン上のmysqlで管理すれば、必要なプログラム用
+に分かれていても、１つのマスタは１つのファイル（mysqlのマスタファイル）
+で管理できるかなと考えています。
+
+このように場当たり的なファイルが増えたのも、小さな完結したプログラムをス
+タンドアロンで使用をするために作成していたが、それを無理矢理ネットワーク
+での使用に合わせようとしたためと思っています。
+共通のファイルであるマスタもそれぞれのアクセスのデータに重複している状態
+です。
+このように同じファイルが複数のマシンにあったり、同じテーブルが複数のデー
+タ用mdbにあるような状態をも。mysqlでデータ管理をすればすっきりできるので
+はないかと考えています。
+
+
+__________________________________________________
+Do You Yahoo!?
+Yahoo! BB is Broadband by Yahoo!
+<a href="http://bb.yahoo.co.jp/">http://bb.yahoo.co.jp/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="7961">[前]</a><a href="7963">[次]</a><a href="../list/7901-8000">[番号順一覧]</a><a href="../thread/7901-8000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7954">   7954 2003-06-26 14:29 [&quot;n_kubo1026@xxxxxxxx] データベースの最適化　 access  の vba より可能か</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7960">   7960 2003-06-26 23:06 ┗[A.K.I. &lt;aki@xxxxxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="7962">   7962 2003-06-27 10:13 　┗[&quot;n_kubo1026@xxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7963">   7963 2003-06-27 11:32 　　┗[A.K.I. &lt;aki@xxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7964">   7964 2003-06-27 14:15 　　　┗[&quot;n_kubo1026@xxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7965">   7965 2003-06-27 15:21 　　　　┗[A.K.I. &lt;aki@xxxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7966">   7966 2003-06-27 19:10 　　　　　┗[&quot;n_kubo1026@xxxxxxxx]                             </a></span>
+</pre>
+</body>
+</html>

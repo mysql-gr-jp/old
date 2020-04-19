@@ -1,0 +1,140 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8558</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8557">[前]</a><a href="8559">[次]</a><a href="../list/8501-8600">[番号順一覧]</a><a href="../thread/8501-8600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8558
+</p>
+<div class="header">
+<p>
+From: zai &lt;zai &lt;zai91210@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 07 Jan 2004 02:39:47 +0900<br>
+Subject: [mysql 08558] count(*) の合計の仕方<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+zaiです。
+
+PHPのMLから、この質問は、MySQLですと、指摘され、参りました。よろしくお願
+いいたします。
+
+　環境は、WindowsXP Pro、Apache1.3.28、PHP4.2.2、MySQL4.0.17です。
+
+　教えていただきたいことは、count(*)の合計の仕方です。
+
+　例えば、test1と言うテーブルに、項目１、項目２、code1、code2、code3、
+code4、code5という７つの項目（以上いずれもVARCHAR型）があります。
+　そして、
+　　レコードAは、code2に&quot;c555&quot;、code4に&quot;d122&quot;、code5に&quot;x333&quot;、
+　　レコードBは、code1に&quot;c222&quot;、code3に&quot;a111&quot;、code4に&quot;c999&quot;、
+　　レコードCは、code2に&quot;c555&quot;、code5に&quot;c999&quot;
+のような３つのレコードがある場合
+
+　　レコードAから２個、Bから２個、Cから１個の合計カウント５を求めたいの
+です。
+
+　PHPのMLで、（PostgreSQLではと、言う断りで）以下のところまでは、教えて
+いただきました。
+
+----ここから----
+
+*前準備*
+create table test1 (k1 varchar(4),k2 varchar(4),code1 varchar(4),code2 
+varchar(4),code3 varchar(4),code4 varchar(4),code5 varchar(4));
+insert into test1(code2,code4,code5) values('c555','d122','x33');
+insert into test1(code1,code3,code4) values ('c222','a111','c999');
+insert into test1(code2,code5) values ('c555','c999');
+
+*本文*
+select * from (
+select k1,k2,code1 as code from test1
+union all
+select k1,k2,code2 as code from test1
+union all
+select k1,k2,code3 as code from test1
+union all
+select k1,k2,code4 as code from test1
+union all
+select k1,k2,code5 as code from test1
+) as a
+where code between 'c555' and 'd998';
+
+*結果*
+  k1   | k2    | code
+-------+-------+------
+       |       | c555
+       |       | c555
+       |       | d122
+       |       | c999
+       |       | c999
+(5 rows)
+
+----ここまで----
+
+　これを、参考に致しまして、
+
+*本文*
+(SELECT code1 as code FROM test1 where code1 between 'c555' and 'd998' )
+UNION ALL (SELECT code2 as code FROM test1 where code2 between 'c555' and 'd998')
+UNION ALL (SELECT code3 as code FROM test1 where code3 between 'c555' and 'd998')
+UNION ALL (SELECT code4 as code FROM test1 where code4 between 'c555' and 'd998')
+UNION ALL (SELECT code5 as code FROM test1 where code5 between 'c555' and 'd998')
+
+で、教えていただいたことと同じことが、
+
+*結果*
+code
+-----
+c555
+c555
+d122
+c999
+c999
+
+、表示されました。
+
+　そこで、これらの結果から、合計数５のみを求め、表示したいのです。
+
+　皆様なにとぞ、よろしくご指導ください。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8557">[前]</a><a href="8559">[次]</a><a href="../list/8501-8600">[番号順一覧]</a><a href="../thread/8501-8600">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="8558">   8558 2004-01-07 02:39 [zai &lt;zai91210@xxxxxx] count(*) の合計の仕方                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8559">   8559 2004-01-07 04:59 ┣[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8561">   8561 2004-01-07 15:29 ┃┗[zai &lt;zai91210@xxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8562">   8562 2004-01-07 15:56 ┃　┣[&lt;lavlav@xxxxxxxxxx&gt; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8563">   8563 2004-01-07 16:00 ┃　┃┗[&lt;lavlav@xxxxxxxxxx&gt; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8565">   8565 2004-01-07 16:37 ┃　┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8566">   8566 2004-01-07 16:46 ┃　　┗[ML account &lt;ml@xxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8564">   8564 2004-01-07 16:22 ┣[Kazuhiro Yoshida &lt;mo]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8790">   8790 2004-02-14 01:48 ┗[zai &lt;zai91210@xxxxxx] 機種の変更に伴う不具合                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8791">   8791 2004-02-14 15:43 　┣[Seto &lt;seto@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8792">   8792 2004-02-14 20:09 　┣[&lt;konet218@xxxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8793">   8793 2004-02-15 03:21 　┃┗[zai &lt;zai91210@xxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8794">   8794 2004-02-15 03:43 　┃　┣[&lt;konet218@xxxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8816">   8816 2004-02-19 05:35 　┃　┃┗[zai &lt;zai91210@xxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8796">   8796 2004-02-15 06:28 　┃　┗[Seto &lt;seto@xxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8818">   8818 2004-02-19 06:35 　┃　　┗[zai &lt;zai91210@xxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8795">   8795 2004-02-15 04:18 　┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8817">   8817 2004-02-19 06:26 　　┗[zai &lt;zai91210@xxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8819">   8819 2004-02-19 09:47 　　　┣[Seto &lt;seto@xxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8820">   8820 2004-02-19 15:29 　　　┃┣[&lt;lavlav@xxxxxxxxxx&gt; ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8824">   8824 2004-02-19 21:12 　　　┃┃┗[zai &lt;zai91210@xxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8823">   8823 2004-02-19 21:02 　　　┃┗[zai &lt;zai91210@xxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8826">   8826 2004-02-19 21:57 　　　┃　┗[bon &lt;bon@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8827">   8827 2004-02-20 02:19 　　　┃　　┗[zai &lt;zai91210@xxxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8821">   8821 2004-02-19 18:52 　　　┗[Hiroto Tsubaki &lt;jak@]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8825">   8825 2004-02-19 21:46 　　　　┗[zai &lt;zai91210@xxxxxx] Re: 機種の変更に伴う不具合（大感謝）</a></span>
+</pre>
+</body>
+</html>

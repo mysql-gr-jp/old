@@ -1,0 +1,185 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14102</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14101">[前]</a><a href="14103">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14102
+</p>
+<div class="header">
+<p>
+From: 忠犬 KEN公 &lt;忠犬 KEN公 &lt;ken_ken_1962@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 08 Jul 2007 21:14:58 +0900<br>
+Subject: [mysql 14102] Re: ログのカウント方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+(1)left joinで日付の範囲をwhereで指定すると、最終結果からその日付の範囲外の
+データが
+　除外されます。日付の範囲外のデータも欲しい場合、onで条件指定します。
+(2)count関数中にcase式を入れて、一度で複数の日付の範囲を集計できるようにしま
+す。
+(3)標準SQLや他のRDBMSでは、group by使用時、selectで選択できるのは、group by
+で
+　指定した列か集計関数（集合関数）だけです。
+
+　select c1,c2,count(*)
+   from t1
+   group by c1
+
+  という指定は、「c2」がgroup byに含まれていないため、標準SQLや他のRDBMSでは
+文法
+　エラーになります。MySQLでは独自仕様として、文法エラーとしないが、c1でグ
+ループ化することで、
+　c2も一意にならないなら、結果は保証しないとしています。
+　今回は、「部品一覧」表のidとnameで一対一の関係のため、MySQLの拡張仕様を利
+用できます。
+
+＜SQL例＞
+select
+  material.id,
+  name,
+  count(case when dt between '2007-03-01 00:00:00' and '2007-03-31 
+23:59:59' then 1 else null end) as a1,
+  count(case when dt between '2007-04-01 00:00:00' and '2007-04-30 
+23:59:59' then 1 else null end) as a2,
+  count(case when dt between '2007-05-01 00:00:00' and '2007-05-31 
+23:59:59' then 1 else null end) as a3,
+  count(case when dt between '2007-06-01 00:00:00' and '2007-06-30 
+23:59:59' then 1 else null end) as a4,
+  count(case when dt between '2007-07-01 00:00:00' and '2007-07-31 
+23:59:59' then 1 else null end) as a5
+ from material 
+ left join log_mate 
+ on material.id=log_mate.mate_id
+ and dt between '2007-1-31 0:0:0' and '2007-7-31 23:59:59' 
+ group by id,name 
+ order by id,name ;
+
+
+
+<span class="quote1">&gt;久光と申します</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;MySQL 5.0.27です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;下記のような部品一覧テーブルと部品の使用履歴テーブルがあります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;部品一覧（material）</span>
+<span class="quote1">&gt;=============</span>
+<span class="quote1">&gt;id   name</span>
+<span class="quote1">&gt;-------------</span>
+<span class="quote1">&gt;1    ネジ</span>
+<span class="quote1">&gt;2    クギ</span>
+<span class="quote1">&gt;3    ワイヤ</span>
+<span class="quote1">&gt;4    フタ</span>
+<span class="quote1">&gt;=============</span>
+<span class="quote1">&gt;（実物は約9000行あります）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;使用履歴（log_mate）</span>
+<span class="quote1">&gt;================================</span>
+<span class="quote1">&gt;id   部品id    日時</span>
+<span class="quote1">&gt;     (mate_id)  (dt)</span>
+<span class="quote1">&gt;--------------------------------</span>
+<span class="quote1">&gt;  1      4    2007-03-31 09:52:11</span>
+<span class="quote1">&gt;  2      1    2007-03-31 10:47:18</span>
+<span class="quote1">&gt;  3      3    2007-04-06 03:27:43</span>
+<span class="quote1">&gt;  4      1    2007-04-27 14:52:10</span>
+<span class="quote1">&gt;  5      2    2007-05-22 10:19:59</span>
+<span class="quote1">&gt;  6      2    2007-06-04 19:10:45</span>
+<span class="quote1">&gt;  7      1    2007-06-05 05:43:35</span>
+<span class="quote1">&gt;  8      4    2007-06-23 00:52:19</span>
+<span class="quote1">&gt;  9      3    2007-06-24 07:06:32</span>
+<span class="quote1">&gt;10      1    2007-07-08 12:30:18</span>
+<span class="quote1">&gt;================================</span>
+<span class="quote1">&gt;（実物は約79万行あります）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;半年に一回、部品別使用状況一覧を作成しているのですが</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;SELECT material.id, material.name, count(log_mate.id)</span>
+<span class="quote1">&gt;FROM `material` left join `log_mate` on material.id=log_mate.mate_id</span>
+<span class="quote1">&gt;WHERE log_mate.dt &gt;= &quot;2007-1-1 0:0:0&quot;</span>
+<span class="quote1">&gt;AND log_mate.dt &lt; &quot;2007-2-1 0:0:0&quot;</span>
+<span class="quote1">&gt;GROUP BY material.id</span>
+<span class="quote1">&gt;ORDER BY material.id</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;このようなSQLを日付の部分を書き換えながら6回実行して 結果をEXCELに貼</span>
+<span class="quote1">&gt;付けてます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;　これの不便なところは期間内に使用がなかった部品がリストから除外 </span>
+<span class="quote1">&gt;され</span>
+<span class="quote1">&gt;てしまうので、6回分をただEXCELに貼付けただけでは部品 </span>
+<span class="quote1">&gt;名がずれてしまう</span>
+<span class="quote1">&gt;のです。count(log_mate.id)が0も出してくれると助かる のですが。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;１）期間内に使用がない部品については0回として、下記のよう にとにかく</span>
+<span class="quote1">&gt;部品一覧テーブル(material)にあるもの全ての使用回数を出力す </span>
+<span class="quote1">&gt;るにはどん</span>
+<span class="quote1">&gt;なSQLにしたらいいでしょうか。</span>
+<span class="quote1">&gt;==================</span>
+<span class="quote1">&gt;id   name       a</span>
+<span class="quote1">&gt;------------------</span>
+<span class="quote1">&gt;1    ネジ      34</span>
+<span class="quote1">&gt;2    クギ      12</span>
+<span class="quote1">&gt;3    ワイヤ     0</span>
+<span class="quote1">&gt;4    フタ      46</span>
+<span class="quote1">&gt;==================</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;２）1回のSQL文で下記のような一覧が出力できるとなおう </span>
+<span class="quote1">&gt;れしいのですが可</span>
+<span class="quote1">&gt;能でしょうか。</span>
+<span class="quote1">&gt;==========================================</span>
+<span class="quote1">&gt;id   name      a1   a2   a3   a4   a5   a6</span>
+<span class="quote1">&gt;------------------------------------------</span>
+<span class="quote1">&gt;1    ネジ      34   21    0    5   45   36</span>
+<span class="quote1">&gt;2    クギ      12   32   22   14   39    0</span>
+<span class="quote1">&gt;3    ワイヤ     0   15   38   17   26   13</span>
+<span class="quote1">&gt;4    フタ      46   37   31   28   41   35</span>
+<span class="quote1">&gt;==========================================</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;　PHPと組み合わせてブラウザに一覧表を作成させる方法ならで きると思う</span>
+<span class="quote1">&gt;ので、そうしちゃおうかなとも思っているのですが、SQLだけで できる方法</span>
+<span class="quote1">&gt;があるならその方が便利だし知識も増えて応用がきくと思うので知って </span>
+<span class="quote1">&gt;おき</span>
+<span class="quote1">&gt;たいのです。よろしくお願いします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;=================================</span>
+<span class="quote1">&gt;==       HISAMITSU ISSEI       ==</span>
+<span class="quote1">&gt;==  DS1I-HSMT@xxxxxxxxxx  ==</span>
+<span class="quote1">&gt;<a href="http://www.ne.jp/asahi/pro/his/">http://www.ne.jp/asahi/pro/his/</a></span>
+<span class="quote1">&gt;=================================</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+_________________________________________________________________
+職場でのメッセンジャー活用法を全5話でお届け！続々公開中。 
+<a href="http://messenger.live.jp/oshigoto/index.htm">http://messenger.live.jp/oshigoto/index.htm</a> 
+
+
+</pre>
+</div>
+<p class="button"><a href="14101">[前]</a><a href="14103">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14100">  14100 2007-07-08 16:41 [Hisamitsu Issei &lt;ds1] ログのカウント方法                      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14101">  14101 2007-07-08 19:04 ┣[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14102">  14102 2007-07-08 21:14 ┗[忠犬 KEN公 &lt;ken_ken_]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14103">@ 14103 2007-07-09 21:19 　┗[Hisamitsu Issei &lt;ds1]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14104">  14104 2007-07-09 21:55 　　┣[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14106">  14106 2007-07-10 11:35 　　┗[hama &lt;smilestyle55@x]                                   </a></span>
+</pre>
+</body>
+</html>

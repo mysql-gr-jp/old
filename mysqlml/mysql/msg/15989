@@ -1,0 +1,124 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15989</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15988">[前]</a><a href="15990">[次]</a><a href="../list/15901-16000">[番号順一覧]</a><a href="../thread/15901-16000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15989
+</p>
+<div class="header">
+<p>
+From: Yuya Hirokawa &lt;Yuya Hirokawa &lt;yu_ya45@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 11 Jul 2013 01:19:22 +0900<br>
+Subject: [mysql 15989] 30sec以上SleepのプロセスでERROR 2013 Lost  connectionが出る問題の対策<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+お世話になります。廣川と申します。
+
+CentOS上にインストールしたMySQL5.6.12へWindows7（開発環境）クライアントから
+アクセスすると
+接続は成功するのですが無通信が30秒以上続いてクエリを発行すると下記エラーが発
+生します。
+ERROR 2013 (HY000): Lost connection to MySQL server during query
+
+この原因について何かご存じの方はいらっしゃいませんでしょうか？
+
+＜環境＞
+クライアント：Windows7上のプロンプトやJDBCドライバ経由、EclipseのDBViewプラ
+グイン等
+サーバー：CentOS6.4 x 2ケ 上にMySQL5.6.12(レプリケーションでマスター、スレー
+ブの二つ)
+仮想環境：VMWare Player (HostはWindows7でゲストOSにCentOS6.4)
+
+＜現象＞
+クライアント上からMySQL5.6.12へ接続後30秒以上Sleep状態でクエリーを発行すると
+プロセスが切れます。
+30秒以上たってからクエリーを発行しない限りはプロセスは生きているみたいです。
+(show full purocesslistで確認)
+30秒以内であれば問題なくクエリーが成功します。
+ローカル（ルートやクライアント用ユーザ）やマスター⇔スレーブ間でアクセスしク
+エリを発行すると現象が再現されません。
+
+＜行った対策＞（効果や変化なし）
+my.cnfへ下記追加
+wait_timeout=31536000
+interactive_timeout=31536000
+bind-address=0.0.0.0
+max_allowed_packet=32M
+エラーログの確認→Warning、Errorなし
+クエリログの確認→特におかしいような内容なし
+
+
+＜気になる点＞
+クライアントのMySQLが5.6.11と一つ前のバージョンなのですが関係ありますでしょ
+うか？
+
+明日以降バージョン揃えてみてトライしてみようと思いますが行き詰まってしまった
+ので何かご存じのかたいらっしゃいましたら
+アドバイスをいただきたくよろしくお願い致します。
+
+
+※以下参考情報として設定ファイル等記述しておきます。
+＜設定＞
+ユーザ
+GRANT ALTER, DELETE, INSERT,  REPLICATION SLAVE, SELECT, UPDATE ON *.* TO
+'webapp'@'%' IDENTIFIED BY '*********';
+my.cnf
+[client]
+no-beep
+
+[mysql]
+default-character-set=utf8
+
+[mysqld]
+port=6033
+server-id=1
+binlog_format=MIXED
+innodb_flush_logs_at_trx_commit=1
+datadir=/var/lib/mysql
+log-err=/var/log/mysql
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+symbolic-links=0
+character-set-server=utf8
+default-storage-engine=INNODB
+sql-mode=&quot;STRICT_TRANS_TABLES,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION&quot;
+slow-query-log=1
+slow_query_log_file=&quot;/var/log/mysql-slow.log&quot;
+innodb_thread_concurrency=4
+innodb_ft_min_token_size=1
+transaction-isolation=READ-UNCOMMITTED
+log-bin=/var/lib/mysql/bin.log
+sync_binlog=1
+innodb_support_xa=1
+max_connections=100
+thread_cache=100
+innodb_buffer_pool_size=512M
+innodb_additional_mem_pool_size=20M
+innodb_log_buffer_size=16M
+innodb_log_file_size=128M
+sort_buffer_size=2M
+read_rnd_buffer_size=1MB
+join_buffer_size=256K
+read_buffer_size=1M
+
+
+</pre>
+</div>
+<p class="button"><a href="15988">[前]</a><a href="15990">[次]</a><a href="../list/15901-16000">[番号順一覧]</a><a href="../thread/15901-16000">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15989">  15989 2013-07-11 01:19 [Yuya Hirokawa &lt;yu_ya] 30sec以上SleepのプロセスでERROR 2013 Lost  connectionが出る問題の対策</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15991">  15991 2013-07-11 19:12 ┗[Watanabe Tomoyuki &lt;W]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15992">  15992 2013-07-11 20:27 　┣[Yu Oasa &lt;you@xxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15993">  15993 2013-07-12 00:38 　┗[Yuya Hirokawa &lt;yu_ya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15994">  15994 2013-07-12 11:36 　　┗[Yu Oasa &lt;you@xxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15995">  15995 2013-07-13 10:01 　　　┗[Yuya Hirokawa &lt;yu_ya]                                 </a></span>
+</pre>
+</body>
+</html>

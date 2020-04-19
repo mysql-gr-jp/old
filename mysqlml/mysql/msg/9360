@@ -1,0 +1,82 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9360</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9359">[前]</a><a href="9361">[次]</a><a href="../list/9301-9400">[番号順一覧]</a><a href="../thread/9301-9400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9360
+</p>
+<div class="header">
+<p>
+From: seiji takegata &lt;seiji takegata &lt;takegata@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 14 May 2004 02:50:03 +0900<br>
+Subject: [mysql 09360] Re: distinct でデータ欠落<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+竹形です。
+<span class="quote2">&gt; &gt; 次のような select 文を書くと distinct の有無で question_no の答え 1 が欠</span>
+<span class="quote2">&gt; &gt; 落してしまいます。何か間違えているでしょうか？</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; mysql&gt; select  question_no from answer order by create_date desc limit 10;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; distinctでどのレコードが選ばれているかが問題な気がします。</span>
+<span class="quote1">&gt; limit 10を外すとどうですか。もしくはorder by question_noで試してみるとか。</span>
+<span class="quote1">&gt;  create_date をselectしてみるとか。etc.</span>
+
+最後の1つは余計でした（余計なカラムを含めるとdistinctにならない）
+
+こんなことをやってみました。
+mysql&gt; select id,a,b from test;
++----+------+------+
+<span class="quote1">| id | a    | b    |</span>
++----+------+------+
+<span class="quote1">|  1 |    1 |    5 |</span>
+<span class="quote1">|  2 |    5 |    4 |</span>
+<span class="quote1">|  3 |    6 |    3 |</span>
+<span class="quote1">|  4 |    1 |    2 |</span>
+<span class="quote1">|  5 |    2 |    1 |</span>
++----+------+------+
+5 rows in set (0.00 sec)
+
+mysql&gt; select distinct a from test order by b;
++------+
+<span class="quote1">| a    |</span>
++------+
+<span class="quote1">|    2 |</span>
+<span class="quote1">|    6 |</span>
+<span class="quote1">|    5 |</span>
+<span class="quote1">|    1 |</span>
++------+
+4 rows in set (0.00 sec)
+
+id=1とid=4の行がdistinctで1つになっているのですが、ソートした結果を見ると、
+id=1が残され、id=4が捨てられているような感じです。これにlimitをかけると、
+島村さんのようなケースになるのではないでしょうか。
+
+--
+seiji takegata
+takegata@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="9359">[前]</a><a href="9361">[次]</a><a href="../list/9301-9400">[番号順一覧]</a><a href="../thread/9301-9400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9354">   9354 2004-05-13 23:53 [Koichi Shimamura &lt;ma] distinct でデータ欠落                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9355">   9355 2004-05-14 00:11 ┗[seiji takegata &lt;take]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9358">   9358 2004-05-14 01:32 　┣[&quot;KATAYOSE hakuo&quot; &lt;ka]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9359">   9359 2004-05-14 02:22 　┃┗[seiji takegata &lt;take]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="9360">   9360 2004-05-14 02:50 　┗[seiji takegata &lt;take]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9364">   9364 2004-05-14 09:54 　　┗[Koichi Shimamura &lt;MA] Re: distinct でデータ             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9365">   9365 2004-05-14 10:43 　　　┗[Koichi Shimamura &lt;MA] Re: distinct でデータ欠落       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9366">   9366 2004-05-14 10:57 　　　　┣[seiji takegata &lt;take]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9368">   9368 2004-05-14 11:29 　　　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9371">   9371 2004-05-14 20:20 　　　　　┗[Koichi Shimamura &lt;ma]                             </a></span>
+</pre>
+</body>
+</html>

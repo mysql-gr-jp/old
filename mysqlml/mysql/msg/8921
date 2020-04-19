@@ -1,0 +1,97 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8921</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8920">[前]</a><a href="8922">[次]</a><a href="../list/8901-9000">[番号順一覧]</a><a href="../thread/8901-9000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8921
+</p>
+<div class="header">
+<p>
+From: ML account &lt;ML account &lt;ml@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 07 Mar 2004 22:06:42 +0900<br>
+Subject: [mysql 08921] Re: DISTINCT オプションの動作について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+　こんにちは。
+
+UNO Shintaro &lt;uno@xxxxxxxxxx&gt;さんの
+&lt;200403070956.i279uGrK013930@xxxxxxxxxx&gt;
+&quot;<a href="08919">[mysql 08919]</a> Re: DISTINCTオプションの動作について&quot;
+
+
+<span class="quote1">&gt; なるほど、自己ジョインに限らず普通のジョインでも「適切なインデックスが</span>
+<span class="quote1">&gt; なければ」直積のロー全件アクセスが起きてしまいますね。</span>
+<span class="quote1">&gt; 使われるクエリーパターンに応じて適切なインデックスをつけるのは当たり前</span>
+<span class="quote1">&gt; だと思っていたのですが、それでは答えとしては足りないということですね。</span>
+<span class="quote1">&gt; すみませんでした。</span>
+
+　インデックスを張る事により検索(SELECT)クエリの処理時間が短くなる可能性
+はあります。別テーブルのINNER JOINの場合、インデックスの有無で処理時間は
+天と地ですよね。
+
+　インデックスを付けて処理時間の再計測をしてみました。テーブル定義は、
+    create table tmp001 (NO int,MESSAGE varchar(50),DATE datetime,
+        index IDX_NO_DATE (NO,DATE));
+です。
+
+    recs | no index | w/index
+    -----+----------+---------
+     100 |    0.02  |   0.02
+    1000 |    1.14  |   0.69
+    2000 |    4.59  |   2.73
+    3000 |   10.31  |   6.24
+    4000 |   18.34  |  11.09
+    5000 |   28.78  |  17.58
+
+　この表で見られる様に、処理時間が６割方と改善はされています。ですが、や
+はりレコード数の二乗に比例の傾向は見て取れます。
+
+　インデックスはもちろん万能ではありませんし、好ましくない副作用が無い訳
+ではありませんし、特に今回の件に関しては「インデックスを張れば」に対して
+はボクの意見は否定的です。挿入/更新/削除クエリの処理時間の増大は、(レコー
+ド数が少ない場合やインデックスの実装によっては)軽視して構わない場合もあ
+りますし、一概には言えません。Ｎの二乗な性質の方が大きな問題です。
+
+　インデックスの副作用と言えば、錠さんの<a href="08917">[mysql 08917]</a>の場合、インデック
+スの再構築が非常な重荷になっている事が８時間ものdeleteクエリの処理時間の
+一因なのではと考えています。
+
+
+<span class="quote1">&gt; それにしても、松枝さんが書いて下さっている結合文字列を使う方法はうまい</span>
+<span class="quote1">&gt; ですね。桁数をきちんと揃えるとかの考慮は要るものの、その条件を満たせば</span>
+<span class="quote1">&gt; 有効な方法だと思います。</span>
+
+　大昔に先輩から教えて貰いました。利用はかなり限定的ですが。
+
+
+
+　　　　松枝知直　　　　&lt;tomom@xxxxxxxxxx&gt;
+　　　　　　　　　　　　<a href="http://www.argus.ne.jp/~tomom/">http://www.argus.ne.jp/~tomom/</a>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8920">[前]</a><a href="8922">[次]</a><a href="../list/8901-9000">[番号順一覧]</a><a href="../thread/8901-9000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8911">   8911 2004-03-07 02:49 [&lt;konet218@xxxxxxxxxx] DISTINCT オプションの動作について       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8912">   8912 2004-03-07 03:52 ┣[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8918">   8918 2004-03-07 16:51 ┃┗[KAWAJI Shinya &lt;kawaj]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8920">   8920 2004-03-07 22:06 ┃　┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8913">   8913 2004-03-07 04:48 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8914">   8914 2004-03-07 06:20 　┣[Sumito_Oda &lt;oda@xxxx] 予約語 (Re: DISTINCT オプションの動作について)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8915">   8915 2004-03-07 06:23 　┗[&lt;konet218@xxxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8916">   8916 2004-03-07 13:36 　　┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8919">   8919 2004-03-07 18:56 　　　┗[UNO Shintaro &lt;uno@xx]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="8921">   8921 2004-03-07 22:06 　　　　┗[ML account &lt;ml@xxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8923">   8923 2004-03-07 22:29 　　　　　┗[UNO Shintaro &lt;uno@xx]                             </a></span>
+</pre>
+</body>
+</html>

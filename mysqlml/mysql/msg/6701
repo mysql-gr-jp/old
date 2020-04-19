@@ -1,0 +1,87 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6701</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6700">[前]</a><a href="6702">[次]</a><a href="../list/6701-6800">[番号順一覧]</a><a href="../thread/6701-6800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6701
+</p>
+<div class="header">
+<p>
+From: とみたまさひろ &lt;とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 12 Dec 2002 07:10:03 +0900<br>
+Subject: [mysql 06701] Re: 排他処理<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+とみたです。
+
+On Tue, 10 Dec 2002 02:33:34 +0900
+&quot;E-Mail&quot; &lt;tyunn@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; MyISAM型のテーブルに対して、更新処理（update,delete、insert）を</span>
+<span class="quote1">&gt; 行っている間他のユーザが同テーブルを参照のみできるようにする</span>
+<span class="quote1">&gt; といったことを行うことはできるでしょうか？</span>
+
+単一の更新処理であれば、特にロックする必要はないでしょうから、やりたい
+ことは、「複数の更新処理を行なう間、他のスレッドから更新処理をさせたく
+ない」ということでしょうか。
+
+WRITE LOCK は、他のスレッドからの検索処理もできなくなっちゃうから、ダ
+メですよね。
+
+<span class="quote1">&gt; //----------------------------------------------------</span>
+<span class="quote1">&gt; 同じテーブルで多くの INSERT と多くの SELECT を行う場合、これを解決するには、</span>
+<span class="quote1">&gt; 他のテーブルに行を挿入して、たまに、その一時テーブルから全てのレコードをもう</span>
+<span class="quote1">&gt; 一方のテーブルに update します。</span>
+<span class="quote1">&gt; これは次のコードで行えます:</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; LOCK TABLES real_table WRITE, insert_table WRITE;</span>
+<span class="quote1">&gt; mysql&gt; insert into real_table select * from insert_table;</span>
+<span class="quote1">&gt; mysql&gt; TRUNCATE TABLE insert_table;</span>
+<span class="quote1">&gt; mysql&gt; UNLOCK TABLES;</span>
+<span class="quote1">&gt; ------------------------------------------------------------//これは、</span>
+<span class="quote1">&gt; <a href="../../../index.html">http://www.mysql.gr.jp/</a>　5.3.1からの引用ですがこのような処理が必要になるので</span>
+<span class="quote1">&gt; しょうか？よろしくお願いいたします。</span>
+
+更新処理が INSERT だけであれば、これでも良いかもしれないですね。DELETE 
+や UPDATE がある場合は、
+
+	SELECT GET_LOCK(&quot;lock&quot;, 10000);
+	CREATE TEMPORARY TABLE insert_table SELECT * FROM real_table;
+	...更新処理...
+	RENAME TABLE real_table TO backup_table, insert_table TO real_table;
+	DROP TABLE insert_table;
+	SELECT_RELEASE_LOCK(&quot;lock&quot;);
+
+というのはどうでしょうか。試してませんが… (^^;
+
+更新用にテーブルを１個作ってるので、素直に WRITE LOCK した方が速かった
+りするかも…。
+
+-- 
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;
+日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a>
+
+</pre>
+</div>
+<p class="button"><a href="6700">[前]</a><a href="6702">[次]</a><a href="../list/6701-6800">[番号順一覧]</a><a href="../thread/6701-6800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="6678">   6678 2002-12-10 02:33 [&quot;E-Mail&quot; &lt;tyunn@xxxx] 排他処理                                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6679">   6679 2002-12-10 03:11 ┣[Sumito_Oda &lt;oda@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6680">   6680 2002-12-10 10:52 ┃┗[&quot;E-Mail&quot; &lt;tyunn@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6681">   6681 2002-12-10 11:35 ┃　┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6682">   6682 2002-12-10 12:01 ┃　　┗[&quot;E-Mail&quot; &lt;tyunn@xxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6683">   6683 2002-12-10 13:15 ┃　　　┗[SUGAWARA Hajime &lt;sug]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6692">   6692 2002-12-11 09:06 ┃　　　　┗[&quot;E-Mail&quot; &lt;tyunn@xxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6694">   6694 2002-12-11 12:03 ┃　　　　　┗[SUGAWARA Hajime &lt;sug]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="6701">   6701 2002-12-12 07:10 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6715">   6715 2002-12-14 11:59 　┗[&quot;E-Mail&quot; &lt;tyunn@xxxx] Re: : 排他処理                      </a></span>
+</pre>
+</body>
+</html>

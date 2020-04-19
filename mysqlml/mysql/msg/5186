@@ -1,0 +1,135 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5186</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="5185">[前]</a><a href="5187">[次]</a><a href="../list/5101-5200">[番号順一覧]</a><a href="../thread/5101-5200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5186
+</p>
+<div class="header">
+<p>
+From: 井田昭一 &lt;井田昭一 &lt;sho@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 21 Feb 2002 16:47:08 +0900<br>
+Subject: [mysql 05186] php+mysql での日本語検索<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして
+昭一といいます。
+
+　書店で「MySQL &amp; PHP Webデータベース入門」の本を見つけまして、購入し
+SQLデータベースにチャレンジしています。
+　ファイルメーカーで持っていた２０万件のデータをCSVにてMysqlに
+移動しWeb検索を作成しています。
+　PHPからlikeを使用して「あいまい検索」をさせています。
+　テーブルを作成するときにindexの設定も入れてありますが、
+非常に検索が遅いように思いまして、いろいろと調べています。
+
+　Mysqlのマニュアルによると
+<a href="http://www.softagency.co.jp/mysql/Manual/mysql-3.23.47/">http://www.softagency.co.jp/mysql/Manual/mysql-3.23.47/</a>
+                     manual.ja_MySQL_Optimization.html#MySQL_indexes
+
+select * from JYUSHO where SHI like &quot;%長野%&quot; MACHI like &quot;%信濃%&quot;;
+
+　上記ではindexが使われないとありましたので、遅いのだと思いますが、
+この検索を早くする方法をご存知の方ご教授願えないでしょうか。
+よろしくお願いします。
+
+phpでは
+・非常に遅い
+  mysql_query(&quot;select * from JYUSHO
+                 where SHI like '%$shi%'
+                       MACHI like '%$machi%'&quot;);
+・非常に早い
+  mysql_query(&quot;select * from JYUSHO
+                 where SHI like '$shi'
+                       MACHI like '%$machi%'&quot;);
+
+テーブルは
++---------------------+--------------+------+-----+------------+-------+
+<span class="quote1">| Field               | Type         | Null | Key | Default    | Extra |</span>
++---------------------+--------------+------+-----+------------+-------+
+<span class="quote1">| ID                  | int(11)      |      | PRI | NULL       | auto_</span>
+                                                             increment |
+<span class="quote1">| GYOSHU_1            | varchar(100) |      | MUL |            |       |</span>
+<span class="quote1">| JIGYOSHO            | varchar(100) |      | MUL |            |       |</span>
+<span class="quote1">| KEN                 | varchar(10)  |      | MUL |            |       |</span>
+<span class="quote1">| GUN                 | varchar(10)  | YES  |     | NULL       |       |</span>
+<span class="quote1">| SHI                 | varchar(16)  |      | MUL |            |       |</span>
+<span class="quote1">| MACHI               | varchar(20)  |      | MUL |            |       |</span>
+<span class="quote1">| YUBIN_3             | int(3)       | YES  |     | NULL       |       |</span>
+<span class="quote1">| YUBIN_4             | int(4)       | YES  |     | NULL       |       |</span>
+<span class="quote1">| JYUSHO              | varchar(150) |      | MUL |            |       |</span>
+<span class="quote1">| TEL                 | varchar(15)  |      | MUL |            |       |</span>
+<span class="quote1">| FAX                 | varchar(15)  | YES  |     | NULL       |       |</span>
++---------------------+--------------+------+-----+------------+-------+
+
+インデックスは
+PRIMARY TEL JIGYOSHO MACHI SHI GYOSHU_1 になっています。
+
+explainの結果は
+mysql&gt; explain select * from JYUSHO where MACHI like &quot;%信濃%&quot;;
+table   type possible_keys key  key_len ref  rows   Extra
+NIIGATA ALL  NULL          NULL NULL    NULL 205705 where used
+
+環境は----------------------------------------------------------------
+
+　Turbolinux 6.5(2.2.18-2)
+　Mysql 3.23.47
+　Apache 1.3.23
+　php 4.1.1
+
+にて運用しています。
+
+インストール時には、下記のようにインストールをしました。
+Apache : ./configure --enable-module=most
+                     --enable-shared=max
+Mysql  : ./configure --prefix=/usr/local/mysql
+                     --with-charset=ujis
+                     --with-extra-charsets=all
+                     --with-mysqld-user=mysql
+Php    : ./configure --enable-trans-sid
+               --with-apxs=/usr/local/apache/bin/apxs
+               --enable-mbstring
+               --enable-mbstr-enc-trans
+               --with-mysql=/usr/local/mysql
+
+# ldd /usr/local/mysql/bin/mysql
+        libncurses.so.5 =&gt; /usr/lib/libncurses.so.5 (0x4001a000)
+        libmysqlclient.so.10 =&gt; /usr/local/mysql/lib/mysql/libmysqlclient.so.10 (0x4005c000)
+        libz.so.1 =&gt; /usr/lib/libz.so.1 (0x40094000)
+        libcrypt.so.1 =&gt; /lib/libcrypt.so.1 (0x400a3000)
+        libnsl.so.1 =&gt; /lib/libnsl.so.1 (0x400d0000)
+        libm.so.6 =&gt; /lib/libm.so.6 (0x400e7000)
+        libstdc++-libc6.1-2.so.3 =&gt; /usr/lib/libstdc++-libc6.1-2.so.3 (0x40105000)
+        libc.so.6 =&gt; /lib/libc.so.6 (0x4014c000)
+        /lib/ld-linux.so.2 =&gt; /lib/ld-linux.so.2 (0x40000000)
+
+# ldd /usr/local/mysql/lib/mysql/libmysqlclient.so
+        libz.so.1 =&gt; /usr/lib/libz.so.1 (0x4003e000)
+        libcrypt.so.1 =&gt; /lib/libcrypt.so.1 (0x4004c000)
+        libnsl.so.1 =&gt; /lib/libnsl.so.1 (0x40079000)
+        libm.so.6 =&gt; /lib/libm.so.6 (0x40091000)
+        libc.so.6 =&gt; /lib/libc.so.6 (0x400af000)
+        /lib/ld-linux.so.2 =&gt; /lib/ld-linux.so.2 (0x80000000)
+
+_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+　
+　昭一&lt; sho@xxxxxxxxxx &gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="5185">[前]</a><a href="5187">[次]</a><a href="../list/5101-5200">[番号順一覧]</a><a href="../thread/5101-5200">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="5186">   5186 2002-02-21 16:47 [井田昭一 &lt;sho@xxxxxx] php+mysql での日本語検索                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5192">   5192 2002-02-24 09:26 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5193">   5193 2002-02-24 17:13 　┗[井田昭一 &lt;sho@xxxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

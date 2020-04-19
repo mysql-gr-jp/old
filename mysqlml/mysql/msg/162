@@ -1,0 +1,152 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:162</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="161">[前]</a><a href="163">[次]</a><a href="../list/101-200">[番号順一覧]</a><a href="../thread/101-200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:162
+</p>
+<div class="header">
+<p>
+From: Kengo Jinno &lt;Kengo Jinno &lt;kengo@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 27 May 1998 21:59:50 +0900<br>
+Subject: [mysql 162] Re: MyODBC でトラブル<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+神野です。
+
+Wed, 27 May 1998 21:20:49 +0900 ごろに
+&lt;356C0521285.5105TAMON@xxxxxxxxxx&gt; の
+&quot;<a href="161">[mysql 161]</a> Re[2]: MyODBC でトラブル&quot; のメールで
+Tamon Nomura &lt;tamon@xxxxxxxxxx&gt; さんは書きました。
+
+<span class="quote1">&gt; ばっちり出来ました。変更したソースなんかみせていただけるとうれしいです。</span>
+
+まず、mysql-3.21.30のSJIS用のマクロをdefineしてしまってます。
+本来ならm_ctype.hあたりでdefineすべきなんでしょうが、こいつをincludeして
+ないファイルもあるのでmyodbc.hでもいいんじゃないでしょうか。
+
+#ifdef	USE_MB
+#define issjishead(c)   ((0x81&lt;=(uchar)(c) &amp;&amp; (uchar)(c)&lt;=0x9f) || (0xe0&lt;=(uchar)(c) &amp;&amp; (uchar)(c)&lt;=0xfc))
+#define issjistail(c)   ((0x40&lt;=(uchar)(c) &amp;&amp; (uchar)(c)&lt;=0x7e) || (0x80&lt;=(uchar)(c) &amp;&amp; (uchar)(c)&lt;=0xfc))
+#endif
+
+で、このマクロを利用して、SJIS判定してます。
+
+[utility.c]
+void remove_escape(char *name)
+{
+  char *to;
+  for (to=name ; *name ; name++)
+  {
+#ifdef USE_MB
+    if( issjishead( name[0] ) &amp;&amp; issjistail( name[1] ) ) {
+        *to++ = *name++;
+        *to++ = *name;
+        continue;
+    }
+#endif
+    if (*name == '\\' &amp;&amp; name[1])
+      name++;
+    *to++= *name;
+  }
+  *to=0;
+}
+
+[prepare.c]
+RETCODE my_SQLPrepare(HSTMT hstmt,UCHAR FAR *szSqlStr, SDWORD cbSqlStr)
+{
+  STMT FAR *stmt=(STMT FAR*) hstmt;
+  char in_string,*pos;
+  uint param_count;
+  DBUG_ENTER(&quot;my_SQLPrepare&quot;);
+(中略)
+  for (pos=stmt-&gt;query; *pos ; pos++)
+  {
+#ifdef  USE_MB
+    if( issjishead( pos[0] ) &amp;&amp; issjistail( pos[1] ) ) {
+        pos += 2-1;
+        continue;
+    }
+#endif
+    if (*pos == '\\' &amp;&amp; pos[1])                 /* Next char is escaped */
+    {
+      pos++;
+      continue;
+    }
+
+[execute.c]
+static char *insert_param(NET *net,char *to,PARAM_BIND *param)
+{
+  uint length;
+  char buff[128],*data;
+  bool convert=0;
+(ずずっと中略)
+  switch (param-&gt;SqlType) {
+  case SQL_CHAR:
+  case SQL_VARCHAR:
+  case SQL_LONGVARCHAR:
+  {
+    char *data_end=data+length;
+    char *to_end=net-&gt;buff+net-&gt;max_packet-3;
+
+    *to++='\'';
+
+    while (data != data_end)
+    {
+      if (to &gt;= to_end)
+      {
+        if (!(to=extend_buffer(net,to,(data_end-data)+256)))
+          return 0;
+        to_end=net-&gt;buff+net-&gt;max_packet-3;
+      }
+      /* Escape \0, \r and \n for better logging */
+#ifdef USE_MB
+      if( issjishead( data[0] ) &amp;&amp; issjistail( data[1] ) ) {
+        *to++ = *data++;
+        *to++ = *data++;
+        continue;
+      }
+#endif
+      if (*data == 0)
+      {
+        data++;
+        *to++= '\\';
+        *to++= '0';
+      }
+
+てな感じです。
+
+<span class="quote1">&gt; ところで、MyODBC 2.50.16bを使っていらっしゃるようですが</span>
+<span class="quote1">&gt; DATEのカラムがおかしくなりませんか？</span>
+
+そこまで見てないです。ごめんなさい。Access97は他の者がつついてますんで。
+
+-----------------------------
+神野健吾 &lt;kengo@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="161">[前]</a><a href="163">[次]</a><a href="../list/101-200">[番号順一覧]</a><a href="../thread/101-200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="159">    159 1998-05-27 13:36 [&quot;Toshiyuki Fujii&quot; &lt;f] MyODBCでトラブル                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="160">    160 1998-05-27 14:16 ┗[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="161">    161 1998-05-27 21:20 　┣[Tamon Nomura &lt;tamon@] Re[2]: MyODBC でトラブル            </a></span>
+<span class="current">-&gt;&nbsp;<a href="162">    162 1998-05-27 21:59 　┃┗[Kengo Jinno &lt;kengo@x] Re: MyODBC でトラブル             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="163">    163 1998-05-27 22:50 　┃　┗[Tamon Nomura &lt;tamon@]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="164">    164 1998-05-27 23:15 　┃　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="166">    166 1998-05-28 01:40 　┗[Hiroshi Marui &lt;bant@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="169">    169 1998-05-28 15:16 　　┗[Kengo Jinno &lt;kengo@x] SJIS&amp;lt;--&amp;gt;UJIS on MyODBC ( Re: MyODBCでトラブル )</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="172">    172 1998-05-28 15:54 　　　┣[&quot;民斗 &quot; &lt;tommy@xxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="175">    175 1998-05-29 01:32 　　　┗[Hiroshi Marui &lt;bant@]                                 </a></span>
+</pre>
+</body>
+</html>

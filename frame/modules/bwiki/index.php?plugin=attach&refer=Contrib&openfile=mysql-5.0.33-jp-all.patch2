@@ -1,0 +1,1111 @@
+diff -ru mysql-5.0.33.orig/client/client_priv.h mysql-5.0.33-jp/client/client_priv.h
+--- mysql-5.0.33.orig/client/client_priv.h	2007-01-09 21:51:14.000000000 +0900
++++ mysql-5.0.33-jp/client/client_priv.h	2007-01-21 10:50:22.000000000 +0900
+@@ -53,4 +53,5 @@
+   OPT_IGNORE_TABLE,OPT_INSERT_IGNORE,OPT_SHOW_WARNINGS,OPT_DROP_DATABASE,
+   OPT_TZ_UTC, OPT_AUTO_CLOSE, OPT_SSL_VERIFY_SERVER_CERT,
+   OPT_DEBUG_INFO
++  , OPT_HEXCHAR, OPT_CSV
+ };
+diff -ru mysql-5.0.33.orig/client/mysql.cc mysql-5.0.33-jp/client/mysql.cc
+--- mysql-5.0.33.orig/client/mysql.cc	2007-01-09 21:51:15.000000000 +0900
++++ mysql-5.0.33-jp/client/mysql.cc	2007-01-21 10:50:22.000000000 +0900
+@@ -147,7 +147,7 @@
+ static int connect_flag=CLIENT_INTERACTIVE;
+ static char *current_host,*current_db,*current_user=0,*opt_password=0,
+             *current_prompt=0, *delimiter_str= 0,
+-            *default_charset= (char*) MYSQL_DEFAULT_CHARSET_NAME;
++            *default_charset= (char*) MYSQL_CLIENT_DEFAULT_CHARSET_NAME;
+ static char *histfile;
+ static char *histfile_tmp;
+ static String glob_buffer,old_buffer;
+diff -ru mysql-5.0.33.orig/client/mysqlcheck.c mysql-5.0.33-jp/client/mysqlcheck.c
+--- mysql-5.0.33.orig/client/mysqlcheck.c	2007-01-09 21:51:07.000000000 +0900
++++ mysql-5.0.33-jp/client/mysqlcheck.c	2007-01-21 10:50:22.000000000 +0900
+@@ -38,7 +38,7 @@
+ static uint verbose = 0, opt_mysql_port=0;
+ static my_string opt_mysql_unix_port = 0;
+ static char *opt_password = 0, *current_user = 0, 
+-	    *default_charset = (char *)MYSQL_DEFAULT_CHARSET_NAME,
++	    *default_charset = (char *)MYSQL_CLIENT_DEFAULT_CHARSET_NAME,
+ 	    *current_host = 0;
+ static int first_error = 0;
+ DYNAMIC_ARRAY tables4repair;
+diff -ru mysql-5.0.33.orig/client/mysqldump.c mysql-5.0.33-jp/client/mysqldump.c
+--- mysql-5.0.33.orig/client/mysqldump.c	2007-01-09 21:51:21.000000000 +0900
++++ mysql-5.0.33-jp/client/mysqldump.c	2007-01-21 10:50:22.000000000 +0900
+@@ -97,6 +97,7 @@
+                 opt_hex_blob=0, opt_order_by_primary=0, opt_ignore=0,
+                 opt_complete_insert= 0, opt_drop_database= 0,
+                 opt_dump_triggers= 0, opt_routines=0, opt_tz_utc=1;
++static my_bool	opt_hex_char=0, opt_csv=0;
+ static ulong opt_max_allowed_packet, opt_net_buffer_length;
+ static MYSQL mysql_connection,*mysql=0;
+ static my_bool insert_pat_inited= 0, info_flag;
+@@ -128,7 +129,7 @@
+   it is the default value which assigned at the very beginning of main().
+ */
+ static const char *mysql_universal_client_charset=
+-  MYSQL_UNIVERSAL_CLIENT_CHARSET;
++  MYSQL_CLIENT_DEFAULT_CHARSET_NAME;
+ static char *default_charset;
+ static CHARSET_INFO *charset_info= &my_charset_latin1;
+ const char *default_dbug_option="d:t:o,/tmp/mysqldump.trace";
+@@ -274,6 +275,9 @@
+   {"hex-blob", OPT_HEXBLOB, "Dump binary strings (BINARY, "
+     "VARBINARY, BLOB) in hexadecimal format.",
+    (gptr*) &opt_hex_blob, (gptr*) &opt_hex_blob, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
++  {"hex-char", OPT_HEXCHAR, "Dump binary strings (CHAR, "
++   "VARCHAR) in hexadecimal format.",
++   (gptr*) &opt_hex_char, (gptr*) &opt_hex_char, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
+   {"host", 'h', "Connect to host.", (gptr*) &current_host,
+    (gptr*) &current_host, 0, GET_STR_ALLOC, REQUIRED_ARG, 0, 0, 0, 0, 0, 0},
+   {"ignore-table", OPT_IGNORE_TABLE,
+@@ -415,6 +419,8 @@
+    (gptr*) &where, (gptr*) &where, 0, GET_STR, REQUIRED_ARG, 0, 0, 0, 0, 0, 0},
+   {"xml", 'X', "Dump a database as well formed XML.", 0, 0, 0, GET_NO_ARG,
+    NO_ARG, 0, 0, 0, 0, 0, 0},
++  {"csv", OPT_CSV, "same as --fields-terminated-by=',' --fields-optionally-enclosed-by='\"' --lines-terminated-by='\\r\\n' .",
++   (gptr*) &opt_csv, (gptr*) &opt_csv, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
+   {0, 0, 0, 0, 0, 0, GET_NO_ARG, NO_ARG, 0, 0, 0, 0, 0, 0}
+ };
+ 
+@@ -763,7 +769,7 @@
+         been reset yet by --default-character-set=xxx.
+       */
+       if (default_charset == mysql_universal_client_charset)
+-        default_charset= (char*) MYSQL_DEFAULT_CHARSET_NAME;
++        default_charset= (char*) MYSQL_CLIENT_DEFAULT_CHARSET_NAME;
+       break;
+     }
+   case (int) OPT_MYSQL_PROTOCOL:
+@@ -810,6 +816,11 @@
+ 
+   if (opt_delayed)
+     opt_lock=0;                         /* Can't have lock with delayed */
++
++  if (opt_csv) { /* by sakaik */
++    opt_enclosed ="\""; fields_terminated = ","; lines_terminated = "\\r\\n";
++  }
++
+   if (!path && (enclosed || opt_enclosed || escaped || lines_terminated ||
+                 fields_terminated))
+   {
+@@ -2420,6 +2431,33 @@
+                    field->type == MYSQL_TYPE_LONG_BLOB ||
+                    field->type == MYSQL_TYPE_MEDIUM_BLOB ||
+                    field->type == MYSQL_TYPE_TINY_BLOB)) ? 1 : 0;
++
++	/*
++	  TEXT = MYSQL_TYPE_BLOB , field->charsetnr <> 63
++	  BLOB = MYSQL_TYPE_BLOB , field->charsetnr == 63
++	  CHAR = MYSQL_TYPE_STRING
++	  but, if we append
++	  --default-character-set=binary
++	  TEXT = MYSQL_TYPE_BLOB , field->charsetnr == 63
++	*/
++        if (opt_hex_char)
++	{
++	  if ( ( field->type == MYSQL_TYPE_STRING ||
++	         field->type == MYSQL_TYPE_VAR_STRING ||
++	         field->type == MYSQL_TYPE_VARCHAR ) ) {
++	    is_blob = 1;
++	  }
++	  else if ( field->charsetnr != 63 &&
++		   ( field->type == MYSQL_TYPE_BLOB ||
++		     field->type == MYSQL_TYPE_LONG_BLOB ||
++		     field->type == MYSQL_TYPE_MEDIUM_BLOB ||
++		     field->type == MYSQL_TYPE_TINY_BLOB )
++		 )
++	  {
++	    is_blob = 1;
++	  }
++	}
++
+         if (extended_insert && !opt_xml)
+         {
+           if (i == 0)
+@@ -2446,7 +2484,7 @@
+                   error= EX_EOM;
+                   goto err;
+                 }
+-                if (opt_hex_blob && is_blob)
++                if ( (opt_hex_blob || opt_hex_char) && is_blob)
+                 {
+                   dynstr_append(&extended_row, "0x");
+                   extended_row.length+= mysql_hex_string(extended_row.str +
+@@ -2524,7 +2562,7 @@
+                 }
+                 fputs("</field>\n", md_result_file);
+               }
+-              else if (opt_hex_blob && is_blob && length)
++              else if ( (opt_hex_blob || opt_hex_char) && is_blob && length)
+               {
+                 fputs("0x", md_result_file);
+                 print_blob_as_hex(md_result_file, row[i], length);
+diff -ru mysql-5.0.33.orig/client/mysqlimport.c mysql-5.0.33-jp/client/mysqlimport.c
+--- mysql-5.0.33.orig/client/mysqlimport.c	2007-01-09 21:51:43.000000000 +0900
++++ mysql-5.0.33-jp/client/mysqlimport.c	2007-01-21 10:50:22.000000000 +0900
+@@ -45,7 +45,7 @@
+ 		*current_host=0, *current_db=0, *fields_terminated=0,
+ 		*lines_terminated=0, *enclosed=0, *opt_enclosed=0,
+ 		*escaped=0, *opt_columns=0, 
+-		*default_charset= (char*) MYSQL_DEFAULT_CHARSET_NAME;
++		*default_charset= (char*) MYSQL_CLIENT_DEFAULT_CHARSET_NAME;
+ static uint     opt_mysql_port= 0, opt_protocol= 0;
+ static my_string opt_mysql_unix_port=0;
+ static longlong opt_ignore_lines= -1;
+diff -ru mysql-5.0.33.orig/client/mysqlshow.c mysql-5.0.33-jp/client/mysqlshow.c
+--- mysql-5.0.33.orig/client/mysqlshow.c	2007-01-09 21:51:08.000000000 +0900
++++ mysql-5.0.33-jp/client/mysqlshow.c	2007-01-21 10:50:22.000000000 +0900
+@@ -31,7 +31,7 @@
+ static my_bool opt_show_keys= 0, opt_compress= 0, opt_count=0, opt_status= 0, 
+   tty_password= 0, opt_table_type= 0;
+ static uint opt_verbose=0;
+-static char *default_charset= (char*) MYSQL_DEFAULT_CHARSET_NAME;
++static char *default_charset= (char*) MYSQL_CLIENT_DEFAULT_CHARSET_NAME;
+ 
+ #ifdef HAVE_SMEM 
+ static char *shared_memory_base_name=0;
+diff -ru mysql-5.0.33.orig/client/sql_string.cc mysql-5.0.33-jp/client/sql_string.cc
+--- mysql-5.0.33.orig/client/sql_string.cc	2007-01-09 21:51:07.000000000 +0900
++++ mysql-5.0.33-jp/client/sql_string.cc	2007-01-21 10:50:22.000000000 +0900
+@@ -250,13 +250,30 @@
+       (e.g. for UCS-2) must be done
+ */
+ 
++int my_cmp_2cs_name(const char *from, const char *to, char *name, int len)
++{
++  if ( strncasecmp(from, name, len) != 0 ) { return strncasecmp(from, name, len); }
++  if ( strncasecmp(to, name, len) != 0 ) { return strncasecmp(to, name, len); }
++  return 0;
++}
++
++int my_cmp_2cs_name_2name(const char *from, const char *to, char *name1, int len1, char *name2, int len2)
++{
++  if ( strncasecmp(from, name1, len1) == 0  &&  strncasecmp(to, name2, len2) == 0 ) { return 0; }
++  if ( strncasecmp(to, name1, len1) == 0  &&  strncasecmp(from, name2, len2) == 0 ) { return 0; }
++  return 1;
++}
++
+ bool String::needs_conversion(uint32 arg_length,
+ 			      CHARSET_INFO *from_cs,
+ 			      CHARSET_INFO *to_cs,
+ 			      uint32 *offset)
+ {
+   *offset= 0;
+-  if ((to_cs == &my_charset_bin) || 
++  if ( (my_cmp_2cs_name(from_cs->csname, to_cs->csname, "binary", 6) == 0) ||
++       (my_cmp_2cs_name_2name(from_cs->csname, to_cs->csname, "sjis", 4, "cp932", 5) == 0) ||
++       (my_cmp_2cs_name_2name(from_cs->csname, to_cs->csname, "ujis", 4, "eucjpms", 7) == 0) ||
++      (to_cs == &my_charset_bin) || 
+       (to_cs == from_cs) ||
+       my_charset_same(from_cs, to_cs) ||
+       ((from_cs == &my_charset_bin) &&
+diff -ru mysql-5.0.33.orig/config/ac-macros/character_sets.m4 mysql-5.0.33-jp/config/ac-macros/character_sets.m4
+--- mysql-5.0.33.orig/config/ac-macros/character_sets.m4	2007-01-09 21:51:21.000000000 +0900
++++ mysql-5.0.33-jp/config/ac-macros/character_sets.m4	2007-01-21 10:50:22.000000000 +0900
+@@ -37,6 +37,19 @@
+    [default_collation="default"])
+ 
+ 
++AC_ARG_WITH(client-charset,
++   [  --with-client-charset=CHARSET
++                          Default character set, use one of:
++                          CHARSETS_AVAILABLE0
++                          CHARSETS_AVAILABLE1
++                          CHARSETS_AVAILABLE2
++                          CHARSETS_AVAILABLE3
++                          CHARSETS_AVAILABLE4
++                          CHARSETS_AVAILABLE5],
++   [default_client_charset="$withval"],
++   [default_client_charset="$DEFAULT_CHARSET"])
++
++
+ AC_ARG_WITH(extra-charsets,
+   [  --with-extra-charsets=CHARSET[,CHARSET,...]
+                           Use charsets in addition to default (none, complex,
+@@ -408,10 +421,180 @@
+   ]);
+ fi
+ 
++
++
++
++
++
++
++
++      default_client_charset_collations=""
++
++case $default_client_charset in 
++    armscii8)
++      default_client_charset_default_collation="armscii8_general_ci"
++      default_charset_collations="armscii8_general_ci armscii8_bin"
++      ;;
++    ascii)
++      default_client_charset_default_collation="ascii_general_ci"
++      default_charset_collations="ascii_general_ci ascii_bin"
++      ;;
++    big5)
++      default_client_charset_default_collation="big5_chinese_ci"
++      default_charset_collations="big5_chinese_ci big5_bin"
++      ;;
++    binary)
++      default_client_charset_default_collation="binary"
++      default_charset_collations="binary"
++      ;;
++    cp1250)
++      default_client_charset_default_collation="cp1250_general_ci"
++      default_charset_collations="cp1250_general_ci cp1250_czech_cs cp1250_bin"
++      ;;
++    cp1251)
++      default_client_charset_default_collation="cp1251_general_ci"
++      default_charset_collations="cp1251_general_ci cp1251_general_cs cp1251_bin cp1251_bulgarian_ci cp1251_ukrainian_ci"
++      ;;
++    cp1256)
++      default_client_charset_default_collation="cp1256_general_ci"
++      default_charset_collations="cp1256_general_ci cp1256_bin"
++      ;;
++    cp1257)
++      default_client_charset_default_collation="cp1257_general_ci"
++      default_charset_collations="cp1257_general_ci cp1257_lithuanian_ci cp1257_bin"
++      ;;
++    cp850)
++      default_client_charset_default_collation="cp850_general_ci"
++      default_charset_collations="cp850_general_ci cp850_bin"
++      ;;
++    cp852)
++      default_client_charset_default_collation="cp852_general_ci"
++      default_charset_collations="cp852_general_ci cp852_bin"
++      ;;
++    cp866)
++      default_client_charset_default_collation="cp866_general_ci"
++      default_charset_collations="cp866_general_ci cp866_bin"
++      ;;
++    cp932)
++      default_client_charset_default_collation="cp932_japanese_ci"
++      default_charset_collations="cp932_japanese_ci cp932_bin"
++      ;;
++    dec8)
++      default_client_charset_default_collation="dec8_swedish_ci"
++      default_charset_collations="dec8_swedish_ci dec8_bin"
++      ;;
++    eucjpms)
++      default_client_charset_default_collation="eucjpms_japanese_ci"
++      default_charset_collations="eucjpms_japanese_ci ujis_bin"
++      ;;
++    euckr)
++      default_client_charset_default_collation="euckr_korean_ci"
++      default_charset_collations="euckr_korean_ci euckr_bin"
++      ;;
++    gb2312)
++      default_client_charset_default_collation="gb2312_chinese_ci"
++      default_charset_collations="gb2312_chinese_ci gb2312_bin"
++      ;;
++    gbk)
++      default_client_charset_default_collation="gbk_chinese_ci"
++      default_charset_collations="gbk_chinese_ci gbk_bin"
++      ;;
++    geostd8)
++      default_client_charset_default_collation="geostd8_general_ci"
++      default_charset_collations="geostd8_general_ci geostd8_bin"
++      ;;
++    greek)
++      default_client_charset_default_collation="greek_general_ci"
++      default_charset_collations="greek_general_ci greek_bin"
++      ;;
++    hebrew)
++      default_client_charset_default_collation="hebrew_general_ci"
++      default_charset_collations="hebrew_general_ci hebrew_bin"
++      ;;
++    hp8)
++      default_client_charset_default_collation="hp8_english_ci"
++      default_charset_collations="hp8_english_ci hp8_bin"
++      ;;
++    keybcs2)
++      default_client_charset_default_collation="keybcs2_general_ci"
++      default_charset_collations="keybcs2_general_ci keybcs2_bin"
++      ;;
++    koi8r)
++      default_client_charset_default_collation="koi8r_general_ci"
++      default_charset_collations="koi8r_general_ci koi8r_bin"
++      ;;
++    koi8u)
++      default_client_charset_default_collation="koi8u_general_ci"
++      default_charset_collations="koi8u_general_ci koi8u_bin"
++      ;;
++    latin1)
++      default_client_charset_default_collation="latin1_swedish_ci"
++      default_charset_collations="latin1_general_ci latin1_general_cs latin1_bin latin1_german1_ci latin1_german2_ci latin1_danish_ci latin1_spanish_ci latin1_swedish_ci"
++      ;;
++    latin2)
++      default_client_charset_default_collation="latin2_general_ci"
++      default_charset_collations="latin2_general_ci latin2_bin latin2_czech_cs latin2_hungarian_ci latin2_croatian_ci"
++      ;;
++    latin5)
++      default_client_charset_default_collation="latin5_turkish_ci"
++      default_charset_collations="latin5_turkish_ci latin5_bin"
++      ;;
++    latin7)
++      default_client_charset_default_collation="latin7_general_ci"
++      default_charset_collations="latin7_general_ci latin7_general_cs latin7_bin latin7_estonian_cs"
++      ;;
++    macce)
++      default_client_charset_default_collation="macce_general_ci"
++      default_charset_collations="macce_general_ci macce_bin"
++      ;;
++    macroman)
++      default_client_charset_default_collation="macroman_general_ci"
++      default_charset_collations="macroman_general_ci macroman_bin"
++      ;;
++    sjis)
++      default_client_charset_default_collation="sjis_japanese_ci"
++      default_charset_collations="sjis_japanese_ci sjis_bin"
++      ;;
++    swe7)
++      default_client_charset_default_collation="swe7_swedish_ci"
++      default_charset_collations="swe7_swedish_ci swe7_bin"
++      ;;
++    tis620)
++      default_client_charset_default_collation="tis620_thai_ci"
++      default_charset_collations="tis620_thai_ci tis620_bin"
++      ;;
++    ujis)
++      default_client_charset_default_collation="ujis_japanese_ci"
++      default_charset_collations="ujis_japanese_ci ujis_bin"
++      ;;
++    ucs2)
++      default_client_charset_default_collation="ucs2_general_ci"
++      default_charset_collations="ucs2_general_ci ucs2_bin ucs2_czech_ci ucs2_danish_ci ucs2_esperanto_ci ucs2_estonian_ci ucs2_icelandic_ci ucs2_latvian_ci ucs2_lithuanian_ci ucs2_persian_ci ucs2_polish_ci ucs2_romanian_ci ucs2_slovak_ci ucs2_slovenian_ci ucs2_spanish2_ci ucs2_spanish_ci ucs2_swedish_ci ucs2_turkish_ci ucs2_unicode_ci"
++      ;;
++    utf8)
++      default_client_charset_default_collation="utf8_general_ci"
++      default_charset_collations="utf8_general_ci utf8_bin utf8_czech_ci utf8_danish_ci utf8_esperanto_ci utf8_estonian_ci utf8_icelandic_ci utf8_latvian_ci utf8_lithuanian_ci utf8_persian_ci utf8_polish_ci utf8_romanian_ci utf8_slovak_ci utf8_slovenian_ci utf8_spanish2_ci utf8_spanish_ci utf8_swedish_ci utf8_turkish_ci utf8_unicode_ci"
++      ;;
++    *)
++      AC_MSG_ERROR([Client Charset $cs not available. (Available are: $CHARSETS_AVAILABLE).
++      See the Installation chapter in the Reference Manual.]);
++esac
++
++default_client_collation="$default_client_charset_default_collation"
++
++
++
++
++
+ AC_DEFINE_UNQUOTED([MYSQL_DEFAULT_CHARSET_NAME], ["$default_charset"],
+                    [Define the default charset name])
+ AC_DEFINE_UNQUOTED([MYSQL_DEFAULT_COLLATION_NAME], ["$default_collation"],
+-                   [Define the default charset name])
++                   [Define the default collation name])
++
++AC_DEFINE_UNQUOTED([MYSQL_CLIENT_DEFAULT_CHARSET_NAME], ["$default_client_charset"],
++                   [Define the default client charset name])
++AC_DEFINE_UNQUOTED([MYSQL_CLIENT_DEFAULT_COLLATION_NAME], ["$default_client_collation"],
++                   [Define the default client collation name])
+ 
+ # Shall we build the UCA-based Unicode collations
+ AC_ARG_WITH(uca,
+diff -ru mysql-5.0.33.orig/config.h.in mysql-5.0.33-jp/config.h.in
+--- mysql-5.0.33.orig/config.h.in	2007-01-09 21:52:29.000000000 +0900
++++ mysql-5.0.33-jp/config.h.in	2007-01-21 10:50:22.000000000 +0900
+@@ -950,6 +950,12 @@
+ /* Maximum number of indexes per table */
+ #undef MAX_INDEXES
+ 
++/* Define the default client charset name */
++#undef MYSQL_CLIENT_DEFAULT_CHARSET_NAME
++
++/* Define the default client charset name */
++#undef MYSQL_CLIENT_DEFAULT_COLLATION_NAME
++
+ /* Define the default charset name */
+ #undef MYSQL_DEFAULT_CHARSET_NAME
+ 
+diff -ru mysql-5.0.33.orig/include/config-win.h mysql-5.0.33-jp/include/config-win.h
+--- mysql-5.0.33.orig/include/config-win.h	2007-01-09 21:51:15.000000000 +0900
++++ mysql-5.0.33-jp/include/config-win.h	2007-01-21 10:50:22.000000000 +0900
+@@ -415,8 +415,8 @@
+ #define MYSQL_DEFAULT_COLLATION_NAME "utf8_general_cs"
+ #define HAVE_UTF8_GENERAL_CS 1
+ #else
+-#define MYSQL_DEFAULT_CHARSET_NAME "latin1"
+-#define MYSQL_DEFAULT_COLLATION_NAME "latin1_swedish_ci"
++#define MYSQL_DEFAULT_CHARSET_NAME "cp932"
++#define MYSQL_DEFAULT_COLLATION_NAME "cp932_japanese_ci"
+ #endif
+ 
+ #define HAVE_SPATIAL 1
+diff -ru mysql-5.0.33.orig/include/my_global.h mysql-5.0.33-jp/include/my_global.h
+--- mysql-5.0.33.orig/include/my_global.h	2007-01-09 21:51:49.000000000 +0900
++++ mysql-5.0.33-jp/include/my_global.h	2007-01-21 10:50:22.000000000 +0900
+@@ -1341,4 +1341,12 @@
+ #define NO_EMBEDDED_ACCESS_CHECKS
+ #endif
+ 
++#ifndef MYSQL_CLIENT_DEFAULT_CHARSET_NAME
++#define MYSQL_CLIENT_DEFAULT_CHARSET_NAME MYSQL_DEFAULT_CHARSET_NAME
++#endif
++
++#ifndef MYSQL_CLIENT_DEFAULT_COLLATION_NAME
++#define MYSQL_CLIENT_DEFAULT_COLLATION_NAME MYSQL_DEFAULT_COLLATION_NAME
++#endif
++
+ #endif /* my_global_h */
+diff -ru mysql-5.0.33.orig/libmysqld/client.c mysql-5.0.33-jp/libmysqld/client.c
+--- mysql-5.0.33.orig/libmysqld/client.c	2007-01-09 21:51:07.000000000 +0900
++++ mysql-5.0.33-jp/libmysqld/client.c	2007-01-21 10:52:52.000000000 +0900
+@@ -1716,9 +1716,9 @@
+   /* Set character set */
+   if (!mysql->options.charset_name)
+   {
+-    default_collation_name= MYSQL_DEFAULT_COLLATION_NAME;
++    default_collation_name= MYSQL_CLIENT_DEFAULT_COLLATION_NAME;
+     if (!(mysql->options.charset_name= 
+-       my_strdup(MYSQL_DEFAULT_CHARSET_NAME,MYF(MY_WME))))
++       my_strdup(MYSQL_CLIENT_DEFAULT_CHARSET_NAME,MYF(MY_WME))))
+     return 1;
+   }
+   else
+@@ -1785,6 +1785,9 @@
+ 		       const char *passwd, const char *db,
+ 		       uint port, const char *unix_socket,ulong client_flag)
+ {
++  char *cs_name;
++  struct charset_info_st *cs;
++
+   char		buff[NAME_LEN+USERNAME_LENGTH+100];
+   char		*end,*host_info;
+   my_socket	sock;
+@@ -1829,6 +1832,20 @@
+     mysql->options.my_cnf_file=mysql->options.my_cnf_group=0;
+   }
+ 
++
++  /* MYSQL_SET_CHARSET_NAME environment variable  */
++  // tommy got this idea.
++  cs_name = getenv("MYSQL_SET_CHARSET_NAME");
++  if ( cs_name != NULL) {
++    cs = get_charset_by_csname(cs_name, MY_CS_PRIMARY, MYF(0));
++    if (cs) {
++      mysql->charset = cs;
++      mysql->options.charset_name = my_strdup(cs_name, MYF(MY_WME));
++      //      mysql_options(mysql, MYSQL_SET_CHARSET_NAME, cs_name);
++    }
++  }
++
++
+   /* Some empty-string-tests are done because of ODBC */
+   if (!host || !host[0])
+     host=mysql->options.host;
+@@ -2759,13 +2776,92 @@
+ }
+ 
+ 
++/* for windows */
++#ifndef HAVE_STRCASECMP
++int strncasecmp(const char *s1, const char *s2, size_t n)
++{
++  int result, i;
++  uchar *a1, *a2;
++  a1 = (uchar *) s1; a2 = (uchar *) s2;
++
++  for (i=0; (unsigned)i<n ;  i++)
++  {
++    result = tolower(*a1) - tolower(*a2);
++    if ( result != 0 ) {
++      return result;
++    }
++    a1++;    a2++;
++  }
++  return 0;
++}
++#endif
++
++
+ int STDCALL
+ mysql_real_query(MYSQL *mysql, const char *query, ulong length)
+ {
++#define MAX_CSNAME_LEN 10
++  ulong i;
++  char *beg;
++  char cs_name[MAX_CSNAME_LEN + 1];
++  int j=0;
++  struct charset_info_st *cs;
++
+   DBUG_ENTER("mysql_real_query");
+   DBUG_PRINT("enter",("handle: 0x%lx", (long) mysql));
+   DBUG_PRINT("query",("Query = '%-.4096s'",query));
+ 
++  // query is "SET NAMES "
++  beg = (char *)query;
++  cs_name[0]='\0';
++
++  for (i=0; i<length; i++) {
++    if (' ' == *beg || '\t' == *beg || '\n' == *beg || '\r' == *beg) { beg++; continue; }
++    else { break; }
++  }
++
++  if (i<length   &&   length - (beg - query) > (3+1+5) )
++  {
++    if (strncasecmp("SET", beg, 3) == 0)
++    {
++      beg += 3;
++      for (i=beg - query; i<length; i++) {
++	if (' ' == *beg || '\t' == *beg || '\n' == *beg || '\r' == *beg) { beg++; continue; }
++	else { break; }
++      }
++
++      if (length - (beg - query) > 6  &&  strncasecmp("NAMES", beg, 5) == 0)
++      {
++	beg += 5;
++	for (i=beg - query; i<length; i++) {
++	  if (' ' == *beg || '\t' == *beg || '\n' == *beg || '\r' == *beg) { beg++; continue; }
++	  else { break; }
++	}
++
++        for (i=beg - query; i<length && j<MAX_CSNAME_LEN; i++) {
++          if ( ((int)(*beg) >= '0' && (int)(*beg) <= '9')  ||  ((int)(*beg) >= 'a' && (int)(*beg) <= 'z') || '_' == *beg ) {
++            cs_name[j] = *beg;
++            beg++;
++            j++;
++            continue;
++          }
++          else { break; }
++        }
++        if (j>0) {
++          cs_name[j] = '\0';
++          DBUG_PRINT("detected SET NAMES ", ("cs_name=%s", cs_name) );
++        }
++      }
++    }
++  }
++
++  if (j>0) {
++    if ( cs = get_charset_by_csname(cs_name, MY_CS_PRIMARY, MYF(0)) ) {
++      mysql->charset = cs;
++    }
++  }
++
++
+   if (mysql_send_query(mysql,query,length))
+     DBUG_RETURN(1);
+   DBUG_RETURN((int) (*mysql->methods->read_query_result)(mysql));
+diff -ru mysql-5.0.33.orig/libmysqld/sql_string.cc mysql-5.0.33-jp/libmysqld/sql_string.cc
+--- mysql-5.0.33.orig/libmysqld/sql_string.cc	2007-01-09 21:51:07.000000000 +0900
++++ mysql-5.0.33-jp/libmysqld/sql_string.cc	2007-01-21 10:50:22.000000000 +0900
+@@ -254,13 +254,33 @@
+   character_set_results is NULL.
+ */
+ 
++int my_cmp_2cs_name(const char *from, const char *to, char *name, int len)
++{
++  if ( strncasecmp(from, name, len) != 0 ) { return strncasecmp(from, name, len); }
++  if ( strncasecmp(to, name, len) != 0 ) { return strncasecmp(to, name, len); }
++  return 0;
++}
++
++int my_cmp_2cs_name_2name(const char *from, const char *to, char *name1, int len1, char *name2, int len2)
++{
++  if ( strncasecmp(from, name1, len1) == 0  &&  strncasecmp(to, name2, len2) == 0 ) { return 0; }
++  if ( strncasecmp(to, name1, len1) == 0  &&  strncasecmp(from, name2, len2) == 0 ) { return 0; }
++  return 1;
++}
++
++extern my_bool opt_skip_conversion;
++
+ bool String::needs_conversion(uint32 arg_length,
+ 			      CHARSET_INFO *from_cs,
+ 			      CHARSET_INFO *to_cs,
+ 			      uint32 *offset)
+ {
++  if (opt_skip_conversion) { return FALSE; }
+   *offset= 0;
+   if (!to_cs ||
++      (my_cmp_2cs_name(from_cs->csname, to_cs->csname, "binary", 6) == 0) ||
++      (my_cmp_2cs_name_2name(from_cs->csname, to_cs->csname, "sjis", 4, "cp932", 5) == 0) ||
++      (my_cmp_2cs_name_2name(from_cs->csname, to_cs->csname, "ujis", 4, "eucjpms", 7) == 0) ||
+       (to_cs == &my_charset_bin) || 
+       (to_cs == from_cs) ||
+       my_charset_same(from_cs, to_cs) ||
+diff -ru mysql-5.0.33.orig/sql/client.c mysql-5.0.33-jp/sql/client.c
+--- mysql-5.0.33.orig/sql/client.c	2007-01-09 21:51:07.000000000 +0900
++++ mysql-5.0.33-jp/sql/client.c	2007-01-21 10:52:46.000000000 +0900
+@@ -1716,9 +1716,9 @@
+   /* Set character set */
+   if (!mysql->options.charset_name)
+   {
+-    default_collation_name= MYSQL_DEFAULT_COLLATION_NAME;
++    default_collation_name= MYSQL_CLIENT_DEFAULT_COLLATION_NAME;
+     if (!(mysql->options.charset_name= 
+-       my_strdup(MYSQL_DEFAULT_CHARSET_NAME,MYF(MY_WME))))
++       my_strdup(MYSQL_CLIENT_DEFAULT_CHARSET_NAME,MYF(MY_WME))))
+     return 1;
+   }
+   else
+@@ -1785,6 +1785,9 @@
+ 		       const char *passwd, const char *db,
+ 		       uint port, const char *unix_socket,ulong client_flag)
+ {
++  char *cs_name;
++  struct charset_info_st *cs;
++
+   char		buff[NAME_LEN+USERNAME_LENGTH+100];
+   char		*end,*host_info;
+   my_socket	sock;
+@@ -1829,6 +1832,20 @@
+     mysql->options.my_cnf_file=mysql->options.my_cnf_group=0;
+   }
+ 
++
++  /* MYSQL_SET_CHARSET_NAME environment variable  */
++  // tommy got this idea.
++  cs_name = getenv("MYSQL_SET_CHARSET_NAME");
++  if ( cs_name != NULL) {
++    cs = get_charset_by_csname(cs_name, MY_CS_PRIMARY, MYF(0));
++    if (cs) {
++      mysql->charset = cs;
++      mysql->options.charset_name = my_strdup(cs_name, MYF(MY_WME));
++      //      mysql_options(mysql, MYSQL_SET_CHARSET_NAME, cs_name);
++    }
++  }
++
++
+   /* Some empty-string-tests are done because of ODBC */
+   if (!host || !host[0])
+     host=mysql->options.host;
+@@ -2759,13 +2776,92 @@
+ }
+ 
+ 
++/* for windows */
++#ifndef HAVE_STRCASECMP
++int strncasecmp(const char *s1, const char *s2, size_t n)
++{
++  int result, i;
++  uchar *a1, *a2;
++  a1 = (uchar *) s1; a2 = (uchar *) s2;
++
++  for (i=0; (unsigned)i<n ;  i++)
++  {
++    result = tolower(*a1) - tolower(*a2);
++    if ( result != 0 ) {
++      return result;
++    }
++    a1++;    a2++;
++  }
++  return 0;
++}
++#endif
++
++
+ int STDCALL
+ mysql_real_query(MYSQL *mysql, const char *query, ulong length)
+ {
++#define MAX_CSNAME_LEN 10
++  ulong i;
++  char *beg;
++  char cs_name[MAX_CSNAME_LEN + 1];
++  int j=0;
++  struct charset_info_st *cs;
++
+   DBUG_ENTER("mysql_real_query");
+   DBUG_PRINT("enter",("handle: 0x%lx", (long) mysql));
+   DBUG_PRINT("query",("Query = '%-.4096s'",query));
+ 
++  // query is "SET NAMES "
++  beg = (char *)query;
++  cs_name[0]='\0';
++
++  for (i=0; i<length; i++) {
++    if (' ' == *beg || '\t' == *beg || '\n' == *beg || '\r' == *beg) { beg++; continue; }
++    else { break; }
++  }
++
++  if (i<length   &&   length - (beg - query) > (3+1+5) )
++  {
++    if (strncasecmp("SET", beg, 3) == 0)
++    {
++      beg += 3;
++      for (i=beg - query; i<length; i++) {
++	if (' ' == *beg || '\t' == *beg || '\n' == *beg || '\r' == *beg) { beg++; continue; }
++	else { break; }
++      }
++
++      if (length - (beg - query) > 6  &&  strncasecmp("NAMES", beg, 5) == 0)
++      {
++	beg += 5;
++	for (i=beg - query; i<length; i++) {
++	  if (' ' == *beg || '\t' == *beg || '\n' == *beg || '\r' == *beg) { beg++; continue; }
++	  else { break; }
++	}
++
++        for (i=beg - query; i<length && j<MAX_CSNAME_LEN; i++) {
++          if ( ((int)(*beg) >= '0' && (int)(*beg) <= '9')  ||  ((int)(*beg) >= 'a' && (int)(*beg) <= 'z') || '_' == *beg ) {
++            cs_name[j] = *beg;
++            beg++;
++            j++;
++            continue;
++          }
++          else { break; }
++        }
++        if (j>0) {
++          cs_name[j] = '\0';
++          DBUG_PRINT("detected SET NAMES ", ("cs_name=%s", cs_name) );
++        }
++      }
++    }
++  }
++
++  if (j>0) {
++    if ( cs = get_charset_by_csname(cs_name, MY_CS_PRIMARY, MYF(0)) ) {
++      mysql->charset = cs;
++    }
++  }
++
++
+   if (mysql_send_query(mysql,query,length))
+     DBUG_RETURN(1);
+   DBUG_RETURN((int) (*mysql->methods->read_query_result)(mysql));
+diff -ru mysql-5.0.33.orig/sql/mysqld.cc mysql-5.0.33-jp/sql/mysqld.cc
+--- mysql-5.0.33.orig/sql/mysqld.cc	2007-01-09 21:51:07.000000000 +0900
++++ mysql-5.0.33-jp/sql/mysqld.cc	2007-01-21 10:50:22.000000000 +0900
+@@ -332,6 +332,7 @@
+ #endif
+ 
+ /* Global variables */
++my_bool opt_skip_conversion = 0;
+ 
+ bool opt_log, opt_update_log, opt_bin_log, opt_slow_log;
+ my_bool opt_log_queries_not_using_indexes= 0;
+@@ -4694,6 +4695,7 @@
+   OPT_PORT_OPEN_TIMEOUT,
+   OPT_MERGE,
+   OPT_INNODB_ROLLBACK_ON_TIMEOUT
++  , OPT_SKIP_CONVERSION
+ };
+ 
+ 
+@@ -4701,6 +4703,8 @@
+ 
+ struct my_option my_long_options[] =
+ {
++  {"skip-conversion", OPT_SKIP_CONVERSION,  "Don't convert strings.",
++   (gptr*) &opt_skip_conversion, (gptr*) &opt_skip_conversion, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
+   {"help", '?', "Display this help and exit.",
+    (gptr*) &opt_help, (gptr*) &opt_help, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0,
+    0, 0},
+diff -ru mysql-5.0.33.orig/sql/sql_string.cc mysql-5.0.33-jp/sql/sql_string.cc
+--- mysql-5.0.33.orig/sql/sql_string.cc	2007-01-09 21:51:07.000000000 +0900
++++ mysql-5.0.33-jp/sql/sql_string.cc	2007-01-21 10:50:22.000000000 +0900
+@@ -254,13 +254,33 @@
+   character_set_results is NULL.
+ */
+ 
++int my_cmp_2cs_name(const char *from, const char *to, char *name, int len)
++{
++  if ( strncasecmp(from, name, len) != 0 ) { return strncasecmp(from, name, len); }
++  if ( strncasecmp(to, name, len) != 0 ) { return strncasecmp(to, name, len); }
++  return 0;
++}
++
++int my_cmp_2cs_name_2name(const char *from, const char *to, char *name1, int len1, char *name2, int len2)
++{
++  if ( strncasecmp(from, name1, len1) == 0  &&  strncasecmp(to, name2, len2) == 0 ) { return 0; }
++  if ( strncasecmp(to, name1, len1) == 0  &&  strncasecmp(from, name2, len2) == 0 ) { return 0; }
++  return 1;
++}
++
++extern my_bool opt_skip_conversion;
++
+ bool String::needs_conversion(uint32 arg_length,
+ 			      CHARSET_INFO *from_cs,
+ 			      CHARSET_INFO *to_cs,
+ 			      uint32 *offset)
+ {
++  if (opt_skip_conversion) { return FALSE; }
+   *offset= 0;
+   if (!to_cs ||
++      (my_cmp_2cs_name(from_cs->csname, to_cs->csname, "binary", 6) == 0) ||
++      (my_cmp_2cs_name_2name(from_cs->csname, to_cs->csname, "sjis", 4, "cp932", 5) == 0) ||
++      (my_cmp_2cs_name_2name(from_cs->csname, to_cs->csname, "ujis", 4, "eucjpms", 7) == 0) ||
+       (to_cs == &my_charset_bin) || 
+       (to_cs == from_cs) ||
+       my_charset_same(from_cs, to_cs) ||
+diff -ru mysql-5.0.33.orig/sql-common/client.c mysql-5.0.33-jp/sql-common/client.c
+--- mysql-5.0.33.orig/sql-common/client.c	2007-01-09 21:51:07.000000000 +0900
++++ mysql-5.0.33-jp/sql-common/client.c	2007-01-21 10:52:36.000000000 +0900
+@@ -1716,9 +1716,9 @@
+   /* Set character set */
+   if (!mysql->options.charset_name)
+   {
+-    default_collation_name= MYSQL_DEFAULT_COLLATION_NAME;
++    default_collation_name= MYSQL_CLIENT_DEFAULT_COLLATION_NAME;
+     if (!(mysql->options.charset_name= 
+-       my_strdup(MYSQL_DEFAULT_CHARSET_NAME,MYF(MY_WME))))
++       my_strdup(MYSQL_CLIENT_DEFAULT_CHARSET_NAME,MYF(MY_WME))))
+     return 1;
+   }
+   else
+@@ -1785,6 +1785,9 @@
+ 		       const char *passwd, const char *db,
+ 		       uint port, const char *unix_socket,ulong client_flag)
+ {
++  char *cs_name;
++  struct charset_info_st *cs;
++
+   char		buff[NAME_LEN+USERNAME_LENGTH+100];
+   char		*end,*host_info;
+   my_socket	sock;
+@@ -1829,6 +1832,20 @@
+     mysql->options.my_cnf_file=mysql->options.my_cnf_group=0;
+   }
+ 
++
++  /* MYSQL_SET_CHARSET_NAME environment variable  */
++  // tommy got this idea.
++  cs_name = getenv("MYSQL_SET_CHARSET_NAME");
++  if ( cs_name != NULL) {
++    cs = get_charset_by_csname(cs_name, MY_CS_PRIMARY, MYF(0));
++    if (cs) {
++      mysql->charset = cs;
++      mysql->options.charset_name = my_strdup(cs_name, MYF(MY_WME));
++      //      mysql_options(mysql, MYSQL_SET_CHARSET_NAME, cs_name);
++    }
++  }
++
++
+   /* Some empty-string-tests are done because of ODBC */
+   if (!host || !host[0])
+     host=mysql->options.host;
+@@ -2759,13 +2776,92 @@
+ }
+ 
+ 
++/* for windows */
++#ifndef HAVE_STRCASECMP
++int strncasecmp(const char *s1, const char *s2, size_t n)
++{
++  int result, i;
++  uchar *a1, *a2;
++  a1 = (uchar *) s1; a2 = (uchar *) s2;
++
++  for (i=0; (unsigned)i<n ;  i++)
++  {
++    result = tolower(*a1) - tolower(*a2);
++    if ( result != 0 ) {
++      return result;
++    }
++    a1++;    a2++;
++  }
++  return 0;
++}
++#endif
++
++
+ int STDCALL
+ mysql_real_query(MYSQL *mysql, const char *query, ulong length)
+ {
++#define MAX_CSNAME_LEN 10
++  ulong i;
++  char *beg;
++  char cs_name[MAX_CSNAME_LEN + 1];
++  int j=0;
++  struct charset_info_st *cs;
++
+   DBUG_ENTER("mysql_real_query");
+   DBUG_PRINT("enter",("handle: 0x%lx", (long) mysql));
+   DBUG_PRINT("query",("Query = '%-.4096s'",query));
+ 
++  // query is "SET NAMES "
++  beg = (char *)query;
++  cs_name[0]='\0';
++
++  for (i=0; i<length; i++) {
++    if (' ' == *beg || '\t' == *beg || '\n' == *beg || '\r' == *beg) { beg++; continue; }
++    else { break; }
++  }
++
++  if (i<length   &&   length - (beg - query) > (3+1+5) )
++  {
++    if (strncasecmp("SET", beg, 3) == 0)
++    {
++      beg += 3;
++      for (i=beg - query; i<length; i++) {
++	if (' ' == *beg || '\t' == *beg || '\n' == *beg || '\r' == *beg) { beg++; continue; }
++	else { break; }
++      }
++
++      if (length - (beg - query) > 6  &&  strncasecmp("NAMES", beg, 5) == 0)
++      {
++	beg += 5;
++	for (i=beg - query; i<length; i++) {
++	  if (' ' == *beg || '\t' == *beg || '\n' == *beg || '\r' == *beg) { beg++; continue; }
++	  else { break; }
++	}
++
++        for (i=beg - query; i<length && j<MAX_CSNAME_LEN; i++) {
++          if ( ((int)(*beg) >= '0' && (int)(*beg) <= '9')  ||  ((int)(*beg) >= 'a' && (int)(*beg) <= 'z') || '_' == *beg ) {
++            cs_name[j] = *beg;
++            beg++;
++            j++;
++            continue;
++          }
++          else { break; }
++        }
++        if (j>0) {
++          cs_name[j] = '\0';
++          DBUG_PRINT("detected SET NAMES ", ("cs_name=%s", cs_name) );
++        }
++      }
++    }
++  }
++
++  if (j>0) {
++    if ( cs = get_charset_by_csname(cs_name, MY_CS_PRIMARY, MYF(0)) ) {
++      mysql->charset = cs;
++    }
++  }
++
++
+   if (mysql_send_query(mysql,query,length))
+     DBUG_RETURN(1);
+   DBUG_RETURN((int) (*mysql->methods->read_query_result)(mysql));
+diff -ru mysql-5.0.33.orig/strings/ctype-cp932.c mysql-5.0.33-jp/strings/ctype-cp932.c
+--- mysql-5.0.33.orig/strings/ctype-cp932.c	2007-01-09 21:51:49.000000000 +0900
++++ mysql-5.0.33-jp/strings/ctype-cp932.c	2007-01-21 10:50:22.000000000 +0900
+@@ -5442,7 +5442,7 @@
+     else
+     {
+       /* Wrong byte sequence */
+-      *error= 1;
++      b++;
+       break;
+     }
+   }
+diff -ru mysql-5.0.33.orig/strings/ctype-eucjpms.c mysql-5.0.33-jp/strings/ctype-eucjpms.c
+--- mysql-5.0.33.orig/strings/ctype-eucjpms.c	2007-01-09 21:51:36.000000000 +0900
++++ mysql-5.0.33-jp/strings/ctype-eucjpms.c	2007-01-21 10:50:22.000000000 +0900
+@@ -8393,42 +8393,15 @@
+   const uchar *b= (uchar *) beg;
+   *error=0;
+ 
+-  for ( ; pos && b < (uchar*) end; pos--, b++)
++  while (pos && b < end)
+   {
+-    char *chbeg;
+-    uint ch= *b;
+-
+-    if (ch <= 0x7F)                 /* one byte */
+-      continue;
+-
+-    chbeg= (char *) b++;
+-    if (b >= (uchar *) end)         /* need more bytes */
+-      return (uint) (chbeg - beg);  /* unexpected EOL  */
+-
+-    if (ch == 0x8E)                 /* [x8E][xA0-xDF] */
+-    {
+-      if (*b >= 0xA0 && *b <= 0xDF)
+-        continue;
+-      *error=1;
+-      return (uint) (chbeg - beg);  /* invalid sequence */
+-    }
+-
+-    if (ch == 0x8F)                 /* [x8F][xA1-xFE][xA1-xFE] */
+-    {
+-      ch= *b++;
+-      if (b >= (uchar*) end)
+-      {
+-        *error= 1;
+-        return (uint)(chbeg - beg); /* unexpected EOL */
+-      }
+-    }
+-
+-    if (ch >= 0xA1 && ch <= 0xFE &&
+-        *b >= 0xA1 && *b <= 0xFE)   /* [xA1-xFE][xA1-xFE] */
+-      continue;
+-    *error=1;
+-    return (uint) (chbeg - beg);    /* invalid sequence */
++    uint mblen;
++    if ((mblen = ismbchar_eucjpms(cs, b, end)) == 0)
++      mblen = 1;
++    b += mblen;
++    pos--;
+   }
++
+   return (uint) (b - (uchar *) beg);
+ }
+ 
+diff -ru mysql-5.0.33.orig/strings/ctype-sjis.c mysql-5.0.33-jp/strings/ctype-sjis.c
+--- mysql-5.0.33.orig/strings/ctype-sjis.c	2007-01-09 21:51:50.000000000 +0900
++++ mysql-5.0.33-jp/strings/ctype-sjis.c	2007-01-21 10:50:22.000000000 +0900
+@@ -4613,7 +4613,8 @@
+     else
+     {
+       /* Wrong byte sequence */
+-      *error= 1;
++      /* *error= 1; */
++      b++;
+       break;
+     }
+   }
+diff -ru mysql-5.0.33.orig/strings/ctype-ujis.c mysql-5.0.33-jp/strings/ctype-ujis.c
+--- mysql-5.0.33.orig/strings/ctype-ujis.c	2007-01-09 21:51:48.000000000 +0900
++++ mysql-5.0.33-jp/strings/ctype-ujis.c	2007-01-21 10:50:22.000000000 +0900
+@@ -8257,46 +8257,17 @@
+                              uint pos, int *error)
+ {
+   const uchar *b= (uchar *) beg;
+-  
+-  for ( *error= 0 ; pos && b < (uchar*) end; pos--, b++)
++  *error = 0;
++
++  while (pos && b < end)
+   {
+-    char *chbeg;
+-    uint ch= *b;
+-    
+-    if (ch <= 0x7F)                 /* one byte */
+-      continue;
+-    
+-    chbeg= (char *) b++;
+-    if (b >= (uchar *) end)         /* need more bytes */
+-    {
+-      *error= 1;
+-      return (uint) (chbeg - beg);  /* unexpected EOL  */ 
+-    }
+-    
+-    if (ch == 0x8E)                 /* [x8E][xA0-xDF] */
+-    {
+-      if (*b >= 0xA0 && *b <= 0xDF)
+-        continue;
+-      *error= 1;
+-      return (uint) (chbeg - beg);  /* invalid sequence */
+-    }
+-    
+-    if (ch == 0x8F)                 /* [x8F][xA1-xFE][xA1-xFE] */
+-    {
+-      ch= *b++;
+-      if (b >= (uchar*) end)
+-      {
+-        *error= 1;
+-        return (uint) (chbeg - beg); /* unexpected EOL */
+-      }
+-    }
+-    
+-    if (ch >= 0xA1 && ch <= 0xFE &&
+-        *b >= 0xA1 && *b <= 0xFE)   /* [xA1-xFE][xA1-xFE] */
+-      continue;
+-    *error= 1;
+-    return (uint) (chbeg - beg);    /* invalid sequence */
++    uint mblen;
++    if ((mblen = ismbchar_ujis(cs, b, end)) == 0)
++      mblen = 1;
++    b += mblen;
++    pos--;
+   }
++
+   return (uint) (b - (uchar *) beg);
+ }
+ 

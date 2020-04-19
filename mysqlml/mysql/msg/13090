@@ -1,0 +1,159 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13090</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13089">[前]</a><a href="13091">[次]</a><a href="../list/13001-13100">[番号順一覧]</a><a href="../thread/13001-13100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13090
+</p>
+<div class="header">
+<p>
+From: Ryutaro Amano &lt;Ryutaro Amano &lt;wn9r-amn@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 12 Jun 2006 17:16:47 +0900<br>
+Subject: [mysql 13090] 5.0.22とopensslとOSX<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+天野竜太郎と申します。
+Mac OSX 10.4.6 PowerPC 32bitです。
+MySQL5.0.22をソースからインストールしようと思い、以下の 
+configureオプションを付けましたが、
+
+CFLAGS=&quot;-O3&quot; CXX=gcc CXXFLAGS=&quot;-O3 -felide-constructors -fno- 
+exceptions -fno-rtti&quot; ./configure --prefix=/usr/local/mysql -- 
+localstatedir=/usr/local/mysql/data --enable-thread-safe-client -- 
+with-unix-socket-path=/private/tmp/mysql.sock  --without-readline -- 
+with-extra-charsets=all --with-mysqld-user=mysql --with-openssl=/usr
+
+checking for OpenSSL... ./configure: line 38941: test: too many  
+arguments
+Could not find an installation of OpenSSL
+となります。同じオプションで、4.1.20では問題ありません。
+
+configureファイルのopenssl関連の個所を見ますと、
+
+4.1.20
+------------------------------------------------------------------------ 
+-----
+  incs=&quot;$openssl_includes&quot;
+   libs=&quot;$openssl_libs&quot;
+   eval shrexts=\&quot;$shrext_cmds\&quot;
+   case &quot;$incs---$libs&quot; in
+     ---)
+       for d in /usr/ssl/include /usr/local/ssl/include /usr/ 
+include \
+/usr/include/ssl /opt/ssl/include /opt/openssl/include \
+/usr/local/ssl/include /usr/local/include /usr/freeware/include ; do
+        if test -f $d/openssl/ssl.h  ; then
+          OPENSSL_INCLUDE=-I$d
+        fi
+       done
+
+       for d in /usr/ssl/lib /usr/local/ssl/lib /usr/lib/openssl \
+/usr/lib /usr/lib64 /opt/ssl/lib /opt/openssl/lib \
+/usr/freeware/lib32 /usr/local/lib/ ; do
+       # Just to be safe, we test for &quot;.so&quot; anyway
+       if test -f $d/libssl.a || test -f $d/libssl.so || test -f $d/ 
+libssl$shrexts ; then
+         OPENSSL_LIB=$d
+       fi
+       done
+       ;;
+     ---* | *---)
+       { { echo &quot;$as_me:$LINENO: error: if either 'includes' or  
+'libs' is specified, both must be specified&quot; &gt;&amp;5
+echo &quot;$as_me: error: if either 'includes' or 'libs' is specified,  
+both must be specified&quot; &gt;&amp;2;}
+    { (exit 1); exit 1; }; }
+       ;;
+     * )
+       if test -f $incs/openssl/ssl.h  ; then
+         OPENSSL_INCLUDE=-I$incs
+       fi
+       # Just to be safe, we test for &quot;.so&quot; anyway
+       if test -f $libs/libssl.a || test -f $libs/libssl.so || test - 
+f &quot;$libs/libssl$shrexts&quot; ; then
+         OPENSSL_LIB=$libs
+       fi
+       ;;
+   esac
+------------------------------------------------------------------------ 
+-----------
+
+5.0.22
+------------------------------------------------------------------------ 
+-----------
+   incs=&quot;$openssl_includes&quot;
+   libs=&quot;$openssl_libs&quot;
+   case &quot;$incs---$libs&quot; in
+     ---)
+       for d in /usr/ssl/include /usr/local/ssl/include /usr/ 
+include \
+/usr/include/ssl /opt/ssl/include /opt/openssl/include \
+/usr/local/ssl/include /usr/local/include /usr/freeware/include ; do
+        if test -f $d/openssl/ssl.h  ; then
+          OPENSSL_INCLUDE=-I$d
+        fi
+       done
+
+       for d in /usr/ssl/lib /usr/local/ssl/lib /usr/lib/openssl \
+/usr/lib /usr/lib64 /opt/ssl/lib /opt/openssl/lib \
+/usr/freeware/lib32 /usr/local/lib/ ; do
+       # Just to be safe, we test for &quot;.so&quot; anyway
+       if test -f $d/libssl.a || test -f $d/libssl.so || test -f $d/ 
+libssl$shrext_cmds ; then
+         OPENSSL_LIB=$d
+       fi
+       done
+       ;;
+       ;;
+     ---* | *---)
+       { { echo &quot;$as_me:$LINENO: error: if either 'includes' or  
+'libs' is specified, both must be specified&quot; &gt;&amp;5
+echo &quot;$as_me: error: if either 'includes' or 'libs' is specified,  
+both must be specified&quot; &gt;&amp;2;}
+    { (exit 1); exit 1; }; }
+       ;;
+     * )
+       if test -f $incs/openssl/ssl.h  ; then
+         OPENSSL_INCLUDE=-I$incs
+       fi
+       # Just to be safe, we test for &quot;.so&quot; anyway
+       if test -f $libs/libssl.a || test -f $libs/libssl.so || test - 
+f &quot;$libs/libssl$shrext_cmds&quot; ; then
+         OPENSSL_LIB=$libs
+       fi
+       ;;
+   esac
+
+------------------------------------------------------------------------ 
+-----------
+
+4.1.20 には、eval shrexts=\&quot;$shrext_cmds\&quot;　が 
+あり、
+5.0.22で、libssl$shrext_cmds　となっているところが、libssl 
+$shrexts　となっています。
+違う個所を4.1.20のようにすると、configure、 
+makeは通ります。
+
+これは、Mysql-5.0.22の問題なのでしょうか？　それとも 
+OSX側に問題があるのでしょうか？
+
+仕事で使うわけでもなく、ローカル内で、単に趣味程度で運用するぐら 
+いですが。
+
+Ryutaro Amano
+wn9r-amn@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="13089">[前]</a><a href="13091">[次]</a><a href="../list/13001-13100">[番号順一覧]</a><a href="../thread/13001-13100">[スレッド一覧]</a></p>
+</body>
+</html>

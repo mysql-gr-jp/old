@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1160</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1159">[前]</a><a href="1161">[次]</a><a href="../list/1101-1200">[番号順一覧]</a><a href="../thread/1101-1200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1160
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Thu, 26 Aug 1999 12:23:13 +0900<br>
+Subject: [mysql 01160] Re: インデックス作成のトラブル<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Thu, 26 Aug 1999 11:26:07 +0900,
+Yuzuru Goto &lt;kn6y-gtu@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; 一つ目のindexや二つ目のindex作成時には時間がかからず</span>
+<span class="quote1">&gt; indexをつける項目が増えるにつれこれを作成する為の時間が</span>
+<span class="quote1">&gt; 急激に増えていくというものでした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ということで、今回の宮原さんの件とは少しかけはなれた話でした。</span>
+
+わたしは、同じだと思ってます
+
+  クライアント　　　　　　　　サーバー
+  mysql command で
+  alter table      - 要求 -&gt; おおもと(親)の mysqld thread が受け
+                                \違うスレッド(子)に処理させる
+                                  |
+                                  V
+                               違う(子)スレッドが alter table 実行
+                                  今のテーブル(.ISD, .ISM) を
+                                  一行一行、チェック、変更して
+                                  A-1.* にコピー
+
+                                  A-1.* が完成したら、A-1.* を
+                                  テーブル名.* にリネーム
+
+                                  データが何百メガとかあると、
+                                  disk をがりがりやってしまう
+
+                               処理終了後、おおもとの親 mysqld に返る
+                                  |
+                                  V
+   mysql コマンドが  &lt;- 返 -  親 mysqld が返答
+  結果受け取り
+
+の流れです。 (あれ、子供が直接返答するのだったけ？)
+
+インデックスは、&quot;テーブル名.ISM&quot; というファイルにかかれます
+全部のデータは &quot;テーブル名.ISD&quot; というファイルです。
+
+ですので、はるインデックスが多くなれば、.ISM も多くなりますし、
+書き込みもチェックも多くなります。
+結果、disk アクセスが多くなって、遅くなります
+
+
+あと、上の流れの通り、クライアントである mysql コマンドは
+単に要求を発行して、受け取りを待っているだけなので、
+クライアントの &quot;mysql コマンド&quot; を落としても、
+命令を実行しようとしているサーバーのスレッドにはあまり影響せず、
+&quot;なにも返ってこない&quot; とか &quot;暴走した&quot; とか、
+操作した人間は思ってしまいます。
+
+さらに、親の mysqld スレッドを kill しても
+( mysql.server stop は 親の mysqld スレッドを kill しているだけ )
+子供のスレッドが命令を完遂しようとしていますので、
+kill できなかったりとか、
+あるいは、親を kill -9 しても、子は別のプロセスで仕事し続けているだとか、
+と、いうことになります。
+# やはり mysqladmin コマンドで落とすのが正攻法かと
+
+
+こういう処理ですので、
+mysqldump (or mysql&gt; SELECT ... INTO OUTFILE) で取ったものを
+mysqlimport (or mysql&gt; LOAD DATA INFILE .... ) で戻すよりも
+遅いです。
+
+# MySQL は一般ファイルに書いているという点が弱点であり、
+# また気軽に扱えるという利点でもありで...
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="1159">[前]</a><a href="1161">[次]</a><a href="../list/1101-1200">[番号順一覧]</a><a href="../thread/1101-1200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1134">   1134 1999-08-23 13:48 [Yutaka Miyahara &lt;yut] インデックス作成のトラブル              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1136">   1136 1999-08-23 15:32 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1146">   1146 1999-08-24 14:07 ┃┗[Yutaka Miyahara &lt;yut]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1147">   1147 1999-08-24 15:34 ┗[Yuzuru Goto &lt;kn6y-gt]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1148">   1148 1999-08-24 18:23 　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1150">   1150 1999-08-25 10:58 　　┣[Yutaka Miyahara &lt;yut]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1158">   1158 1999-08-26 11:26 　　┗[Yuzuru Goto &lt;kn6y-gt]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="1160">   1160 1999-08-26 12:23 　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5783</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="5782">[前]</a><a href="5784">[次]</a><a href="../list/5701-5800">[番号順一覧]</a><a href="../thread/5701-5800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5783
+</p>
+<div class="header">
+<p>
+From: 大杉眞規  &lt;大杉眞規  &lt;osugi@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 11 Jul 2002 16:03:33 +0900<br>
+Subject: [mysql 05783] Re: 電話番号の検索<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+初めてメールします。大杉と言います。
+
+Oracleの経験ですが、
+
+<span class="quote1">&gt; select * from tbl where replace(tel,'-','')='033456aaaa';</span>
+
+とするのは左辺加工（ = の左側の項）といってオススメしない…とSIの人にに話
+を聞いたことがあります。INDEXが無効化されてしまうとのことです。
+
+<span class="quote1">&gt; 手持ちのデータ(8千件)での所感ですが。</span>
+くらいであれば、パフォーマンスの劣化は体感できないかもしれません。ただ、
+このようなコーディングを日常的にしているとクセになってしまうかもしれませ
+ん。
+
+Oracleを使い始めた頃、左辺加工を組み込んだプログラムを作成したのですが、
+パフォーマンスが非常に悪かったです。左辺加工をやめたらぐっと早くなりまし
+た。
+
+ちなみにこんな感じでした。（カラムCは日付型で、不特定日の00:00:00が入って
+います）
+
+【遅いパターン】
+SELECT A FROM B 
+WHERE TO_CHAR(C,'YYYYMMDD') = TO_CHAR(SYSDATE,'YYYYMMDD');
+
+【速いパターン】
+SELECT A FROM B 
+WHERE C = TO_DATE(TO_CHAR(SYSDATE,'YYYYMMDD'),'YYYYMMDD');
+
+SYSDATEを年月日のみの形式にテキストフォーマットして、それを年月日形式とし
+て日付型に変換してやると、余計な時間（HH24:MI:SS）が切り捨てられて、
+SYSDATEの00:00:00にセットされます。このパターンだとご覧のように左辺が加工
+されていない状態になっています。
+
+遠藤さんのおっしゃるように、格納時に工夫をするのがベストだと思います。も
+ちろん、すでに運用されているDBで表の構成変更が難しいと言うことであれば、
+
+<span class="quote1">&gt; select * from tbl where replace(tel,'-','')='033456aaaa';</span>
+
+のようなコーディングになると思います。
+
+おおすぎ
+
+</pre>
+</div>
+<p class="button"><a href="5782">[前]</a><a href="5784">[次]</a><a href="../list/5701-5800">[番号順一覧]</a><a href="../thread/5701-5800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="5779">   5779 2002-07-11 15:02 [ebihara &lt;ebiharaml@x] 電話番号の検索                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5780">   5780 2002-07-11 15:31 ┣[遠藤 俊裕 &lt;endo_t@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5781">   5781 2002-07-11 15:34 ┣[&quot;Yuya.Nishida.&quot; &lt;yuy]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5782">   5782 2002-07-11 15:41 ┗[&quot;MIYATSU Kazunari&quot; &lt;]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="5783">   5783 2002-07-11 16:03 　┗[大杉眞規  &lt;osugi@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5784">   5784 2002-07-11 17:33 　　┣[&quot;MIYATSU Kazunari&quot; &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5792">   5792 2002-07-12 13:27 　　┗[ebihara &lt;ebiharaml@x]                                   </a></span>
+</pre>
+</body>
+</html>

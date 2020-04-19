@@ -1,0 +1,169 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16446</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16445">[前]</a><a href="16447">[次]</a><a href="../list/16401-16500">[番号順一覧]</a><a href="../thread/16401-16500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16446
+</p>
+<div class="header">
+<p>
+From: meiji kimura &lt;meiji kimura &lt;meiji.kimura@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 04 Dec 2017 10:04:29 +0900<br>
+Subject: [mysql 16446] Re: MySQL8.0のwindow関数と他DBとの比較結果<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+木村明治です。状況を以下のようにバグ登録し、担当者からの回答がついてます。
+
+CTE with window function don't work with update/delete as expected.
+<a href="https://bugs.mysql.com/bug.php?id=88397">https://bugs.mysql.com/bug.php?id=88397</a>
+
+(Bug内では動作する例としてSQL Server 2017 on Linuxを使ってます)
+
+少なくとも制限に書く必要はありそうなので、その点は別途バグ登録しようと思 
+います。
+
+(2017/11/04 14:35), mysql201706mailing@xxxxxxxxxx wrote:
+<span class="quote1">&gt; 明智重蔵です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQL8.0でWindow関数を使ったビューは、</span>
+<span class="quote1">&gt; 更新(および削除)不可のようですね。</span>
+<span class="quote1">&gt; ありがとうございました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     ----- Original Message -----</span>
+<span class="quote1">&gt;     *From:* meiji kimura &lt;meiji.kimura@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt;     *To:* ml@xxxxxxxxxx</span>
+<span class="quote1">&gt;     *Date:* 2017/11/4, Sat 13:04</span>
+<span class="quote1">&gt;     *Subject:* <a href="16440">[mysql 16440]</a> Re: MySQL8.0のwindow関数と他DBとの比較結果</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     木村明治です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     取り急ぎためしてみました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     (2017/11/04 12:03), mysql201706mailing@xxxxxxxxxx</span>
+<span class="quote1">&gt;     &lt;mailto:mysql201706mailing@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote2">&gt;      &gt; 明智重蔵です。</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt; MySQL8.0のWindow関数を他DBと比較してまして、</span>
+<span class="quote2">&gt;      &gt; MySQLエキスパートの皆様に御願いがあります。</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt; MySQL8.0が動かせる方がおりましたら、</span>
+<span class="quote2">&gt;      &gt; 比較3を、試した結果を書いていただけないでしょうか？</span>
+<span class="quote2">&gt;      &gt; (同様の比較をされる方に、有用な情報になると思いますので)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     8.0.3では以下のようにどちらもエラーになります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     mysql [localhost] {msandbox} (test) &gt;</span>
+<span class="quote1">&gt;     mysql [localhost] {msandbox} (test) &gt; with UpdView as(</span>
+<span class="quote1">&gt;          -&gt; select Val,Row_Number() over(order by Val) as NewVal</span>
+<span class="quote1">&gt;          -&gt;  from TestTable)</span>
+<span class="quote1">&gt;          -&gt; update UpdView set Val = NewVal;</span>
+<span class="quote1">&gt;     ERROR 1288 (HY000): The target table UpdView of the UPDATE is not</span>
+<span class="quote1">&gt;     updatable</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     mysql [localhost] {msandbox} (test) &gt;</span>
+<span class="quote1">&gt;     mysql [localhost] {msandbox} (test) &gt; with DelView as(</span>
+<span class="quote1">&gt;          -&gt; select Row_Number() over(order by Val) as rn</span>
+<span class="quote1">&gt;          -&gt;  from TestTable)</span>
+<span class="quote1">&gt;          -&gt; delete from DelView where rn &lt; 3;</span>
+<span class="quote1">&gt;     ERROR 1146 (42S02): Table 'test.DelView' doesn't exist</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;      &gt; ■■■比較1■■■■■■■■■■■■■■■■■■■■■■■■■■■</span>
+<span class="quote2">&gt;      &gt; Oracleで可能な、</span>
+<span class="quote2">&gt;      &gt; Lag,Lead,First_Value,Last_Value,Nth_Valueでのignore nulls</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote1">&gt;     <a href="https://www.slideshare.net/oysteing/common-table-expressions-cte-window-functions-in-mysql-80">https://www.slideshare.net/oysteing/common-table-expressions-cte-window-functions-in-mysql-80</a></span>
+<span class="quote1">&gt;     &lt;<a href="https://urldefense.proofpoint.com/v2/url?u=https-3A__www.slideshare.net_oysteing_common-2Dtable-2Dexpressions-2Dcte-2Dwindow-2Dfunctions-2Din-2Dmysql-2D80&amp;d=DwMFaQ&amp;c=RoP1YumCXCgaWHvlZYR8PZh8Bv7qIrMUB65eapI_JnE&amp;r=GNgoqPdiFhTG1pZngMpFGFaAQsvtTeh5BjMIGT-TWsw&amp;m=0uQDDzbyFE16M3mLi3ugypzv7jpcjZ0cDUZs1PU-reE&amp;s=fl62__JrM6nBPARIUMnSLyhC_uAzd7S8NXl_q17EnTk&amp;e=">https://urldefense.proofpoint.com/v2/url?u=https-3A__www.slideshare.net_oysteing_common-2Dtable-2Dexpressions-2Dcte-2Dwindow-2Dfunctions-2Din-2Dmysql-2D80&amp;d=DwMFaQ&amp;c=RoP1YumCXCgaWHvlZYR8PZh8Bv7qIrMUB65eapI_JnE&amp;r=GNgoqPdiFhTG1pZngMpFGFaAQsvtTeh5BjMIGT-TWsw&amp;m=0uQDDzbyFE16M3mLi3ugypzv7jpcjZ0cDUZs1PU-reE&amp;s=fl62__JrM6nBPARIUMnSLyhC_uAzd7S8NXl_q17EnTk&amp;e=</a>&gt;</span>
+<span class="quote2">&gt;      &gt; の48ページと49ページによると、MySQL8.0では不可</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt; ■■■比較2■■■■■■■■■■■■■■■■■■■■■■■■■■■</span>
+<span class="quote2">&gt;      &gt; ソートキーが日付型で、Range指定でのInterVal型の使用</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote1">&gt;     <a href="https://www.slideshare.net/oysteing/common-table-expressions-cte-window-functions-in-mysql-80">https://www.slideshare.net/oysteing/common-table-expressions-cte-window-functions-in-mysql-80</a></span>
+<span class="quote1">&gt;     &lt;<a href="https://urldefense.proofpoint.com/v2/url?u=https-3A__www.slideshare.net_oysteing_common-2Dtable-2Dexpressions-2Dcte-2Dwindow-2Dfunctions-2Din-2Dmysql-2D80&amp;d=DwMFaQ&amp;c=RoP1YumCXCgaWHvlZYR8PZh8Bv7qIrMUB65eapI_JnE&amp;r=GNgoqPdiFhTG1pZngMpFGFaAQsvtTeh5BjMIGT-TWsw&amp;m=0uQDDzbyFE16M3mLi3ugypzv7jpcjZ0cDUZs1PU-reE&amp;s=fl62__JrM6nBPARIUMnSLyhC_uAzd7S8NXl_q17EnTk&amp;e=">https://urldefense.proofpoint.com/v2/url?u=https-3A__www.slideshare.net_oysteing_common-2Dtable-2Dexpressions-2Dcte-2Dwindow-2Dfunctions-2Din-2Dmysql-2D80&amp;d=DwMFaQ&amp;c=RoP1YumCXCgaWHvlZYR8PZh8Bv7qIrMUB65eapI_JnE&amp;r=GNgoqPdiFhTG1pZngMpFGFaAQsvtTeh5BjMIGT-TWsw&amp;m=0uQDDzbyFE16M3mLi3ugypzv7jpcjZ0cDUZs1PU-reE&amp;s=fl62__JrM6nBPARIUMnSLyhC_uAzd7S8NXl_q17EnTk&amp;e=</a>&gt;</span>
+<span class="quote2">&gt;      &gt; の35ページによると、MySQL8.0で可能です</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt; ■■■比較3■■■■■■■■■■■■■■■■■■■■■■■■■■■</span>
+<span class="quote2">&gt;      &gt; SQLServerで可能な、</span>
+<span class="quote2">&gt;      &gt; Window関数を使用したインラインビューでのUpdateとDelete</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt; create table TestTable(</span>
+<span class="quote2">&gt;      &gt; Val int unsigned);</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt; insert into TestTable values</span>
+<span class="quote2">&gt;      &gt; (1),(3),(5),(10),(20),(30),(40);</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt; with UpdView as(</span>
+<span class="quote2">&gt;      &gt; select Val,Row_Number() over(order by Val) as NewVal</span>
+<span class="quote2">&gt;      &gt;    from TestTable)</span>
+<span class="quote2">&gt;      &gt; update UpdView set Val = NewVal;</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt; with DelView as(</span>
+<span class="quote2">&gt;      &gt; select Row_Number() over(order by Val) as rn</span>
+<span class="quote2">&gt;      &gt;    from TestTable)</span>
+<span class="quote2">&gt;      &gt; delete from DelView where rn &lt; 3;</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote1">&gt;     <a href="https://www.slideshare.net/oysteing/mysql-80-common-table-expressions-71760102">https://www.slideshare.net/oysteing/mysql-80-common-table-expressions-71760102</a></span>
+<span class="quote1">&gt;     &lt;<a href="https://urldefense.proofpoint.com/v2/url?u=https-3A__www.slideshare.net_oysteing_mysql-2D80-2Dcommon-2Dtable-2Dexpressions-2D71760102&amp;d=DwMFaQ&amp;c=RoP1YumCXCgaWHvlZYR8PZh8Bv7qIrMUB65eapI_JnE&amp;r=GNgoqPdiFhTG1pZngMpFGFaAQsvtTeh5BjMIGT-TWsw&amp;m=0uQDDzbyFE16M3mLi3ugypzv7jpcjZ0cDUZs1PU-reE&amp;s=e9eMsXBdHrncSYvXL1k8fR7SzBU2BHA9M0Q0LeByj0Q&amp;e=">https://urldefense.proofpoint.com/v2/url?u=https-3A__www.slideshare.net_oysteing_mysql-2D80-2Dcommon-2Dtable-2Dexpressions-2D71760102&amp;d=DwMFaQ&amp;c=RoP1YumCXCgaWHvlZYR8PZh8Bv7qIrMUB65eapI_JnE&amp;r=GNgoqPdiFhTG1pZngMpFGFaAQsvtTeh5BjMIGT-TWsw&amp;m=0uQDDzbyFE16M3mLi3ugypzv7jpcjZ0cDUZs1PU-reE&amp;s=e9eMsXBdHrncSYvXL1k8fR7SzBU2BHA9M0Q0LeByj0Q&amp;e=</a>&gt;</span>
+<span class="quote2">&gt;      &gt; の5ページに書いてある構文です。</span>
+<span class="quote2">&gt;      &gt;</span>
+<span class="quote2">&gt;      &gt; <a href="https://dev.mysql.com/doc/refman/8.0/en/view-updatability.html">https://dev.mysql.com/doc/refman/8.0/en/view-updatability.html</a></span>
+<span class="quote2">&gt;      &gt; にWindow関数を使うと更新(および削除)不可と書いてないので</span>
+<span class="quote2">&gt;      &gt; 更新(および削除)可能と予想してます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     上記のとおりです。ちなみにFirebird 3.0の場合は、そもそもCTEがselectのみ</span>
+<span class="quote1">&gt;     の対応なので、当然エラーになります。(token select 以外は×)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     create table TestTable(Val int);</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     insert into TestTable values(1);</span>
+<span class="quote1">&gt;     insert into TestTable values(3);</span>
+<span class="quote1">&gt;     insert into TestTable values(5);</span>
+<span class="quote1">&gt;     insert into TestTable values(10);</span>
+<span class="quote1">&gt;     insert into TestTable values(20);</span>
+<span class="quote1">&gt;     insert into TestTable values(30);</span>
+<span class="quote1">&gt;     insert into TestTable values(40);</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     commit;</span>
+<span class="quote1">&gt;     SQL&gt; with UpdView as(</span>
+<span class="quote1">&gt;     CON&gt; select Val,Row_Number() over(order by Val) as NewVal</span>
+<span class="quote1">&gt;     CON&gt;  from TestTable)</span>
+<span class="quote1">&gt;     CON&gt; update UpdView set Val = NewVal;</span>
+<span class="quote1">&gt;     Statement failed, SQLSTATE = 42000</span>
+<span class="quote1">&gt;     Dynamic SQL Error</span>
+<span class="quote1">&gt;     -SQL error code = -104</span>
+<span class="quote1">&gt;     -Token unknown - line 4, column 1</span>
+<span class="quote1">&gt;     -update</span>
+<span class="quote1">&gt;     SQL&gt;</span>
+<span class="quote1">&gt;     SQL&gt; with DelView as(</span>
+<span class="quote1">&gt;     CON&gt; select Row_Number() over(order by Val) as rn</span>
+<span class="quote1">&gt;     CON&gt;  from TestTable)</span>
+<span class="quote1">&gt;     CON&gt; delete from DelView where rn &lt; 3;</span>
+<span class="quote1">&gt;     Statement failed, SQLSTATE = 42000</span>
+<span class="quote1">&gt;     Dynamic SQL Error</span>
+<span class="quote1">&gt;     -SQL error code = -104</span>
+<span class="quote1">&gt;     -Token unknown - line 4, column 1</span>
+<span class="quote1">&gt;     -delete</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="16445">[前]</a><a href="16447">[次]</a><a href="../list/16401-16500">[番号順一覧]</a><a href="../thread/16401-16500">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16439">@ 16439 2017-11-04 12:03 [&lt;mysql201706mailing@] MySQL8.0のwindow関数と他DBとの比較結果  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16440">  16440 2017-11-04 13:04 ┗[meiji kimura &lt;meiji.]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16441">@ 16441 2017-11-04 14:35 　┗[&lt;mysql201706mailing@] Re: [mysql 16440] Re: MySQL8.0のwindow関数と他DBとの比較結果</a></span>
+<span class="current">-&gt;&nbsp;<a href="16446">  16446 2017-12-04 10:04 　　┗[meiji kimura &lt;meiji.] Re: MySQL8.0のwindow関数と他DBとの比較結果</a></span>
+</pre>
+</body>
+</html>

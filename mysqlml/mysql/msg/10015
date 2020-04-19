@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10015</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10014">[前]</a><a href="10016">[次]</a><a href="../list/10001-10100">[番号順一覧]</a><a href="../thread/10001-10100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10015
+</p>
+<div class="header">
+<p>
+From: AMEYANAGI YUU &lt;AMEYANAGI YUU &lt;ameyanagi_yuu@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 13 Aug 2004 21:02:37 +0900 (JST)<br>
+Subject: [mysql 10015] 副問い合わせでの索引の使われ方<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+はじめまして、雨柳と言います。
+
+仕事の関係でMySQLを勉強し始めたところなのですが、
+以下の条件で検索を行うと、索引があるに関わらず、全件をなめます。
+
+
+create table TBL_A( COL_A char(10), PRIMARY KEY (COL_A));
+create table TBL_B( COL_B char(10), PRIMARY KEY (COL_B));
+
+
+mysql&gt; desc TBL_A;
++-------+----------+------+-----+---------+-------+
+<span class="quote1">| Field | Type     | Null | Key | Default | Extra |</span>
++-------+----------+------+-----+---------+-------+
+<span class="quote1">| COL_A | char(10) |      | PRI |         |       |</span>
++-------+----------+------+-----+---------+-------+
+1 row in set (0.00 sec)
+
+mysql&gt; desc TBL_B;
++-------+----------+------+-----+---------+-------+
+<span class="quote1">| Field | Type     | Null | Key | Default | Extra |</span>
++-------+----------+------+-----+---------+-------+
+<span class="quote1">| COL_B | char(10) |      | PRI |         |       |</span>
++-------+----------+------+-----+---------+-------+
+1 row in set (0.00 sec)
+
+
+TBL_A、TBL_Bともに0000000000〜0000000009の１０件挿入する。
+
+
+mysql&gt; explain select COL_A from TBL_A where COL_A in (select COL_B from TBL_B where COL_B like '0000000001');
++----+--------------------+-------+-----------------+---------------+---------+---------+------+------+--------------------------+
+<span class="quote1">| id | select_type        | table | type            | possible_keys | key     | key_len | ref  | rows | Extra                    |</span>
++----+--------------------+-------+-----------------+---------------+---------+---------+------+------+--------------------------+
+<span class="quote1">|  1 | PRIMARY            | TBL_A | index           | NULL          | PRIMARY |      20 | NULL |   10 | Using where; Using index |</span>
+<span class="quote1">|  2 | DEPENDENT SUBQUERY | TBL_B | unique_subquery | PRIMARY       | PRIMARY |      20 | func |    1 | Using index; Using where |</span>
++----+--------------------+-------+-----------------+---------------+---------+---------+------+------+--------------------------+
+2 rows in set (0.00 sec)
+
+
+テーブル TBL_A に対し、全件なめているようです。
+以下ですと、そうではないのですが。。。。
+
+
+mysql&gt; explain select COL_A from TBL_A where COL_A in ('0000000001');
++----+-------------+-------+-------+---------------+---------+---------+-------+------+-------------+
+<span class="quote1">| id | select_type | table | type  | possible_keys | key     | key_len | ref   | rows | Extra       |</span>
++----+-------------+-------+-------+---------------+---------+---------+-------+------+-------------+
+<span class="quote1">|  1 | SIMPLE      | TBL_A | const | PRIMARY       | PRIMARY |      20 | const |    1 | Using index |</span>
++----+-------------+-------+-------+---------------+---------+---------+-------+------+-------------+
+1 row in set (0.00 sec)
+
+mysql&gt; explain select COL_A from TBL_A where COL_A like (select COL_B from TBL_B where COL_B like '0000000001');
++----+-------------+-------+-------+---------------+---------+---------+------+------+--------------------------+
+<span class="quote1">| id | select_type | table | type  | possible_keys | key     | key_len | ref  | rows | Extra                    |</span>
++----+-------------+-------+-------+---------------+---------+---------+------+------+--------------------------+
+<span class="quote1">|  1 | PRIMARY     | TBL_A | range | PRIMARY       | PRIMARY |      20 | NULL |    1 | Using where; Using index |</span>
+<span class="quote1">|  2 | SUBQUERY    | TBL_B | ALL   | PRIMARY       | NULL    |    NULL | NULL |    1 |                          |</span>
++----+-------------+-------+-------+---------------+---------+---------+------+------+--------------------------+
+2 rows in set (0.00 sec)
+
+
+この現象は、ＭｙＳＱＬの仕様でしょうか？
+それとも、設定等の問題でしょうか？
+
+ご教授ください。よろしくお願いします。
+
+
+
+
+---------------------------------
+GANBARE! NIPPON!
+Yahoo! JAPAN JOC OFFICIAL INTERNET PORTAL SITE
+<a href="http://mail.ganbare-nippon.yahoo.co.jp/">http://mail.ganbare-nippon.yahoo.co.jp/</a>
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="http://www.mysql.gr.jp/mysqlml/mysql/msg/10015/0/"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="10014">[前]</a><a href="10016">[次]</a><a href="../list/10001-10100">[番号順一覧]</a><a href="../thread/10001-10100">[スレッド一覧]</a></p>
+</body>
+</html>

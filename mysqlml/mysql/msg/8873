@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8873</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8872">[前]</a><a href="8874">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8873
+</p>
+<div class="header">
+<p>
+From: bon &lt;bon &lt;bon@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 26 Feb 2004 00:34:59 +0900<br>
+Subject: [mysql 08873] MyODBC &amp; text<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+bonです。
+
+今まで
+Linux(apache) &amp; Perl &amp; MySQL
+Linux(apache) &amp; PHP &amp; MySQL
+Windows(IIS) &amp; ActivePerl &amp; MySQL
+の環境でMySQLを使用していたのですが、今回初めて
+
+OSはWindows 2000 Serverで
+IIS(asp) &amp; SQL Server 2000
+で開発してたものを
+IIS(asp) &amp; MyODBC3.51.06 &amp; MySQL4.0.18(SJIS)
+（MySQLは5.0.0-alphaを使用しようとしてたのですが、
+　ODBCの設定で、プロトコルがどうだらこうだらのエラーメッセージが出たので、
+　時間がないので即断念しました）
+に移行することになりました。（というか、既に移行しました）
+MyODBCを使用するのは初めてということになります。
+
+ODBCのオプションの設定はデフォルトのままで
+Don't Optimize Column Width
+Return Matching Row
+にチェックされています。
+
+修正した主な点は、
+１；text型のデータを取得する場合、
+　　ActualSizeでデータサイズをとってきて、
+　　そのサイズが0より大きい場合GetChunkで取得するようにしたこと。
+２：テーブル内にtext型が含まれる場合、データの更新ができないので、
+　　update文に変更したこと。
+です。
+２の内容は、
+
+create table tbla (
+  id1 int,
+  id2 int,
+  info varchar(16),
+  msg text,
+  primary key(id1)
+);
+strSql = &quot;select * from tbla where id1=1&quot;
+Set rs = CreateObject(&quot;ADODB.Recordset&quot;)
+rs.CursorType = C_adOpenDynamic
+rs.LockType = C_adLockOptimistic
+rs.Open strSql, cn	'接続文字列にoptionの設定はしていません。
+Do While Not rs.EOF
+    rs(&quot;info&quot;) = strInfo
+    rs(&quot;msg&quot;) = strMsg
+'(A)
+    rs.Update 	'(B)
+    rs.MoveNext
+Loop
+rs.Close
+というような処理をupdate文に変更しました。
+（上記だけの処理だとupdate文だけでいいのですが、
+　実際の処理はいろいろと複雑で書くと長くなるので、
+　簡単に書いています。）
+
+テーブル内にtextが含まれない場合、上記処理で問題ないのですが、
+含まれる場合、
+(A)の時点で、rs.EditModeの値が、adEditInProgress
+（カレント レコードのデータが変更されましたが、
+保存されていないことを示します。 ）
+であるにもかかわらず、
+(B)で、
+更新する行が見つからなかったため、クエリ_ベースの更新に失敗しました。
+というエラーになります。(C)
+
+これはODBCの設定でどうにかなるものなのでしょうか？
+(C)のところを見るとMyODBCのバグのような気もするのですが。。。
+
+また、text型のフィールドの値が、
+Nullか空文字かの判別はどうやってするのでしょうか？
+SQL ServerだとValueがNullかどうかチェックすればいいだけなのですが。。。
+
+上記内容は、mysqld-nt,mysqld-max-ntの両方試しました。
+テーブルもmysqld-max-ntの場合、type=InnoDBにしています。
+
+よろしくお願いします。
+
+
+-----------------
+bon@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="8872">[前]</a><a href="8874">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="8873">   8873 2004-02-26 00:34 [bon &lt;bon@xxxxxxxxxx&gt;] MyODBC &amp;amp; text                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8874">   8874 2004-02-26 01:49 ┗[bon &lt;bon@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8875">   8875 2004-02-26 04:59 　┗[bon &lt;bon@xxxxxxxxxx&gt;]                                     </a></span>
+</pre>
+</body>
+</html>

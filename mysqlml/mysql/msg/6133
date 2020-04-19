@@ -1,0 +1,149 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6133</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6132">[前]</a><a href="6134">[次]</a><a href="../list/6101-6200">[番号順一覧]</a><a href="../thread/6101-6200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6133
+</p>
+<div class="header">
+<p>
+From: &quot;梅村繁実&quot; &lt;&quot;梅村繁実&quot; &lt;umemura@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 12 Sep 2002 09:47:56 +0900<br>
+Subject: [mysql 06133] Re: 他テーブルのデータでアップデート<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+山下さん、遠藤さん、菅原さん、川合さん、とみたさん
+
+はじめまして、梅村です、皆さんご教授有難う御座います。
+
+
+<span class="quote2">&gt;&gt; 山下さんは書きました</span>
+<span class="quote1">&gt; 以下のようなSQL文を発行するのが「筋」らしいです。</span>
+<span class="quote1">&gt; =====================================================</span>
+<span class="quote1">&gt; update codemaster set EDP_Code=temp.EDP</span>
+<span class="quote1">&gt;                            where ID=(select ID from temp);</span>
+<span class="quote1">&gt; =====================================================</span>
+<span class="quote1">&gt; # 上の式があってるかどうかは保証の限りではありません（汗）。</span>
+
+↑検証したところやはりエラーが帰ってきました
+You have an error in your SQL syntax near 'select ID from temp)' at line 2
+
+<span class="quote1">&gt; しかし、「村上、立岡著　MySQL活用ガイド　株式会社秀和システム」の</span>
+<span class="quote1">&gt; ７ページにMySQLの現行バージョンには「副問い合わせ」が存在しない</span>
+<span class="quote1">&gt; という記述がありました。</span>
+<span class="quote1">&gt; したがって、現状ではアプリケーション側で反復処理（loop）などで</span>
+<span class="quote1">&gt; 対応するしかないと思われます。</span>
+
+なるほど、tempテーブルのIDとEDPを先に抽出してスクリプト内の配列に格納してか
+ら
+ｌｏｏｐ内で配列回数文updateするという事ですね。
+やってみます。
+-------------------------------------------------------
+
+<span class="quote2">&gt;&gt;菅原さんは書きました</span>
+<span class="quote1">&gt; 　副問い合わせの一種に違いないと思いますが、こういうケースはデータベース</span>
+<span class="quote1">&gt; によってSQLの書き方が違うようです。</span>
+<span class="quote1">&gt; 　MS SQLServerでは</span>
+<span class="quote1">&gt;     UPDATE codemaster SET EDP_Code = temp.EDP</span>
+<span class="quote1">&gt;     FROM temp WHERE codemaster.ID = temp.ID</span>
+<span class="quote1">&gt; のようになるらしいです。</span>
+<span class="quote1">&gt; 　副問い合わせなら</span>
+<span class="quote1">&gt;     UPDATE codemaster SET EDP_Code = (</span>
+<span class="quote1">&gt;         SELECT temp.EDP FROM temp, codemaster</span>
+<span class="quote1">&gt;         WHERE temp.ID = codemaster.ID)</span>
+<span class="quote1">&gt; になるような気がしますが、UPDATE文にWHERE句を書かなくても良いのか気にな</span>
+<span class="quote1">&gt; るとこです。</span>
+
+此方も試してみましたがやはり次のように構文エラーと帰ってきました
+You have an error in your SQL syntax near 'SELECT temp.EDP FROM temp,
+codemaster WHERE temp.ID = codemaster.ID)' at line 1
+
+<span class="quote1">&gt; 　まあ、MySQLはまだ副問い合わせが使えないですし（4.1で実装予定らしい）、</span>
+<span class="quote1">&gt; ドキュメントの「近い将来に完了せねばならないもの」の中に</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     UPDATE items,month SET items.price=month.price</span>
+<span class="quote1">&gt;     WHERE items.id=month.id;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ってのがありますんで、それまで待たなくてはいけないです（これは4.1よりさ</span>
+<span class="quote1">&gt; らに後みたいですね……）。</span>
+
+なるほど、、私の使ってるバージョンでは未対応なのか。
+-------------------------------------------------------------------
+<span class="quote2">&gt;&gt; 川合 孝典 さんは書きました</span>
+<span class="quote1">&gt; ただテーブルを作るといっても一時テーブル(TEMPORARY TABLE)であれば、</span>
+<span class="quote1">&gt; コネクション単位に作成されますし、コネクションが切れると自動的に削除され</span>
+<span class="quote1">&gt; ますから、通常にテーブルを作ることを考えるよりは、安心して使える思います。</span>
+
+そうなんですか、Replaceコマンドは勉強してませんでしたので、どんどんテーブル
+が
+作成されて、手動で削除しないといけないと思ってました＾＾；
+
+<span class="quote1">&gt; CREATE TEMPORARY TABLE tmp_code</span>
+<span class="quote1">&gt;   SELECT temp.ID, temp.EDP, MST.sonota</span>
+<span class="quote1">&gt;  FROM temp INNER JOIN codemaster MST ON temp.ID=MST.ID;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; REPLACE codemaster(ID, EDP_code, sonota)</span>
+<span class="quote1">&gt;   SELECT * FROM tmp_code;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; SELECT * FROM codemaster;</span>
+<span class="quote1">&gt; +----+----------+----------+</span>
+<span class="quote2">&gt; | ID | sonota   | EDP_Code |</span>
+<span class="quote1">&gt; +----+----------+----------+</span>
+<span class="quote2">&gt; |  1 | SONOTA:1 | MSTER:1  |</span>
+<span class="quote2">&gt; |  2 | SONOTA:2 | TMP:2    |</span>
+<span class="quote2">&gt; |  3 | SONOTA:3 | MSTER:3  |</span>
+<span class="quote1">&gt; +----+----------+----------+</span>
+
+此方も、後で挑戦してみたいと思います、同じ結果を得られるのであれば、処理速度
+の速いほうを
+選んで、実装しようと思います。
+---------------------------------------------------------------------
+<span class="quote1">&gt; とみたです。</span>
+<span class="quote1">&gt; ところがどっこい、4.0.2 で使えるようになってるみたいです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Changes in release 4.0.2</span>
+<span class="quote1">&gt; ------------------------</span>
+<span class="quote1">&gt; 〜中略〜</span>
+<span class="quote1">&gt;    * First pre-version of multi-table `UPDATE' statement.</span>
+
+そうなんですか、そしたら早々にリリースされてるMySQL 4.0 -- beta release をダ
+ウンロードして
+見ます。確か4.0.3でしたよねｂｅｔａ　release
+副問い合わせが出来るか試してみます。
+
+
+最後に、こんな返信の仕方で大丈夫ですか？それぞれの方のメールに返信したほうが
+良かったのでしょうか？
+本題とは違いますが、MLの使い方の（マナー的なもの）がおかしかったらご指摘くだ
+さい。
+皆さん、有難うございました。
+
+
+</pre>
+</div>
+<p class="button"><a href="6132">[前]</a><a href="6134">[次]</a><a href="../list/6101-6200">[番号順一覧]</a><a href="../thread/6101-6200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="6113">   6113 2002-09-11 12:52 [&quot;梅村繁実&quot; &lt;umemura@] 他テーブルのデータでアップデート        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6124">   6124 2002-09-11 16:22 ┣[&quot;Takashi Yamashita&quot; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6126">   6126 2002-09-11 17:05 ┃┣[SUGAWARA Hajime &lt;sug]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6132">   6132 2002-09-11 23:44 ┃┃┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6140">   6140 2002-09-13 22:11 ┃┃　┗[&quot;umemura&quot; &lt;shigemi.u]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6141">   6141 2002-09-14 00:54 ┃┃　　┗[ふぁんく &lt;freeml@xxx] 格納データ型について          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6142">   6142 2002-09-14 01:45 ┃┃　　　┣[&lt;miffyz@xxxxxxxxxx&gt; ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6147">   6147 2002-09-14 21:37 ┃┃　　　┃┗[&lt;freeml@xxxxxxxxxx&gt; ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6144">   6144 2002-09-14 19:26 ┃┃　　　┗[とみたまさひろ &lt;tomm]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="6133">   6133 2002-09-12 09:47 ┃┗[&quot;梅村繁実&quot; &lt;umemura@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6134">   6134 2002-09-12 10:14 ┃　┗[&quot;Takashi Yamashita&quot; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6125">   6125 2002-09-11 17:03 ┣[遠藤 俊裕 &lt;endo_t@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6127">   6127 2002-09-11 17:11 ┃┗[遠藤 俊裕 &lt;endo_t@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6130">   6130 2002-09-11 18:02 ┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
+</pre>
+</body>
+</html>

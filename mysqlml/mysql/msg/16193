@@ -1,0 +1,308 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16193</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16192">[前]</a><a href="16194">[次]</a><a href="../list/16101-16200">[番号順一覧]</a><a href="../thread/16101-16200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16193
+</p>
+<div class="header">
+<p>
+From: &quot;koichi.s&quot; &lt;&quot;koichi.s&quot; &lt;asp91462@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 17 Dec 2014 11:38:58 +0900 (JST)<br>
+Subject: [mysql 16193] Re: [mysql 16192] Re: [mysql 16190] MySQL5.6.20をインストール後rootでログイン出来ない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+yoku0825さま、みなさま
+
+
+佐々木でございます。
+
+早速のご返答を頂き、ありがとうございました。
+私が数日悩んでいた問題に的確なご回答をくださり、感謝しております。
+
+
+サーバ側とクライアント側の両方のsecure-authをOFFにすることで
+rootでのログインは可能となりました。
+
+原因ですが、
+
+　&gt;または rootのパスワードを設定した時に有効になっていませんでしたか？
+
+
+状況的にこちらであると思われます。
+(お恥ずかしい話ですが、パイロット用環境であったため、構築ログが流れてしまっておりました)
+
+また追加でご教示頂きたいのですが、
+
+<span class="quote1">&gt; old_passwordsの設定を消して最初からセットアップするのが良いとは思います。</span>
+
+こちらについては以下の作業を実施してみたのですが、上手く行きませんでした。
+・yum removeにて以下のパッケージをアンインストール
+ MySQL-client MySQL-devel
+ MySQL-server
+ MySQL-test
+※MySQL-shared-compatは、依存関係の都合でcrontabなども消えるため自重
+・MySQLのデータファイル格納フォルダ(defaultのままのため/var/lib/mysql)
+配下をバックアップを取得し削除
+・yum localinstallにて以下を再インストール
+ MySQL-client MySQL-devel
+ MySQL-server
+ MySQL-test
+・my.cnfにold_passwordsの設定が無いことを確認してmysqlを起動
+・再度rootで接続を試みる←ここで今までと同じ問題に遭遇
+
+最初からのセットアップと呼ぶためには、MySQL-shared-compatまで
+きれいにアンインストール＆インストールする必要があるのか、
+
+それとも、当方のやり方とは異なる何らかの手順があるのか判断付きませんでした。
+MySQL-shared-compatのアンインストール＆インストールまで
+行えば解消するはずでしょうか？
+
+※複数人で環境を構築しており、crontabなどの設定やテストが進んで
+　いるため、簡単にMySQL-shared-compatのアンインストールが出来ない
+　状況になっております。
+
+よろしくお願いいたします。
+
+以上
+
+
+
+----- Original Message -----
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;こんにちは、yoku0825といいます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;rpmで突っ込むと、~/.mysql_secret にrootの初期パスワードが突っ込まれて、</span>
+<span class="quote1">&gt;SET PASSWORDで変更しないと有効にならない件…ではないように見えますので、</span>
+<span class="quote1">&gt;そこはクリアされてると思って進めますと、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;my.cnfにold_passwordsが設定されている,</span>
+<span class="quote1">&gt;または rootのパスワードを設定した時に有効になっていませんでしたか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;これによりrootのパスワードが16桁ハッシュで作成されてしまったのではないかと思います。</span>
+<span class="quote1">&gt;secure-authは *サーバーと* *クライアントで* それぞれOFFにされる(skip-secure-authまたはsecure-auth=0)必要があるので、</span>
+<span class="quote1">&gt;my.cnfの[mysqld]セクションにskip-secure-authを追加してあげれば可能だと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;↓バージョンちょっと違いますが、再現させてみました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;bash-4.1# cat /root/.mysql_secret</span>
+<span class="quote1">&gt;# The random password set for the root user at Tue Dec 16 01:32:45 2014 (local time): NpWp_bz1tOSHMv1y</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;bash-4.1# mysql -uroot -pNpWp_bz1tOSHMv1y</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;mysql&gt; SET PASSWORD = PASSWORD('hoge');</span>
+<span class="quote1">&gt;Query OK, 0 rows affected, 1 warning (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;-- ワーニングが出ませんでしたか？ --</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;mysql&gt; SHOW WARNINGS;</span>
+<span class="quote1">&gt;+---------+------+--------------------------------------------------------------------------------------------------------------------------+</span>
+<span class="quote2">&gt;| Level  | Code | Message                                                         |</span>
+<span class="quote1">&gt;+---------+------+--------------------------------------------------------------------------------------------------------------------------+</span>
+<span class="quote2">&gt;| Warning | 1287 | 'pre-4.1 password hash' is deprecated and will be removed in a future release. Please use post-4.1 password hash instead |</span>
+<span class="quote1">&gt;+---------+------+--------------------------------------------------------------------------------------------------------------------------+</span>
+<span class="quote1">&gt;1 row in set (0.01 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;mysql&gt; SHOW GRANTS;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;+---------------------------------------------------------------------------------------------------------------+</span>
+<span class="quote2">&gt;| Grants for root@localhost                                           |</span>
+<span class="quote1">&gt;+---------------------------------------------------------------------------------------------------------------+</span>
+<span class="quote2">&gt;| GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY PASSWORD '13ae08e92ef36dd0' WITH GRANT OPTION |</span>
+<span class="quote2">&gt;| GRANT PROXY ON ''@'' TO 'root'@'localhost' WITH GRANT OPTION                         |</span>
+<span class="quote1">&gt;+---------------------------------------------------------------------------------------------------------------+</span>
+<span class="quote1">&gt;2 rows in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;mysql&gt; SELECT @@old_passwords;</span>
+<span class="quote1">&gt;+-----------------+</span>
+<span class="quote2">&gt;| @@old_passwords |</span>
+<span class="quote1">&gt;+-----------------+</span>
+<span class="quote2">&gt;|        1 |</span>
+<span class="quote1">&gt;+-----------------+</span>
+<span class="quote1">&gt;1 row in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;-- 16桁ハッシュで保存されています --</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;bash-4.1# mysql -uroot -phoge</span>
+<span class="quote1">&gt;Warning: Using a password on the command line interface can be insecure.</span>
+<span class="quote1">&gt;ERROR 2049 (HY000): Connection using old (pre-4.1.1) authentication protocol refused (client option 'secure_auth' enabled)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;-- クライアントが16桁ハッシュでの認証を拒否するので、Error 2049(2000番台はクライアントのエラーコードです)が出ます --</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;bash-4.1# mysql -uroot -phoge --skip-secure-auth</span>
+<span class="quote1">&gt;Warning: Using a password on the command line interface can be insecure.</span>
+<span class="quote1">&gt;ERROR 1275 (HY000): Server is running in --secure-auth mode, but 'root'@'localhost' has a password in the old format; please change the password to the new format</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;-- クライアントに16桁ハッシュを許可させても、サーバーが16桁ハッシュを拒否するのでError 1275(1000番台はサーバーのエラーコード)になりました --</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;# vim /usr/my.cnf</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;..</span>
+<span class="quote1">&gt;[mysqld]</span>
+<span class="quote1">&gt;old_passwords= 1</span>
+<span class="quote1">&gt;skip-secure-auth</span>
+<span class="quote1">&gt;..</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;bash-4.1# /etc/init.d/mysql restart</span>
+<span class="quote1">&gt;Shutting down MySQL.. SUCCESS!</span>
+<span class="quote1">&gt;Starting MySQL. SUCCESS!</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;-- サーバー側でもskip-secure-authにして再起動します --</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;bash-4.1# mysql -uroot -phoge</span>
+<span class="quote1">&gt;Warning: Using a password on the command line interface can be insecure.</span>
+<span class="quote1">&gt;ERROR 2049 (HY000): Connection using old (pre-4.1.1) authentication protocol refused (client option 'secure_auth' enabled)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;-- サーバー側でskip-しても、クライアント側で拒否するのでクライアントからskip-secure-authを外すと2049になります --</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;bash-4.1# mysql -uroot -phoge --skip-secure-auth</span>
+<span class="quote1">&gt;Warning: Using a password on the command line interface can be insecure.</span>
+<span class="quote1">&gt;Welcome to the MySQL monitor. Commands end with ; or \g.</span>
+<span class="quote1">&gt;Your MySQL connection id is 2</span>
+<span class="quote1">&gt;Server version: 5.6.22 MySQL Community Server (GPL)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;Copyright (c) 2000, 2014, Oracle and/or its affiliates. All rights reserved.</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;Oracle is a registered trademark of Oracle Corporation and/or its</span>
+<span class="quote1">&gt;affiliates. Other names may be trademarks of their respective</span>
+<span class="quote1">&gt;owners.</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;mysql&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;-- 両方のsecure-authがOFFになることで初めて16桁ハッシュで認証できました --</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;取り敢えず5.6.21ではこれでしのげるかも知れませんが、</span>
+<span class="quote1">&gt;5.7ではskip-secure-authは完全に解釈されなくなっているので</span>
+<span class="quote1">&gt;(5.6にもいつバックポートされるかされないかわかりませんし)</span>
+<span class="quote1">&gt;old_passwordsの設定を消して最初からセットアップするのが良いとは思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;余談ですが、</span>
+<span class="quote2">&gt;&gt; パスワードハッシュの管理に</span>
+<span class="quote2">&gt;&gt;  変更が入ったこと、およびMySQL5.6から新しい管理方式が標準となったこと</span>
+<span class="quote2">&gt;&gt;  により発生している問題と理解した</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;パスワードハッシュが変わったのも、新しい方が標準になったのも10年以上前です :-P</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;解決しますように。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;yoku0825,</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;2014年12月16日 15:07 koichi.s &lt;asp91462@xxxxxxxxxx&gt;:</span>
+<span class="quote1">&gt;メーリングリストの皆さま</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;はじめまして</span>
+<span class="quote2">&gt;&gt;WEBシステム構築をメインとしている技術者の佐々木浩一と申します。</span>
+<span class="quote2">&gt;&gt;いつもはJAVA+Oracleを使用しての開発が多いMySQL初心者です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;MySQLは初めてですが、Oracle以外にPostgreSQLなどは環境構築の経験ありです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;今回、依頼元の要望によりシステムの一部をRHEL+MySQL+Perl(CGI)にて</span>
+<span class="quote2">&gt;&gt;構築する事になり、環境構築を行っているのですが、表題のとおりrootにて</span>
+<span class="quote2">&gt;&gt;ログイン出来ない状況に陥ってしまいました。過去ログなどを拝見したのですが</span>
+<span class="quote2">&gt;&gt;ピンと来る情報にたどり着けませんでしたので、ご存知の方がいらっしゃれば</span>
+<span class="quote2">&gt;&gt;勝手なお願いで恐縮ですが、ご教示頂けませんでしょうか？</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;【状況】</span>
+<span class="quote2">&gt;&gt;・依頼元指定のOS(RHEL6.2)のカスタムインストール版OS(MySQLはmysql-libs</span>
+<span class="quote2">&gt;&gt; 5.1.52-1.el6_0.1のみインストール済)のマシンにMySQL5.6.20-1.el6を</span>
+<span class="quote2">&gt;&gt; バンドル版アーカイブファイルからyumでインストール</span>
+<span class="quote2">&gt;&gt;・MySQLのsharedインストール時、mysql-libs 5.1.52-1.el6_0.1が競合したため、</span>
+<span class="quote2">&gt;&gt; 代わりにMySQL-shared-compat-5.6.20-1.el6にてmysql-libsのアップデート</span>
+<span class="quote2">&gt;&gt;・インストールしたパッケージは以下(全て5.6.20-1.el6)</span>
+<span class="quote2">&gt;&gt; MySQL-client</span>
+<span class="quote2">&gt;&gt; MySQL-devel</span>
+<span class="quote2">&gt;&gt; MySQL-server</span>
+<span class="quote2">&gt;&gt; MySQL-shared-compat</span>
+<span class="quote2">&gt;&gt; MySQL-test</span>
+<span class="quote2">&gt;&gt;・インストール完了後にOSのrootでMySQLを起動し、起動後に以下のコマンドを実行</span>
+<span class="quote2">&gt;&gt; msql -uroot -p</span>
+<span class="quote2">&gt;&gt; すると、以下のメッセージが表示された</span>
+<span class="quote2">&gt;&gt; Connection using old(pre-4.1.1)authentication protocol refused(client option 'secure_auth' enavled)</span>
+<span class="quote2">&gt;&gt;・過去ログや他の方のblogなどを拝見した結果、パスワードハッシュの管理に</span>
+<span class="quote2">&gt;&gt; 変更が入ったこと、およびMySQL5.6から新しい管理方式が標準となったこと</span>
+<span class="quote2">&gt;&gt; により発生している問題と理解した</span>
+<span class="quote2">&gt;&gt;・msql -uroot -pのコマンドに追加パラメータとして--skip-secure-authを追加</span>
+<span class="quote2">&gt;&gt; その結果、ログインに成功(rootにパスワードを設定してログアウト)</span>
+<span class="quote2">&gt;&gt;・mysql起動状態でメモリ使用状況を確認したところ、2Gbyte以上を使用していたため、</span>
+<span class="quote2">&gt;&gt; my.cnfに初期メモリなどの設定値を設定しmysqlを再起動</span>
+<span class="quote2">&gt;&gt;・再度rootでログインしようとしたところ、以下のエラーが発生し再度ログイン出来ず</span>
+<span class="quote2">&gt;&gt; Server is running in --secure-auth mode, but 'root@localhost' has a password in the old format; please change the password to the new format</span>
+<span class="quote2">&gt;&gt;それ以降、何をやっても上記エラーでログイン出来ず</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;といった状況です。</span>
+<span class="quote2">&gt;&gt;過去ログや色々な方の記事を拝見すると、そもそも5.1から5.6への更新は推奨されていない</span>
+<span class="quote2">&gt;&gt;などの断片的な情報は見つかるものの、見つけ出した断片的な情報を試しても解決出来ませんでした。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;rootでログイン出来ないとどうする事も出来ず、困っております。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;よろしくお願いいたします。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="16192">[前]</a><a href="16194">[次]</a><a href="../list/16101-16200">[番号順一覧]</a><a href="../thread/16101-16200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16190">  16190 2014-12-16 15:07 [&quot;koichi.s&quot; &lt;asp91462] MySQL5.6.20をインストール後rootでログイン出来ない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16192">@ 16192 2014-12-16 15:46 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16190] MySQL5.6.20をインストール後rootでログイン出来ない</a></span>
+<span class="current">-&gt;&nbsp;<a href="16193">  16193 2014-12-17 11:38 　┗[&quot;koichi.s&quot; &lt;asp91462] Re: [mysql 16192] Re: [mysql 16190] MySQL5.6.20をインストール後rootでログイン出来ない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16194">@ 16194 2014-12-17 12:46 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16193] Re: [mysql 16192] Re: [mysql 16190] MySQL5.6.20をインストール後rootでログイン出来ない</a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11277</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11276">[前]</a><a href="11278">[次]</a><a href="../list/11201-11300">[番号順一覧]</a><a href="../thread/11201-11300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11277
+</p>
+<div class="header">
+<p>
+From: &quot;KKuji_Y2&quot; &lt;&quot;KKuji_Y2&quot; &lt;kkuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 26 Mar 2005 17:21:45 +0900<br>
+Subject: [mysql 11277] Re: selectで<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+ＫＫ＠ＩＢです
+
+柳町さんの言われたことは、
+「私がやりたかったのは、物理ソートまでやる必要のないこと」
+という意味だと解釈しました。
+
+物理ソートというのは、レコードを実際に
+その順序に並べ直す処理です。
+
+ソートの手法に、インデックスソートというのがあり、
+インデックスを使った、「論理的な（ここでは、物理的に
+は並べ替えをしない、という意味を含んでいます。）」
+順序づけは、これに当たると考えて良いでしょう。
+
+インデックスが無くても、レコードになにがしかの
+一意的なマークをつけて、それで、並べ替えをする
+ケースもあります。（下記のWHERE句があるORDER BYなど。）
+そのときも、レコードを実際に並べ直すことは、
+まずありません。
+
+それで、物理ソートですが、その順序で
+レコードをスムーズに読み出したいときに
+物理ソートをしておいて、順（シーケンシャル）アクセス
+したほうがトータルコストがかからない場合が
+あります。
+
+そういう時に使います。
+そうでないときは、使わないでしょうね。
+
+--------------------------------
+
+以下、青山さんのコメントに対するコメントです。
+
+<span class="quote1">&gt; 検索するデータ数がある程度多い場合では、ランダムアクセスは</span>
+<span class="quote1">&gt; 逆に効率が悪くなり、シーケンシャルアクセスの方が効率が良くなります。</span>
+<span class="quote1">&gt; # これはまあ直感的にわかる話とは思いますが・・。</span>
+
+この話は、私は、もう少し説明が必要だと思います。
+データが、飛び飛びにある状態で、いくつかデータを拾ってくるときは
+一般には、ランダムアクセス、つまりインデックスを使った方が
+早いでしょう。
+
+なお、データ総数が数十程度だと、インデックス処理の
+オーバーヘッドなどのせいで、シークエンシャル
+アクセスの方が早い場合もあります。
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; また、1個または数個のデータにアクセスしたい場合には常に</span>
+<span class="quote1">&gt; ランダムアクセスの方が効率がよいのかというと、必ずしもそうではなく、</span>
+<span class="quote1">&gt; 行数に比べてキー値の種類が少ない列(=カーディナリティが低い列)</span>
+<span class="quote1">&gt; については、検索結果データの絶対数とディスク上の分布によって、</span>
+<span class="quote1">&gt; どちらの方法が速いのかが変わってきます。</span>
+
+これは非常に重要な指摘ですね。
+最速の検索は、データの内容によって変化します。
+上記のような場合は、キーが意味をなさない状態です。
+別のキーがない場合、同じキー値の中でシークエンシャルアクセスで
+データを探す状態になりますから。
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; また、全件検索する場合でも、Bツリーのリーフを順に読めばそのまま</span>
+<span class="quote1">&gt; PRIMARY KEYの順になっているので、シーケンシャルアクセスをすれば</span>
+<span class="quote1">&gt; PRIMARY KEYでソート済みデータが得られることになります。</span>
+
+PRIMARY KEYでデータを特定する場合は、ですね。
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; このため、検索件数がある程度多い場合は、インデックスを使わずに</span>
+<span class="quote1">&gt; シーケンシャルアクセス(FULL SCAN)する方が速かったりします。</span>
+
+これもほぼ上記と同じことのように読めますが、
+もう少し説明が必要でしょう。
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; このため、通常のインデックスを張った列データを検索キーにして</span>
+<span class="quote1">&gt; 大量に検索をかける場合、ORDER BYなどを指定してしまうと</span>
+<span class="quote1">&gt; インデックスを使って毎回ランダムアクセスせざるを得ないような</span>
+<span class="quote1">&gt; 状況になってしまうので、上記の内容からすると、かなり重たい</span>
+<span class="quote1">&gt; 処理になる可能性があることがわかると思います。</span>
+
+WHERE句が使われていて、データが複数選択された時、
+ORDER BY がかかっている状態では、
+その場での順序づけが必要でしょう。
+
+WHERE句の指定条件にぴったり合ったインデックスが
+ある場合は、それを使えば、再ソートは必要ないですが、
+そういうものがない場合、順序づけする必要があるのではないでしょうか？
+
+<span class="quote1">&gt; 上記のことからわかると思いますが、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ＫＫ＠ＩＢ さん:</span>
+<span class="quote2">&gt;&gt; order by の場合、データレコードを実際に並べ替えず、</span>
+<span class="quote2">&gt;&gt; そのレコードを指すインデックスをソートするのが一般的だと私は</span>
+<span class="quote2">&gt;&gt; 理解しています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; とありますが、インデックスを使う場合は、最初からソートされているので</span>
+<span class="quote1">&gt; 後からソートしたりはしません。</span>
+
+ここは、私の書き方が悪かったかもしれませんが、
+「そのレコードを指すインデックス」とは、レコードのＩＤ（となっているもの）のことです。
+「インデックスソート」の「インデックス」です。
+青山さんのおっしゃっている「インデックス」は、そういうID的なものが、
+並べられ終わった記録、ファイルのことですね。これもインデックスと呼ばれるので
+話がややこしくなっていると思います。
+それは、並べられているので、当然、並べ直しをもう一度やる必要はありません。
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; ところが、上述したように、特定の順番で、早く取り出す、などの目的で、</span>
+<span class="quote2">&gt;&gt; 実際にレコードをそういう順序で並べたい</span>
+<span class="quote2">&gt;&gt; ケースがあり、そういうときに、実際にレコードを</span>
+<span class="quote2">&gt;&gt; 様々な、その状況にあった手段で並べ直します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 文脈からすると「実際に」というのは物理的な並びを指しているのだと</span>
+<span class="quote1">&gt; 思いますが、MySQLが勝手に全レコードを物理的に後から並べ替えたり</span>
+<span class="quote1">&gt; することは決してありません。</span>
+
+マルチタスクでバックグランドでそういう処理をさせるようなシステムを
+作れば別でしょうが、ＤＢＭＳが勝手に物理ソートをすることは
+青山さんのおっしゃるとおり、まず無いでしょうね。
+
+プログラマーが物理ソートをかけるという話です。
+すみません。この話を書いていたときは、ＭｙＳＱＬのことを忘れていました。
+一般的な話をしていました。
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQLの現在の機能では、物理的に並べ替えたい場合は、一旦データを</span>
+<span class="quote1">&gt; ダンプしてからテーブルを削除し、再度テーブルを作り直す必要が</span>
+<span class="quote1">&gt; あるようです。</span>
+<span class="quote1">&gt; # Oracleとかだと運用しながらテーブル再構築する機能があったりします。</span>
+
+ＭｙＳＱＬがどうかは別とすると、（すみません、考えていなかったのです。）
+ＤＢの機能としては、物理ソート機能があるのが普通ではないでしょうか？
+そうでもないのでしょうかねぇ。
+
+
+</pre>
+</div>
+<p class="button"><a href="11276">[前]</a><a href="11278">[次]</a><a href="../list/11201-11300">[番号順一覧]</a><a href="../thread/11201-11300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11272">  11272 2005-03-26 01:58 [&lt;hiromitsu.narimasu_] Re: selectで                            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11274">  11274 2005-03-26 10:49 ┗[Hirokazu Aoyama &lt;aoy]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11275">  11275 2005-03-26 12:56 　┣[Hirokazu Aoyama &lt;aoy]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11276">  11276 2005-03-26 16:12 　┃┗[深海水草 &lt;VYG01106@x]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="11277">  11277 2005-03-26 17:21 　┗[&quot;KKuji_Y2&quot; &lt;kkuji@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11278">  11278 2005-03-26 19:35 　　┣[Hirokazu Aoyama &lt;aoy]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11281">  11281 2005-03-27 05:04 　　┃┗[&quot;KKuji_Y2&quot; &lt;kkuji@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11280">  11280 2005-03-27 03:15 　　┗[Hirokazu Aoyama &lt;aoy]                                   </a></span>
+</pre>
+</body>
+</html>

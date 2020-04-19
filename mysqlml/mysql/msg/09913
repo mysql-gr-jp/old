@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9913</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9912">[前]</a><a href="9914">[次]</a><a href="../list/9901-10000">[番号順一覧]</a><a href="../thread/9901-10000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9913
+</p>
+<div class="header">
+<p>
+From: ML account &lt;ML account &lt;ml@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 28 Jul 2004 17:13:04 +0900<br>
+Subject: [mysql 09913] Re: 芋づる式検索について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+　こんにちは。
+
+yoshiyama akihiko &lt;yoshiyama@xxxxxxxxxx&gt;さんの
+&lt;20040728042607.45F3CFD80B@xxxxxxxxxx&gt;
+&quot;<a href="09906">[mysql 09906]</a> 芋づる式検索について&quot;
+
+
+<span class="quote1">&gt; はじめまして。検索処理でアドバイスをお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; before  after</span>
+<span class="quote1">&gt; -------------</span>
+<span class="quote1">&gt; a       b</span>
+<span class="quote1">&gt; b       c</span>
+<span class="quote1">&gt; c       NULL</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 上記のデータは、値aは値bに変わった、値bは値cに変わったことを</span>
+<span class="quote1">&gt; 表しています。値cは変わらないのでafterがNULLです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 値aが値cに変わったことを知りたいのですが、SQL文が思いつきません。</span>
+<span class="quote1">&gt; afterがNULLになるまでたどることはできるでしょうか。</span>
+
+　３過程(a-&gt;b, b-&gt;c, c-&gt;NULL)で変化するのが確定なら、検出するのは比較的
+簡単でしょう。
+
+----定義と初期化(一回限り実行)----
+create table test08 (before char(1),after char(1));
+insert into test08(before,after) values('a','b');
+insert into test08(before,after) values('b','c');
+insert into test08(before,after) values('c',NULL);
+----実行----
+select s0.before,s1.before,s2.before,s2.after
+<span class="quote1">&gt;from test08 as s0 inner join</span>
+    (test08 as s1 inner join test08 as s2 on s1.after=s2.before)
+    on s0.after=s1.before
+where s0.before='a' and s2.after is NULL;
+
+　速度的にお勧め出来るかは別問題です。インデックスを付けたとしてもレコー
+ド数の三乗に比例して時間が掛かるでしょう。
+
+
+　幾つの過程を経て変化するのかが分からない場合、１発のクエリで行うのは無
+理でしょう。クエリを乱発する必要があるでしょうね。DBMSの種類やバージョン
+依存で良いのであれば、こんな感じで出来る事は出来ます。一応、循環(a-&gt;b、
+b-&gt;aの様な）や分岐（a-&gt;b、a-&gt;dの２つがある）も考慮しています。過程数には、
+textの文字列長の制限があります（超過すると永久ループ）。
+
+----定義と初期化(一回限り実行)----
+create table tmp08 (str text,next char(1),steps int);
+set @_first='a';
+insert into tmp08 (str,next,steps)
+  select @_first,after,1
+  from test08
+  where before=@_first;
+----実行----
+select @_maxsteps:=max(steps) from tmp08;
+insert into tmp08 (str,next,steps) 
+  select concat(tmp08.str,test08.before) as newstr
+    ,test08.after as newnext,steps+1 as newsteps
+  from tmp08,test08
+  where tmp08.next=test08.before and tmp08.steps=@_maxsteps 
+    and test08.before &lt;&gt; @_first;
+
+　新規挿入されるレコードがある、あるいはtmp08.nextがNULLのレコードが存在
+しない間は、「実行」の部分のクエリ２発を繰り返し発行します。変化するしな
+いの判定は tmp08.nextがNULLのレコードが存在するかしないかで行います。
+
+　MySQL変数の@_firstと@_maxlenを言語の変数に取る方がまだしも一般形でしょ
+うか。
+
+
+　　　　松枝知直　　　　&lt;tomom@xxxxxxxxxx&gt;
+　　　　　　　　　　　　<a href="http://www.argus.ne.jp/~tomom/">http://www.argus.ne.jp/~tomom/</a>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="9912">[前]</a><a href="9914">[次]</a><a href="../list/9901-10000">[番号順一覧]</a><a href="../thread/9901-10000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9906">   9906 2004-07-28 13:26 [yoshiyama akihiko &lt;y] 芋づる式検索について                    </a></span>
+<span class="current">-&gt;&nbsp;<a href="9913">   9913 2004-07-28 17:13 ┗[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9923">   9923 2004-07-29 11:00 　┗[yoshiyama akihiko &lt;y]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9925">   9925 2004-07-29 13:09 　　┗[SAITO Masaru &lt;daisai]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9927">   9927 2004-07-29 14:53 　　　┗[ML account &lt;ml@xxxxx]                                 </a></span>
+</pre>
+</body>
+</html>

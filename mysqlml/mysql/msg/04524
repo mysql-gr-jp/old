@@ -1,0 +1,194 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4524</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="4523">[前]</a><a href="4525">[次]</a><a href="../list/4501-4600">[番号順一覧]</a><a href="../thread/4501-4600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4524
+</p>
+<div class="header">
+<p>
+From: Shin-ichi Tsurunaga &lt;Shin-ichi Tsurunaga &lt;ml-shin@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 19 Oct 2001 19:53:58 +0900<br>
+Subject: [mysql 04524] Re: Proftpd + qmail + vpopmail<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+Taro Yamamoto さんは書きました:
+
+<span class="quote1">&gt;それで、vadddomain を実行したところ、以下のようなエラーが出ました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;# ./vadddomain hogehoge.or.jp</span>
+<span class="quote1">&gt;/usr/libexec/ld-elf.so.1: Shared object &quot;libmysqlclient.so.10&quot; not found</span>
+LD_LIBRARY_PATHの追加が必要なようですが、BSDはSunOS時
+代の知識が活かせるかどうかのぐらいなので、アドバイスにな
+るか分かりませんが&quot;/etc/rc.conf&quot;のldconfigの項に追加すると
+いう方法があったような。よくあるのは
+export LD_LIBRARY_PATH=&quot;/usr/local/lib/mysql&quot;
+（csh系なら setenv LD_LIBRARY_PATH /usr/local/lib/mysql）
+を実行した後にvadddomainを使うかですが、しかしこちらだと
+vadddomain以外で有効にならないので、結局駄目だと思います。
+強引にはMakefileで&quot;-L /usr/local/lib/mysql&quot;となっているとこ
+ろを&quot;-R /usr/local/lib/mysql&quot;で置換してみるというのはどう
+でしょうか。
+この辺りはMySQLクライント使用でのFAQと同じなので、FreeBSD
+使いの方に補足していただければありがたいです。
+
+<span class="quote1">&gt;# 余談で qmail の話になって恐縮なのですが、</span>
+<span class="quote1">&gt;# どのように vpopmail のアカウント（？）にメールを配送させるのでしょうか？</span>
+<span class="quote1">&gt;# もう少し vpopmail の知識も深めないといけないですね(^^;</span>
+vpopmailでドメインを追加すると&quot;/var/qmail/control&quot;のvirtualdomains
+に1行追加されます。このような感じで
+ドメイン名:識別子
+これで&quot;XXX@ドメイン名&quot;宛に来たメール全てがユーザー&quot;識別子&quot;
+に転送されます。例えば
+foo.jp:USER
+となっている場合は&quot;anyone@xxxxxxxxxx&quot;宛のメールは、&quot;USER-anyone&quot;
+と変換されます。これはqmailの拡張アドレスで、あとはUSER
+のホームディレクトリー中にある、.qmail-anyoneで制御されま
+す。もし、.qmail-anyoneに転送するように
+&amp;test@xxxxxxxxxx
+とはいっていれば、そこに転送されます。しかしこの方法だと、
+追加するバーチャルドメイン1つ1つに実ユーザーが必要になる
+ため(重複してもいいのですが)、さらに&quot;/var/qmail/users/assign
+を使います。例えば次のような行があれば
++foo.jp:foo.jp:vpopmailのUID:vpopmailのGID:/vpopmailがインストールされたディレクトリー/domains/foo.jp:::
+
+foo.jp（ここではドメイン名そのままの仮想ユーザーになってい
+ます）ユーザー宛のメールをvpopmailを動かしているユーザーに
+マッピングし、
+/vpopmailがインストールされたディレクトリー/domains/foo.jp/.qmail
+を参照するとなります。
+このあたりはvpopmailの機能でなく、qmailが元々持っている仮
+想ドメインの機能です。vpopmailはその名の通り、popでメール
+を取る際の役割が大きいです。
+
+vpopmailに関してはもう一息だと思いますのでとりあえずProftpd
+の方を添付いたします。
+私の環境はSolaris8(x86)です。
+
+---ここから----
+「Proftpd1.2.2+mod_sql+mod_sql_mysql+mod_quota」のインストール
+mod_quota.cのヘッダーにて&quot;#define QUOTA_MYSQL&quot;が有効になるよう修正
+Proftpdソース展開後&quot;contrib/&quot;にmod*.cをコピー
+./configure --localstatedir=/var/lock --sysconfdir=/etc --with-includes=/usr/local/include/mysql 
+--with-libraries=mod_sql:mod_sql_mysql:mod_quota
+make
+make install
+&quot;vftp&quot;グループ・ユーザーを&quot;/var/vftp&quot;ホームとともに作成
+MySQLに前述のDBとテーブルを用意
+/etc/proftpd.confの用意
+-----追加したもの（一例）---
+#####################
+#SQL Quota
+#    Added by shin
+#####################
+Quotas on
+QuotaDefault 1024
+QuotaCalc on
+SQLQuotaInfo DBホスト名 ユーザー名 パスワード DB名
+SQLQuotaTable users
+SQLQuotaName userid
+SQLQuotaUsed used
+SQLQuotaQuota quota
+#QuotaType soft
+QuotaType hard
+QuotaExempt 0,1001
+
+#####################
+#SQL Authentic
+#    Added by shin
+#####################
+SQLDoAuth on
+SQLConnectInfo DB名@DBホスト名 ユーザー名 パスワード
+SQLHomedirField homedir
+SQLAuthTypes Backend
+#SQLAuthTypes Plaintext
+#SQLDoGroupAuth Off
+SQLAuthoritative on
+SQLLog PASS update users &quot;count=count+1 where userid='%u'&quot;
+SQLHomedirOnDemand on
+SQLDefaultGID 1001
+
+次のようなstartスクリプトを用意
+
+#!/bin/sh
+#
+# 2001, by Shin-ichi Tsurunaga.
+#
+LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/mysql
+export LD_LIBRARY_PATH
+
+[ -f /usr/local/sbin/in.proftpd ] || exit 0
+[ -f /etc/proftpd.conf ] || exit 0
+state=$1
+
+set `who -r`
+case $state in
+
+'start')
+        /usr/local/sbin/in.proftpd
+        echo 'proftpd started.'
+        touch /var/lock/ftpd
+        ;;
+'stop')
+        PID=`/bin/ps -aef | grep proftpd | awk '{print $2}'`
+        if [ ! -z &quot;$PID&quot; ] ;  then
+            /bin/kill ${PID} 1&gt; /dev/null 2&gt;&amp;1
+            echo 'Shutdown proftpd.'
+        fi
+        echo
+        rm -f /var/lock/ftpd
+        ;;
+esac
+
+----ここまで----
+ノートに書いてあったメモを手打ちいたしましたので、間違い
+がありましたらお許しいただければと思います。
+
+----
+Shin-ichi Tsurunaga  shin@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="4523">[前]</a><a href="4525">[次]</a><a href="../list/4501-4600">[番号順一覧]</a><a href="../thread/4501-4600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="4489">   4489 2001-10-16 18:33 [&quot;Taro Yamamoto&quot; &lt;tar] Proftpd + qmail + vpopmail              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4492">   4492 2001-10-16 21:10 ┗[Shin-ichi Tsurunaga ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4497">   4497 2001-10-17 08:45 　┗[&quot;Taro Yamamoto&quot; &lt;tar]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4498">   4498 2001-10-17 08:56 　　┣[&quot;Taro Yamamoto&quot; &lt;tar]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4505">   4505 2001-10-18 01:44 　　┗[Shin-ichi Tsurunaga ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4509">   4509 2001-10-18 09:40 　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4511">   4511 2001-10-18 14:06 　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="4524">   4524 2001-10-19 19:53 　　　　　┗[Shin-ichi Tsurunaga ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4525">   4525 2001-10-20 10:21 　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4526">   4526 2001-10-20 17:29 　　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4527">   4527 2001-10-20 18:18 　　　　　　　　┗[Shin-ichi Tsurunaga ]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4528">   4528 2001-10-21 01:26 　　　　　　　　　┣[Shin-ichi Tsurunaga ]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4529">   4529 2001-10-21 02:12 　　　　　　　　　┣[&quot;Taro Yamamoto&quot; &lt;tar]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4531">   4531 2001-10-21 13:05 　　　　　　　　　┃┗[Shin-ichi Tsurunaga ]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4532">   4532 2001-10-21 15:40 　　　　　　　　　┃　┗[&quot;Taro Yamamoto&quot; &lt;tar]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4533">   4533 2001-10-21 22:49 　　　　　　　　　┃　　┗[&quot;Taro Yamamoto&quot; &lt;tar]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4535">   4535 2001-10-22 00:20 　　　　　　　　　┃　　　┣[&quot;Taro Yamamoto&quot; &lt;tar]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4536">   4536 2001-10-23 04:05 　　　　　　　　　┃　　　┗[Shin-ichi Tsurunaga ]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4537">   4537 2001-10-23 07:53 　　　　　　　　　┃　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4538">   4538 2001-10-23 11:26 　　　　　　　　　┃　　　　　┗[Shin-ichi Tsurunaga ]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4543">   4543 2001-10-23 21:43 　　　　　　　　　┃　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4556">   4556 2001-10-25 09:27 　　　　　　　　　┃　　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4559">   4559 2001-10-25 10:53 　　　　　　　　　┃　　　　　　　　┣[Shin-ichi Tsurunaga ]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4584">   4584 2001-10-27 00:34 　　　　　　　　　┃　　　　　　　　┃┗[&quot;Taro Yamamoto&quot; &lt;tar] </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4595">   4595 2001-10-29 12:29 　　　　　　　　　┃　　　　　　　　┃　┗[Shin-ichi Tsurunaga ]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4596">   4596 2001-10-29 15:26 　　　　　　　　　┃　　　　　　　　┃　　┣[Seiji Tateyama &lt;tate]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4600">   4600 2001-10-30 02:29 　　　　　　　　　┃　　　　　　　　┃　　┃┗[&quot;Taro Yamamoto&quot; &lt;tar]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4599">   4599 2001-10-30 02:25 　　　　　　　　　┃　　　　　　　　┃　　┗[&quot;Taro Yamamoto&quot; &lt;tar]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4564">   4564 2001-10-25 23:59 　　　　　　　　　┃　　　　　　　　┗[とみたまさひろ &lt;tomm]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4585">   4585 2001-10-27 00:38 　　　　　　　　　┃　　　　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar] </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4530">   4530 2001-10-21 02:21 　　　　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,341 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.texi on 20 June 1998 -->
+
+  <TITLE>MySQL Reference Manual for version 3.21.31. - Comments on porting to other systems.</TITLE>
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Todo.html">previous</A>, <A HREF="manual_Regexp.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Porting" HREF="manual_toc.html#Porting">Comments on porting to other systems.</A></H1>
+
+<P>
+A working Posix thread library is needed for the server. On Solaris 2.5
+we use SUN PThreads (the native thread support in 2.4 and earlier
+versions are not good enough) and on Linux we use LinuxThreads by Xavier
+Leroy <a HREF="mailto:Xavier.Leroy@inria.fr">Xavier.Leroy@inria.fr</a>.
+
+</P>
+<P>
+The hard part of porting to a new UNIX variant without good native
+thread support is probably to port MIT threads. See
+<TT>`mit-pthreads/README'</TT> and
+<a HREF="http://www.humanfactor.com/pthreads/"> Programming POSIX Threads</a>.
+
+</P>
+<P>
+The <STRONG>MySQL</STRONG> distribution includes a patched version of
+Provenzano's Pthreads from MIT (see
+<a HREF="http://www.mit.edu:8001/people/proven/pthreads.html"> MIT Pthreads
+web page</a>). This can be used for some operating systems that does not
+have posix threads.
+
+</P>
+<P>
+It is also possible to use another user level thread package named FSU
+Pthreads (see
+<a HREF="http://www.informatik.hu-berlin.de/~mueller/pthreads.html"> FSU
+pthread home page</a>). This implementation is being used for the SCO port.
+
+</P>
+<P>
+See the <TT>`thr_lock.c'</TT> and <TT>`thr_alarm.c'</TT> programs in the mysys
+directory for some tests/examples of these problems
+
+</P>
+<P>
+Both the server and the client needs a working C++ compiler (we use gcc
+and have tried SparcWorks). Other compiler that is known to work is the
+IRIX cc.
+
+</P>
+<P>
+To compile only the client use <TT>`./configure --without-server'</TT>
+
+</P>
+<P>
+There currently no support for only compiling the server. Nor is it
+likly to be added unless someone has a good reason for it.
+
+</P>
+<P>
+If you want/need to change any Makefile or the configure script you must
+get automake and autoconf. We have used autoconf-2.12 and automake-1.2.
+
+</P>
+<P>
+All steps needed to remake everything from the most basic files.
+
+</P>
+
+<PRE>
+/bin/rm */.deps/*.P
+/bin/rm -f config.cache
+aclocal
+autoheader
+aclocal
+automake
+autoconf
+./configure --with-debug=yes --prefix='your installation directory'
+
+# The makefiles generated above needs GNU make (called gmake below)
+gmake clean all install init-db
+</PRE>
+
+<P>
+If you run into problem with a new port, you may have to do some debugging
+of mysql!
+ 「<A HREF="manual_Porting.html#Debugging"><STRONG>MySQL</STRONG> のデバッグ</A>」節参照 
+
+</P>
+<P>
+<STRONG>NOTE</STRONG>: Before you start debugging mysqld, first get the test programs
+mysys/thr_alarm and mysys/thr_lock to work.  This will ensure that your
+thread installation has even a remotely change to work!
+
+</P>
+
+
+
+<H2><A NAME="Debugging" HREF="manual_toc.html#Debugging"><STRONG>MySQL</STRONG> のデバッグ</A></H2>
+
+<P>
+とても特有の問題がある場合は、いつでも MySQL のデバッグを試みることがで
+きます。これをおこなうには、オプション <CODE>--with-debug=yes</CODE> をつけて
+<STRONG>MySQL</STRONG> を configure する必要があります。.  You can check if <STRONG>MySQL</STRONG> if compiled with
+debugging by doing: <CODE>mysqld --help</CODE>.  If the <CODE>--debug</CODE> flag
+is listed with the options then you have debugging enabled.
+<CODE>mysqladmin ver</CODE> also lists the mysqld version as <CODE>mysql ... -debug</CODE>
+in this case.
+
+</P>
+<P>
+mysql サーバを /tmp/mysql.trace 内にトレースログを取るように起動します。
+ログファイルはとても <EM>大きく</EM> なります。
+
+</P>
+<P>
+<CODE>mysqld --debug</CODE>
+
+</P>
+<P>
+または次で起動できます
+
+</P>
+<P>
+<CODE>mysqld --debug=d,info,error,query,general,where:O,/tmp/mysql.trace</CODE>
+
+</P>
+<P>
+これは最も興味のあるタグの情報だけを出力します。
+
+</P>
+<P>
+When you configure <STRONG>MySQL</STRONG> for debugging you automaticly enable a lot
+of extra safety check functions that monitors the health of mysqld. If they
+find something 'unexpected' a entry will be written to stderr, which
+safe_mysqld directs to the error log!  This also means that if you are
+having some unexpected problems with <CODE>MySQL</CODE>, the first thing you,
+if you are using a source distribution, is to configure <CODE>MySQL</CODE> for
+debugging!  (The second thing is of course to mail to mysql@tcx.se and
+ask for help.  Please use the mysqlbug script for all bug reports or questions
+regarding a <CODE>MySQL</CODE> version you are using!
+
+</P>
+<P>
+多くのシステム（Linux を除く）では、mysqld がクラッシュした場合により多
+くの情報を得るために <CODE>gdb</CODE> 内で mysqld を実行することもできます。
+
+</P>
+
+<PRE>
+shell&#62; gdb libexec/mysqld
+gdb&#62;   run
+...
+back   # Do this when mysqld crashes
+quit
+</PRE>
+
+
+
+<H2><A NAME="RTS-threads" HREF="manual_toc.html#RTS-threads">Comments about RTS threads:</A></H2>
+
+<P>
+I have tried to use the RTS thread packages with <STRONG>MySQL</STRONG> but
+stumbled on the following problems:
+
+</P>
+<P>
+They use old version of a lot of POSIX calls and it is very tedious to
+make wrappers for all functions. I am inclined to think that it would
+be easier to change the thread libraries to the newest POSIX
+specification.
+
+</P>
+<P>
+Some wrappers are already written. Se mysys/my_pthread.c for more info.
+
+</P>
+<P>
+At least the following should be changed:
+
+</P>
+<P>
+pthread_get_specific should use on argument.
+sigwait should take two arguments.
+A lot of functions (at least pthread_cond_wait, pthread_cond_timedwait)
+should return the error code on error. Now they return -1 and set errno.
+
+</P>
+<P>
+Another problem is that user level threads uses the ALRM signal and this
+aborts a lot of functions (read, write, open...). <STRONG>MySQL</STRONG> should
+do a retry on interrupt on all of these but it not that easy to verify
+it.
+
+</P>
+<P>
+The biggest unsolved problem is the following:
+
+</P>
+<P>
+To get thread_level alarms I changed mysys/thr_alarm.c to wait between
+alarms with pthread_cond_timedwait() but this aborts with error EINTR.
+I tried to debug the thread library why this happens but couldn't find
+any easy solution.
+
+</P>
+<P>
+If someone wants to try <STRONG>MySQL</STRONG> with RTS threads I suggest the
+following:
+
+</P>
+
+<UL>
+<LI>
+
+Change functions <STRONG>MySQL</STRONG> uses from the thread library to POSIX.
+This shouldn't take that long.
+<LI>
+
+Compile all libraries with the -DHAVE_rts_threads.
+<LI>
+
+Compile thr_alarm
+<LI>
+
+If there is some small differences in the implementation they may be fixed
+by changing my_pthread.h and my_pthread.c
+<LI>
+
+Run thr_alarm. If it runs without any 'warning', 'error' or aborted messages
+you are one the right track. Here follows an successful run on Solaris:
+
+<PRE>
+Main thread: 1
+Tread 0 (5) started
+Thread: 5  Waiting
+process_alarm
+Tread 1 (6) started
+Thread: 6  Waiting
+process_alarm
+process_alarm
+thread_alarm
+Thread: 6  Sleeped for 1 (1) sec
+Thread: 6  Waiting
+process_alarm
+process_alarm
+thread_alarm
+Thread: 6  Sleeped for 2 (2) sec
+Thread: 6  Simulation of no alarm needed
+Thread: 6  Sleeped for 0 (3) sec
+Thread: 6  Waiting
+process_alarm
+process_alarm
+thread_alarm
+Thread: 6  Sleeped for 4 (4) sec
+Thread: 6  Waiting
+process_alarm
+thread_alarm
+Thread: 5  Sleeped for 10 (10) sec
+Thread: 5  Waiting
+process_alarm
+process_alarm
+thread_alarm
+Thread: 6  Sleeped for 5 (5) sec
+Thread: 6  Waiting
+process_alarm
+process_alarm
+
+...
+thread_alarm
+Thread: 5  Sleeped for 0 (1) sec
+end
+</PRE>
+
+</UL>
+
+
+
+<H2><A NAME="Thread packages" HREF="manual_toc.html#Thread packages">スレッドパッケージ間の違いは何？</A></H2>
+
+<P>
+<STRONG>MySQL</STRONG> は使用されるスレッドパッケージに非常に依存しています。そ
+のため、<STRONG>MySQL</STRONG> に良いプラットフォームを選択する時には、スレッド
+パッケージが非常に重要です。
+
+</P>
+<P>
+少なくとも3つのタイプのスレッドパッケージがあります。
+
+</P>
+
+<UL>
+<LI>
+
+シングルプロセス内のユーザスレッド。スレッド切替えはアラームで管理され、
+スレッドライブラリはロックを伴う非スレッド安全関数のすべてを管理します。
+動作中スレッドデータを待つ必要がある場合、read, write そして select は、
+通常、他のスレッドに切替えるスレッド固有の select で管理されます。ユーザ
+スレッドパッケージは標準ライブラリ (FreeBSD と BSDI スレッド) に統合され
+ている場合、スレッドパッケージのオーバーヘッドは、全ての非安全コールをマッ
+プしなければならないスレッドパッケージ(MIT-スレッド, FSU-スレッド そして 
+RTS スレッド)よりも少なくなります。他の環境(例えば SCO)では、全てのシス
+テムコールはスレッド安全なので、マッピングはとても簡単に行なわれます(SCO 
+上の FSU-スレッド)。Downside: 全てのマップされるコールは少しの時間を使用
+し、全ての状況を処理可能にすることは、とても困難です。通常、スレッドパッ
+ケージによって処理できないシステムコールがいくつかあります(MIT-スレッド
+とソケットのように)。スレッドスケジューリングは常に最適というわけではあ
+りません。
+<LI>
+
+別のプロセスないのユーザスレッド。スレッド切替えはカーネルによって行なわ
+れ、全てのデータはスレッド間で共有されます。スレッドパッケージは、スレッ
+ド間のデータ共有を許可するために標準スレッドコールを管理します。Linux ス
+レッドはこの方法を使用しています。Downside: 多くのプロセス。スレッド生成
+は遅いです。一つのスレッドが死ぬと、残りは通常ハングして残り、再起動前に
+それら全てを kill する必要があります。スレッド切替えはいくらか高価です。
+<LI>
+
+カーネルスレッド。スレッド切替えはスレッドライブラリかカーネルによって処
+理され、とても速いです。全ては一つのプロセス内で行なわれますが、'ps' は
+いくるつかのシステム上で異なったスレッドを示します。一つのスレッドがアボー
+トした場合、プロセス全体がアボートします。多くのシステムコールはスレッド
+安全で、オーバーヘッドはとても少ないです。Solaris, HP/UX, AIX そして 
+OSF1 がカーネルスレッドを持っています。
+</UL>
+
+<P>
+いくつかのシステムでは、カーネルスレッドは、システムライブラリ内で、ユー
+ザレベルスレッドの統合によって管理されます。この場合、スレッド切替えはス
+レッドライブラリによってだけ行なわれ、カーネルは実際には 'thread aware' 
+ではありません。
+
+</P>
+<P><HR><P>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Todo.html">previous</A>, <A HREF="manual_Regexp.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

@@ -1,0 +1,146 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:557</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="556">[前]</a><a href="558">[次]</a><a href="../list/501-600">[番号順一覧]</a><a href="../thread/501-600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:557
+</p>
+<div class="header">
+<p>
+From: Tatsuya Ina &lt;Tatsuya Ina &lt;ina@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 15 Jan 1999 19:06:22 GMT<br>
+Subject: [mysql 557] Re: MySQL speed<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+伊奈＠セイコーエプソンです。皆様お世話になります。
+
+<span class="quote1">&gt; 毅です</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; explain select count(*) from Test_all_tab where lotno like 'D15A0%';</span>
+<span class="quote1">&gt; の結果をみると、だいたい妥当な感じです。</span>
+<span class="quote1">&gt; で MySQL の場合、like を使用すると、それの正当性をいちいちチャックして回</span>
+<span class="quote1">&gt; ります</span>
+<span class="quote1">&gt; すなわち、単に数え上げているわけでなく、内部では verify しているようです</span>
+<span class="quote1">&gt; で、MySQL3.22 のルーチンでは、今回のような場合において、</span>
+<span class="quote1">&gt; MySQL は 遅くなる事がわかりました。(monty は限られた場合と言ってます)</span>
+<span class="quote1">&gt; TcX にあげたら、これは、3.23 で fix されます。</span>
+
+おお、すばらしい。ありがとうございます。期待できますね。
+## 私も少しは貢献できたのでしょうか？
+
+<span class="quote1">&gt; mysql&gt; explain select count(*) from Test_all_tab where stop_day &gt;'1998-11-14</span>
+<span class="quote1">&gt; 'and stop_day &lt;'1998-12-14';</span>
+<span class="quote1">&gt; からは、</span>
+<span class="quote1">&gt; monty いわく、</span>
+<span class="quote1">&gt; &quot;こんなに違うのはとても興味深く&quot; (なかば信じられない)てかんじで、</span>
+<span class="quote1">&gt; 私は empress の特徴をつかんでいないのですが、</span>
+<span class="quote1">&gt; ↓の場合、(columnは何を指す？) Empress は速くなるそうです。</span>
+<span class="quote1">&gt; &quot; Do you happen to know how Empress saves data?  If they save everything </span>
+<span class="quote1">&gt; by column, this could explain why this is fast.  This would of course mean</span>
+<span class="quote1">&gt; that if you retrieve a couple of columns of data things would get</span>
+<span class="quote1">&gt; extremely slow.&quot;</span>
+
+そうなんですか。(と、言ってもTCXの言っている意味は理解できていません。)
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; show status;</span>
+<span class="quote1">&gt; からは、(ハマさんや民斗さんの言うとおりIOで、)</span>
+<span class="quote1">&gt; MySQL は 22793 個のキーを探し、(この場合、disk を探しに行っています)</span>
+<span class="quote1">&gt; disk seek に 10ms, 計 227秒かかっています。</span>
+<span class="quote1">&gt; Linux 側の file system の利用が</span>
+<span class="quote1">&gt; 足を引っ張っているのではないかとのかんがえです。↓</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; &quot;The only reason I can explain why Empress does the later query in 6 seconds is</span>
+<span class="quote1">&gt; that Empress uses prealloced files or a pre-allocated disk partition and</span>
+<span class="quote1">&gt; that it the MySQL tables are very distributed on the disk (by Linux).&quot;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; また、IOのために遅くなっているので、key_buffer を増やします。</span>
+<span class="quote1">&gt; (monty は empress にあたえているメモリーと同じぐらいにするとどうなの？</span>
+<span class="quote1">&gt; 　と言ってます -O key_buffer=16M</span>
+
+empressには明示的になんらののメモリーを割り振るようなことはしていません。
+-O key-buffer=32m -O sort-buffer=32m -O record_buffer=32mとかやってみましたが、
+10sec程度速くなったに留まっています。(これではちゃんとしたデータではないので
+また、データ取って報告します)
+ 
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; で、少しでも速くするには、4つ方法があり、</span>
+<span class="quote1">&gt; a).</span>
+<span class="quote1">&gt; mysqladmin flush-tables</span>
+<span class="quote1">&gt; isamchk -r database/Test_all_tab</span>
+<span class="quote1">&gt;    </span>
+<span class="quote1">&gt;  〜 中略 〜</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; b) ISAM のバッファの変更</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  〜 中略 〜</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; c) char binary 型の使用</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  〜 中略 〜</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; d) key_buffer= の十分なわりあて</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以上、ご報告いただけるとありがたいです。</span>
+
+アドバイスありがとうございます。TCXに素早い問い合わせなどして頂いた
+のに申し訳ないのですが、これらの確認は来週の月曜日以降になってしまいます。
+少し時間がかかるかと思いますが、必ず行い、また報告したいと思いますので
+よろしくお願いいたします。
+
+<span class="quote1">&gt; また、参考のためにも、</span>
+<span class="quote1">&gt; empress でテーブルやメモリー割り当て、ファイルアロケーションなどをどのように</span>
+<span class="quote1">&gt; したか、教えていただくとありがたいです。</span>
+
+empressに関してはなんのコンフィグレーションもしていません。
+インストーラの指示に従い、インストールしただけで、インストールの際にも
+メモリーの割当やファイルアロケーション等、なにも聞かれませんでした。
+
+EIDEのマスター側に4GのHDDを接続し、
+ /dev/hda1  /          1G byte
+ /dev/hda2  /home      1G byte
+ /dev/hda3  /DATA      2G byte
+にパーテーションを分割し、empress本体を/home/empressの下に、データベース
+を/DATAの下に作成したのみです。
+
+Shogo Hamamotoさんwrote:
+<span class="quote1">&gt; 今のところCPUパワーはくっていないようですので、データ専用のディスク(フ</span>
+<span class="quote1">&gt; ォーマット済)に出して評価できないでしょうか。</span>
+
+実はMySQLの環境は、Linux及び、MySQLをEIDEのHDDにインストールして、
+データはUltra SCSIのディスク上へ作成してあります。EIDE側はempressと同じ構成で
+ /dev/hda1  /          1G byte
+ /dev/hda2  /home      1G byte
+ /dev/hda3  /DATA      2G byte
+となっており
+ /dev/sda1  /DATA3     4G byte
+として
+/usr/local/var(データ領域) を /DATA3/varへシンボリックリンクしています。
+#シンボリックリンクが何かの問題を起こすとかありませんよね。
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="556">[前]</a><a href="558">[次]</a><a href="../list/501-600">[番号順一覧]</a><a href="../thread/501-600">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="557">    557 1999-01-16 04:06 [Tatsuya Ina &lt;ina@xxx] Re: MySQL speed                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="560">    560 1999-01-15 19:34 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+</pre>
+</body>
+</html>

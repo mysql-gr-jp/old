@@ -1,0 +1,5796 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.ja.texi on 17 Febuary 2002 -->
+
+  <TITLE>MySQL Reference Manual for version 3.23.49. - 8  MySQL APIs</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
+  </HEAD>
+  <BODY BGCOLOR=silver TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Table_types.html">previous</A>, <A HREF="manual.ja_Extending_MySQL.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Clients" HREF="manual.ja_toc.html#Clients">8  MySQL APIs</A></H1>
+
+<P>
+<A NAME="IDX1429"></A>
+<A NAME="IDX1430"></A>
+<A NAME="IDX1431"></A>
+<A NAME="IDX1432"></A>
+<A NAME="IDX1433"></A>
+
+</P>
+
+<P>
+This chapter describes the APIs available for MySQL, where to get
+them, and how to use them.  The C API is the most extensively covered, as it
+was developed by the MySQL team, and is the basis for most of the 
+other APIs.
+
+</P>
+
+
+
+<H2><A NAME="PHP" HREF="manual.ja_toc.html#PHP">8.1  MySQL PHP API</A></H2>
+
+<P>
+<A NAME="IDX1434"></A>
+
+</P>
+<P>
+PHP is a server-side, HTML-embedded scripting language that may be used to
+create dynamic Web pages.  It contains support for accessing several
+databases, including MySQL.  PHP may be run as a separate program
+or compiled as a module for use with the Apache Web server.
+
+</P>
+<P>
+The distribution and documentation are available at the
+<a HREF="http://www.php.net/"> PHP web site</a>.
+
+</P>
+
+
+
+<H3><A NAME="PHP_problems" HREF="manual.ja_toc.html#PHP_problems">8.1.1  Common Problems with MySQL and PHP</A></H3>
+
+
+<UL>
+<LI>Error: "Maximum Execution Time Exceeded"
+
+This is a PHP limit;  Go into the <TT>`php3.ini'</TT> file and set the maximum
+execution time up from 30 seconds to something higher, as needed.
+It is also not a bad idea to double the ram allowed per script to 16MB instead of
+8 MB.
+<LI>Error: "Fatal error: Call to unsupported or undefined function mysql_connect() in .."
+
+This means that your PHP version isn't compiled with MySQL support.
+You can either compile a dynamic MySQL module and load it into PHP or
+recompile PHP with built-in MySQL support.  This is described in
+detail in the PHP manual.
+<LI>Error: "undefined reference to `uncompress'"
+
+This means that the client library is compiled with support for a compressed
+client/server protocol. The fix is to add <CODE>-lz</CODE> last when linking
+with <CODE>-lmysqlclient</CODE>.
+</UL>
+
+
+
+<H2><A NAME="Perl" HREF="manual.ja_toc.html#Perl">8.2  MySQL Perl API</A></H2>
+
+<P>
+<A NAME="IDX1435"></A>
+<A NAME="IDX1436"></A>
+
+</P>
+<P>
+ここでは Perl <CODE>DBI</CODE> インターフェースについて述べる。
+以前のインターフェースは <CODE>mysqlperl</CODE> であった。
+<CODE>DBI</CODE>/<CODE>DBD</CODE> が Perl インターフェースとして現在推奨されているので、
+<CODE>mysqlperl</CODE> に関してはここでは述べない。
+
+</P>
+
+
+
+<H3><A NAME="DBI_with_DBD" HREF="manual.ja_toc.html#DBI_with_DBD">8.2.1  <CODE>DBI</CODE> with <CODE>DBD::mysql</CODE></A></H3>
+
+<P>
+<CODE>DBI</CODE> は多くのデーターベースとの一般的なインターフェースである。
+これは、多くのデーターベースと動作するスクリプトを変更なしに書けることを意味する。
+そのためには、それぞれのデータベース用のデータベースドライバ (DBD) が必要である。
+<STRONG>MySQL</STRONG> では、そのドライバは <CODE>DBD::mysql</CODE> である。
+
+</P>
+<P>
+Perl5 DBI に関する詳細は、<CODE>DBI</CODE>ウェッブページを参照のこと：
+
+<PRE>
+<a HREF="http://www.symbolstone.org/technology/perl/DBI/index.html">http://www.symbolstone.org/technology/perl/DBI/index.html</a>
+</PRE>
+
+<P>
+Object Oriented Programming (OOP) に関する詳細は、Perl OOP ページを参照のこと：
+
+<PRE>
+<a HREF="http://language.perl.com/info/documentation.html">http://language.perl.com/info/documentation.html</a>
+</PRE>
+
+<P>
+Note that if you want to use transactions with Perl, you need to have
+<CODE>Msql-Mysql-modules</CODE> version 1.2216 or newer.
+
+</P>
+<P>
+Installation instructions for <STRONG>MySQL</STRONG> Perl support are given in
+ 「<A HREF="manual.ja_Placeholder.html#Perl_support">M.2  Perl Installation Comments</A>」節.
+
+</P>
+
+
+
+<H3><A NAME="Perl_DBI_Class" HREF="manual.ja_toc.html#Perl_DBI_Class">8.2.2  The <CODE>DBI</CODE> Interface</A></H3>
+
+<P>
+<STRONG>Portable DBI Methods</STRONG>
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><CODE>connect</CODE> </TD><TD> データベースサーバと接続する
+</TR NOSAVE>
+<TR><TD><CODE>disconnect</CODE> </TD><TD> データベースサーバとの接続を切る
+</TR NOSAVE>
+<TR><TD><CODE>prepare</CODE> </TD><TD> SQL文を設定する
+</TR NOSAVE>
+<TR><TD><CODE>execute</CODE> </TD><TD> 設定されたSQL文を実行する
+</TR NOSAVE>
+<TR><TD><CODE>do</CODE> </TD><TD> SQL文を設定し、実行する
+</TR NOSAVE>
+<TR><TD><CODE>quote</CODE> </TD><TD> 挿入するためのクォート文字、または <CODE>BLOB</CODE> 値
+</TR NOSAVE>
+<TR><TD><CODE>fetchrow_array</CODE> </TD><TD> フィールドの配列として次のレコードを取り出す
+</TR NOSAVE>
+<TR><TD><CODE>fetchrow_arrayref</CODE> </TD><TD> フィールドの配列参照として次のレコードを取り出す
+</TR NOSAVE>
+<TR><TD><CODE>fetchrow_hashref</CODE> </TD><TD> ハッシュテーブルへの参照として次のレコードを取り出す
+</TR NOSAVE>
+<TR><TD><CODE>fetchall_arrayref</CODE> </TD><TD> 配列の配列として全データを取り出す
+</TR NOSAVE>
+<TR><TD><CODE>finish</CODE> </TD><TD> 命令を終了し、リソースからシステムを切り離す
+</TR NOSAVE>
+<TR><TD><CODE>rows</CODE> </TD><TD> 影響のあったレコードの数を返す
+</TR NOSAVE>
+<TR><TD><CODE>data_sources</CODE> </TD><TD> ローカルホスト上で利用できるデータベースの配列を返す
+</TR NOSAVE>
+<TR><TD><CODE>ChopBlanks</CODE> </TD><TD> <CODE>fetchrow_*</CODE> メソッドが空白を取り除くかどうかを管理する
+</TR NOSAVE>
+<TR><TD><CODE>NUM_OF_PARAMS</CODE> </TD><TD> 設定された命令文中の placeholder の数
+</TR NOSAVE>
+<TR><TD><CODE>NULLABLE</CODE> </TD><TD> どのフィールドに <CODE>NULL</CODE> 値があるか？
+</TR NOSAVE>
+<TR><TD><CODE>trace</CODE> </TD><TD> Perform tracing for debugging
+</TR>
+</TABLE>
+
+<P>
+<STRONG>MySQL 固有メソッド</STRONG>
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><CODE>insertid</CODE> </TD><TD> 最後の <CODE>AUTO_INCREMENT</CODE> 値
+</TR NOSAVE>
+<TR><TD><CODE>is_blob</CODE> </TD><TD> どのフィールドが <CODE>BLOB</CODE> か？
+</TR NOSAVE>
+<TR><TD><CODE>is_key</CODE> </TD><TD> どのフィールドがキーか？
+</TR NOSAVE>
+<TR><TD><CODE>is_num</CODE> </TD><TD> どのフィールドが数値型か？
+</TR NOSAVE>
+<TR><TD><CODE>is_pri_key</CODE> </TD><TD> どのフィールドがプライマリキーか？
+</TR NOSAVE>
+<TR><TD><CODE>is_not_null</CODE> </TD><TD> どのフィールドが <CODE>NULL</CODE> 値か？　<CODE>NULLABLE</CODE> 参照。
+</TR NOSAVE>
+<TR><TD><CODE>length</CODE> </TD><TD> 利用可能なフィールドサイズの最大値
+</TR NOSAVE>
+<TR><TD><CODE>max_length</CODE> </TD><TD> 実際に存在しているフィールドサイズの最大値
+</TR NOSAVE>
+<TR><TD><CODE>NAME</CODE> </TD><TD> フィールド名
+</TR NOSAVE>
+<TR><TD><CODE>NUM_OF_FIELDS</CODE> </TD><TD> 返されたフィールドの数
+</TR NOSAVE>
+<TR><TD><CODE>table</CODE> </TD><TD> 返されたセットのテーブル名
+</TR NOSAVE>
+<TR><TD><CODE>type</CODE> </TD><TD> 全てのフィールドの型
+</TR NOSAVE>
+<TR><TD><CODE>_CreateDB</CODE> </TD><TD> データベースを作成する
+</TR NOSAVE>
+<TR><TD><CODE>_DropDB</CODE> </TD><TD> データベースを削除する。 <STRONG>＊＊＊このメソッドは危険である＊＊＊</STRONG>
+</TR>
+</TABLE>
+
+<P>
+以下の節に、より詳細な Perl メソッドの解説がある。
+Variables used for method return values have these meanings:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>$dbh</CODE>
+<DD>
+Database handle
+
+<DT><CODE>$sth</CODE>
+<DD>
+Statement handle
+
+<DT><CODE>$rc</CODE>
+<DD>
+Return code (often a status)
+
+<DT><CODE>$rv</CODE>
+<DD>
+Return value (often a row count)
+</DL>
+
+<P>
+<STRONG>汎用 DBI メソッド</STRONG>
+
+</P>
+<DL COMPACT>
+
+Generally the 'do' statement is MUCH faster (and is preferable)
+than prepare/execute for statements that doesn't contain parameters.
+
+<DT><CODE>connect($data_source, $username, $password)</CODE>
+<DD>
+<A NAME="IDX1437"></A>
+ <A NAME="IDX1438"></A>
+ 
+データソースとのデータベース接続をするために <CODE>connect</CODE> を使う。
+<CODE>$data_source</CODE> 値は <CODE>DBI:driver_name:</CODE> ではじめること。
+<CODE>DBD::mysql</CODE> ドライバーを用いた <CODE>connect</CODE> の使用例：
+
+<PRE>
+$dbh = DBI-&#62;connect("DBI:mysql:$database", $user, $password);
+$dbh = DBI-&#62;connect("DBI:mysql:$database:$hostname",
+                    $user, $password);
+$dbh = DBI-&#62;connect("DBI:mysql:$database:$hostname:$port",
+                    $user, $password);
+</PRE>
+
+ユーザー名またはパスワードが未設定の場合、 <CODE>DBI</CODE> は環境変数である
+ <CODE>DBI_USER</CODE> と <CODE>DBI_PASS</CODE> をそれぞれ使う。
+ホスト名を指定しない場合は、<CODE>'localhost'</CODE> がデフォルトとなる。
+ポート番号を指定しない場合は、<STRONG>MySQL</STRONG> ポート（3306）
+がデフォルトとなる。
+
+As of <CODE>Msql-Mysql-modules</CODE> Version 1.2009,
+the <CODE>$data_source</CODE> value allows certain modifiers:
+
+<DL COMPACT>
+
+<DT><CODE>mysql_read_default_file=file_name</CODE>
+<DD>
+Read <TT>`filename'</TT> as an option file.  For information on option files,
+see  「<A HREF="manual.ja_MySQL_Database_Administration.html#Option_files">4.1.2  my.cnf オプションファイル</A>」節.
+
+<DT><CODE>mysql_read_default_group=group_name</CODE>
+<DD>
+The default group when reading an option file is normally the
+<CODE>[client]</CODE> group.  By specifying the <CODE>mysql_read_default_group</CODE>
+option, the default group becomes the <CODE>[group_name]</CODE> group.
+
+<DT><CODE>mysql_compression=1</CODE>
+<DD>
+Use compressed communication between the client and server (<STRONG>MySQL</STRONG>
+Version 3.22.3 or later).
+
+<DT><CODE>mysql_socket=/path/to/socket</CODE>
+<DD>
+Specify the pathname of the Unix socket that is used to connect
+to the server (<STRONG>MySQL</STRONG> Version 3.21.15 or later).
+</DL>
+
+Multiple modifiers may be given; each must be preceded by a semicolon.
+
+For example, if you want to avoid hardcoding the user name and password into
+a <CODE>DBI</CODE> script, you can take them from the user's <TT>`~/.my.cnf'</TT>
+option file instead by writing your <CODE>connect</CODE> call like this:
+
+
+<PRE>
+$dbh = DBI-&#62;connect("DBI:mysql:$database"
+                . ";mysql_read_default_file=$ENV{HOME}/.my.cnf",
+                $user, $password);
+</PRE>
+
+This call will read options defined for the <CODE>[client]</CODE> group in the
+option file.  If you wanted to do the same thing but use options specified
+for the <CODE>[perl]</CODE> group as well, you could use this:
+
+
+<PRE>
+$dbh = DBI-&#62;connect("DBI:mysql:$database"
+                . ";mysql_read_default_file=$ENV{HOME}/.my.cnf"
+                . ";mysql_read_default_group=perl",
+                $user, $password);
+</PRE>
+
+<A NAME="IDX1439"></A>
+<A NAME="IDX1440"></A>
+<DT><CODE>disconnect</CODE>
+<DD>
+<CODE>disconnect</CODE> メソッドは、データベースとのデータベースハンドルを切断する。
+プログラムを終了する直前に呼び出されるのが典型的である。
+例：
+
+<PRE>
+$rc = $dbh-&#62;disconnect;
+</PRE>
+
+<A NAME="IDX1441"></A>
+<A NAME="IDX1442"></A>
+<DT><CODE>prepare($statement)</CODE>
+<DD>
+データベースエンジンで実行するためのSQL文を設定し、<CODE>execute</CODE> メソッドで
+使用出来るステートメントハンドル <CODE>($sth)</CODE> を返す。
+Typically you handle <CODE>SELECT</CODE> statements (and <CODE>SELECT</CODE>-like statements
+such as <CODE>SHOW</CODE>, <CODE>DESCRIBE</CODE>, and <CODE>EXPLAIN</CODE>) by means of
+<CODE>prepare</CODE> and <CODE>execute</CODE>.
+例：
+
+<PRE>
+$sth = $dbh-&#62;prepare($statement)
+    or die "Can't prepare $statement: $dbh-&#62;errstr\n";
+</PRE>
+
+<A NAME="IDX1443"></A>
+<A NAME="IDX1444"></A>
+<DT><CODE>execute</CODE>
+<DD>
+<CODE>execute</CODE> メソッドは、設定されたSQL文を実行する。非 <CODE>SELECT</CODE> 文のときは、
+影響のあったレコードの数を返す。 もしなんの変化もなかったなら、 <CODE>execute</CODE> は <CODE>"0E0"</CODE>
+(これは Perl では ゼロ 扱いですが、 真 でもある) を返す。
+If an error occurs, <CODE>execute</CODE> returns <CODE>undef</CODE>.
+<CODE>SELECT</CODE> 文のときは、SQL要求を開始するのみである。
+データを操作する <CODE>fetch_*</CODE> メソッドの内の一つを記述する必要がある。
+例：
+
+<PRE>
+$rv = $sth-&#62;execute
+          or die "can't execute the query: $sth-&#62;errstr;
+</PRE>
+
+<A NAME="IDX1445"></A>
+<A NAME="IDX1446"></A>
+<DT><CODE>do($statement)</CODE>
+<DD>
+<CODE>do</CODE> メソッドはSQL文を設定・実行し、影響のあったレコードの数を返す。
+このメソッドは、「非 select」文、すなわち、高度（ドライバーの限界のため）で設定できない文、
+一度の実行（inserts, deletes など）で済む文のときに一般的に用いられる。
+例：
+
+<PRE>
+$rv = $dbh-&#62;do($statement)
+        or die "Can't execute $statement: $dbh- &#62;errstr\n";
+</PRE>
+
+<A NAME="IDX1447"></A>
+<A NAME="IDX1448"></A>
+<A NAME="IDX1449"></A>
+<A NAME="IDX1450"></A>
+<DT><CODE>quote($string)</CODE>
+<DD>
+<CODE>quote</CODE> メソッドは、文字列中にエスケープ文字があるときに用いられ、
+クォート文字を文の外側に付加する。
+例：
+
+<PRE>
+$sql = $dbh-&#62;quote($string)
+</PRE>
+
+<A NAME="IDX1451"></A>
+<A NAME="IDX1452"></A>
+<DT><CODE>fetchrow_array</CODE>
+<DD>
+このメソッドはデータの次のレコードを取り出し、フィールドの値の配列として返す。
+例：
+
+<PRE>
+while(@row = $sth-&#62;fetchrow_array) {
+        print qw($row[0]\t$row[1]\t$row[2]\n);
+}
+</PRE>
+
+<A NAME="IDX1453"></A>
+<A NAME="IDX1454"></A>
+<DT><CODE>fetchrow_arrayref</CODE>
+<DD>
+このメソッドはデータの次のレコードを取り出し、フィールドの値の配列への参照として返す。
+例：
+
+<PRE>
+while($row_ref = $sth-&#62;fetchrow_arrayref) {
+        print qw($row_ref-&#62;[0]\t$row_ref-&#62;[1]\t$row_ref-&#62;[2]\n);
+}
+</PRE>
+
+<A NAME="IDX1455"></A>
+<A NAME="IDX1456"></A>
+<DT><CODE>fetchrow_hashref</CODE>
+<DD>
+このメソッドはデータのレコードを取り出し、名前・値のペアのフィールドを含んだ
+ハッシュテーブルへの参照を返す。このメソッドは、上で示した配列参照
+（訳注：<CODE>fetchrow_arrayref</CODE>）よりもかなり効率的ではない。例：
+
+<PRE>
+while($hash_ref = $sth-&#62;fetchrow_hashref) {
+        print qw($hash_ref-&#62;{firstname}\t$hash_ref-&#62;{lastname}\t\
+                $hash_ref- &#62; title}\n);
+}
+</PRE>
+
+<A NAME="IDX1457"></A>
+<A NAME="IDX1458"></A>
+<DT><CODE>fetchall_arrayref</CODE>
+<DD>
+このメソッドは、SQL文より返されたデータ（レコード）の全てを得るために使う。
+このメソッドは、各レコードへの参照の配列の配列への参照を返す。
+入れ子のループを使ってデータを利用・表示する。例：
+
+<PRE>
+my $table = $sth-&#62;fetchall_arrayref
+                or die "$sth-&#62;errstr\n";
+my($i, $j);
+for $i ( 0 .. $#{$table} ) {
+        for $j ( 0 .. $#{$table-&#62;[$i]} ) {
+                print "$table-&#62;[$i][$j]\t";
+        }
+        print "\n";
+}
+</PRE>
+
+<A NAME="IDX1459"></A>
+<A NAME="IDX1460"></A>
+<DT><CODE>finish</CODE>
+<DD>
+そのステートメントハンドルからそれ以上データを取り出さないことを示す。ステートメントハンドルや、つかんでいたシステムリソースを解放するためにこのメソッドを呼び出す。例：
+
+<PRE>
+$rc = $sth-&#62;finish;
+</PRE>
+
+<A NAME="IDX1461"></A>
+<A NAME="IDX1462"></A>
+<DT><CODE>rows</CODE>
+<DD>
+最後の命令により、（データの更新、削除、などで）影響のあったレコードの数を返す。
+このメソッドは <CODE>do</CODE> あるいは 非 <CODE>SELECT</CODE> <CODE>execute</CODE> 文を
+実行した後に、たいてい使われる。例：
+Example:
+
+<PRE>
+$rv = $sth-&#62;rows;
+</PRE>
+
+<A NAME="IDX1463"></A>
+<A NAME="IDX1464"></A>
+<DT><CODE>NULLABLE</CODE>
+<DD>
+配列の各要素に対し、ブール値の配列への参照を返す。
+TRUE であればそのフィールドに <CODE>NULL</CODE> 値が含まれていることを示す。例：
+Example:
+
+<PRE>
+$null_possible = $sth-&#62;{NULLABLE};
+</PRE>
+
+<A NAME="IDX1465"></A>
+<A NAME="IDX1466"></A>
+<DT><CODE>NUM_OF_FIELDS</CODE>
+<DD>
+この属性は、<CODE>SELECT</CODE> 文や <CODE>SHOW FIELDS</CODE> 文によって返された
+フィールドの数を示している。命令文が結果を返したかどうかをチェックするのに、
+これを使うことが出来る：０値は、<CODE>INSERT</CODE>, <CODE>DELETE</CODE> または
+ <CODE>UPDATE</CODE> のような非 <CODE>SELECT</CODE> 文を示している。例：
+Example:
+
+<PRE>
+$nr_of_fields = $sth-&#62;{NUM_OF_FIELDS};
+</PRE>
+
+<A NAME="IDX1467"></A>
+<A NAME="IDX1468"></A>
+<DT><CODE>data_sources($driver_name)</CODE>
+<DD>
+このメソッドは、<CODE>'localhost'</CODE> ホスト上の <STRONG>MySQL</STRONG> サーバで
+利用可能なデータベースの名前を含んだ配列を返す。例：
+
+<PRE>
+@dbs = DBI-&#62;data_sources("mysql");
+</PRE>
+
+<A NAME="IDX1469"></A>
+<A NAME="IDX1470"></A>
+<DT><CODE>ChopBlanks</CODE>
+<DD>
+この属性は、 <CODE>fetchrow_*</CODE> メソッドが返り値から前後の空白を
+除去するかどうかを決定する。例：
+
+<PRE>
+$sth-&#62;{'ChopBlanks'} =1;
+</PRE>
+
+<A NAME="IDX1471"></A>
+<A NAME="IDX1472"></A>
+<DT><CODE>trace($trace_level)</CODE>
+<DD>
+<DT><CODE>trace($trace_level, $trace_filename)</CODE>
+<DD>
+The <CODE>trace</CODE> method enables or disables tracing.  When invoked as a
+<CODE>DBI</CODE> class method, it affects tracing for all handles.  When invoked as
+a database or statement handle method, it affects tracing for the given
+handle (and any future children of the handle).  Setting <CODE>$trace_level</CODE>
+to 2 provides detailed trace information.  Setting <CODE>$trace_level</CODE> to 0
+disables tracing.  Trace output goes to the standard error output by
+default.  If <CODE>$trace_filename</CODE> is specified, the file is opened in
+append mode and output for <EM>all</EM> traced handles is written to that
+file.  Example:
+
+<PRE>
+DBI-&#62;trace(2);                # trace everything
+DBI-&#62;trace(2,"/tmp/dbi.out"); # trace everything to
+                              # /tmp/dbi.out
+$dth-&#62;trace(2);               # trace this database handle
+$sth-&#62;trace(2);               # trace this statement handle
+</PRE>
+
+<A NAME="IDX1473"></A>
+<A NAME="IDX1474"></A>
+You can also enable <CODE>DBI</CODE> tracing by setting the <CODE>DBI_TRACE</CODE>
+environment variable.  Setting it to a numeric value is equivalent to calling
+<CODE>DBI-&#62;(value)</CODE>.  Setting it to a pathname is equivalent to calling
+<CODE>DBI-&#62;(2,value)</CODE>.
+
+</DL>
+
+<P>
+<STRONG>MySQL 固有メソッド</STRONG>
+
+</P>
+<P>
+The methods shown below are <STRONG>MySQL</STRONG>-specific and not part of the
+<CODE>DBI</CODE> standard.  Several of them are now deprecated:
+<CODE>is_blob</CODE>, <CODE>is_key</CODE>, <CODE>is_num</CODE>, <CODE>is_pri_key</CODE>,
+<CODE>is_not_null</CODE>, <CODE>length</CODE>, <CODE>max_length</CODE>, and <CODE>table</CODE>.
+Where <CODE>DBI</CODE>-standard alternatives exist, they are noted below.
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>insertid</CODE>
+<DD>
+<A NAME="IDX1475"></A>
+ <A NAME="IDX1476"></A>
+ <A NAME="IDX1477"></A>
+ 
+<STRONG>MySQL</STRONG> の特徴である <CODE>AUTO_INCREMENT</CODE> を使うとき、
+新しい自動繰り上がり値がここに記憶される。例：
+Example:
+
+<PRE>
+$new_id = $sth-&#62;{insertid};
+</PRE>
+
+As an alternative, you can use <CODE>$dbh-&#62;{'mysql_insertid'}</CODE>.
+
+<A NAME="IDX1478"></A>
+<A NAME="IDX1479"></A>
+<DT><CODE>is_blob</CODE>
+<DD>
+配列の各要素に対し、ブール値の配列への参照を返す。TRUE であれば
+そのフィールドが <CODE>BLOB</CODE> 値であることを示す。例：
+
+<PRE>
+$keys = $sth-&#62;{is_blob};
+</PRE>
+
+<A NAME="IDX1480"></A>
+<A NAME="IDX1481"></A>
+<DT><CODE>is_key</CODE>
+<DD>
+配列の各要素に対し、ブール値の配列への参照を返す。TRUE であれば
+そのフィールドがキーであることを示す。
+例：
+
+<PRE>
+$keys = $sth-&#62;{is_key};
+</PRE>
+
+<A NAME="IDX1482"></A>
+<A NAME="IDX1483"></A>
+<DT><CODE>is_num</CODE>
+<DD>
+配列の各要素に対し、ブール値の配列への参照を返す。TRUE であれば
+そのフィールドが数値型であることを示す。
+例：
+
+<PRE>
+$nums = $sth-&#62;{is_num};
+</PRE>
+
+<A NAME="IDX1484"></A>
+<A NAME="IDX1485"></A>
+<DT><CODE>is_pri_key</CODE>
+<DD>
+配列の各要素に対し、ブール値の配列への参照を返す。TRUE であれば
+そのフィールドがプライマリーキーであることを示す。
+例：
+
+<PRE>
+$pri_keys = $sth-&#62;{is_pri_key};
+</PRE>
+
+<A NAME="IDX1486"></A>
+<A NAME="IDX1487"></A>
+<DT><CODE>is_not_null</CODE>
+<DD>
+配列の各要素に対し、ブール値の配列への参照を返す。FALSE であれば
+そのフィールドが <CODE>NULL</CODE> 値を含むことを示す。
+例：
+
+<PRE>
+$not_nulls = $sth-&#62;{is_not_null};
+</PRE>
+
+<CODE>is_not_null</CODE> is deprecated;
+前述の <CODE>NULLABLE</CODE> 属性を使用するほうが望ましい。それが DBI の標準である。
+
+<A NAME="IDX1488"></A>
+<A NAME="IDX1489"></A>
+<A NAME="IDX1490"></A>
+<A NAME="IDX1491"></A>
+<DT><CODE>length</CODE>
+<DD>
+<DT><CODE>max_length</CODE>
+<DD>
+それぞれのメソッドは、フィールドサイズの配列への参照を返す。<CODE>length</CODE> 配列は、
+（テーブル記述で定義された）各フィールドの利用可能最大値を示す。
+<CODE>max_length</CODE> 配列は、テーブル中に実際に存在している最大値を示す。例：
+
+
+<PRE>
+$lengths = $sth-&#62;{length};
+$max_lengths = $sth-&#62;{max_length};
+</PRE>
+
+<A NAME="IDX1492"></A>
+<A NAME="IDX1493"></A>
+<DT><CODE>NAME</CODE>
+<DD>
+フィールド名の配列への参照を返す。
+例：
+
+<PRE>
+$names = $sth-&#62;{NAME};
+</PRE>
+
+<A NAME="IDX1494"></A>
+<A NAME="IDX1495"></A>
+<DT><CODE>table</CODE>
+<DD>
+テーブル名の配列への参照を返す。
+例：
+
+<PRE>
+$tables = $sth-&#62;{table};
+</PRE>
+
+<A NAME="IDX1496"></A>
+<A NAME="IDX1497"></A>
+<DT><CODE>type</CODE>
+<DD>
+フィールドの型の配列への参照を返す。
+例：
+
+<PRE>
+$types = $sth-&#62;{type};
+</PRE>
+
+</DL>
+
+
+
+<H3><A NAME="DBI-info" HREF="manual.ja_toc.html#DBI-info">8.2.3  <CODE>DBI</CODE>/<CODE>DBD</CODE> に関するそれ以上の情報</A></H3>
+
+<P>
+<CODE>DBI</CODE> に関するそれ以上の情報は <CODE>perldoc</CODE> コマンドで得られる。
+
+</P>
+
+<PRE>
+perldoc DBI
+perldoc DBI::FAQ
+perldoc DBD::mysql
+</PRE>
+
+<P>
+他のフォーマットに変換するツール、<CODE>pod2man</CODE>, <CODE>pod2html</CODE> なども
+使うことが出来る。
+
+</P>
+<P>
+そしてもちろん、<CODE>DBI</CODE> の最新情報は <CODE>DBI</CODE> ウェッブページで見ることが出来る：
+
+<PRE>
+<a HREF="http://www.symbolstone.org/technology/perl/DBI/index.html">http://www.symbolstone.org/technology/perl/DBI/index.html</a>
+</PRE>
+
+
+
+<H2><A NAME="ODBC" HREF="manual.ja_toc.html#ODBC">8.3  MySQL ODBC サポート</A></H2>
+
+<P>
+<A NAME="IDX1498"></A>
+<A NAME="IDX1499"></A>
+<A NAME="IDX1500"></A>
+
+</P>
+
+<P>
+<STRONG>MySQL</STRONG> は <STRONG>MyODBC</STRONG> プログラムで ODBC 機能を提供します。
+This chapter will teach you how to install <STRONG>MyODBC</STRONG>,
+and how to use it.  Here, you will also find a list of common programs that
+are known to work with <STRONG>MyODBC</STRONG>.
+
+</P>
+
+
+
+<H3><A NAME="Installing_MyODBC" HREF="manual.ja_toc.html#Installing_MyODBC">8.3.1  How To Install MyODBC</A></H3>
+
+<P>
+<STRONG>MyODBC</STRONG> is a 32-bit ODBC (2.50) level 0 (with level 1 and level
+2 features) driver for connecting an ODBC-aware application to
+MySQL.  <STRONG>MyODBC</STRONG> works on Windows95, Windows98, NT, and
+on most Unix platforms.
+
+</P>
+<P>
+<STRONG>MyODBC</STRONG> はパブリック・ドメインで、最新の物は以下にあります：
+<a HREF="http://www.mysql.com/downloads/api-myodbc.html">http://www.mysql.com/downloads/api-myodbc.html</a>.
+
+</P>
+<P>
+日本語文字コードに対応させた物は：
+<a HREF="http://www.SoftAgency.co.jp/">http://www.SoftAgency.co.jp/</a>.
+
+</P>
+<P>
+If you have problem with <STRONG>MyODBC</STRONG> and your program also works
+with OLEDB, you should try the OLEDB driver that you can find in the
+Contrib section.   「<A HREF="manual.ja_Contrib.html#Contrib">D  Contributed Programs</A>」節参照.
+
+</P>
+<P>
+Normally you only need to install <STRONG>MyODBC</STRONG> on Windows machines.
+You only need <STRONG>MyODBC</STRONG> for Unix if you have a program like
+ColdFusion that is running on the Unix machine and uses ODBC to connect
+to the databases.
+
+</P>
+<P>
+もし、UNIX に <STRONG>MyODBC</STRONG> をインストールしたいなら、 <STRONG>ODBC</STRONG> 
+マネージャーも必要でしょう。 <STRONG>MyODBC</STRONG> は UNIX の ODBC マネージャー
+でも動作することが知られています。 <STRONG>MySQL</STRONG> useful links page の
+<STRONG>ODBC</STRONG>-related links 節に、見つけることができます。
+ 「<A HREF="manual.ja_Introduction.html#Useful_Links">1.2.3  便利な <STRONG>MySQL</STRONG> 関連リンク</A>」節参照.
+
+</P>
+<P>
+To install <STRONG>MyODBC</STRONG> on Windows, you should download the
+appropriate <STRONG>MyODBC</STRONG> .zip file (for Windows or NT/Win2000),
+unpack it with <CODE>WINZIP</CODE>, or some similar program, and execute the
+<CODE>SETUP.EXE</CODE> file.
+
+</P>
+<P>
+Windows/NT の場合、<STRONG>MyODBC</STRONG> をインストール時にいかのような
+エラーになるかもしれません:
+
+</P>
+
+<PRE>
+An error occurred while copying C:\WINDOWS\SYSTEM\MFC30.DLL. Restart
+Windows and try installing again (before running any applications which
+use ODBC)
+</PRE>
+
+<P>
+The problem in this case is that some other program is using ODBC and
+because of how Windows is designed, you may not in this case be able to
+install a new ODBC drivers with Microsoft's ODBC setup program. In most
+cases you can continue by just pressing <CODE>Ignore</CODE> to copy the rest
+of the MyODBC files and the final installation should still work. 
+これを解決するには、一度 ’セーフモード’でコンピュータを立ち上げ直し、
+(windows リブート時に、F8キーを押すことで、セーフモードの選択が可能です)
+<STRONG>MyODBC</STRONG> をインストールして、リブートします:
+
+</P>
+
+<UL>
+<LI>
+
+Windows マシンから UNIX に ODBC アプリケーションを使用して接続するには、
+まず最初に Windows マシンに <STRONG>MyODBC</STRONG> をインストールしなくては
+なりません。
+<LI>
+
+UNIX 上の <STRONG>MySQL</STRONG> サーバーに対して、ユーザーと Windows マシンの
+アクセス許可を与えます。 これは、 <CODE>GRANT</CODE> コマンドで可能です。
+ 「<A HREF="manual.ja_MySQL_Database_Administration.html#GRANT">4.3.1  <CODE>GRANT</CODE> と <CODE>REVOKE</CODE> 構文</A>」節参照.
+<LI>
+
+ODBC DSN を以下のようにして作成しなくてはなりません：
+
+
+<UL>
+<LI>
+
+Windows マシンのコントロールパネルを開く
+<LI>
+
+Double-click the ODBC Data Sources 32 bits icon.
+<LI>
+
+"ユーサーDSN" をクリック
+<LI>
+
+"追加..." ボタンをクリック
+<LI>
+
+新しいデータソース の画面から、<STRONG>MySQL</STRONG> を選び、完了ボタンをクリック。
+<LI>
+
+<STRONG>MySQL</STRONG> Driver のデフォルト設定が現れます。
+ 「<A HREF="manual.ja_Clients.html#ODBC_administrator">8.3.2  ODBC 管理プログラムの各種項目を埋めるには？</A>」節参照.
+</UL>
+
+<LI>
+
+Now start your application and select the ODBC driver with the DSN you
+specified in the ODBC administrator.
+</UL>
+
+<P>
+MyODBC の設定画面には、<STRONG>MySQL</STRONG> 接続時のオプションがいくつか
+設定できるようになっています。
+もし問題がある場合は、これらを試します。
+
+</P>
+
+
+
+<H3><A NAME="ODBC_administrator" HREF="manual.ja_toc.html#ODBC_administrator">8.3.2  ODBC 管理プログラムの各種項目を埋めるには？</A></H3>
+
+<P>
+<A NAME="IDX1501"></A>
+
+</P>
+<P>
+Windows95 上のサーバ名の記述には3つの可能性があります:
+
+</P>
+
+<UL>
+<LI>
+
+サーバの IP アドレスの使用
+<LI>
+
+ファイル <TT>`\windows\lmhosts'</TT> への次の情報の追加:
+
+
+<PRE>
+ip hostname
+</PRE>
+
+例えば：
+
+
+<PRE>
+194.216.84.21 my_hostname
+</PRE>
+
+<LI>
+
+DNS を使用するように設定します。
+</UL>
+
+<P>
+<CODE>ODBC setup</CODE> を埋める方法の例:
+
+<PRE>
+Windows DSN name:   test
+Description:        This is my test database
+MySql Database:     test
+Server:             194.216.84.21
+User:               monty
+Password:           my_password
+Port:
+</PRE>
+
+<P>
+<CODE>Windows DSN name</CODE> 項目の値は、あなたのwindows ODBC setup における
+一意の名前です。
+
+</P>
+<P>
+ODBC setup 画面で、<CODE>Server</CODE>, <CODE>User</CODE>, <CODE>Password</CODE>, <CODE>Port</CODE>
+ フィールドを設定する必要はありません。
+しかし、ここで設定をすると、後でサーバーに接続する際に、
+設定した値がデフォルト値として使用されます。
+使用時に値を変更するオプションはあります。
+
+</P>
+<P>
+ポート番号が設定されていないなら、デフォルトポート (3306) が使用
+されます。
+
+</P>
+<P>
+もしオプションを <CODE>Read options from C:\my.cnf</CODE> にすると, 
+<CODE>client</CODE> と <CODE>odbc</CODE> グループは <TT>`C:\my.cnf'</TT> ファイルから読まれます。
+<CODE>mysql_options()</CODE> で使用できる全てのオプションが利用可能です。
+ 「<A HREF="manual.ja_Clients.html#mysql_options">8.4.3.159  <CODE>mysql_options()</CODE></A>」節参照.
+
+</P>
+
+
+
+<H3><A NAME="MyODBC_connect_parameters" HREF="manual.ja_toc.html#MyODBC_connect_parameters">8.3.3  Connect parameters for MyODBC</A></H3>
+
+<P>
+One can specify the following parameters for <STRONG>MyODBC</STRONG> on
+the <CODE>[Servername]</CODE> section of an <CODE>ODBC.INI</CODE> file or
+through  the <CODE>InConnectionString</CODE> argument in the
+<CODE>SQLDriverConnect()</CODE> call.
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>Parameter</STRONG> </TD><TD> <STRONG>Default value</STRONG> </TD><TD> <STRONG>Comment</STRONG>
+</TR NOSAVE>
+<TR><TD>user </TD><TD> ODBC (on Windows) </TD><TD> The username used to connect to MySQL.
+</TR NOSAVE>
+<TR><TD>server </TD><TD> localhost </TD><TD> The hostname of the MySQL server.
+</TR NOSAVE>
+<TR><TD>database </TD><TD> </TD><TD> The default database
+</TR NOSAVE>
+<TR><TD>option </TD><TD> 0 </TD><TD> A integer by which you can specify how <STRONG>MyODBC</STRONG> should work. See below.
+</TR NOSAVE>
+<TR><TD>port </TD><TD> 3306 </TD><TD> The TCP/IP port to use if <CODE>server</CODE> is not <CODE>localhost</CODE>.
+</TR NOSAVE>
+<TR><TD>stmt </TD><TD> </TD><TD> A statement that will be executed when connection to <CODE>MySQL</CODE>.
+</TR NOSAVE>
+<TR><TD>password </TD><TD> </TD><TD> The password for the <CODE>server</CODE> <CODE>user</CODE> combination.
+</TR NOSAVE>
+<TR><TD>socket </TD><TD> </TD><TD> The socket or Windows pipe to connect to.
+</TR>
+</TABLE>
+
+<P>
+The option argument is used to tell <STRONG>MyODBC</STRONG> that the client isn't 100%
+ODBC compliant. On Windows, one normally sets the option flag by
+toggling the different options on the connection screen but one can also
+set this in the opton argument. The following options are listed in the
+same order as they appear in the <STRONG>MyODBC</STRONG> connect screen:
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>Bit</STRONG> </TD><TD> <STRONG>Meaning</STRONG>
+</TR NOSAVE>
+<TR><TD>1 </TD><TD> The client can't handle that <STRONG>MyODBC</STRONG> returns the real width of a column.
+</TR NOSAVE>
+<TR><TD>2 </TD><TD> The client can't handle that MySQL returns the true value of affected rows.  If this flag is set then MySQL returns 'found rows' instead.  One must have MySQL 3.21.14 or newer to get this to work.
+</TR NOSAVE>
+<TR><TD>4 </TD><TD> Make a debug log in c:\myodbc.log.  This is the same as putting <CODE>MYSQL_DEBUG=d:t:O,c::\myodbc.log</CODE> in <TT>`AUTOEXEC.BAT'</TT>
+</TR NOSAVE>
+<TR><TD>8 </TD><TD> Don't set any packet limit for results and parameters.
+</TR NOSAVE>
+<TR><TD>16 </TD><TD> Don't prompt for questions even if driver would like to prompt
+</TR NOSAVE>
+<TR><TD>32 </TD><TD> Simulate a ODBC 1.0 driver in some context.
+</TR NOSAVE>
+<TR><TD>64 </TD><TD> Ignore use of database name in 'database.table.column'.
+</TR NOSAVE>
+<TR><TD>128 </TD><TD> Force use of ODBC manager cursors (experimental).
+</TR NOSAVE>
+<TR><TD>256 </TD><TD> Disable the use of extended fetch (experimental)
+</TR NOSAVE>
+<TR><TD>512 </TD><TD> Pad CHAR fields to full column length.
+</TR NOSAVE>
+<TR><TD>1024 </TD><TD> SQLDescribeCol() will return fully qualifed column names
+</TR NOSAVE>
+<TR><TD>2048 </TD><TD> Use the compressed server/client protocol
+</TR NOSAVE>
+<TR><TD>4096 </TD><TD> Tell server to ignore space after function name and before <CODE>'('</CODE> (needed by PowerBuilder).  This will make all function names keywords!
+</TR NOSAVE>
+<TR><TD>8192 </TD><TD> Connect with named pipes to a <CODE>mysqld</CODE> server running on NT.
+</TR NOSAVE>
+<TR><TD>16384 </TD><TD> Change LONGLONG columns to INT columns (Some applications can't handle LONGLONG).
+</TR NOSAVE>
+<TR><TD>32768 </TD><TD> Return 'user' as Table_qualifier and Table_owner from SQLTables (experimental)
+</TR NOSAVE>
+<TR><TD>65536 </TD><TD> Read parameters from the <CODE>client</CODE> and <CODE>odbc</CODE> groups from <TT>`my.cnf'</TT>
+</TR NOSAVE>
+<TR><TD>131072 </TD><TD> Add some extra safety checks (should not bee needed but...)
+</TR>
+</TABLE>
+
+<P>
+If you want to have many options, you should add the above flags!  For
+example setting option to 12 (4+8) gives you debugging without package
+limits!
+
+</P>
+<P>
+The default <TT>`MYODBC.DLL'</TT> is compiled for optimal performance.  If
+you want to to debug <STRONG>MyODBC</STRONG> (for example to enable tracing),
+you should instead use <CODE>MYODBCD.DLL</CODE>.  To install this file, copy
+<TT>`MYODBCD.DLL'</TT> over the installed <CODE>MYODBC.DLL</CODE> file.
+
+</P>
+
+
+
+<H3><A NAME="ODBC_Problems" HREF="manual.ja_toc.html#ODBC_Problems">8.3.4  MyODBC での問題をどのように報告すべきか？</A></H3>
+
+<P>
+<STRONG>MyODBC</STRONG> は以下でテストされました： Access, Admndemo.exe, C++-Builder,
+Borland Builder 4, Centura Team Developer (formerly Gupta SQL/Windows),
+ColdFusion (on Solaris and NT with svc pack 5), Crystal Reports,
+DataJunction, Delphi, ERwin, Excel, iHTML, FileMaker Pro, FoxPro, Notes
+4.5/4.6, SBSS, Perl DBD-ODBC, Paradox, Powerbuilder, Powerdesigner 32
+bit, VC++, and Visual Basic.
+
+</P>
+<P>
+If you know of any other applications that work with <STRONG>MyODBC</STRONG>, please
+send mail to <a HREF="mailto:myodbc@lists.mysql.com">myodbc@lists.mysql.com</a> about this!
+
+</P>
+<P>
+With some programs you may get an error like:
+<CODE>Another user has modifies the record that you have modified</CODE>. In most
+cases this can be solved by doing one of the following things:
+
+</P>
+
+<UL>
+<LI>
+
+Add a primary key for the table if there isn't one already.
+<LI>
+
+Add a timestamp column if there isn't one already.
+<LI>
+
+Only use double float fields. Some programs may fail when they compare
+single floats.
+</UL>
+
+<P>
+If the above doesn't help, you should do a <CODE>MyODBC</CODE> trace file and
+try to figure out why things go wrong.
+
+</P>
+
+
+
+<H3><A NAME="MyODBC_clients" HREF="manual.ja_toc.html#MyODBC_clients">8.3.5  MyODBC で動作することが知られているプログラム</A></H3>
+
+<P>
+Most programs should work with <STRONG>MyODBC</STRONG>, but for each of those
+listed below, we have tested it ourselves or received confirmation from
+some user that it works:
+
+</P>
+<DL COMPACT>
+
+<DT><STRONG>Program</STRONG>
+<DD>
+<STRONG>Comment</STRONG>
+<A NAME="IDX1502"></A>
+
+<DT>Access
+<DD>
+To make Access work:
+
+<UL>
+<LI>
+
+If you are using Access 2000, you should get and install the newest
+(version 2.6 or above) Microsoft MDAC (<CODE>Microsoft Data Access
+Components</CODE>) from <a HREF="http://www.microsoft.com/data">http://www.microsoft.com/data</a>.  This will fix
+the following bug in Access: when you export data to MySQL, the
+table and column names aren't specified.  Another way to around this bug
+is to upgrade to MyODBC Version 2.50.33 and MySQL Version
+3.23.x, which together provide a workaround for this bug!
+
+You should also get and apply the Microsoft Jet 4.0 Service Pack 5 (SP5)
+which can be found here
+<a HREF="http://support.microsoft.com/support/kb/articles/Q 239/1/14.ASP">http://support.microsoft.com/support/kb/articles/Q 239/1/14.ASP</a>.
+This will fix some cases where columns are marked as <CODE>#deleted#</CODE>
+in Access.
+
+Note that if you are using MySQL Version 3.22, you must to apply the
+MDAC patch and use MyODBC 2.50.32 or 2.50.34 and above to go around
+this problem.
+<LI>
+
+Set the ``Return matching rows'' MyODBC option field when connecting to
+MySQL.
+<LI>
+
+テーブルにプライマリキーを設定しなければなりません。 If not, new or updated rows
+may show up as <CODE>#Deleted#</CODE>.
+<LI>
+
+更新するつもりのあるテーブルの全てに、timestamp を持たせなければなりません。
+For maximum portability <CODE>TIMESTAMP(14)</CODE> or simple <CODE>TIMESTAMP</CODE>
+is recommended instead of other <CODE>TIMESTAMP(X)</CODE> variations.
+<LI>
+
+ダブルフロート型だけが(実数に)使用できます。Accessではシングルフロートと比較は失
+敗します。
+The symptom usually is that new or updated rows may show up as <CODE>#Deleted#</CODE>
+or that you can't find or update rows.
+<LI>
+
+If you still get the error <CODE>Another user has changed your data</CODE> after
+adding a <CODE>TIMESTAMP</CODE> column, the following trick may help you:
+
+Don't use <CODE>table</CODE> data sheet view. Create instead a form with the
+fields you want, and use that <CODE>form</CODE> data sheet view.  You should
+set the <CODE>DefaultValue</CODE> property for the <CODE>TIMESTAMP</CODE> column to
+<CODE>NOW()</CODE>.  It may be a good idea to hide the <CODE>TIMESTAMP</CODE> column
+from view so your users are not confused.
+<LI>
+
+NT 上の Access は <CODE>BLOB</CODE> フィールドを <CODE>OLE OBJECTS</CODE> と認識します。
+もし <CODE>MEMO</CODE> フィールドを代わりに使用したいなら、 <CODE>ALTER TABLE</CODE> を使って、
+<CODE>TEXT</CODE> 型にフィールドを変更しなくてはなりません。
+<LI>
+
+Access は <CODE>DATE</CODE> フィールドをいつも正しく扱うことが出来ません。
+もしこれらの問題があった場合、フィールド型を <CODE>DATETIME</CODE> に変えてください。
+<LI>
+
+アクセスは、<STRONG>MySQL</STRONG> が理解できない間違った SQL クエリを
+作成するかもしれません。 これはアクセスのメニューから
+<CODE>"Query|SQLSpecific|Pass-Through"</CODE> を選択すれば
+直すことが可能です。
+<LI>
+
+If you have in Access a column defined as BYTE, Access will try to export this
+as <CODE>TINYINT</CODE> instead of <CODE>TINYINT UNSIGNED</CODE>.  This will give you
+problems if you have values &#62; 127 in the column!
+<LI>
+
+If you are using Access 7.0, You should use the option flag <CODE>Return
+matching rows</CODE>.
+<LI>
+
+If you are using Access 2.0, You should use the option flags <CODE>Return
+matching rows</CODE> and <CODE>Simulate ODBC 1.0</CODE>.
+</UL>
+
+<A NAME="IDX1503"></A>
+<DT>ADO
+<DD>
+When you are coding with the ADO API and <STRONG>MyODBC</STRONG> you need to put
+attention in some default properties that aren't supported by the
+MySQL server.  For example, using the <CODE>CursorLocation
+Property</CODE> as <CODE>adUseServer</CODE> will return for the <CODE>RecordCount
+Property</CODE> a result of -1. To have the right value, you need to set this
+property to <CODE>adUseClient</CODE>, like is showing in the VB code below:
+
+
+<PRE>
+Dim myconn As New ADODB.Connection
+Dim myrs As New Recordset
+Dim mySQL As String
+Dim myrows As Long
+
+myconn.Open "DSN=MyODBCsample"
+mySQL = "SELECT * from user"
+myrs.Source = mySQL
+Set myrs.ActiveConnection = myconn
+myrs.CursorLocation = adUseClient
+myrs.Open
+myrows = myrs.RecordCount
+
+myrs.Close
+myconn.Close
+</PRE>
+
+Another workaround is to use a <CODE>SELECT COUNT(*)</CODE> statement
+for a similar query to get the correct row count.
+
+<DT>Active server pages (ASP)
+<DD>
+You should use the option flag <CODE>Return matching rows</CODE>.
+
+<DT>BDE applications
+<DD>
+To get these to work, you should set the option flags
+<CODE>Don't optimize column widths</CODE> and <CODE>Return matching rows</CODE>.
+
+<A NAME="IDX1504"></A>
+<DT>Borland Builder 4
+<DD>
+When you start a query you can use the property <CODE>Active</CODE> or use the
+method <CODE>Open</CODE>.  Note that <CODE>Active</CODE> will start by automatically
+issuing a <CODE>SELECT * FROM ...</CODE> query that may not be a good thing if
+your tables are big!
+<DT>ColdFusion (On Unix)
+<DD>
+The following information is taken from the ColdFusion documentation:
+
+Use the following information to configure ColdFusion Server for Linux
+to use the unixODBC driver with <STRONG>MyODBC</STRONG> for MySQL data
+sources.  Allaire has verified that <STRONG>MyODBC</STRONG> Version 2.50.26
+works with MySQL Version 3.22.27 and ColdFusion for Linux. (Any
+newer version should also work.) You can download <STRONG>MyODBC</STRONG> at
+<a HREF="http://www.mysql.com/downloads/api-myodbc.html">http://www.mysql.com/downloads/api-myodbc.html</a>
+
+<A NAME="IDX1505"></A>
+ColdFusion Version 4.5.1 allows you to us the ColdFusion Administrator
+to add the MySQL data source. However, the driver is not
+included with ColdFusion Version 4.5.1. Before the MySQL driver
+will appear in the ODBC datasources drop-down list, you must build and
+copy the <STRONG>MyODBC</STRONG> driver to
+<TT>`/opt/coldfusion/lib/libmyodbc.so'</TT>.
+
+The Contrib directory contains the program mydsn-xxx.zip which allows
+you to build and remove the DSN registry file for the MyODBC driver
+on Coldfusion applications.
+
+<A NAME="IDX1506"></A>
+<DT>DataJunction
+<DD>
+You have to change it to output <CODE>VARCHAR</CODE> rather than <CODE>ENUM</CODE>, as
+it exports the latter in a manner that causes MySQL grief.
+<A NAME="IDX1507"></A>
+<DT>Excel
+<DD>
+Works. Some tips:
+
+<UL>
+<LI>
+
+日付に問題が起きた場合、<CODE>CONCAT()</CODE> 関数を使用し、文字として SELECT してみて
+ください。 例えば：
+
+<PRE>
+select CONCAT(rise_time), CONCAT(set_time)
+    from sunrise_sunset;
+</PRE>
+
+この方法で文字として返ってきた値を、Excel97 で時間として扱うようにすべきです。
+
+この例の <CODE>CONCAT()</CODE> の目的は、フィールドの型が文字列であると ODBC をだます
+ことです。
+<CODE>CONCAT()</CODE> がなければ、ODBC はフィールドの型が日付とわかるので、
+Excel が今度はそれを理解できなくなります。
+
+これは Excel のバグです。なぜなら文字を自動で日付に直すのですから。
+これは単にテキストファイルの情報を扱う場合ならばいいのですが、
+各項目の型を知らせる ODBC 接続の情報を扱う場合は、とても愚かな方法です。
+</UL>
+
+<A NAME="IDX1508"></A>
+<DT>Word
+<DD>
+To retrieve data from MySQL to Word/Excel documents, you need to
+use the <CODE>MyODBC</CODE> driver and the Add-in Microsoft Query help.
+
+For example, create a db with a table containing 2 columns of text:
+
+
+<UL>
+<LI>
+
+Insert rows using the <CODE>mysql</CODE> client command-line tool.
+<LI>
+
+Create a DSN file using the MyODBC driver, for example, my for the db above.
+<LI>
+
+Open the Word application.
+<LI>
+
+Create a blank new documentation.
+<LI>
+
+Using the tool bar called Database, press the button insert database.
+<LI>
+
+Press the button Get Data.
+<LI>
+
+At the right hand of the screen Get Data, press the button Ms Query.
+<LI>
+
+In the Ms Query create a New Data Source using the DSN file my.
+<LI>
+
+Select the new query.
+<LI>
+
+Select the columns that you want.
+<LI>
+
+Make a filter if you want.
+<LI>
+
+Make a Sort if you want.
+<LI>
+
+Select Return Data to Microsoft Word.
+<LI>
+
+Click Finish.
+<LI>
+
+Click Insert data and select the records.
+<LI>
+
+Click OK and you see the rows in your Word document.
+</UL>
+
+<A NAME="IDX1509"></A>
+<DT>odbcadmin
+<DD>
+ODBC のテストプログラム.
+<A NAME="IDX1510"></A>
+<DT>Delphi
+<DD>
+DBE 3.2 以上を必ず使用してください。
+<STRONG>MySQL</STRONG> に接続する際には、'Don't optimize column width' オプションをセッ
+トします。
+
+Also, here is some potentially useful Delphi code that sets up both an
+ODBC entry and a BDE entry for <STRONG>MyODBC</STRONG> (the BDE entry requires a BDE
+Alias Editor that is free at a Delphi Super Page near
+you. (Thanks to Bryan Brunton <a HREF="mailto:bryan@flesherfab.com">bryan@flesherfab.com</a> for this):
+
+
+<PRE>
+fReg:= TRegistry.Create;
+  fReg.OpenKey('\Software\ODBC\ODBC.INI\DocumentsFab', True);
+  fReg.WriteString('Database', 'Documents');
+  fReg.WriteString('Description', ' ');
+  fReg.WriteString('Driver', 'C:\WINNT\System32\myodbc.dll');
+  fReg.WriteString('Flag', '1');
+  fReg.WriteString('Password', '');
+  fReg.WriteString('Port', ' ');
+  fReg.WriteString('Server', 'xmark');
+  fReg.WriteString('User', 'winuser');
+  fReg.OpenKey('\Software\ODBC\ODBC.INI\ODBC Data Sources', True);
+  fReg.WriteString('DocumentsFab', 'MySQL');
+  fReg.CloseKey;
+  fReg.Free;
+
+  Memo1.Lines.Add('DATABASE NAME=');
+  Memo1.Lines.Add('USER NAME=');
+  Memo1.Lines.Add('ODBC DSN=DocumentsFab');
+  Memo1.Lines.Add('OPEN MODE=READ/WRITE');
+  Memo1.Lines.Add('BATCH COUNT=200');
+  Memo1.Lines.Add('LANGDRIVER=');
+  Memo1.Lines.Add('MAX ROWS=-1');
+  Memo1.Lines.Add('SCHEMA CACHE DIR=');
+  Memo1.Lines.Add('SCHEMA CACHE SIZE=8');
+  Memo1.Lines.Add('SCHEMA CACHE TIME=-1');
+  Memo1.Lines.Add('SQLPASSTHRU MODE=SHARED AUTOCOMMIT');
+  Memo1.Lines.Add('SQLQRYMODE=');
+  Memo1.Lines.Add('ENABLE SCHEMA CACHE=FALSE');
+  Memo1.Lines.Add('ENABLE BCD=FALSE');
+  Memo1.Lines.Add('ROWSET SIZE=20');
+  Memo1.Lines.Add('BLOBS TO CACHE=64');
+  Memo1.Lines.Add('BLOB SIZE=32');
+
+  AliasEditor.Add('DocumentsFab','MySQL',Memo1.Lines);
+</PRE>
+
+<A NAME="IDX1511"></A>
+<DT>C++ Builder
+<DD>
+BDE 3.0で,テストされました。唯一の知られた問題は、
+テーブルスキーマが変化する時、クエリフィールドが更新されないことです。
+BDE は、index PRIMARY だけを認識し、プライマリーキーは認識していないように思えま
+す。これはさほど問題ではないですが。
+
+<DT>Vision
+<DD>
+You should use the option flag <CODE>Return matching rows</CODE>.
+
+<A NAME="IDX1512"></A>
+<DT>Visual Basic
+<DD>
+テーブルの更新を可能にするため、テーブルにプライマリーキーを作成しなくてはなりま
+せん。
+
+Visual Basic with ADO can't handle big integers. This means that some queries
+like <CODE>SHOW PROCESSLIST</CODE> will not work properly.  The fix is to set
+add the option <CODE>OPTION=16834</CODE> in the ODBC connect string or set
+the <CODE>Change BIGINT columns to INT</CODE> option in the MyODBC connect screen.
+You may also want to set the <CODE>Return matching rows</CODE> option.
+
+<DT>VisualInterDev
+<DD>
+If you get the error <CODE>[Microsoft][ODBC Driver Manager] Driver does
+not support this parameter</CODE> the reason may be that you have a
+<CODE>BIGINT</CODE> in your result.  Try setting the <CODE>Change BIGINT
+columns to INT</CODE> option in the MyODBC connect screen.
+
+<DT>Visual Objects
+<DD>
+You should use the option flag <CODE>Don't optimize column widths</CODE>.
+</DL>
+
+
+
+<H3><A NAME="ODBC_and_last_insert_id" HREF="manual.ja_toc.html#ODBC_and_last_insert_id">8.3.6  <CODE>AUTO_INCREMENT</CODE> フィールドの値を ODBC で得る方法</A></H3>
+
+<P>
+<A NAME="IDX1513"></A>
+
+</P>
+<P>
+共通の問題は、<CODE>INSERT</CODE> で自動的に生成されるIDの値を得ることです。
+ODBCでは、以下のようにします( 例中の <CODE>auto</CODE> が <CODE>AUTO_INCREMENT</CODE> フィー
+ルドです)：
+
+</P>
+
+<PRE>
+INSERT INTO foo (auto,text) VALUES(NULL,'text');
+SELECT LAST_INSERT_ID();
+</PRE>
+
+<P>
+もしくは、他のテーブルにIDを挿入するだけなら以下のようにします：
+
+</P>
+
+<PRE>
+INSERT INTO foo (auto,text) VALUES(NULL,'text');
+INSERT INTO foo2 (id,text) VALUES(LAST_INSERT_ID(),'text');
+</PRE>
+
+<P>
+ 「<A HREF="manual.ja_Clients.html#Getting_unique_ID">8.4.5.3  最後に挿入された行のユニーク ID をどのように得られるか？</A>」節参照.
+
+</P>
+<P>
+For the benefit of some ODBC applications (at least Delphi and Access),
+the following query can be used to find a newly inserted row:
+
+<PRE>
+SELECT * FROM tbl_name WHERE auto IS NULL;
+</PRE>
+
+
+
+<H3><A NAME="MyODBC_bug_report" HREF="manual.ja_toc.html#MyODBC_bug_report">8.3.7  Reporting Problems with MyODBC</A></H3>
+
+<P>
+<A NAME="IDX1514"></A>
+<A NAME="IDX1515"></A>
+<A NAME="IDX1516"></A>
+
+</P>
+<P>
+もし <STRONG>MyODBC</STRONG> 使用時に難しい問題にあたった場合、
+ODBC マネージャのログファイル (ODBCADMIN からリクエストしたときのログ)
+と <STRONG>MyODBC</STRONG> のログを取り始めるべきです。
+これはいかなる問題にも解決の糸口になるはずです。
+
+</P>
+<P>
+<STRONG>MyODBC</STRONG> のログを取るには、以下のように行ないます：
+
+</P>
+
+<OL>
+<LI>
+
+Ensure that you are using <CODE>myodbcd.dll</CODE> and not <CODE>myodbc.dll</CODE>.
+The easiest way to do this is to get <CODE>myodbcd.dll</CODE> from the MyODBC
+distribution and copy it over the <CODE>myodbc.dll</CODE>, which is probably
+in your <CODE>C:\windows\system32</CODE> or <CODE>C:\winnt\system32</CODE> directory.
+
+Note that you probably want to restore the old myodbc.dll file when you
+have finished testing, as this is a lot faster than <CODE>myodbcd.dll</CODE>.
+<LI>
+
+Tag the `Trace MyODBC' option flag in the <STRONG>MyODBC</STRONG> connect/configure
+screen.  The log will be written to file <TT>`C:\myodbc.log'</TT>.
+
+If the trace option is not remembered when you are going back to the
+above screen, it means that you are not using the <CODE>myodbcd.dll</CODE>
+driver (see above).
+<LI>
+
+Start your application and try to get it to fail.
+</OL>
+
+<P>
+Check the <CODE>MyODBC trace file</CODE>, to find out what could be wrong.
+You should be able to find out the issued queries by searching after
+the string <CODE>&#62;mysql_real_query</CODE> in the <TT>`myodbc.log'</TT> file.
+
+</P>
+<P>
+You should also try duplicating the queries in the <CODE>mysql</CODE> monitor
+or <CODE>admndemo</CODE> to find out if the error is MyODBC or MySQL.
+
+</P>
+<P>
+If you find out something is wrong, please only send the relevant rows
+(max 40 rows) to <a HREF="mailto:myodbc@lists.mysql.com">myodbc@lists.mysql.com</a>.  Please never
+send the whole MyODBC or ODBC log file!
+
+</P>
+<P>
+If you are unable to find out what's wrong, the last option is to
+make an archive (tar or zip) that contains a MyODBC trace file, the ODBC
+log file, and a README file that explains the problem.  You can send this
+to <a HREF="ftp://support.mysql.com/pub/mysql/secret">ftp://support.mysql.com/pub/mysql/secret</a>.  Only we at 
+MySQL AB will have access to the files you upload, and we will
+be very discrete with the data!
+
+</P>
+<P>
+If you can create a program that also shows this problem, please
+upload this too!
+
+</P>
+<P>
+If the program works with some other SQL server, you should make an ODBC log
+file where you do exactly the same thing in the other SQL server.
+
+</P>
+<P>
+Remember that the more information you can supply to us, the more
+likely it is that we can fix the problem!
+
+</P>
+
+
+
+<H2><A NAME="C" HREF="manual.ja_toc.html#C">8.4  MySQL C API</A></H2>
+
+<P>
+<A NAME="IDX1517"></A>
+<A NAME="IDX1518"></A>
+
+</P>
+
+<P>
+C API コードは <STRONG>MySQL</STRONG> とともに配布されます。これは 
+<CODE>libmysqlclient</CODE> ライブラリに含まれ、C プログラムからデータベースへ
+のアクセスを許します。
+
+</P>
+<P>
+MySQL ソースディストリビューション内のクライアントの多くは C で書かれています。C API の使
+用法を示す例を探すなら、これらのクライアントを調べてください。
+
+</P>
+<P>
+他のクライアント API の多く(Java を除く全て)は、<STRONG>MySQL</STRONG> サーバと
+の通信にこのライブラリを使用します。そのため、例えば、他のクライアントプ
+ログラムで使用されるのと同じ環境変数の多くの利点を得ることができます。そ
+れらはライブラリから参照されるからです。これらの変数のリストについては 
+ 「<A HREF="manual.ja_MySQL_Database_Administration.html#Client-Side_Scripts">4.8  MySQL Client-Side Scripts and Utilities</A>」節 を参照して下さい。
+
+</P>
+<P>
+クライアントは最大通信バッファサイズを持ちます。最初に割り当てられるバッ
+ファのサイズ(16K バイト)は自動的に最大サイズ(デフォルトは 16M)まで増加し
+ます。バッファサイズは必要に応じて増加するため、単純にデフォルトの最大制
+限を増加しても、さらに内部で資源を使用することはありません。このサイズチェッ
+クは主に間違ったクエリと通信パケットのためのチェックです。
+
+</P>
+<P>
+通信バッファは一つの SQL ステートメント(クライアントからサーバへの通信)と、
+返されるデータ(サーバからクライアントへの通信)の１レコードを含むのに
+十分大きくなくてはいけません。各スレッドの
+通信バッファは、任意のレコードやクエリを処理するために、指定された制限まで動的
+に増大します。例えば、最大 16M のデータを含む <CODE>BLOB</CODE> 値がある場合、
+少なくとも 16M を通信バッファ制限として持つ必要があります(サーバとクライ
+アントの両方で)。
+クライアントのデフォルトの最大値は 16M ですが、サーバの最大値のデフォルトは
+1M です。これはサーバ起動時に、<CODE>max_allowed_packet</CODE> パラメータの
+値を変更することにより、増やすことが出来ます。
+ 「<A HREF="manual.ja_MySQL_Optimization.html#Server_parameters">5.5.2  サーバーパラメーターのチューニング</A>」節参照.
+
+</P>
+<P>
+<STRONG>MySQL</STRONG> サーバは、各クエリ後に各通信バッファを 
+<CODE>net_buffer_length</CODE> バイトに縮小します。
+クライアントでは、接続に割り当てられたバッファのサイズは、接続が閉じられるまで減少しません。
+クライアントメモリは接続がクローズされた時に調整されます。
+
+</P>
+<P>
+スレッドプログラミングについては、
+ 「<A HREF="manual.ja_Clients.html#Threaded_clients">8.4.7  スレッドクライアントを作る方法</A>」節参照. を参考にしてください。
+
+</P>
+
+
+<H3><A NAME="C_API_datatypes" HREF="manual.ja_toc.html#C_API_datatypes">8.4.1  C API データ型</A></H3>
+
+<DL COMPACT>
+
+<DT><CODE>MYSQL</CODE>
+<DD>
+<A NAME="IDX1519"></A>
+ 
+この構造体は一つのデータベース接続のハンドルを表わします。これはほとんど全て
+の <STRONG>MySQL</STRONG> 関数に使用されます。
+
+<A NAME="IDX1520"></A>
+<DT><CODE>MYSQL_RES</CODE>
+<DD>
+この構造体はレコードを返すクエリ(<CODE>SELECT</CODE>, <CODE>SHOW</CODE>, <CODE>DESCRIBE</CODE>, <CODE>EXPLAIN</CODE>)の結果を表わ
+します。クエリから返される情報は、この節の残りでは<EM>結果セット</EM>と呼
+ばれます。
+
+<A NAME="IDX1521"></A>
+<DT><CODE>MYSQL_ROW</CODE>
+<DD>
+これはデータの１レコードの安全な型表現です。これは現在バイト文字列の配列として実
+装されています。(フィールド値がバイナリデータを含むことがある場合、これを NULL 
+終端文字列として扱うことはできません。そのような値は内部に NULL バイトを含
+むことがあるからです。) <CODE>mysql_fetch_row()</CODE> の呼び出しによりレコードが獲得
+されます。
+
+<A NAME="IDX1522"></A>
+<DT><CODE>MYSQL_FIELD</CODE>
+<DD>
+この構造体はフィールドについての情報、つまりフィールドの名前、型、サイズ
+等を含んでいます。このメンバは後でさらに詳細に説明されています。
+<CODE>mysql_fetch_field()</CODE> を繰り返し呼び出すことにより、各フィールドの 
+<CODE>MYSQL_FIELD</CODE> 構造体を得ることができます。
+フィールド値はこの構造体の一部ではありません; それは <CODE>MYSQL_ROW</CODE> 構造
+体に含まれています。
+
+<A NAME="IDX1523"></A>
+<DT><CODE>MYSQL_FIELD_OFFSET</CODE>
+<DD>
+これは、<STRONG>MySQL</STRONG> フィールドリストへのオフセットの安全な型表現です。
+(<CODE>mysql_field_seek()</CODE> で使用されます。)オフセットはレコード内のフィールド
+番号で、0 から始まります。
+
+<A NAME="IDX1524"></A>
+<A NAME="IDX1525"></A>
+<DT><CODE>my_ulonglong</CODE>
+<DD>
+レコード数と <CODE>mysql_affected_rows()</CODE>,
+<CODE>mysql_num_rows()</CODE> そして <CODE>mysql_insert_id()</CODE> に使用される型です。
+この型は <CODE>0</CODE> から <CODE>1.84e19</CODE> の範囲を与えます。
+
+システムによっては、<CODE>my_ulonglong</CODE> 型の値を表示しようとしても、動作
+しないことがあります。この値を表示するには、<CODE>unsigned long</CODE> に変換
+し、<CODE>%lu</CODE> 出力書式を使用してください。例:
+
+<PRE>
+printf (Number of rows: %lu\n", (unsigned long) mysql_num_rows(result));
+</PRE>
+
+</DL>
+
+<P>
+<CODE>MYSQL_FIELD</CODE> 構造体は次のメンバを含みます:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>char * name</CODE>
+<DD>
+フィールドの名前。null終端文字列。
+
+<DT><CODE>char * table</CODE>
+<DD>
+このフィールドを含むテーブルの名前。計算されたフィールドでない場合のみ有
+効です。計算されたフィールドでは、<CODE>table</CODE> 値は空文字列です。
+
+<DT><CODE>char * def</CODE>
+<DD>
+このフィールドのデフォルト値。null終端文字列。
+これは <CODE>mysql_list_fields()</CODE> 使用時にだけ設定されます。
+
+<DT><CODE>enum enum_field_types type</CODE>
+<DD>
+フィールドの型。
+<CODE>type</CODE> 値は次の一つです:
+
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>型の値</STRONG> </TD><TD> <STRONG>型の意味</STRONG>
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_TINY</CODE> </TD><TD> <CODE>TINYINT</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_SHORT</CODE> </TD><TD> <CODE>SMALLINT</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_LONG</CODE> </TD><TD> <CODE>INTEGER</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_INT24</CODE> </TD><TD> <CODE>MEDIUMINT</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_LONGLONG</CODE> </TD><TD> <CODE>BIGINT</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_DECIMAL</CODE> </TD><TD> <CODE>DECIMAL</CODE> または <CODE>NUMERIC</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_FLOAT</CODE> </TD><TD> <CODE>FLOAT</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_DOUBLE</CODE> </TD><TD> <CODE>DOUBLE</CODE> または <CODE>REAL</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_TIMESTAMP</CODE> </TD><TD> <CODE>TIMESTAMP</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_DATE</CODE> </TD><TD> <CODE>DATE</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_TIME</CODE> </TD><TD> <CODE>TIME</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_DATETIME</CODE> </TD><TD> <CODE>DATETIME</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_YEAR</CODE> </TD><TD> <CODE>YEAR</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_STRING</CODE> </TD><TD> 文字列 (<CODE>CHAR</CODE> または <CODE>VARCHAR</CODE>) フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_BLOB</CODE> </TD><TD> <CODE>BLOB</CODE> または <CODE>TEXT</CODE> フィールド (最大長を確定するには <CODE>max_length</CODE> を使用して下さい)
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_SET</CODE> </TD><TD> <CODE>SET</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_ENUM</CODE> </TD><TD> <CODE>ENUM</CODE> フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_NULL</CODE> </TD><TD> <CODE>NULL</CODE>型 フィールド
+</TR NOSAVE>
+<TR><TD><CODE>FIELD_TYPE_CHAR</CODE> </TD><TD> 非推奨; <CODE>FIELD_TYPE_TINY</CODE> を代わりに使用してください
+</TR>
+</TABLE>
+
+<CODE>IS_NUM()</CODE> マクロで、フィールドが数値タイプかどうかをテストできます。
+フィールドが数値の場合、<CODE>type</CODE> メンバを <CODE>IS_NUM()</CODE> に渡すと
+TRUE と評価します:
+
+
+<PRE>
+if (IS_NUM(field-&#62;type))
+    printf("Field is numeric\n");
+</PRE>
+
+<DT><CODE>unsigned int length</CODE>
+<DD>
+フィールドの幅。これはテーブル定義で指定されたものです。
+
+<DT><CODE>unsigned int max_length</CODE>
+<DD>
+結果セットのフィールドの最大幅(実際の結果セットの中のレコードの最長フィールド値
+の長さ)。<CODE>mysql_store_result()</CODE> または <CODE>mysql_list_fields()</CODE> を
+使用する場合は、これはフィールドの最大幅になります。
+<CODE>mysql_use_result()</CODE> を使用する場合は、この変数の値は 0 になります。
+
+<DT><CODE>unsigned int flags</CODE>
+<DD>
+フィールドの種々のビットフラグ。<CODE>flags</CODE> 値は 0 または次のビットの一つ
+以上の組み合わせです:
+
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>フラグの値</STRONG> </TD><TD> <STRONG>フラグの意味</STRONG>
+</TR NOSAVE>
+<TR><TD><CODE>NOT_NULL_FLAG</CODE> </TD><TD> フィールドは <CODE>NULL</CODE> にできない
+</TR NOSAVE>
+<TR><TD><CODE>PRI_KEY_FLAG</CODE> </TD><TD> フィールドはプライマリキーの一部である
+</TR NOSAVE>
+<TR><TD><CODE>UNIQUE_KEY_FLAG</CODE> </TD><TD> フィールドはユニークキーの一部である
+</TR NOSAVE>
+<TR><TD><CODE>MULTIPLE_KEY_FLAG</CODE> </TD><TD> フィールドは非ユニークキーの一部である
+</TR NOSAVE>
+<TR><TD><CODE>UNSIGNED_FLAG</CODE> </TD><TD> フィールドは <CODE>UNSIGNED</CODE> 属性を持っている
+</TR NOSAVE>
+<TR><TD><CODE>ZEROFILL_FLAG</CODE> </TD><TD> フィールドは <CODE>ZEROFILL</CODE> 属性を持っている
+</TR NOSAVE>
+<TR><TD><CODE>BINARY_FLAG</CODE> </TD><TD> フィールドは <CODE>BINARY</CODE> 属性を持っている
+</TR NOSAVE>
+<TR><TD><CODE>AUTO_INCREMENT_FLAG</CODE> </TD><TD> フィールドは <CODE>AUTO_INCREMENT</CODE> 属性を持っている
+</TR NOSAVE>
+<TR><TD><CODE>ENUM_FLAG</CODE> </TD><TD> フィールドは <CODE>ENUM</CODE> である (非推奨)
+</TR NOSAVE>
+<TR><TD><CODE>BLOB_FLAG</CODE> </TD><TD> フィールドは <CODE>BLOB</CODE> または <CODE>TEXT</CODE> である (非推奨)
+</TR NOSAVE>
+<TR><TD><CODE>TIMESTAMP_FLAG</CODE> </TD><TD> フィールドは <CODE>TIMESTAMP</CODE> である (非推奨)
+</TR>
+</TABLE>
+
+<CODE>BLOB_FLAG</CODE>, <CODE>ENUM_FLAG</CODE>, <CODE>TIMESTAMP_FLAG</CODE> の使用は推奨さ
+れません。これらは型の属性ではなくフィールドの型を示すからです。代わり
+に <CODE>field-&#62;type</CODE> を <CODE>FIELD_TYPE_BLOB</CODE>, <CODE>FIELD_TYPE_ENUM</CODE>,
+<CODE>FIELD_TYPE_TIMESTAMP</CODE> に対してテストする方をお勧めします。
+
+次の例は <CODE>flags</CODE> 値の典型的な使用を示しています:
+
+
+<PRE>
+if (field-&#62;flags &#38; NOT_NULL_FLAG)
+    printf("Field can't be null\n");
+</PRE>
+
+<CODE>flags</CODE> 値の真偽状態を調べるために、次の便利なマクロを使用でき
+ます:
+
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><CODE>IS_NOT_NULL(flags)</CODE> </TD><TD> このフィールドが <CODE>NOT NULL</CODE> として定義されていれば真
+</TR NOSAVE>
+<TR><TD><CODE>IS_PRI_KEY(flags)</CODE> </TD><TD> このフィールドがプライマリキーならば真
+</TR NOSAVE>
+<TR><TD><CODE>IS_BLOB(flags)</CODE> </TD><TD> このフィールドが <CODE>BLOB</CODE> または <CODE>TEXT</CODE> ならば真 (非推奨; 代わりに <CODE>field-&#62;type</CODE> をテストして下さい)
+</TR>
+</TABLE>
+
+<DT><CODE>unsigned int decimals</CODE>
+<DD>
+数値フィールドの小数部桁数。
+</DL>
+
+<P>
+<A NAME="IDX1526"></A>
+<A NAME="IDX1527"></A>
+
+
+<H3><A NAME="C_API_function_overview" HREF="manual.ja_toc.html#C_API_function_overview">8.4.2  C API 関数概要</A></H3>
+
+<P>
+C API には次に一覧された関数が存在します。これらの関数は次の節でかな
+り詳細に説明されています。
+ 「<A HREF="manual.ja_Clients.html#C_API_functions">8.4.3  C API 関数説明</A>」節参照。
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>mysql_affected_rows()</STRONG> </TD><TD>
+最後の <CODE>UPDATE</CODE>, <CODE>DELETE</CODE>, <CODE>INSERT</CODE> クエリによって変更／削
+除／挿入されたレコード数を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_close()</STRONG> </TD><TD>
+サーバ接続をクローズします。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_connect()</STRONG> </TD><TD>
+<STRONG>MySQL</STRONG> サーバに接続します。この関数は推奨されません; 代わりに
+<CODE>mysql_real_connect()</CODE> を使用してください。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_change_user()</STRONG> </TD><TD>
+接続中ののユーザとデータベースを変更します。
+
+</TR NOSAVE>
+<TR><TD><CODE>mysql_character_set_name()</CODE> </TD><TD>
+接続のデフォルト文字セットの名前を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_create_db()</STRONG> </TD><TD>
+データベースを生成します。この関数は推奨されません; 代わりに SQL コマン
+ド <CODE>CREATE DATABASE</CODE> を使用してください。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_data_seek()</STRONG> </TD><TD>
+クエリ結果セット中の任意のレコードにシークします。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_debug()</STRONG> </TD><TD>
+与えられた文字列で <CODE>DBUG_PUSH</CODE> を行ないます。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_drop_db()</STRONG> </TD><TD>
+データベースを破棄します。この関数は推奨されません; 代わりに SQL コマン
+ド <CODE>DROP DATABASE</CODE> を使用してください。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_dump_debug_info()</STRONG> </TD><TD>
+サーバに、デバッグ情報をログに書き出させます。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_eof()</STRONG> </TD><TD>
+結果セットの最後のレコードが読まれたかどうかを判定します。この関数は推奨されませ
+ん; 代わりに <CODE>mysql_errno()</CODE> または <CODE>mysql_error()</CODE> を使用して下
+さい。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_errno()</STRONG> </TD><TD>
+最後の <STRONG>MySQL</STRONG> 関数からのエラー番号を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_error()</STRONG> </TD><TD>
+最後の <STRONG>MySQL</STRONG> 関数からのエラーメッセージを返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_real_escape_string()</STRONG> </TD><TD>
+Escapes special characters in a string for use in a SQL statement taking
+into account the current charset of the connection.
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_escape_string()</STRONG> </TD><TD>
+SQL ステートメント内で使用するために文字列中の特殊文字をエスケープします。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_fetch_field()</STRONG> </TD><TD>
+テーブルの次のフィールドの型を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_fetch_field_direct()</STRONG> </TD><TD>
+テーブルの、番号で指定されたフィールドの型を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_fetch_fields()</STRONG> </TD><TD>
+全てのフィールド構造体の配列を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_fetch_lengths()</STRONG> </TD><TD>
+現在のレコード中の全てのフィールドの長さを返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_fetch_row()</STRONG> </TD><TD>
+結果セットから次のレコードを取り出します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_field_seek()</STRONG> </TD><TD>
+指定されたフィールド上にフィールドカーソルを置きます。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_field_count()</STRONG> </TD><TD>
+最後のクエリの結果のフィールドの数を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_field_tell()</STRONG> </TD><TD>
+最後の <CODE>mysql_fetch_field()</CODE> で使用されたフィールドカーソルの位置を返
+します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_free_result()</STRONG> </TD><TD>
+結果セットによって使用されたメモリを解放します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_get_client_info()</STRONG> </TD><TD>
+クライアントバージョン情報を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_get_host_info()</STRONG> </TD><TD>
+接続を説明する文字列を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_get_proto_info()</STRONG> </TD><TD>
+接続に使用されるプロトコルバージョンを返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_get_server_info()</STRONG> </TD><TD>
+サーバのバージョン番号を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_info()</STRONG> </TD><TD>
+最後に実行されたクエリについての情報を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_init()</STRONG> </TD><TD>
+<CODE>MYSQL</CODE> 構造体を獲得または初期化します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_insert_id()</STRONG> </TD><TD>
+<CODE>AUTO_INCREMENT</CODE> フィールドに最後に生成された ID を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_kill()</STRONG> </TD><TD>
+指定されたスレッドを殺します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_list_dbs()</STRONG> </TD><TD>
+簡易正規表現に適合するデータベース名を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_list_fields()</STRONG> </TD><TD>
+簡易正規表現に適合するフィールド名を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_list_processes()</STRONG> </TD><TD>
+現在のサーバスレッドのリストを返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_list_tables()</STRONG> </TD><TD>
+簡易正規表現に適合するテーブル名を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_num_fields()</STRONG> </TD><TD>
+結果セット中のフィールド数を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_num_rows()</STRONG> </TD><TD>
+結果セット中のレコード数を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_options()</STRONG> </TD><TD>
+<CODE>mysql_connect()</CODE> のための接続オプションを設定します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_ping()</STRONG> </TD><TD>
+サーバへの接続が動作しているかどうかをチェックします。
+必要であれば再接続します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_query()</STRONG> </TD><TD>
+NULL 終端文字列として記述された SQL クエリを実行します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_real_connect()</STRONG> </TD><TD>
+<STRONG>MySQL</STRONG> サーバに接続します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_real_query()</STRONG> </TD><TD>
+数えられた文字列として記述された SQL クエリを実行します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_reload()</STRONG> </TD><TD>
+権限テーブルを再読み込みするようにサーバに指示します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_row_seek()</STRONG> </TD><TD>
+結果セット内のあるレコードへシークします。<CODE>mysql_row_tell()</CODE> から返される値を
+使用します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_row_tell()</STRONG> </TD><TD>
+レコードカーソルの位置を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_select_db()</STRONG> </TD><TD>
+データベースを選択します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_shutdown()</STRONG> </TD><TD>
+データベースサーバをシャットダウンします。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_stat()</STRONG> </TD><TD>
+文字列でサーバ状態を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_store_result()</STRONG> </TD><TD>
+クライアントに完全な結果セットを取り出します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_thread_id()</STRONG> </TD><TD>
+現在のスレッド ID を返します。
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_thread_save()</STRONG> </TD><TD>
+Returns 1 if the clients are compiled as thread-safe.
+
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_use_result()</STRONG> </TD><TD>
+各レコードの動的結果セットを初期化します。
+</TR>
+</TABLE>
+
+<P>
+サーバへ接続するには、接続ハンドラを初期化するために <CODE>mysql_init()</CODE> 
+を呼びだし、それから <CODE>mysql_real_connect()</CODE> をそのハンドラで呼びだし
+ます (ホスト名、ユーザ名、パスワードのような他の情報に加えて)。
+Upon connection, <CODE>mysql_real_connect()</CODE> sets the
+<CODE>reconnect</CODE> flag (part of the MYSQL structure) to a value of
+<CODE>1</CODE>. This flag indicates, in the event that a query cannot be
+performed because of a lost connection, to try reconnecting to the
+server before giving up.
+その接続で
+の処理が終了した時は、接続を終了させるために <CODE>mysql_close()</CODE> を呼びだ
+します。
+
+</P>
+<P>
+接続が有効な間は、クライアントは <CODE>mysql_query()</CODE> または 
+<CODE>mysql_real_query()</CODE> を使用して SQL クエリをサーバに送信できます。こ
+の２つの違いは、<CODE>mysql_query()</CODE> は NULL終端文字列としてクエリが記述さ
+れることを期待するのに対し、<CODE>mysql_real_query()</CODE> は数えられた文字列を
+期待することです。文字列がバイナリデータ(NULバイトを含みことがある)を含む
+場合は、<CODE>mysql_real_query()</CODE> を使用する必要があります。
+
+</P>
+<P>
+非<CODE>SELECT</CODE> クエリ(例えば、<CODE>INSERT</CODE>, <CODE>UPDATE</CODE>,
+<CODE>DELETE</CODE>)では、どれくらいのレコードが変更(影響)されたかを
+<CODE>mysql_affected_rows()</CODE> を呼び出すことで見つけ出すことができます。
+
+</P>
+<P>
+<CODE>SELECT</CODE> クエリでは、選択されたレコードを結果セットとして取り出します。
+(注意: いくつかのステートメントは、レコードを返すという点で 
+<CODE>SELECT</CODE>に似ています。それは <CODE>SHOW</CODE>, <CODE>DESCRIBE</CODE>,
+<CODE>EXPLAIN</CODE> です。これらは <CODE>SELECT</CODE> ステートメントと同じ方法で扱わ
+れるべきです。)
+
+</P>
+<P>
+クライアントが結果セットを処理するには２つの方法があります。一つ目は、
+<CODE>mysql_store_result()</CODE> を呼び出すことで、結果セット全体を一度にすべて
+取り出すことです。この関数はサーバからクエリによって返されるすべてのレコー
+ドを取得し、それをクライアントに格納します。二つ目は、
+<CODE>mysql_use_result()</CODE> を呼び出すことで、レコードごとの結果セット取り出
+しを初期化することです。この関数は取り出しを初期化しますが、実際にはサーバ
+から何のレコードも得ません。
+
+</P>
+<P>
+どちらの場合でも、<CODE>mysql_fetch_row()</CODE> を呼び出してレコードにアクセス
+します。<CODE>mysql_store_result()</CODE> では、<CODE>mysql_fetch_row()</CODE> は既に
+サーバから取得してあるレコードにアクセスします。
+<CODE>mysql_use_result()</CODE> では、<CODE>mysql_fetch_row()</CODE> は実際にサーバか
+らレコードを取り出します。各レコードのデータ値のサイズについての情報は 
+<CODE>mysql_fetch_lengths()</CODE> を呼び出すことで得られます。
+
+</P>
+<P>
+結果セットでの処理が終った後は、<CODE>mysql_free_result()</CODE> を呼び出し、そ
+れが使用していたメモリを解放して下さい。
+
+</P>
+<P>
+この２つの取り出し機構は相補的なものです。クライアントプログラムは、必要に
+よってもっとも適切なアプローチを選択すべきです。慣例的に、クライアントは一
+般に <CODE>mysql_store_result()</CODE> を使用する傾向にあります。
+
+</P>
+<P>
+<CODE>mysql_store_result()</CODE> の利点は、すべてのレコードをクライアントに取っ
+て来るため、連続してレコードをアクセスできるだけでなく、結果セット中の現在
+のレコード位置を変更するために、<CODE>mysql_data_seek()</CODE> や 
+<CODE>mysql_row_seek()</CODE> を使用して、結果セットの中を後や前に移動することが
+できます。また、<CODE>mysql_num_rows()</CODE> を呼び出すことで、レコード数を見つ
+けることもできます。一方、<CODE>mysql_store_result()</CODE> の必要メモリは、大き
+な結果セットではとても高く、out-of-memory 状態に遭遇する可能性が高くなりま
+す。
+
+</P>
+<P>
+<CODE>mysql_use_result()</CODE> の利点は、一度に一つのレコードだけを保持するため、
+クライアントが結果セットに要求するメモリが少ないことです（そして、割当のオー
+バーヘッドも少ないので、<CODE>mysql_use_result()</CODE> はより速くなります）。不
+利な点は、サーバの拘束を避けるため、各レコードを素早く処理する必要があるこ
+と、結果セット中でレコードのランダムアクセスができないこと（レコードを順番
+にアクセスすることしかできません）、そして、すべてのレコードを取り出さない
+限り、結果セット中にいくつのレコードがあるかを知ることができないことです。
+さらに、あなたが探している情報を、検索の途中で見つけることができて、問題が
+解決したとしても、すべてのレコードを取り出さ<EM>なければなりません</EM>。
+
+</P>
+<P>
+API はクライアントがクエリが <CODE>SELECT</CODE> であるかどうかを知ることなしに、
+（必要時だけレコードを取り出す）クエリに適切に応答できるようにします。
+それぞれの <CODE>mysql_query()</CODE>（または <CODE>mysql_real_query()</CODE>）の後で、
+<CODE>mysql_store_result()</CODE> を呼び出すことで、これが可能です。結果セットの
+呼び出しが成功すると、クエリは <CODE>SELECT</CODE> であり、レコードを読むことが
+できます。結果セット呼び出しが失敗した場合は、結果が実際に期待されたもので
+あるかどうかを確定するために、<CODE>mysql_field_count()</CODE> を呼び出してくだ
+さい。<CODE>mysql_field_count()</CODE> が 0 を返す場合は、クエリはデータを返しま
+せん（クエリが <CODE>INSERT</CODE>, <CODE>UPDATE</CODE>, <CODE>DELETE</CODE> 等であることを
+示します）。つまりレコードが返ることを期待できません。
+<CODE>mysql_field_count()</CODE> が 0 でない場合は、クエリはレコードを返すべきな
+のに、返さなかったということです。これはクエリが <CODE>SELECT</CODE> で失敗した
+ということを示します。これをどのように行なうことができるかの例は、
+<CODE>mysql_field_count()</CODE> の説明を参照してください。
+
+</P>
+<P>
+<CODE>mysql_store_result()</CODE> と <CODE>mysql_use_result()</CODE> はどちらも、結果
+セットを作るフィールドについての情報（フィールドの数、その名前や型など）を
+獲得することができます。<CODE>mysql_fetch_field()</CODE> を繰り返し呼び出すこと
+で順番に、または、<CODE>mysql_fetch_field_direct()</CODE> を呼び出すことでレコー
+ド内のフィールド番号で、レコード内のフィールド情報にアクセスすることができ
+ます。現在のフィールドカーソル位置は <CODE>mysql_field_seek()</CODE> を呼び出す
+ことで変更できます。フィールドカーソルの設定は、その後の 
+<CODE>mysql_fetch_field()</CODE> 呼び出しに影響します。
+<CODE>mysql_fetch_fields()</CODE> を呼び出すことで、一度にすべてのフィールドの情
+報を得ることもできます。
+
+</P>
+<P>
+エラーの検出、報告については、<CODE>mysql_errno()</CODE> と 
+<CODE>mysql_error()</CODE> 関数の方法によって、<STRONG>MySQL</STRONG> はエラー情報へのア
+クセスを提供します。これらは、最後に呼び出された成功または失敗し得る関数に
+ついてのエラーコードとエラーメッセージを返し、エラーがいつ何で発生したかを
+確定することができます。
+
+</P>
+
+
+<H3><A NAME="C_API_functions" HREF="manual.ja_toc.html#C_API_functions">8.4.3  C API 関数説明</A></H3>
+
+<P>
+以下の説明では、<CODE>NULL</CODE> の引数または戻り値は C プログラミング言語で
+の <CODE>NULL</CODE> を意味します。<STRONG>MySQL</STRONG> <CODE>NULL</CODE> 値ではありません。
+ 
+関数は通常ポインタか整数の値を返します。しかし関数説明に記述がある場合、
+ポインタを返す関数は、成功を示すために非 <CODE>NULL</CODE> 値を返し、エラーを示すた
+めに <CODE>NULL</CODE> を返します。整数を返す関数は、成功を示すために 0 を返し、
+エラーを示すために非0を返します。``非0'' は関数説明が他に述べていない限
+り、その意味になることに注意してください; 関数説明が他に述べている場合、
+これらに対して 0 以外の固有の値をテストしないでください:
+
+</P>
+
+<PRE>
+if (result)                   /* 正しい */
+    ... error ...
+
+if (result &#60; 0)               /* 間違い */
+    ... error ...
+
+if (result == -1)             /* 間違い */
+    ... error ...
+</PRE>
+
+<P>
+関数がエラーを返すとき、関数説明の <STRONG>エラー</STRONG> 節が起り得るエラーの
+種類を一覧しています。<CODE>mysql_errno()</CODE> の呼び出しによってどれが発生
+したかを見つけ出すことができます。エラーを表現する文字列は 
+<CODE>mysql_error()</CODE> の呼び出しによって得られます。
+
+</P>
+<P>
+<A NAME="IDX1528"></A>
+
+
+<H4><A NAME="mysql_affected_rows" HREF="manual.ja_toc.html#mysql_affected_rows">8.4.3.1  <CODE>mysql_affected_rows()</CODE></A></H4>
+
+<P>
+<CODE>my_ulonglong mysql_affected_rows(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.2  説明</H4>
+
+<P>
+最後の <CODE>UPDATE</CODE> によって変更されたレコード数、または、<CODE>DELETE</CODE> 
+によって削除されたレコード数、<CODE>INSERT</CODE> によって挿入されたレコード数を
+返します。<CODE>UPDATE</CODE>, <CODE>DELETE</CODE>, <CODE>INSERT</CODE> ステートメントでの 
+<CODE>mysql_query()</CODE> 直後に呼び出します。<CODE>SELECT</CODE> ステートメントでは、
+<CODE>mysql_affected_rows()</CODE> は <CODE>mysql_num_rows()</CODE> に似た動きをします。
+
+</P>
+
+<H4>8.4.3.3  戻り値</H4>
+
+<P>
+0 より大きい整数は影響された行数または取り出された行数を示します。0 は
+<CODE>UPDATE</CODE> ステートメントで更新されたレコードがないこと、またはクエリの 
+<CODE>WHERE</CODE> 節に適合したレコードがないこと、またはまだなんのクエリも実行
+していないことを示します。-1 はクエリがエラーを返したこと、あるいは 
+<CODE>SELECT</CODE> クエリで、<CODE>mysql_affected_rows()</CODE> が 
+<CODE>mysql_store_result()</CODE> 呼び出しよりも先に呼び出されたことを揣摩します。
+
+</P>
+
+<H4>8.4.3.4  エラー</H4>
+
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.5  例</H4>
+
+
+<PRE>
+mysql_query(&#38;mysql,"UPDATE products SET cost=cost*1.25 WHERE group=10");
+printf("%ld products updated",(long) mysql_affected_rows(&#38;mysql));
+</PRE>
+
+<P>
+If one specifies the flag <CODE>CLIENT_FOUND_ROWS</CODE> when connecting to
+<CODE>mysqld</CODE>, <CODE>mysql_affected_rows()</CODE> will return the number of
+rows matched by the <CODE>WHERE</CODE> statement for <CODE>UPDATE</CODE> statements.
+
+</P>
+<P>
+Note that when one uses a <CODE>REPLACE</CODE> command,
+<CODE>mysql_affected_rows()</CODE> will return 2 if the new row replaced and
+old row.  This is because in this case one row was inserted and then the
+duplicate was deleted.
+
+</P>
+<P>
+<A NAME="IDX1529"></A>
+
+
+<H4><A NAME="mysql_close" HREF="manual.ja_toc.html#mysql_close">8.4.3.6  <CODE>mysql_close()</CODE></A></H4>
+
+<P>
+<CODE>void mysql_close(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.7  説明</H4>
+<P>
+前にオープンされた接続をクローズします。ハンドルが <CODE>mysql_init()</CODE> ま
+たは <CODE>mysql_connect()</CODE> で自動的に割り当てられた場合、
+<CODE>mysql_close()</CODE> は <CODE>mysql</CODE> で示される接続ハンドルの解放も行ない
+ます。
+
+</P>
+
+<H4>8.4.3.8  戻り値</H4>
+
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.9  エラー</H4>
+
+<P>
+無し。
+
+</P>
+
+<P>
+<A NAME="IDX1530"></A>
+
+
+<H4><A NAME="mysql_connect" HREF="manual.ja_toc.html#mysql_connect">8.4.3.10  <CODE>mysql_connect()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL *mysql_connect(MYSQL *mysql, const char *host, const char *user, const char *passwd)</CODE>
+
+</P>
+
+<H4>8.4.3.11  説明</H4>
+
+<P>
+この関数は推奨されません。代わりに <CODE>mysql_real_connect()</CODE> の使用を
+お勧めします。
+
+</P>
+<P>
+<CODE>mysql_connect()</CODE> は <CODE>host</CODE> 上で動作している <STRONG>MySQL</STRONG> デー
+タベースエンジンへの接続の確立を試みます。<CODE>mysql_get_client_info()</CODE> 
+を除く他のすべての API 関数を実行する前に<CODE>mysql_connect()</CODE> が成功終了
+している必要があります。
+
+</P>
+<P>
+パラメータの意味は <CODE>mysql_real_connect()</CODE> の対応するパラメータと同じですが、
+接続パラメータは <CODE>NULL</CODE> にできることが異なります。この場合 C API は接
+続構造体に自動的にメモリを割り当て、<CODE>mysql_close()</CODE> 呼び出し時にそれ
+を解放します。このアプローチの不利な点は接続が失敗した場合にエラーメッセー
+ジを取り出すことができないことです。（<CODE>mysql_errno()</CODE> または 
+<CODE>mysql_error()</CODE> からエラー情報を得るには、正しい <CODE>MYSQL</CODE> ポイン
+タを提供する必要があります。）
+
+</P>
+
+<H4>8.4.3.12  戻り値</H4>
+
+<P>
+<CODE>mysql_real_connect()</CODE> と同じ
+
+</P>
+
+<H4>8.4.3.13  エラー</H4>
+
+<P>
+<CODE>mysql_real_connect()</CODE> と同じ
+
+</P>
+<P>
+<A NAME="IDX1531"></A>
+
+
+<H4><A NAME="mysql_change_user" HREF="manual.ja_toc.html#mysql_change_user">8.4.3.14  <CODE>mysql_change_user()</CODE></A></H4>
+
+<P>
+<CODE>my_bool mysql_change_user(MYSQL *mysql, const char *user, const
+char *password, const char *db)</CODE>
+
+</P>
+
+<H4>8.4.3.15  説明</H4>
+
+<P>
+ユーザを変更し、<CODE>mysql</CODE> で示された接続上で、<CODE>db</CODE> で示されたデー
+タベースがデフォルト（現在の）データベースになります。その後のクエリでは、
+明示的なデータベースの指定を含んでいないテーブル参照について、このデータベー
+スがデフォルトになります。
+
+</P>
+<P>
+この関数は <STRONG>MySQL</STRONG> 3.23.3 で導入されました。
+
+</P>
+<P>
+<CODE>mysql_change_user()</CODE> は接続されたユーザが認証されない場合、またはデー
+タベースを使用する権限を持っていない場合に失敗します。この場合、ユーザとデー
+タベースは変更されません。
+
+</P>
+<P>
+デフォルトデータベースを持ちたくない場合、<CODE>db</CODE> パラメータを 
+<CODE>NULL</CODE> に設定できます。
+
+</P>
+
+<H4>8.4.3.16  戻り値</H4>
+
+<P>
+成功時 0。エラーが発生した場合は非0。
+
+</P>
+
+<H4>8.4.3.17  エラー</H4>
+
+<P>
+<CODE>mysql_real_connect()</CODE> から得られるものと同じです。
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+<DT><CODE>ER_UNKNOWN_COM_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバはこのコマンドを実装していない（おそらく古いサーバ）。
+<DT><CODE>ER_ACCESS_DENIED_ERROR</CODE>
+<DD>
+ユーザまたはパスワードが間違っている。
+<DT><CODE>ER_BAD_DB_ERROR</CODE>
+<DD>
+データベースが存在しない。
+<DT><CODE>ER_DBACCESS_DENIED_ERROR</CODE>
+<DD>
+ユーザがデータベースへのアクセス権を持っていない。
+<DT><CODE>ER_WRONG_DB_NAME</CODE>
+<DD>
+データベース名が長過ぎる。
+</DL>
+
+
+<H4>8.4.3.18  例</H4>
+
+
+<PRE>
+if (mysql_change_user(&#38;mysql, "user", "password", "new_database"))
+{
+   fprintf(stderr, "Failed to change user.  Error: %s\n",
+           mysql_error(&#38;mysql));
+}
+</PRE>
+
+<P>
+<A NAME="IDX1532"></A>
+
+
+<H4><A NAME="mysql_character_set_name" HREF="manual.ja_toc.html#mysql_character_set_name">8.4.3.19  <CODE>mysql_character_set_name()</CODE></A></H4>
+
+<P>
+<CODE>const char *mysql_character_set_name(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.20  Description</H4>
+
+<P>
+Returns the default character set for the current connection. 
+
+</P>
+
+<H4>8.4.3.21  Return Values</H4>
+
+<P>
+The default character set
+
+</P>
+
+<H4>8.4.3.22  Errors</H4>
+<P>
+None.
+
+</P>
+
+<P>
+<A NAME="IDX1533"></A>
+
+
+<H4><A NAME="mysql_create_db" HREF="manual.ja_toc.html#mysql_create_db">8.4.3.23  <CODE>mysql_create_db()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_create_db(MYSQL *mysql, const char *db)</CODE>
+
+</P>
+
+<H4>8.4.3.24  説明</H4>
+<P>
+<CODE>db</CODE> 引数によって指定されたデータベースを作成します。
+
+</P>
+<P>
+この関数は推奨されません。代わりに <CODE>mysql_query()</CODE> を使って、SQL
+<CODE>CREATE DATABASE</CODE> ステートメントを発行することをお勧めします。
+
+</P>
+
+<H4>8.4.3.25  戻り値</H4>
+
+<P>
+データベースの作成が成功した場合は0。エラーが発生した場合は非0。
+
+</P>
+
+<H4>8.4.3.26  エラー</H4>
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+
+<H4>8.4.3.27  例</H4>
+
+
+<PRE>
+if(mysql_create_db(&#38;mysql, "my_database"))
+{
+   fprintf(stderr, "Failed to create new database.  Error: %s\n",
+           mysql_error(&#38;mysql));
+}
+</PRE>
+
+<P>
+<A NAME="IDX1534"></A>
+
+
+<H4><A NAME="mysql_data_seek" HREF="manual.ja_toc.html#mysql_data_seek">8.4.3.28  <CODE>mysql_data_seek()</CODE></A></H4>
+
+<P>
+<CODE>void mysql_data_seek(MYSQL_RES *result, unsigned long long offset)</CODE>
+
+</P>
+
+<H4>8.4.3.29  説明</H4>
+<P>
+クエリ結果セット中の任意のレコードにシークします。これは、結果セット構造体
+がクエリのすべての結果を持っていることを要求します。そのため、
+<CODE>mysql_data_seek()</CODE> は <CODE>mysql_store_result()</CODE> と共にだけ使用され、
+<CODE>mysql_use_result()</CODE> と共には使用できません。
+
+</P>
+<P>
+オフセットの値は <CODE>0</CODE> から <CODE>mysql_num_rows(result)-1</CODE> でなくては
+なりません。
+
+</P>
+
+<H4>8.4.3.30  戻り値</H4>
+
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.31  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1535"></A>
+
+
+<H4><A NAME="mysql_debug" HREF="manual.ja_toc.html#mysql_debug">8.4.3.32  <CODE>mysql_debug()</CODE></A></H4>
+
+<P>
+<CODE>void mysql_debug(char *debug)</CODE>
+
+</P>
+
+<H4>8.4.3.33  説明</H4>
+<P>
+与えられた文字列で <CODE>DBUG_PUSH</CODE> を行ないます。<CODE>mysql_debug()</CODE> 
+は Fred Fish が作成した debug library を使用します。この関数を使用するためには、デバッ
+グをサポートするように、クライアントライブラリをコンパイルする必要があり
+ます。
+ 「<A HREF="manual.ja_Porting.html#Debugging_server">G.1  MySQL server のデバッグ</A>」節参照.  「<A HREF="manual.ja_Porting.html#Debugging_client">G.2  Debugging a MySQL client</A>」節参照.
+
+</P>
+
+<H4>8.4.3.34  戻り値</H4>
+
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.35  エラー</H4>
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.36  例</H4>
+
+<P>
+次に示した呼び出しは、クライアントライブラリが、クライアントマシン上の 
+<TT>`/tmp/client.trace'</TT> にトレースファイルを生成します:
+
+</P>
+
+<PRE>
+mysql_debug("d:t:O,/tmp/client.trace");
+</PRE>
+
+<P>
+<A NAME="IDX1536"></A>
+
+
+<H4><A NAME="mysql_drop_db" HREF="manual.ja_toc.html#mysql_drop_db">8.4.3.37  <CODE>mysql_drop_db()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_drop_db(MYSQL *mysql, const char *db)</CODE>
+
+</P>
+
+<H4>8.4.3.38  説明</H4>
+<P>
+<CODE>db</CODE> 引数によって指定されたデータベースを破棄します。
+
+</P>
+<P>
+この関数は推奨されません。代わりに <CODE>mysql_query()</CODE> を使って、SQL
+<CODE>DROP DATABASE</CODE> ステートメントを発行することをお勧めします。
+
+</P>
+
+<H4>8.4.3.39  戻り値</H4>
+
+<P>
+データベースの破棄が成功した場合は0。エラーが発生した場合は非0。
+
+</P>
+
+<H4>8.4.3.40  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+
+<H4>8.4.3.41  例</H4>
+
+
+<PRE>
+if(mysql_drop_db(&#38;mysql, "my_database"))
+  fprintf(stderr, "Failed to drop the database: Error: %s\n",
+          mysql_error(&#38;mysql));
+</PRE>
+
+<P>
+<A NAME="IDX1537"></A>
+
+
+<H4><A NAME="mysql_dump_debug_info" HREF="manual.ja_toc.html#mysql_dump_debug_info">8.4.3.42  <CODE>mysql_dump_debug_info()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_dump_debug_info(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.43  説明</H4>
+
+<P>
+いくつかのデバッグ情報をログにダンプするようにサーバに指示します。この動
+作をするためには、接続されたユーザが <STRONG>process</STRONG> 権を持っていなけ
+ればなりません。
+
+</P>
+
+<H4>8.4.3.44  戻り値</H4>
+
+<P>
+コマンドが成功した場合は0。コマンドが失敗した場合は非0。
+
+</P>
+
+<H4>8.4.3.45  エラー</H4>
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1538"></A>
+
+
+<H4><A NAME="mysql_eof" HREF="manual.ja_toc.html#mysql_eof">8.4.3.46  <CODE>mysql_eof()</CODE></A></H4>
+
+<P>
+<CODE>my_bool mysql_eof(MYSQL_RES *result)</CODE>
+
+</P>
+
+<H4>8.4.3.47  説明</H4>
+
+<P>
+この関数は推奨されません。<CODE>mysql_errno()</CODE> か <CODE>mysql_error()</CODE> が
+代わりに使用できます。
+
+</P>
+<P>
+<CODE>mysql_eof()</CODE> は結果セットの最後のレコードが読まれたかどうかを調べま
+す。
+
+</P>
+<P>
+<CODE>mysql_store_result()</CODE> の呼び出しが成功して、結果セットを入手した場合、
+クライアントは一つのオペレーションですべてのセットを受け取ります。この場合、
+<CODE>mysql_fetch_row()</CODE> から返される <CODE>NULL</CODE> は、常に結果セットの終端
+に達したことを意味し、<CODE>mysql_eof()</CODE> を呼ぶ必要はありません。
+
+</P>
+<P>
+一方、結果セット取り出しの初期化のために <CODE>mysql_use_result()</CODE> を使用
+する場合、セットのレコードは <CODE>mysql_fetch_row()</CODE> を繰り返し呼ぶことに
+より、ひとつずつサーバから獲得されます。この処理中に接続上でエラーが発生し
+得るため、<CODE>mysql_fetch_row()</CODE> からの戻り値 <CODE>NULL</CODE> は、通常必ずし
+も結果セットの終端に達したことを意味しません。この場合 
+<CODE>mysql_eof()</CODE> を使用して、何が起こったかを検出できます。結果セットの
+終端に達した場合は <CODE>mysql_eof()</CODE> は非0値を返し、エラーが発生した場合
+は 0 を返します。
+
+</P>
+<P>
+歴史的に <CODE>mysql_eof()</CODE> は標準 <STRONG>MySQL</STRONG> エラー関数 
+<CODE>mysql_errno()</CODE> と <CODE>mysql_error()</CODE> 以前に遡ります。これらのエラー
+関数は同じ情報を提供するので、これらの使用が <CODE>mysql_eof()</CODE> よりも好ま
+れます。<CODE>mysql_eof()</CODE> は現在推奨されません。（実際、これらは多くの情
+報を提供します。エラー関数はエラーが発生した時のエラーの理由を示しますが、
+<CODE>mysql_eof()</CODE> は真偽値だけを返します。）
+
+</P>
+
+<H4>8.4.3.48  戻り値</H4>
+
+<P>
+エラーが発生しなかった場合は0。結果セットの終端に達した場合は非0。
+
+</P>
+
+<H4>8.4.3.49  エラー</H4>
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.50  例</H4>
+
+<P>
+次の例は <CODE>mysql_eof</CODE> の使用方法を示します:
+
+</P>
+
+<PRE>
+mysql_query(&#38;mysql,"SELECT * FROM some_table");
+result = mysql_use_result(&#38;mysql);
+while((row = mysql_fetch_row(result)))
+{
+    // do something with data
+}
+if(!mysql_eof(result))  // mysql_fetch_row() failed due to an error
+{
+    fprintf(stderr, "Error: %s\n", mysql_error(&#38;mysql));
+}
+</PRE>
+
+<P>
+しかし、標準 <STRONG>MySQL</STRONG> エラー関数で同じ効果を得ることができます:
+
+</P>
+
+<PRE>
+mysql_query(&#38;mysql,"SELECT * FROM some_table");
+result = mysql_use_result(&#38;mysql);
+while((row = mysql_fetch_row(result)))
+{
+    // do something with data
+}
+if(mysql_errno(&#38;mysql))  // mysql_fetch_row() failed due to an error
+{
+    fprintf(stderr, "Error: %s\n", mysql_error(&#38;mysql));
+}
+</PRE>
+
+<P>
+<A NAME="IDX1539"></A>
+
+
+<H4><A NAME="mysql_errno" HREF="manual.ja_toc.html#mysql_errno">8.4.3.51  <CODE>mysql_errno()</CODE></A></H4>
+
+<P>
+<CODE>unsigned int mysql_errno(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.52  説明</H4>
+
+<P>
+<CODE>mysql</CODE> によって指定された接続上で、最後に呼び出された API 関数の成否のエラーコー
+ドを返します。戻り値0はエラーが発生しなかったことを意味します。クライア
+ントエラーメッセージ番号は <TT>`errmsg.h'</TT> にリストされています。サーバ
+エラーメッセージ番号は <TT>`mysqld_error.h'</TT> にリストされています。
+In the
+<STRONG>MySQL</STRONG> source distribution you can find a complete list of
+error messages and error numbers in the file <TT>`Docs/mysqld_error.txt'</TT>.
+
+</P>
+
+<H4>8.4.3.53  戻り値:</H4>
+
+<P>
+エラーコード値。エラーが発生していない場合は0。
+
+</P>
+
+<H4>8.4.3.54  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1540"></A>
+
+
+<H4><A NAME="mysql_error" HREF="manual.ja_toc.html#mysql_error">8.4.3.55  <CODE>mysql_error()</CODE></A></H4>
+
+<P>
+<CODE>char *mysql_error(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.56  説明</H4>
+
+<P>
+<CODE>mysql</CODE> によって指定された接続上で、 <CODE>mysql_error()</CODE> は
+最後に呼び出された API 関数の成否を、エラーメッセージとして返します。
+エラー発生しなかった場合は空文字列 (<CODE>""</CODE>) が返されます。
+これは次の２つのテストが同じであることを意味します:
+
+</P>
+
+<PRE>
+if(mysql_errno(&#38;mysql))
+{
+    // an error occurred
+}
+
+if(mysql_error(&#38;mysql)[0] != '\0')
+{
+    // an error occurred
+}
+</PRE>
+
+<P>
+クライアントエラーメッセージの言語は <STRONG>MySQL</STRONG> クラ
+イアントライブラリの再コンパイルで変更できます。現在はいくつかの言語で書かれた
+クライアントエラーメッセージを選択できます。
+ 「<A HREF="manual.ja_MySQL_Database_Administration.html#Languages">4.6.2  Non-English Error Messages</A>」節参照.
+
+</P>
+
+<H4>8.4.3.57  戻り値</H4>
+
+<P>
+エラーを表わす文字列。
+エラーが発生していない場合は空文字列。
+
+</P>
+
+<H4>8.4.3.58  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1541"></A>
+
+
+<H4><A NAME="mysql_escape_string" HREF="manual.ja_toc.html#mysql_escape_string">8.4.3.59  <CODE>mysql_escape_string()</CODE></A></H4>
+
+<P>
+You should use <CODE>mysql_real_escape_string()</CODE> instead!
+
+</P>
+<P>
+This is identical to <CODE>mysql_real_escape_string()</CODE> except that it
+takes the connection as the first
+argument. <CODE>mysql_real_escape_string()</CODE> will escape the string
+according to the current character set while
+<CODE>mysql_escape_string()</CODE> does not respect the current charset
+setting.
+
+</P>
+<P>
+<A NAME="IDX1542"></A>
+
+
+<H4><A NAME="mysql_fetch_field" HREF="manual.ja_toc.html#mysql_fetch_field">8.4.3.60  <CODE>mysql_fetch_field()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_FIELD *mysql_fetch_field(MYSQL_RES *result)</CODE>
+
+</P>
+
+<H4>8.4.3.61  説明</H4>
+
+<P>
+結果セットの一つのフィールドの定義を <CODE>MYSQL_FIELD</CODE> 構造体として返しま
+す。結果セット内の全てのフィールドについて情報を取り出すには、この関数を繰
+り返し呼んでください。<CODE>mysql_fetch_field()</CODE> はフィールドが残っていな
+いと <CODE>NULL</CODE> を返します。
+
+</P>
+<P>
+<CODE>mysql_fetch_field()</CODE> は、新しい <CODE>SELECT</CODE> クエリを実行するたびに、
+最初のフィールドについての情報を返すようにリセットされます。
+<CODE>mysql_fetch_field()</CODE> で返されるフィールドは 
+<CODE>mysql_field_seek()</CODE> の呼び出しにも影響をうけます。
+
+</P>
+<P>
+テーブルを <CODE>SELECT</CODE> するために <CODE>mysql_query()</CODE> を呼び、しかしま
+だ <CODE>mysql_store_result()</CODE> を呼んでいない場合、
+<CODE>mysql_fetch_field()</CODE> を <CODE>BLOB</CODE> フィールドの長さの問い合わせに使
+用すると、<STRONG>MySQL</STRONG> はデフォルトの blob 長 (8K bytes) を返します。
+(8K サイズになるのは、<STRONG>MySQL</STRONG> は <CODE>BLOB</CODE> の最大長を知らないから
+です。これはいつかコンフィグ可能になるべきです。) 一度結果セットを取り出せ
+ば、<CODE>field-&#62;max_length</CODE> は指定したクエリ内でのこのフィールドの最大値
+の長さを含みます。
+
+</P>
+
+<H4>8.4.3.62  戻り値</H4>
+
+<P>
+現在のフィールドの <CODE>MYSQL_FIELD</CODE> 構造体。フィールドが残っていない場合は 
+<CODE>NULL</CODE>。
+
+</P>
+
+<H4>8.4.3.63  エラー</H4>
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.64  例</H4>
+
+
+<PRE>
+MYSQL_FIELD *field;
+
+while((field = mysql_fetch_field(result)))
+{
+    printf("field name %s\n", field-&#62;name);
+}
+</PRE>
+
+<P>
+<A NAME="IDX1543"></A>
+
+
+<H4><A NAME="mysql_fetch_fields" HREF="manual.ja_toc.html#mysql_fetch_fields">8.4.3.65  <CODE>mysql_fetch_fields()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_FIELD *mysql_fetch_fields(MYSQL_RES *result)</CODE>
+
+</P>
+
+<H4>8.4.3.66  説明</H4>
+
+<P>
+結果セットのすべての <CODE>MYSQL_FIELD</CODE> 構造体の配列を返します。各構造体は
+結果セットの一つのフィールドのフィールド定義を提供します。
+
+</P>
+
+<H4>8.4.3.67  戻り値</H4>
+
+<P>
+結果セットの全ての項目の <CODE>MYSQL_FIELD</CODE> 構造体の配列。
+
+</P>
+
+<H4>8.4.3.68  エラー</H4>
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.69  例</H4>
+
+
+<PRE>
+unsigned int num_fields;
+unsigned int i;
+MYSQL_FIELD *fields;
+
+num_fields = mysql_num_fields(result);
+fields = mysql_fetch_fields(result);
+for(i = 0; i &#60; num_fields; i++)
+{
+   printf("Field %u is %s\n", i, fields[i].name);
+}
+</PRE>
+
+<P>
+<A NAME="IDX1544"></A>
+
+
+<H4><A NAME="mysql_fetch_field_direct" HREF="manual.ja_toc.html#mysql_fetch_field_direct">8.4.3.70  <CODE>mysql_fetch_field_direct()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_FIELD *mysql_fetch_field_direct(MYSQL_RES *result, unsigned int fieldnr)</CODE>
+
+</P>
+
+<H4>8.4.3.71  説明</H4>
+
+<P>
+結果セット中のフィールドを示すフィールド番号 <CODE>fieldnr</CODE> が与えられ、そ
+のフィールドのフィールド定義を <CODE>MYSQL_FIELD</CODE> 構造体として返します。こ
+の関数は任意のフィールドについての定義を取り出すことに使用できます。
+<CODE>fieldnr</CODE> の値は 0 から <CODE>mysql_num_fields(result)-1</CODE> の範囲にす
+べきです。
+
+</P>
+
+<H4>8.4.3.72  戻り値</H4>
+
+<P>
+指定されたフィールドの <CODE>MYSQL_FIELD</CODE> 構造体。
+
+</P>
+
+<H4>8.4.3.73  エラー</H4>
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.74  例</H4>
+
+
+<PRE>
+unsigned int num_fields;
+unsigned int i;
+MYSQL_FIELD *field;
+
+num_fields = mysql_num_fields(result);
+for(i = 0; i &#60; num_fields; i++)
+{
+    field = mysql_fetch_field_direct(result, i);
+    printf("Field %u is %s\n", i, field-&#62;name);
+}
+</PRE>
+
+<P>
+<A NAME="IDX1545"></A>
+
+
+<H4><A NAME="mysql_fetch_lengths" HREF="manual.ja_toc.html#mysql_fetch_lengths">8.4.3.75  <CODE>mysql_fetch_lengths()</CODE></A></H4>
+
+<P>
+<CODE>unsigned long *mysql_fetch_lengths(MYSQL_RES *result)</CODE>
+
+</P>
+
+<H4>8.4.3.76  説明</H4>
+
+<P>
+結果セット中の現在のレコードのフィールドの長さを返します。フィールドの値をコピーする場合、
+この長さ情報は最適化にも有用です。<CODE>strlen()</CODE> の呼び出しを回避できる
+ためです。
+さらに、結果セットがバイナリデータを持つ場合は、データのサイズを特定するためにこの関数を<EM>使わなければなりません</EM>。
+なぜなら <CODE>strlen()</CODE> は NULL 文字を含むフィールドについての結果を正しく返さないからです。
+
+</P>
+<P>
+空フィールドの長さと <CODE>NULL</CODE> 値を含むフィールドの長さは 0 です。この２
+つのケースを区別する方法については、<CODE>mysql_fetch_row()</CODE> の説明を参照
+して下さい。
+
+</P>
+
+<H4>8.4.3.77  戻り値</H4>
+
+<P>
+各フィールドのサイズ (終端 NUL 文字は含みません)を提供する unsigned long 
+整数の配列。
+エラーが発生した場合は <CODE>NULL</CODE>。
+
+</P>
+
+<H4>8.4.3.78  エラー</H4>
+<P>
+<CODE>mysql_fetch_lengths()</CODE> は結果セットの現在のレコードについてだけ有効
+です。<CODE>mysql_fetch_row()</CODE> を呼び出す前、または結果の全てのレコードを
+取り出した後にこれを呼んだ場合、<CODE>NULL</CODE> が返されます。
+
+</P>
+
+<H4>8.4.3.79  例</H4>
+
+
+<PRE>
+MYSQL_ROW row;
+unsigned long *lengths;
+unsigned int num_fields;
+unsigned int i;
+
+row = mysql_fetch_row(result);
+if (row)
+{
+    num_fields = mysql_num_fields(result);
+    lengths = mysql_fetch_lengths(result);
+    for(i = 0; i &#60; num_fields; i++)
+    {
+         printf("Column %u is %lu bytes in length.\n", i, lengths[i]);
+    }
+}
+</PRE>
+
+<P>
+<A NAME="IDX1546"></A>
+
+
+<H4><A NAME="mysql_fetch_row" HREF="manual.ja_toc.html#mysql_fetch_row">8.4.3.80  <CODE>mysql_fetch_row()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_ROW mysql_fetch_row(MYSQL_RES *result)</CODE>
+
+</P>
+
+<H4>8.4.3.81  説明</H4>
+
+<P>
+結果セットの次のレコードを取り出します。<CODE>mysql_store_result()</CODE> の後に使用すると、
+これ以上取り出すレコードがない時は、<CODE>NULL</CODE> を返します。
+<CODE>mysql_use_result()</CODE> の後に使用するなら、
+これ以上取り出すレコードがない場合やエラーが発生した場合に <CODE>NULL</CODE> を返します。
+
+</P>
+<P>
+レコード内の値の数は <CODE>mysql_num_fields(result)</CODE> によって与えられます。
+<CODE>row</CODE> が <CODE>mysql_fetch_row()</CODE> の呼び出しからの戻り値を保持する場
+合、値へのポインタは <CODE>row[0]</CODE> から 
+<CODE>row[mysql_num_fields(result)-1</CODE> としてアクセスされます。レコード内の 
+<CODE>NULL</CODE> 値は<CODE>NULL</CODE> ポインタによって示されます。
+
+</P>
+<P>
+レコードのフィールド値の長さは、<CODE>mysql_fetch_lengths()</CODE> の呼び出しで
+獲得できます。空フィールドと <CODE>NULL</CODE> を含むフィールドはどちらも長さ 
+0 を持ちます; フィールド値のポインタをチェックすることで、これらを区別でき
+ます。ポインタが <CODE>NULL</CODE> の場合、フィールドは <CODE>NULL</CODE> です; そうで
+なければフィールドは空です。
+
+</P>
+
+<H4>8.4.3.82  戻り値</H4>
+
+<P>
+次のレコードの <CODE>MYSQL_ROW</CODE> 構造体、エラーが発生したか、もう取り出すレ
+コードがない場合は <CODE>NULL</CODE>。
+
+</P>
+
+<H4>8.4.3.83  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+
+<H4>8.4.3.84  例</H4>
+
+
+<PRE>
+MYSQL_ROW row;
+unsigned int num_fields;
+unsigned int i;
+
+num_fields = mysql_num_fields(result);
+while ((row = mysql_fetch_row(result)))
+{
+   unsigned long *lengths;
+   lengths = mysql_fetch_lengths(result);
+   for(i = 0; i &#60; num_fields; i++)
+   {
+       printf("[%.*s] ", (int) lengths[i], row[i] ? row[i] : "NULL");
+   }
+   printf("\n");
+}
+</PRE>
+
+<P>
+<A NAME="IDX1547"></A>
+
+
+<H4><A NAME="mysql_field_count" HREF="manual.ja_toc.html#mysql_field_count">8.4.3.85  <CODE>mysql_field_count()</CODE></A></H4>
+
+<P>
+<CODE>unsigned int mysql_field_count(MYSQL *mysql)</CODE>
+
+</P>
+<P>
+3.22.24 より前の <CODE>MySQL</CODE> バージョンを使用している場合、
+<CODE>unsigned int mysql_num_fields(MYSQL *mysql)</CODE> を代わりに使用すべきで
+す。
+
+</P>
+
+<H4>8.4.3.86  説明</H4>
+
+<P>
+接続上の最後のクエリのフィールド数を返します。
+
+</P>
+<P>
+この関数は通常 <CODE>mysql_store_result()</CODE> が <CODE>NULL</CODE> を返した時（そし
+てこのように結果セットポインタを持っていない時）に使用されます。この場合、
+<CODE>mysql_store_result()</CODE> が空でない結果を提供すべきかどうかを調べるため
+に、<CODE>mysql_field_count()</CODE> を呼び出すことができます。これは、クエリが 
+<CODE>SELECT</CODE>（または <CODE>SELECT</CODE>に似た）ステートメントであるかを知るこ
+と無しに、クライアントプログラムに、適切な行動をとらせることができます。下
+に示される例は、これをどのように行なうことができるかを説明しています。
+
+</P>
+<P>
+ 「<A HREF="manual.ja_Clients.html#NULL_mysql_store_result">8.4.5.1  <CODE>mysql_query()</CODE> が成功を返した後、<CODE>mysql_store_result()</CODE> が <CODE>NULL</CODE> を返す時があるのは何故？</A>」節参照.
+
+</P>
+
+<H4>8.4.3.87  戻り値</H4>
+
+<P>
+結果セット中のフィールド番号を表す unsigned integer。
+
+</P>
+
+<H4>8.4.3.88  エラー</H4>
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.89  例</H4>
+
+
+<PRE>
+MYSQL_RES *result;
+unsigned int num_fields;
+unsigned int num_rows;
+
+if (mysql_query(&#38;mysql,query_string))
+{
+    // error
+}
+else // query succeeded, process any data returned by it
+{
+    result = mysql_store_result(&#38;mysql);
+    if (result)  // there are rows
+    {
+        num_fields = mysql_num_fields(result);
+        // retrieve rows, then call mysql_free_result(result)
+    }
+    else  // mysql_store_result() returned nothing; should it have?
+    {
+        if(mysql_field_count(&#38;mysql) == 0)
+        {
+            // query does not return data
+            // (it was not a SELECT)
+            num_rows = mysql_affected_rows(&#38;mysql);
+        }
+        else // mysql_store_result() should have returned data
+        {
+            fprintf(stderr, "Error: %s\n", mysql_error(&#38;mysql));
+        }
+    }
+}
+</PRE>
+
+<P>
+別の方法は、<CODE>mysql_field_count(&#38;mysql)</CODE> 呼び出しを 
+<CODE>mysql_errno(&#38;mysql)</CODE> に置き換えることです。この場合、ステートメント
+が <CODE>SELECT</CODE> かどうかを <CODE>mysql_field_count()</CODE> の値から推測するの
+ではなく、直接 <CODE>mysql_store_result()</CODE> からのエラーをチェックします。
+
+</P>
+<P>
+<A NAME="IDX1548"></A>
+
+
+<H4><A NAME="mysql_field_seek" HREF="manual.ja_toc.html#mysql_field_seek">8.4.3.90  <CODE>mysql_field_seek()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_FIELD_OFFSET mysql_field_seek(MYSQL_RES *result, MYSQL_FIELD_OFFSET offset)</CODE>
+
+</P>
+
+<H4>8.4.3.91  説明</H4>
+
+<P>
+与えられたオフセットにフィールドカーソルを設定します。次の 
+<CODE>mysql_fetch_field()</CODE> の呼び出しはそのオフセットに対応したフィールドを取
+り出します。
+
+</P>
+<P>
+レコードの最初にシークするには、0 の <CODE>offset</CODE> 値を渡してください。
+
+</P>
+
+<H4>8.4.3.92  戻り値</H4>
+
+<P>
+フィールドカーソルの前の値。
+
+</P>
+
+<H4>8.4.3.93  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1549"></A>
+
+
+<H4><A NAME="mysql_field_tell" HREF="manual.ja_toc.html#mysql_field_tell">8.4.3.94  <CODE>mysql_field_tell()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_FIELD_OFFSET mysql_field_tell(MYSQL_RES *result)</CODE>
+
+</P>
+
+<H4>8.4.3.95  説明</H4>
+
+<P>
+最後の <CODE>mysql_fetch_field()</CODE> に使用したフィールドカーソルの位置を返
+します。この値は <CODE>mysql_field_seek()</CODE> への引数として使用できます。
+
+</P>
+
+<H4>8.4.3.96  戻り値</H4>
+
+<P>
+フィールドカーソルの現在のオフセット。
+
+</P>
+
+<H4>8.4.3.97  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1550"></A>
+
+
+<H4><A NAME="mysql_free_result" HREF="manual.ja_toc.html#mysql_free_result">8.4.3.98  <CODE>mysql_free_result()</CODE></A></H4>
+
+<P>
+<CODE>void mysql_free_result(MYSQL_RES *result)</CODE>
+
+</P>
+
+<H4>8.4.3.99  説明</H4>
+
+<P>
+<CODE>mysql_store_result()</CODE>, <CODE>mysql_use_result()</CODE>,
+<CODE>mysql_list_dbs()</CODE> 等によって結果セットに割り当てられたメモリを解放
+します。結果セットで何かを行なった時、<CODE>mysql_free_result()</CODE> を呼び
+出してそれが使用したメモリを解放する必要があります。
+
+</P>
+
+<H4>8.4.3.100  戻り値</H4>
+
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.101  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1551"></A>
+
+
+<H4><A NAME="mysql_get_client_info" HREF="manual.ja_toc.html#mysql_get_client_info">8.4.3.102  <CODE>mysql_get_client_info()</CODE></A></H4>
+
+<P>
+<CODE>char *mysql_get_client_info(void)</CODE>
+
+</P>
+
+<H4>8.4.3.103  説明</H4>
+
+<P>
+クライアントライブラリバージョンを表わす文字列を返します。
+
+</P>
+
+<H4>8.4.3.104  戻り値</H4>
+
+<P>
+<STRONG>MySQL</STRONG> クライアントライブラリバージョンを表わす文字列。
+
+</P>
+
+<H4>8.4.3.105  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1552"></A>
+
+
+<H4><A NAME="mysql_get_host_info" HREF="manual.ja_toc.html#mysql_get_host_info">8.4.3.106  <CODE>mysql_get_host_info()</CODE></A></H4>
+
+<P>
+<CODE>char *mysql_get_host_info(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.107  説明</H4>
+
+<P>
+使用中の接続タイプを表わす文字列を返します。サーバのホスト名を含みます。
+
+</P>
+
+<H4>8.4.3.108  戻り値</H4>
+
+<P>
+サーバホスト名と接続タイプを表わす文字列。
+
+</P>
+
+<H4>8.4.3.109  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1553"></A>
+
+
+<H4><A NAME="mysql_get_proto_info" HREF="manual.ja_toc.html#mysql_get_proto_info">8.4.3.110  <CODE>mysql_get_proto_info()</CODE></A></H4>
+
+<P>
+<CODE>unsigned int mysql_get_proto_info(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.111  説明</H4>
+
+<P>
+現在の接続に使用されているプロトコルバージョンを返します。
+
+</P>
+
+<H4>8.4.3.112  Return Values</H4>
+
+<P>
+現在の接続に使用されているプロトコルバージョンを表わす符号無し整数値。
+
+</P>
+
+<H4>8.4.3.113  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1554"></A>
+
+
+<H4><A NAME="mysql_get_server_info" HREF="manual.ja_toc.html#mysql_get_server_info">8.4.3.114  <CODE>mysql_get_server_info()</CODE></A></H4>
+
+<P>
+<CODE>char *mysql_get_server_info(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.115  説明</H4>
+
+<P>
+サーバのバージョン番号を表わす文字列を返します。
+
+</P>
+
+<H4>8.4.3.116  戻り値</H4>
+
+<P>
+サーバのバージョン番号を表わす文字列。
+
+</P>
+
+<H4>8.4.3.117  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1555"></A>
+
+
+<H4><A NAME="mysql_info" HREF="manual.ja_toc.html#mysql_info">8.4.3.118  <CODE>mysql_info()</CODE></A></H4>
+
+<P>
+<CODE>char * mysql_info(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.119  説明</H4>
+
+<P>
+最も最近に実行されたクエリについての情報を文字列で返します。が、
+以下に挙げる構文に限ります。
+他の構文では<CODE>mysql_info()</CODE> は <CODE>NULL</CODE> を返します。
+文字列の形式
+はクエリの型によって様々です。次に説明します (数値は例です; 文字列はクエ
+リに適した値を含みます):
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>INSERT INTO ... SELECT ...</CODE>
+<DD>
+String format: <CODE>Records: 100 Duplicates: 0 Warnings: 0</CODE>
+<DT><CODE>INSERT INTO ... VALUES (...),(...),(...)...</CODE>
+<DD>
+String format: <CODE>Records: 3  Duplicates: 0  Warnings: 0</CODE>
+<DT><CODE>LOAD DATA INFILE ...</CODE>
+<DD>
+String format: <CODE>Records: 1 Deleted: 0 Skipped: 0 Warnings: 0</CODE>
+<DT><CODE>ALTER TABLE</CODE>
+<DD>
+String format: <CODE>Records: 3 Duplicates: 0 Warnings: 0</CODE>
+<DT><CODE>UPDATE</CODE>
+<DD>
+String format: <CODE>Rows matched: 40 Changed: 40 Warnings: 0</CODE>
+</DL>
+
+<P>
+注意: 複数の値リストがステートメント中に記述された場合にだけ、
+<CODE>mysql_info()</CODE> は、<CODE>INSERT ... VALUES</CODE> ステートメントに非
+<CODE>NULL</CODE>値を返します。
+
+</P>
+
+<H4>8.4.3.120  戻り値</H4>
+
+<P>
+最も最近に実行されたクエリについての追加情報を表わす文字列。クエリに有効
+な情報がない場合は <CODE>NULL</CODE> ポインタ。
+
+</P>
+
+<H4>8.4.3.121  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1556"></A>
+
+
+<H4><A NAME="mysql_init" HREF="manual.ja_toc.html#mysql_init">8.4.3.122  <CODE>mysql_init()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL * mysql_init(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.123  説明</H4>
+
+<P>
+<CODE>mysql_real_connect()</CODE> に適した <CODE>MYSQL</CODE> オブジェクトの割り当て
+または初期化を行ないます。引数が <CODE>NULL</CODE> ポインタの場合、関数は新し
+いオブジェクトを割り当てて初期化し返します。そうでなければオブジェクトは
+初期化され、オブジェクトのアドレスが返されます。新しいオブジェクトが割り
+当てられた場合、<CODE>mysql_close()</CODE> はこのオブジェクトを解放します。
+
+</P>
+
+<H4>8.4.3.124  戻り値</H4>
+
+<P>
+初期化された <CODE>MYSQL*</CODE> ハンドル、または新しいオブジェクトを割り当て
+るのに十分なメモリがなかった場合は <CODE>NULL</CODE> ポインタ。
+
+</P>
+
+<H4>8.4.3.125  エラー</H4>
+<P>
+メモリ不足の場合は <CODE>NULL</CODE> が返されます。
+
+</P>
+<P>
+<A NAME="IDX1557"></A>
+
+
+<H4><A NAME="mysql_insert_id" HREF="manual.ja_toc.html#mysql_insert_id">8.4.3.126  <CODE>mysql_insert_id()</CODE></A></H4>
+
+<P>
+<CODE>my_ulonglong mysql_insert_id(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.127  説明</H4>
+
+<P>
+前のクエリによって <CODE>AUTO_INCREMENT</CODE> フィールドに生成された ID を返します。
+<CODE>AUTO_INCREMENT</CODE> フィールドを含むテーブルに <CODE>INSERT</CODE> クエリを
+実行した後で、この関数を使用してください。
+
+</P>
+<P>
+注意: 前のクエリが <CODE>AUTO_INCREMENT</CODE> 値を生成しなかった場合、
+<CODE>mysql_insert_id()</CODE> は <CODE>0</CODE> を返します。後のために値を保存する必
+要がある場合、値を生成するクエリの直後に <CODE>mysql_insert_id()</CODE> を呼び出
+すことに気をつけてください。
+
+</P>
+<P>
+<CODE>mysql_insert_id()</CODE> is updated after <CODE>INSERT</CODE> and
+<CODE>UPDATE</CODE> statements that generate an <CODE>AUTO_INCREMENT</CODE> value or
+that set a column value to <CODE>LAST_INSERT_ID(expr)</CODE>.
+ 「<A HREF="manual.ja_Reference.html#Miscellaneous_functions">6.3.5.2  その他の関数</A>」節参照.
+
+</P>
+<P>
+また、SQL <CODE>LAST_INSERT_ID()</CODE> 常に最後に生成された 
+<CODE>AUTO_INCREMENT</CODE> 値を含み、クエリ間でリセットされないことに注意して下
+さい。その関数の値はサーバ内で保守されるからです。
+
+</P>
+
+<H4>8.4.3.128  戻り値</H4>
+
+<P>
+前のクエリによって更新された <CODE>AUTO_INCREMENT</CODE> フィールドの値。接続上
+の前のクエリがない場合、クエリが <CODE>AUTO_INCREMENT</CODE> 値を更新しなかった
+場合には 0 が返ります。
+
+</P>
+
+<H4>8.4.3.129  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1558"></A>
+
+
+<H4><A NAME="mysql_kill" HREF="manual.ja_toc.html#mysql_kill">8.4.3.130  <CODE>mysql_kill()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_kill(MYSQL *mysql, unsigned long pid)</CODE>
+
+</P>
+
+<H4>8.4.3.131  説明</H4>
+
+<P>
+<CODE>pid</CODE> で指定されたスレッドを殺すようにサーバに頼みます。
+
+</P>
+
+<H4>8.4.3.132  戻り値</H4>
+
+<P>
+成功時0。失敗時非0。
+
+</P>
+
+<H4>8.4.3.133  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1559"></A>
+
+
+<H4><A NAME="mysql_list_dbs" HREF="manual.ja_toc.html#mysql_list_dbs">8.4.3.134  <CODE>mysql_list_dbs()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_RES *mysql_list_dbs(MYSQL *mysql, const char *wild)</CODE>
+
+</P>
+
+<H4>8.4.3.135  説明</H4>
+
+<P>
+サーバ上の、<CODE>wild</CODE> 引数で指定された簡易正規表現に適合する、データベー
+ス名からなる結果セットを返します。<CODE>wild</CODE> はワイルドカード文字 
+<SAMP>`%'</SAMP> または <SAMP>`_'</SAMP> を含むことができます。また、全てのデータベース
+に適合するように <CODE>NULL</CODE> ポインタにできます。<CODE>mysql_list_dbs()</CODE> 
+の呼び出しはクエリ <CODE>SHOW databases [LIKE wild]</CODE> を実行するのと同様
+です。
+
+</P>
+<P>
+<CODE>mysql_free_result()</CODE> で結果セットを解放する必要があります。
+
+</P>
+
+<H4>8.4.3.136  戻り値</H4>
+
+<P>
+成功時 <CODE>MYSQL_RES</CODE> 結果セット。失敗した場合は <CODE>NULL</CODE>。
+
+</P>
+
+<H4>8.4.3.137  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_OUT_OF_MEMORY</CODE>
+<DD>
+メモリ不足。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1560"></A>
+
+
+<H4><A NAME="mysql_list_fields" HREF="manual.ja_toc.html#mysql_list_fields">8.4.3.138  <CODE>mysql_list_fields()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_RES *mysql_list_fields(MYSQL *mysql, const char *table, const char *wild)</CODE>
+
+</P>
+
+<H4>8.4.3.139  説明</H4>
+
+<P>
+与えられたテーブル内の、<CODE>wild</CODE> 引数で指定された簡易正規表現に適合する
+フィールド名からなる結果セットを返します。<CODE>wild</CODE> はワイルドカー
+ド文字 <SAMP>`%'</SAMP> または <SAMP>`_'</SAMP> を含むことができます。また、全てのフィー
+ルドに適合するように <CODE>NULL</CODE> ポインタにできます。
+<CODE>mysql_list_fields()</CODE> はクエリ <CODE>SHOW COLUMNS FROM table [LIKE
+wild]</CODE> を実行するのと同様です。
+
+</P>
+<P>
+注意: <CODE>mysql_list_fields()</CODE> の代わりに <CODE>SHOW COLUMNS FROM
+tbl_name</CODE> の使用を勧めます。
+
+</P>
+<P>
+<CODE>mysql_free_result()</CODE> で結果セットを解放する必要があります。
+
+</P>
+
+<H4>8.4.3.140  戻り値</H4>
+
+<P>
+成功時 <CODE>MYSQL_RES</CODE> 結果セット。エラーが発生した場合は <CODE>NULL</CODE>。
+
+</P>
+
+<H4>8.4.3.141  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1561"></A>
+
+
+<H4><A NAME="mysql_list_processes" HREF="manual.ja_toc.html#mysql_list_processes">8.4.3.142  <CODE>mysql_list_processes()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_RES *mysql_list_processes(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.143  説明</H4>
+
+<P>
+現在のサーバスレッドを示す結果セットを返します。これは <CODE>mysqladmin
+processlist</CODE> や <CODE>SHOW PROCESSLIST</CODE> クエリで
+報告されるものと同じ種類の情報です。
+
+</P>
+<P>
+<CODE>mysql_free_result()</CODE> で結果セットを解放する必要があります。
+
+</P>
+
+<H4>8.4.3.144  戻り値</H4>
+
+<P>
+成功時 <CODE>MYSQL_RES</CODE> 結果セット。失敗した場合は <CODE>NULL</CODE>。
+
+</P>
+
+<H4>8.4.3.145  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1562"></A>
+
+
+<H4><A NAME="mysql_list_tables" HREF="manual.ja_toc.html#mysql_list_tables">8.4.3.146  <CODE>mysql_list_tables()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_RES *mysql_list_tables(MYSQL *mysql, const char *wild)</CODE>
+
+</P>
+
+<H4>8.4.3.147  説明</H4>
+
+<P>
+<CODE>wild</CODE> 引数で指定された簡易正規表現に適合する、現在のデータベース
+内のテーブル名からなる結果セットを返します。<CODE>wild</CODE> はワイルドカード
+文字 <SAMP>`%'</SAMP> または <SAMP>`_'</SAMP> を含むことができます。また、全てのテーブル
+に適合するように <CODE>NULL</CODE> ポインタにできます。
+<CODE>mysql_list_tables()</CODE> はクエリ <CODE>SHOW tables [LIKE wild]</CODE> を実
+行するのと同様です。
+
+</P>
+<P>
+<CODE>mysql_free_result()</CODE> で結果セットを解放する必要があります。
+
+</P>
+
+<H4>8.4.3.148  戻り値</H4>
+
+<P>
+成功時 <CODE>MYSQL_RES</CODE> 結果セット。失敗した場合は <CODE>NULL</CODE>。
+
+</P>
+
+<H4>8.4.3.149  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1563"></A>
+<A NAME="IDX1564"></A>
+
+
+<H4><A NAME="mysql_num_fields" HREF="manual.ja_toc.html#mysql_num_fields">8.4.3.150  <CODE>mysql_num_fields()</CODE></A></H4>
+
+<P>
+<CODE>unsigned int mysql_num_fields(MYSQL_RES *result)</CODE>
+
+</P>
+<P>
+または
+
+</P>
+<P>
+<CODE>unsigned int mysql_num_fields(MYSQL *mysql)</CODE>
+
+</P>
+<P>
+二番目の形式は <STRONG>MySQL</STRONG> 3.23 以上では動作しません。<CODE>MYSQL*</CODE> 引
+数を通す場合は、代わりに <CODE>unsigned int mysql_field_count(MYSQL*mysql)</CODE>
+を使用しなくてはいけません。
+
+</P>
+
+<H4>8.4.3.151  説明</H4>
+
+<P>
+結果セット中のフィールド数を返します。
+
+</P>
+<P>
+注意: 結果セットへのポインタまたは接続ハンドルのいずれかからフィールドの数
+を得ることができます。<CODE>mysql_store_result()</CODE> または 
+<CODE>mysql_use_result()</CODE> が <CODE>NULL</CODE> を返した（つまり結果セットポイン
+タが無い）場合、接続ハンドルを使用します。この場合、
+<CODE>mysql_field_count()</CODE> を呼び出して、<CODE>mysql_store_result()</CODE> が空
+でない結果を提供すべきかどうかを決定できます。これにより、クライアントプロ
+グラムはクエリが <CODE>SELECT</CODE>（または <CODE>SELECT</CODE> に似た）ステートメン
+トだったかどうかを知ることなしに、適切な行動を取ることができます。以下に示
+す例はこれをどのように行なうかを説明しています。
+
+</P>
+<P>
+ 「<A HREF="manual.ja_Clients.html#NULL_mysql_store_result">8.4.5.1  <CODE>mysql_query()</CODE> が成功を返した後、<CODE>mysql_store_result()</CODE> が <CODE>NULL</CODE> を返す時があるのは何故？</A>」節参照.
+
+</P>
+
+<H4>8.4.3.152  戻り値</H4>
+
+<P>
+結果セット中のフィールド数を表わす符号無し整数。
+
+</P>
+
+<H4>8.4.3.153  エラー</H4>
+<P>
+無し。
+
+</P>
+
+<H4>8.4.3.154  例</H4>
+
+
+<PRE>
+MYSQL_RES *result;
+unsigned int num_fields;
+unsigned int num_rows;
+
+if (mysql_query(&#38;mysql,query_string))
+{
+    // error
+}
+else // query succeeded, process any data returned by it
+{
+    result = mysql_store_result(&#38;mysql);
+    if (result)  // there are rows
+    {
+        num_fields = mysql_num_fields(result);
+        // retrieve rows, then call mysql_free_result(result)
+    }
+    else  // mysql_store_result() returned nothing; should it have?
+    {
+        if (mysql_errno(&#38;mysql))
+	{
+           fprintf(stderr, "Error: %s\n", mysql_error(&#38;mysql));
+	}
+        else if (mysql_field_count(&#38;mysql) == 0)
+        {
+            // query does not return data
+            // (it was not a SELECT)
+            num_rows = mysql_affected_rows(&#38;mysql);
+        }
+    }
+}
+</PRE>
+
+<P>
+（結果セットが返るべきクエリであることを知っている場合の）方法は、
+<CODE>mysql_errno(&#38;mysql)</CODE> コールを <CODE>mysql_field_count(&#38;mysql)</CODE> が 
+0 かどうかのチェックに置き換えることです。これは何かが悪い場合にだけ起こり
+ます。
+
+</P>
+<P>
+<A NAME="IDX1565"></A>
+
+
+<H4><A NAME="mysql_num_rows" HREF="manual.ja_toc.html#mysql_num_rows">8.4.3.155  <CODE>mysql_num_rows()</CODE></A></H4>
+
+<P>
+<CODE>my_ulonglong mysql_num_rows(MYSQL_RES *result)</CODE>
+
+</P>
+
+<H4>8.4.3.156  説明</H4>
+
+<P>
+結果セット中のレコード数を返します。
+
+</P>
+<P>
+<CODE>mysql_num_rows()</CODE> の使用は、結果セットを返すのに 
+<CODE>mysql_store_result()</CODE> か <CODE>mysql_use_result()</CODE> のどちらを使用す
+るかに依存します。<CODE>mysql_store_result()</CODE> を使用する場合、
+<CODE>mysql_num_rows()</CODE> はすぐに呼ぶことができます。
+<CODE>mysql_use_result()</CODE> を使用する場合、結果セットの全てのレコードが取り
+出されるまで、<CODE>mysql_num_rows()</CODE> は正しい値を返しません。
+
+</P>
+
+<H4>8.4.3.157  戻り値</H4>
+
+<P>
+結果セットのレコード数。
+
+</P>
+
+<H4>8.4.3.158  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1566"></A>
+
+
+<H4><A NAME="mysql_options" HREF="manual.ja_toc.html#mysql_options">8.4.3.159  <CODE>mysql_options()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_options(MYSQL *mysql, enum mysql_option option, const char *arg)</CODE>
+
+</P>
+
+<H4>8.4.3.160  説明</H4>
+
+<P>
+特別な接続オプションを設定し、接続の振舞いに影響を与えるために使用できます。
+この関数は複数のオプションを設定するために複数回呼ぶことができます。
+
+</P>
+<P>
+<CODE>mysql_options()</CODE> は <CODE>mysql_init()</CODE> の後で、
+<CODE>mysql_connect()</CODE> や <CODE>mysql_real_connect()</CODE> の前に呼ばれなければ
+なりません。
+
+</P>
+<P>
+<CODE>option</CODE> 引数は設定したいオプションです; <CODE>arg</CODE> 引数はオプション
+に対する値です。オプションが整数の場合、<CODE>arg</CODE> は整数値へのポインタで
+す。
+
+</P>
+<P>
+有効なオプション値:
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>オプション</STRONG> </TD><TD> <STRONG>引数型</STRONG> </TD><TD> <STRONG>機能</STRONG>
+</TR NOSAVE>
+<TR><TD><CODE>MYSQL_OPT_CONNECT_TIMEOUT</CODE> </TD><TD> <CODE>unsigned int *</CODE> </TD><TD> 接続タイムアウト（秒）。
+</TR NOSAVE>
+<TR><TD><CODE>MYSQL_OPT_COMPRESS</CODE> </TD><TD> 使用しない </TD><TD> 圧縮クライアント／サーバプロトコルを使用する。
+</TR NOSAVE>
+<TR><TD><CODE>MYSQL_OPT_NAMED_PIPE</CODE> </TD><TD> 使用しない </TD><TD> NT 上の <STRONG>MySQL</STRONG> サーバへの接続に名前付パイプを使用する。
+</TR NOSAVE>
+<TR><TD><CODE>MYSQL_INIT_COMMAND</CODE> </TD><TD> <CODE>char *</CODE> </TD><TD> <STRONG>MySQL</STRONG> サーバへの接続時に実行するコマンド。再接続時に自動的に再実行される。
+</TR NOSAVE>
+<TR><TD><CODE>MYSQL_READ_DEFAULT_FILE</CODE> </TD><TD> <CODE>char *</CODE> </TD><TD> <TT>`my.cnf'</TT> の代わりに指定されたオプションファイルからオプションを読み込む。
+</TR NOSAVE>
+<TR><TD><CODE>MYSQL_READ_DEFAULT_GROUP</CODE> </TD><TD> <CODE>char *</CODE> </TD><TD> <TT>`my.cnf'</TT> または <CODE>MYSQL_READ_DEFAULT_FILE</CODE> で指定されたファイルから指定されたグループのオプションを読み込む。
+</TR>
+</TABLE>
+
+<P>
+注意: <CODE>MYSQL_READ_DEFAULT_FILE</CODE> と <CODE>MYSQL_READ_DEFAULT_GROUP</CODE> を
+使用する場合、<CODE>client</CODE> グループが常に読まれます。
+
+</P>
+<P>
+オプションファイル中に指定されるグループは次のオプションを含むことができま
+す:
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><CODE>connect_timeout</CODE> </TD><TD> 接続タイムアウト（秒）。On Linux this timeout is also used for waiting for the first answer from the server.
+</TR NOSAVE>
+<TR><TD><CODE>compress</CODE> </TD><TD> 圧縮クライアント／サーバプロトコルを使用する。
+</TR NOSAVE>
+<TR><TD><CODE>database</CODE> </TD><TD> 接続命令中でデータベースが指定されない場合、このデータベースに接続する。
+</TR NOSAVE>
+<TR><TD><CODE>debug</CODE> </TD><TD> デバッグオプション
+</TR NOSAVE>
+<TR><TD><CODE>host</CODE> </TD><TD> デフォルトホスト名
+</TR NOSAVE>
+<TR><TD><CODE>init-command</CODE> </TD><TD> <STRONG>MySQL</STRONG> サーバへの接続時に実行するコマンド。再接続時に自動的に再実行される。
+</TR NOSAVE>
+<TR><TD><CODE>password</CODE> </TD><TD> デフォルトパスワード
+</TR NOSAVE>
+<TR><TD><CODE>pipe</CODE> </TD><TD> NT 上の <STRONG>MySQL</STRONG> サーバへの接続に名前付パイプを使用する。
+</TR NOSAVE>
+<TR><TD><CODE>port</CODE> </TD><TD> デフォルトポート番号
+</TR NOSAVE>
+<TR><TD><CODE>return-found-rows</CODE> </TD><TD> <CODE>UPDATE</CODE> 使用時、<CODE>mysql_info()</CODE> が更新された行の代わりに見つかった行を返すようにする。
+</TR NOSAVE>
+<TR><TD><CODE>socket</CODE> </TD><TD> デフォルトソケット番号
+</TR NOSAVE>
+<TR><TD><CODE>user</CODE> </TD><TD> デフォルトユーザ
+</TR>
+</TABLE>
+
+<P>
+Note that <CODE>timeout</CODE> has been replaced by <CODE>connect_timeout</CODE>, but
+<CODE>timeout</CODE> will still work for a while.
+
+</P>
+<P>
+オプションファイルについてのさらなる情報は、 「<A HREF="manual.ja_MySQL_Database_Administration.html#Option_files">4.1.2  my.cnf オプションファイル</A>」節 を参照して
+下さい。
+
+</P>
+
+<H4>8.4.3.161  戻り値</H4>
+
+<P>
+成功の場合は0。未知のオプションを使用した場合は非0。
+
+</P>
+
+<H4>8.4.3.162  例</H4>
+
+
+<PRE>
+MYSQL mysql;
+
+mysql_init(&#38;mysql);
+mysql_options(&#38;mysql,MYSQL_OPT_COMPRESS,0);
+mysql_options(&#38;mysql,MYSQL_READ_DEFAULT_GROUP,"odbc");
+if (!mysql_real_connect(&#38;mysql,"host","user","passwd","database",0,NULL,0))
+{
+    fprintf(stderr, "Failed to connect to database: Error: %s\n",
+          mysql_error(&#38;mysql));
+}
+</PRE>
+
+<P>
+上記は、圧縮クライアント／サーバプロトコルを使用し、<CODE>my.cnf</CODE> ファイル
+中の <CODE>odbc</CODE> セクションから追加オプションを読むように、クライアントに
+要求します。
+
+</P>
+<P>
+<A NAME="IDX1567"></A>
+
+
+<H4><A NAME="mysql_ping" HREF="manual.ja_toc.html#mysql_ping">8.4.3.163  <CODE>mysql_ping()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_ping(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.164  説明</H4>
+
+<P>
+サーバへの接続が動作しているかどうかをチェックします。ダウンしている場合
+は、自動的に再接続を試みます。
+
+</P>
+<P>
+この関数は、長い間静かにしているクライアントが、サーバが接続をクローズし
+たかどうかをチェック（と再接続）するために使用できます。
+
+</P>
+
+<H4>8.4.3.165  戻り値</H4>
+
+<P>
+サーバが生きている場合0。他の値はエラーを示します。
+
+</P>
+
+<H4>8.4.3.166  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1568"></A>
+
+
+<H4><A NAME="mysql_query" HREF="manual.ja_toc.html#mysql_query">8.4.3.167  <CODE>mysql_query()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_query(MYSQL *mysql, const char *query)</CODE>
+
+</P>
+
+<H4>8.4.3.168  説明</H4>
+<P>
+NULL 終端文字列 <CODE>query</CODE> で示される SQL クエリを実行します。クエリはひ
+とつの SQL ステートメントでなければなりません。終端のセミコロン
+(<SAMP>`;'</SAMP>)や <CODE>\g</CODE> をステートメントに追加すべきではありません。
+
+</P>
+<P>
+<CODE>mysql_query()</CODE> はバイナリデータを含むクエリには使用できません（バ
+イナリデータは <SAMP>`\0'</SAMP> 文字を含むことがあります。これはクエリ文字列の
+最後として解釈されます）。この場合、<CODE>mysql_real_query()</CODE> を代わりに
+使用してください。
+
+</P>
+<P>
+If you want to know if the query should return a result set or not, you can
+use <CODE>mysql_field_count()</CODE> to check for this.
+ 「<A HREF="manual.ja_Clients.html#mysql_field_count">8.4.3.85  <CODE>mysql_field_count()</CODE></A>」節参照.
+
+</P>
+
+<H4>8.4.3.169  戻り値</H4>
+
+<P>
+クエリが成功した場合は0。クエリが失敗した場合は非0。
+
+</P>
+
+<H4>8.4.3.170  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1569"></A>
+
+
+<H4><A NAME="mysql_real_connect" HREF="manual.ja_toc.html#mysql_real_connect">8.4.3.171  <CODE>mysql_real_connect()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL *mysql_real_connect(MYSQL *mysql, const char *host,
+                          const char *user, const char *passwd, const char *db,
+                          unsigned int port, const char *unix_socket,
+                          unsigned int client_flag)</CODE>
+
+</P>
+
+<H4>8.4.3.172  説明</H4>
+
+<P>
+<CODE>host</CODE> 上で動作している <STRONG>MySQL</STRONG> データベースエンジンへの接続
+の確立を試みます。
+<CODE>mysql_get_client_info()</CODE> 以外の他の API 関数を実行する前に、
+<CODE>mysql_real_connect()</CODE> が成功している必要があります。
+
+</P>
+<P>
+<CODE>mysql_real_connect()</CODE> を呼び出す前に、<CODE>MYSQL</CODE> 構造体を獲得ま
+たは初期化するために <CODE>mysql_init()</CODE> を呼ぶ必要があることに注意して
+ください。
+
+</P>
+
+<UL>
+<LI>
+
+最初のパラメータは既存の <CODE>MYSQL</CODE> 構造体のアドレスです。
+<CODE>mysql_real_connect()</CODE> を呼ぶ前に、<CODE>MYSQL</CODE> 構造体の初期化のため
+に <CODE>mysql_init()</CODE> を呼ぶ必要があります。
+<CODE>mysql_options()</CODE> 呼び出しで多くの接続オプションを変更できます。
+ 「<A HREF="manual.ja_Clients.html#mysql_options">8.4.3.159  <CODE>mysql_options()</CODE></A>」節参照。
+
+<LI>
+
+<CODE>host</CODE> の値はホスト名か IP アドレスのどちらでも可能です。
+<CODE>host</CODE> が <CODE>NULL</CODE> または文字列 <CODE>"localhost"</CODE> の場合はロー
+カルホストへの接続とみなされます。OS がソケットをサポートする場合(UNIX)
+または名前つきパイプをサポートする場合(Windows)、サーバへの TCP/IP 接続の
+代わりに使用されます。
+
+<LI>
+
+<CODE>user</CODE> パラメータはユーザの <STRONG>MySQL</STRONG> ログイン ID が入っています。
+<CODE>user</CODE> が <CODE>NULL</CODE> の場合、現在のユーザとみなされます。Windows
+ODBC 下では、現在のユーザは明示的に指定されなければなりません。UNIX 下で
+は現在のログイン名が適用されます。
+Windows ODBC では, カレントのユーザー名を与えなければなりません。
+ 「<A HREF="manual.ja_Clients.html#ODBC_administrator">8.3.2  ODBC 管理プログラムの各種項目を埋めるには？</A>」節参照.
+
+<LI>
+
+<CODE>passwd</CODE> パラメータは <CODE>user</CODE> のパスワードが入っています。
+もし <CODE>passwd</CODE> が <CODE>NULL</CODE> の場合、空白のパスワードフィールドを持つ 
+<CODE>user</CODE> テーブル内のレコードだけが適合チェックされます。このような方
+法で、パスワードが記述されたかどうかによってユーザが異なる権限を得るよう
+に、データベース管理者が <STRONG>MySQL</STRONG> 特権システムを設定することができ
+ます。
+
+注意: <CODE>mysql_connect()</CODE> を呼び出す前に <CODE>passwd</CODE> を暗号化しない
+でください。パスワードの暗号化はクライアント API で自動的に処理されます。
+
+<LI>
+
+<CODE>db</CODE> が <CODE>NULL</CODE> でない場合、接続はこの値をデフォルトデータベー
+スにセットします。
+
+<LI>
+
+<CODE>port</CODE> が 0 でない場合、値は TCP/IP 接続のポート番号として使用され
+ます。<CODE>host</CODE> パラメータが接続のタイプを決定することに注意してくださ
+い。
+
+<LI>
+
+<CODE>unix_socket</CODE> が <CODE>NULL</CODE> でない場合、文字列は使用されるソケット
+または名前つきパイプを記述します。<CODE>host</CODE> パラメータが接続のタイプを
+決定することに注意してください。
+
+<LI>
+
+client_flag の値は通常 0 ですが、とても特殊な状況のため次のフラグの組み
+合わせを設定できます:
+
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>フラグ名</STRONG> </TD><TD> <STRONG>フラグの意味</STRONG>
+</TR NOSAVE>
+<TR><TD><CODE>CLIENT_COMPRESS</CODE> </TD><TD> Use compression protocol.
+</TR NOSAVE>
+<TR><TD><CODE>CLIENT_FOUND_ROWS</CODE> </TD><TD> 影響された行数ではなく見つかった行数を返します
+</TR NOSAVE>
+<TR><TD><CODE>CLIENT_IGNORE_SPACE</CODE> </TD><TD> Allow spaces after function names. Makesall functions names reserved words.
+</TR NOSAVE>
+<TR><TD><CODE>CLIENT_INTERACTIVE</CODE> </TD><TD> Allow <CODE>interactive_timeout</CODE> seconds(instead of <CODE>wait_timeout</CODE> seconds) of inactivity before closing the connection.
+</TR NOSAVE>
+<TR><TD><CODE>CLIENT_NO_SCHEMA</CODE> </TD><TD> <CODE>db_name.tbl_name.col_name</CODE> を許しません。これは ODBC のためです; その構文を使用した場合、パーサがエラーを生成します。これはいくつかの ODBC プログラムのバグのトラップに役立ちます。
+</TR NOSAVE>
+<TR><TD><CODE>CLIENT_COMPRESS</CODE> </TD><TD> 圧縮プロトコルを使用します
+</TR NOSAVE>
+<TR><TD><CODE>CLIENT_ODBC</CODE> </TD><TD> クライアントが ODBC クライアント。これは <CODE>mysqld</CODE> をさらに ODBC-フレンドリに変更します。
+</TR NOSAVE>
+<TR><TD><CODE>CLIENT_SSL</CODE> </TD><TD> Use SSL (encrypted protocol).
+</TR>
+</TABLE>
+</UL>
+
+<P>
+<CODE>mysql_real_connect()</CODE> の最初の引数に <CODE>NULL</CODE> ポインタを記述す
+ることもできます。これは C API が接続構造体のメモリを割り当て、
+<CODE>mysql_close()</CODE> 呼び出し時に自動的に解放されます。この方法の不利な
+点は、接続が失敗した場合に <CODE>mysql_real_connect()</CODE> からのエラーメッ
+セージを取り出すことができないことです。
+
+</P>
+<P>
+最初の引数が <CODE>NULL</CODE> ポインタでない場合は、存在する <CODE>MYSQL</CODE> 構
+造体のアドレスであるべきです。
+
+</P>
+
+<H4>8.4.3.173  戻り値</H4>
+
+<P>
+接続が成功した場合は <CODE>MYSQL*</CODE> 接続ハンドルです。接続が失敗した場合
+は C <CODE>NULL</CODE> ポインタです。
+接続に成功すると、戻り値はその最初のパラメータの値と同じです。
+
+</P>
+
+<H4>8.4.3.174  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_CONN_HOST_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバへの接続に失敗した。
+
+<DT><CODE>CR_CONNECTION_ERROR</CODE>
+<DD>
+ローカル <STRONG>MySQL</STRONG> サーバへの接続に失敗した。
+
+<DT><CODE>CR_IPSOCK_ERROR</CODE>
+<DD>
+IP ソケットの生成に失敗した。
+
+<DT><CODE>CR_OUT_OF_MEMORY</CODE>
+<DD>
+メモリ不足。
+
+<DT><CODE>CR_SOCKET_CREATE_ERROR</CODE>
+<DD>
+UNIX ソケットの生成に失敗した。
+
+<DT><CODE>CR_UNKNOWN_HOST</CODE>
+<DD>
+ホスト名の IP  アドレスを見つけるのに失敗した。
+
+<DT><CODE>CR_VERSION_ERROR</CODE>
+<DD>
+異なるプロトコルバージョンを使用するクライアントライブラリでサーバへの接
+続を試みた結果のプロトコルミスマッチ。これは、とても古いクライアントライ
+ブラリを使用して、<CODE>--old-protocol</CODE> オプション付きで開始していない新
+しいサーバに接続する場合に発生します。
+
+<DT><CODE>CR_NAMEDPIPEOPEN_ERROR</CODE>
+<DD>
+Windows 上の名前つきパイプの生成に失敗した。
+
+<DT><CODE>CR_NAMEDPIPEWAIT_ERROR</CODE>
+<DD>
+Windows 上の名前つきパイプの wait に失敗した。
+
+<DT><CODE>CR_NAMEDPIPESETSTATE_ERROR</CODE>
+<DD>
+Windows 上のパイプハンドラの獲得に失敗した。
+
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+If <CODE>connect_timeout</CODE> &#62; 0 and it took longer then <CODE>connect_timeout</CODE>
+seconds to connect to the server or if the server died while executing the
+<CODE>init-command</CODE>.
+
+</DL>
+
+
+<H4>8.4.3.175  例</H4>
+
+
+<PRE>
+MYSQL mysql;
+
+mysql_init(&#38;mysql);
+mysql_options(&#38;mysql,MYSQL_READ_DEFAULT_GROUP,"your_prog_name");
+if (!mysql_real_connect(&#38;mysql,"host","user","passwd","database",0,NULL,0))
+{
+    fprintf(stderr, "Failed to connect to database: Error: %s\n",
+          mysql_error(&#38;mysql));
+}
+</PRE>
+
+<P>
+By using <CODE>mysql_options()</CODE> the <STRONG>MySQL</STRONG> library will read the
+<CODE>[client]</CODE> and <CODE>your_prog_name</CODE> sections in the <CODE>my.cnf</CODE>
+file which will ensure that your program will work, even if someone has
+set up <STRONG>MySQL</STRONG> in some non-standard way.
+
+</P>
+<P>
+Note that upon connection, <CODE>mysql_real_connect()</CODE> sets the <CODE>reconnect</CODE>
+flag (part of the MYSQL structure) to a value of <CODE>1</CODE>. This flag indicates,
+in the event that a query cannot be performed because of a lost connection, to
+try reconnecting to the server before giving up.
+
+</P>
+
+<P>
+<A NAME="IDX1570"></A>
+
+
+<H4><A NAME="mysql_real_escape_string" HREF="manual.ja_toc.html#mysql_real_escape_string">8.4.3.176  <CODE>mysql_real_escape_string()</CODE></A></H4>
+
+<P>
+<CODE>unsigned int mysql_real_escape_string(MYSQL *mysql, char *to, const char *from, unsigned int length)</CODE>
+
+</P>
+
+<H4>8.4.3.177  説明</H4>
+
+<P>
+This function is used to create a legal SQL string that you can use in a
+SQL statement.  「<A HREF="manual.ja_Reference.html#String_syntax">6.1.1.1  文字列</A>」節参照.
+
+</P>
+<P>
+<CODE>from</CODE> の文字列を、SQL ステートメントとしてサーバに送ることができる
+ように、現在のキャラクタ・セットを考慮しながら変換します。
+結果は <CODE>to</CODE> に入り、終端 null 文字を追加します。
+変換される文字列は <SAMP>`NUL'</SAMP> (ASCII 0), <SAMP>`\n'</SAMP>, <SAMP>`\r'</SAMP>, <SAMP>`\'</SAMP>,
+<SAMP>`''</SAMP>, <SAMP>`"'</SAMP>, Control-Z です。( 「<A HREF="manual.ja_Reference.html#Literals">6.1.1  文字列と数値をどのように書くか？</A>」節参照).
+
+</P>
+<P>
+<CODE>from</CODE> で示される文字列
+は<CODE>length</CODE> バイト長でなければなりません。
+<CODE>to</CODE> バッファには少なくとも <CODE>length*2+1</CODE> バイト長を割り当てる
+必要があります。（最悪の場合、それぞれの文字が２バイトに変換されることがあ
+り、さらに終端 null バイトのための場所が必要です。）
+<CODE>mysql_escape_string()</CODE> が復帰するとき、<CODE>to</CODE> 
+の内容は <CODE>NUL</CODE> 終端文字列になります。
+戻り値は変換された文字列の長さです。終端 null 文字は含みません。
+
+</P>
+
+<H4>8.4.3.178  例</H4>
+
+
+<PRE>
+char query[1000],*end;
+
+end = strmov(query,"INSERT INTO test_table values(");
+*end++ = '\'';
+end += mysql_real_escape_string(&#38;mysql, end,"What's this",11);
+*end++ = '\'';
+*end++ = ',';
+*end++ = '\'';
+end += mysql_real_escape_string(&#38;mysql, end,"binary data: \0\r\n",16);
+*end++ = '\'';
+*end++ = ')';
+
+if (mysql_real_query(&#38;mysql,query,(unsigned int) (end - query)))
+{
+   fprintf(stderr, "Failed to insert row, Error: %s\n",
+           mysql_error(&#38;mysql));
+}
+</PRE>
+
+<P>
+上記の <CODE>strmov()</CODE> 関数は <CODE>mysqlclient</CODE> ライブラリに含まれてい
+て、<CODE>strcpy()</CODE> のように働きますが、最初の引数の終りの null へのポイ
+ンタを返します。
+
+</P>
+
+<H4>8.4.3.179  戻り値</H4>
+
+<P>
+<CODE>to</CODE> へ置かれた値の長さ。終端 null 文字は含みません。
+
+</P>
+
+<H4>8.4.3.180  エラー</H4>
+<P>
+無し。
+
+</P>
+
+<P>
+<A NAME="IDX1571"></A>
+
+
+<H4><A NAME="mysql_real_query" HREF="manual.ja_toc.html#mysql_real_query">8.4.3.181  <CODE>mysql_real_query()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_real_query(MYSQL *mysql, const char *query, unsigned int length)</CODE>
+
+</P>
+
+<H4>8.4.3.182  説明</H4>
+
+<P>
+<CODE>query</CODE> で示される SQL クエリを実行します。これは <CODE>length</CODE> バ
+イト長です。クエリはひとつの SQL ステートメントでなければなりません。終端
+のセミコロン(<SAMP>`;'</SAMP>)や <CODE>\g</CODE> をステートメントに追加すべきではありま
+せん。
+
+</P>
+<P>
+バイナリデータを含むクエリは <CODE>mysql_real_query()</CODE> を使
+用<EM>しなければなりません</EM>。バイナリデータは <SAMP>`\0'</SAMP> 文字を含むこと
+があるからです。
+また、<CODE>mysql_real_query()</CODE> は <CODE>mysql_query()</CODE> よりも速いです。
+クエリの <CODE>strlen()</CODE> を呼ばないからです。
+
+</P>
+<P>
+If you want to know if the query should return a result set or not, you can
+use <CODE>mysql_field_count()</CODE> to check for this.
+ 「<A HREF="manual.ja_Clients.html#mysql_field_count">8.4.3.85  <CODE>mysql_field_count()</CODE></A>」節参照.
+
+</P>
+
+<H4>8.4.3.183  戻り値</H4>
+
+<P>
+クエリが成功した場合は0。クエリが失敗した場合は非0。
+
+</P>
+
+<H4>8.4.3.184  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1572"></A>
+
+
+<H4><A NAME="mysql_reload" HREF="manual.ja_toc.html#mysql_reload">8.4.3.185  <CODE>mysql_reload()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_reload(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.186  説明</H4>
+
+<P>
+<STRONG>MySQL</STRONG> サーバに、アクセス権テーブルを再読み込みするように依頼し
+ます。接続されたユーザは <STRONG>reload</STRONG> 権限を持つ必要があります。
+
+</P>
+<P>
+この関数は推奨されません。代わりに、SQL <CODE>FLUSH PRIVILEGES</CODE> ステートメ
+ントを発行する <CODE>mysql_query()</CODE> の使用が推奨されます。
+
+</P>
+
+<H4>8.4.3.187  戻り値</H4>
+
+<P>
+成功時0。失敗時非0。
+
+</P>
+
+<H4>8.4.3.188  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1573"></A>
+
+
+<H4><A NAME="mysql_row_seek" HREF="manual.ja_toc.html#mysql_row_seek">8.4.3.189  <CODE>mysql_row_seek()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_ROW_OFFSET mysql_row_seek(MYSQL_RES *result, MYSQL_ROW_OFFSET offset)</CODE>
+
+</P>
+
+<H4>8.4.3.190  説明</H4>
+<P>
+レコードカーソルをクエリ結果セット中の絶対レコードに設定します。これは、結
+果セット構造体がクエリのすべての結果を持っていることを要求します。そのため、
+<CODE>mysql_row_seek()</CODE> は <CODE>mysql_store_result()</CODE> と共にだけ使用でき、
+<CODE>mysql_use_result()</CODE> と共には使用できません。
+
+</P>
+<P>
+オフセットは <CODE>mysql_row_tell()</CODE> または <CODE>mysql_row_seek()</CODE> 呼びだ
+しからの戻り値であるべきです。この値は単純なレコード番号ではありません;レ
+コード番号を使用して結果セット内のレコードにシークしたい場合は、
+<CODE>mysql_data_seek()</CODE> を代わりに使用してください。
+
+</P>
+
+<H4>8.4.3.191  戻り値</H4>
+
+<P>
+レコードカーソルの前の値。この値はその後の <CODE>mysql_row_seek()</CODE> 呼びだ
+しに渡すことができます。
+
+</P>
+
+<H4>8.4.3.192  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1574"></A>
+
+
+<H4><A NAME="mysql_row_tell" HREF="manual.ja_toc.html#mysql_row_tell">8.4.3.193  <CODE>mysql_row_tell()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_ROW_OFFSET mysql_row_tell(MYSQL_RES *result)</CODE>
+
+</P>
+
+<H4>8.4.3.194  説明</H4>
+
+<P>
+最後の <CODE>mysql_fetch_row()</CODE> についてレコードカーソルの現在の位置を返します。
+この値は <CODE>mysql_row_seek()</CODE> への引数として使用できます。
+
+</P>
+<P>
+<CODE>mysql_row_tell()</CODE> は <CODE>mysql_store_result()</CODE> の後にだけ使用すべ
+きで、<CODE>mysql_use_result()</CODE> の後には使用すべきではありません。
+
+</P>
+
+<H4>8.4.3.195  戻り値</H4>
+
+<P>
+行カーソルの現在のオフセット。
+
+</P>
+
+<H4>8.4.3.196  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1575"></A>
+
+
+<H4><A NAME="mysql_select_db" HREF="manual.ja_toc.html#mysql_select_db">8.4.3.197  <CODE>mysql_select_db()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_select_db(MYSQL *mysql, const char *db)</CODE>
+
+</P>
+
+<H4>8.4.3.198  説明</H4>
+
+<P>
+<CODE>mysql</CODE> で示される現在の接続に、デフォルト(現在の)データベースとし
+て <CODE>db</CODE> で示されるデータベースを使用するように指示します。以降のク
+エリでは、明示的にデータベースを指定しないテーブル参照について、このデー
+タベースがデフォルトになります。
+
+</P>
+<P>
+接続されたユーザがデータベースを使用する権限を持っていると証明されなけれ
+ば、<CODE>mysql_select_db()</CODE> は失敗します。
+
+</P>
+
+<H4>8.4.3.199  戻り値</H4>
+
+<P>
+成功時0。失敗時非0。
+
+</P>
+
+<H4>8.4.3.200  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1576"></A>
+
+
+<H4><A NAME="mysql_shutdown" HREF="manual.ja_toc.html#mysql_shutdown">8.4.3.201  <CODE>mysql_shutdown()</CODE></A></H4>
+
+<P>
+<CODE>int mysql_shutdown(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.202  説明</H4>
+
+<P>
+データベースサーバにシャットダウンするように要求します。接続されたユーザ
+は <STRONG>shutdown</STRONG> 権限を持っている必要があります。
+
+</P>
+
+<H4>8.4.3.203  戻り値</H4>
+
+<P>
+成功時0。失敗時非0。
+
+</P>
+
+<H4>8.4.3.204  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1577"></A>
+
+
+<H4><A NAME="mysql_stat" HREF="manual.ja_toc.html#mysql_stat">8.4.3.205  <CODE>mysql_stat()</CODE></A></H4>
+
+<P>
+<CODE>char *mysql_stat(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.206  説明</H4>
+
+<P>
+<CODE>mysqladmin status</CODE> で提供されるのと同様の情報を文字列として返しま
+す。これは秒での uptime と、実行中のスレッド数、問い合わせ数、再読み込み
+数、オープンテーブル数を含みます。
+
+</P>
+
+<H4>8.4.3.207  戻り値</H4>
+
+<P>
+サーバ状態を表わす文字列。エラーが発生した場合 <CODE>NULL</CODE>。
+
+</P>
+
+<H4>8.4.3.208  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1578"></A>
+
+
+<H4><A NAME="mysql_store_result" HREF="manual.ja_toc.html#mysql_store_result">8.4.3.209  <CODE>mysql_store_result()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_RES *mysql_store_result(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.210  説明</H4>
+
+<P>
+データを取り出すクエリ(<CODE>SELECT</CODE>, <CODE>SHOW</CODE>, <CODE>DESCRIBE</CODE>,
+<CODE>EXPLAIN</CODE>)が成功する毎に、<CODE>mysql_store_result()</CODE> または 
+<CODE>mysql_use_result()</CODE> を呼び出す必要があります。
+
+</P>
+<P>
+You don't have to call <CODE>mysql_store_result()</CODE> or
+<CODE>mysql_use_result()</CODE> for other queries, but it will not do any
+harm or cause any notable performance if you call <CODE>mysql_store_result()</CODE>
+in all cases.  You can detect if the query didn't have a result set by
+checking if <CODE>mysql_store_result()</CODE> returns 0 (more about this later one).
+
+</P>
+<P>
+If you want to know if the query should return a result set or not, you can
+use <CODE>mysql_field_count()</CODE> to check for this.
+ 「<A HREF="manual.ja_Clients.html#mysql_field_count">8.4.3.85  <CODE>mysql_field_count()</CODE></A>」節参照.
+
+</P>
+<P>
+<CODE>mysql_store_result()</CODE> はクエリのすべての結果をクライアントへ読み込み、
+<CODE>MYSQL_RES</CODE> 構造体を割り当て、この構造体に結果を配置します。
+
+</P>
+<P>
+<CODE>mysql_store_results()</CODE> returns a null pointer if the query didn't return
+a result sets (If the query was, for example, an <CODE>INSERT</CODE> statement).
+
+</P>
+<P>
+<CODE>mysql_store_results()</CODE> returns also null pointer if reading of the
+result set failed. You can check if you got an error by checking if
+<CODE>mysql_error()</CODE> doesn't return a null pointer, if
+<CODE>mysql_errno()</CODE> returns &#60;&#62; 0 or if <CODE>mysql_field_count()</CODE>
+returns &#60;&#62; 0.
+
+</P>
+<P>
+返されるレコードが無い場合、空の結果セットが返されます。 (空の結果セットは 
+<CODE>NULL</CODE> 戻り値とは異なります。)
+
+</P>
+<P>
+一度 <CODE>mysql_store_result()</CODE> を呼び出して null ポインターでない
+結果を得る事ができたら、結果セット中にいくつのレ
+コードがあるかを見つけるために、<CODE>mysql_num_rows()</CODE> を呼び出すことがで
+きます。
+
+</P>
+<P>
+結果セットからレコードを取り出すために <CODE>mysql_fetch_row()</CODE> を呼び出す
+ことができます。また、結果セット内の現在のレコード位置を設定／取得するため
+に <CODE>mysql_row_seek()</CODE> と <CODE>mysql_row_tell()</CODE> を呼び出すことができ
+ます。
+
+</P>
+<P>
+一度結果セットで行なうと、<CODE>mysql_free_result()</CODE> を呼び出す必要があ
+ります。
+
+</P>
+<P>
+ 「<A HREF="manual.ja_Clients.html#NULL_mysql_store_result">8.4.5.1  <CODE>mysql_query()</CODE> が成功を返した後、<CODE>mysql_store_result()</CODE> が <CODE>NULL</CODE> を返す時があるのは何故？</A>」節参照.
+
+</P>
+
+<H4>8.4.3.211  戻り値</H4>
+
+<P>
+結果の <CODE>MYSQL_RES</CODE> 結果構造体。エラーがある場合 <CODE>NULL</CODE>。
+
+</P>
+
+<H4>8.4.3.212  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_OUT_OF_MEMORY</CODE>
+<DD>
+メモリ不足。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+<P>
+<A NAME="IDX1579"></A>
+
+
+<H4><A NAME="mysql_thread_id" HREF="manual.ja_toc.html#mysql_thread_id">8.4.3.213  <CODE>mysql_thread_id()</CODE></A></H4>
+
+<P>
+<CODE>unsigned long mysql_thread_id(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.214  説明</H4>
+
+<P>
+現在の接続のスレッド ID を返します。この値は、スレッドを殺すための
+<CODE>mysql_kill()</CODE> への引数として使用できます。
+
+</P>
+<P>
+接続が失われて、<CODE>mysql_ping()</CODE> で再接続した場合、スレッド ID は変更さ
+れます。これはスレッド ID を後で使うために取得して格納すべきではないことを
+意味します。必要な時にそれを取得すべきです。
+
+</P>
+
+<H4>8.4.3.215  戻り値</H4>
+
+<P>
+現在の接続のスレッド ID。
+
+</P>
+
+<H4>8.4.3.216  エラー</H4>
+<P>
+無し。
+
+</P>
+<P>
+<A NAME="IDX1580"></A>
+
+
+<H4><A NAME="mysql_use_result" HREF="manual.ja_toc.html#mysql_use_result">8.4.3.217  <CODE>mysql_use_result()</CODE></A></H4>
+
+<P>
+<CODE>MYSQL_RES *mysql_use_result(MYSQL *mysql)</CODE>
+
+</P>
+
+<H4>8.4.3.218  説明</H4>
+
+<P>
+データを取り出すクエリ(<CODE>SELECT</CODE>, <CODE>SHOW</CODE>, <CODE>DESCRIBE</CODE>,
+<CODE>EXPLAIN</CODE>)が成功する毎に、 <CODE>mysql_store_result()</CODE> または 
+<CODE>mysql_use_result()</CODE> を呼び出す必要があります。
+
+</P>
+<P>
+<CODE>mysql_use_result()</CODE> は結果セット検索を開始しますが,
+<CODE>mysql_store_result()</CODE> のように、実際にクライアントに結果セットを読み
+取りません. 代わりに、各レコードは <CODE>mysql_fetch_row()</CODE> 呼びだしが行な
+われることにより、個々に取り出されます。
+<CODE>mysql_use_result()</CODE> はクエリの結果を、一時テーブルやローカルバッファ
+に格納すること無く、サーバから直接読み込みます。これは 
+<CODE>mysql_store_result()</CODE> よりもいくらか速く、少ないメモリを使用します。
+この場合、クライアントは現在の行と接続バッファ
+( <CODE>max_allowed_packet</CODE> bytes まで増加する ) のメモリだけを割り当てます。
+
+</P>
+<P>
+一方、クライアント側で各行に
+ついて多くの処理を行なう場合や、ユーザが <CODE>^S</CODE> (スクロール停止) を入
+力できるような画面に出力を送る場合は、<CODE>mysql_use_result()</CODE> を使用す
+べきではありません。これはサーバと連携しており、他のスレッドが
+データが取り出されるテーブルを更新する事を邪魔します。
+
+</P>
+<P>
+<CODE>mysql_use_result()</CODE> 使用時、<CODE>NULL</CODE> 値を取り出すまで 
+<CODE>mysql_fetch_row()</CODE> を実行する必要があります。そうしないと、次のク
+エリは前のクエリから結果を取り出します。これを忘れると、C API はエラー 
+<CODE>Commands out of sync; You can't run this command now</CODE> を与えます！
+
+</P>
+<P>
+<CODE>mysql_use_result()</CODE> から返される結果では、
+<CODE>mysql_data_seek()</CODE>, <CODE>mysql_row_seek()</CODE>,
+<CODE>mysql_row_tell()</CODE>, <CODE>mysql_num_rows()</CODE>,
+<CODE>mysql_affected_rows()</CODE> を使用できません。
+また、<CODE>mysql_use_result()</CODE> が終了するまで他のクエリの発行もできませ
+ん。(全ての行をフェッチした後に、フェッチされた行数を知るために 
+<CODE>mysql_num_rows</CODE> を呼び出すことができます。)
+
+</P>
+<P>
+一度結果セットで行なうと、<CODE>mysql_free_result()</CODE> を呼び出す必要があ
+ります。
+
+</P>
+
+<H4>8.4.3.219  戻り値</H4>
+
+<P>
+結果の <CODE>MYSQL_RES</CODE> 結果構造体。エラーがある場合 <CODE>NULL</CODE>。
+
+</P>
+
+<H4>8.4.3.220  エラー</H4>
+
+<DL COMPACT>
+
+<DT><CODE>CR_COMMANDS_OUT_OF_SYNC</CODE>
+<DD>
+不当な順にコマンドが実行された。
+<DT><CODE>CR_OUT_OF_MEMORY</CODE>
+<DD>
+メモリ不足。
+<DT><CODE>CR_SERVER_GONE_ERROR</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバがいなくなった。
+<DT><CODE>CR_SERVER_LOST</CODE>
+<DD>
+サーバへの接続がクエリ中に失われた。
+<DT><CODE>CR_UNKNOWN_ERROR</CODE>
+<DD>
+未知のエラーが発生した。
+</DL>
+
+
+
+<H3><A NAME="C_Thread_functions" HREF="manual.ja_toc.html#C_Thread_functions">8.4.4  C Threaded Function Descriptions</A></H3>
+
+<P>
+You need to use the following functions when you want to create a
+threaded client.  「<A HREF="manual.ja_Clients.html#Threaded_clients">8.4.7  スレッドクライアントを作る方法</A>」節参照.
+
+</P>
+
+
+
+<H4><A NAME="my_init" HREF="manual.ja_toc.html#my_init">8.4.4.1  <CODE>my_init()</CODE></A></H4>
+
+<P>
+<A NAME="IDX1581"></A>
+
+</P>
+
+<H4>8.4.4.2  Description</H4>
+
+<P>
+This function needs to be called once in the program before calling any
+MySQL function.  This initializes some global variables that MySQL
+needs.  If you are using a thread safe client library, this will also
+call <CODE>my_thread_init()</CODE> for this thread.
+
+</P>
+<P>
+This is automatically called by <CODE>mysql_init()</CODE>
+and <CODE>mysql_connect()</CODE>.
+
+</P>
+
+<H4>8.4.4.3  Return Values</H4>
+
+<P>
+none.
+
+</P>
+
+
+<H4><A NAME="my_thread_init()" HREF="manual.ja_toc.html#my_thread_init()">8.4.4.4  <CODE>my_thread_init()</CODE></A></H4>
+
+<P>
+<A NAME="IDX1582"></A>
+
+</P>
+
+<H4>8.4.4.5  Description</H4>
+
+<P>
+This function needs to be called for each created thread to initialize
+thread specific variables.
+
+</P>
+<P>
+This is automatically called by <CODE>my_init()</CODE> and <CODE>mysql_connect()</CODE>.
+
+</P>
+
+<H4>8.4.4.6  Return Values</H4>
+
+<P>
+none.
+
+</P>
+
+
+<H4><A NAME="my_thread_end()" HREF="manual.ja_toc.html#my_thread_end()">8.4.4.7  <CODE>my_thread_end()</CODE></A></H4>
+
+<P>
+<A NAME="IDX1583"></A>
+
+</P>
+
+<H4>8.4.4.8  Description</H4>
+
+<P>
+This function needs to be called before calling <CODE>pthread_exit()</CODE> to
+freed memory allocated by <CODE>my_thread_init()</CODE>.
+
+</P>
+<P>
+Note that this function is NOT invoked automatically by the client
+library!
+
+</P>
+
+<H4>8.4.4.9  Return Values</H4>
+
+<P>
+none.
+
+</P>
+
+
+<H3><A NAME="C_API_problems" HREF="manual.ja_toc.html#C_API_problems">8.4.5  Common questions and problems when using the C API</A></H3>
+
+<P>
+<A NAME="IDX1584"></A>
+<A NAME="IDX1585"></A>
+
+</P>
+
+
+
+<H4><A NAME="NULL_mysql_store_result" HREF="manual.ja_toc.html#NULL_mysql_store_result">8.4.5.1  <CODE>mysql_query()</CODE> が成功を返した後、<CODE>mysql_store_result()</CODE> が <CODE>NULL</CODE> を返す時があるのは何故？</A></H4>
+
+<P>
+<CODE>mysql_query()</CODE> の呼び出しが成功した後に 
+<CODE>mysql_store_result()</CODE> が <CODE>NULL</CODE> を返すことがあります。これが
+起こったとき、次の条件のどれかの発生を意味します:
+
+</P>
+
+<UL>
+<LI>
+
+<CODE>malloc()</CODE> が失敗した (例えば、結果セットが大き過ぎた場合)。
+
+<LI>
+
+データが読めなかった (接続のエラー)。
+
+<LI>
+
+クエリがデータを返さなかった (<CODE>INSERT</CODE>, <CODE>UPDATE</CODE>, <CODE>DELETE</CODE>)。
+</UL>
+
+<P>
+ステートメントが空でない結果を提供するかどうかは 
+<CODE>mysql_field_count()</CODE> の呼び出しによっていつでもチェックできます。
+<CODE>mysql_field_count()</CODE> が 0 を返す場合、結果は空で最後のクエリは値を
+返さないステートメントです (例えば、<CODE>INSERT</CODE> や <CODE>DELETE</CODE>)。
+<CODE>mysql_field_count()</CODE> が非 0 値を返す場合、ステートメントは空でない
+結果を提供します。
+例は<CODE>mysql_field_count()</CODE> 関数の説明を参照してください。
+
+</P>
+<P>
+<CODE>mysql_error()</CODE> または <CODE>mysql_errno()</CODE> を呼び出すことによって
+エラーのテストもできます。
+
+</P>
+<P>
+<A NAME="IDX1586"></A>
+
+</P>
+
+
+<H4><A NAME="Query_results" HREF="manual.ja_toc.html#Query_results">8.4.5.2  クエリから得られる結果は何か？</A></H4>
+
+<P>
+クエリによって返される結果セットに加えて、次の情報も得ることができます:
+
+</P>
+
+<UL>
+<LI>
+
+<CODE>mysql_affected_rows()</CODE> は、<CODE>INSERT</CODE>, <CODE>UPDATE</CODE> または 
+<CODE>DELETE</CODE> を行なった時の最後のクエリで、影響された行数を返します。
+<CODE>WHERE</CODE> 節がない <CODE>DELETE</CODE> が使用されて、テーブルが切り詰められ
+た場合は例外です。これはとても速いです！ この場合、
+<CODE>mysql_affected_rows()</CODE> は影響された行数を 0 と返します。
+
+<LI>
+
+<CODE>mysql_num_rows()</CODE> は結果セットのレコード数を返します。
+<CODE>mysql_store_result()</CODE> では、<CODE>mysql_num_rows()</CODE> は 
+<CODE>mysql_store_result()</CODE> が復帰したすぐ後に呼び出すことができます。
+<CODE>mysql_use_result()</CODE> では、<CODE>mysql_num_rows()</CODE> は 
+<CODE>mysql_fetch_row()</CODE> ですべてのレコードを取り出した後にだけ呼ぶ出すこ
+とができます。
+
+<LI>
+
+<CODE>mysql_insert_id()</CODE> は、<CODE>AUTO_INCREMENT</CODE> インデックスを持つテー
+ブルに行を挿入した最後のクエリによって生成された ID を返します。
+ 「<A HREF="manual.ja_Clients.html#mysql_insert_id">8.4.3.126  <CODE>mysql_insert_id()</CODE></A>」節参照.
+
+<LI>
+
+いくつかのクエリ (<CODE>LOAD DATA INFILE...</CODE>, <CODE>INSERT INTO ... 
+SELECT ...</CODE>, <CODE>UPDATE</CODE>) は追加情報を返します。結果は 
+<CODE>mysql_info()</CODE> で返されます。
+返す文字列の形式については、<CODE>mysql_info()</CODE> の説明を参照してください。
+<CODE>mysql_info()</CODE> は追加情報がない場
+合は <CODE>NULL</CODE> ポインタを返します。
+</UL>
+
+<P>
+<A NAME="IDX1587"></A>
+<A NAME="IDX1588"></A>
+<A NAME="IDX1589"></A>
+<A NAME="IDX1590"></A>
+
+
+<H4><A NAME="Getting_unique_ID" HREF="manual.ja_toc.html#Getting_unique_ID">8.4.5.3  最後に挿入された行のユニーク ID をどのように得られるか？</A></H4>
+
+<P>
+<CODE>AUTO_INCREMENT</CODE> 属性を持つ項目を含むテーブルにレコードを挿入する場
+合、<CODE>mysql_insert_id()</CODE> 関数で与えられた ID を得ることができます。
+
+</P>
+<P>
+<CODE>mysql_query()</CODE> に渡すクエリ文字列内の<CODE>LAST_INSERT_ID()</CODE> 関数
+を使用することでも、ID を取り出すことができます。
+
+</P>
+<P>
+次のコードを実行することで、<CODE>AUTO_INCREMENT</CODE> インデックスが使用され
+たかどうかチェックできます。これは、クエリが <CODE>AUTO_INCREMENT</CODE> イン
+デックスを伴う <CODE>INSERT</CODE> だったかどうかもチェックできます:
+
+</P>
+
+<PRE>
+if (mysql_error(&#38;mysql)[0] == 0 &#38;&
+    mysql_num_fields(result) == 0 &#38;&
+    mysql_insert_id(&#38;mysql) != 0)
+{
+    used_id = mysql_insert_id(&#38;mysql);
+}
+</PRE>
+
+<P>
+生成された最後の ID は接続毎にサーバ内で維持されています。他のクライアント
+によって変更はされません。他の <CODE>AUTO_INCREMENT</CODE> 項目を非マジック値 
+(すなわち、<CODE>NULL</CODE> でなく <CODE>0</CODE> でない値) で更新する場合でも、それは変更
+されません。
+
+</P>
+<P>
+また、他のテーブルにその ID を挿入しようとする場合、次で行なうことができます:
+
+</P>
+
+<PRE>
+INSERT INTO foo (auto,text)
+    VALUES(NULL,'text');              # generate ID by inserting NULL
+INSERT INTO foo2 (id,text)
+    VALUES(LAST_INSERT_ID(),'text');  # use ID in second table
+</PRE>
+
+<P>
+<A NAME="IDX1591"></A>
+<A NAME="IDX1592"></A>
+
+
+<H4><A NAME="C_API_linking_problems" HREF="manual.ja_toc.html#C_API_linking_problems">8.4.5.4  C API でのリンクの問題</A></H4>
+
+<P>
+C API でリンクする時、いくつかのシステム上では次のエラーになります:
+
+</P>
+
+<PRE>
+gcc -g -o client test.o -L/usr/local/lib/mysql -lmysqlclient -lsocket -lnsl
+
+Undefined        first referenced
+ symbol          in file
+floor            /usr/local/lib/mysql/libmysqlclient.a(password.o)
+ld: fatal: Symbol referencing errors. No output written to client
+</PRE>
+
+<P>
+これは、あなたのシステム上では、コンパイル/リンク行の最後に、math ライブ
+ラリ (<CODE>-lm</CODE>) を含める必要があることを意味します。
+
+</P>
+
+
+
+<H3><A NAME="Building_clients" HREF="manual.ja_toc.html#Building_clients">8.4.6  Building Client Programs</A></H3>
+
+<P>
+<A NAME="IDX1593"></A>
+<A NAME="IDX1594"></A>
+<A NAME="IDX1595"></A>
+<A NAME="IDX1596"></A>
+
+</P>
+<P>
+If you compile MySQL clients that you've written yourself or that
+you obtain from a third party, they must be linked using the
+<CODE>-lmysqlclient -lz</CODE> option on the link command.  You may also need to
+specify a <CODE>-L</CODE> option to tell the linker where to find the library.  For
+example, if the library is installed in <TT>`/usr/local/mysql/lib'</TT>, use
+<CODE>-L/usr/local/mysql/lib -lmysqlclient -lz</CODE> on the link command.
+
+</P>
+<P>
+For clients that use MySQL header files, you may need to specify a
+<CODE>-I</CODE> option when you compile them (for example,
+<CODE>-I/usr/local/mysql/include</CODE>), so the compiler can find the header
+files.
+
+</P>
+
+
+
+<H3><A NAME="Threaded_clients" HREF="manual.ja_toc.html#Threaded_clients">8.4.7  スレッドクライアントを作る方法</A></H3>
+
+<P>
+<A NAME="IDX1597"></A>
+<A NAME="IDX1598"></A>
+
+</P>
+<P>
+クライアントは `ほとんど' スレッド安全です。一番大きな問題は 
+<TT>`net.c'</TT> (ソケットから読み込みをするサブルーチンを含むファイル) が割
+り込み安全でないことです。これは、サーバからの長い読み込みを中断できるよ
+うに、自身のアラームを持ちたいだろうという考慮で行なわれました。
+If you
+install interrupt handlers for the <CODE>SIGPIPE</CODE> interrupt,
+the socket handling should be thread safe. 
+
+</P>
+<P>
+われわれの Web site で公開している古いバイナリ配布では、
+標準クライアントライブラリはスレッドオプションでコンパイルされていません。
+(the
+Windows binaries are by default compiled to be thread safe).
+Newer binary distributions should have both a normal and a
+thread-safe client library.
+
+</P>
+<P>
+スレッド安全クライアント(<STRONG>MySQL</STRONG>サーバーとの通信時に、
+他のスレッドがクライアントのスレッドに interrupt をかけたり、
+タイムアウトをセットしたりする)
+を得るためには、<CODE>-lmysys</CODE>, <CODE>-lstring</CODE>,
+<CODE>-ldbug</CODE> ライブラリとサーバが使用する <CODE>net_serv.o</CODE> を使用しま
+す。
+
+</P>
+<P>
+If you don't need interrupts or timeouts, you can just compile a thread
+safe client library <CODE>(mysqlclient_r)</CODE> and use this.   「<A HREF="manual.ja_Clients.html#C">8.4  MySQL C API</A>」節参照.  In this case you don't have to worry about the
+<CODE>net_serv.o</CODE> object file or the other <STRONG>MySQL</STRONG> libraries.
+
+</P>
+<P>
+スレッドクライアントを使用する時、<TT>`thr_alarm.c'</TT> ルーチンを大いに使
+用できます。<CODE>mysys</CODE> ライブラリからのルーチンを使用する場合、覚えて
+おかなければならないことは <CODE>my_init()</CODE> を最初に呼ぶことだけです！
+
+</P>
+<P>
+<CODE>mysql_real_connect()</CODE> を除く全ての関数は現在スレッド安全です。スレッ
+ド安全クライアントライブラリをコンパイルし、それをスレッド安全なマナーで使
+用するための方法を、次の注意で説明します。(この 
+<CODE>mysql_real_connect()</CODE> についての注意は、実際には 
+<CODE>mysql_connect()</CODE> にも有効です。しかし <CODE>mysql_connect()</CODE> は推奨
+されませんので、とにかく <CODE>mysql_real_connect()</CODE> を使用すべきです。)
+
+</P>
+<P>
+<CODE>mysql_real_connect()</CODE> をスレッド安全にするためには、クライアントを次の
+コマンドで再コンパイルする必要があります:
+
+</P>
+
+<PRE>
+shell&#62; ./configure --enable-thread-safe-client
+</PRE>
+
+<P>
+This will create a thread-safe client library <CODE>libmysqlclient_r</CODE>.
+<CODE>--enable-thread-safe-client</CODE>.  This library is thread safe per
+connection.  You can let two threads share the same connection as long
+as you do the following:
+
+</P>
+
+<UL>
+<LI>
+
+２つのスレッドが同じ接続上で同時に <STRONG>MySQL</STRONG> にクエリを送信することは
+できません。特に <CODE>mysql_query()</CODE> と <CODE>mysql_store_result()</CODE> の間
+で、他のスレッドが同じ接続を使用しないことを確実にする必要があります。
+<LI>
+
+多くのスレッドが <CODE>mysql_store_result()</CODE> で取り出された別々の結果セッ
+トにアクセスできます。
+<LI>
+
+<CODE>mysql_use_result</CODE> を使用する場合、結果セットがクローズされるまで、他
+のスレッドが同じ接続上で何も尋ねないことを確実にする必要があります。
+However, it really is best for threaded clients that share the same
+connection to use <CODE>mysql_use_result()</CODE>.
+<LI>
+
+If you want to use multiple threads on the same connection, you must
+have a mutex lock around your <CODE>mysql_query()</CODE> and
+<CODE>mysql_store_result()</CODE> call combination.  Once
+<CODE>mysql_store_result()</CODE> is ready, the lock can be released and other
+threads may query the same connection.
+<LI>
+
+If you program with POSIX threads, you can use
+<CODE>pthread_mutex_lock()</CODE> and <CODE>pthread_mutex_unlock()</CODE> to
+establish and release a mutex lock.
+</UL>
+
+<P>
+You may get some errors because of undefined symbols when linking your
+client with <CODE>mysqlclient_r</CODE>. In most cases this is because you haven't
+included the thread libraries on the link/compile line.
+  
+
+</P>
+
+
+
+<H2><A NAME="Cplusplus" HREF="manual.ja_toc.html#Cplusplus">8.5  MySQL C++ APIs</A></H2>
+
+<P>
+<A NAME="IDX1599"></A>
+
+</P>
+<P>
+Two APIs are available in the MySQL
+<a HREF="http://www.mysql.com/Downloads/Contrib/">Contrib directory</a>.
+
+</P>
+
+
+
+<H3><A NAME="Borland_C++" HREF="manual.ja_toc.html#Borland_C++">8.5.1  Borland C++</A></H3>
+
+<P>
+<A NAME="IDX1600"></A>
+
+</P>
+<P>
+You can compile the MySQL Windows source with Borland C++ 5.02.
+(The Windows source includes only projects for Microsoft VC++, for
+Borland C++ you have to do the project files yourself).
+
+</P>
+<P>
+One known problem with Borland C++ is that it uses a different structure
+alignment than VC++.  This means that you will run into problems if you
+try to use the default <CODE>libmysql.dll</CODE> libraries (that was compiled
+with VC++) with Borland C++. You can do one of the following to avoid
+this problem.
+
+</P>
+
+<UL>
+<LI>
+
+You can use the static MySQL libraries for Borland C++ that you
+can find on <a HREF="http://www.mysql.com/downloads/os-win32.html">http://www.mysql.com/downloads/os-win32.html</a>.
+<LI>
+
+Only call <CODE>mysql_init()</CODE> with <CODE>NULL</CODE> as an argument, not a
+pre-allocated MYSQL struct.
+</UL>
+
+
+
+<H2><A NAME="Java" HREF="manual.ja_toc.html#Java">8.6  MySQL Java Connectivity (JDBC)</A></H2>
+
+<P>
+<A NAME="IDX1601"></A>
+<A NAME="IDX1602"></A>
+
+</P>
+<P>
+There are 2 supported JDBC drivers for MySQL (the mm driver and
+the Reisin JDBC driver).  You can find a copy of the mm driver at
+<a HREF="http://mmmysql.sourceforge.net/">http://mmmysql.sourceforge.net/</a> or
+<a HREF="http://www.mysql.com/Downloads/Contrib/">http://www.mysql.com/Downloads/Contrib/</a> and the Reisin driver at
+<a HREF="http://www.caucho.com/projects/jdbc-mysql/index.xtp">http://www.caucho.com/projects/jdbc-mysql/index.xtp</a> For
+documentation consult any JDBC documentation and the driver's own
+documentation for MySQL-specific features.
+
+</P>
+
+
+
+<H2><A NAME="Python" HREF="manual.ja_toc.html#Python">8.7  MySQL Python APIs</A></H2>
+
+<P>
+<A NAME="IDX1603"></A>
+
+</P>
+<P>
+The MySQL <a HREF="http://www.mysql.com/Downloads/Contrib/">Contrib directory</a>
+contains a Python interface written by Joseph Skinner.
+
+</P>
+<P>
+You can also use the Python interface to iODBC to access a
+MySQL server.
+<a HREF="http://starship.skyport.net/~lemburg/">mxODBC</a>
+
+</P>
+
+
+
+<H2><A NAME="Tcl" HREF="manual.ja_toc.html#Tcl">8.8  MySQL Tcl APIs</A></H2>
+
+<P>
+<A NAME="IDX1604"></A>
+
+</P>
+<P>
+<a HREF="http://www.binevolve.com/~tdarugar/tcl-sql/"> Tcl at binevolve</a>.
+The
+<a HREF="http://www.mysql.com/Downloads/Contrib">Contrib directory</a> contains a Tcl
+interface that is based on msqltcl 1.50.
+
+</P>
+
+
+
+<H2><A NAME="Eiffel" HREF="manual.ja_toc.html#Eiffel">8.9  MySQL Eiffel wrapper</A></H2>
+
+<P>
+<A NAME="IDX1605"></A>
+<A NAME="IDX1606"></A>
+
+</P>
+<P>
+The MySQL <a HREF="http://www.mysql.com/Downloads/Contrib/">Contrib directory</a>
+contains an Eiffel wrapper written by Michael Ravits.
+
+</P>
+<P>
+You can also find this at:
+<A HREF="http://www.netpedia.net/hosting/newplayer/">http://www.netpedia.net/hosting/newplayer/</A>
+
+</P>
+
+
+
+<H2><A NAME="Ruby" HREF="manual.ja_toc.html#Ruby">8.10  <STRONG>MySQL</STRONG> Ruby API</A></H2>
+
+<P>
+以下のサイトに、Ruby の MySQL インターフェースがあります。
+
+</P>
+<P>
+<a HREF="http://www.tmtm.org/"> www.tmtm.org とみたまさひろ氏の Web ページ</a>
+
+</P>
+
+<P><HR><P>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Table_types.html">previous</A>, <A HREF="manual.ja_Extending_MySQL.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

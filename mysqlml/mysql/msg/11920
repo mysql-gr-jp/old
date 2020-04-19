@@ -1,0 +1,130 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11920</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11919">[前]</a><a href="11921">[次]</a><a href="../list/11901-12000">[番号順一覧]</a><a href="../thread/11901-12000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11920
+</p>
+<div class="header">
+<p>
+From: Hirofumi Fujiwara &lt;Hirofumi Fujiwara &lt;fuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 08 Aug 2005 19:29:34 +0900 (JST)<br>
+Subject: [mysql 11920] Re: メタデータに漢字を使った場合のトラブル<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+藤原です
+
+  無くても動いちゃったりするもので、つい バッククオート(`) で囲むのを
+  忘れていました。
+
+<span class="quote1">&gt; たてやんっす</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 特殊文字コードになるので データベース名/テーブル名には</span>
+<span class="quote1">&gt; バッククオート(`)で囲むことが必要になると思います</span>
+<span class="quote1">&gt;     →シングルクオート(') ではないので念のため</span>
+<span class="quote1">&gt; 私もLinux(Debian)上で 5.0.10  / 4.1.12で 試してみましたが問題なく作成/削</span>
+<span class="quote1">&gt; 除できました</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt;  set names cp932;</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; create database `あ`;</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.04 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; create database `唖`;</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; use `唖`;</span>
+<span class="quote1">&gt; Database changed</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; create table  `あ` ( i int );</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.01 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; insert  `あ` values (1);</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.01 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; insert  `あ` values (2);</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select * from `あ`;</span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote2">&gt; | i    |</span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote2">&gt; |    1 |</span>
+<span class="quote2">&gt; |    2 |</span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote1">&gt; 2 rows in set (0.03 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; drop database `あ`;</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; drop database  `唖`;</span>
+<span class="quote1">&gt; Query OK, 1 row affected (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ちなみに </span>
+<span class="quote1">&gt; Server characterset:    latin1</span>
+<span class="quote1">&gt; と</span>
+<span class="quote1">&gt; Server characterset:    utf8</span>
+<span class="quote1">&gt; の状態の2通りを試してみました</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; On Mon, 08 Aug 2005 12:10:44 +0900 (JST)</span>
+<span class="quote1">&gt; Hirofumi Fujiwara &lt;fuji@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; 藤原です</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 5.0.10で、cp932 を使ってメタデータに漢字を使用した場合、</span>
+<span class="quote2">&gt; &gt; 問題が発生しました。Linuxバージョン。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; エラーが発生するのは、CP932で漢字１文字だけの名前を使用した場合で、</span>
+<span class="quote2">&gt; &gt; 第２バイト目が a0 の場合です。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; mysql&gt; set names cp932;</span>
+<span class="quote2">&gt; &gt; mysql&gt; create database あ;</span>
+<span class="quote2">&gt; &gt; ERROR 1064 (42000): You have an error in your SQL syntax; check the</span>
+<span class="quote2">&gt; &gt; manual that corresponds to your MySQL server version for the right</span>
+<span class="quote2">&gt; &gt; syntax to use near '' at line 1</span>
+<span class="quote2">&gt; &gt; mysql&gt; select x'88a0';</span>
+<span class="quote2">&gt; &gt; +---------+</span>
+<span class="quote3">&gt; &gt; | x'88a0' |</span>
+<span class="quote2">&gt; &gt; +---------+</span>
+<span class="quote3">&gt; &gt; | 唖      |</span>
+<span class="quote2">&gt; &gt; +---------+</span>
+<span class="quote2">&gt; &gt; 1 row in set (0.00 sec)</span>
+<span class="quote2">&gt; &gt;  </span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt;   彡彡从        たてやんっす</span>
+<span class="quote1">&gt;  d□/□-ｂ      &lt;tateyan@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt;  ヽ&quot;ー&quot;丿</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Key fingerprint = 5D56 8EA3 B9FE A721 4866  FB4A 0041 672C 08DD C33A</span>
+<span class="quote1">&gt; </span>
+
+------------------------------------------------------------------
+株式会社 タイムインターメディア       藤原 博文 fuji@xxxxxxxxxx
+本社 160-0002 東京都新宿区坂町26-27 ＩＰＢビル    TEL 03-5362-9009
+URL  <a href="http://www.timedia.co.jp/">http://www.timedia.co.jp/</a>                    FAX 03-5362-9008
+地図 <a href="http://www.timedia.co.jp/company/map/">http://www.timedia.co.jp/company/map/</a>     新宿線曙橋駅徒歩5分
+------------------------------------------------------------------
+オープンソースWEB   <a href="http://oss.timedia.co.jp/">http://oss.timedia.co.jp/</a>   「MySQL日本語の旅」
+------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="11919">[前]</a><a href="11921">[次]</a><a href="../list/11901-12000">[番号順一覧]</a><a href="../thread/11901-12000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11916">  11916 2005-08-08 12:10 [Hirofumi Fujiwara &lt;f] メタデータに漢字を使った場合のトラブル  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11918">  11918 2005-08-08 17:46 ┗[舘山 聖司 &lt;tateyan@x]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="11920">  11920 2005-08-08 19:29 　┗[Hirofumi Fujiwara &lt;f]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11921">  11921 2005-08-08 22:06 　　┗[tateyan &lt;tateyan@xxx]                                   </a></span>
+</pre>
+</body>
+</html>

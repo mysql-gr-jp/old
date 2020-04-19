@@ -1,0 +1,160 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12660</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="12659">[前]</a><a href="12661">[次]</a><a href="../list/12601-12700">[番号順一覧]</a><a href="../thread/12601-12700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12660
+</p>
+<div class="header">
+<p>
+From: Kenta Hashimoto &lt;Kenta Hashimoto &lt;kem@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 21 Jan 2006 00:04:47 +0900<br>
+Subject: [mysql 12660] Re: リレーログがおかしい<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+橋本です。
+解決しました。
+
+最悪、レプリケーションをはじめからしなおせば良いだけだと
+考え、relay-log.infoを編集し、解決しました。
+
+relay-log.infoを、
+----
+./slave2-relay-bin.000145
+4
+masterdb-bin.000085
+731884440
+----
+のように書き換え、
+
+slave2-relay-bin.index
+にリストされているリレーログから、
+----
+./slave2-relay-bin.000144
+----
+
+を削除し、start slaveすることにより、
+レプリケーションが再開しました。
+
+Kenta Hashimoto wrote:
+<span class="quote1">&gt; 橋本です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; スレーブの情報は、以下の通りです。</span>
+<span class="quote1">&gt; ----</span>
+<span class="quote1">&gt; mysql&gt; show slave status\G</span>
+<span class="quote1">&gt; *************************** 1. row ***************************</span>
+<span class="quote1">&gt;              Slave_IO_State:</span>
+<span class="quote1">&gt;                 Master_Host: 192.168.1.123</span>
+<span class="quote1">&gt;                 Master_User: repl</span>
+<span class="quote1">&gt;                 Master_Port: 3306</span>
+<span class="quote1">&gt;               Connect_Retry: 60</span>
+<span class="quote1">&gt;             Master_Log_File: masterdb-bin.000085</span>
+<span class="quote1">&gt;         Read_Master_Log_Pos: 731901898</span>
+<span class="quote1">&gt;              Relay_Log_File: slave2-relay-bin.000144</span>
+<span class="quote1">&gt;               Relay_Log_Pos: 706459275</span>
+<span class="quote1">&gt;       Relay_Master_Log_File: masterdb-bin.000085</span>
+<span class="quote1">&gt;            Slave_IO_Running: No</span>
+<span class="quote1">&gt;           Slave_SQL_Running: No</span>
+<span class="quote1">&gt;             Replicate_Do_DB:</span>
+<span class="quote1">&gt;         Replicate_Ignore_DB:</span>
+<span class="quote1">&gt;          Replicate_Do_Table:</span>
+<span class="quote1">&gt;      Replicate_Ignore_Table:</span>
+<span class="quote1">&gt;     Replicate_Wild_Do_Table: db1.%</span>
+<span class="quote1">&gt; Replicate_Wild_Ignore_Table:</span>
+<span class="quote1">&gt;                  Last_Errno: 0</span>
+<span class="quote1">&gt;                  Last_Error:</span>
+<span class="quote1">&gt;                Skip_Counter: 0</span>
+<span class="quote1">&gt;         Exec_Master_Log_Pos: 731884440</span>
+<span class="quote1">&gt;             Relay_Log_Space: 0</span>
+<span class="quote1">&gt;             Until_Condition: None</span>
+<span class="quote1">&gt;              Until_Log_File:</span>
+<span class="quote1">&gt;               Until_Log_Pos: 0</span>
+<span class="quote1">&gt;          Master_SSL_Allowed: No</span>
+<span class="quote1">&gt;          Master_SSL_CA_File:</span>
+<span class="quote1">&gt;          Master_SSL_CA_Path:</span>
+<span class="quote1">&gt;             Master_SSL_Cert:</span>
+<span class="quote1">&gt;           Master_SSL_Cipher:</span>
+<span class="quote1">&gt;              Master_SSL_Key:</span>
+<span class="quote1">&gt;       Seconds_Behind_Master: NULL</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; ----</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; スタートしようとすると、次のようなエラーが出ます。</span>
+<span class="quote1">&gt; ----</span>
+<span class="quote1">&gt; mysql&gt; start slave;</span>
+<span class="quote1">&gt; ERROR 1201 (HY000): Could not initialize master info structure; more</span>
+<span class="quote1">&gt; error messages can be found in the MySQL error log</span>
+<span class="quote1">&gt; ----</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; エラーログは、次の通りです。</span>
+<span class="quote1">&gt; ----</span>
+<span class="quote1">&gt; 060120 23:14:31 [ERROR] Failed to open log (file</span>
+<span class="quote1">&gt; './slave2-relay-bin.000144', errno 2)</span>
+<span class="quote1">&gt; 060120 23:14:31 [ERROR] Failed to open the relay log</span>
+<span class="quote1">&gt; './slave2-relay-bin.000144' (relay_log_pos 706459275)</span>
+<span class="quote1">&gt; 060120 23:14:31 [ERROR] Could not open log file</span>
+<span class="quote1">&gt; ----</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; マスターの情報は、以下の通りです。</span>
+<span class="quote1">&gt; ----</span>
+<span class="quote1">&gt; mysql&gt; show master status;</span>
+<span class="quote1">&gt; +---------------------+-----------+--------------+------------------+</span>
+<span class="quote2">&gt; | File                | Position  | Binlog_Do_DB | Binlog_Ignore_DB |</span>
+<span class="quote1">&gt; +---------------------+-----------+--------------+------------------+</span>
+<span class="quote2">&gt; | masterdb-bin.000086 | 337429262 |              |                  |</span>
+<span class="quote1">&gt; +---------------------+-----------+--------------+------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; ----</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; SATOH Fumiyasu wrote:</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt;さとうふみやす @ ミラクルです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;At Fri, 20 Jan 2006 22:26:30 +0900,</span>
+<span class="quote2">&gt;&gt;Kenta Hashimoto wrote:</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;ところが、今日になって、２台あるスレーブサーバのうち、</span>
+<span class="quote3">&gt;&gt;&gt;片方のレプリケーションが止まってしまって困っています。</span>
+<span class="quote3">&gt;&gt;&gt;お力をお貸しくださるとありがたいです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;とりあえず、show slave status (スレーブに対し)、</span>
+<span class="quote2">&gt;&gt;show master status (マスタqー) で何と表示されますか?</span>
+<span class="quote2">&gt;&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="12659">[前]</a><a href="12661">[次]</a><a href="../list/12601-12700">[番号順一覧]</a><a href="../thread/12601-12700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12242">  12242 2005-10-18 23:58 [Kenta Hashimoto &lt;kem] デュアルコアで２ＣＰＵ                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12243">  12243 2005-10-19 09:24 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12245">  12245 2005-10-19 09:52 　┗[Kenta Hashimoto &lt;kem]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12247">  12247 2005-10-19 10:03 　　┣[Hideki SUNADA &lt;hidek]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12249">  12249 2005-10-19 10:35 　　┃┣[Hideki SUNADA &lt;hidek]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12250">  12250 2005-10-19 10:37 　　┃┗[IGARASHI Kouichi &lt;ig]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12251">  12251 2005-10-19 11:00 　　┃　┗[Kenta Hashimoto &lt;kem]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12252">  12252 2005-10-19 12:00 　　┃　　┗[Hideki SUNADA &lt;hidek]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12257">  12257 2005-10-21 10:15 　　┃　　　┗[草野龍雄 &lt;kusano@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12258">  12258 2005-10-21 10:23 　　┃　　　　┣[草野龍雄 &lt;kusano@xxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12259">  12259 2005-10-21 14:00 　　┃　　　　┣[Kenta Hashimoto &lt;kem]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12261">  12261 2005-10-21 23:14 　　┃　　　　┃┣[murayama &lt;locutus@xx] 並列屋の視点(Re: デュアルコアで２ＣＰＵ)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12263">  12263 2005-10-22 16:32 　　┃　　　　┃┃┗[草野龍雄 &lt;kusano@xxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12657">  12657 2006-01-20 22:26 　　┃　　　　┃┗[Kenta Hashimoto &lt;kem] リレーログがおかしい  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12658">  12658 2006-01-20 23:09 　　┃　　　　┃　┗[SATOH Fumiyasu &lt;fumi]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12659">  12659 2006-01-20 23:19 　　┃　　　　┃　　┗[Kenta Hashimoto &lt;kem]                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="12660">  12660 2006-01-21 00:04 　　┃　　　　┃　　　┗[Kenta Hashimoto &lt;kem]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12271">  12271 2005-10-24 00:06 　　┃　　　　┗[Hiro Yoshioka &lt;hyosh]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12272">  12272 2005-10-24 02:03 　　┃　　　　　┗[草野龍雄 &lt;kusano@xxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12248">  12248 2005-10-19 10:29 　　┗[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                   </a></span>
+</pre>
+</body>
+</html>

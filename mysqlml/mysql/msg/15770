@@ -1,0 +1,144 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15770</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15769">[前]</a><a href="15771">[次]</a><a href="../list/15701-15800">[番号順一覧]</a><a href="../thread/15701-15800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15770
+</p>
+<div class="header">
+<p>
+From: HAYASHI Kentaro &lt;HAYASHI Kentaro &lt;hayashi@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 29 May 2012 18:35:11 +0900<br>
+Subject: [mysql 15770] [ANN] mroonga 2.03<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+林です。
+
+今日は肉の日ですね。
+
+mroonga 2.03をリリースしました。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-03">http://mroonga.github.com/ja/docs/news.html#release-2-03</a>
+
+mroongaはMySQL 5.1/5.5/5.6、MariaDB 5.3/5.5で利用できる全文検
+索・位置情報検索可能なストレージエンジンです。mroongaは
+Tritonnの後継プロジェクトです。
+
+ドキュメント:
+  <a href="http://mroonga.github.com/ja/">http://mroonga.github.com/ja/</a>
+インストールガイド:
+  <a href="http://mroonga.github.com/ja/docs/install.html">http://mroonga.github.com/ja/docs/install.html</a>
+
+注意: 今回のリリースでは、マルチカラムインデックスに関する後方互換性のない
+変更が1つ含まれています。
+もしストレージモードでマルチカラムインデックスを使用している場合は、
+インデックスを再作成する必要があります。
+
+マルチカラムインデックスを使用しているテーブルに対して以下のコマンドを
+実行します。
+
+mysql&gt; ALTER TABLE table_name DISABLE KEYS;
+mysql&gt; ALTER TABLE table_name ENABLE KEYS;
+
+1.20より前のバージョンからアップグレードする場合は以下にある
+手順を使ってください。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-1-20">http://mroonga.github.com/ja/docs/news.html#release-1-20</a>
+
+1.20からアップグレードする場合は以下にある手順を使ってくださ
+い。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-00">http://mroonga.github.com/ja/docs/news.html#release-2-00</a>
+
+今回のリリースの主なトピックは以下の通りです。
+
+  * バルクインサート時のインデックスの有効/無効化のサポート
+  * mroonga_match_escalation_thresholdサーバ変数の追加
+  * Mac OS XでHomebrewサポートを追加
+
+○ バルクインサート時のインデックスの有効/無効化のサポート
+
+MyISAMと同様にインデックスの有効/無効化が切り替えられるようになり、
+mysqldumpしたデータベースのリストアを高速に行えるようになりました。
+
+ただし、マルチカラムインデックス(全文インデックス除く)には、
+オフラインインデックス構築が有効になりません。
+
+また、マルチカラムインデックスの有効/無効化はラッパーモードでは正常に
+動作しないため注意が必要です。
+
+○ mroonga_match_escalation_thresholdシステム変数の追加
+
+検索方法をエスカレーションするかどうかを決定するための閾値を
+サーバ変数で指定することができるようになりました。
+
+今までは閾値を変更するためにはmroongaをビルドしなおす必要が
+ありましたが、my.cnfもしくはSET GLOBAL mroonga_match_escalation_thresholdを
+利用して変更することができます。
+
+mroonga_match_escalation_thresholdの詳細については以下を
+参照してください。
+
+  <a href="http://mroonga.github.com/ja/docs/reference.html#mroonga-match-escalation-threshold">http://mroonga.github.com/ja/docs/reference.html#mroonga-match-escalation-threshold</a>
+
+○ Mac OS XでHomebrewサポートを追加
+
+Mac OS XではHomebrewを使ってインストールすることができるようになりました。
+
+Homebrewを使ってインストールする方法については以下を参照して下さい。
+
+  <a href="http://mroonga.github.com/ja/docs/install.html#mac-os-x">http://mroonga.github.com/ja/docs/install.html#mac-os-x</a>
+
+○ 変更点
+
+2.02からの変更点は以下の通りです。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-03">http://mroonga.github.com/ja/docs/news.html#release-2-03</a>
+
+改良
+^^^^
+
+  * [ストレージモード] バルクインサートにてインデックスの有効/無効化をサポート。
+    [#1310]
+  * [rpm][centos] MySQL 5.5.24に対応。
+  * [rpm][fedora] MySQL 5.5.23に対応。
+  * mroonga_match_escalation_threshold システム変数を追加。
+  * groonga 2.0.3以降を必須にした。
+  * [yum] groonga-releaseへと変更し、RPMパッケージ
+    命名規則をcentos-releaseやfedora-releaseに合わせた。
+  * [Mac OS X] Homebrewでインストールできるようになった。
+    詳細はこちら <a href="http://mroonga.github.com/ja/docs/install.html">http://mroonga.github.com/ja/docs/install.html</a>
+
+修正
+^^^^
+
+  * Mac OS Xでビルドに失敗する問題を修正。
+  * [ラッパーモード] トランザクション内の検索で見つからないというエラーが
+　　報告される不具合を修正。
+    [#1322][groonga-dev,00746] [石橋卓見さんが報告]
+  * [rpm] mroongaプラグインがアップグレードのときに登録解除される
+    不具合を修正。
+    [groonga-dev,00810] [石橋卓見さんが報告][岩井さんがパッチ提供]
+  * MySQL 5.5以前では行ベースのレプリケーションで間違ったデータが転送されてしまう
+    不具合を修正。[#1379][groonga-dev,00902] [土井健司さんが報告]
+
+感謝
+^^^^
+
+  * 石橋卓見さん
+  * 岩井さん
+  * 土井健司さん
+
+
+
+-- 
+HAYASHI Kentaro &lt;hayashi@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="15769">[前]</a><a href="15771">[次]</a><a href="../list/15701-15800">[番号順一覧]</a><a href="../thread/15701-15800">[スレッド一覧]</a></p>
+</body>
+</html>

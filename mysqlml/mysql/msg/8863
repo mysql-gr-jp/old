@@ -1,0 +1,130 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8863</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8862">[前]</a><a href="8864">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8863
+</p>
+<div class="header">
+<p>
+From: tateyan &lt;tateyan &lt;tateyan@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 23 Feb 2004 23:04:07 +0900<br>
+Subject: [mysql 08863] Re: mod_auth_mysql のパスワード暗号化について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+たてやんっす
+
+杉本誠さんの
+題名「<a href="08860">[mysql 08860]</a> mod_auth_mysql のパスワード暗号化について」のメールからの引用です
+<span class="quote1">&gt; お世話になります。はじめて投稿します。</span>
+<span class="quote1">&gt; すぎもとといいます。よろしくお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 早速ですが、ご教授いただければ幸いです。</span>
+<span class="quote1">&gt; 社内イントラで、mod_auth_mysqlを使用し、MySQL上で暗号化パスワードの利用を</span>
+<span class="quote1">&gt; 考えています。</span>
+<span class="quote1">&gt; しかし、通常のテキストなら認証ＯＫなのですが、パスワードフィールドを暗号化する</span>
+<span class="quote1">&gt; と認証できなくなってしまいます。</span>
+<span class="quote1">&gt; 環境は以下の通りです。</span>
+<span class="quote1">&gt; ＯＳ：　　　　　WindowsNT4.0SP6a</span>
+<span class="quote1">&gt; WebServer： Apache1.3.24</span>
+<span class="quote1">&gt; MySQL　   ：3.23.55</span>
+<span class="quote1">&gt; 使用データベースとテーブル　authdb 、authtable</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ●Apache　httpd.confのmod_auth_mysql関係部分抜粋</span>
+<span class="quote1">&gt; LoadModule mysql_auth_module modules/mod_auth_mysql.so</span>
+<span class="quote1">&gt; &lt;IfModule mod_auth_mysql.c&gt;</span>
+<span class="quote1">&gt;     &lt;Location /restricted&gt;</span>
+<span class="quote1">&gt;         AuthName &quot;MySQL Secured Place&quot;</span>
+<span class="quote1">&gt;         AuthType Basic</span>
+<span class="quote1">&gt;         require valid-user</span>
+<span class="quote1">&gt;         AuthMySQLHost localhost</span>
+<span class="quote1">&gt;         AuthMySQLDB authtdb</span>
+<span class="quote1">&gt;         AuthMySQLUser apache</span>
+<span class="quote1">&gt;         AuthMySQLPassword PaSsWorD</span>
+<span class="quote1">&gt;         AuthMySQLUserTable authtable</span>
+<span class="quote1">&gt;         AuthMySQLNameField username</span>
+<span class="quote1">&gt;         AuthMySQLPasswordField password</span>
+<span class="quote1">&gt;         AuthMySQLCryptedPasswords On</span>
+<span class="quote1">&gt;     &lt;/Location&gt;</span>
+<span class="quote1">&gt; &lt;/IfModule&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ●認証対象のディレクトリの.htaccess</span>
+<span class="quote1">&gt; AuthName &quot;このページはパスワード制限されています&quot;</span>
+<span class="quote1">&gt; AuthType Basic</span>
+<span class="quote1">&gt; require valid-user</span>
+<span class="quote1">&gt; AuthMySQLHost localhost</span>
+<span class="quote1">&gt; AuthMySQLDB authdb</span>
+<span class="quote1">&gt; AuthMySQLUser apache</span>
+<span class="quote1">&gt; AuthMySQLPassword PaSsWorD</span>
+<span class="quote1">&gt; AuthMySQLUserTable authtable</span>
+<span class="quote1">&gt; AuthMySQLNameField username</span>
+<span class="quote1">&gt; AuthMySQLPasswordField password</span>
+<span class="quote1">&gt; AuthMySQLCryptedPasswords On</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これら２つの設定は、mod_auth_mysqlの付属サンプルほぼそのままです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ●authtableにユーザーを追加するＳＱＬ</span>
+<span class="quote1">&gt; INSERT INTO authtable (username, password) VALUES('sugimoto', password('abcd'));</span>
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; password()関数で、確かに暗号化されますが、それを正しくBasic認証することが出来ません。</span>
+password はMySQLのパスワードになります
+Basic認証に使うには　ENCRYPT()関数を使うことになるんでしょうけど　
+WindowsNTなんですね...
+
+
+PASSWORD() 暗号は不可逆です。 PASSWORD() は UNIX のパスワードが暗号化す
+るのと同じ方法で暗号化を行うわけではありません。 UNIX のパスワードと
+MySQL のパスワードが同じと思ってはいけません。 UNIX のパスワードファイル
+に保存される値が PASSWORD() が返すと考えてはいけません。 ENCRYPT() 参照。
+れます。 
+
+ということなんで使えないですね
+
+apacheであれば　md5 でbasic 認証できますので
+
+mysql のmd5()関数と組み合わせれば認証できそうな気がします
+
+あとで　この辺試してみます
+<span class="quote1">&gt; password()を使用せずにBasic認証すると、ＯＫとなります。</span>
+<span class="quote1">&gt; AuthMySQLCryptedPasswords Onで暗号化対応だと思うのですが、プレーンテキストで</span>
+<span class="quote1">&gt; 認証してしまいます。</span>
+<span class="quote1">&gt; いろいろ調べて、暗号化がpassword()関数ではなく、encrypt()関数を使用するという記</span>
+<span class="quote1">&gt; 述に行き当たりましたが、WinNT用MySQLでは使用できないとの事でした。</span>
+
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mod_auth_mysqlはバージョンによって、設定方法がかなり違うようで、試行錯誤しています。</span>
+<span class="quote1">&gt; 何かヒントでもいただければ幸いです。</span>
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  彡彡从        たてやんっす
+ d□/□-ｂ      &lt;tateyan@xxxxxxxxxx&gt;
+ ヽ&quot;ー&quot;丿
+
+Key fingerprint = 5D56 8EA3 B9FE A721 4866  FB4A 0041 672C 08DD C33A
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8862">[前]</a><a href="8864">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8860">   8860 2004-02-23 10:34 [杉本誠 &lt;sugimoto@xxx] mod_auth_mysql のパスワード暗号化について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8862">   8862 2004-02-23 22:31 ┣[&quot;A.K.I.&quot; &lt;aki@xxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8865">   8865 2004-02-24 10:31 ┃┗[杉本誠 &lt;sugimoto@xxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="8863">   8863 2004-02-23 23:04 ┗[tateyan &lt;tateyan@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8864">   8864 2004-02-23 23:35 　┣[tateyan &lt;tateyan@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8867">   8867 2004-02-24 11:06 　┃┗[杉本誠 &lt;sugimoto@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8866">   8866 2004-02-24 10:43 　┗[杉本誠 &lt;sugimoto@xxx]                                     </a></span>
+</pre>
+</body>
+</html>

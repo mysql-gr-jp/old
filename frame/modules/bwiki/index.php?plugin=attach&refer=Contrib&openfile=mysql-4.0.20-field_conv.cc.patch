@@ -1,0 +1,79 @@
+--- mysql-4.0.20/sql/field_conv.cc.orig	2004-08-12 17:30:59.000000000 +0900
++++ mysql-4.0.20/sql/field_conv.cc	2004-08-12 17:47:04.000000000 +0900
+@@ -542,22 +542,75 @@
+ 	to->table->db_low_byte_first == from->table->db_low_byte_first)
+     {						// Identical fields
+       memcpy(to->ptr,from->ptr,to->pack_length());
+       return;
+     }
+   }
++
+   if (to->type() == FIELD_TYPE_BLOB)
+   {						// Be sure the value is stored
+     Field_blob *blob=(Field_blob*) to;
+     from->val_str(&blob->value,&blob->value);
+     if (!blob->value.is_alloced() &&
+-	from->real_type() != FIELD_TYPE_STRING)
++	from->real_type() != FIELD_TYPE_STRING) {
+       blob->value.copy();
++    }
++
++#ifdef USE_MB
++    if ( strcmp(default_charset_info->name, "sjis") == 0 ||
++	 strcmp(default_charset_info->name, "big5") == 0 ||
++	 strcmp(default_charset_info->name, "gbk") == 0     )
++    {
++       char *s_ptr=0, c, *ptr;
++       uint i, slen, len;
++       ptr = (char*) blob->value.ptr();
++       len = blob->value.length();
++       if ((s_ptr=(char * ) my_malloc(sizeof(char) * len, MYF(0))))
++       {
++	  slen = 0;
++	  for (i=0; i<len; i++)
++	  {
++	     c = *(ptr + i);
++	       if (0x5c == c) {
++		  i++;
++		  c = *(ptr + i);
++		  switch(c)
++		  {
++		     case 'n': c = '\n'; break;
++		     case 't': c = '\t'; break;
++		     case 'r': c = '\r'; break;
++		     case 'b': c = '\b'; break;
++		     case '0': c = 0x00; break;  // Ascii null
++		     case 'Z': c = '\032'; break;// Win32 end of file
++		     case 'N': c = 0x00; break;
++		  }
++	       }
++	       *(s_ptr + slen) = c;
++	       slen++;
++	  }
++
++	    *(s_ptr + slen) = 0;
++
++	    if (slen > 0) {
++	       ptr = (char*) s_ptr;
++	    }
++	 }
++
++       blob->store(ptr, slen);
++
++       my_free(s_ptr, MYF(MY_ALLOW_ZERO_PTR));
++    }
++    else
++#endif /* sjis, big5, gbk */
++
++
+     blob->store(blob->value.ptr(),blob->value.length());
++
+     return;
+   }
++
+   if ((from->result_type() == STRING_RESULT &&
+        (to->result_type() == STRING_RESULT ||
+ 	(from->real_type() != FIELD_TYPE_ENUM &&
+ 	 from->real_type() != FIELD_TYPE_SET))) ||
+       to->type() == FIELD_TYPE_DECIMAL)
+   {

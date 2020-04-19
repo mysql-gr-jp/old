@@ -1,0 +1,91 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14167</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14166">[前]</a><a href="14168">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14167
+</p>
+<div class="header">
+<p>
+From: &lt;kozu@xxxxxxxxxx&gt;<br>
+Date: Sat, 11 Aug 2007 20:29:49 +0900 (JST)<br>
+Subject: [mysql 14167] レプリケーションについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+MySQL4.0.27 ユーザーの kozu と申します。
+
+レプリケーションについて一つ確認させて下さい。
+
+最近レプリケーションシステムを導入して、問題なく同期は出来ているのですが、
+tcpdump でパケットを確認すると、内部用の Inside NIC (eth0) ではなく、
+外部用の Outside NIC (eth1) で同期していることに気付きました。
+
+・DB1 で tcpdump -i eth1 を実施し、DB2 で create database を実施した際のダンプデータ
+20:22:56.711325 IP 192.168.110.6.mysql &gt; 192.168.110.5.netopia-vo3: P 349803143:349803200(57) ack 173125362 win 724 &lt;nop,nop,timestamp 533818302 1066651192&gt;
+20:22:56.711532 IP 192.168.110.5.netopia-vo3 &gt; 192.168.110.6.mysql: . ack 57 win 998 &lt;nop,nop,timestamp 1068546941 533818302&gt;
+※DB2 で同様のコマンドを実施し、tcpdump -i eth0 を実行したが、何も記録は残らなかった。
+
+せっかく内部用インターフェースを用意しておりますので、
+Inside NIC を使用してレプリケーションさせたいと考えておりますが、
+レプリケーションで使用するインターフェースを指定する事は可能でしょうか？
+
+
+○詳細な状況
+・NW構成情報
+
+WAN
+ |
+rooter
+ |
+ +--[eth1] DB1
+ |        [eth0]
+ |          | &lt;ココで同期させたい&gt;
+ |        [eth0]
+ +--[eth1] DB2
+
+・DB1 NIC の設定
+DefaultGateway 192.168.110.1
+eth1 192.168.110.5
+eth0 192.168.100.5
+
+・DB2 NIC の設定
+DefaultGateway 192.168.110.1
+eth1 192.168.110.6
+eth0 192.168.100.6
+
+・DB1 my.cnf の抜粋
+server-id   = 1
+master-host = 192.168.100.6 &lt;DB2 eth0 を指定&gt;
+master-user = RepUser
+
+・DB2 my.cnf の抜粋
+server-id   = 1
+master-host = 192.168.100.5 &lt;DB1 eth0 を指定&gt;
+master-user = RepUser
+
+
+もしかしたら OS 側での調整が必要な事である可能性もありますが、何かアドバイスを頂けると幸いです。
+ご回答よろしくお願いします。
+
+
+</pre>
+</div>
+<p class="button"><a href="14166">[前]</a><a href="14168">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="14167">  14167 2007-08-11 20:29 [&lt;kozu@xxxxxxxxxx&gt;   ] レプリケーションについて                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14168">  14168 2007-08-11 20:47 ┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14169">  14169 2007-08-11 23:06 　┗[&lt;kozu@xxxxxxxxxx&gt;   ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14170">  14170 2007-08-12 02:55 　　┗[&quot;Katsuyuki Sakai&quot; &lt;s]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14171">  14171 2007-08-12 10:54 　　　┣[&lt;kozu@xxxxxxxxxx&gt;   ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14172">  14172 2007-08-12 19:35 　　　┣[&quot;Katsuyuki Sakai&quot; &lt;s]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14173">  14173 2007-08-13 09:55 　　　┗[島村秀世 &lt;h.shimamur] Copying to tmp table　と Lockの関係について</a></span>
+</pre>
+</body>
+</html>

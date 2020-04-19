@@ -1,0 +1,168 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9852</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9851">[前]</a><a href="9853">[次]</a><a href="../list/9801-9900">[番号順一覧]</a><a href="../thread/9801-9900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9852
+</p>
+<div class="header">
+<p>
+From: Hirofumi Fujiwara &lt;Hirofumi Fujiwara &lt;fuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 14 Jul 2004 12:25:03 +0900 (JST)<br>
+Subject: [mysql 09852] Re: MySQL 4.1.2 の日本語の扱い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+From: takeshi@xxxxxxxxxx
+Subject: <a href="09850">[mysql 09850]</a> Re: MySQL 4.1.2 の日本語の扱い
+Date: Wed, 14 Jul 2004 09:56:50 +0900
+Message-ID: &lt;871xjf1k4t.wl@xxxxxxxxxx&gt;
+
+<span class="quote1">&gt; 村上です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; At Tue, 13 Jul 2004 17:35:49 -0700,</span>
+<span class="quote1">&gt; shuichi@xxxxxxxxxx wrote:</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 玉川です。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt;   英文の方のマニュアルを探しても、このあたりの事が書かれているページが</span>
+<span class="quote3">&gt; &gt; &gt;   見つからないのですが、参考にすべきURLがありましたら、教えてください。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 「このあたりの事」がどのあたりを指すのかにもよりますが、</span>
+<span class="quote2">&gt; &gt; --init-connectシステム変数についてはこちらのページに書かれています。</span>
+<span class="quote2">&gt; &gt; <a href="http://dev.mysql.com/doc/mysql/en/Server_system_variables.html">http://dev.mysql.com/doc/mysql/en/Server_system_variables.html</a></span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; しかし、binaryキャラクタセットについて、及び4.0から4.1（バイナリ版）に</span>
+<span class="quote2">&gt; &gt; アップグレードする際に「latin1以外でコンパイルしたクライアントを使用している</span>
+<span class="quote2">&gt; &gt; 場合は--init-connect='set names binary'オプションをつかってサーバーを</span>
+<span class="quote2">&gt; &gt; 起動する必要がある」という点については確かに言及されていないようです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; --init-connect='set names binary' の記述を追加する場合は</span>
+<span class="quote1">&gt; 必ず注意事項を書いて欲しいです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 注意：</span>
+<span class="quote1">&gt; --init-connect='SET NAMES binary' を指定して mysqld サーバーを</span>
+<span class="quote1">&gt; 立ち上げた場合、いかなるクライアントも binary になってしまうこと</span>
+<span class="quote1">&gt; に注意してださい。</span>
+<span class="quote1">&gt; たとえあなたが mysql --default-character-set=ujis と指定して接続</span>
+<span class="quote1">&gt; していたとしても binary になります。</span>
+<span class="quote1">&gt; そのため、--init-connect='SET NAMES binary' を指定してたち上げて</span>
+<span class="quote1">&gt; いるサーバーに対して、クライアントを ujis/sjis/utf8 などの</span>
+<span class="quote1">&gt; キャラクタセットで接続させたい場合は、クライアント接続後、</span>
+<span class="quote1">&gt; 必ずクライアントが 'SET NAMES ujis' を実行する必要があります。</span>
+
+  init-connect での指定と、クライアント側(mysql)からの 
+  default-character-set の指定の優先度は明確にはどこにも書かれていなかっ
+  た気がします。
+  もちろん、クライアントで指定したら、そっちが優先するのが当然だと思い
+  ます。クライアントがそうしたいのだから。
+
+<span class="quote1">&gt; こういうことなので、この方法は</span>
+<span class="quote1">&gt; 今私はあまり乗り気ではありません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 一番の解は、MySQL 自身をサーバー、クライアント含めて binary でコンパイルすること。</span>
+<span class="quote1">&gt; 最低サーバーに default-character-set を設定するだけできれいに動くので。</span>
+<span class="quote1">&gt; 「mysqld と mysqldump には必ず default-character-set を設定してね」、</span>
+<span class="quote1">&gt; という運用だけですみます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; MySQL AB 自身がコンパイルしているバイナリすらもそうしてもらえば OK。</span>
+<span class="quote1">&gt; そうすればコンパイルしない人もトラブルに遭遇する率は減ると思ってます。</span>
+<span class="quote1">&gt; 知らないうちに latin1 ライブラリをリンクしたクライアントのバイナリを</span>
+<span class="quote1">&gt; 使用して混乱するしそうな予感はしているので、</span>
+<span class="quote1">&gt; 世界中に latin1 の libmysqlclient がばらまかれるよりも</span>
+<span class="quote1">&gt; binary の libmysqlclient がばらまかれた方がうれしいのです。</span>
+<span class="quote1">&gt; </span>
+
+2.3.2 Typical configure Options
+<a href="http://dev.mysql.com/doc/mysql/en/configure_options.html">http://dev.mysql.com/doc/mysql/en/configure_options.html</a>
+
+の --with-charset を見ると、
+
+By default, MySQL uses the latin1 (ISO-8859-1) character set. To
+change the default set, use the --with-charset option:
+
+shell&gt; ./configure --with-charset=CHARSET
+
+CHARSET may be one of big5, cp1251, cp1257, czech, danish, dec8, dos,
+euc_kr, gb2312, gbk, german1, hebrew, hp8, hungarian, koi8_ru,
+koi8_ukr, latin1, latin2, sjis, swe7, tis620, ujis, usa7, or
+win1251ukr. See section 5.7.1 The Character Set Used for Data and
+Sorting.
+
+となっていて、binaryは書かれていないようなのですが、保証されているので
+しょうか？
+
+# 何か誤解しているかなぁ。
+
+
+  今のマニュアル（英文）は、マルチバイトを使用した場合に考慮すべき点が、
+  マニュアルのあちこちに散乱していて、それらを拾い読みして、利用者自身
+  が自分の頭で全体像を構築して、セットアップなどをしないといけません。
+
+  ある意味では、マニュアルのどこかに書かれていることが多いのですが、そ
+  ういうのは相当マズイと思います。
+
+  MySQLのマニュアルに、 How to use Multi-Byte Character / Multi-Byte
+  Character Tutorial が必要ではないかと思います。英文の場合、とりあえず、
+  UTF8だけに対して説明しておけば充分でしょう。
+
+  日本語の場合、文字コードがらみで最初のセットアップに失敗する場合が多
+  いようです。英語のメーリングリストを見ていても、Unicodeでうまくいっ
+  ていない人が少なくないようなので、マルチバイトで注意すべきことを1つ
+  の章の形でまとめておくのは、非常に有意義ではないかと思っています。
+
+------------------------------------------------------------------
+株式会社 タイムインターメディア       藤原 博文 fuji@xxxxxxxxxx
+本社 160-0002 東京都新宿区坂町26-27 ＩＰＢビル    TEL 03-5362-9009
+URL  <a href="http://www.timedia.co.jp/">http://www.timedia.co.jp/</a>                    FAX 03-5362-9008
+地図 <a href="http://www.timedia.co.jp/company/map/">http://www.timedia.co.jp/company/map/</a>     新宿線曙橋駅徒歩5分
+------------------------------------------------------------------
+♪  Puzzle Japan  <a href="http://www.puzzle.jp/">http://www.puzzle.jp/</a>  毎日新作パズルで遊ぼう ♪
+------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="9851">[前]</a><a href="9853">[次]</a><a href="../list/9801-9900">[番号順一覧]</a><a href="../thread/9801-9900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9530">   9530 2004-06-03 23:28 [とみたまさひろ &lt;tomm] MySQL 4.1.2 の日本語の扱い              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9531">   9531 2004-06-04 01:51 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9533">   9533 2004-06-04 08:26 　┣[SUGAWARA Hajime &lt;sug]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9547">   9547 2004-06-07 19:25 　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9550">   9550 2004-06-07 21:09 　　┣[&quot;Ryuichiro Munechika]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9556">   9556 2004-06-07 22:02 　　┃┗[SUGAWARA Hajime &lt;sug]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9573">   9573 2004-06-08 11:51 　　┃　┗[Hirofumi Fujiwara &lt;f]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9586">   9586 2004-06-10 02:48 　　┃　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9628">   9628 2004-06-13 21:50 　　┃　　　┗[Hirofumi Fujiwara &lt;f]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9578">   9578 2004-06-09 08:05 　　┣[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9580">   9580 2004-06-09 09:39 　　┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9592">   9592 2004-06-11 05:04 　　┗[&lt;shuichi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9596">   9596 2004-06-11 11:00 　　　┣[&lt;shuichi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9598">   9598 2004-06-12 00:16 　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9611">   9611 2004-06-12 21:55 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9687">   9687 2004-06-18 09:40 　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9699">   9699 2004-06-23 09:41 　　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9728">   9728 2004-07-01 11:18 　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9756">   9756 2004-07-02 21:14 　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9808">   9808 2004-07-10 16:55 　　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9839">   9839 2004-07-13 14:26 　　　　　　　　　┗[Shuichi Tamagawa &lt;sh]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9842">   9842 2004-07-13 15:12 　　　　　　　　　　┣[Hirofumi Fujiwara &lt;f]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9848">   9848 2004-07-14 09:35 　　　　　　　　　　┃┗[&lt;shuichi@xxxxxxxxxx&gt;]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9850">   9850 2004-07-14 09:56 　　　　　　　　　　┃　┗[&lt;takeshi@xxxxxxxxxx&gt;]               </a></span>
+<span class="current">-&gt;&nbsp;<a href="9852">   9852 2004-07-14 12:25 　　　　　　　　　　┃　　┗[Hirofumi Fujiwara &lt;f]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9854">   9854 2004-07-14 13:39 　　　　　　　　　　┃　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9858">   9858 2004-07-14 15:31 　　　　　　　　　　┃　　　┃┗[Hirofumi Fujiwara &lt;f]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9860">   9860 2004-07-14 16:35 　　　　　　　　　　┃　　　┃　┣[&lt;takeshi@xxxxxxxxxx&gt;]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9867">   9867 2004-07-16 02:16 　　　　　　　　　　┃　　　┃　┗[Shuichi Tamagawa &lt;sh]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9863">   9863 2004-07-15 11:34 　　　　　　　　　　┃　　　┗[&lt;shuichi@xxxxxxxxxx&gt;]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9847">   9847 2004-07-14 08:52 　　　　　　　　　　┗[&lt;shuichi@xxxxxxxxxx&gt;]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9849">   9849 2004-07-14 09:39 　　　　　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                 </a></span>
+</pre>
+</body>
+</html>

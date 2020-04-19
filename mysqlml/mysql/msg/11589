@@ -1,0 +1,151 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11589</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11588">[前]</a><a href="11590">[次]</a><a href="../list/11501-11600">[番号順一覧]</a><a href="../thread/11501-11600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11589
+</p>
+<div class="header">
+<p>
+From: &quot;Shinichi Izumi&quot; &lt;&quot;Shinichi Izumi&quot; &lt;izumi@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 16 Jun 2005 21:23:13 +0900<br>
+Subject: [mysql 11589] REDHAT-ES3へのインストール<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+和泉＠自社サーバー運用者です。
+Redhat LINUX ES3 へのインストールをしています。
+
+手順がわからず混乱しています。
+実行した内容とエラー内容をできるだけ正確にコピー＆ペーストします。
+間違っている点がありましたらご指摘いただければ幸いです。
+
+●RPMパッケージのインストール
+rpm -ivh　でインストールしました。
+ファイルはRedHat Network のChannelからダウンロードした
+ものを入れました。
+現在入っているパッケージは、
+
+# rpm -qa | grep mysql
+mysql-3.23.58-1
+libdbi-dbd-mysql-0.6.5-5
+hde-php-mysql-4.3.10-1
+mysql-server-3.23.58-16.RHEL3.1
+
+●mysqldの起動
+
+サーバーを起動しようと、下記のように実行しました。
+
+# /etc/rc.d/init.d/mysqld start
+Timeout error occurred trying to start MySQL Daemon.
+MySQLを起動中:                                             [失敗]
+
+と出力され、/var/log/mysqld.logには、
+
+050616 20:42:13  mysqld started
+050616 20:42:13  /usr/libexec/mysqld: Incorrect information in file: 
+'./mysql/host.frm'
+050616 20:42:13  mysqld ended
+
+となっています。
+
+※my.cnfの内容
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+
+[mysql.server]
+user=mysql
+basedir=/var/lib
+
+[safe_mysqld]
+err-log=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+
+host.frmの保存場所は、/var/lib/mysql/mysql/host.frmになっており、
+権限/パーミッションはmysql:mysql 660 になっています。
+mysqld start を実行したのはrootユーザーです。
+
+●mysqlシステム用テーブルの作成
+
+マニュアルに従い、mysql_install_dbも実行しました。
+
+[root]# /usr/bin/mysql_install_db --user=mysql &amp;
+[1] 8664
+
+[root]# Installing all prepared tables
+050616 20:55:46  /usr/libexec/mysqld: Shutdown Complete
+
+To start mysqld at boot time you have to copy support-files/mysql.server
+to the right place for your system
+
+PLEASE REMEMBER TO SET A PASSWORD FOR THE MySQL root USER !
+This is done with:
+/usr/bin/mysqladmin -u root  password 'new-password'
+/usr/bin/mysqladmin -u root -h kanako.e-comtec.ne.jp  password 
+'new-password'
+See the manual for more instructions.
+
+NOTE:  If you are upgrading from a MySQL &lt;= 3.22.10 you should run
+the /usr/bin/mysql_fix_privilege_tables. Otherwise you will not be
+able to use the new GRANT command!
+
+You can start the MySQL daemon with:
+cd /usr ; /usr/bin/safe_mysqld &amp;
+
+You can test the MySQL daemon with the benchmarks in the 'sql-bench' 
+directory:
+cd sql-bench ; run-all-tests
+
+Please report any problems with the /usr/bin/mysqlbug script!
+
+The latest information about MySQL is available on the web at
+<a href="http://www.mysql.com">http://www.mysql.com</a>
+Support MySQL by buying support/licenses at <a href="https://order.mysql.com">https://order.mysql.com</a>
+
+とエラーが出ます。
+
+※エラー内容からすると、mysqldを実行してから、という様に読めるのですが・・・（？） 
+
+
+●mysqladminの実行と管理者権限の設定（？）
+
+最後に、mysqladminを実行しました。
+
+# /usr/bin/mysqladmin -u root  password 'tmpPassword'
+/usr/bin/mysqladmin: connect to server at 'localhost' failed
+error: 'Can't connect to local MySQL server through socket 
+'/var/lib/mysql/mysql.sock' (11
+1)'
+Check that mysqld is running and that the socket: 
+'/var/lib/mysql/mysql.sock' exists!
+
+と表示が出ます。
+
+●不明点
+
+・　実行しなければいけない順序がマニュアル通りのつもりがエラーが出ている。
+・　mysqlユーザーを id 75で作成したが、どのタイミングで使うのかわからない。
+・　my.cnfの設定は初期状態のままで良いのかどうか・・・。
+
+tarballをダウンロードして試しましたが、実行結果が同じ様なものでした。
+
+どうぞよろしくお願い致します。
+
+
+#---- 　和泉　慎一
+#--  izumi@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="11588">[前]</a><a href="11590">[次]</a><a href="../list/11501-11600">[番号順一覧]</a><a href="../thread/11501-11600">[スレッド一覧]</a></p>
+</body>
+</html>

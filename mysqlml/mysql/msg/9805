@@ -1,0 +1,211 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9805</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9804">[前]</a><a href="9806">[次]</a><a href="../list/9801-9900">[番号順一覧]</a><a href="../thread/9801-9900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9805
+</p>
+<div class="header">
+<p>
+From: Yasumitsu Ito &lt;Yasumitsu Ito &lt;y-ito@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 9 Jul 2004 23:43:23 +0900<br>
+Subject: [mysql 09805] Re: レプリケーションスレーブの能動的な同期<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+ひろせ様。
+ご助言頂き、ありがとうございます。
+
+On Fri, 09 Jul 2004 19:06:39 +0900
+&quot;HIROSE, Masaaki&quot; &lt;hirose31@xxxxxxxxxx&gt; wrote:
+
+<span class="quote2">&gt; &gt; [問題点]</span>
+<span class="quote2">&gt; &gt; 何らかの原因で、ネットワークが切断されるため、</span>
+<span class="quote2">&gt; &gt; 同期がとれず、同期回復まで待たなければならない。</span>
+<span class="quote2">&gt; &gt; そこで、スレーブから能動的に同期をあわせたい。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ネットワーク接続が回復すれば、マスターとスレーブ(のI/Oスレッド)のやり</span>
+<span class="quote1">&gt; とりも再開されて、待てばマスターに追いつきませんか?</span>
+
+現状では slave_net_timeout をデフォルトの3600に設定しているため、
+それまで待たなくては再開されません。
+ネットワークが頻繁に切断されるため
+(この原因は他にあると思うのですが、
+ここでは切断されることを前提として、処置策を考えたいのです)
+スレーブからどうにかできれば、と思っています。
+
+<span class="quote2">&gt; &gt; [質問]</span>
+<span class="quote2">&gt; &gt; スレーブ側で</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; slave$ mysql --user=root --password=pass -e &quot;show slave status&quot;</span>
+<span class="quote2">&gt; &gt; slave$ mysql --user=slave_account --host=master --password=pass -e &quot;show master status&quot;</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; を行い、ポジションの違いを発見した場合に、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 『同期がとれていない』と判断するのは、『ポジションが一致しない場合』じゃ</span>
+<span class="quote1">&gt; なくて『ポジションがある程度以上離れている場合』としないとまずいと思い</span>
+<span class="quote1">&gt; ます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; なぜなら、</span>
+<span class="quote1">&gt;   o MySQLのレプリケーションは非同期である。</span>
+<span class="quote1">&gt;   o 『同時に』SHOW MASTER STATUS と SHOW SLAVE STATUS が実行できるわけ</span>
+<span class="quote1">&gt;     ではない。</span>
+<span class="quote1">&gt; の 2 つの理由からです。</span>
+
+そうでした。
+今の環境ではそれほど頻繁にマスターのポジションが進むわけではないので、
+一致しなければレプリケートされていないと判断できる、
+と勘違いしていました。
+
+<span class="quote2">&gt; &gt; slave$ mysql_synchronise</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; の様な自作コマンドを発行して、強制的に同期をあわせる作業を行いたい。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; たとえば、その中身を</span>
+<span class="quote2">&gt; &gt; slave mysql&gt; slave stop;</span>
+<span class="quote2">&gt; &gt; slave mysql&gt; slave start;</span>
+<span class="quote2">&gt; &gt; slave mysql&gt; select master_pos_wait('master_log_file', master_log_pos);</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; などと考えるのですが、どうでしょうか?</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; SELECT MASTER_POS_WAIT を実行したからといって、レプリケーションの処理が</span>
+<span class="quote1">&gt; 速くなるわけでも遅くなるわけでもありません。単に、指定したポジションに</span>
+<span class="quote1">&gt; 達した時点でスレーブのレプリケート処理が停止するだけです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; どうしても同期させたいのであれば、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 『Q: スレーブが追いつくまでマスタの更新をブロックするにはどうしますか。』</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/mysql/ja/Replication_FAQ.html">http://dev.mysql.com/doc/mysql/ja/Replication_FAQ.html</a></span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; にあるように、マスターで更新ロックをしてから SELECT MASTER_POS_WAIT し</span>
+<span class="quote1">&gt; ないといけませんが、先にも述べたように、SHOW SLAVE STATUS で確認して</span>
+<span class="quote1">&gt; I/O スレッドと SQL スレッドが動いていれば、放っておけばマスターに追いつ</span>
+<span class="quote1">&gt; くはずです。</span>
+
+show slave status でI/Oスレッドと SQL スレッドがYESであっても、
+エラーログを見ると
+'Can't connect to MySQL...'
+と出力がされており、レプリケートされていない状態が生まれています。
+そして、上記エラーが出力されるのは最後の通信より
+slave_net_timeout秒後だと認識しているのですが。
+
+今、実験環境を作っているのですが、
+slave_net_timeout=30
+master-retry-connect=60
+に設定している状態でレプリケーション環境を作り、
+LANケーブルを抜いて放置すると、
+30秒以内に
+エラーログに 'Can't connect to MySQL...' errno: 2003
+そしてその約1分後に
+'Lost connection to MySQL..' errno: 2013
+と出ますが、show slave status はどちらも
+Slave_IO_Running: YES
+Slave_SQL_Running: YES
+となっています。
+
+この状況で、LANケーブルを接続し、
+netstat -p
+を実行すると、mysqlに該当するTCPコネクションは消えています。
+
+そして、master-retry-connect の時間が経過すると、
+レプリケーションが再び始まるようです。
+
+<span class="quote2">&gt; &gt; LANケーブルを引っこ抜いてしまったあとに、</span>
+<span class="quote2">&gt; &gt; slave stop;</span>
+<span class="quote2">&gt; &gt; slave start;</span>
+<span class="quote2">&gt; &gt; を実行しても、すんなりと通ってしまったり、</span>
+<span class="quote2">&gt; &gt; 逆に slave stop; を実行したときにプロンプトがかえってくるまでに</span>
+<span class="quote2">&gt; &gt; 非常に多くの時間がかかったりと、</span>
+<span class="quote2">&gt; &gt; いまいち挙動が掴めていないのが現状です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; SLAVE STOPに時間がかかるのはわかりませんが、</span>
+<span class="quote1">&gt; マスターで ifconfig down (/etc/init.d/network stop) しても、スレーブで</span>
+<span class="quote1">&gt; は I/O、SQL スレッド共に動いたままなので、マスターで ifconfig up すれ</span>
+<span class="quote1">&gt; ば STOP/START SLAVE などしなくてもレプリケーションは再開されました。</span>
+
+この状況はこちらでも再現できました。
+
+<span class="quote2">&gt; &gt; slave_net_timeout の時間を小さくする方法も考えられますが、</span>
+<span class="quote2">&gt; &gt; あまり小さな値では、無駄なトラフィックを生むだけのような気がします。</span>
+<span class="quote2">&gt; &gt; デフォルトでは3600秒になっているのですが、</span>
+<span class="quote2">&gt; &gt; たとえば、これを10秒などとしてしまうと、なにか弊害があったりするのでしょうか?</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; slave_net_timeout が使われるのは最初の1回だけなので、小さくしても問題</span>
+<span class="quote1">&gt; ないんじゃないかと思います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ただ、slave_net_timeout や master-connect-retry を小さくしてもしなくて</span>
+<span class="quote1">&gt; も、マスターが復活すれば程なくレプリケーションは再開されます。そのため</span>
+<span class="quote1">&gt; にはスレーブで I/O と SQL スレッドが動いている必要があるので、SHOW</span>
+<span class="quote1">&gt; SLAVE STATUS で両スレッドの状態を監視する必要はあります。</span>
+
+master-retry-connectのタイマーがくると、
+レプリケーションが再開することは理解できたのですが、
+これを、スレーブ側のタイミングで行いたいのです。
+
+マスターに書き込みを行ったあと、
+書き込んだはずのデータがスレーブに存在しておらず、
+エラーログに Lost connection/ Can't connect... が表示されている場合に
+スレーブ側から能動的にレプリケーションを開始する動作を行いたいのです。
+
+このような需要は一般的では無いのでしょうか？
+
+今のところ
+slave_net_timeout=10
+master-connect-retry=10
+として対処しようと考えています。
+
+<span class="quote1">&gt; ふと思ったのですが、もし、回線復旧後になかなかレプリケーションが再開さ</span>
+<span class="quote1">&gt; れないのが問題なのであれば、回線復旧後の stunnel の再接続がうまくいっ</span>
+<span class="quote1">&gt; てないという問題だったりしませんか?</span>
+
+現在は、実験環境として、stunnelを使わずに実験しています。
+(これも問題になるかもしれません)
+
+ところで、レプリケーションが取れている状態で
+マスターであるテーブルに値をインサートし、
+直後にスレーブ側で
+
+mysql&gt; show processlist;
+
+を実行すると、私の環境では以下のように、
+Time: 欄が非常に大きく表示されてしまいます。
+
+*************************** 2. row ***************************
+     Id: 75
+   User: system user
+   Host:
+     db: NULL
+Command: Connect
+   Time: 4294967273
+  State: Has read all relay log; waiting for the I/O slave thread to update it
+   Info: NULL
+*************************** 3. row ***************************
+
+バグかと思い、 MySQL-4.0.20 (OS: VineLinux 2.93) で試したのですが、
+やはり同じ値です。
+バグなのでしょうか？
+ちなみに、
+2^32 = 4294967296
+でした。
+
+最後に、ひろせ様、ご助言頂きありがとうございました。
+
+</pre>
+</div>
+<p class="button"><a href="9804">[前]</a><a href="9806">[次]</a><a href="../list/9801-9900">[番号順一覧]</a><a href="../thread/9801-9900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9789">   9789 2004-07-07 15:33 [Yasumitsu Ito &lt;y-ito] レプリケーションスレーブの能動的な同期  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9790">   9790 2004-07-07 21:58 ┣[&quot;Ohashi Koji&quot; &lt;ohash] mysqldumpの出力結果を取り込もうとするとUnknwon command</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9804">   9804 2004-07-09 19:06 ┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="9805">   9805 2004-07-09 23:43 　┗[Yasumitsu Ito &lt;y-ito]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9845">   9845 2004-07-14 00:22 　　┗[Yasumitsu Ito &lt;y-ito]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9866">   9866 2004-07-16 00:08 　　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5386</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="5385">[前]</a><a href="5387">[次]</a><a href="../list/5301-5400">[番号順一覧]</a><a href="../thread/5301-5400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5386
+</p>
+<div class="header">
+<p>
+From: &quot;KAWAI,Takanori&quot; &lt;&quot;KAWAI,Takanori&quot; &lt;GCD00051@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 21 Apr 2002 23:19:53 +0900<br>
+Subject: [mysql 05386] Re: Full-text Search<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+川合孝典です。
+
+----- Original Message -----
+From: &lt;moeru@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Sunday, April 21, 2002 11:13 AM
+Subject: <a href="05383">[mysql 05383]</a> Re: Full-text Search
+
+<span class="quote1">&gt; 2002/04/21 07:37:46 +0900に&quot;KAWAI,Takanori&quot; &lt;GCD00051@xxxxxxxxxx&gt;さんに頂</span>
+いた
+<span class="quote1">&gt; 「<a href="05381">[mysql 05381]</a> Re: Full-text Search」への返事です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; モエルです。</span>
+（中略）
+<span class="quote1">&gt; どうしようかと思うのが</span>
+<span class="quote1">&gt; ●データ入力してもらった際に全角スペースで入力された名前(商品名)と</span>
+<span class="quote1">&gt; 半角スペースのと２通りある。</span>
+<span class="quote1">&gt; ●全角か半角スペースなどで区切られた名前(商品名)もある。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; これらをどう区別するかって事なんです。</span>
+それをまずきちんと整理しない限り、正しい結果は得られないでしょう。
+というかどういう検索をしたいのかも含めて、もう少し整理するべきなのでは？
+商品名の完全一致だけを目指すのであれば、下記のようなことから
+あまり効果的とは思えません。
+
+<span class="quote1">&gt; Full-text Searchがどういう挙動をするのか興味ありますが</span>
+だとすれば、ナマズ本あたりをご覧になることをお薦めします：
+『Namazuシステムの構築と活用』
+<a href="http://homepage2.nifty.com/baba_hajime/namazubook/">http://homepage2.nifty.com/baba_hajime/namazubook/</a>
+
+私は古いのしか読んでませんが
+<a href="http://homepage2.nifty.com/baba_hajime/namazubook/v1/support.html">http://homepage2.nifty.com/baba_hajime/namazubook/v1/support.html</a>
+
+（中略）
+<span class="quote1">&gt; やっぱ、全文一致だと</span>
+<span class="quote1">&gt; WHERE title  = 'Steve' and  title  = 'Lukather' and title  = '&amp;'</span>
+<span class="quote1">&gt; and title  = 'Larry語'...</span>
+<span class="quote1">&gt; で２０万レコードから検索するほうが</span>
+<span class="quote1">&gt; WHERE like '%Steve Lukather &amp; Larry Carlton%'</span>
+<span class="quote1">&gt; を１万レコードから検索するよりかは、全然速かったりするんでしょうか？</span>
+やり方とデータの大きさ次第でしょう。
+全文検索といった場合、通常はある単位(単語など）に分割し、
+検索文字列のためのテーブルを作成し、各検索文字列に対する
+インデックスを利用することで検索スピードを改善しようとします。
+中間一致であれば全件を総ナメするしかありませんが、完全一致、
+せめて前方一致であればインデックスが有効になります。
+単純に件数の多い少ないでは決まりません。
+
+ただしそうした場合、単語ごとにしか検索文字列を作っていなければ
+Steve Lukather &amp; Larry Carltonを検索しても
+Steve, Lukather, &amp;, Larry, Carltonの各単語が含まれている
+レコード、例えばSteve Carlton &amp; Larry Lukather なんてちょっと
+順番が違っているものであっても検索してくることがあるでしょう。
+＃検索サイトではよくあることですよね？
+
+それがイヤなら、&quot;Steve Lukather &amp; Larry Carlton&quot;という語であっても
+単語毎だけでなく、Steve Lukather、Steve Lukather &amp; 、
+Steve Lukather &amp; Larry 、Steve Lukather &amp; Larry Carlton、
+Lukather &amp; Larry Carlton　等々、各単語の組み合わせで、
+各レコード用の検索文字列を作り出して、専用のテーブルに入れて
+いくことになるのでしょう。
+
+ちなみに
+<span class="quote1">&gt; WHERE title  = 'Steve' and  title  = 'Lukather' and title  = '&amp;' and</span>
+<span class="quote1">&gt; title  = 'Larry語'...なんてゲリ長い句になりますよね</span>
+こんなに単純なSQLでは済みませんよ。第一、この条件では絶対成立
+しないでしょう（titleがどんな文字列だと成立するかを考えてみては？）
+
+完全にANDだけであれば検索対象のテーブルを複数違う名前で
+参照するという方法もあるでしょうけれど、普通は対象になる
+title in ('Steve', 'Lukather', ....)
+とでもしてまとめて取ってきて対象レコード単位にポイントを計算する
+ような形になるとは思います。（というか自分ではそうしてます）
+
+そうか日本語であっても、ChaSenかKakasiで単語に分解して
+各単語を16進数に変換して、各単語を空白で分けて、別の
+TEXTに突っ込むようにすれば動きそうだなぁ。
+きちんと文字単位になるように区切り文字もつければ...。
+＃かなり強引だけど...ウズウズ。
+
+===================================================
+川合 孝典 (Hippo2000)
+   DBI日本語メーリングリスト管理人、Kansai.pm所属
+   kwitknr@xxxxxxxxxx GCD00051@xxxxxxxxxx
+   <a href="http://member.nifty.ne.jp/hippo2000">http://member.nifty.ne.jp/hippo2000</a>
+   <a href="http://www.hippo2000.info/">http://www.hippo2000.info/</a>
+「Perlを256倍使うための本　DBI編」　発売中
+<a href="http://member.nifty.ne.jp/hippo2000/p256dbi/p256dbi.htm">http://member.nifty.ne.jp/hippo2000/p256dbi/p256dbi.htm</a>
+そしてその次は...(^-^)
+===================================================
+
+
+</pre>
+</div>
+<p class="button"><a href="5385">[前]</a><a href="5387">[次]</a><a href="../list/5301-5400">[番号順一覧]</a><a href="../thread/5301-5400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="5375">   5375 2002-04-20 22:23 [&lt;moeru@xxxxxxxxxx&gt;  ] Full-text Search                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5376">   5376 2002-04-20 23:19 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5377">   5377 2002-04-20 23:35 　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5378">   5378 2002-04-21 00:34 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5379">   5379 2002-04-21 00:47 　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5381">   5381 2002-04-21 07:37 　　　　┣[&quot;KAWAI,Takanori&quot; &lt;GC]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5383">   5383 2002-04-21 11:13 　　　　┃┗[&lt;moeru@xxxxxxxxxx&gt;  ]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="5386">   5386 2002-04-21 23:19 　　　　┃　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5387">   5387 2002-04-22 00:13 　　　　┃　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5401">   5401 2002-04-25 11:06 　　　　┃　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5403">   5403 2002-04-25 12:14 　　　　┃　　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5404">   5404 2002-04-25 14:10 　　　　┃　　　　　┣[&quot;KAWAI,Takanori&quot; &lt;GC]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5407">   5407 2002-04-26 01:10 　　　　┃　　　　　┃┣[&lt;moeru@xxxxxxxxxx&gt;  ]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5408">   5408 2002-04-26 07:44 　　　　┃　　　　　┃┃┗[&quot;KAWAI,Takanori&quot; &lt;GC]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5410">   5410 2002-04-26 09:47 　　　　┃　　　　　┃┃　┗[&lt;moeru@xxxxxxxxxx&gt;  ]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5411">   5411 2002-04-26 10:52 　　　　┃　　　　　┃┃　　┣[&quot;KAWAI,Takanori&quot; &lt;GC]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5417">   5417 2002-04-27 00:22 　　　　┃　　　　　┃┃　　┃┣[&lt;moeru@xxxxxxxxxx&gt;  ]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5419">   5419 2002-04-27 12:30 　　　　┃　　　　　┃┃　　┃┗[Tatsuhiko Miyagawa &lt;]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5421">   5421 2002-04-27 12:46 　　　　┃　　　　　┃┃　　┃　┣[&quot;TOYOSHIMA, Masayuki]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5422">   5422 2002-04-27 13:06 　　　　┃　　　　　┃┃　　┃　┃┣[Tatsuhiko Miyagawa &lt;]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5423">   5423 2002-04-28 11:50 　　　　┃　　　　　┃┃　　┃　┃┃┗[&quot;TOYOSHIMA, Masayuki]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5424">   5424 2002-04-28 18:36 　　　　┃　　　　　┃┃　　┃　┃┗[&quot;KAWAI,Takanori&quot; &lt;GC]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5425">   5425 2002-04-28 18:50 　　　　┃　　　　　┃┃　　┃　┗[&quot;KAWAI,Takanori&quot; &lt;GC]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5432">   5432 2002-05-05 14:58 　　　　┃　　　　　┃┃　　┃　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5416">   5416 2002-04-26 20:20 　　　　┃　　　　　┃┃　　┗[Hidetoshi OKAWA &lt;hid]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5420">   5420 2002-04-27 12:46 　　　　┃　　　　　┃┗[Tatsuhiko Miyagawa &lt;]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5405">   5405 2002-04-25 18:33 　　　　┃　　　　　┗[Hidetoshi OKAWA &lt;hid]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5382">   5382 2002-04-21 08:04 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+</pre>
+</body>
+</html>

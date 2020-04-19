@@ -1,0 +1,406 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10948</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10947">[前]</a><a href="10949">[次]</a><a href="../list/10901-11000">[番号順一覧]</a><a href="../thread/10901-11000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10948
+</p>
+<div class="header">
+<p>
+From: &quot;zen kishimoto&quot; &lt;&quot;zen kishimoto&quot; &lt;zen@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 9 Feb 2005 21:33:23 -0800<br>
+Subject: [mysql 10948] MySQL Cluster: ２つのサーバーを使ってmysql cluster  をセットする方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+<a href="http://dev.mysql.com/tech-resources/articles/mysql-cluster-for-two-servers.html">http://dev.mysql.com/tech-resources/articles/mysql-cluster-for-two-servers.html</a>
+
+２つのサーバーを使ってmysql cluster をセットする方法
+(本当の冗長性を求めるのであれば３つのサーバが必要)
+
+初めに
+
+このHOWTOはloadbalancerの内側で２つの サーバーを使う
+方法を示します。目的は 本当の冗長性を求めることで、
+どちらかのサーバーを取り除いても、システムが正しく
+作動するということです。
+
+注:
+
+管理ノードとして第３のサーバが必要ですが、クラスターが
+作動し始めると第３のサーバを停止することができます。ですが
+管理サーバーを停止することはお勧めしません。（この記事
+の最後を参照。）２つのサーバーだけでは完全な冗長性を
+達成できません。
+
+２つのサーバーでクラスターをセットできますが、１つのサーバー
+を停止してクラスターを問題なく作動続けることは出来ません。
+そのためには３つ目のサーバーが管理ノードとして稼動して
+いる必要があります。
+
+３つのサーバーを考えてみます。
+
+mysql1.domain.com   192.168.0.1
+mysql2.domain.com   192.168.0.2
+mysql3.domain.com   192.168.0.3
+
+サーバー１と２はクラスターの一部となります。loadbalancer
+の内側かround robin　DNSを使用する２サーバーの解に
+適しています。リプリケーションの代わりにもなり得ます。サーバー
+３はほんの少しの変更が必要だけで、mysqlを搭載する必要
+はありませんし、力のあまりないコンピュータで十分で、他の
+用途にも同時に使用していても構いません。
+
+ステージ 1: 最初の２つのコンピュータにmysqlをインストール
+
+次のステップをmysql1とmysql2にほどこします。
+
+cd /usr/local/
+<a href="http://dev.mysql.com/get/Downloads/MySQL-4.1/mysql-max-4.1.9-pc-linux-gnu-i686.tar.gz/">http://dev.mysql.com/get/Downloads/MySQL-4.1/mysql-max-4.1.9-pc-linux-gnu-i686.tar.gz/</a>
+ from/<a href="http://www.signal42.com/mirrors/mysql/">http://www.signal42.com/mirrors/mysql/</a>
+groupadd mysql
+useradd -g mysql mysql
+tar -zxvf mysql-max-4.1.9-pc-linux-gnu-i686.tar.gz
+rm mysql-max-4.1.9-pc-linux-gnu-i686.tar.gz
+ln -s mysql-max-4.1.9-pc-linux-gnu-i686 mysql
+cd mysql
+scripts/mysql_install_db --user=mysql
+chown -R root  .
+chown -R mysql data
+chgrp -R mysql .
+cp support-files/mysql.server /etc/rc.d/init.d/
+chmod +x /etc/rc.d/init.d/mysql.server
+chkconfig --add mysql.server
+
+まだmysqlを開始しないでください。
+
+ステージ 2: 管理サーバーのインストールとコンフィギュレーション
+
+mysqlディレクトリのbin/ から次のファイルが必要となります。
+
+ndb_mgmとndb_mgmd
+
+mysql-max tarballを全部ダウンロードしてbin/　ディレクトリーから
+取り出してください。
+
+mkdir /usr/src/mysql-mgm
+cd /usr/src/mysql-mgm
+<a href="http://dev.mysql.com/get/Downloads/MySQL-4.1/mysql-max-4.1.9-pc-linux-gnu-i686.tar.gz/">http://dev.mysql.com/get/Downloads/MySQL-4.1/mysql-max-4.1.9-pc-linux-gnu-i686.tar.gz/</a>
+ from/<a href="http://www.signal42.com/mirrors/mysql/">http://www.signal42.com/mirrors/mysql/</a>
+tar -zxvf mysql-max-4.1.9-pc-linux-gnu-i686.tar.gz
+rm mysql-max-4.1.9-pc-linux-gnu-i686.tar.gz
+cd mysql-max-4.1.9-pc-linux-gnu-i686
+mv bin/ndb_mgm .
+mv bin/ndb_mgmd .
+chmod +x ndb_mg*
+mv ndb_mg* /usr/bin/
+cd
+rm -rf /usr/src/mysql-mgm
+
+管理のためにconfigのファイルをセットアップする
+必要があります。
+
+mkdir /var/lib/mysql-cluster
+cd /var/lib/mysql-cluster
+vi [またはemacsまたは他のエディター] config.ini
+
+次を挿入してくだし。(必要に応じて変更をしてください。）
+
+[NDBD DEFAULT]
+NoOfReplicas=2
+[MYSQLD DEFAULT]
+[NDB_MGMD DEFAULT]
+[TCP DEFAULT]
+# Managment Server
+[NDB_MGMD]
+HostName=192.168.0.3  # このサーバのIPアドレス
+# Storage Engines
+[NDBD]
+HostName=192.168.0.1  # 1番目のサーバのIPアドレス
+DataDir= /var/lib/mysql-cluster
+[NDBD]
+HostName=192.168.0.2  # ２番目のサーバのIPアドレス
+DataDir=/var/lib/mysql-cluster
+# 2 MySQL Clients
+# 個人的にはここはブランクにしておきます。mysqlクライアント
+の速い変化に対応するためです。上記の２つのサーバーの
+名前を入れることもできますが、お勧めしません。
+[MYSQLD]
+[MYSQLD]
+
+管理サーバーを立ち上げます。
+
+ndb_mgmd
+
+これはmysqlの管理サーバーですが、管理コンソールでは
+ありません。ですから、ここにはアウトプットを期待しないで
+ください。コンソールは後でスタートさせます。
+
+ステージ 3: ストレッジとSQLサーバーをコンフィギュアしてmysqlをスタート
+
+192.168.0.1と192.168.0.2のマシン上でそれぞれに以下を追加して
+ください。（必要に応じて変更して。）
+
+vi /etc/my.cnf
+
+「i 」と入れて挿入モードにしてこれを両方のサーバ
+に入れてください。(ステージ２でセットした管理サーバーのIP
+アドレスをIPアドレスにセットしてください):
+
+[mysqld]
+ndbcluster
+ndb-connectstring=192.168.0.3 # 管理（3番目の）サーバ
+[mysql_cluster]
+ndb-connectstring=192.168.0.3 # 管理（3番目の）サーバ
+
+データディレクトリーを生成してストレッジエンジンを
+開始します。
+
+mkdir /var/lib/mysql-cluster
+cd /var/lib/mysql-cluster
+/usr/local/mysql/bin/ndbd --initial
+/etc/rc.d/init.d/mysql.server start
+
+最初のサーバーに関してこのプロセスが終了したのであれば、
+ステージ３の最初に戻って2番目のサーバーに全く同じことを
+してください。
+
+注: 全く最初から始めるか管理サーバー上でconfig.ini
+を変えた場合のみ「--initial」のオプションを使用して
+ください。
+
+ステージ 4: 正しく動作しているかの確認
+
+管理サーバ(mysql3)に戻って管理コンソールをセットしましょう。
+
+/usr/local/mysql/bin/ndb_mgm
+
+SHOWのコマンドを叩いて状況を見ましょう。サンプルの
+アウトプットは以下のようです。
+
+[root@mysql3 mysql-cluster]# /usr/local/mysql/bin/ndb_mgm
+-- NDB Cluster -- Management Client --
+ndb_mgm&gt; show
+Connected to Management Server at: localhost:1186
+Cluster Configuration
+---------------------
+[ndbd(NDB)]     2 node(s)
+id=2    @xxxxxxxxxx  (Version: 4.1.9, Nodegroup: 0, Master)
+id=3    @xxxxxxxxxx  (Version: 4.1.9, Nodegroup: 0)
+
+[ndb_mgmd(MGM)] 1 node(s)
+id=1    @xxxxxxxxxx  (Version: 4.1.9)
+
+[mysqld(API)]   2 node(s)
+id=4   (Version: 4.1.9)
+id=5   (Version: 4.1.9)
+
+ndb_mgm&gt;
+
+もし
+
+not connected, accepting connect from 192.168.0.[1/2/3]
+
+が最初か2番目のラインに出たら、問題が生じています。
+
+出来るだけ詳しい情報をメールで送ってください。どこに
+問題があるのか、どうやって解決したら良いかを考え、
+このHOWTOを変更します。
+
+ここまでＯＫであれば、mysqlをテストしましょう。 mysql1か mysql2
+のいずれかのサーバーに以下のコマンドを入れてください。まだ
+ルートパスワードを設定していないことに注意してください。
+
+mysql
+use test;
+CREATE TABLE ctest (i INT) ENGINE=NDBCLUSTER;
+INSERT INTO ctest () VALUES (1);
+SELECT * FROM ctest;
+
+１つの行が返還されて値は１のはずです。
+
+これが成功すれば他のサーバに行って同じSELECT を実行して
+結果をみてください。そのホストから挿入してホスト１に
+戻って様子をみてください。もし正しく作動すれば、結構なことです。
+
+最後のテストは１つのサーバを殺して、その結果がどうなる
+かをみることです。実際にマシンに触れることが出来るので
+あればネットワークのケーブルを外してください。もし、もう一方
+のサーバが問題なく作動しているか（SELECTクエリを試して）
+見てください。実際にマシンに触れることが出来ない場合は
+
+ps aux | grep ndbd
+
+とするとアウトプットは以下のようになります。
+
+root      5578  0.0  0.3  6220 1964 ?        S    03:14   0:00 ndbd
+root      5579  0.0 20.4 492072 102828 ?     R    03:14   0:04 ndbd
+root     23532  0.0  0.1  3680  684 pts/1    S    07:59   0:00 grep ndbd
+
+「grep ndbd」 (最後の行）は無視して、最初の2つのプロセス
+をkill -9 pid pidコマンドで強制終了します。
+
+kill -9 5578 5579
+
+それから他のサーバ上でselectをしてみてください。その際、管理ノードで
+ SHOWコマンドを実行してサーバーがダウンしていることを
+確認してください。再スタートは
+
+ndbd
+
+注: 「--inita」オプションは使わないでください。l!
+
+セットアップに関する注
+
+この記事を全部読むことをお勧めします。またこのページを
+ブックマークしてください。そうすればきっとお役に立ちます。
+
+管理サーバー
+
+一旦管理サーバーをスタートしたら、停止しないことをお勧め
+します。これは幾つかの理由によります。
+
+    * 管理サーバーは殆どコンピュータのリソースを消費しません。
+    * クラスタに問題が発生したとき、単にsshでアクセスしてndbd
+と打って状態を調べることができます。違うサーバーを取り扱はなければ
+ならないのは面倒なことです。
+    * バックアップを取るときは管理サーバーが実行中である必要があります。
+    * クラスターのログは管理サーバーに送られてクラスタの状況を知らせます。
+    * ndb_mgmクライアントからのコマンドは管理サーバーに送られますので
+管理サーバーがなければ管理コマンドも作動しません。
+    * 管理サーバーはクラスターのコンフィギュレーションが
+変更される時（サーバー・クラッシュやネットワークを分割するとき）
+に必要です。管理サーバが実行されていないと、いわゆる「split-brain」
+のシナリオが起こります。より優れたフォールトトレランスを提供する
+ために管理サーバーの調停機能が必要とされます。
+
+もちらん、サーバーを止めても構いません。
+
+ブート時に自動的にndbdをスタートしたり停止する
+
+これをするにはmysql1とmysql2のどちらの上でも次のことを
+してください。
+
+echo &quot;ndbd&quot; &gt; /etc/rc.d/init.d/ndbd chmod +x /etc/rc.d/init.d/ndbd 
+chkconfig --add ndbd
+
+これは本当に簡単なスクリプトです。少なくともndbd が既に
+稼動しているか確かめる程度のスクリプトを用意すべきです。
+
+ホスト名を使用
+
+セットアップ時にIPアドレスを使用してきました。これはホスト名を
+使用すると色々と問題がおきる可能性が増えるからです。MySQL AB
+の Mikael Ronstro&quot;m はこう説明します。「ホスト名はMySQL Cluster
+でも使用できます。しかし、ホスト名を使用するとエラーを
+発生する可能性が増えます。それは正しくDNSへの参照がセット
+されていなければならないからです。/etc/hostsを編集する必要
+があります。時にはあるポート以外であるマシンとの交信が
+出来ないようにするための指定をしなければならないかも知れません。」
+テストをするときはIPアドレスを使用して、一旦正しく動作したら
+ホスト名に代えることをお勧めします。
+
+RAM
+
+次の計算式を使ってそれぞれのストレッジ・ノードで必要
+なRAMの大きさを計算してください。
+
+(データベースの大きさ * NumberofReplicas * 1.1) / ストレッジ・ノードの数
+
+NumberofReplicasはデフォルトでは２にセットされています。
+これはconfig.iniの中で変更可能です。 4GBのデータベースを
+実装するためにはそれぞれのストレッジ・エンジン上に9GBの
+RAMを必要とします。SQLと管理ノードには大してRAMは必要では
+ありません。
+
+ストレッジ・ノードの追加
+
+ストレッジ・ノードの数を増加するのであれば、３は最適な
+値ではありません。２から増加するのなら、４が最適です。
+
+SQLノードを追加
+
+もう一つSQLのノードを追加するのであれば(つまりクラスター
+に追加したいサーバーがあるがストレッジ・ノードとして
+機能する必要がない場合）次のブロックをサーバーの/etc/my.cnfに
+追加してください。(mysql-maxサーバーでなければなりません)
+
+[mysqld]
+ndbcluster
+ndb-connectstring=192.168.0.3 # 管理（3番目の）サーバのIPアドレス
+[mysql_cluster]
+ndb-connectstring=192.168.0.3 # 管理（3番目の）サーバのIPアドレス
+
+もう１つの[MYSQLD] の行が管理サーバー上のconfig.iniの
+最後にあるはずです。クラスターを再スタートさせ（下の
+重要なノートをみてください）新しいAPIでmysqlを再スタートして
+ください。接続するはずです。
+
+config.iniを変更する際の重要なノート
+
+config.iniを変更するようなことがあれば、クラスター
+を停止してconfigファイルを読み込みなおす必要があります。
+SHUTDOWNコマンドを管理サーバ上のndb_mgm
+パッケージに発行することでクラスターを停止します。そして全ての
+ストレッジ・ノードを再スタートします。
+
+大きなテーブルがあるときに有用なコンフィギュレーションの
+オプション
+
+DataMemory: はデータベース内に実際のレコードを格納する
+のに必要なスペースを定義します。全てのDataMemoryはメモリー
+内に割り当てられため、DataMemoryの大きさを十分にサポートできる
+メモリーがあることが必要です。 DataMemoryはordered indexを
+格納するのにも使用できます。 Ordered indexはレコードあたり
+10 バイトを使います。デフォルトは80MBです。
+
+IndexMemory：はMySQL Clusterのhash indexに使用する
+ストレッジの量をコントロールするパラメーターです。Hash
+indexはいつもprimary key index、unique indexとunique
+constraintのために使用されています。デフォルトは 18MB
+
+MaxNoOfAttributes：　このパラメータはクラスターで定義
+できる属性の数を定義します。デフォルト 1000
+
+MaxNoOfTables：あまりにも明らか(それぞれのBLOBフィールド
+は色々な理由で他のテーブルを生成することがありますので、それも
+考慮して）デフォルト128
+
+config.iniの[NDBD]セクションに書き込むものの情報はこのページを参照してください。 
+
+<a href="http://mysql.oss.eznetsols.org/doc/mysql/en/mysql-cluster-db-definition.html">http://mysql.oss.eznetsols.org/doc/mysql/en/mysql-cluster-db-definition.html</a>
+
+セキュリティ
+
+MySQL Clusterはセキュアーではありません。デフォルトでは
+誰でも管理サーバーに接続でき全部をシャットダウンできます。
+次のことに気をつける必要があります。
+
+    * APFをインストールして、使用しないポートは全部ブロック
+(MySQL Clusterのポートは除く） /etc/apf/allow_hostsファイル
+にクラスター内のマシンのIPアドレスを格納。
+    * MySQL Clusterを隔離されたネットワークに搭載するべきです。
+---------------------
+Zen Kishimoto                        zen@xxxxxxxxxx
+IP Devices, Inc.                       (408) 567-9391
+2175 De La Cruz Blvd., Suite 10  (801) 720-8847 (FAX)
+Santa Clara, CA 95050
+
+
+
+</pre>
+</div>
+<p class="button"><a href="10947">[前]</a><a href="10949">[次]</a><a href="../list/10901-11000">[番号順一覧]</a><a href="../thread/10901-11000">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="10948">  10948 2005-02-10 14:33 [&quot;zen kishimoto&quot; &lt;zen] MySQL Cluster: ２つのサーバーを使ってmysql cluster  をセットする方法</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10949">  10949 2005-02-10 14:45 ┗[SATOH Fumiyasu &lt;fumi]                                       </a></span>
+</pre>
+</body>
+</html>

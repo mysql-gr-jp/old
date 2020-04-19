@@ -1,0 +1,144 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15638</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15637">[前]</a><a href="15639">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15638
+</p>
+<div class="header">
+<p>
+From: 亀田義裕 &lt;亀田義裕 &lt;kameda.sbng@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 6 Oct 2011 14:51:25 +0900<br>
+Subject: [mysql 15638] Re: collationについて質問<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+平塚様
+
+亀田です。
+
+<span class="quote1">&gt; マニュアルの11章に記載されていました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 11.5.1. String Comparison Functions</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/refman/5.1/en/string-comparison-functions.html">http://dev.mysql.com/doc/refman/5.1/en/string-comparison-functions.html</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; | Per the SQL standard, LIKE performs matching on a per-character basis,</span>
+<span class="quote2">&gt; | thus it can produce results different from the = comparison operator:</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 「SQL標準に則り、LIKEは1文字ごとに比較を行うので</span>
+<span class="quote1">&gt;  ＝比較演算子とは異なる結果を生成することがあります。」</span>
+
+なるほどです。
+LIKE検索の制限と考えて、collationとは別の方法で対応するように検討致します。
+ありがとうございました。
+
+
+2011年10月4日21:01 HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; こんばんは、平塚です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; On Tue, 4 Oct 2011 17:43:06 +0900</span>
+<span class="quote1">&gt; 亀田義裕 &lt;kameda.sbng@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; collationについて、想定と違う動作に遭遇しました。どなたか動作の理由を</span>
+<span class="quote2">&gt;&gt; ご存知であれば、教えていただけないでしょうか?</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; * like検索ではなく、 = を用いて検索すると、マッチする</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; マニュアルの11章に記載されていました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 11.5.1. String Comparison Functions</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/refman/5.1/en/string-comparison-functions.html">http://dev.mysql.com/doc/refman/5.1/en/string-comparison-functions.html</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; | Per the SQL standard, LIKE performs matching on a per-character basis,</span>
+<span class="quote2">&gt; | thus it can produce results different from the = comparison operator:</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 「SQL標準に則り、LIKEは1文字ごとに比較を行うので</span>
+<span class="quote1">&gt;  ＝比較演算子とは異なる結果を生成することがあります。」</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ドイツ語の例がありますが、半角カタカナの濁点の扱いも</span>
+<span class="quote1">&gt; これと同じ状況ではないかと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; SQL92によれば、</span>
+<span class="quote1">&gt; <a href="http://www.contrib.andrew.cmu.edu/~shadow/sql/sql1992.txt">http://www.contrib.andrew.cmu.edu/~shadow/sql/sql1992.txt</a> (ドラフト版)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 「M LIKE Pと書いたときに</span>
+<span class="quote1">&gt;  Pのi文字目に対応するものが、必ずMに存在すること」</span>
+<span class="quote1">&gt; という流れで照合を行うようです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; | 5) Case:</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |    a) If M and P are character strings whose lengths are variable</span>
+<span class="quote2">&gt; |      and if the lengths of both M and P are 0, then</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |         M LIKE P</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |      is true.</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |    b) The &lt;predicate&gt;</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |         M LIKE P</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |      is true if there exists a partitioning of M into substrings</span>
+<span class="quote2">&gt; |      such that:</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |      i) A substring of M is a sequence of 0 or more contiguous</span>
+<span class="quote2">&gt; |         &lt;character representation&gt;s of M and each &lt;character repre-</span>
+<span class="quote2">&gt; |         sentation&gt; of M is part of exactly one substring.</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |     ii) If the i-th substring specifier of P is an arbitrary char-</span>
+<span class="quote2">&gt; |         acter specifier, the i-th substring of M is any single</span>
+<span class="quote2">&gt; |         &lt;character representation&gt;.</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ※ arbitrary character specifier： _ のこと</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; |    iii) If the i-th substring specifier of P is an arbitrary string</span>
+<span class="quote2">&gt; |         specifier, then the i-th substring of M is any sequence of</span>
+<span class="quote2">&gt; |         0 or more &lt;character representation&gt;s.</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ※ arbitrary string specifier： % のこと</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; |     iv) If the i-th substring specifier of P is neither an arbi-</span>
+<span class="quote2">&gt; |         trary character specifier nor an arbitrary string speci-</span>
+<span class="quote2">&gt; |         fier, then the i-th substring of M is equal to that sub-</span>
+<span class="quote2">&gt; |         string specifier according to the collating sequence of</span>
+<span class="quote2">&gt; |         the &lt;like predicate&gt;, without the appending of &lt;space&gt;</span>
+<span class="quote2">&gt; |         characters to M, and has the same length as that substring</span>
+<span class="quote2">&gt; |         specifier.</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |      v) The number of substrings of M is equal to the number of</span>
+<span class="quote2">&gt; |         substring specifiers of P.</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |    c) Otherwise,</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |         M LIKE P</span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; |      is false.</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よろしくお願いします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; 平塚貞夫 hiratsuka.sadao@xxxxxxxxxx</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="15637">[前]</a><a href="15639">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15636">  15636 2011-10-04 17:43 [亀田義裕 &lt;kameda.sbn] collationについて質問                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15637">  15637 2011-10-04 21:01 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="15638">  15638 2011-10-06 14:51 　┗[亀田義裕 &lt;kameda.sbn]                                     </a></span>
+</pre>
+</body>
+</html>

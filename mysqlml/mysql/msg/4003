@@ -1,0 +1,87 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4003</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="4002">[前]</a><a href="4004">[次]</a><a href="../list/4001-4100">[番号順一覧]</a><a href="../thread/4001-4100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4003
+</p>
+<div class="header">
+<p>
+From: YONEMOTO Kazumasa &lt;YONEMOTO Kazumasa &lt;yonemoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 13 Jul 2001 21:15:00 +0900<br>
+Subject: [mysql 04003] Re: INTERVAL がうまく動きません<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+米本と申します。
+
+From: Tybalt of Capulet &lt;ice-man@xxxxxxxxxx&gt;
+Subject: <a href="03989">[mysql 03989]</a> INTERVAL がうまく動きません
+Date: Fri, 13 Jul 2001 01:01:33 +0900
+
+<span class="quote1">&gt; 下記の様なスクリプトをcronで動かしています。</span>
+<span class="quote1">&gt; ところがこれをAM2:45に動かすとデータが全て削除されてしまいます。</span>
+<span class="quote1">&gt; サンプルデータからするとINTERVALが1なのでidが1と2のデータが消えて</span>
+<span class="quote1">&gt; 3は残って欲しいわけです。</span>
+<span class="quote1">&gt; --------------ここから------------------------------</span>
+<span class="quote1">&gt; ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);</span>
+<span class="quote1">&gt; $mon = $mon + 1;</span>
+<span class="quote1">&gt; $year += 1900;</span>
+<span class="quote1">&gt; $mon = substr('0'.$mon,-2,2);</span>
+<span class="quote1">&gt; $hour = substr('0'.$hour,-2,2);</span>
+<span class="quote1">&gt; $nowday = $year.$mon.$mday.$hour.$min.$sec;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # 1時間以上経過しているAテーブルのデータの削除</span>
+<span class="quote1">&gt; $sth = $dbh-&gt;prepare( qq{</span>
+<span class="quote1">&gt;   DELETE FROM A WHERE (inputday + INTERVAL 1 HOUR) &lt; ?</span>
+<span class="quote1">&gt; }) || die &quot;Can't prepare statement:&quot; . $dbh-&gt;errstr . &quot;\n&quot;;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; (snip)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; INTERVALとtimestamp型の使い方が間違っているのでしょうか？</span>
+<span class="quote1">&gt; どなたかおわかりのかた教えていただけませんでしょうか？</span>
+
+直接的な答えになりませんが、次のような使い方は参考になりませんか。
+
+$query = &quot;DELETE FROM popwatch WHERE DATE_ADD(timestamp, INTERVAL 1 hour) &lt; NOW()&quot;;
+#print &quot;$progname: $query\n&quot;;
+$db-&gt;do($query);
+
+これに対するpopwatchとは
+
+CREATE TABLE popwatch (
+  id        INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  timestamp TIMESTAMP,
+  handle    VARCHAR(255) NOT NULL,
+  host      VARCHAR(255) NOT NULL,
+  ip        VARCHAR(255) NOT NULL
+);
+
+これはPOP before SMTPといって、POPアクセスしてくる人を認証してSMTPで
+中継を許すデータベースを、整理するためのPerlスクリプトの一部です。
+
+もし「inputday + INTERVAL 1 HOUR」というような使い方をしたいのであれ
+ば、一旦UNIXタイムスタンプに変換してから+3600秒でしょうか。
+そうしないとtimestamp型の場合、ぐちゃぐちゃになってしまって、うまく
+動かない気がしますけど。確認はしてないです。
+
+--------
+  米本和正 (YONEMOTO Kazumasa)
+  yonemoto@xxxxxxxxxx, yonemoto@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="4002">[前]</a><a href="4004">[次]</a><a href="../list/4001-4100">[番号順一覧]</a><a href="../thread/4001-4100">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3989">   3989 2001-07-13 01:01 [Tybalt of Capulet &lt;i] INTERVAL がうまく動きません             </a></span>
+<span class="current">-&gt;&nbsp;<a href="4003">   4003 2001-07-13 21:15 ┗[YONEMOTO Kazumasa &lt;y]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4005">   4005 2001-07-14 00:40 　┗[Tybalt of Capulet &lt;i]                                     </a></span>
+</pre>
+</body>
+</html>

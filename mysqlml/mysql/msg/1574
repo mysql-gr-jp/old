@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1574</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1573">[前]</a><a href="1575">[次]</a><a href="../list/1501-1600">[番号順一覧]</a><a href="../thread/1501-1600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1574
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Mon, 14 Feb 2000 13:43:54 +0900<br>
+Subject: [mysql 01574] Re: mysql-ruby のインストール<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Mon, 14 Feb 2000 11:06:43 +0900,
+N.Yoshida &lt;yosh_no@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;不思議ですね…。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;mysql.so 以外ではどうでしょうか？ 例えば socket.so とか。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;	$ ruby -rsocket -e 1</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;…で試せます。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   socket.soなどrubyのインストール時に用意されるモジュールについても確かに</span>
+<span class="quote1">&gt; ファイルとしてはあるのに lddコマンドでは無いように認識されています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   私の環境はSlackware 3.5ベースのlinuxでkernel 2.2.12、libc5ですが以下のよ</span>
+<span class="quote1">&gt; うになりました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ------------------------------------------------------------------------------</span>
+<span class="quote1">&gt; fz000785:~# ls -l /usr/local/lib/ruby/1.4/i586-linux/mysql.so</span>
+<span class="quote1">&gt; -r-xr-xr-x   1 root     root        77115 Feb 10 12:55 /usr/local/lib/ruby/1.4/i</span>
+<span class="quote1">&gt; 586-linux/mysql.so*</span>
+<span class="quote1">&gt; fz000785:~# ldd /usr/local/lib/ruby/1.4/i586-linux/mysql.so</span>
+<span class="quote1">&gt; ldd: can't execute /usr/local/lib/ruby/1.4/i586-linux/mysql.so (No such file or</span>
+<span class="quote1">&gt; directory)</span>
+<span class="quote1">&gt; fz000785:~# ls -l /usr/local/lib/ruby/1.4/i586-linux/socket.so</span>
+<span class="quote1">&gt; -r-xr-xr-x   1 root     root       122471 Feb  9 20:39 /usr/local/lib/ruby/1.4/i</span>
+<span class="quote1">&gt; 586-linux/socket.so*</span>
+<span class="quote1">&gt; fz000785:~# ldd /usr/local/lib/ruby/1.4/i586-linux/socket.so</span>
+<span class="quote1">&gt; ldd: can't execute /usr/local/lib/ruby/1.4/i586-linux/socket.so (No such file or</span>
+<span class="quote1">&gt;  directory)</span>
+
+ldd: can't execute は、
+バイナリに埋め込まれている ld-linux.so と、
+ldd を実行したマシンの ld-linux.so が一致していない場合でます。
+あるいは、ld-linux.so と ldd が一致していない場合
+(ld.so と ldd は同じソースから、コンパイル &amp; install される)
+
+linux の dynamic link されたバイナリは、ld-linux.so.X (Xはバージョン番号)
+を、フルパス指定で、自分に埋め込んでいます
+less, hex 等のバイナリが見れるコマンドで、バイナリの中身を覗いてみると、
+ld-linux.so.X が、フルパスで埋め込まれているのが確認できます。
+この埋め込まれているものと、マシンに存在するものが
+一致しないと、このdynamic link されたバイナリはうごかないです
+
+問題は、
+ ld.so が不正なのか
+ ldd が不正なのか、
+ gcc がまちがってリンクしたのか
+ mysql.so が、単に作成されたときに間違ったのか
+あたりだと思います
+
+shell$ ruby
+ は起動するか
+shell$ ruby -e &quot;require 'socket'&quot;
+ は起動するか
+socket.so と mysql.so が同じ ld-linux.so を見ているか
+
+これらがクリアされているのに、
+
+shell$ ruby -e &quot;require 'mysql'&quot;
+
+が動かないなら、原因は、
+  mysql.so を作成したとき、指定するライブラリが足りなかった
+  mysql.so が必要としているライブラリが見つからなかった
+  libmysqlclient.so へのパスが通っていない
+  コンパイルに使用した gcc がわるい
+ぐらいしかないと思います
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="1573">[前]</a><a href="1575">[次]</a><a href="../list/1501-1600">[番号順一覧]</a><a href="../thread/1501-1600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1562">   1562 2000-02-10 10:06 [&quot;N.Yoshida&quot; &lt;yosh_no] mysql-ruby のインストール               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1563">   1563 2000-02-10 12:22 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1564">   1564 2000-02-10 13:01 　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1565">   1565 2000-02-10 14:25 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1570">   1570 2000-02-14 11:06 　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1571">   1571 2000-02-14 11:29 　　　　┣[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1572">   1572 2000-02-14 12:50 　　　　┃┗[&quot;N.Yoshida&quot; &lt;yosh_no]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1573">   1573 2000-02-14 13:08 　　　　┃　┗[とみたまさひろ &lt;tomm]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="1574">   1574 2000-02-14 13:43 　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1575">   1575 2000-02-14 13:54 　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1576">   1576 2000-02-14 15:00 　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1577">   1577 2000-02-14 16:34 　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1578">   1578 2000-02-15 10:06 　　　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1579">   1579 2000-02-15 10:16 　　　　　　　　┗[とみたまさひろ &lt;tomm]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1580">   1580 2000-02-15 10:45 　　　　　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1581">   1581 2000-02-15 11:20 　　　　　　　　　　┣[とみたまさひろ &lt;tomm]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1584">   1584 2000-02-15 13:23 　　　　　　　　　　┗[UENO Kazuaki &lt;kazu@x]                   </a></span>
+</pre>
+</body>
+</html>

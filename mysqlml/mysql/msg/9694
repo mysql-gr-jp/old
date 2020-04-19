@@ -1,0 +1,131 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9694</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9693">[前]</a><a href="9695">[次]</a><a href="../list/9601-9700">[番号順一覧]</a><a href="../thread/9601-9700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9694
+</p>
+<div class="header">
+<p>
+From: &quot;HIROSE, Masaaki&quot; &lt;&quot;HIROSE, Masaaki&quot; &lt;hirose31@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 22 Jun 2004 00:36:44 +0900<br>
+Subject: [mysql 09694] db.optについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+ひろせといいます
+
+MySQL 4.1.1 から database の文字コードの情報を保存しておくために、
+db.opt というファイルが作られるようになりました。このファイルは
+CREATE DATABASE や ALTER DATABASE を実行したときに
+DATADIR/DBNAME/db.opt に作られ、テキスト形式で中身は
+
+  default-character-set=sjis
+  default-collation=sjis_japanese_ci
+
+のようになっています。
+
+この db.opt に関係して、トラブりそうな場面が出てくるような気がするので
+すがどうなんでしょうか? というメールです。
+
+# なんかトリビアの種みたいなメールだ…
+
+
+まず 4.1.2 での挙動を列挙します。
+
+# ざっくり find -type f -print0 | xargs -0 egrep '(db\.opt|MY_DB_OPT_FILE)'
+# で見た感じでは、さっきclone した bk 版と、4.1.2 とでは違いはないよう
+# でした。
+
+1 CREATE DATABASE を実行したときに db.opt が作られる。
+
+2 CREATE DATABASE で CHARACTER SET を指定した場合はその文字コードが保
+  存される。
+
+3 CREATE DATABASE で CHARACTER SET を省略した場合は
+  character_set_server の文字コードが保存される。
+
+4 ALTER DATABASE を実行したときに db.opt が作られ、指定した文字コード
+  が保存される。
+
+5 SHOW CREATE DATABASE が出力する DEFAULT CHARACTER SET 句には、db.opt
+  があればそれを、なければ character_set_server の文字コードが表示され
+  る。
+
+6 database、test と mysql を作る mysql_install_db は CREATE DATABASE を
+  使用していないので、db.opt は作られない。
+
+7 MySQL 4.0 以前の環境から丸ごとコピー、もしくは、mysqld を 4.1 にバー
+  ジョンアップした場合は、これらの database には db.opt は存在しない。
+
+8 mysqldump は CREATE DATABASE 文に DEFAULT CHARACTER SET 句を付加しな
+  い。(--compatible が指定されていなければ、CREATE TABLE の DEFAULT
+  CHARSET は付加される)
+  従って、レストア時には元の database に db.opt があってもそれとは関係
+  なく、レストア時の character_set_server が database の文字コードとし
+  て db.opt に保存される。
+
+9 db.opt がない database で、DEFAULT CHARSET を省略した CREATE TABLE で
+  作った table の文字コードは、character_set_database の文字コードにな
+  る。
+
+
+続いて (こじつけっぽのもありますが) 考えられるトラブルの具体例です。他
+にもあればフォローお願いします。
+
+# 変数 character_set_* の制御方法は
+# <a href="9586">[mysql:9586]</a> <a href="9586">http://www.mysql.gr.jp/mysqlml/mysql/msg/9586</a>
+# を参照ください。
+
+A sjis の database を mysqldump でダンプして、mysqld
+  --default-character-set=utf8 なサーバーにレストアした。database の文
+  字コードが sjis になっているつもりで、文字コード指定を省略して
+  CREATE TABLE したら table の文字コードが sjis ではなく、utf8 になっ
+  てしまった。[8]
+  → 無用なトラブルを回避するために、4.1 での CREATE TABLE には
+     DEFAULT CHARSET をつけるようにした方がいい?
+
+B database mysql と test には db.opt がないので、これらの database で
+  DEFAULT CHARSET なしで CREATE TABLE した場合の table の文字コードは
+  変数 character_set_database の値によって恣意的に決定されてしまう。
+  [6,9]
+  → character_set_database を変えたりしない、mysql の table に入れるデー
+     タは専ら us-ascii だけ、test はあくまでテスト用の database である、
+     という理由で、実際に問題になる局面は少ないかも?
+
+C db.opt がない database で DEFAULT CHARSET を省略した CREATE TABLE で
+  作った table の文字コードは、SHOW CREATE DATABASE で表示される
+  database の文字コードと異なる場合がある。[5,9]
+  → 無用なトラブルを回避するために、4.1 での CREATE TABLE には
+     DEFAULT CHARSET をつけるようにした方がいい?
+
+
+結局、
+db.opt がある/ないに関わらず、database の文字コードには依存しないよう
+に、CREATE TABLE には DEFAULT CHARSET をつけるようにする、というのが安
+全ということでしょうかね。
+
+ではでは
+
+-- 
+ひろせ
+<a href="http://www.irori.org/">http://www.irori.org/</a>
+
+</pre>
+</div>
+<p class="button"><a href="9693">[前]</a><a href="9695">[次]</a><a href="../list/9601-9700">[番号順一覧]</a><a href="../thread/9601-9700">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="9694">   9694 2004-06-22 00:36 [&quot;HIROSE, Masaaki&quot; &lt;h] db.optについて                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9696">   9696 2004-06-22 10:32 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9697">   9697 2004-06-22 12:16 　┣[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9701">   9701 2004-06-23 10:17 　┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9698">   9698 2004-06-22 13:58 　┗[Hirofumi Fujiwara &lt;f]                                     </a></span>
+</pre>
+</body>
+</html>

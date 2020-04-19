@@ -1,0 +1,73 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8196</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8195">[前]</a><a href="8197">[次]</a><a href="../list/8101-8200">[番号順一覧]</a><a href="../thread/8101-8200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8196
+</p>
+<div class="header">
+<p>
+From: OHTSUKA Ko-hei &lt;OHTSUKA Ko-hei &lt;techml@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 06 Sep 2003 05:55:27 +0900<br>
+Subject: [mysql 08196] SELECT GET_LOCK?<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+大塚です。
+複数列SELECTの際は色々ご教授いただきありがとうございました。
+何とかうまくいきました。
+
+今回は、おそらくMySQLが原因でサーバがダウンしてしまう件についてなのですが…。
+環境は、MySQL4.1.0α、OS RH9、Apache2.0.40、Perl5.8.0、mod_perl1.99です。
+
+運用しているシステムで、Slow Queryのログを取っていて、一つだけ遅いSQL文が
+あるのは知っていたのですが、体感的に十分レスポンスも早く、また数週間問題なく
+稼動しているので、手が回らない事もあり放っていました。
+
+すると昨晩突然落ちたようなのですが、Slow Queryのログをチェックしてみると、
+22:50頃を境に、それまで上記の件のクエリだけでしか発生していなかったSlow
+Queryが様々なクエリ(本の数十行走査するだけのクエリでも)で発生するように
+なり、しかもそれまではQuery Timeは多くても10前後だったのが数十、しばらく
+経つと数百にもなるようになってしまいました。
+
+で、そのどんなクエリでもSlow Queryになってしまったログの先頭にあったのが、
+以下のSELECT GET_LOCKのログなのです。
+
+# Time: 030905 22:47:14
+# User@Host: root[root] @ localhost []
+# Query_time: 11  Lock_time: 0  Rows_sent: 1  Rows_examined: 0
+SELECT GET_LOCK('Apache-Session-0c9bb14471a9906f7c3d993c89714577', 3600);
+
+これ自体のQuery Timeは11ですが、これ以降のクエリのQuery Timeは40を下回る
+ものはなくなっています。
+また発生時間的にも、弊システムのユーザが23時頃から繋がらなくなったと言っていた
+のと一致します。
+
+といった事より、これがダウンに繋がったトリガのクエリくさいのですが、私はプロ
+グラムの中でこのSELECT GET_LOCKというSQLは使っていません。
+perlのDBI等が内部処理上勝手に発行しているものだと思うのですが、これがサーバ
+ダウンのトリガになっているという解析は正しいかどうか、また回避するにはどう
+すればよいかについて、ご教授賜れば有難く存じます。
+
+以上、よろしくお願いいたします。
+
+
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8195">[前]</a><a href="8197">[次]</a><a href="../list/8101-8200">[番号順一覧]</a><a href="../thread/8101-8200">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="8196">   8196 2003-09-06 05:55 [OHTSUKA Ko-hei &lt;tech] SELECT GET_LOCK?                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8198">   8198 2003-09-06 23:17 ┗[Tatsuhiko Miyagawa &lt;]                                       </a></span>
+</pre>
+</body>
+</html>

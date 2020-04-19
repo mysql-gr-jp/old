@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15633</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15632">[前]</a><a href="15634">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15633
+</p>
+<div class="header">
+<p>
+From: Kenji Funasaki &lt;Kenji Funasaki &lt;kenji.funasaki@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 27 Sep 2011 20:31:51 +0900<br>
+Subject: [mysql 15633] データ更新時のエラーについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+初めまして、舟崎と申します。
+投稿先が間違っておりましたら、申し訳ございません。
+
+MySQL DB 上のテーブルのデータを更新する時に生じるエラーについて
+質問させてください。
+
+MySQL DB に対して、Java の Web アプリケーションから
+データを更新する時に、下記の例外が毎回生じます。
+
+同じテーブルの他の行のデータは更新ができますが、どうも
+特定の行のみ更新ができないようです。
+
+----------------------
+Caused by: &lt;openjpa-2.0.1-r422266:989424 fatal store error&gt;
+org.apache.openjpa.persistence.RollbackException: Streaming result set
+com.mysql.jdbc.RowDataDynamic@1cd2b82 is still active. No statements
+may be issued when any
+streaming result sets are open and in use on a given connection.
+Ensure that you have called
+.close() on any active streaming result sets before attempting more queries.
+	at org.apache.openjpa.persistence.EntityManagerImpl.commit(EntityManagerImpl.java:584)
+
+Caused by: &lt;openjpa-2.0.1-r422266:989424 nonfatal general error&gt;
+org.apache.openjpa.persistence.PersistenceException: Streaming result
+set com.mysql.jdbc.RowDataDynamic@dc294 is still active. No statements
+may be issued when any streaming result sets are open and in use on a
+given connection. Ensure that you have called .close() on any active
+streaming result sets before attempting more queries.
+	at org.apache.openjpa.jdbc.sql.DBDictionary.narrow(DBDictionary.java:4832)
+	at org.apache.openjpa.jdbc.sql.DBDictionary.newStoreException(DBDictionary.java:4792)
+	at org.apache.openjpa.jdbc.sql.SQLExceptions.getStore(SQLExceptions.java:136)
+	at org.apache.openjpa.jdbc.sql.SQLExceptions.getStore(SQLExceptions.java:110)
+	at org.apache.openjpa.jdbc.sql.SQLExceptions.getStore(SQLExceptions.java:62)
+	at org.apache.openjpa.jdbc.kernel.JDBCStoreManager.begin(JDBCStoreManager.java:215)
+	at org.apache.openjpa.kernel.DelegatingStoreManager.begin(DelegatingStoreManager.java:91)
+	at org.apache.openjpa.kernel.BrokerImpl.beginStoreManagerTransaction(BrokerImpl.java:1396)
+	at org.apache.openjpa.kernel.BrokerImpl.flush(BrokerImpl.java:2097)
+	at org.apache.openjpa.kernel.BrokerImpl.flushSafe(BrokerImpl.java:2037)
+	at org.apache.openjpa.kernel.BrokerImpl.beforeCompletion(BrokerImpl.java:1955)
+	at org.apache.openjpa.kernel.LocalManagedRuntime.commit(LocalManagedRuntime.java:81)
+	at org.apache.openjpa.kernel.BrokerImpl.commit(BrokerImpl.java:1479)
+	at org.apache.openjpa.kernel.DelegatingBroker.commit(DelegatingBroker.java:925)
+	at org.apache.openjpa.persistence.EntityManagerImpl.commit(EntityManagerImpl.java:560)
+	... 32 more
+Caused by: java.sql.SQLException: Streaming result set
+com.mysql.jdbc.RowDataDynamic@dc294 is still active. No statements may
+be issued when any streaming result sets are open and in use on a
+given connection. Ensure that you have called .close() on any active
+streaming result sets before attempting more queries.
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:934)
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:931)
+	at com.mysql.jdbc.MysqlIO.checkForOutstandingStreamingData(MysqlIO.java:2724)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1895)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2140)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2620)
+	at com.mysql.jdbc.ConnectionImpl.setAutoCommit(ConnectionImpl.java:5022)
+	at org.apache.commons.dbcp.DelegatingConnection.setAutoCommit(DelegatingConnection.java:371)
+	at org.apache.commons.dbcp.PoolingDataSource$PoolGuardConnectionWrapper.setAutoCommit(PoolingDataSource.java:328)
+	at org.apache.openjpa.lib.jdbc.DelegatingConnection.setAutoCommit(DelegatingConnection.java:220)
+	at org.apache.openjpa.lib.jdbc.DelegatingConnection.setAutoCommit(DelegatingConnection.java:220)
+	at org.apache.openjpa.lib.jdbc.ConfiguringConnectionDecorator$ConfiguringConnection.setAutoCommit(ConfiguringConnectionDecorator.java:132)
+	at org.apache.openjpa.lib.jdbc.DelegatingConnection.setAutoCommit(DelegatingConnection.java:220)
+	at org.apache.openjpa.jdbc.kernel.JDBCStoreManager.begin(JDBCStoreManager.java:212)
+	... 41 more
+----------------------
+
+上記の例外により、データは更新されません。
+
+特定の行のレコードがまだ active (≒更新中のステータス？）となっており、
+更新ができないのではないかと考えております。
+
+MySQL DB を再起動、および Java アプリケーションが動作する
+Tomcat を再起動しましたが、解消されません。
+
+どのようにすれば、上記の状態を解消し、データを更新できるか？
+どなたかご助言頂けますと大変助かります。
+
+・環境
+　　　DB: MySQL 5.1.52 InnoDB
+      AP: Tomcat 上に Java の動的 Web アプリケーションを配備、
+　　　　　OpenJPA を使って、MySQL DB にアクセス
+　　　Java: JDK 1.6
+
+他に必要な情報等ありましたら、ご指摘頂けますと幸いです。
+よろしくお願いします。
+
+舟崎
+
+</pre>
+</div>
+<p class="button"><a href="15632">[前]</a><a href="15634">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15633">  15633 2011-09-27 20:31 [Kenji Funasaki &lt;kenj] データ更新時のエラーについて            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15634">  15634 2011-09-28 11:04 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+</pre>
+</body>
+</html>

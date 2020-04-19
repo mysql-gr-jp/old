@@ -1,0 +1,109 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11282</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11281">[前]</a><a href="11283">[次]</a><a href="../list/11201-11300">[番号順一覧]</a><a href="../thread/11201-11300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11282
+</p>
+<div class="header">
+<p>
+From: &quot;KAWAI,Takanori&quot; &lt;&quot;KAWAI,Takanori&quot; &lt;GCD00051@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 27 Mar 2005 22:54:13 +0900<br>
+Subject: [mysql 11282] Re: perlからのストアドプロシージャーの使い方を教えて下さい<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+川合孝典です。
+
+
+----- Original Message ----- 
+From: &quot;HORI&quot; &lt;john.smith@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Saturday, March 26, 2005 10:06 PM
+Subject: <a href="11279">[mysql 11279]</a> perlからのストアドプロシージャーの使い方を教えて下さい 
+
+
+
+<span class="quote1">&gt; いつもお世話になっております。堀と申します。</span>
+（中略）
+<span class="quote1">&gt; hori@debian:~$ ./aa.pl</span>
+<span class="quote1">&gt; DBD::mysql::st execute failed: SELECT in a stored procedure must have</span>
+<span class="quote1">&gt; INTO at ./aa.pl line 6.</span>
+このメッセージを読んでますか？
+stored procedureの中でSELECTを実行しただけでは値を取得しようと
+しても、そりゃ無理かもと思うのですけど。
+
+<a href="http://dev.mysql.com/doc/mysql/en/create-procedure.html">http://dev.mysql.com/doc/mysql/en/create-procedure.html</a>
+のサンプルをベースにちょっとだけ変えたもので試しましたけど、
+特に問題はないようでした。
+#残念ながらbind_param_inoutでは
+#DBD::mysql::st bind_param_inout failed: Output parameters not implemented
+#ということでしたけど
+
+[サンプル]
+use strict;
+use DBI;
+my $hDb = DBI-&gt;connect('dbi:mysql:database=test', 'root', 'hogehoge',
+             {RaiseError =&gt; 1, PrintError=&gt; 0, AutoCommit =&gt; 1});
+# 先に削除
+eval {$hDb-&gt;do('DROP PROCEDURE simpleproc');};
+eval {$hDb-&gt;do('DROP FUNCTION  hello');};
+# プロシージャ、ファンクションを作成
+eval {
+$hDb-&gt;do(
+'CREATE PROCEDURE simpleproc (OUT param1 INT)
+ BEGIN
+   SELECT COUNT(*) INTO param1 FROM t;
+   SET param1 = param1 + 10;
+ END');
+$hDb-&gt;do(
+q{CREATE FUNCTION hello (s VARCHAR(20))
+  RETURNS VARCHAR(50)
+ BEGIN
+  RETURN CONCAT('やぁ', s , '調子どう？');
+ END});
+};
+die $@ if($@);
+
+# 1. simpleprocを実行して戻り値をSELECT
+$hDb-&gt;do('call simpleproc(@rtnVal)');
+my $iVal = $hDb-&gt;selectrow_array('SELECT @rtnVal');
+print &quot;戻り値:&quot; . $iVal . &quot;\n&quot;;
+
+# 2.
+my $hSt = $hDb-&gt;prepare(q{SELECT hello(?)});
+$hSt-&gt;execute('堀さん');
+while (my $raRes = $hSt-&gt;fetchrow_arrayref()) {
+  print join(',', @$raRes) . &quot;\n&quot;;
+}
+
+[実行結果]
+戻り値:13
+やぁ堀さん調子どう？
+
+===================================================
+川合 孝典 (Hippo2000)
+   DBI日本語メーリングリスト管理人、Kansai.pm所属
+   kwitknr@xxxxxxxxxx GCD00051@xxxxxxxxxx
+   <a href="http://homepage3.nifty.com/hippo2000/">http://homepage3.nifty.com/hippo2000/</a>、<a href="http://www.hippo2000.info/">http://www.hippo2000.info/</a>
+perldocの日本語情報ならperldocjp：翻訳してみませんか？
+  <a href="http://perldocjp.sourceforge.jp/">http://perldocjp.sourceforge.jp/</a>
+=================================================== 
+
+
+</pre>
+</div>
+<p class="button"><a href="11281">[前]</a><a href="11283">[次]</a><a href="../list/11201-11300">[番号順一覧]</a><a href="../thread/11201-11300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11279">  11279 2005-03-26 22:06 [HORI &lt;john.smith@xxx] perlからのストアドプロシージャーの使い方を教えて下さい</a></span>
+<span class="current">-&gt;&nbsp;<a href="11282">  11282 2005-03-27 22:54 ┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11289">  11289 2005-03-28 23:10 　┗[HORI &lt;john.smith@xxx]                                     </a></span>
+</pre>
+</body>
+</html>

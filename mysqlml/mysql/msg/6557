@@ -1,0 +1,211 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6557</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6556">[前]</a><a href="6558">[次]</a><a href="../list/6501-6600">[番号順一覧]</a><a href="../thread/6501-6600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6557
+</p>
+<div class="header">
+<p>
+From: mineo_mina &lt;mineo_mina &lt;mineo_mina@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 09 Nov 2002 23:03:40 +0900<br>
+Subject: [mysql 06557] MacOSX+MySQL で、スクリプトによる一括定義ができません<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして。mina と申します。
+
+自宅iBookにて、MacOSX10.2.1
+<a href="http://www.entropy.ch/software/macosx/mysql/">http://www.entropy.ch/software/macosx/mysql/</a>からの
+MySQL version 3.23.52 パッケージ
+及び同ホームページの自動起動パッケージ
+mysql-startupitem.pkg.tar.qzをインストール済みです。
+
+データベースの初期化も済み、
+ターミナル上からは問題なくデータベースとテーブルが作れる状態ですが、
+新しく作ったデータベースに、テキストで作られた
+database.txtスクリプト（以下のようなもの）
+
+# MySQL dump 8.14
+#
+# Host: localhost    Database: sample
+#--------------------------------------------------------
+# Server version    3.23.39-nt
+
+#
+# Table structure for table 'active_sessions'
+#
+
+CREATE TABLE active_sessions (
+  sid varchar(32) NOT NULL default '',
+  name varchar(32) NOT NULL default '',
+  val text,
+  changed varchar(14) NOT NULL default '',
+  PRIMARY KEY  (name,sid),
+  KEY changed (changed)
+) TYPE=MyISAM;
+
+#
+# Dumping data for table 'active_sessions'
+#
+
+#
+# Table structure for table 'active_sessions_split'
+#
+
+CREATE TABLE active_sessions_split (
+  ct_sid varchar(32) NOT NULL default '',
+  ct_name varchar(32) NOT NULL default '',
+  ct_pos varchar(6) NOT NULL default '',
+  ct_val text,
+  ct_changed varchar(14) NOT NULL default '',
+  PRIMARY KEY  (ct_name,ct_sid,ct_pos),
+  KEY ct_changed (ct_changed)
+) TYPE=MyISAM;
+
+
+（以降　略）
+
+
+を一括定義しようと思い、
+
+コマンドラインで
+
+[Macintosh:~] mina% mysql sample &lt; database.txt
+
+のようにいれましたが、
+
+./bin/mysql  Ver 11.18 Distrib 3.23.51, for apple-darwin6.0 (powerpc)
+Copyright (C) 2000 MySQL AB &amp; MySQL Finland AB &amp; TCX DataKonsult AB
+This software comes with ABSOLUTELY NO WARRANTY. This is free software,
+and you are welcome to modify and redistribute it under the GPL license
+
+Usage: ./bin/mysql [OPTIONS] [database]
+
+  -?, --help            Display this help and exit.
+  -A, --no-auto-rehash  No automatic rehashing. One has to use 'rehash' to
+                        get table and field completion. This gives a quicker
+                        start of mysql and disables rehashing on reconnect.
+  -B, --batch           Print results with a tab as separator, each row on
+                        a new line. Doesn't use history file.
+  --character-sets-dir=...
+                        Directory where character sets are located.
+  -C, --compress        Use compression in server/client protocol.
+  -D, --database=..     Database to use.
+  --default-character-set=...
+                        Set the default character set.
+  -e, --execute=...     Execute command and quit. (Output like with --batch)
+  -E, --vertical        Print the output of a query (rows) vertically.
+  -f, --force           Continue even if we get an sql error.
+  -g, --no-named-commands
+                        Named commands are disabled. Use \* form only, or
+                        use named commands only in the beginning of a line
+                        ending with a semicolon (;) Since version 10.9 the
+                        client now starts with this option ENABLED by
+                        default! Disable with '-G'. Long format commands
+                        still work from the first line.
+  -G, --enable-named-commands
+                        Named commands are enabled. Opposite to -g.
+  -i, --ignore-spaces   Ignore spaces after function names.
+  -h, --host=...        Connect to host.
+  -H, --html            Produce HTML output.
+  --local-infile=[1|0]  Enable/disable LOAD DATA LOCAL INFILE
+  -L, --skip-line-numbers
+                        Don't write line number for errors.
+  --no-pager            Disable pager and print to stdout. See interactive
+                        help (\h) also.
+  --no-tee              Disable outfile. See interactive help (\h) also.
+  -n, --unbuffered      Flush buffer after each query.
+  -N, --skip-column-names
+                        Don't write column names in results.
+  -O, --set-variable var=option
+                        Give a variable an value. --help lists variables.
+  -o, --one-database    Only update the default database. This is useful
+                        for skipping updates to other database in the update
+                        log.
+  --pager[=...]         Pager to use to display results. If you don't supply
+                        an option the default pager is taken from your ENV
+                        variable PAGER ().
+                        Valid pagers are less, more, cat [&gt; filename], etc.
+                        See interactive help (\h) also. This option does
+                        not work in batch mode.
+  -p[password], --password[=...]
+                        Password to use when connecting to server
+                        If password is not given it's asked from the tty.
+
+  -P, --port=...        Port number to use for connection.
+  -q, --quick           Don't cache result, print it row by row. This may
+                        slow down the server if the output is suspended.
+                        Doesn't use history file.
+  -r, --raw             Write fields without conversion. Used with --batch
+  -s, --silent          Be more silent.
+  -S  --socket=...      Socket file to use for connection.
+  -t, --table           Output in table format.
+  -T, --debug-info      Print some debug info at exit.
+  --tee=...             Append everything into outfile. See interactive help
+                        (\h) also. Does not work in batch mode.
+  -u, --user=#          User for login if not current user.
+  -U, --safe-updates[=#], --i-am-a-dummy[=#]
+                        Only allow UPDATE and DELETE that uses keys.
+  -v, --verbose         Write more. (-v -v -v gives the table output format)
+  -V, --version         Output version information and exit.
+  -w, --wait            Wait and retry if connection is down.
+
+Default options are read from the following files in the given order:
+/etc/my.cnf /usr/local/mysql/data/my.cnf ~/.my.cnf
+The following groups are read: mysql client
+The following options may be given as the first argument:
+--print-defaults        Print the program argument list and exit
+--no-defaults           Don't read default options from any options file
+--defaults-file=#       Only read default options from the given file #
+--defaults-extra-file=# Read this file after the global files are read
+
+Possible variables for option --set-variable (-O) are:
+connect_timeout       current value: 0
+max_allowed_packet    current value: 16777216
+net_buffer_length     current value: 16384
+select_limit          current value: 1000
+max_join_size         current value: 1000000
+[Macintosh:~] mina%
+
+と、出てしまい、成功したのかと思っていましたが、
+中を見てみたら、何も作られていませんでした。
+
+パッケージの標準configureオプション以外に特にやったことといえば、
+このパッケージはujisのオプションがないらしかったので、
+
+/usr/local/mysql/support-files/
+
+の中の　my-small.cnf を my.cnf に書き換え、
+
+[mysqld] のところに
+default-character-set = ujis
+
+と書き加えて /etc/ 直下に置いたことぐらいです。
+
+MacOSXは、他のOSとディレクトリ構成が少し違うようなので、
+いろいろ調べてみたのですが、
+どこがおかしいのかわかりません。
+
+どうしたら一括定義ができるのでしょうか。
+
+mina
+
+
+
+</pre>
+</div>
+<p class="button"><a href="6556">[前]</a><a href="6558">[次]</a><a href="../list/6501-6600">[番号順一覧]</a><a href="../thread/6501-6600">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="6557">   6557 2002-11-09 23:03 [mineo_mina &lt;mineo_mi] MacOSX+MySQL で、スクリプトによる一括定義ができません</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6561">   6561 2002-11-10 12:59 ┗[大島克彦 &lt;redhair@xx] Re: MacOSX+MySQL で                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6563">   6563 2002-11-10 18:45 　┗[mineo_mina &lt;mineo_mi]                                     </a></span>
+</pre>
+</body>
+</html>

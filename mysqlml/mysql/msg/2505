@@ -1,0 +1,109 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2505</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2504">[前]</a><a href="2506">[次]</a><a href="../list/2501-2600">[番号順一覧]</a><a href="../thread/2501-2600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2505
+</p>
+<div class="header">
+<p>
+From: とみたまさひろ &lt;とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 27 Sep 2000 03:43:35 +0900<br>
+Subject: [mysql 02505] Re: mysqldump について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+とみたです。
+
+On Tue, 26 Sep 2000 10:27:27 +0900
+Tetsuya Watanabe &lt;watanabe@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; 	以下のようにコマンドを打って（***は伏字）実行すると、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 	mysqldump -h *.*.*.* -u *** -p*** -C --opt *** &gt;&gt; ***.sql</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 	以下ようなエラーが出て、ヘッダー部分を吐き出した後に止まります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 	mysqldump: Got error: 1064: You have an error in your SQL s</span>
+<span class="quote1">&gt; 	yntax near '32311 LOCAL */,予約 READ /*!32311 LOCAL */,部屋ID READ /*!3231</span>
+<span class="quote1">&gt; 	1 LOCAL */' at line 1 when using LOCK TABLES</span>
+
+多分、LOCK TABLES 文でエラーになっていると思うので、「--opt」を
+省けばうまくいくんじゃないかと思います。
+
+どうやら、実行中のサーバの charset に合わないテーブル名があると
+(つまり、サーバが sjis で動いていて、ujis のテーブル名があると)
+エラーになるようですが、少なくとも 3.23.x では mysqldump がテーブル名
+を `` で括るべきだと思うので、mysqldump のバグと言ってもいいかも。
+
+…ということでパッチです。3.23.22 が手元になかったので、3.23.20 の
+mysqldump に対するものです。
+
+---
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt; <a href="http://www.tmtm.org">http://www.tmtm.org</a>
+日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a>
+
+
+*** mysqldump.c.orig	Tue Jun 27 11:29:10 2000
+--- mysqldump.c	Wed Sep 27 03:26:28 2000
+***************
+*** 1118,1121 ****
+--- 1118,1122 ----
+    char *table;
+    uint numrows;
++   char table_buff[NAME_LEN+3];
+  
+    if (init_dumping(database))
+***************
+*** 1127,1131 ****
+      for (numrows=0 ; (table = getTableName(1)) ; numrows++)
+      {
+!       dynstr_append(&amp;query, table);
+        dynstr_append(&amp;query, &quot; READ /*!32311 LOCAL */,&quot;);
+      }
+--- 1128,1132 ----
+      for (numrows=0 ; (table = getTableName(1)) ; numrows++)
+      {
+!       dynstr_append(&amp;query, quote_name(table,table_buff));
+        dynstr_append(&amp;query, &quot; READ /*!32311 LOCAL */,&quot;);
+      }
+***************
+*** 1157,1160 ****
+--- 1158,1162 ----
+  {
+    uint numrows;
++   char table_buff[NAME_LEN+3];
+  
+    if (init_dumping(db))
+***************
+*** 1168,1172 ****
+      for (i=0 ; i &lt; tables ; i++)
+      {
+!       dynstr_append(&amp;query, table_names[i]);
+        dynstr_append(&amp;query, &quot; READ /*!32311 LOCAL */,&quot;);
+      }
+--- 1170,1174 ----
+      for (i=0 ; i &lt; tables ; i++)
+      {
+!       dynstr_append(&amp;query, quote_name(table_names[i],table_buff));
+        dynstr_append(&amp;query, &quot; READ /*!32311 LOCAL */,&quot;);
+      }
+
+</pre>
+</div>
+<p class="button"><a href="2504">[前]</a><a href="2506">[次]</a><a href="../list/2501-2600">[番号順一覧]</a><a href="../thread/2501-2600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2497">   2497 2000-09-25 21:39 [&lt;kemi@xxxxxxxxxx&gt;   ] 文字化けについて。                      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2499">   2499 2000-09-26 00:32 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2502">   2502 2000-09-26 10:11 ┗[Toyoshima Hiroshi &lt;t]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2503">   2503 2000-09-26 10:27 　┗[Tetsuya Watanabe &lt;wa] mysqldump について                  </a></span>
+<span class="current">-&gt;&nbsp;<a href="2505">   2505 2000-09-27 03:43 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+</pre>
+</body>
+</html>

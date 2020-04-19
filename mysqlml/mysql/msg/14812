@@ -1,0 +1,170 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14812</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14811">[前]</a><a href="14813">[次]</a><a href="../list/14801-14900">[番号順一覧]</a><a href="../thread/14801-14900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14812
+</p>
+<div class="header">
+<p>
+From: SAKAI Kei &lt;SAKAI Kei &lt;sak2@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 18 Apr 2009 16:10:55 +0900<br>
+Subject: [mysql 14812] Re: SJISで文字コードがシフト？してしまい検索できない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+坂井です
+
+  立岡さん、素早いですね！
+  私のほうでもさくっとソースを見て、my_case* を指定している部分が、
+  cp932/sjis では *_8bit になっていること、
+  utf8/ujis/eucjpms/euc_kr/big5/gbk/gb2312 では _mb または独自
+  の関数になっていることを確認しました。
+  
+  それにしてもこんな不具合がまだ残っていたとは驚きです。。
+  今回浅山さんの辛抱強い投稿のおかげですね^^
+
+
+
+余談ですが、私のお気に入りのUPPER()での変換例です。
+一層呪文っぽくなります:-)
+
+mysql&gt; SELECT UPPER(&quot;ビビデバビデブー&quot;);
++---------------------------+
+<span class="quote1">| UPPER(&quot;ビビデバビデブー&quot;) |</span>
++---------------------------+
+<span class="quote1">| ココェグコェザー          | </span>
++---------------------------+
+1 row in set (0.00 sec)
+  
+Thank you
+On Sat, 18 Apr 2009 13:37:34 +0900
+Satoshi Tatsuoka &lt;satoshi@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; 立岡です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ソースコード眺めてみたらおかしなところを発見しました。</span>
+<span class="quote1">&gt; ようするにUPPERとLOWERがlatin1と同じ関数が使われているようです。</span>
+<span class="quote1">&gt; これをマルチバイト用の関数に直したらうまく動きました。</span>
+<span class="quote1">&gt; (この関数がcp932とsjisに対応しているという前提ですが。。。)</span>
+<span class="quote1">&gt; 動作は下記です。そのあとパッチです。</span>
+<span class="quote1">&gt; cp932だけでなくsjisもコードがおかしいようです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; show create table t;</span>
+<span class="quote1">&gt; +-------+-----------------------------------------------------------------------------------------+</span>
+<span class="quote2">&gt; | Table | Create Table</span>
+<span class="quote2">&gt;                           |</span>
+<span class="quote1">&gt; +-------+-----------------------------------------------------------------------------------------+</span>
+<span class="quote2">&gt; | t     | CREATE TABLE `t` (</span>
+<span class="quote1">&gt;   `a` varchar(16) default NULL</span>
+<span class="quote1">&gt; ) ENGINE=MyISAM DEFAULT CHARSET=cp932 |</span>
+<span class="quote1">&gt; +-------+-----------------------------------------------------------------------------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; SELECT a, HEX(a), HEX(UPPER(a)) FROM t;</span>
+<span class="quote1">&gt; +--------+----------+---------------+</span>
+<span class="quote2">&gt; | a      | HEX(a)   | HEX(UPPER(a)) |</span>
+<span class="quote1">&gt; +--------+----------+---------------+</span>
+<span class="quote2">&gt; | ビタ | 8372835E | 8372835E      |</span>
+<span class="quote2">&gt; | ABC    | 414243   | 414243        |</span>
+<span class="quote2">&gt; | abc    | 616263   | 414243        |</span>
+<span class="quote1">&gt; +--------+----------+---------------+</span>
+<span class="quote1">&gt; 3 rows in set (0.02 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select * from t WHERE upper(a)=&quot;ビタ&quot;;</span>
+<span class="quote1">&gt; +--------+</span>
+<span class="quote2">&gt; | a      |</span>
+<span class="quote1">&gt; +--------+</span>
+<span class="quote2">&gt; | ビタ |</span>
+<span class="quote1">&gt; +--------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select * from t WHERE upper(a)=&quot;コタ&quot;;</span>
+<span class="quote1">&gt; Empty set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; パッチ</span>
+<span class="quote1">&gt; --- mysql-5.0.77-org/strings/ctype-cp932.c	2009-01-30 06:45:47.000000000</span>
+<span class="quote1">&gt; +0900</span>
+<span class="quote1">&gt; +++ mysql-5.0.77-new/strings/ctype-cp932.c	2009-04-18 12:34:32.000000000</span>
+<span class="quote1">&gt; +0900</span>
+<span class="quote1">&gt; @@ -5485,10 +5485,10 @@</span>
+<span class="quote1">&gt;    my_numcells_cp932,</span>
+<span class="quote1">&gt;    my_mb_wc_cp932,	/* mb_wc */</span>
+<span class="quote1">&gt;    my_wc_mb_cp932,	/* wc_mb */</span>
+<span class="quote1">&gt; -  my_caseup_str_8bit,</span>
+<span class="quote1">&gt; -  my_casedn_str_8bit,</span>
+<span class="quote1">&gt; -  my_caseup_8bit,</span>
+<span class="quote1">&gt; -  my_casedn_8bit,</span>
+<span class="quote1">&gt; +  my_caseup_str_mb,</span>
+<span class="quote1">&gt; +  my_casedn_str_mb,</span>
+<span class="quote1">&gt; +  my_caseup_mb,</span>
+<span class="quote1">&gt; +  my_casedn_mb,</span>
+<span class="quote1">&gt;    my_snprintf_8bit,</span>
+<span class="quote1">&gt;    my_long10_to_str_8bit,</span>
+<span class="quote1">&gt;    my_longlong10_to_str_8bit,</span>
+<span class="quote1">&gt; satoshi@fasta:~/Downloads$ diff -u mysql-5.0.77-org/strings/ctype-sjis.c</span>
+<span class="quote1">&gt; mysql-5.0.77-new/strings/ctype-sjis.c</span>
+<span class="quote1">&gt; --- mysql-5.0.77-org/strings/ctype-sjis.c	2009-01-30 06:45:48.000000000</span>
+<span class="quote1">&gt; +0900</span>
+<span class="quote1">&gt; +++ mysql-5.0.77-new/strings/ctype-sjis.c	2009-04-18 12:35:00.000000000</span>
+<span class="quote1">&gt; +0900</span>
+<span class="quote1">&gt; @@ -4648,10 +4648,10 @@</span>
+<span class="quote1">&gt;    my_numcells_sjis,</span>
+<span class="quote1">&gt;    my_mb_wc_sjis,	/* mb_wc */</span>
+<span class="quote1">&gt;    my_wc_mb_sjis,	/* wc_mb */</span>
+<span class="quote1">&gt; -  my_caseup_str_8bit,</span>
+<span class="quote1">&gt; -  my_casedn_str_8bit,</span>
+<span class="quote1">&gt; -  my_caseup_8bit,</span>
+<span class="quote1">&gt; -  my_casedn_8bit,</span>
+<span class="quote1">&gt; +  my_caseup_str_mb,</span>
+<span class="quote1">&gt; +  my_casedn_str_mb,</span>
+<span class="quote1">&gt; +  my_caseup_mb,</span>
+<span class="quote1">&gt; +  my_casedn_mb,</span>
+<span class="quote1">&gt;    my_snprintf_8bit,</span>
+<span class="quote1">&gt;    my_long10_to_str_8bit,</span>
+<span class="quote1">&gt;    my_longlong10_to_str_8bit,</span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="14811">[前]</a><a href="14813">[次]</a><a href="../list/14801-14900">[番号順一覧]</a><a href="../thread/14801-14900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14789">  14789 2009-04-15 19:14 [&lt;ALCYONE@xxxxxxxxxx&gt;] SJISで文字コードがシフト？してしまい検索できない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14790">  14790 2009-04-15 19:28 ┣[Isamu Moriyama &lt;mori]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14791">  14791 2009-04-15 19:43 ┃┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14792">  14792 2009-04-15 20:17 ┣[SAKAI Kei &lt;sak2@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14795">  14795 2009-04-16 15:06 ┃┣[&lt;ALCYONE@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14796">  14796 2009-04-16 15:13 ┃┃┣[&lt;ALCYONE@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14800">@ 14800 2009-04-16 17:28 ┃┃┃┗[chuuken kenkou &lt;ken_]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14803">  14803 2009-04-17 19:51 ┃┃┃　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14805">  14805 2009-04-17 20:50 ┃┃┃　　┗[Satoshi Tatsuoka &lt;sa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14802">  14802 2009-04-17 17:05 ┃┃┗[SAKAI Kei &lt;sak2@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14806">  14806 2009-04-17 20:55 ┃┃　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14801">  14801 2009-04-17 15:52 ┃┗[Mikiya Okuno &lt;Mikiya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14804">  14804 2009-04-17 20:38 ┃　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14807">  14807 2009-04-17 21:00 ┃　　┗[SAKAI Kei &lt;sak2@xxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14808">  14808 2009-04-17 21:12 ┃　　　┣[SAKAI Kei &lt;sak2@xxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14810">  14810 2009-04-18 13:37 ┃　　　┃┗[Satoshi Tatsuoka &lt;sa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14811">  14811 2009-04-18 15:38 ┃　　　┃　┣[Yoshinori Matsunobu ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14813">  14813 2009-04-18 17:03 ┃　　　┃　┃┗[Satoshi Tatsuoka &lt;sa]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14814">  14814 2009-04-18 17:17 ┃　　　┃　┃　┗[Yoshinori Matsunobu ]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14815">  14815 2009-04-20 10:03 ┃　　　┃　┃　　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14821">  14821 2009-05-06 14:05 ┃　　　┃　┃　　　┗[SAKAI Kei &lt;sak2@xxxx]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14840">  14840 2009-05-09 12:01 ┃　　　┃　┃　　　　┣[SAKAI Kei &lt;sakaik@xx]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14956">  14956 2009-07-06 16:57 ┃　　　┃　┃　　　　┗[SAKAI Kei &lt;sak2@xxxx] MySQL 5.1.36 リリース（was Re:  Re: SJISで文字コードがシフト？してしまい検索できない</a></span>
+<span class="current">-&gt;&nbsp;<a href="14812">  14812 2009-04-18 16:10 ┃　　　┃　┗[SAKAI Kei &lt;sak2@xxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14809">  14809 2009-04-17 21:23 ┃　　　┗[Satoshi Tatsuoka &lt;sa]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14794">  14794 2009-04-15 23:37 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14797">  14797 2009-04-16 15:34 　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14798">  14798 2009-04-16 15:41 　　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14799">  14799 2009-04-16 16:44 　　　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                 </a></span>
+</pre>
+</body>
+</html>

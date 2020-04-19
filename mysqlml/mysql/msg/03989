@@ -1,0 +1,94 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3989</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="3988">[前]</a><a href="3990">[次]</a><a href="../list/3901-4000">[番号順一覧]</a><a href="../thread/3901-4000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3989
+</p>
+<div class="header">
+<p>
+From: Tybalt of Capulet &lt;Tybalt of Capulet &lt;ice-man@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 13 Jul 2001 01:01:33 +0900<br>
+Subject: [mysql 03989] INTERVAL がうまく動きません<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+神崎です。
+
+INTERVALを使い該当データを削除しようとしているのですがうまくいきません。
+
+［テーブル：A］
+id varchar(10)
+inputday timestamp
+
+［サンプルデータ］
+1	20010713012030
+2	20010713014030
+3	20010713015030
+
+下記の様なスクリプトをcronで動かしています。
+ところがこれをAM2:45に動かすとデータが全て削除されてしまいます。
+サンプルデータからするとINTERVALが1なのでidが1と2のデータが消えて
+3は残って欲しいわけです。
+--------------ここから------------------------------
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$mon = $mon + 1;
+$year += 1900;
+$mon = substr('0'.$mon,-2,2);
+$hour = substr('0'.$hour,-2,2);
+$nowday = $year.$mon.$mday.$hour.$min.$sec;
+
+# 1時間以上経過しているAテーブルのデータの削除
+$sth = $dbh-&gt;prepare( qq{
+  DELETE FROM A WHERE (inputday + INTERVAL 1 HOUR) &lt; ?
+}) || die &quot;Can't prepare statement:&quot; . $dbh-&gt;errstr . &quot;\n&quot;;
+
+$rc = $sth-&gt;execute($nowday)
+	|| die &quot;Can't execute statement:&quot;;
+$sth-&gt;finish;
+$dbh-&gt;disconnect();
+exit;
+--------------ここまで------------------------------
+
+ちなみに下記の様に?の部分に直接変数を入れると今度は
+該当データが削除できません。
+--------------ここから------------------------------
+$sth = $dbh-&gt;prepare( qq{
+  DELETE FROM A WHERE (inputday + INTERVAL 1 HOUR) &lt; $nowday
+}) || die &quot;Can't prepare statement:&quot; . $dbh-&gt;errstr . &quot;\n&quot;;
+
+$rc = $sth-&gt;execute
+	|| die &quot;Can't execute statement:&quot;;
+--------------ここまで------------------------------
+
+INTERVALとtimestamp型の使い方が間違っているのでしょうか？
+どなたかおわかりのかた教えていただけませんでしょうか？
+
+［環境］
+mysql-3.23.39
+perl v5.6.0
+Red Hat Linux7.0
+
+
+________________________________R_y_u_____
+神崎 隆
+Mail：ice-man@xxxxxxxxxx
+_____K_a_n_z_a_k_i________________________
+
+
+</pre>
+</div>
+<p class="button"><a href="3988">[前]</a><a href="3990">[次]</a><a href="../list/3901-4000">[番号順一覧]</a><a href="../thread/3901-4000">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="3989">   3989 2001-07-13 01:01 [Tybalt of Capulet &lt;i] INTERVAL がうまく動きません             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4003">   4003 2001-07-13 21:15 ┗[YONEMOTO Kazumasa &lt;y]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4005">   4005 2001-07-14 00:40 　┗[Tybalt of Capulet &lt;i]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12213</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="12212">[前]</a><a href="12214">[次]</a><a href="../list/12201-12300">[番号順一覧]</a><a href="../thread/12201-12300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12213
+</p>
+<div class="header">
+<p>
+From: Tetsuro IKEDA &lt;Tetsuro IKEDA &lt;ikdttr@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 4 Oct 2005 14:22:53 -0700<br>
+Subject: [mysql 12213] Re: 皆さんの使っているJDBCドライバのバージョン<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+池田です。
+
+Connector/Jにおけるフィールド値 &quot;0000-00-00 00:00:00&quot;の取り扱いですが、
+調べていたらどうも既にドキュメントに結論のようなものが書かれておりました。
+
+<a href="http://dev.mysql.com/doc/mysql/en/cj-upgrading.html#cj-upgrading-3-0-to-3-1">http://dev.mysql.com/doc/mysql/en/cj-upgrading.html#cj-upgrading-3-0-to-3-1</a>
+
+・JDBC仕様／SQL標準により忠実なのはSQLExceptionをスローする挙動
+・ver3.1.4から実装を変更した
+・現在はオプションを指定することで挙動を選ぶことができる
+
+プロパティ名：zeroDateTimeBehavior
+値の候補：exception　・・・SQLExceptionをスローする（デフォルト）
+値の候補：convertToNull　・・・nullを返す（ver3.0系と同じ動き）
+値の候補：round　・・・&quot;0001-01-01 00:00:00&quot;を返す
+
+とのことです。既にドキュメントにもこう書かれてしまっていますので、
+これを変更するのはちょっと難しいかなと思います・・・。
+
+この話だけで考えれば、データソース設定なりの部分で
+渡す接続プロパティを1つ追加（zeroDateTimeBehavior=convertToNull)
+するだけということにはなりますが。
+
+他にも同URLにver3.0系からver3.1系へアップグレードする際の注意点のようなものが
+列挙されております。よろしければそちらもご参照ください。
+
+05/10/04 に NAGASAWA Teruo&lt;tech-ml@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; 長沢です。お世話になっております。</span>
+<span class="quote1">&gt;</span>
+<span class="quote3">&gt; |&gt; たとえば3.1から値が0の時に例外がスローされるようになっていますよね？</span>
+<span class="quote3">&gt; |&gt; そのような例外がスローされたので、ドライバのソースを読んでみると、</span>
+<span class="quote3">&gt; |&gt; オプションのような物で変更可能になっていましたが、</span>
+<span class="quote3">&gt; |&gt; そのオプションを変更するようなものがどうも無さそうな感じでした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; やっと再現できました。mysql-connector-java-3.1.10です。</span>
+<span class="quote1">&gt; フィールドの値が'0000-00-00 00:00:00'を取得しようとした時に発生しました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Caused by: java.sql.SQLException: Cannot convert value '0000-00-00 00:00:00' from column 8 to TIMESTAMP.</span>
+<span class="quote1">&gt;         at com.mysql.jdbc.ResultSet.getTimestampFromString(ResultSet.java:5639)</span>
+<span class="quote1">&gt;         at com.mysql.jdbc.ResultSet.getTimestampInternal(ResultSet.java:5667)</span>
+<span class="quote1">&gt;         at com.mysql.jdbc.ResultSet.getTimestamp(ResultSet.java:5320)</span>
+<span class="quote1">&gt;         at com.mysql.jdbc.ResultSet.getObject(ResultSet.java:4433)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; まぁ、、、0000-00-00の状態はjava.util.Calendarでは表現できませんから、</span>
+<span class="quote1">&gt; スローされるのもわかるんですが、3.0では問題なかったんですよね。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 僕の場合はテーブル定義にnot nullを多用するので、新規案件ならともかく、</span>
+<span class="quote1">&gt; すでに稼働中のシステムではバージョンアップは断念せざるを得ない状態です。</span>
+<span class="quote1">&gt; # オプションで指定できるのかもしれませんが、他の隠れた問題が怖い。。。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote3">&gt; |&gt; # 元々のExceptionをinitCauseしていなくて出所がわからず少し苦労しました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; このドライバのソース全体にいえることなんですが、</span>
+<span class="quote1">&gt; SQLException#initCause(Throwable)を一切使っていないように思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 特に上の(ResultSet.java:5639)の部分の場合、ソースを見えればわかりますが、</span>
+<span class="quote1">&gt; initCauseを使用することで圧倒的にデバッグがしやすくなると思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; initCauseをあえて使っていないとしても、その意図がよくわかりません。</span>
+<span class="quote1">&gt; パフォーマンスを気にするのであればこのようなドライバにはならないと思いま</span>
+<span class="quote1">&gt; すし。。。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; |現在MySQL ABのConnectorsチームにてインターンを行っている者です。</span>
+<span class="quote2">&gt; |（Mark Matthewsの下で働いております）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQL信者としては非常にうらやましい環境です^^</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; |長沢さんが書かれている以下の現象ですとか、あるいは高橋さんが</span>
+<span class="quote2">&gt; |お感じになられている現Connector/Jへの不満点ですとか、</span>
+<span class="quote2">&gt; |よろしければ詳しいフィードバックをいただければと思うのですがいかがでしょうか。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 個人的な要望としては、下位互換とシンプルで堅いドライバがほしいです。</span>
+<span class="quote1">&gt; ただ、Connector/Jを見ているとコンセプトが少し違うように思いますが。。。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; P.S. 全く関係ないんですが、Excelのファイル名に[]を入れると</span>
+<span class="quote1">&gt; シート名が変更できなくなるのを今日発見しましたｗ</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ---</span>
+<span class="quote1">&gt; NAGASAWA Teruo &lt;tech-ml@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="12212">[前]</a><a href="12214">[次]</a><a href="../list/12201-12300">[番号順一覧]</a><a href="../thread/12201-12300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12200">  12200 2005-10-01 23:53 [NAGASAWA Teruo &lt;tech] 皆さんの使っているJDBCドライバのバージョン</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12201">  12201 2005-10-01 23:53 ┣[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12202">  12202 2005-10-01 23:58 ┃┗[&quot;TAKAHASHI, Tomohiro]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12203">  12203 2005-10-02 00:23 ┃　┗[NAGASAWA Teruo &lt;tech]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12206">  12206 2005-10-03 15:28 ┗[Tetsuro IKEDA &lt;tetsu]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12211">  12211 2005-10-05 01:35 　┗[NAGASAWA Teruo &lt;tech]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12212">  12212 2005-10-05 02:13 　　┣[Tetsuro IKEDA &lt;ikdtt]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="12213">  12213 2005-10-05 06:22 　　┣[Tetsuro IKEDA &lt;ikdtt]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12214">  12214 2005-10-05 07:17 　　┃┣[Tetsuro IKEDA &lt;tetsu]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12216">  12216 2005-10-05 14:52 　　┃┗[&quot;NAGASAWA Teruo&quot; &lt;te] Re: 皆さんの使っているJDBC= ?ISO-2022-JP?B?GyRCJUklaSUkJVAkTiVQITwlOCVnJXMbKEI=?=</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12217">  12217 2005-10-05 15:44 　　┃　┗[&quot;TAKAHASHI, Tomohiro] Re: 皆さんの使っているJDBC=?ISO-202 2-JP?B?GyRCJUklaSUkJVAkTiVQITwlOCVnJXMbKEI=</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12218">  12218 2005-10-05 17:00 　　┃　　┗[NAGASAWA Teruo &lt;tech]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12215">  12215 2005-10-05 11:21 　　┗[&quot;TAKAHASHI, Tomohiro]                                   </a></span>
+</pre>
+</body>
+</html>

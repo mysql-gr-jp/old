@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15377</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15376">[前]</a><a href="15378">[次]</a><a href="../list/15301-15400">[番号順一覧]</a><a href="../thread/15301-15400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15377
+</p>
+<div class="header">
+<p>
+From: SAKAI Kei &lt;SAKAI Kei &lt;sak2@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 20 Aug 2010 22:10:41 +0900<br>
+Subject: [mysql 15377] Re: int column への2147483648<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+坂井です
+
+  sumiya さん、こんにちは。横から失礼します。
+  
+<span class="quote1">&gt; 5.1.xになって、columnの型がunsignedに変わり、  </span>
+ 
+  の部分がとても気になりました。
+  バージョンアップをする過程のどこかで、signed int が
+  unsigned int になる操作が入ってしまったのだと推測し
+  ていますが、心当たりはあるでしょうか。
+  
+  推測ついでにもうひとつ書くと、
+  おそらく 5.0.47 でも unsigned int にしたテーブルで
+  同様の操作をすると、同じ結果（0）になると思います。
+  処理結果のコードを見ると、Code:1264 の Warning が
+  帰ってきていませんか。メッセージはこんな感じです。
+
+    Out of range value adjusted for column 'c1' at row 1
+  
+  これは、unsigned のカラムに負の数字を与えたときに
+  値がゼロに切り捨て（？）られたために出る警告です。
+  
+    INSERT INTO t VALUES (-2147483648);
+  
+  という文を、signed 型カラムのテーブルに対して実行すれば
+  -2147483648 が登録されるし、
+  unsigned型のテーブルに対して実行したら 0 になります。
+  
+  この切り捨てが起きないようにする方法も、最近出た奥野さん
+  の本に出ていましたね。（SQL MODE の話）
+
+
+Thank you
+On Fri, 20 Aug 2010 08:23:53 +0900 (LMT)
+Etsuo SUMIYA &lt;sumiya-e@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; sumiyaといいますす。お世話になっております。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; From: Mikiya Okuno &lt;mikiya.okuno@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; Subject: <a href="15375">[mysql 15375]</a> Re: int column への2147483648</span>
+<span class="quote1">&gt; Date: Thu, 19 Aug 2010 21:50:03 +0900</span>
+<span class="quote1">&gt; Message-ID: &lt;4C6D287B.3010009@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; bind[0].is_unsigned = 1にしましょう。</span>
+<span class="quote2">&gt; &gt; そうしないと符号付き32ビット整数の最大値=2147483647に</span>
+<span class="quote2">&gt; &gt; 引っかかってしまいます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; うーん！そうだったんですか？確かに、マニュアルを見ると、記載があり</span>
+<span class="quote1">&gt; ますが、サンプルコーディングには記載がないので、見落としました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; アプリを修正してみたところ、動作しました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 実は、このアプリ、5.0.24aの頃から使っているアプリなんですが、手元</span>
+<span class="quote1">&gt; の環境(5.0.47)では、show create table の結果は、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; CREATE TABLE `t` (</span>
+<span class="quote1">&gt;   `c1` int(11) default NULL</span>
+<span class="quote1">&gt; ) ENGINE=MyISAM DEFAULT CHARSET=sjis</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; int がsignedで定義され、先のアプリを実行すると、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select * from t;</span>
+<span class="quote1">&gt; +-------------+</span>
+<span class="quote2">&gt; | c1          |</span>
+<span class="quote1">&gt; +-------------+</span>
+<span class="quote2">&gt; |  2147483647 |</span>
+<span class="quote2">&gt; | -2147483648 |</span>
+<span class="quote1">&gt; +-------------+</span>
+<span class="quote1">&gt; 2 rows in set (0.03 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; となり、書き込みが行えます。5.1.xになって、columnの型がunsignedに</span>
+<span class="quote1">&gt; 変わり、is_unsigned = 1としないといけなくなったということでしょう</span>
+<span class="quote1">&gt; か？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; アプリの修正を行います。ありがとうございました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15376">[前]</a><a href="15378">[次]</a><a href="../list/15301-15400">[番号順一覧]</a><a href="../thread/15301-15400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15374">  15374 2010-08-19 20:46 [Etsuo SUMIYA &lt;sumiya] int column への2147483648               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15375">  15375 2010-08-19 21:50 ┗[Mikiya Okuno &lt;mikiya]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15376">  15376 2010-08-20 08:23 　┗[Etsuo SUMIYA &lt;sumiya]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="15377">  15377 2010-08-20 22:10 　　┗[SAKAI Kei &lt;sak2@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15378">  15378 2010-08-21 10:39 　　　┗[Etsuo SUMIYA &lt;sumiya]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15379">  15379 2010-08-21 18:31 　　　　┗[SAKAI Kei &lt;sak2@xxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15381">  15381 2010-08-24 08:56 　　　　　┗[&quot;Watanabe Tomoyuki&quot; ]                             </a></span>
+</pre>
+</body>
+</html>

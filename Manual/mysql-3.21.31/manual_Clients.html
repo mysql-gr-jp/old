@@ -1,0 +1,998 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.texi on 20 June 1998 -->
+
+  <TITLE>MySQL Reference Manual for version 3.21.31. - MySQL クライアントツールと API</TITLE>
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Common_problems.html">previous</A>, <A HREF="manual_Comparisons.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Clients" HREF="manual_toc.html#Clients"><STRONG>MySQL</STRONG> クライアントツールと API</A></H1>
+
+
+
+<H2><A NAME="C" HREF="manual_toc.html#C"><STRONG>MySQL</STRONG> C API</A></H2>
+
+<P>
+<CODE>C</CODE> API は <STRONG>MySQL</STRONG> で配布されます。それは 
+<CODE>libmysqlclient</CODE> ライブラリに含まれます。データベースへのアクセスに 
+<CODE>C</CODE> プログラムを許します。
+
+</P>
+<P>
+他のクライアント API の多く(Java を除く全て)は、このライブラリを接続に使
+用します。そして例えば、同じ環境変数を使用できます。
+
+</P>
+<P>
+クライアントは最大通信バッファサイズを持ちます。これは自動的に増加する最
+大サイズ(デフォルトは 512kb)です。バッファは要求に応じて増加する(しかし 
+close まで減少しない)ので、これを増加させても資源は取られません。このサ
+イズチェックは主に間違ったクエリと通信パケットのためのチェックです。
+
+</P>
+<P>
+通信バッファは一つの SQL ステートメントと、返されるデータの1行を含むのに
+十分大きくなくてはいけません(もちろん同時にではありません)。各スレッドの
+通信バッファは、任意の行やクエリのために指定された制限まで、動的に増大し
+ます。
+
+</P>
+<P>
+最大 16M のデータを含む <CODE>BLOB</CODE> を持っている場合は、少なくとも 16M 
+を通信バッファ制限にしなくてはいけません。 「<A HREF="manual_Performance.html#MySQL parameters"><STRONG>MySQL</STRONG> のバッファサイズの変更方法</A>」節参照 。
+
+</P>
+<P>
+MySQL は、クエリ後に各接続バッファを <CODE>net_buffer_length</CODE> に縮小しま
+す。
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>mysql_affected_rows</STRONG> </TD><TD>
+最後の UPDATE, DELETE または INSERT によって影響された行数を取り出します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_close</STRONG> </TD><TD>
+サーバ接続をクローズします。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_connect</STRONG> </TD><TD>
+<STRONG>MySQL</STRONG> サーバへの接続を確立します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_create_db</STRONG> </TD><TD>
+データベースを生成します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_data_seek</STRONG> </TD><TD>
+クエリ結果セットから任意の行にシークします。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_drop_db</STRONG> </TD><TD>
+データベースを破棄します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_eof</STRONG> </TD><TD>
+最後の行が読まれたかどうかを判定します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_escape_string</STRONG> </TD><TD>
+SQL ステートメントのために文字列をエスケープします。
+ 「<A HREF="manual_Syntax.html#Base Syntax">リテラル。文字列と数値をどのように書くか？</A>」節参照 
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_error</STRONG> </TD><TD>
+最後の <STRONG>MySQL</STRONG> 関数からのエラーメッセージ。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_fetch_field</STRONG> </TD><TD>
+テーブル項目の型を見つけ出します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_fetch_lengths</STRONG> </TD><TD>
+クエリ結果セット中の全ての項目の長さを返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_fetch_row</STRONG> </TD><TD>
+クエリ結果から '次の' 行を取り出します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_field_seek</STRONG> </TD><TD>
+項目番号項目上に項目カーソルを置きます。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_free_result</STRONG> </TD><TD>
+クエリ結果を格納するために使用されたメモリを解放します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_get_client_info</STRONG> </TD><TD>
+現在のクライアントライブラリのバージョン情報を返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_get_host_info</STRONG> </TD><TD>
+サーバホストの名前を返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_get_proto_info</STRONG> </TD><TD>
+接続に使用されるプロトコルバージョンを得ます。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_get_server_info</STRONG> </TD><TD>
+サーバのバージョン番号を返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_insert_id</STRONG> </TD><TD>
+AUTO_INCREMENT 項目に生成された ID を返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_list_dbs</STRONG> </TD><TD>
+適合するデータベース名を返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_list_fields</STRONG> </TD><TD>
+適合する項目名を返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_list_processes</STRONG> </TD><TD>
+現在のサーバスレッドのリストを得ます。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_list_tables</STRONG> </TD><TD>
+適合するテーブルの名前を返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_num_fields</STRONG> </TD><TD>
+結果セット中の項目の数を返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_num_rows</STRONG> </TD><TD>
+結果セット中の行の数を返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_query</STRONG> </TD><TD>
+SQL クエリを実行します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_real_query</STRONG> </TD><TD>
+長さ情報を伴う SQL クエリを実行します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_reload</STRONG> </TD><TD>
+サーバのユーザパーミッションテーブルを再ロードします。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_select_db</STRONG> </TD><TD>
+データベースに接続します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_shutdown</STRONG> </TD><TD>
+データベースサーバをシャットダウンします。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_stat</STRONG> </TD><TD>
+文字列でサーバ状態を返します。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_store_result</STRONG> </TD><TD>
+クライアントに結果セットを読み込みます。
+</TR NOSAVE>
+<TR><TD><STRONG>mysql_use_result</STRONG> </TD><TD>
+各行の動的な結果セットを始めます。これは <CODE>mysql_store_result()</CODE> よ
+りもとても少ないメモリを使用しますが、サーバにより多くの strain を与えま
+す。
+</TR>
+</TABLE>
+
+<DL COMPACT>
+
+<DT><CODE>int <STRONG>mysql_affected_rows</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+<A NAME="IDX302"></A>
+ 
+最後の UPDATE, DELETE または INSERT によって影響された行数を取り出します。
+<A NAME="IDX303"></A>
+<DT><CODE>void <STRONG>mysql_close</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+サーバ接続をクローズします。
+<A NAME="IDX304"></A>
+<DT><CODE>MYSQL *<STRONG>mysql_connect</STRONG>(MYSQL *mysql, const char *host, const char *user, const char *passwd)</CODE>
+<DD>
+<STRONG>MySQL</STRONG> サーバへの接続を確立します。
+<A NAME="IDX305"></A>
+<DT><CODE>int <STRONG>mysql_create_db</STRONG>(MYSQL *mysql, const char *db)</CODE>
+<DD>
+データベースを生成します。
+<A NAME="IDX306"></A>
+<DT><CODE>void <STRONG>mysql_data_seek</STRONG>(MYSQL_RES *res, uint offset)</CODE>
+<DD>
+クエリ結果セットから任意の行にシークします。
+<A NAME="IDX307"></A>
+<DT><CODE>int <STRONG>mysql_drop_db</STRONG>(MYSQL *mysql, const char *db)</CODE>
+<DD>
+データベースを破棄します。
+<A NAME="IDX308"></A>
+<DT><CODE>int <STRONG>mysql_eof</STRONG>(MYSQL_RES *)</CODE>
+<DD>
+最後の行が読まれたかどうかを判定します。
+<A NAME="IDX309"></A>
+<DT><CODE>char *<STRONG>mysql_error</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+最後の <STRONG>MySQL</STRONG> 関数からのエラーメッセージ。
+<A NAME="IDX310"></A>
+<DT><CODE>uint <STRONG>mysql_escape_string</STRONG>(char *to,char *from,uint length)</CODE>
+<DD>
+SQL ステートメントのために文字列をエスケープします。
+<A NAME="IDX311"></A>
+<DT><CODE>MYSQL_FIELD *<STRONG>mysql_fetch_field</STRONG>(MYSQL_RES *handle)</CODE>
+<DD>
+テーブル項目の型を見つけ出します。
+
+結果を取り出さないで <CODE>BLOB</CODE> の長さをクエリすると、<STRONG>MySQL</STRONG> は 
+'default blob length' を返します。これは 8192 です。テーブルの検索を行っ
+た時。結果を取り出す時、column_object-&#62;max_length は、個々のクエリの実際
+の max_length を含みます。
+
+<STRONG>MySQL</STRONG> は <CODE>BLOB</CODE> の最大長を知らないため、8192 サイズが選択
+されます。これはいつかコンフィグ可能になるべきです。
+
+<A NAME="IDX312"></A>
+<DT><CODE>unsigned int *<STRONG>mysql_fetch_lengths</STRONG>(MYSQL_RES *mysql)</CODE>
+<DD>
+クエリ結果セット中の全ての項目の長さを返します。
+<A NAME="IDX313"></A>
+<DT><CODE>MYSQL_ROW <STRONG>mysql_fetch_row</STRONG>(MYSQL_RES *mysql)</CODE>
+<DD>
+クエリ結果から '次の' 行を取り出します。
+<A NAME="IDX314"></A>
+<DT><CODE>void <STRONG>mysql_field_seek</STRONG>(MYSQL_RES *result, int field)</CODE>
+<DD>
+項目番号項目上に項目カーソルを置きます。
+<A NAME="IDX315"></A>
+<DT><CODE>void <STRONG>mysql_free_result</STRONG>(MYSQL_RES *result)</CODE>
+<DD>
+クエリ結果を格納するために使用されたメモリを解放します。
+<A NAME="IDX316"></A>
+<DT><CODE>char *<STRONG>mysql_get_client_info</STRONG>(void)</CODE>
+<DD>
+現在のクライアントライブラリのバージョン情報を返します。
+<A NAME="IDX317"></A>
+<DT><CODE>char *<STRONG>mysql_get_host_info</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+サーバホストの名前を返します。
+<A NAME="IDX318"></A>
+<DT><CODE>int <STRONG>mysql_get_proto_info</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+接続に使用されるプロトコルバージョンを得ます。
+<A NAME="IDX319"></A>
+<DT><CODE>char *<STRONG>mysql_get_server_info</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+サーバのバージョン番号を返します。
+<A NAME="IDX320"></A>
+<DT><CODE>unsigned long <STRONG>mysql_insert_id</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+AUTO_INCREMENT 項目に生成された ID を返します。API は unsigned long を返
+すため、これを <CODE>BIGINT</CODE> 項目で使用できません。この場合、
+<CODE>LAST_INSERT_ID()</CODE> SQL 関数を使用する必要があります。
+<A NAME="IDX321"></A>
+<DT><CODE>MYSQL_RES *<STRONG>mysql_list_dbs</STRONG>(MYSQL *mysql, const char *wild)</CODE>
+<DD>
+適合するデータベース名を返します。
+<A NAME="IDX322"></A>
+<DT><CODE>MYSQL_RES *<STRONG>mysql_list_fields</STRONG>(MYSQL *mysql, const char *table, const char *wild)</CODE>
+<DD>
+適合する項目名を返します。
+<A NAME="IDX323"></A>
+<DT><CODE>MYSQL_RES *<STRONG>mysql_list_processes</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+現在のサーバスレッドのリストを得ます。
+<A NAME="IDX324"></A>
+<DT><CODE>MYSQL_RES *<STRONG>mysql_list_tables</STRONG>(MYSQL *mysql, const char *wild)</CODE>
+<DD>
+適合するテーブルの名前を返します。
+<A NAME="IDX325"></A>
+<DT><CODE>int <STRONG>mysql_num_fields</STRONG>(MYSQL_RES *result)</CODE>
+<DD>
+結果セット中の項目の数を返します。
+<A NAME="IDX326"></A>
+<DT><CODE>int <STRONG>mysql_num_rows</STRONG>(MYSQL_RES *result)</CODE>
+<DD>
+結果セット中の行の数を返します。
+<A NAME="IDX327"></A>
+<DT><CODE>int <STRONG>mysql_query</STRONG>(MYSQL *mysql, const char *query)</CODE>
+<DD>
+SQL クエリを実行します。
+<A NAME="IDX328"></A>
+<DT><CODE>int <STRONG>mysql_real_query</STRONG>(MYSQL *mysql, const char *query, uint length)</CODE>
+<DD>
+長さ情報を伴う SQL クエリを実行します。
+<A NAME="IDX329"></A>
+<DT><CODE>int <STRONG>mysql_reload</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+サーバのユーザパーミッションテーブルを再ロードします。
+<A NAME="IDX330"></A>
+<DT><CODE>int <STRONG>mysql_select_db</STRONG>(MYSQL *mysql, const char *db)</CODE>
+<DD>
+データベースに接続します。
+<A NAME="IDX331"></A>
+<DT><CODE>int <STRONG>mysql_shutdown</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+データベースサーバをシャットダウンします。
+<A NAME="IDX332"></A>
+<DT><CODE>char *<STRONG>mysql_stat</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+文字列でサーバ状態を返します。
+<A NAME="IDX333"></A>
+<DT><CODE>MYSQL_RES *<STRONG>mysql_store_result</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+クライアントに結果セットを読み込みます。
+<A NAME="IDX334"></A>
+<DT><CODE>MYSQL_RES *<STRONG>mysql_use_result</STRONG>(MYSQL *mysql)</CODE>
+<DD>
+各行の動的な結果セットを始めます。
+</DL>
+
+
+
+<H3><A NAME="Query Results" HREF="manual_toc.html#Query Results"><CODE>mysql_query()</CODE> が成功して復帰した後、<CODE>mysql_store_result()</CODE> が NULL を返す時があるのは何故？</A></H3>
+
+<P>
+これは次の一つを意味します:
+
+</P>
+
+<OL>
+<LI>
+
+Malloc が失敗した。
+<LI>
+
+データが読めなかった (接続時のエラー)。
+<LI>
+
+ステートメントがデータを返さないステートメント (<CODE>INSERT</CODE> または 
+<CODE>UPDATE</CODE> または <CODE>DELETE</CODE>) だった。
+</OL>
+
+<P>
+ステートメントが与えられた結果を持つかどうかは、
+<CODE>mysql_num_fields(MYSQL *)</CODE> が 0 でないことをチェックすることで、
+常にチェックできます。これが 0 なら、最後のクエリは値を返さないステート
+メントです。例えば <CODE>INSERT</CODE> や <CODE>DELETE</CODE> 。
+
+</P>
+<P>
+<CODE>mysql_error(MYSQL *)</CODE> が空でない場合はエラーです！
+
+</P>
+
+
+<H3><A NAME="Result values" HREF="manual_toc.html#Result values">クエリから得られる結果は何か？</A></H3>
+
+<P>
+<CODE>mysql_affected_rows(MYSQL *)</CODE> は、<CODE>INSERT</CODE>, <CODE>UPDATE</CODE> ま
+たは <CODE>DELETE</CODE> を行なった時の最後のクエリで、影響された行数を返しま
+す。ただし、<CODE>WHERE</CODE> 節がない <CODE>DELETE</CODE> が使用されて、テーブルが
+切り詰められた場合は例外です。これはとても速いです！ この場合、影響され
+た行数は 0 として返されます。
+
+</P>
+<P>
+<CODE>AUTO_INCREMENT</CODE> インデックスを持つテーブルに行を挿入した時、
+<CODE>mysql_insert_id(MYSQL *)</CODE> は最後のクエリで与えられた ID を返します。
+ 「<A HREF="manual_Clients.html#mysql_insert_id">最後に挿入された行のユニーク ID をどのように得られるか？</A>」節参照 
+
+</P>
+<P>
+一部のクエリ、<CODE>LOAD DATA INFILE...</CODE> と <CODE>INSERT INTO ... SELECT
+...</CODE>, <CODE>UPDATE</CODE> は追加の情報を返します。この結果は 
+<CODE>mysql_info(MYSQL *)</CODE> で返されます。<CODE>mysql_info()</CODE> は追加情報
+がない場合は null ポインタを返します。
+
+</P>
+
+
+<H3><A NAME="mysql_insert_id" HREF="manual_toc.html#mysql_insert_id">最後に挿入された行のユニーク ID をどのように得られるか？</A></H3>
+
+<P>
+<CODE>AUTO_INCREMENT</CODE> キーを持つレコードを挿入すると、
+<CODE>mysql_insert_id(MYSQL *)</CODE> で与えられた ID が得られます。
+
+</P>
+<P>
+最後の値はサーバ内にも格納され、<CODE>LAST_INSERT_ID()</CODE> 関数で取り出せま
+す。
+
+</P>
+<P>
+次のコードで、auto_increment インデックスが使用されたかどうかチェックで
+きます。これは、クエリが <CODE>auto_increment</CODE> インデックスを伴う 
+<CODE>INSERT</CODE> かどうかもチェックできます。
+
+</P>
+
+<PRE>
+if (mysql_error(MYSQL)[0] == 0 &#38;&
+    mysql_num_fields(MYSQL_RESULT) == 0 &#38;&
+    mysql_insert_id(MYSQL) != 0)
+  used_id = mysql_insert_id(MYSQL);
+</PRE>
+
+<P>
+<CODE>LAST_INSERT_ID()</CODE> が返す id はサーバで接続毎に管理されます。他のク
+ライアントによっておかしくなることはありません。他の auto_increment 項目を 
+非マジック値 (非 NULL または 非 0) で更新した場合でも、それは変更されま
+せん。
+
+</P>
+
+
+<H3><A NAME="mysql_use_result" HREF="manual_toc.html#mysql_use_result">What is the difference between <CODE>mysql_use_result()</CODE> and <CODE>mysql_store_result()</CODE> modes?</A></H3>
+
+<P>
+<CODE>mysql_use_resulys</CODE> はサーバからの結果を、一時テーブルやローカルバッ
+ファに格納することなく、直接読み込みます。これは 
+<CODE>mysql_store_result</CODE> よりもいくらか速くなり、より少ないメモリを使用
+します。クライアント側で各行に行なう多くの処理がある場合、またはユーザが 
+^S (stop scroll) を行なうような画面に出力を送る場合は、
+<CODE>mysql_use_results</CODE> を使用すべきではありません。これを行なうと、サー
+バとタイアップし、他のスレッドは使用中のテーブルを更新できなくなります。
+<CODE>mysql_use_result</CODE> 使用時は <CODE>mysql_data_seek</CODE>
+<CODE>mysql_num_rows</CODE> の使用や他のクエリの発行ができません。
+
+</P>
+<P>
+<CODE>mysql_use_result</CODE> 使用時、NULL ポインタを得るまで 
+<CODE>mysql_fetch_row()</CODE> を実行する必要があります。そうでなければ次のク
+エリは前のクエリからの結果を得るためです。これを行うことを忘れた場合、C
+API はエラーを与えます！
+<CODE>Commands out of sync;  You can't run this command now</CODE>
+
+</P>
+
+
+<H3><A NAME="linking" HREF="manual_toc.html#linking">C API でのリンクの問題</A></H3>
+
+<P>
+C API でリンクする時、いくつかのシステム上では次のエラーになります:
+
+</P>
+
+<PRE>
+gcc -g -o client test.o -L/usr/local/lib/mysql -lmysqlclient -lsocket -lnsl
+
+Undefined        first referenced
+ symbol          in file
+floor            /usr/local/lib/mysql/libmysqlclient.a(password.o)
+ld: fatal: Symbol referencing errors. No output written to client
+</PRE>
+
+<P>
+これは、あなたのシステム上では、コンパイル/リンク行の最後で、math ライブ
+ラリ (-lm) を含める必要があることを意味します。
+
+</P>
+
+
+<H3><A NAME="threadsafe" HREF="manual_toc.html#threadsafe">スレッド安全クライアントを作る方法</A></H3>
+
+<P>
+クライアントは 'ほとんど' スレッド安全です。一番大きな問題は net.c (ソケッ
+トから読み込みをするサブルーチン) が割り込みに対して安全でないことです。
+これは、サーバからの長い読み込みを中断できるように、自身のアラームを持ち
+たいだろうという考慮からです。
+
+</P>
+<P>
+標準クライアントライブラリはスレッドオプションでコンパイルされていません。
+
+</P>
+<P>
+スレッド安全クライアントを得るためには、<CODE>-lmysys</CODE>, <CODE>-lstring</CODE> 
+と <CODE>-ldbug</CODE> ライブラリとサーバが使用する <CODE>net_serv.o</CODE> を使用し
+ます。
+
+</P>
+<P>
+スレッドクライアントを使用する時、thr_alarm.c ルーチンを大いに使用できる
+と私は考えます。mysys ルーチンを使用する場合、覚えておくべきたった一つの
+ことは my_init() を最初に呼ぶことです！
+
+</P>
+
+
+<H3><A NAME="Threadsafe client" HREF="manual_toc.html#Threadsafe client">スレッド安全クライアントの作成</A></H3>
+
+<P>
+mysql_connect() を除く全ての関数は現在スレッド安全です。
+
+</P>
+<P>
+スレッド安全を得るためには次を行ないます:
+
+</P>
+<P>
+クライアントを次で再コンパイル:
+
+</P>
+
+<PRE>
+CPPFLAGS=-DTHREAD_SAFE_CLIENT ./configure ...
+</PRE>
+
+<P>
+いくつかのエラーが出ます。標準クライアントのリンク時の未定義シンボルのた
+めです。pthread ライブラリがデフォルトでは含められていないので。
+
+</P>
+<P>
+結果の libmysqld.a ライブラリはスレッド安全です。
+
+</P>
+<P>
+2つのスレッドは同じハンドル (<CODE>mysql_connect()</CODE> で返される) を同時に
+使用できません。2つのスレッドが、<CODE>mysql_store_result()</CODE> で作成され
+た異なる <CODE>MYSQL_RES</CODE> ハンドルを使用できるとしてもです。
+
+</P>
+<P>
+スレッドクライアントを使用する時、thr_alarm.c ルーチンを大いに使用できま
+す。mysys ルーチンを使用する場合に、覚えておく必要があることは、
+my_init() を最初に呼ぶことだけです！
+
+</P>
+
+
+<H2><A NAME="Perl" HREF="manual_toc.html#Perl"><STRONG>MySQL</STRONG> Perl API</A></H2>
+
+<P>
+Since <CODE>DBI/DBD</CODE> now is the recommended perl interface mysqlperl is
+not documented here.
+
+</P>
+
+
+
+<H3><A HREF="manual_toc.html#"><CODE>DBI</CODE> with <CODE>DBD::mysql</CODE></A></H3>
+
+<P>
+<CODE>DBI</CODE> is a generic interface for many databases. That means that
+you can write a script what works with many different database engines
+without change. You need a DataBase Driver (DBD) defined for each
+database type. For <STRONG>MySQL</STRONG>, this driver is called
+<CODE>DBD::mysql</CODE>.
+
+</P>
+<P>
+For more information on the Perl5 DBI, please visit
+<a HREF="http://www.hermetica.com/technologia/DBI/"> DBIs web page</a> and read
+the documentation. For more information on Object Oriented Programming
+(OOP) as defined in Perl5, see
+<a HREF="http://language.perl.com/info/documentation.html"> the perl OOP
+page</a>.
+
+</P>
+
+
+<H4><A NAME="Perl DBI Class" HREF="manual_toc.html#Perl DBI Class">The DBI interface</A></H4>
+
+<P>
+<STRONG>Portable DBI methods.</STRONG>
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD>connect </TD><TD> Establish a connection to a database server
+</TR NOSAVE>
+<TR><TD>prepare </TD><TD> Get a SQL statement ready for execution
+</TR NOSAVE>
+<TR><TD>do </TD><TD> Prepares and executes a SQL statement
+</TR NOSAVE>
+<TR><TD>disconnect </TD><TD> Disconnect from the database server
+</TR NOSAVE>
+<TR><TD>quote </TD><TD> Quote strings/blobs to be inserted
+</TR NOSAVE>
+<TR><TD>execute </TD><TD> Executes prepared statements
+</TR NOSAVE>
+<TR><TD>fetchrow_array </TD><TD> fetch the next row as an array of fields.
+</TR NOSAVE>
+<TR><TD>fetchrow_arrayref </TD><TD> fetch next row as a reference array of fields
+</TR NOSAVE>
+<TR><TD>fetchrow_hashref </TD><TD> fetch next row as a reference to a hashtable
+</TR NOSAVE>
+<TR><TD>fetchall_arrayref </TD><TD> Get all data as a array of arrays
+</TR NOSAVE>
+<TR><TD>finish </TD><TD> finish a statment and let the system free resources
+</TR NOSAVE>
+<TR><TD>rows </TD><TD> Returns the number of rows affected
+</TR NOSAVE>
+<TR><TD>data_sources </TD><TD> Return an array of databases available on localhost
+</TR NOSAVE>
+<TR><TD>ChopBlanks </TD><TD> Shall fetchrow trim spaces
+</TR NOSAVE>
+<TR><TD>NUM_OF_PARAMS </TD><TD> Number of placeholders in the prepared statement
+</TR NOSAVE>
+<TR><TD>NULLABLE </TD><TD> Which columns can be NULL
+</TR>
+</TABLE>
+
+<STRONG>MySQL specific methods.</STRONG>
+
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD>insertid </TD><TD> The latest auto_increment value
+</TR NOSAVE>
+<TR><TD>is_blob </TD><TD> Which column ar BLOBs
+</TR NOSAVE>
+<TR><TD>is_key </TD><TD> Which columns are keys
+</TR NOSAVE>
+<TR><TD>is_num </TD><TD> Which columns are numeric
+</TR NOSAVE>
+<TR><TD>is_pri_key </TD><TD> Which columns are primary keys
+</TR NOSAVE>
+<TR><TD>is_not_null </TD><TD> Which columns can NOT be NULL. See NULLABLE
+</TR NOSAVE>
+<TR><TD>length </TD><TD> Maximum theoretically possible column sizes
+</TR NOSAVE>
+<TR><TD>max_length </TD><TD> Maximum physical present column sizes
+</TR NOSAVE>
+<TR><TD>NAME </TD><TD> Column names
+</TR NOSAVE>
+<TR><TD>NUM_OF_FIELDS </TD><TD> Number of fields returned.
+</TR NOSAVE>
+<TR><TD>table </TD><TD> Table names in returned set
+</TR NOSAVE>
+<TR><TD>type </TD><TD> All coulumn types
+</TR NOSAVE>
+<TR><TD>_CreateDB </TD><TD> Create a database
+</TR NOSAVE>
+<TR><TD>_DropDB </TD><TD> Drop a database. <STRONG>THIS IS DANGEROUS</STRONG>
+</TR>
+</TABLE>
+
+<DL COMPACT>
+
+<DT><CODE>connect</CODE>
+<DD>
+<A NAME="IDX335"></A>
+ 
+You use the connect method to make a database connection to the data
+source. The <CODE>$data_source</CODE> value should begin with
+<CODE>DBI:driver_name:</CODE>.
+Example connect methods with the <CODE>DBD::mysql</CODE> driver:
+
+<PRE>
+$dbh = DBI-&#62;connect("DBI:mysql:$database", $user, $password);
+$dbh = DBI-&#62;connect("DBI:mysql:$database:$hostname",
+                    $user, $password);
+$dbh = DBI-&#62;connect("DBI:mysql:$database:$hostname:$port",
+                    $user, $password);
+</PRE>
+
+If the username and/or password are undefined, then the DBI will use the
+values of the <CODE>DBI_USER</CODE>, <CODE>DBI_PASS</CODE> environment variables
+respectively. If you don't specify a hostname, then it will default to
+<CODE>"localhost"</CODE>. If you don't specify a port, then it defaults to the
+default mysql port (3306).
+
+<A NAME="IDX336"></A>
+<DT><CODE>prepare</CODE>
+<DD>
+Prepare gets a SQL statement ready for execution by the database engine
+and returns a statement handle <CODE>($sth)</CODE> which invokes the execute
+method. Example:
+
+<PRE>
+$sth = $dbh-&#62;prepare($statement) or die "Can't prepare $statement: 
+$dbh-&#62;errstr\n";
+</PRE>
+
+<A NAME="IDX337"></A>
+<DT><CODE>do</CODE>
+<DD>
+The "do" method prepares and executes a SQL statement and returns the
+number of rows effected. This method is generally used for "non-select"
+statements which can not be prepared in advance (driver limitation) or
+which do not need to executed more than once (inserts, deletes,
+etc.). Examples:
+
+<PRE>
+$rc = $dbh-&#62;do($statement) or
+        die "Can't execute $statement: $dbh- &#62;errstr\n";
+</PRE>
+
+<A NAME="IDX338"></A>
+<DT><CODE>disconnect</CODE>
+<DD>
+Disconnect will disconnect the database handle from the database. This
+is typically called right before you exit from the program. 
+Example:
+
+<PRE>
+$rc = $dbh-&#62;disconnect;
+</PRE>
+
+<A NAME="IDX339"></A>
+<DT><CODE>quote</CODE>
+<DD>
+The quote method is used to "escape" any special characters contained in
+the string and to add the required outer quotation marks.
+
+<PRE>
+$sql = $dbh-&#62;quote($string)
+</PRE>
+
+<A NAME="IDX340"></A>
+<DT><CODE>execute</CODE>
+<DD>
+This method executes the prepared statement. For non-select satements,
+it returns the number of rows affected. For select statements, execute
+only starts the SQL query in the database. You need to use one of the
+<CODE>fetch_*</CODE> methods below to retrieve the data.  Example:
+
+<PRE>
+$rv = $sth-&#62;execute or die "can't execute the query: $sth-&#62;errstr;
+</PRE>
+
+<A NAME="IDX341"></A>
+<DT><CODE>fetchrow_array</CODE>
+<DD>
+This method "fetches" the next row of data and returns it as an array of
+field values.  Example:
+
+<PRE>
+while(@row = $sth-&#62;fetchrow_array) {
+        print qw($row[0]\t$row[1]\t$row[2]\n); 
+}
+</PRE>
+
+<A NAME="IDX342"></A>
+<DT><CODE>fetchrow_arrayref</CODE>
+<DD>
+This method "fetches" the next row of data and returns it as a reference
+to an array of field values. Example:
+
+<PRE>
+while($row_ref = $sth-&#62;fetchrow_arrayref) {
+        print qw($row_ref-&#62;[0]\t$row_ref-&#62;[1]\t$row_ref-&#62;[2]\n);
+}
+</PRE>
+
+<A NAME="IDX343"></A>
+<DT><CODE>fetchrow_hashref</CODE>
+<DD>
+This method fetches a row of data and returns a reference to a hash
+table containing field name/value pairs. This method is not nearly as
+efficient as using array references as demonstrated above. Example:
+
+<PRE>
+while($hash_ref = $sth-&#62;fetchrow_hashref) {
+        print qw($hash_ref-&#62;{firstname}\t$hash_ref-&#62;{lastname}\t\
+                $hash_ref- &#62; title}\n);
+}
+</PRE>
+
+<A NAME="IDX344"></A>
+<DT><CODE>fetchall_arrayref</CODE>
+<DD>
+This method is used to get all the data (rows) to be returned from the
+SQL statement. It returns a reference to an array of arrays of
+references to each row. You access/print the data by using a nested
+loop. Example:
+
+<PRE>
+my $table = $sth-&#62;fetchall_arrayref or die "$sth-&#62;errstr\n";
+my($i, $j);
+for $i ( 0 .. $#{$table} ) {
+        for $j ( 0 .. $#{$table-&#62;[$i]} ) {
+                print "$table-&#62;[$i][$j]\t";
+        }
+        print "\n";
+}
+</PRE>
+
+<A NAME="IDX345"></A>
+<DT><CODE>finish</CODE>
+<DD>
+Indicates that no more data will be fetched from this statement
+handle. You call this method to free up the statement handle and any
+system resources it may be holding.  Example:
+
+<PRE>
+$rc = $sth-&#62;finish;
+</PRE>
+
+<A NAME="IDX346"></A>
+<DT><CODE>rows</CODE>
+<DD>
+Returns the number of rows affected (updated, deleted, etc.) from the
+last command.  This is usually used after a do() or non-select execute()
+statement.
+
+<PRE>
+$rv = $sth-&#62;rows;
+</PRE>
+
+<A NAME="IDX347"></A>
+<DT><CODE>NULLABLE</CODE>
+<DD>
+A reference to an array of boolean values; TRUE indicates that this
+column may contain NULLs.
+
+<PRE>
+$null_possible = $sth-&#62;{NULLABLE}; 
+</PRE>
+
+<A NAME="IDX348"></A>
+<DT><CODE>NUM_OF_FIELDS</CODE>
+<DD>
+Number of fields returned by a SELECT or LISTFIELDS statement.  You may
+use this for checking whether a statement returned a result: A zero
+value indicates a non-SELECT statement like INSERT, DELETE or UPDATE.
+
+<PRE>
+$nr_of_fields = $sth-&#62;{NUM_OF_FIELDS};
+</PRE>
+
+<A NAME="IDX349"></A>
+<DT><CODE>data_sources</CODE>
+<DD>
+This method returns an array of databases available to the mysql daemon
+on localhost.
+
+<PRE>
+@dbs = DBI-&#62;data_sources("mysql"); 
+</PRE>
+
+<A NAME="IDX350"></A>
+<DT><CODE>ChopBlanks</CODE>
+<DD>
+This determines whether a fetchrow will chop preceding and trailing
+blanks off the returned values.
+
+<PRE>
+$sth-&#62;{'ChopBlanks') =1; 
+</PRE>
+
+</DL>
+
+<STRONG>MySQL specific methods.</STRONG>
+
+<DL COMPACT>
+
+<DT><CODE>insertid</CODE>
+<DD>
+<A NAME="IDX351"></A>
+ 
+If you use the auto-increment feature of mysql, the new auto-incremented
+values will be stored here.
+
+<PRE>
+$new_id = $sth-&#62;{insertid};
+</PRE>
+
+<A NAME="IDX352"></A>
+<DT><CODE>is_blob</CODE>
+<DD>
+Reference to an array of boolean values; TRUE indicates that the
+respective column is a blob.
+
+<PRE>
+$keys = $sth-&#62;{is_blob};
+</PRE>
+
+<A NAME="IDX353"></A>
+<DT><CODE>is_key</CODE>
+<DD>
+Reference to an array of boolean values; TRUE indicates, that the
+respective column is a key.
+
+<PRE>
+$keys = $sth-&#62;{is_key};
+</PRE>
+
+<A NAME="IDX354"></A>
+<DT><CODE>is_num</CODE>
+<DD>
+Reference to an array of boolean values; TRUE indicates, that the
+respective column contains numeric values.
+
+<PRE>
+$nums = $sth-&#62;{is_num};
+</PRE>
+
+<A NAME="IDX355"></A>
+<DT><CODE>is_pri_key</CODE>
+<DD>
+Reference to an array of boolean values; TRUE indicates, that the
+respective column is a primary key.
+
+<PRE>
+$pri_keys = $sth-&#62;{is_pri_key};
+</PRE>
+
+<A NAME="IDX356"></A>
+<DT><CODE>is_not_null</CODE>
+<DD>
+A reference to an array of boolean values; FALSE indicates that this
+column may contain NULLs. You should better use the NULLABLE attribute
+above which is a DBI standard.
+
+<PRE>
+$not_nulls = $sth-&#62;{is_not_null};
+</PRE>
+
+<A NAME="IDX357"></A>
+<DT><CODE>max_length</CODE>
+<DD>
+<A NAME="IDX358"></A>
+<DT><CODE>length</CODE>
+<DD>
+A reference to an array of maximum column sizes. The max_length is the
+maximum physically present in the result table, length gives the
+theoretically possible maximum.
+
+<PRE>
+$max_lengts = $sth-&#62;{max_length};
+$lengts = $sth-&#62;{length};
+</PRE>
+
+<A NAME="IDX359"></A>
+<DT><CODE>NAME</CODE>
+<DD>
+A reference to an array of column names.
+
+<PRE>
+$names = $sth-&#62;{NAME};
+</PRE>
+
+<A NAME="IDX360"></A>
+<DT><CODE>table</CODE>
+<DD>
+Returns a reference to an array of table names. 
+
+<PRE>
+$tables = $sth-&#62;{table};
+</PRE>
+
+</DL>
+
+
+
+<H4><A NAME="DBI-info" HREF="manual_toc.html#DBI-info">More DBI/DBD information</A></H4>
+
+<P>
+You can use the perldoc command to get more information about DBI.
+
+</P>
+
+<PRE>
+perldoc DBI
+perldoc DBI::FAQ
+perldoc mysql
+</PRE>
+
+<P>
+You can also use the <CODE>pod2man</CODE>, <CODE>pod2html</CODE>, etc.. tools to
+translate to other formats.
+
+</P>
+<P>
+And of course you can find the latest DBI information at
+<a HREF="http://www.hermetica.com/technologia/DBI/"> the DBI web page <BR></a>.
+
+</P>
+
+
+<H2><A NAME="Java" HREF="manual_toc.html#Java"><STRONG>MySQL</STRONG> Java connectivity (JDBC)</A></H2>
+
+<P>
+Insert pointers/descriptions of JDBC.
+
+</P>
+
+
+<H2><A NAME="PHP" HREF="manual_toc.html#PHP"><STRONG>MySQL</STRONG> PHP API's</A></H2>
+
+<P>
+<a HREF="http://www.php.net/manual/ref.mysql.php3"> PHP documentation</a>
+
+</P>
+
+
+<H2><A NAME="Cplusplus" HREF="manual_toc.html#Cplusplus"><STRONG>MySQL</STRONG> C++ API's</A></H2>
+
+<P>
+Insert pointers/descriptions for C++.
+
+</P>
+
+
+<H2><A NAME="Python" HREF="manual_toc.html#Python"><STRONG>MySQL</STRONG> Python API's</A></H2>
+
+<P>
+Insert pointers/descriptions for Python.
+
+</P>
+
+
+<H2><A NAME="TCL" HREF="manual_toc.html#TCL"><STRONG>MySQL</STRONG> TCL API's</A></H2>
+
+<P>
+Insert pointers/descriptions for TCL.
+
+</P>
+<P><HR><P>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Common_problems.html">previous</A>, <A HREF="manual_Comparisons.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

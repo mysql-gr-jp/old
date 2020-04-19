@@ -1,0 +1,456 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10864</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10863">[前]</a><a href="10865">[次]</a><a href="../list/10801-10900">[番号順一覧]</a><a href="../thread/10801-10900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10864
+</p>
+<div class="header">
+<p>
+From: &quot;zen kishimoto&quot; &lt;&quot;zen kishimoto&quot; &lt;zen@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 2 Feb 2005 10:10:07 -0800<br>
+Subject: [mysql 10864] Windows上でMySQL サーバーをセキュアーにする方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+Windows上でMySQL サーバーをセキュアーにする方法
+<a href="http://dev.mysql.com/tech-resources/articles/securing_mysql_windows.html">http://dev.mysql.com/tech-resources/articles/securing_mysql_windows.html</a>
+
+Mike Hillyer著
+
+2005年2月1日
+
+   1. 初めに
+   2. ステップ 1: 最近のNTベースのWindowsにMySQLをインストール
+   3. ステップ 2: MySQLをNTFS ファイルシステムにインストール
+   4. ステップ 3: MySQLを他のサービスのないコンピュータにインストール
+   5. ステップ 4: MySQLの最新のプロダクション版をインストール
+   6. ステップ 5: MySQLのユーザー・アカウントをセキュアーにする
+   7. ステップ 6: TCP/IP アクセスをオフ
+          * ステップ 6.1: Named Pipeの使用
+          * ステップ 6.2: Shared Memoryの使用
+   8. ステップ 7: TCP/IP アドレスのバインド
+   9. ステップ 8: サーバーをファイアーウオールで守る
+  10. ステップ 9: MySQLのサービスをルート以外のユーザで実行
+  11. ステップ 10: データ・フォルダーを暗号化
+  12. ステップ 11: 必要最小限のの特権を与える
+  13. ステップ 12: ルート・ユーザの名前を変更
+  14. 結論
+
+初めに
+
+2005年1月の最後にForbotと呼ばれるワームのようなマルウエア(malware)
+がインターネットに流され、拡大しました。これは正しくコンフィギュアーされて
+いないMySQLのインストレーションを探し、その弱みを利用して
+Windows のコンピュータに侵入します。 Forbotは他のコンピュータを感染
+させ続けるための信号を受ける必要がないという点ではワームでは
+ありません。Forbotとそのコントロールするものとの交信が
+なくなるとbotの拡大は止まります。forbotに関する詳細記事は
+<a href="http://dev.mysql.com/tech-resources/articles/security_alert.html.">http://dev.mysql.com/tech-resources/articles/security_alert.html.</a>
+
+ForbotがMySQLの弱みを利用していないことに注目してください。
+将来の感染に備えてMySQLにパッチをあてる必要はありません。Forbotは
+ルートパスワードがないか、簡単に破られるようなパスワード
+でインストールされたMySQLを利用します。Forbotが破ること
+ができるMySQLのパスワードは例えば、abcd1234や 654321です。
+(そういったパスワードのリストは
+www3.ca.com/securityadvisor/virusinfo/virus.aspx?id=41547を参照).
+
+MySQL ABはデフォルトのMySQLのインストレーションが出来る
+だけセキュアーであることを保障するプロセスを開発するのに
+貢献します。カスタマーに対して技術アラートやアップデート
+を迅速に伝達します。しかし、今MySQLサーバー
+をセキュアーにする方法が幾つかあります。
+
+この記事の意図は管理者がWindows上のMySQLのインストレーション
+をセキュアーにするステップを示すことです。ここで述べられて
+いるプロセスはWindowsのユーザ用ですが、ここでの要点はLinux
+やUnixのユーザに対しても有用です。ForbotはWindowsコンピュータ
+を対象にしていますが、将来この攻撃の亜流がLinuxやUnixのユーザに
+も及ぶこともあり得ます。
+
+ステップ 1: 最新のNTベースのWindowsにMySQLをインストール
+
+Windows 2000, Windows XPとWindows サーバーServer 2003を
+含む最近のNTベースのは前の版のWindows 95, Windows 98や
+Windows MEに比べてもっとセキュアーであり安定しています。
+
+OSが最新のサービスパックやパッチを導入すること。
+
+ステップ 2:　MySQLをNTFS ファイルシステムにインストール
+
+NTFSは前のFAT32よりもっとセキュアーなファイルシステムです。
+
+NTFSはアクセス・コントロール、大きいファイルとデータの暗号化
+をサポートします。NTFSのFAT32に対する利点は
+<a href="http://www.ntfs.com/ntfs_vs_fat.htm">http://www.ntfs.com/ntfs_vs_fat.htm</a>を参照。
+
+ステップ 3: MySQLを他のサービスのないコンピュータにインストール
+
+実ビジネスではMySQLはMySQLのサーバー用に設置されたサーバー
+コンピュータにインストールされるべきです。必要とされないサービス
+は全て取り除き、必要のないアプリも実行されるべきではありません。
+これはサーバーの安定性を増加するだけではなくて、MySQLへのリソース
+を増しますし、サードパーティのアプリがセキュリティの問題に
+なることも防止します。アドミ以外のログインもつくるべきでは
+ありません。
+
+ステップ 4: MySQLを最新のプロダクション版のインストール
+
+この記事の段階ではMySQL 4.1.9 は最新のプロダクション版です。
+新しいWindows インストラーがMySQL 4.1.5 でリリースされMySQL
+のインストレーションを容易にします。全てのユーザは4.1版に
+アップグレードすることをお勧めします。セキュリティのバグ
+修理は前の版のMySQLにもポートされますが、最新版のMySQLL
+を使用することで、最も安定してセキュアーの環境を保障できます。
+MySQL 5.0などのプロダクション版前のソフトをプロダクション用に
+使用するのは好ましくありません。それは全てのバグが発見されて
+修理されているという保障がないため、安定性を欠きセキュリティ
+レベルも減少するかもしれないからです。
+
+ステップ 5: MySQLのユーザー・アカウントをセキュアーにする
+
+インストレーションのプロセスの最中に、プロンプトがあれば
+ルートパスワードを提供してください。更にルートパスワード
+が容易に推測されないようなもので文字、番号とシンボル
+から成り立っていることを確認してください。パスワードは最低
+6文字で辞書にある言葉を含まず、文字は大文字と小文字を
+含むべきです。
+
+１つの方法は簡単に覚えられる語句を見つけます。そして
+それぞれの言葉の最初の文字を取り、他のシンボルと組み合わせて
+パスワードにします。例えば、「To be, or not to be: that is the question!」
+という一節があるとします。これを利用して「2b,On2b:Titq!」
+というパスワードになります。このパスワードはかなり強固で
+（少なくとも私がこれをこの記事で例に引くまでは）覚えやすいです。
+将来のワームがこのテクニックを使って攻撃しないように
+あまり有名でない一節を使うことをお勧めします。
+
+その他「Root May Only Connect from Localhost」と書いた箱に
+チェックマークを入れて、「 Create An Anonymous Account」
+の箱のチェックマークを外してください。こうすることで、
+MySQLのインストレーションのセキュリティを大幅に増大します。
+
+既存のMySQLのインストレーションをもっとセキュアーに
+したい方は以下の方法で手動でanonymousアカウントを削除してください。
+
+Enter password: *****
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 1 to server version: 4.1.9-nt
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql&gt; use mysql;
+Database changed
+mysql&gt; DELETE FROM user WHERE user = '';
+Query OK, 2 rows affected (0.03 sec)
+
+mysql&gt; FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.05 sec)
+
+mysql&gt;
+
+その他ルートのアカウントは次のコマンドでlocalhostから
+のログインに限定できます。
+
+Enter password: *****
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 1 to server version: 4.1.9-nt
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql&gt; use mysql;
+Database changed
+mysql&gt; DELETE FROM user WHERE user = 'root' AND host = '%';
+Query OK, 2 rows affected (0.03 sec)
+
+mysql&gt; FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.05 sec)
+
+mysql&gt;
+
+これでlocalhostから接続できる１つのルートユーザだけとなります。
+次をhostファイルに追加してください。（大抵は
+C:\WINDOWS\system32\drivers\etc\hostsにあります):
+
+127.0.0.1 localhost
+
+これを入れておけばlocalhostの値を探せないときに
+ログイン・エラーを防げます。
+
+ステップ 6:　TCP/IP アクセスをオフ
+
+デフォルトで MySQLサーバーはどのホストからでもTCP/IPを使って
+接続させます。（しかしもちろん、ホストの名前とＩＰアドレス
+によっては接続を拒否するかもしれません。）多くの場合
+TCP/IPによる接続は必要ありません。そのためリモートから
+MySQLのサーバに接続することを防ぐためオフにすることも
+できます。MySQLをローカルに開発のために使用しているか
+ウエブサーバと共に使用しているのであれば、TCP/IPのネットワーク
+はオフにすべきです。
+
+TCP/IP ネットワークをオフにするには、インストレーションの
+際にDetailed Configuration オプションを選択して、Enable TCP/IP
+Networking オプションをチェックしないでください。
+(以下をフォローすればサーバーを再びコンフィギュアーできます。
+MySQL Configuration Wizard located at Start &gt; Programs &gt;
+MySQL &gt; MySQL Server 4.1 &gt; MySQL Server Instance Config Wizard).
+
+古い版の MySQL のユーザは以下の行をMySQLサーバのコンフィギュレーション
+ファイルの[mysqld] セクションに追加してください。
+
+skip-networking
+
+enable-named-pipes
+
+こうすればTCP/IP接続をオフにしてnamed pipesをオンに
+できます。
+
+これが出来るためにはMySQLがNTベースのWindowsのコンピュータに
+インストールされている必要があり、mysqld-nt.exe サーバー
+のバイナリを使用します。コンフィギュレーション・ファイルの場所は
+MySQLの版によって違います。以下のどれかをみてください。
+
+    * C:\my.cnf
+    * C:\Windows\my.ini
+
+ステップ 6.1: Named Pipeの使用
+
+named pipeのサポートでサーバーが立ち上がって場合、以下の
+コマンドで接続できます。
+
+C:\&gt;mysql -h . -u root -p
+
+これはnamed pipeを使ってサーバーに接続します。
+最近の（4.1以降）のサーバーだとコマンドラインに-h を
+使用する他に--protocol=pipeオプション
+も使用できます。
+
+C:\&gt;mysql --protocol=pipe -u root -p
+
+それぞれのクライアント・ツールとAPIはnamed pipeで接続する際
+は異なったシンタクスを必要とするかも知れません。それぞれの
+ツールとAPIに関してはnamed pipeで接続する際はマニュアルを参照してください。
+
+ステップ 6.2: Shared Memoryの使用
+
+named pipesのほかに MySQL 4.1はshared memoryによる
+接続もサポートします。 shared memoryをオンにするためには
+次の行をMySQLサーバーのコンフィギュレーション・ファイル
+の[mysqld] セクションに追加してください。
+
+shared-memory
+
+MySQL Configuration Wizard にはshared memoryをコンフィギュアーする
+オプションがありません。そのため手動で追加となります。
+MySQL Configuration Wizardのユーザは
+C:\Program Files\MySQL\MySQL Server 4.1\my.ini.
+にあるmy.iniを参照してください。
+
+shared memoryでサーバーに接続するには次のようにしてください。
+
+C:\&gt;mysql --protocol=memory -u root -p
+
+ステップ 7: TCP/IP アドレスのバインド
+
+サーバーlocalhostからのリクエストしか必要ない場合でも
+TCP/IPのネットワークをオフにできない場合があります。１つの
+例はnamed pipeやshared memoryでの接続をサポートしない
+ツールを使用するときです。そのような場合は以下をサーバー
+コンフィギュレーションの[mysqld]セクションに追加します。
+
+bind-address=127.0.0.1
+
+こうすればMySQLサーバーはlocalhostからだけのリクエスト
+に答えるようになり、コンピュータのネットワーク・インターフェース
+からのリクエストを無視します。
+
+ステップ 8: サーバーをファイアーウオールで守る
+
+ハッカーからの第一の守備はファイアーウオールです。どのような
+場合でもMySQLのサーバーはインターネットへ直接アクセスすべきで
+はありません。 サーバーがLANを介してクライアントによって
+アクセスされている場合はLAN上のほかのコンピュータから
+のアクセスを許しますが、それでもそのLANはポート3306
+をブロックするファイアーウオールでインターネットから
+分離されるべきです。
+
+最低でもソフトのファイアーウオールをMySQLのサーバーに
+設置すべきです。そのファイアーウオールはローカル
+のネットやその他の信頼できるIPアドレスから
+の接続のみを許します。理想的にはMySQLのサーバーと
+インターネットの間にはハードの ファイアーウオールを
+設置すべきですが。
+
+しかしこれはMySQLにリモートでアクセスできないというわけでは
+ありません。SSHのポート・フォワーディングを使用してMySQL
+のトラフィックをトンネルしてファイアーウオールを通り抜ける
+ことができます。SSH トンネルの記事は以下にあります。
+<a href="http://www.vbmysql.com/articles/security/gui-tunnel.html">http://www.vbmysql.com/articles/security/gui-tunnel.html</a>
+
+ステップ 9: MySQLのサービスをルート以外のユーザで実行
+
+デフォルトではMySQLサーバーのサービスは特権を持った
+ローカルのシステムユーザとして実行されます。 MySQL は
+その能力を制限するために制限されたユーザとして
+実行することができます。これはセキュリティが破られたMySQLが
+更に害をなすのを制限するためでもあります。
+
+最初に強固なパスワードを持つmysqlというアカウントを
+作成してください。Windows Control PanelのAdministrative Tools
+セクションの中のServicesウインドウを使ってサービスを
+停止してください。サービスリストのなかのMySQLの項目を
+右クリックしてください。そしてドロップ・ダウンメニューから
+ストップのオプションを選んでください。
+
+サービス・ウインドウを最小化してC:\Program Files\MySQL\MySQL Server 4.1に
+あるMySQLディレクトリをブラウズしてください。
+
+このフォルダーとその中身のパーミッションを変更してMySQLユーザだけ
+がアクセスできるようにしてください。フォルダーを右クリックして
+ドロップ・ダウンメニューからプロパティのオプションを選択して
+ください。Securityタブを選択してください。(もしなければ、Windowsの
+インストレーションは簡単なファイル・シェアリングを使用しています。
+ToolsメニューからFolder Optionsオプションを選択して、View タブ
+へ移動してください。 Advanced Settingウインドウの底まで
+スクロールしてください。そして、Use simple file sharing boxを
+のチェックは外してください。):
+
+最初は既存のユーザにはデイレトリーのツリーの上層部から受け継いだ
+様々なパーミッションを持っています。これはAdvancedボタンをクリック
+しInherit from parent... boxのボックスをチェックしないことで
+除去できます。プロンプトが出れば、Removeボタンをクリックして存在
+するパーミションを除去します。
+
+ユーザリストの下のAdd... buttonをクリックし
+mysqlユーザをMySQLインストレーションフォルダーにアクセスできる
+ユーザのリストに加えます。（そのパーミションは空の
+はずです。先ほど存在するパーミッションを全部除去しましたから。）
+
+mysql のユーザ名を入れてCheck Names ボタンをクリックしてください。
+正しいパスとユーザ名を挿入します。そして、OKボタンをクリックします。
+パーミションリストのFull Controlオプションリストをチェックしてフォルダーへ
+の完全アクセスを与えます。
+
+Apply をクリックしてパーミションを与えます。その上貴方自信のユーザ
+アカウントへも同様のパーミションを与えます。そうしておけば後で
+コンフィギュレーション・ファイルを変更してユーザを変更することなく
+myisamchkなどのツールを使用できます。
+
+一旦ディレクトリーのパーミションがセットされると、サービスリストに戻り、
+MySQLサービスの項目を右クリックして、Log Onタブを選択してください。
+
+This Account のラジオ・ボタン選び前に作成したmysqlのユーザの
+情報を記入します。OK をクリックしてセッティングを有効にします。
+それからサービスリストのMySQLサービスを右クリックしてStartオプションを
+選択します。MySQL サービスがスタートして権限限定のユーザとして
+実行します。
+
+ステップ 10: データ・フォルダーを暗号化
+
+MySQLデータベースに重要な情報を格納するユーザは、MySQLの
+データのディレクトリーを暗号化できます。暗号化はサーバー
+が実行中でなく、mysqlユーザとしてログインしているとき
+になされるべきです。プライベート鍵を損失した場合はデータへ
+のアクセスは出来なくなります。暗号化するとデータが
+暗号化と解読のために性能が悪くなります。データと
+性能の劣化を考えるとどうしても必要な時以外は、使用すること
+をお勧めできません。その際でも経験を積んだユーザに
+限ります。
+
+データの暗号化と最良の事例はここを参照ください。
+<a href="http://support.microsoft.com/default.aspx?scid=kb">http://support.microsoft.com/default.aspx?scid=kb</a>;EN-US;q223316.
+ファイルはmysql Windows のユーザのために暗号化されます。外部の
+アプリケーションのmyisamchkなどはmysqlユーザとして
+ログインしなければこのデータファイルにアクセス出来ません。
+
+ステップ 11: 必要最小限のの特権を与える
+
+新しいユーザを作成して特権を与える時、大抵の場合はデータベースに
+対して全ての特権を与えるか全ての特権をグローバルに与える
+方が簡単です。ですが、これは避けるべきです。特権を与える場合
+必要最小限に限るべきです。特権はデーターベースごとに
+与えるべきです。そしてホストの名前には%は避けるべきです。
+ユーザが192.168.1.0のネットワーク内で接続する
+必要であれば、特権を「username'@'192.168.1.%」に与えます。
+出来るだけ、権限を抑えて必要に応じて新たな特権を与えて
+いきます。
+
+例えばクエリとデータを処理する「fictional」のデータベース用に
+新しいユーザを作成する時は、以下のようにします。
+
+mysql&gt; GRANT SELECT, INSERT, UPDATE, DELETE ON fictional.* TO 
+'bob'@'192.168.1.%';
+
+ステップ 12: ルート・ユーザの名前を変更
+
+ルートのユーザの名前は「root」である必要はありません。大抵
+のハッカーは「root」アカウントを狙ってきます。ですから、[root]
+アカウントがなければ防ぐことができます。ルート・ユーザのアカウント
+を変更するには次のコマンドを使ってください。
+
+Enter password: *****
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 1 to server version: 4.1.9-nt
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql&gt; USE mysql;
+Database changed
+mysql&gt; UPDATE user SET user='bob' WHERE user='root';
+Query OK, 1 row affected (0.19 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql&gt; FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.23 sec)
+
+もちろんどの様な他の名前を使っても構いません。しかし、自分の名前を使うのは
+良くないでしょう。というのも、ハッカーは自分の名前であれば
+それがルートの特権を持ったユーザだと思うからです。
+
+結論
+
+簡単な２−３のステップを踏めばWindows上のMySQLとそのデータを
+悪意を持ったユーザから守ることが出来ます。 大切なステップ
+はデフォルトのユーザのアカウントのセキュリティを正しく
+設定し、外部からのアクセスを制限し、強固なパスワードを
+使用することです。更にサーバーのセキュリティを増加しようと
+いう人はMySQLを権限の低いユーザとして実行し、ルートの名前を
+変えて、MySQLのデータのディレクトリーを暗号化すればよいのです。
+
+Forbotのマルウエアは将来形を変えて出現する可能性が非常に高いです。
+しかし、十分な準備と簡単ではあるがベストのセキュリティ・プラクティス
+があれば、新たな攻撃を防ぐことが可能でMySQLのサーバーを守ることが
+できます。
+---------------------
+Zen Kishimoto                        zen@xxxxxxxxxx
+IP Devices, Inc.                       (408) 567-9391
+2175 De La Cruz Blvd., Suite 10  (801) 720-8847 (FAX)
+Santa Clara, CA 95050
+
+
+
+</pre>
+</div>
+<p class="button"><a href="10863">[前]</a><a href="10865">[次]</a><a href="../list/10801-10900">[番号順一覧]</a><a href="../thread/10801-10900">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="10864">  10864 2005-02-03 03:10 [&quot;zen kishimoto&quot; &lt;zen] Windows上でMySQL サーバーをセキュアーにする方法</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10865">  10865 2005-02-03 11:28 ┗[take_tk &lt;CQK01016@xx] 「attacker」を「ハッカー（偉大なプログラマ）」と訳さないでくださいませ。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10866">  10866 2005-02-03 11:40 　┣[&quot;zen kishimoto&quot; &lt;zen]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10867">  10867 2005-02-03 11:49 　┃┗[Tomohiro 'Tomo-p' KA]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10868">  10868 2005-02-03 12:42 　┃　┗[森下　克徳 &lt;mokkosan] Re: 「attacker」を「ハッカー（偉大なプログ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10869">  10869 2005-02-03 12:49 　┗[Shinji Sato &lt;subscri] Re: 「attacker」を「ハッカー（偉大なプログ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10870">  10870 2005-02-03 12:54 　　┣[Shinji Sato &lt;subscri]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10871">  10871 2005-02-03 13:03 　　┣[Masakazu Nakano &lt;n-m]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10873">  10873 2005-02-03 14:30 　　┃┗[take_tk &lt;CQK01016@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10874">  10874 2005-02-04 00:23 　　┃　┗[Masakazu Nakano &lt;n-m]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10872">  10872 2005-02-03 13:05 　　┗[FUJII Hiroyuki &lt;hfuj]                                   </a></span>
+</pre>
+</body>
+</html>

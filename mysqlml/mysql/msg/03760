@@ -1,0 +1,95 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3760</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="3759">[前]</a><a href="3761">[次]</a><a href="../list/3701-3800">[番号順一覧]</a><a href="../thread/3701-3800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3760
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Wed, 13 Jun 2001 17:35:54 +0900<br>
+Subject: [mysql 03760] Re: BDB テーブルの SELECT 結果 0 件で PANIC<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Tue, 12 Jun 2001 14:58:15 +0900,
+Noriyuki Sakimura wrote:
+
+<span class="quote1">&gt;  複数のBerkeleyDBタイプのテーブルを複数結合して検索するSELECT文を</span>
+<span class="quote1">&gt; 実行しようとしているのですが、検索結果が0件になるようなパターンを</span>
+<span class="quote1">&gt; 実行すると、初回は0件が返ってきますが、再度実行すると</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ERROR 1015: Can't lock file (errno: -30989)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; が発生し、それ以降mysqldを再起動するまで正常動作しなくなります。この</span>
+<span class="quote1">&gt; SQL文で参照していないテーブルも参照できなくなり、ERROR 1016: Can't</span>
+<span class="quote1">&gt; open file が発生します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;  ホスト名.err ログには、初回の実行時に</span>
+<span class="quote1">&gt; 010612 13:41:56  bdb:  PANIC: Invalid argument</span>
+<span class="quote1">&gt; と出力されます。</span>
+
+
+詳細なレポートがあると助かります。ありがとうございます
+以下のパッチでいかがでしょう？
+
+ 村上 毅  takeshi@xxxxxxxxxx
+
+=== patch ===
+diff -ru mysql-3.23.38.orig/sql/sql_select.cc mysql-3.23.38/sql/sql_select.cc
+--- mysql-3.23.38.orig/sql/sql_select.cc	Thu May 10 05:34:37 2001
++++ mysql-3.23.38/sql/sql_select.cc	Wed Jun 13 17:30:35 2001
+@@ -400,7 +400,22 @@
+     goto err;					/* purecov: inspected */
+   }
+   if (join.const_tables &amp;&amp; !thd-&gt;locked_tables)
++  {
++    TABLE **table, **end;
++    for (table=join.table, end=table + join.const_tables ;
++	 table != end;
++	 table++)
++    {
++      /* BDB tables require that we call index_end() before doing an unlock */
++      if ((*table)-&gt;key_read)
++      {
++	(*table)-&gt;key_read=0;
++	(*table)-&gt;file-&gt;extra(HA_EXTRA_NO_KEYREAD);
++      }
++      (*table)-&gt;file-&gt;index_end();
++    }
+     mysql_unlock_some_tables(thd, join.table,join.const_tables);
++  }
+   if (!conds &amp;&amp; join.outer_join)
+   {
+     /* Handle the case where we have an OUTER JOIN without a WHERE */
+@@ -2761,7 +2776,12 @@
+     if (send_row)
+       result-&gt;send_data(fields);
+     if (tables)					// Not from do_select()
++    {
++      /* Close open cursors */
++      for (TABLE_LIST *table=tables; table ; table=table-&gt;next)
++	table-&gt;table-&gt;file-&gt;index_end();
+       result-&gt;send_eof();			// Should be safe
++    }
+   }
+   DBUG_RETURN(0);
+ }
+
+</pre>
+</div>
+<p class="button"><a href="3759">[前]</a><a href="3761">[次]</a><a href="../list/3701-3800">[番号順一覧]</a><a href="../thread/3701-3800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3755">   3755 2001-06-12 14:58 [Noriyuki Sakimura &lt;s] BDB テーブルの SELECT 結果 0 件で PANIC </a></span>
+<span class="current">-&gt;&nbsp;<a href="3760">   3760 2001-06-13 17:35 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3762">   3762 2001-06-13 19:06 　┗[崎村 典行 &lt;sakimura@]                                     </a></span>
+</pre>
+</body>
+</html>

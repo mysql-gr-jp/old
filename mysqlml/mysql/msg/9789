@@ -1,0 +1,97 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9789</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9788">[前]</a><a href="9790">[次]</a><a href="../list/9701-9800">[番号順一覧]</a><a href="../thread/9701-9800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9789
+</p>
+<div class="header">
+<p>
+From: Yasumitsu Ito &lt;Yasumitsu Ito &lt;y-ito@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 7 Jul 2004 15:33:36 +0900<br>
+Subject: [mysql 09789] レプリケーションスレーブの能動的な同期<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+伊藤と申します。
+レプリケーションについてお聞きしたいことがあります。
+
+レプリケーションスレーブが同期していないことを気づいたときに、
+スレーブ側から能動的に同期を取りに行く方法を探しています。
+
+[環境]
+mysql-4.0.18-*.rpm  (mysql.comから取得したRPM)
+
+*master
+TurboLinux 8.0WS
+常時接続 固定IP
+
+*slave
+VineLinux 2.6r4
+ダイアルアップルータを介して 64Kで接続
+
+マスター-スレーブ 間はインターネットを介しており、
+stunnel-4.04にてSSL暗号化しています。
+(ここではstunnelについては除外して書きます)
+
+[問題点]
+何らかの原因で、ネットワークが切断されるため、
+同期がとれず、同期回復まで待たなければならない。
+そこで、スレーブから能動的に同期をあわせたい。
+
+[質問]
+スレーブ側で
+
+slave$ mysql --user=root --password=pass -e &quot;show slave status&quot;
+slave$ mysql --user=slave_account --host=master --password=pass -e &quot;show master status&quot;
+
+を行い、ポジションの違いを発見した場合に、
+
+slave$ mysql_synchronise
+
+の様な自作コマンドを発行して、強制的に同期をあわせる作業を行いたい。
+
+たとえば、その中身を
+slave mysql&gt; slave stop;
+slave mysql&gt; slave start;
+slave mysql&gt; select master_pos_wait('master_log_file', master_log_pos);
+
+などと考えるのですが、どうでしょうか?
+強引な方法に感じるのですが。
+もっとスマートな方法はあるのでしょうか?
+
+LANケーブルを引っこ抜いてしまったあとに、
+slave stop;
+slave start;
+を実行しても、すんなりと通ってしまったり、
+逆に slave stop; を実行したときにプロンプトがかえってくるまでに
+非常に多くの時間がかかったりと、
+いまいち挙動が掴めていないのが現状です。
+
+slave_net_timeout の時間を小さくする方法も考えられますが、
+あまり小さな値では、無駄なトラフィックを生むだけのような気がします。
+デフォルトでは3600秒になっているのですが、
+たとえば、これを10秒などとしてしまうと、なにか弊害があったりするのでしょうか?
+
+よろしくお願いいたします。
+
+
+</pre>
+</div>
+<p class="button"><a href="9788">[前]</a><a href="9790">[次]</a><a href="../list/9701-9800">[番号順一覧]</a><a href="../thread/9701-9800">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="9789">   9789 2004-07-07 15:33 [Yasumitsu Ito &lt;y-ito] レプリケーションスレーブの能動的な同期  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9790">   9790 2004-07-07 21:58 ┣[&quot;Ohashi Koji&quot; &lt;ohash] mysqldumpの出力結果を取り込もうとするとUnknwon command</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9804">   9804 2004-07-09 19:06 ┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9805">   9805 2004-07-09 23:43 　┗[Yasumitsu Ito &lt;y-ito]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9845">   9845 2004-07-14 00:22 　　┗[Yasumitsu Ito &lt;y-ito]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9866">   9866 2004-07-16 00:08 　　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
+</pre>
+</body>
+</html>

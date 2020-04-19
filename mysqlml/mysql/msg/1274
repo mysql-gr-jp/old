@@ -1,0 +1,88 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1274</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1273">[前]</a><a href="1275">[次]</a><a href="../list/1201-1300">[番号順一覧]</a><a href="../thread/1201-1300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1274
+</p>
+<div class="header">
+<p>
+From: egashira &lt;egashira &lt;egashira@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 12 Oct 1999 11:47:15 +0900<br>
+Subject: [mysql 01274] Re: 登録時に同じレコードの値を使う良い方法ありますか？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+松本様
+
+<span class="quote1">&gt; そこで江頭さんに質問なんですが、ファイルをアップロードする時の</span>
+<span class="quote1">&gt; ファイル名は、下記１．のように取得し、DBにまず登録してから</span>
+<span class="quote1">&gt; ファイルをアップロードしてますでしょうか？</span>
+<span class="quote1">&gt; できれば、時間のかかるファイルアップロードをDB登録より先に</span>
+<span class="quote1">&gt; 行わせたいのですが、さらに負荷のかからない方法は思いつきませんで。。</span>
+
+私のケースとちょっと異なるので実動実績がありませんが
+おそらく一度にやってしまったほうが良いと思います。
+
+まずFORMでファイルをアップロードする。
+(想定スクリプト=uptest.php3)
+(想定アップロードファイル=test.gif)
+
+&lt;FORM ENCTYPE=&quot;multipart/form-data&quot; ACTION=&quot;uptest.php3&quot; METHOD=POST&gt;
+&lt;INPUT TYPE=&quot;hidden&quot; name=&quot;MAX_FILE_SIZE&quot; value=&quot;1000&quot;&gt;
+Send this file: &lt;INPUT NAME=&quot;userfile&quot; TYPE=&quot;file&quot;&gt;
+&lt;INPUT TYPE=&quot;submit&quot; VALUE=&quot;Send File&quot;&gt;
+&lt;/FORM&gt;
+
+実行後のuptest.php3で受け取った変数は次のようになります。
+
+$userfile : /tmp/php00305aaa
+$userfile_name : test.gif
+$userfile_size : 801
+$userfile_type : image/gif
+
+$userfileというのはアップロードされたファイルの一時(ディレクトリと)ファイル
+です。
+
+uptest.php3では次のことを行います。
+
+1.$userfile_nameか$userfile_typeから拡張子を取得する。
+  (gif or jpg これ以外はエラー制御処理)
+2.mysqlへinsertする。
+3.mysql_insert_id()でidを取得する。
+4.id + 拡張子でファイル名を組立
+5.一時ファイル(/tmp/php00305aaa)を4.で組立てたファイル名で所定のディレクトリ
+へコピー
+6.必要があればパーミッション等の変更処理
+
+&lt;注意&gt;
+一時ファイルはuptest.php3内だけ有効です。スクリプト終了時は自動で削除されま
+す。
+
+MAX_FILE_SIZEはに PHP3.iniやApache .confで指定されたファイルサイズより大くで
+きないそうです。
+
+------------------------------------------------
+江頭正敏 egashira@xxxxxxxxxx
+------------------------------------------------
+
+
+
+</pre>
+</div>
+<p class="button"><a href="1273">[前]</a><a href="1275">[次]</a><a href="../list/1201-1300">[番号順一覧]</a><a href="../thread/1201-1300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1264">   1264 1999-10-08 01:30 [kouichi matsumoto &lt;m] 登録時に同じレコードの値を使う良い方法ありますか？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1265">   1265 1999-10-08 10:33 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1266">   1266 1999-10-07 22:41 ┗[egashira &lt;egashira@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1273">   1273 1999-10-12 03:28 　┗[kouichi matsumoto &lt;m]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="1274">   1274 1999-10-12 11:47 　　┗[egashira &lt;egashira@x]                                   </a></span>
+</pre>
+</body>
+</html>

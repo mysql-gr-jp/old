@@ -1,0 +1,186 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16256</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16255">[前]</a><a href="16257">[次]</a><a href="../list/16201-16300">[番号順一覧]</a><a href="../thread/16201-16300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16256
+</p>
+<div class="header">
+<p>
+From: 林正紀 &lt;林正紀 &lt;hayashi.masa.norii@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 10 Jul 2015 20:04:48 +0900<br>
+Subject: [mysql 16256] Re: [mysql 16255] Re: [mysql 16254] Re: [mysql 16253] Re: [mysql 16252] ORDER BY句を指定しなかった場合のSELECT結果について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんばんは。
+
+<span class="quote1">&gt; 断片化が発生しても、断片の先頭はもとのレコードと同じ位置に書かれ、並び順は断片の先頭順に並びそうだから…という感じです。</span>
+
+なるほど。
+自分も可変長カラムにUPDATEが走るケースは厳しいかと思っていましたが
+断片先頭は保存されていそうですね。
+
+詳細な情報ありがとうございました。
+お手数おかけいたしました。
+
+
+
+
+2015年7月10日 12:47 yoku ts. &lt;yoku0825@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; こんにちは。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; 「そのテーブルは過去にDELETE操作をされたことがない」</span>
+<span class="quote2">&gt;&gt; 「mysqldumpではなく、コールドバックアップでとった.MYDがある」</span>
+<span class="quote2">&gt;&gt; という状況であれば、同じデータが再現できる、という認識であっていますでしょうか。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; UPDATEだけでもvarcharのカラムがフラグメントを作っちゃうので再現できないかと思ったんですが、</span>
+<span class="quote1">&gt; 試してみた限りではUPDATEとINSERTだけなら再現できるんじゃないかって気がしました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; <a href="https://gist.github.com/yoku0825/6ae9dc58598f7084410d">https://gist.github.com/yoku0825/6ae9dc58598f7084410d</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 断片化が発生しても、断片の先頭はもとのレコードと同じ位置に書かれ、並び順は断片の先頭順に並びそうだから…という感じです。</span>
+<span class="quote1">&gt; 考慮漏れがないか自信がないんですが、俺自身が同じ難題を突きつけられたら「とりあえずこのレコードが容疑者1」って感じにすると思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; DELETEが全くない &amp;&amp; mysqldumpでも確実にキーが使われていなかったことが保証できるなら、</span>
+<span class="quote1">&gt; mysqldumpからのリストアでも同じ要領で再現できるかも知れません。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 自信はないです。すいません(´・ω・｀)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote3">&gt;&gt; &gt; バイナリーログが残っていてbinlog_format= MIXEDかROWならそちらから追えるかも知れません。</span>
+<span class="quote1">&gt; &lt;snip&gt;</span>
+<span class="quote2">&gt;&gt; 当時のものはないので、諦めていました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 残念です＞＜</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ( ´-｀).oO(しかし、難題ですね。。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; yoku0825,</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 2015年7月9日 20:49 林正紀 &lt;hayashi.masa.norii@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt;&gt; yoku0825さん</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 丁寧なご回答ありがとうございます。</span>
+<span class="quote2">&gt;&gt; 諸々事情が理解出来ました。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; バックアップが物理ファイルであれば可能性はあるかも知れませんが、「ダンプデータ」ということはmysqldumpっぽいですよね…？</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; はい、ダンプデータはmysqldumpで取得したものです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 説明のgist拝見したのですが、MyISAMはDELETEのあとINSERTがあると</span>
+<span class="quote2">&gt;&gt; 開いた隙間を埋めるように動作するとのことですが</span>
+<span class="quote2">&gt;&gt; 「そのテーブルは過去にDELETE操作をされたことがない」</span>
+<span class="quote2">&gt;&gt; 「mysqldumpではなく、コールドバックアップでとった.MYDがある」</span>
+<span class="quote2">&gt;&gt; という状況であれば、同じデータが再現できる、という認識であっていますでしょうか。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; バイナリーログが残っていてbinlog_format= MIXEDかROWならそちらから追えるかも知れません。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; そうですね。。。こちらはその「過去の時点」が少々古く</span>
+<span class="quote2">&gt;&gt; サーバのHDDの制約で定期的に消してしまっているので</span>
+<span class="quote2">&gt;&gt; 当時のものはないので、諦めていました。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 林 正紀</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 2015年7月9日 20:13 yoku ts. &lt;yoku0825@xxxxxxxxxx&gt;:</span>
+<span class="quote3">&gt;&gt;&gt; こんばんは、yoku0825といいます。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; わたしもマニュアルに見つけられなかったんですが、</span>
+<span class="quote3">&gt;&gt;&gt; 実装上は「条件が揃えば同じレコードが返る」です。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; テーブルスキャンの場合、</span>
+<span class="quote3">&gt;&gt;&gt; * InnoDBではクラスターインデックスの昇順に並びます</span>
+<span class="quote3">&gt;&gt;&gt;   * PRIMARY KEYがあればPRIMARY KEY,</span>
+<span class="quote3">&gt;&gt;&gt;     PRIMARY KEYがなくてUNIQUE KEYがあれば最初に定義されたUNIQUE KEY,</span>
+<span class="quote3">&gt;&gt;&gt;     どちらもなければ6バイトの暗黙の行ID順に並べられます。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; <a href="https://gist.github.com/yoku0825/6d3cae7b5fb2744fe801#file-innodb_pk-md">https://gist.github.com/yoku0825/6d3cae7b5fb2744fe801#file-innodb_pk-md</a></span>
+<span class="quote3">&gt;&gt;&gt; <a href="https://gist.github.com/yoku0825/6d3cae7b5fb2744fe801#file-innodb_nonpk-md">https://gist.github.com/yoku0825/6d3cae7b5fb2744fe801#file-innodb_nonpk-md</a></span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; MySQL :: MySQL 5.6 リファレンスマニュアル :: 14.2.13.2 クラスタインデックスとセカンダリインデックス</span>
+<span class="quote3">&gt;&gt;&gt; <a href="http://dev.mysql.com/doc/refman/5.6/ja/innodb-index-types.html">http://dev.mysql.com/doc/refman/5.6/ja/innodb-index-types.html</a></span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; * MyISAMの場合は物理的に.MYDファイルに入っている順番で並びます</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; <a href="https://gist.github.com/yoku0825/6d3cae7b5fb2744fe801#file-myisam-md">https://gist.github.com/yoku0825/6d3cae7b5fb2744fe801#file-myisam-md</a></span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 何らかのキーを選んでいた場合、そのキーの並び順になります。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; InnoDBでPKがあれば、同じデータ同じSQLで再現可能だと思います。</span>
+<span class="quote3">&gt;&gt;&gt; InnoDBでPKなし、MyISAMの場合は保証が難しいです。</span>
+<span class="quote3">&gt;&gt;&gt; バックアップが物理ファイルであれば可能性はあるかも知れませんが、「ダンプデータ」ということはmysqldumpっぽいですよね…？</span>
+<span class="quote3">&gt;&gt;&gt; その場合、mysqldumpがテーブルをSELECTした時に何のインデックスも使わずにデータを読んでいれば…とか微妙な気がします。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; <a href="https://gist.github.com/yoku0825/6d3cae7b5fb2744fe801#file-myisam_mysqldump-md">https://gist.github.com/yoku0825/6d3cae7b5fb2744fe801#file-myisam_mysqldump-md</a></span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 内部的な事情でいうと、</span>
+<span class="quote3">&gt;&gt;&gt; * handler::ha_rnd_init が呼ばれる</span>
+<span class="quote3">&gt;&gt;&gt;   * こいつが ha_innobase::rnd_init や ha_myisam::rnd_init を呼ぶ</span>
+<span class="quote3">&gt;&gt;&gt; * handler::ha_rnd_next が呼ばれる</span>
+<span class="quote3">&gt;&gt;&gt;   * こいつが ha_innobase::rnd_next や ha_myisam::rnd_next を呼ぶ</span>
+<span class="quote3">&gt;&gt;&gt; * HA_ERR_END_OF_FILE が返るまで rnd_next を呼ぶループ</span>
+<span class="quote3">&gt;&gt;&gt; です。詳しく知りたい場合はこのあたりを丁寧に追う感じになると思います。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; バイナリーログが残っていてbinlog_format= MIXEDかROWならそちらから追えるかも知れません。</span>
+<span class="quote3">&gt;&gt;&gt; とか思いました（もう検討済みですかね。。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; yoku0825,</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 2015年7月9日 15:08 林正紀 &lt;hayashi.masa.norii@xxxxxxxxxx&gt;:</span>
+<span class="quote4">&gt;&gt;&gt;&gt; ORDER BY句を指定しなかった場合、SELECT文で取得するデータの並び順についての質問です。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 一般的なSQLでは、ORDER BY句を指定しなかった場合、</span>
+<span class="quote4">&gt;&gt;&gt;&gt; その検索結果の並び順は保証されないものと認識しています。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; MySQLにおいても、仕様上はそうであったと記憶しています。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; （マニュアルの記述箇所がみつけられなかったのですが）</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; こちらについて、「実装レベル」では実際どうなのか</span>
+<span class="quote4">&gt;&gt;&gt;&gt; （本当に仕様通り不定なのか、実際には必ずなにがしかの順序で変えるのか）を知りたいのです。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 具体的には、過去に実行したSQLが判明しており</span>
+<span class="quote4">&gt;&gt;&gt;&gt; そのSQLで具体的にどのレコードが抽出されたかを特定したく</span>
+<span class="quote4">&gt;&gt;&gt;&gt; その過去の時点のダンプデータもあるのですが</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 該当SQLがORDER BY句を含んでおらず、LIMITが指定されており</span>
+<span class="quote4">&gt;&gt;&gt;&gt; （例えば SELECT * FROM some_table LIMIT 1 のようなSQLです）</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 過去流したSQLとそのダンプデータで実行した結果が</span>
+<span class="quote4">&gt;&gt;&gt;&gt; そのSQLを流した当時のものと同じレコードがセレクトされるかが保証できるかを確認したいのです。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 調査したいSQLも、実行計画が full scanになるようなクエリです。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; また、その該当テーブルにはデータはINSERT/UPDATEはされますが、DELETEはされません。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; UPDATEが走るので、カラムレベルでは完全に同じレコードが再現できない可能性はありますが</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 同じレコード（同じPKのレコード）が得られるかどうかが知りたいです。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; MySQLのバージョンは、5.1系</span>
+<span class="quote4">&gt;&gt;&gt;&gt; ストレージエンジンはMyISAM / InnoDB それぞれについてです。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; どなたかご存知のかたいましたら、ご教示いただけますでしょうか。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 以上、よろしくお願いいたします。</span>
+
+</pre>
+</div>
+<p class="button"><a href="16255">[前]</a><a href="16257">[次]</a><a href="../list/16201-16300">[番号順一覧]</a><a href="../thread/16201-16300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16252">  16252 2015-07-09 15:08 [林正紀 &lt;hayashi.masa] ORDER BY句を指定しなかった場合のSELECT結果について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16253">  16253 2015-07-09 20:13 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16252] ORDER BY句を指定しなかった場合のSELECT結果について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16254">  16254 2015-07-09 20:49 　┗[林正紀 &lt;hayashi.masa] Re: [mysql 16253] Re: [mysql 16252] ORDER BY句を指定しなかった場合のSELECT結果について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16255">  16255 2015-07-10 12:47 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16254] Re: [mysql 16253] Re: [mysql 16252] ORDER BY句を指定しなかった場合のSELECT結果について</a></span>
+<span class="current">-&gt;&nbsp;<a href="16256">  16256 2015-07-10 20:04 　　　┗[林正紀 &lt;hayashi.masa] Re: [mysql 16255] Re: [mysql 16254] Re: [mysql 16253] Re: [mysql 16252] ORDER BY句を指定しなかった場合のSELECT結果について</a></span>
+</pre>
+</body>
+</html>

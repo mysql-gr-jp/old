@@ -1,0 +1,238 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13478</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13477">[前]</a><a href="13479">[次]</a><a href="../list/13401-13500">[番号順一覧]</a><a href="../thread/13401-13500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13478
+</p>
+<div class="header">
+<p>
+From: SAKAI Kei &lt;SAKAI Kei &lt;sak2@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 12 Nov 2006 12:23:36 +0900<br>
+Subject: [mysql 13478] Re: レコード件数０をカウントしたい<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+坂井です
+
+<span class="quote1">&gt; SELECT syain.no, syain.name, COUNT(data.no)</span>
+<span class="quote1">&gt; FROM syain LEFT JOIN data ON syain.no = data.no</span>
+<span class="quote1">&gt; GROUP BY data.no</span>
+<span class="quote1">&gt; ORDER BY syain.no</span>
+
+
+<span class="quote1">&gt; GROUP BY data.no</span>
+
+    ここが
+    
+<span class="quote1">&gt; GROUP BY syain.no</span>
+
+  ですかね。
+  存在しない(可能性がある)側のテーブルの no でグルーピング
+  しちゃっているので、「番号がないどうし」がひとつとして
+  扱われています。
+  「必ず存在する側」(syain) の no ごとにまとめるのが吉です。
+  
+以上
+
+
+On Sun, 12 Nov 2006 11:55:51 +0900
+&quot;F.Yamazaki&quot; &lt;fumihiko@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; こんにちは。先日、下記の件でアドバイス頂き運用していたのですが、</span>
+<span class="quote1">&gt; Table:dataのカウント０が２件存在した場合、１件のみの出力となってしまう</span>
+<span class="quote1">&gt; 現象が発生しました。</span>
+<span class="quote1">&gt; LEFT JOINに関して特に問題ないように思うのですが、仕方ないのでしょうか。</span>
+<span class="quote1">&gt; 解決法、アドバイスいただければ幸いです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; SELECT syain.no, syain.name, COUNT(data.no)</span>
+<span class="quote1">&gt; FROM syain LEFT JOIN data ON syain.no = data.no</span>
+<span class="quote1">&gt; GROUP BY data.no</span>
+<span class="quote1">&gt; ORDER BY syain.no</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; の出力は、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; +---+------+--------------------+</span>
+<span class="quote2">&gt; |no | name | COUNT( data . no ) |</span>
+<span class="quote1">&gt; +---+------+--------------------+</span>
+<span class="quote2">&gt; | 1 | 山田 |                  2 |</span>
+<span class="quote2">&gt; | 2 | 佐藤 |                  0 |</span>
+<span class="quote2">&gt; | 3 | 山本 |                  3 |</span>
+<span class="quote2">&gt; | 4 | 吉田 |                  1 |</span>
+<span class="quote2">&gt; | 6 | 田中 |                  2 |</span>
+<span class="quote1">&gt; +---+------+--------------------+</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; となり、期待する出力、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; +---+------+--------------------+</span>
+<span class="quote2">&gt; |no | name | COUNT( data . no ) |</span>
+<span class="quote1">&gt; +---+------+--------------------+</span>
+<span class="quote2">&gt; | 1 | 山田 |                  2 |</span>
+<span class="quote2">&gt; | 2 | 佐藤 |                  0 |</span>
+<span class="quote2">&gt; | 3 | 山本 |                  3 |</span>
+<span class="quote2">&gt; | 4 | 吉田 |                  1 |</span>
+<span class="quote2">&gt; | 5 | 中村 |                  0 |←この行がない</span>
+<span class="quote2">&gt; | 6 | 田中 |                  2 |</span>
+<span class="quote1">&gt; +---+------+--------------------+</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; となりません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ＊使用したテストのテーブルはこちらです</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- phpMyAdmin SQL Dump</span>
+<span class="quote1">&gt; -- version 2.6.4-pl4</span>
+<span class="quote1">&gt; -- <a href="http://www.phpmyadmin.net">http://www.phpmyadmin.net</a></span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; -- ホスト: localhost</span>
+<span class="quote1">&gt; -- 作成の時間: 2006 年 11 月 12 日 11:30</span>
+<span class="quote1">&gt; -- サーバーのバージョン: 4.0.26</span>
+<span class="quote1">&gt; -- PHP バージョン: 4.3.9</span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; -- データベース: `yamazaki_test`</span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- --------------------------------------------------------</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; -- テーブルの構造 `data`</span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; CREATE TABLE `data` (</span>
+<span class="quote1">&gt;   `no` tinyint(4) NOT NULL default '0',</span>
+<span class="quote1">&gt;   `etc` varchar(10) NOT NULL default ''</span>
+<span class="quote1">&gt; ) TYPE=MyISAM;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; -- テーブルのダンプデータ `data`</span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; INSERT INTO `data` VALUES (1, 'AAAA');</span>
+<span class="quote1">&gt; INSERT INTO `data` VALUES (3, 'BBBB');</span>
+<span class="quote1">&gt; INSERT INTO `data` VALUES (1, 'CCCC');</span>
+<span class="quote1">&gt; INSERT INTO `data` VALUES (4, 'DDDD');</span>
+<span class="quote1">&gt; INSERT INTO `data` VALUES (3, 'EEEE');</span>
+<span class="quote1">&gt; INSERT INTO `data` VALUES (6, 'FFFF');</span>
+<span class="quote1">&gt; INSERT INTO `data` VALUES (6, 'GGGG');</span>
+<span class="quote1">&gt; INSERT INTO `data` VALUES (3, 'HHHH');</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- --------------------------------------------------------</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; -- テーブルの構造 `syain`</span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; CREATE TABLE `syain` (</span>
+<span class="quote1">&gt;   `no` int(4) NOT NULL default '0',</span>
+<span class="quote1">&gt;   `name` varchar(10) NOT NULL default ''</span>
+<span class="quote1">&gt; ) TYPE=MyISAM;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; -- テーブルのダンプデータ `syain`</span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; INSERT INTO `syain` VALUES (1, '山田');</span>
+<span class="quote1">&gt; INSERT INTO `syain` VALUES (2, '佐藤');</span>
+<span class="quote1">&gt; INSERT INTO `syain` VALUES (3, '山本');</span>
+<span class="quote1">&gt; INSERT INTO `syain` VALUES (4, '吉田');</span>
+<span class="quote1">&gt; INSERT INTO `syain` VALUES (5, '中村');</span>
+<span class="quote1">&gt; INSERT INTO `syain` VALUES (6, '田中');</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; &quot;Hiroshi Kabayama&quot; &lt;kaba@xxxxxxxxxx&gt;さん：</span>
+<span class="quote2">&gt; &gt; こんにちははじめまして。樺山と申します。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 実際にサンプルで記載されているテーブルを作成し</span>
+<span class="quote2">&gt; &gt; 下記SQL文を実行したところ予想通りの結果が取れました。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; SELECT syain.no, syain.name, COUNT(data.no)</span>
+<span class="quote2">&gt; &gt; FROM syain LEFT JOIN data ON syain.no = data.no</span>
+<span class="quote2">&gt; &gt; GROUP BY data.no</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; LEFT JOINすることにより、syainテーブルが主となる為</span>
+<span class="quote2">&gt; &gt; 0件でも出力されるようになります。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; ----- Original Message ----- </span>
+<span class="quote2">&gt; &gt; From: &quot;F.Yamazaki&quot; &lt;fumihiko@xxxxxxxxxx&gt;</span>
+<span class="quote2">&gt; &gt; To: &lt;ml@xxxxxxxxxx&gt;</span>
+<span class="quote2">&gt; &gt; Sent: Thursday, October 26, 2006 4:17 PM</span>
+<span class="quote2">&gt; &gt; Subject: <a href="13429">[mysql 13429]</a> レコード件数０をカウントしたい</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; はじめまして。</span>
+<span class="quote3">&gt; &gt; &gt; まだ始めたばかりで、いろいろ試してみたのですが解決できませんでした。</span>
+<span class="quote3">&gt; &gt; &gt; 皆さんの知識をお借りできればと思います。</span>
+<span class="quote3">&gt; &gt; &gt; MySQL 4.0.26の環境でやっています。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; Table:syain      Table:data</span>
+<span class="quote3">&gt; &gt; &gt; +----+------+    +----+------+</span>
+<span class="quote4">&gt; &gt; &gt; | no | name |    | no | etc  |</span>
+<span class="quote3">&gt; &gt; &gt; +----+------+    +----+------+</span>
+<span class="quote4">&gt; &gt; &gt; |  1 | 山田 |    |  1 | AAAA |</span>
+<span class="quote4">&gt; &gt; &gt; |  2 | 佐藤 |    |  3 | BBBB |</span>
+<span class="quote4">&gt; &gt; &gt; |  3 | 山本 |    |  1 | CCCC |</span>
+<span class="quote4">&gt; &gt; &gt; |  4 | 吉田 |    |  4 | DDDD |</span>
+<span class="quote3">&gt; &gt; &gt; +----+------+    |  3 | EEEE |</span>
+<span class="quote3">&gt; &gt; &gt;                 +----+------+</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; この２つのテーブルから、syainに登録されている各人についてdataから件数（レコード数）を</span>
+<span class="quote3">&gt; &gt; &gt; カウントしたいのです。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; SELECT `syain`.`no`,`syain`.`name`,COUNT(`data`.`no`) FROM `syain`,`data`</span>
+<span class="quote3">&gt; &gt; &gt; WHERE `syain`.`no` = `data`.`no`　 ROUP BY  `data`.`no`</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; ここまではたどり着いたのですが、結果は</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; +----+------+---------------------+</span>
+<span class="quote4">&gt; &gt; &gt; | no | name |　COUNT(`data`.`no`) |</span>
+<span class="quote3">&gt; &gt; &gt; +----+------+---------------------+</span>
+<span class="quote4">&gt; &gt; &gt; |  1 | 山田 |                   2 |</span>
+<span class="quote4">&gt; &gt; &gt; |  3 | 山本 |                   2 |</span>
+<span class="quote4">&gt; &gt; &gt; |  4 | 吉田 |                   1 |</span>
+<span class="quote3">&gt; &gt; &gt; +----+------+---------------------+</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; で、カウント０の佐藤さんはリストされません。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; +----+------+---------------------+</span>
+<span class="quote4">&gt; &gt; &gt; | no | name |　COUNT(`data`.`no`) |</span>
+<span class="quote3">&gt; &gt; &gt; +----+------+---------------------+</span>
+<span class="quote4">&gt; &gt; &gt; |  1 | 山田 |                   2 |</span>
+<span class="quote4">&gt; &gt; &gt; |  2 | 佐藤 |                   0 |</span>
+<span class="quote4">&gt; &gt; &gt; |  3 | 山本 |                   2 |</span>
+<span class="quote4">&gt; &gt; &gt; |  4 | 吉田 |                   1 |</span>
+<span class="quote3">&gt; &gt; &gt; +----+------+---------------------+</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; のように、０でもリストさせたいのですが、良い方法はありますでしょうか。</span>
+<span class="quote3">&gt; &gt; &gt; よろしくお願いします。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; ------------------</span>
+<span class="quote3">&gt; &gt; &gt; From:山崎文彦</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ------------------</span>
+<span class="quote1">&gt; From:山崎文彦</span>
+<span class="quote1">&gt; </span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="13477">[前]</a><a href="13479">[次]</a><a href="../list/13401-13500">[番号順一覧]</a><a href="../thread/13401-13500">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13429">  13429 2006-10-26 16:17 [&quot;F.Yamazaki&quot; &lt;fumihi] レコード件数０をカウントしたい          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13430">  13430 2006-10-26 16:34 ┗[&quot;Hiroshi Kabayama&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13431">  13431 2006-10-26 16:52 　┣[&quot;F.Yamazaki&quot; &lt;fumihi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13477">  13477 2006-11-12 11:55 　┗[&quot;F.Yamazaki&quot; &lt;fumihi]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="13478">  13478 2006-11-12 12:23 　　┗[SAKAI Kei &lt;sak2@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13479">  13479 2006-11-12 13:23 　　　┗[&quot;F.Yamazaki&quot; &lt;fumihi]                                 </a></span>
+</pre>
+</body>
+</html>

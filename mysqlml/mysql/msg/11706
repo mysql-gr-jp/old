@@ -1,0 +1,225 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11706</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11705">[前]</a><a href="11707">[次]</a><a href="../list/11701-11800">[番号順一覧]</a><a href="../thread/11701-11800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11706
+</p>
+<div class="header">
+<p>
+From: Kenta Hashimoto &lt;Kenta Hashimoto &lt;kem@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 07 Jul 2005 20:18:56 +0900<br>
+Subject: [mysql 11706] Re: 全文検索と他条件の組み合わせ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+佐々木様、宇野様、ありがとうございます。
+
+質問内容が漠然としてしまっており、すみませんでした。
+また、お返事が遅くなり、すみません。
+
+データの量は、約13万行で、容量は245MBほどです。
+MySQLのバージョンは、4.1.10aで、CentOS上で動かしています。
+
+実行速度としては、以下のとおりでした。
+単純化のために、CategoryBの条件は抜かしました。
+
+＜クエリ１＞
+
+	SELECT
+		ID
+	FROM
+		Recipe
+	WHERE
+		MATCH( Title,Description )
+		AGAINST( '+&quot;じゃがいも&quot;' IN BOOLEAN MODE )
+		AND
+		CategoryA = 4
+	LIMIT
+		10
+
+の場合、145ms
+
+＜クエリ２＞
+
+	SELECT
+		ID
+	FROM
+		Recipe
+	WHERE
+		MATCH( Title )
+		AGAINST( '+&quot;じゃがいも&quot;' IN BOOLEAN MODE )
+	LIMIT
+		10
+
+の場合、1ms
+
+＜クエリ３＞
+
+	SELECT
+		ID
+	FROM
+		Recipe
+	WHERE
+		CategoryA = 4
+	LIMIT
+		10
+
+の場合、1msです。
+
+
+<span class="quote2">&gt;&gt;CagetoryA、CategoryB について、インデックスを使用できない</span>
+<span class="quote2">&gt;&gt;でいることが、クエリが遅い原因だと考えています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 何故そう思いました？</span>
+
+EXPLAINをつけて調べた結果、
+使用しているキーが、全文検索のインデックスだったからです。
+で、いろいろ調べるうちに、一つのクエリに使用できるインデックスは
+一つのみだということがわかり、上記の書き方では、全文検索のインデックス
+のみしか使用されていないということがわかりました。
+
+
+副問い合わせを用いたクエリでは、より遅くなってしまいました。
+
+＜クエリ４＞
+
+	SELECT
+		ID
+	FROM
+		Recipe
+	WHERE
+		MATCH( Title )
+		AGAINST( '+&quot;じゃがいも&quot;' IN BOOLEAN MODE )
+		AND
+		ID IN (
+			SELECT
+				ID
+			FROM
+				Recipe
+			WHERE
+				CategoryA=4 )
+	LIMIT
+		10
+
+これで、232msかかりました。
+副問い合わせ部分を逆に全文検索にしてみると、810msかかります。
+
+これは、副問い合わせ部分に、LIMITをつけれないからではないかと
+思います。
+
+
+考えたのですが、もしかして、この速度の違いは、LIMITによる
+制限のせいでしょうか？
+つまり、上記のクエリ１では、見つかるレシピ数が
+少なくなるために、10個目のレシピが見つかるまで時間がかかるが、
+クエリ２、クエリ３では、見つかるレシピが多いため、
+10個目のレシピがすぐにみつかり、処理がそこで打ち切られる
+ということでしょうか？
+
+実際、クエリ１の形で、より多くのレシピが該当するような
+値で検索した場合は、6ms程度で済みました。
+
+
+<span class="quote1">&gt; はしけむさんの案１のように、</span>
+<span class="quote1">&gt; 全 Category を文字列として結合したキー項目を一つ用意して、</span>
+<span class="quote1">&gt; その項目にインデックスを作成するという手も有効です。</span>
+<span class="quote1">&gt; 副問合せの部分が速くなると思います。</span>
+<span class="quote1">&gt; この場合 FULLTEXT じゃなくて INDEX の方ですね。</span>
+
+副問い合わせを使うと、副問い合わせ部分にLIMITが
+かけれないと思うので、副問い合わせは使わない方法で
+考えたほうがよいかと思っています。
+
+となると、
+
+FULLTEXT( Title,Description,CategoryString )
+
+という形で、全文検索に含めてしまったほうがいいかと思いますが、
+この場合には、もしかして「カーディナリティ値」の問題が
+出てきてしまいますでしょうか。
+具体的には、
+「CategoryA4 CategoryB2」などの、TitleやDescriptionには
+通常含まれない単語を、CategoryStringに登録して、全文検索の
+対象にしようかと考えています。
+
+
+
+T.Sasaki wrote:
+<span class="quote1">&gt; 佐々木といいます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt;CagetoryA、CategoryB について、インデックスを使用できない</span>
+<span class="quote2">&gt;&gt;でいることが、クエリが遅い原因だと考えています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 何故そう思いました？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt;Categoryは、9種類あり、それぞれ、2〜8種類の値が入ります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; レコード数が10万なら各 Category のカーディナリティ値が低すぎますので、</span>
+<span class="quote1">&gt; FULLTEXT 以外のインデックスは複数の項目から構成されているものと仮定します。</span>
+<span class="quote1">&gt; （一つの問合せで使用できるインデックスは一つだけですから）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; その上で、純粋に SQL だけで解決するなら・・・。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; SELECT ID FROM Recipe</span>
+<span class="quote1">&gt;  WHERE MATCH (Title, Description) AGAINST('+&quot;じゃがいも&quot;' IN BOOLEAN MODE)</span>
+<span class="quote1">&gt;    AND ID IN (SELECT ID FROM Recipe WHERE CategoryA = 4 AND CategorB = 2);</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; MySQL のオプティマイザ次第ですが、</span>
+<span class="quote1">&gt; 副問合せを利用すれば両方のインデックスが活用できます。</span>
+<span class="quote1">&gt; （MySQL 4.1 以上）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; はしけむさんの案１のように、</span>
+<span class="quote1">&gt; 全 Category を文字列として結合したキー項目を一つ用意して、</span>
+<span class="quote1">&gt; その項目にインデックスを作成するという手も有効です。</span>
+<span class="quote1">&gt; 副問合せの部分が速くなると思います。</span>
+<span class="quote1">&gt; この場合 FULLTEXT じゃなくて INDEX の方ですね。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; また、全文検索だと該当レコードが膨大な数になる可能性が高いため、</span>
+<span class="quote1">&gt; LIMIT 句等を使用して取得レコード数の上限を制限する必要があるでしょう。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; とりあえず、全文検索と通常の検索を切り離して、個々に検索時間を計測し、</span>
+<span class="quote1">&gt; 遅い方の SQL を EXPLAIN 等でコストを見つつ、許容範囲内に収まるよう、</span>
+<span class="quote1">&gt; データベース環境を含め調整していくのが良いのではと考えます。</span>
+<span class="quote1">&gt; それから上記のような形で２つの SQL を結合してはどうでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 尚、私の環境は senna のMySQLバインディングを</span>
+<span class="quote1">&gt; 無理やり MySQL 5.0 へ埋め込んだものなので、ネイティブの</span>
+<span class="quote1">&gt; 全文検索機能と結果が異なる可能性があります。:-)</span>
+
+</pre>
+</div>
+<p class="button"><a href="11705">[前]</a><a href="11707">[次]</a><a href="../list/11701-11800">[番号順一覧]</a><a href="../thread/11701-11800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11693">  11693 2005-07-06 16:07 [Kenta Hashimoto &lt;kem] 全文検索と他条件の組み合わせ            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11694">  11694 2005-07-07 00:55 ┣[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11697">  11697 2005-07-07 09:58 ┗[&quot;T.Sasaki&quot; &lt;papasan2]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="11706">  11706 2005-07-07 20:18 　┗[Kenta Hashimoto &lt;kem]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11707">  11707 2005-07-07 20:47 　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11712">  11712 2005-07-07 21:39 　　　┗[Kenta Hashimoto &lt;kem]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11713">  11713 2005-07-07 21:58 　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11714">  11714 2005-07-07 22:14 　　　　　┗[Kenta Hashimoto &lt;kem]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11715">  11715 2005-07-07 22:56 　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11716">  11716 2005-07-07 23:10 　　　　　　　┣[Kenta Hashimoto &lt;kem]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11717">  11717 2005-07-07 23:17 　　　　　　　┗[Kazuhiro Osawa &lt;ko@x]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11719">  11719 2005-07-08 00:14 　　　　　　　　┣[Kenta Hashimoto &lt;kem]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11720">  11720 2005-07-08 06:25 　　　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11734">  11734 2005-07-09 13:45 　　　　　　　　　┗[Kazuhiro Osawa &lt;ko@x]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11735">  11735 2005-07-09 20:31 　　　　　　　　　　┣[&quot;T.Sasaki&quot; &lt;papasan2]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11736">  11736 2005-07-12 15:33 　　　　　　　　　　┗[&quot;Naoi Masaaki&quot; &lt;naoi] MySQLでの最大項目数につきまして</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11737">  11737 2005-07-12 16:33 　　　　　　　　　　　┣[Tetsuro IKEDA &lt;ikdtt]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11739">  11739 2005-07-12 17:42 　　　　　　　　　　　┃┗[&quot;Naoi Masaaki&quot; &lt;naoi]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11738">  11738 2005-07-12 17:10 　　　　　　　　　　　┗[Hiroshi Moriyama &lt;mt]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11740">  11740 2005-07-12 17:47 　　　　　　　　　　　　┣[&quot;Naoi Masaaki&quot; &lt;naoi]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11742">  11742 2005-07-13 20:08 　　　　　　　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]               </a></span>
+</pre>
+</body>
+</html>

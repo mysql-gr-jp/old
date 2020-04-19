@@ -1,0 +1,625 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.ja.texi on 22 May 2000 -->
+
+  <TITLE>MySQL Reference Manual for version 3.23.16-alpha. - 23  How MySQL compares to other databases</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Clients.html">previous</A>, <A HREF="manual.ja_MySQL_internals.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Comparisons" HREF="manual.ja_toc.html#Comparisons">23  How <STRONG>MySQL</STRONG> compares to other databases</A></H1>
+
+
+
+<H2><A NAME="Compare_mSQL" HREF="manual.ja_toc.html#Compare_mSQL">23.1  <STRONG>MySQL</STRONG> と <CODE>mSQL</CODE> との比較</A></H2>
+
+<P>
+この節は、<STRONG>MySQL</STRONG> 開発者によって書かれていますので、そのつもりで
+読んで下さい。しかし我々が知っている事実上の間違いはありません。
+
+</P>
+<P>
+For a list of all supported limits, functions and types, see the
+<a HREF="http://www.mysql.com/crash-me-choose.htmy"> <CODE>crash-me</CODE> web page</a>.
+
+</P>
+<DL COMPACT>
+
+<DT><STRONG>Performance</STRONG>
+<DD>
+真の速度比較のためは、増加する <STRONG>MySQL</STRONG> ベンチマークスイートを見て下さい
+ 「<A HREF="manual.ja_Performance.html#Benchmarks">12.7  Using your own benchmarks</A>」節参照.
+
+Because there is no thread creation overhead, a small parser, few features and
+simple security, <CODE>mSQL</CODE> should be quicker at:
+
+
+<UL>
+<LI>
+
+Tests that perform repeated connects and disconnects, running a very simple
+query during each connection.
+<LI>
+
+<CODE>INSERT</CODE> operations into very simple tables with few columns and keys.
+<LI>
+
+<CODE>CREATE TABLE</CODE> and <CODE>DROP TABLE</CODE>.
+<LI>
+
+<CODE>SELECT</CODE> on something that isn't an index. (A table scan is very
+easy.)
+</UL>
+
+これらのオペレーションはとても単純なので、開始のオーバーヘッドが高くなる
+時にそれらを良くするのは難しいです。接続が確立された後は <STRONG>MySQL</STRONG> 
+はとても良い性能になります。
+
+他のものでは <STRONG>MySQL</STRONG> は <CODE>mSQL</CODE> や多くの他の SQL 実装よりとて
+も速いです:
+
+
+<UL>
+<LI>
+
+Complex <CODE>SELECT</CODE> operations.
+<LI>
+
+大きな結果の取り出し (<STRONG>MySQL</STRONG> はより良く, より速くそしてより安全
+なプロトコルを持ちます)
+<LI>
+
+可変長文字列を持つテーブル。<STRONG>MySQL</STRONG> はさらに効率的な処理を持ち、 <CODE>VARCHAR</CODE>
+上にインデックスを持つことができます。
+<LI>
+
+多くのフィールドを持つテーブルの処理。
+<LI>
+
+大きなレコード長のテーブルの処理。
+<LI>
+
+<CODE>SELECT</CODE> with many expressions.
+<LI>
+
+<CODE>SELECT</CODE> on large tables.
+<LI>
+
+同時に多くの接続を処理します。<STRONG>MySQL</STRONG> は完全なマルチスレッドです。
+各接続はそれ自身のスレッドを持ちます。これは、それらが他を待つ必要がない
+ことを意味します(同じテーブルを変更するクエリが実行される場合を除く)。
+<CODE>mSQL</CODE> では、全ての他の接続は、最初のもの - クエリが長いか短いかに
+関わらず - が実行され、終わるまで待つ必要があります。その後次の接続が与
+えられ、他の全ては再び待ちます。
+<LI>
+
+Joins.
+<CODE>mSQL</CODE> can become pathologically slow if you change the order of tables
+in a <CODE>SELECT</CODE>. In the benchmark suite, a time more than 15000 times
+slower than <STRONG>MySQL</STRONG> was seen.  This is due to <CODE>mSQL</CODE>'s lack of a
+join optimizer to order tables in the optimal order. However, if you put the
+tables in exactly the right order in <CODE>mSQL</CODE>2 and the <CODE>WHERE</CODE> is
+simple and uses index columns, the join will be relatively fast!
+ 「<A HREF="manual.ja_Performance.html#Benchmarks">12.7  Using your own benchmarks</A>」節参照.
+<LI>
+
+<CODE>ORDER BY</CODE> and <CODE>GROUP BY</CODE>.
+<LI>
+
+<CODE>DISTINCT</CODE>.
+<LI>
+
+<CODE>TEXT</CODE> または <CODE>BLOB</CODE> フィールドの使用。
+</UL>
+
+<DT><STRONG>SQL Features</STRONG>
+<DD>
+
+<UL>
+<LI><CODE>GROUP BY</CODE> and <CODE>HAVING</CODE>.
+
+<CODE>mSQL</CODE> does not support <CODE>GROUP BY</CODE> at all.
+<STRONG>MySQL</STRONG> は <CODE>HAVING</CODE> を伴う完全な <CODE>GROUP BY</CODE> や、次の関
+数 <CODE>count()</CODE>, <CODE>avg()</CODE>, <CODE>min()</CODE>, <CODE>max()</CODE>,
+<CODE>sum()</CODE> そして <CODE>std()</CODE> をサポートします。<CODE>min()</CODE> と 
+<CODE>max()</CODE> は文字列の引数も取れます。<CODE>count(*)</CODE> は、クエリ内がこ
+れだけの場合にとても速く返されるように最適化されます。<CODE>mSQL</CODE> は 
+<CODE>GROUP BY</CODE> を全くサポートしません。
+
+<LI><CODE>INSERT</CODE> and <CODE>UPDATE</CODE> with calculations.
+
+<STRONG>MySQL</STRONG> can do calculations in an <CODE>INSERT</CODE> or <CODE>UPDATE</CODE>.
+For example:
+
+<PRE>
+mysql&#62; UPDATE SET x=x*10+y WHERE x&#60;20;
+</PRE>
+
+<LI>Aliasing.
+
+<STRONG>MySQL</STRONG> はフィールドのエイリアス名を持ちます。
+
+<LI>Qualifying column names.
+
+In <STRONG>MySQL</STRONG>, if a column name is unique among the tables used in a
+query, you do not have to use the full qualifier.
+
+<LI><CODE>SELECT</CODE> with functions.
+
+<STRONG>MySQL</STRONG> has many functions (too many to list here; see  「<A HREF="manual.ja_Reference.html#Functions">7.4  <CODE>SELECT</CODE> と <CODE>WHERE</CODE> 節で使用する関数</A>」節).
+
+</UL>
+
+<DT><STRONG>領域能力</STRONG>
+<DD>
+これは、テーブルをどのように小さくできるかです。
+
+<STRONG>MySQL</STRONG> はとても精密な型を持ちます。とても小さい領域を使用するテーブルを作成でき
+るためです。<STRONG>MySQL</STRONG> データ型の有用な例は、3バイト長の <CODE>MEDIUMINT</CODE> 
+です。10,000,000 レコードを持つ場合、1レコードあたり1バイトの節約でもと
+ても重要です。
+
+<CODE>mSQL2</CODE> は4つの型(char,text,int,real)しかないので、小さなテーブルを
+得るのは難しいです。
+
+<DT><STRONG>安定性</STRONG>
+<DD>
+これを客観的に判断するのは難しいです。<STRONG>MySQL</STRONG> の安定性については
+ 「<A HREF="manual.ja_Introduction.html#Stability">1.6  <STRONG>MySQL</STRONG> はどれくらい安定か？</A>」節 を参照してください。
+
+我々には <CODE>mSQL</CODE> 安定性の経験がありません。そのため、我々はこれにつ
+いては何も言えません。
+
+<DT><STRONG>価格</STRONG>
+<DD>
+もう一つの重要な問題はもちろんライセンスです。<STRONG>MySQL</STRONG> は 
+<CODE>mSQL</CODE> よりも柔軟なライセンスを持っています。そして <CODE>mSQL</CODE> よ
+りもより安いです。少なくとも、あなたが使用を選択した製品全てに、ライセン
+スまたは email サポートへの支払いを考慮することを覚えていて下さい。
+<STRONG>MySQL</STRONG> を含めた製品を売る場合、もちろんこのライセンスの獲得が要求
+されます。
+
+<DT><STRONG>Perl interfaces</STRONG>
+<DD>
+<STRONG>MySQL</STRONG> は基本的に <CODE>mSQL</CODE> と同じ perl インタフェースと、いくつかの追
+加機能を持ちます。
+
+<DT><STRONG>JDBC (Java)</STRONG>
+<DD>
+<STRONG>MySQL</STRONG> currently has 4 JDBC drivers:
+
+<UL>
+<LI>
+
+The gwe driver: A Java interface by GWE technologies (not supported anymore).
+<LI>
+
+The jms driver: An improved gwe driver by Xiaokun Kelvin ZHU
+<a HREF="mailto:X.Zhu@brad.ac.uk">X.Zhu@brad.ac.uk</a>.
+<LI>
+
+The twz driver: A type 4 JDBC driver by Terrence W. Zellers
+<a HREF="mailto:zellert@voicenet.com">zellert@voicenet.com</a>.  This is commercial but is free for private
+and educational use.
+<LI>
+
+The mm driver: A type 4 JDBC driver by Mark Matthews
+<a HREF="mailto:mmatthew@ecn.purdue.edu">mmatthew@ecn.purdue.edu</a>.  This is released under the GPL.
+</UL>
+
+The recommended drivers are the twz or mm driver. Both are reported to work
+excellently.
+
+We know that <CODE>mSQL</CODE> has a JDBC driver, but we have too little experience
+with it to compare.
+
+<DT><STRONG>開発の速度</STRONG>
+<DD>
+<STRONG>MySQL</STRONG> はとても小さい開発チームを持っていますが、我々は C と C++ のコーディ
+ングをとても速く行ないます。スレッド、関数、 <CODE>GROUP BY</CODE> などはまだ 
+<CODE>mSQL</CODE> には実装されていませんので、it has a lot of chatching up to
+do.  この上でいくつかの見通しを得るために、去年の <CODE>mSQL</CODE> <TT>`HISTORY'</TT> ファ
+イルを見て、<STRONG>MySQL</STRONG> Reference Manual News 節と比較できます( 「<A HREF="manual.ja_News.html#News">E  <STRONG>MySQL</STRONG> change history</A>」節)。速く開発された多くのもの
+が、かなり明白になります。
+
+<DT><STRONG>ユーティリティプログラム</STRONG>
+<DD>
+<CODE>mSQL</CODE> と <STRONG>MySQL</STRONG> は多くの興味深いサードパーティツールを持っ
+ています。上位への移行 (<CODE>mSQL</CODE> -&#62; <STRONG>MySQL</STRONG>) はとても簡単です。
+<STRONG>MySQL</STRONG> は、ほとんど全ての興味深い <CODE>mSQL</CODE> アプリケーションを
+持っています。
+
+<STRONG>MySQL</STRONG> には、簡単な <CODE>msql2mysql</CODE> プログラムが用意されています。
+これは、<CODE>mSQL</CODE> と <STRONG>MySQL</STRONG> の C API 関数のスペルの違いを修正するプログラムです。
+For example, it changes instances of <CODE>msqlConnect()</CODE> to
+<CODE>mysql_connect()</CODE>. 
+<CODE>mSQL</CODE> から MySQL への変換は通常、数分使用するだけです。
+</DL>
+
+
+
+<H3><A NAME="Using_mSQL_tools" HREF="manual.ja_toc.html#Using_mSQL_tools">23.1.1  How to convert <CODE>mSQL</CODE> tools for MySQL</A></H3>
+
+<P>
+According to our experience, it would just take a few hours to convert tools
+such as <CODE>msql-tcl</CODE> and <CODE>msqljava</CODE> that use the
+<CODE>mSQL</CODE> C API so that they work with the <STRONG>MySQL</STRONG> C API.
+
+</P>
+<P>
+The conversion procedure is:
+
+</P>
+
+<OL>
+<LI>
+
+シェルスクリプト <CODE>msql2mysql</CODE> をソースに実行します。バイナリプログラム 
+<CODE>replace</CODE> が必要です。これは <STRONG>MySQL</STRONG> で配布されます。
+<LI>
+
+Compile.
+<LI>
+
+全てのコンパイラエラーを修復します.
+</OL>
+
+<P>
+<STRONG>MySQL</STRONG> と <CODE>mSQL</CODE> 間の C API の違い:
+
+<UL>
+<LI>
+
+<STRONG>MySQL</STRONG> は <CODE>MYSQL</CODE> 構造体を接続型として使用します (<CODE>mSQL</CODE> は 
+<CODE>int</CODE> を使用します)。
+<LI>
+
+<CODE>mysql_connect()</CODE> は <CODE>MYSQL</CODE> 構造体へのポインタをパラメータとして使用します。そ
+れをグローバルに定義したり、その獲得に <CODE>malloc()</CODE> を使用するのは簡単です。
+<CODE>mysql_connect()</CODE> also takes 2 parameters for specifying the user and
+password.  You may set these to <CODE>NULL, NULL</CODE> for default use.
+<LI>
+
+<CODE>mysql_error()</CODE> は <CODE>MYSQL</CODE> 構造体をパラメータとして使用します。古いコードを移
+行する場合、あなたの古い  <CODE>msql_error()</CODE> コードへパラメータを追加してください。
+<LI>
+
+<STRONG>MySQL</STRONG> returns an error number and a text error message for all
+errors. <CODE>mSQL</CODE> returns only a text error message.
+<LI>
+
+Some incompatibilities exist as a result of <STRONG>MySQL</STRONG> supporting
+multiple connections to the server from the same process.
+</UL>
+
+
+
+<H3><A NAME="Protocol_differences" HREF="manual.ja_toc.html#Protocol_differences">23.1.2  How <CODE>mSQL</CODE> and MySQL client/server communications protocols differ</A></H3>
+
+<P>
+There are enough differences that it is impossible (or at least not easy)
+to support both.
+
+</P>
+<P>
+The most significant ways in which the <STRONG>MySQL</STRONG> protocol differs
+from the <CODE>mSQL</CODE> protocol are listed below:
+
+</P>
+
+<UL>
+<LI>
+
+メッセージバッファは多くの結果行を含めます。
+<LI>
+
+質問または回答が現在のバッファよりも大きい場合、サーバとクライアントのコ
+ンフィグ可能制限まで、メッセージバッファは動的に増大されます。
+<LI>
+
+全てのパケットは、パケットの重複や見失いを見つけ出すために、番号づけさ
+れています。
+<LI>
+
+全ての項目は ASCII で送られ、項目の行と長さはパックされたバイナリコーディン
+グ(1,2 または 3 バイト)で送られます。
+<LI>
+
+<STRONG>MySQL</STRONG> はバッファされない結果で読み込み可能です(クライアント内に完全なセッ
+トを格納する必要がありません)。
+<LI>
+
+一つの書き込み/読み込みが 30 秒以上かかると、サーバは接続をクローズしま
+す。
+<LI>
+
+接続で 8 時間何も起きないと、サーバは接続をクローズします。
+</UL>
+
+
+
+<H3><A NAME="Syntax_differences" HREF="manual.ja_toc.html#Syntax_differences">23.1.3  <STRONG>MySQL</STRONG> &#38; <CODE>mSQL</CODE> 2.0 間の SQL 構文の違いは？</A></H3>
+
+<P>
+<STRONG>Column types</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+他に加え次の項目オプション型を持ちます (among others; see
+ 「<A HREF="manual.ja_Reference.html#CREATE_TABLE">7.7  <CODE>CREATE TABLE</CODE>構文</A>」節):
+
+<UL>
+<LI>
+
+<CODE>ENUM</CODE> type for one of a set of strings.
+<LI>
+
+<CODE>SET</CODE> type for many of a set of strings.
+<LI>
+
+<CODE>BIGINT</CODE> type for 64-bit integers.
+</UL>
+
+<DT><CODE></CODE>
+<DD>
+<STRONG>MySQL</STRONG> also supports
+the following additional type attributes:
+
+<UL>
+<LI>
+
+整数項目への <CODE>UNSIGNED</CODE> オプション
+<LI>
+
+整数項目への <CODE>ZEROFILL</CODE> オプション
+<LI>
+
+<CODE>PRIMARY KEY</CODE> も含み全ての整数項目への <CODE>AUTO_INCREMENT</CODE> オプション
+ 「<A HREF="manual.ja_Clients.html#mysql_insert_id">22.4.29  <CODE>mysql_insert_id()</CODE></A>」節参照.
+<LI>
+
+全ての項目への <CODE>DEFAULT</CODE> 値
+</UL>
+
+<DT><CODE>mSQL2</CODE>
+<DD>
+<CODE>mSQL</CODE> column types correspond to the <STRONG>MySQL</STRONG> types shown below:
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><CODE>mSQL</CODE> <STRONG>type</STRONG> </TD><TD> <STRONG>Corresponding <STRONG>MySQL</STRONG> type</STRONG>
+</TR NOSAVE>
+<TR><TD><CODE>CHAR(len)</CODE> </TD><TD> <CODE>CHAR(len)</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>TEXT(len)</CODE> </TD><TD> <CODE>TEXT(len)</CODE>. <CODE>len</CODE> is the maximal length.
+And <CODE>LIKE</CODE> works.
+</TR NOSAVE>
+<TR><TD><CODE>INT</CODE> </TD><TD> <CODE>INT</CODE>. With many more options!
+</TR NOSAVE>
+<TR><TD><CODE>REAL</CODE> </TD><TD> <CODE>REAL</CODE>. Or <CODE>FLOAT</CODE>. Both 4- and 8-byte versions are available.
+</TR NOSAVE>
+<TR><TD><CODE>UINT</CODE> </TD><TD> <CODE>INT UNSIGNED</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>DATE</CODE> </TD><TD> <CODE>DATE</CODE>. Uses ANSI SQL format rather than <CODE>mSQL</CODE>'s own.
+</TR NOSAVE>
+<TR><TD><CODE>TIME</CODE> </TD><TD> <CODE>TIME</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>MONEY</CODE> </TD><TD> <CODE>DECIMAL(12,2)</CODE>. A fixed-point value with two decimals.
+</TR>
+</TABLE>
+</DL>
+
+<P>
+<STRONG>Index creation</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+Indexes may be specified at table creation time with the <CODE>CREATE TABLE</CODE>
+statement.
+<DT><CODE>mSQL</CODE>
+<DD>
+Indexes must be created after the table has been created, with separate
+<CODE>CREATE INDEX</CODE> statements.
+</DL>
+
+<P>
+<STRONG>To insert a unique identifier into a table</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+Use <CODE>AUTO_INCREMENT</CODE> as a column type
+specifier.
+ 「<A HREF="manual.ja_Clients.html#mysql_insert_id">22.4.29  <CODE>mysql_insert_id()</CODE></A>」節参照.
+<DT><CODE>mSQL</CODE>
+<DD>
+Create a <CODE>SEQUENCE</CODE> on a table and select the <CODE>_seq</CODE> column.
+</DL>
+
+<P>
+<STRONG>To obtain a unique identifier for a row</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+Add a <CODE>PRIMARY KEY</CODE> or <CODE>UNIQUE</CODE> key to the table and use this.
+New in 3.23.11: If the <CODE>PRIMARY</CODE> or <CODE>UNIQUE</CODE> key consists of only one
+column and this is of type integer, one can also refer to it as
+<CODE>_rowid</CODE>.
+<DT><CODE>mSQL</CODE>
+<DD>
+Use the <CODE>_rowid</CODE> column. Observe that <CODE>_rowid</CODE> may change over time
+depending on many factors.
+</DL>
+
+<P>
+<STRONG>To get the time a column was last modified</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+Add a <CODE>TIMESTAMP</CODE> column to the table. This column is automatically set
+to the current date and time for <CODE>INSERT</CODE> or <CODE>UPDATE</CODE> statements if
+you don't give the column a value or if you give it a <CODE>NULL</CODE> value.
+
+<DT><CODE>mSQL</CODE>
+<DD>
+Use the <CODE>_timestamp</CODE> column.
+</DL>
+
+<P>
+<STRONG><CODE>NULL</CODE> value comparisons</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+<STRONG>MySQL</STRONG> follows
+ANSI SQL and a comparison with <CODE>NULL</CODE> is always <CODE>NULL</CODE>.
+<DT><CODE>mSQL</CODE>
+<DD>
+In <CODE>mSQL</CODE>, <CODE>NULL = NULL</CODE> is TRUE.  You
+must change <CODE>=NULL</CODE> to <CODE>IS NULL</CODE> and <CODE>&#60;&#62;NULL</CODE> to
+<CODE>IS NOT NULL</CODE> when porting old code from <CODE>mSQL</CODE> to <STRONG>MySQL</STRONG>.
+</DL>
+
+<P>
+<STRONG>String comparisons</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+Normally, string comparisons are performed in case-independent fashion with
+the sort order determined by the current character set (ISO-8859-1 Latin1 by
+default).  If you don't like this, declare your columns with the
+<CODE>BINARY</CODE> attribute, which causes comparisons to be done according to the
+ASCII order used on the <STRONG>MySQL</STRONG> server host.
+<DT><CODE>mSQL</CODE>
+<DD>
+All string comparisons are performed in case-sensitive fashion with
+sorting in ASCII order.
+</DL>
+
+<P>
+<STRONG>Case-insensitive searching</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+<CODE>LIKE</CODE> is a case-insensitive or case-sensitive operator, depending on
+the columns involved. If possible, <STRONG>MySQL</STRONG> uses indexes if the
+<CODE>LIKE</CODE> argument doesn't start with a wildcard character.
+<DT><CODE>mSQL</CODE>
+<DD>
+Use <CODE>CLIKE</CODE>.
+</DL>
+
+<P>
+<STRONG>Handling of trailing spaces</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+Strips all spaces at the end of <CODE>CHAR</CODE> and <CODE>VARCHAR</CODE>
+columns. Use a <CODE>TEXT</CODE> column if this behavior is not desired.
+<DT><CODE>mSQL</CODE>
+<DD>
+Retains trailing space.
+</DL>
+
+<P>
+<STRONG><CODE>WHERE</CODE> clauses</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+<STRONG>MySQL</STRONG> correctly prioritizes everything (<CODE>AND</CODE> is evaluated
+before <CODE>OR</CODE>). To get <CODE>mSQL</CODE> behavior in <STRONG>MySQL</STRONG>, use
+parentheses (as shown below).
+<DT><CODE>mSQL</CODE>
+<DD>
+Evaluates everything from left to right. This means that some logical
+calculations with more than three arguments cannot be expressed in any
+way. It also means you must change some queries when you upgrade to
+<STRONG>MySQL</STRONG>. You do this easily by adding parentheses.  Suppose you
+have the following <CODE>mSQL</CODE> query:
+
+<PRE>
+mysql&#62; SELECT * FROM table WHERE a=1 AND b=2 OR a=3 AND b=4;
+</PRE>
+
+To make <STRONG>MySQL</STRONG> evaluate this the way that <CODE>mSQL</CODE> would,
+you must add parentheses:
+
+<PRE>
+mysql&#62; SELECT * FROM table WHERE (a=1 AND (b=2 OR (a=3 AND (b=4))));
+</PRE>
+
+</DL>
+
+<P>
+<STRONG>Access control</STRONG>
+
+</P>
+<DL COMPACT>
+
+<DT><CODE><STRONG>MySQL</STRONG></CODE>
+<DD>
+Has tables to store grant (permission) options per user, host and
+database.  「<A HREF="manual.ja_Privilege_system.html#Privileges">6.7  特権システムはどのように動くか？</A>」節参照.
+<DT><CODE>mSQL</CODE>
+<DD>
+Has a file <TT>`mSQL.acl'</TT> in which you can grant read/write privileges for
+users.
+<DT><CODE></CODE>
+<DD>
+</DL>
+
+
+
+<H2><A NAME="Compare_PostgreSQL" HREF="manual.ja_toc.html#Compare_PostgreSQL">23.2  How <STRONG>MySQL</STRONG> compares to PostgreSQL</A></H2>
+
+<P>
+<CODE>PostgreSQL</CODE> はさらに進んだ機能をいくつか持っています。ユーザ定義型、トリ
+ガ、ルール、トランザクションのような。しかし ANSI SQL と ODBC の標準型と
+機能の多くが欠けています。サポート/未サポートの型/関数の完全な一覧は
+<a HREF="http://www.mysql.com/crash-me-choose.htmy"> <CODE>crash-me</CODE> web page</a> を見てください。
+
+</P>
+<P>
+通常、<CODE>PostgreSQL</CODE> は <STRONG>MySQL</STRONG> よりとても遅いです。
+ 「<A HREF="manual.ja_Performance.html#Benchmarks">12.7  Using your own benchmarks</A>」節参照.  This is due largely to their
+transactions system which is not as sofisticated as Berkely DB's.  In
+<STRONG>MySQL</STRONG> you can decide per table if you want the table to be fast
+or take the speed penalty of making it transaction safe. If you really
+the rich type system PostgreSQL offers and you can afford the speed
+penalty, you should take a look at PostgreSQL.
+
+</P>
+<P><HR><P>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Clients.html">previous</A>, <A HREF="manual.ja_MySQL_internals.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

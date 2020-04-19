@@ -1,0 +1,102 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15966</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15965">[前]</a><a href="15967">[次]</a><a href="../list/15901-16000">[番号順一覧]</a><a href="../thread/15901-16000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15966
+</p>
+<div class="header">
+<p>
+From: ram &lt;ram &lt;ram@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 06 Jun 2013 17:08:14 +0900<br>
+Subject: [mysql 15966] テーブルのレストアが出来なくて困っています<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+MYSQLのデータベース初心者兼管理者です。
+誤ってデータを消してしまい、バックアップでデータを戻そうとしているのですが、
+mysqldumpで吐き出したSQLを実行するとエラーが出てきて困っております。
+基幹システムではないのですが、ちょっと復旧を焦っております。
+
+◆実行環境
+MYSQL5.1.41　Windows2003/R3
+
+Server charcterset = cp932
+Client charcterset = cp932
+
+◆現象
+mysqldump --opt --add-drop-table --add-locks --user=root --password=*** dbname &gt; W:\backupsql.txt
+をバッチで実行して出力されるのが以下のファイルです。
+
+-- MySQL dump 10.13  Distrib 5.1.41, for Win32 (ia32)
+--
+-- Host: localhost    Database: dbname
+-- ------------------------------------------------------
+-- Server version	5.1.41-community
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+--
+-- Table structure for table `ckbtbl`
+--
+
+DROP TABLE IF EXISTS `ckbtbl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ckbtbl` (
+  `CKBKBID` varchar(10) NOT NULL DEFAULT '',
+中略
+  `CKBGNCN` decimal(7,2) DEFAULT NULL,
+  `UPDATE_IDENT` decimal(7,0) DEFAULT NULL,
+  PRIMARY KEY (`CKBKBID`,`CKBKBCN`)
+) ENGINE=InnoDB DEFAULT CHARSET=cp932;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+これを
+mysql --default-character-set=cp932 dbname -u user -p*** &lt; W:\backupsql.txt
+と実行します。
+（/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+などのコメント部分は全て削っています。）
+
+ところが、
+ERROR 1231 (42000) at line 36:
+ Variable 'character_set_client' can't be set to the value of 'NULL'
+というエラーが出てきます。line 36というのは下記の行です。
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+SET character_set_client = @saved_cs_client
+という行をコメントアウトしますが、結果は同じです。
+
+何が間違っているのでしょうか？
+アドバイス頂ければ有難いです。
+
+初穂太郎
+
+
+</pre>
+</div>
+<p class="button"><a href="15965">[前]</a><a href="15967">[次]</a><a href="../list/15901-16000">[番号順一覧]</a><a href="../thread/15901-16000">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15966">  15966 2013-06-06 17:08 [ram &lt;ram@xxxxxxxxxx&gt;] テーブルのレストアが出来なくて困っています</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15967">  15967 2013-06-06 17:48 ┗[&quot;Atsushi.Shizawa&quot; &lt;a]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15968">  15968 2013-06-06 19:47 　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15969">  15969 2013-06-11 18:21 　　┗[&quot;Atsushi.Shizawa&quot; &lt;a]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15970">  15970 2013-06-14 11:51 　　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15974">  15974 2013-06-14 15:11 　　　　┗[&quot;Atsushi.Shizawa&quot; &lt;a]                               </a></span>
+</pre>
+</body>
+</html>

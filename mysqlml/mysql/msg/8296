@@ -1,0 +1,129 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8296</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8295">[前]</a><a href="8297">[次]</a><a href="../list/8201-8300">[番号順一覧]</a><a href="../thread/8201-8300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8296
+</p>
+<div class="header">
+<p>
+From: Hiroyasu TOBA &lt;Hiroyasu TOBA &lt;toba@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 18 Oct 2003 15:20:46 +0900<br>
+Subject: [mysql 08296] Re: SELECT JOIN  　した結果の PHP mysql     関数からの取り出しについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+たびたびすみません、鳥羽です。
+　編集途中で送ってしまいました。再度投稿します。
+
+-----
+
+　こんにちは、鳥羽です。
+
+　古賀様、とみた様、早速のアドバイスありがとうございます。
+
+
+とみたまさひろ wrote:
+
+<span class="quote2">&gt;&gt;とみたです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;API があるようなので、それを使って mysql_fetch_array() の代わりとなる</span>
+<span class="quote2">&gt;&gt;ような独自の関数を作ればよいのかも…。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;mysql_fetch_row() で１レコードを取り出して、各フィールドについて</span>
+<span class="quote2">&gt;&gt;mysql_fetch_field() でテーブル名とフィールド名を求めて、&quot;.&quot; で結合して</span>
+<span class="quote2">&gt;&gt;ハッシュのキーとする…という関数です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;私の怪しい PHP の知識で書くとこういう感じ…。</span>
+<span class="quote2">&gt;&gt;# 試してません。たぶん、このままでは動かないと思います (^^;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; $row = mysql_fetch_array($result)</span>
+<span class="quote2">&gt;&gt; $hash = array()</span>
+<span class="quote2">&gt;&gt; for ($i=0; $i&lt;count($row); $i++) {</span>
+<span class="quote2">&gt;&gt; $f = mysql_fetch_field($result, $i)</span>
+<span class="quote2">&gt;&gt; $k = $f-&gt;table + &quot;.&quot; + $f-&gt;name</span>
+<span class="quote2">&gt;&gt; $hash[$k] = $row[$i]</span>
+<span class="quote2">&gt;&gt; }</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+
+
+　　解決のヒント、どうもありがとうございます。
+　　早速、アドバイスどおり試してみました。
+　　こんな感じでうまくいきました。
+
+　$flag = 0;
+　// レコード読み込みループ
+while ($row =@mysql_fetch_array($result,MYSQL_ASSOC)) {
+// 　ハッシング？テーブル作成は　1回だけ
+if( $flag == 0 ) {
+$hash = array();
+$v = array_values($row);
+for( $i=0; $i&lt;count($row); $i++ ) {
+$f = mysql_fetch_field($result,$i);
+$k = $f-&gt;table . &quot;.&quot; . $f-&gt;name;
+$hash[$k] = $i;
+}
+$flag = 1;
+}
+
+// 1要素配列がかえってくるので苦肉の策でarray_pop()
+$table1_elm1 = array_pop( array_slice($row,$hash[&quot;Table1.Element1&quot;],1)) ;
+$table1_elm1 = array_pop( array_slice($row,$hash[&quot;Table5.Element6&quot;],1));
+　　　　　.
+　　　　　.
+}
+　とかです。
+
+　参照用テーブル作成の部分はごちゃごちゃするので関数化しようかと思います。
+　アクセスに行く部分は、特にきにならないので、そのまま、、、。
+　参照の時などは、直接、配列内の要素を順番指定でアクセスできると、
+　効率的なのですが、、、
+
+yuji koga wrote:
+
+<span class="quote2">&gt;&gt;お世話になります。古賀です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;異なるテーブル間のリレーションならば、</span>
+<span class="quote2">&gt;&gt;とみた様の解決策が良いと思います。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;＃とりあえず、異なるテーブル間で同じフィールド名を使わない、</span>
+<span class="quote2">&gt;&gt;＃というのが一番の解決策なのかも知れません。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+
+　　なるほど、確かに、重ならないフィールド名ならば、素のままでアクセス
+　できますね。（知らなかった、、、。）
+
+　とみたさん、古賀さん、どうもありがとうございました。
+
+　それでは、失礼します。
+
+----
+
+　鳥羽　弘康
+
+
+</pre>
+</div>
+<p class="button"><a href="8295">[前]</a><a href="8297">[次]</a><a href="../list/8201-8300">[番号順一覧]</a><a href="../thread/8201-8300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8283">   8283 2003-10-17 17:31 [Hiroyasu TOBA &lt;toba@] SELECT JOIN 　した結果の PHP mysql  関数からの取り出しについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8284">   8284 2003-10-17 17:54 ┗[yuji koga &lt;koga-y@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8286">   8286 2003-10-17 18:39 　┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8288">   8288 2003-10-17 19:07 　　┣[yuji koga &lt;koga-y@xx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8308">   8308 2003-10-21 09:14 　　┃┗[とみたまさひろ &lt;tomm]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8295">   8295 2003-10-18 15:08 　　┗[Hiroyasu TOBA &lt;toba@]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="8296">   8296 2003-10-18 15:20 　　　┗[Hiroyasu TOBA &lt;toba@]                                 </a></span>
+</pre>
+</body>
+</html>

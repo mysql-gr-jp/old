@@ -1,0 +1,139 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13827</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13826">[前]</a><a href="13828">[次]</a><a href="../list/13801-13900">[番号順一覧]</a><a href="../thread/13801-13900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13827
+</p>
+<div class="header">
+<p>
+From: MORIYAMA Masayuki &lt;MORIYAMA Masayuki &lt;moriyama@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 26 Mar 2007 17:03:47 +0900<br>
+Subject: [mysql 13827] Re: MySQLの現行UTF-8の問題とその対処方法について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+森山です。
+
+松信さん、詳しい解説ありがとうございます。
+
+Yoshinori Matsunobu wrote:
+<span class="quote1">&gt; ●そもそもの問題</span>
+<span class="quote1">&gt; Windows Vistaから標準でサポートされるJIS X 0213:2004には、</span>
+<span class="quote1">&gt; UTF-8表現で4バイトとなる文字が存在します。</span>
+<span class="quote1">&gt; このような文字はMySQLのcharset utf8で定義した文字列型の列には入れることがで</span>
+<span class="quote1">&gt; きません。</span>
+<span class="quote1">&gt; MySQLのutf8は3バイト文字までしか対応していないためです。</span>
+<span class="quote1">&gt; 不正な文字として扱われ(その意味でCESU-8とは異なると私は理解しています)、</span>
+<span class="quote1">&gt; 「その4バイトのUTF-8の文字以降の全ての文字列が削除された上で格納される」</span>
+<span class="quote1">&gt; という動作をします。これは現時点の「仕様」と位置づけられています。</span>
+
+UTF-16 から UTF-8 への変換で UTF-8 の 3 バイトまでしかサポートせず、サロ
+ゲートペアを意識せずに変換すると CESU-8 になるとの理解でいます。
+
+# 以下、CESU-8 としている所は、3 バイトまでの対応の UTF-8 とお考えくださ
+# い。
+
+Unicodeスカラ値   UTF-16       UTF-8          CESU-8
+---------------  ---------  -----------  -----------------
+   U+10000       D800 DC00  F0 90 80 80  ED A0 80 ED B0 80
+
+UTF-16 から UTF-8 への変換は、本来、UTF-16 のサロゲートペアをUnicodeスカ
+ラ値(UTF-32) に変換してから、UTF-8 に変換するという事をしなければならな
+いのですが、CESU-8 は、サロゲートペアを意識せずに単純変換して 3 バイト x
+2 = 6 バイトに変換するようになっています。
+
+ですので、MySQL の utf8 は、CESU-8 と言っていいと思います。
+
+Unicode Technical Report #26
+Compatibility Encoding Scheme for UTF-16: 8-Bit (CESU-8)
+<a href="http://www.unicode.org/unicode/reports/tr26/">http://www.unicode.org/unicode/reports/tr26/</a>
+
+参考)
+  XML文字メーリングリストでの CESU-8 のスレッド
+  <a href="http://www2.xml.gr.jp/log.html?MLID=xmlmoji&amp;TID=1145&amp;F=0&amp;L=10&amp;R=0">http://www2.xml.gr.jp/log.html?MLID=xmlmoji&amp;TID=1145&amp;F=0&amp;L=10&amp;R=0</a>
+  <a href="http://www2.xml.gr.jp/log.html?MLID=xmlmoji&amp;TID=1175&amp;F=0&amp;L=10&amp;R=0">http://www2.xml.gr.jp/log.html?MLID=xmlmoji&amp;TID=1175&amp;F=0&amp;L=10&amp;R=0</a>
+
+<span class="quote1">&gt; ●計画している対処案</span>
+<span class="quote1">&gt; MySQL社内では、以下のような実装案を検討しています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 1.現行エンコーディングutf8(3バイト)を4バイトに拡張する。(残るのは新utf8)</span>
+
+本来のあるべき姿と思います。
+
+CESU-8 を前提としたアプリがあった場合に、このような変更は非互換を生む事
+になりえるので慎重に検討する必要があるでしょう。
+
+ただ、現実問題として、あまり使われることがない文字の対応の為にアプリケー
+ション側で、UTF-8 &lt;-&gt; CESU-8 変換をして、データベースに格納するというよ
+な処理をしているとも思えないので、非互換が問題になることは、ほとんどない
+のではないかと思いますが…
+
+<span class="quote1">&gt; 2.現行エンコーディングutf8(3バイト)はそのまま残し、UTF-8 4バイト対応の新しい</span>
+<span class="quote1">&gt; エンコーディングutf8_4を追加する。</span>
+<span class="quote1">&gt; (残るのはutf8と新utf8_4)</span>
+
+MySQL の互換性維持を考えると、この案を検討する必要はあるでしょう。
+
+しかし、他のソフトで正しく実装している UTF-8 とのデータ交換の際に、
+utf8_4 を使うようにする必要があり、それが周知徹底できるか?
+という問題があるように思います。
+
+<span class="quote1">&gt; 3.現行エンコーディングutf8(3バイト)の名称をutf8_oldに変更する。そして</span>
+<span class="quote1">&gt; UTF-8 4バイト対応のエンコーディングutf8を追加する。(残るのはutf8_oldと新</span>
+<span class="quote1">&gt; utf8)</span>
+<span class="quote1">&gt; ステータス変数でどちらを使うかを切り替えられるようにし、同時に使えるのは片方</span>
+<span class="quote1">&gt; のみ</span>
+
+個人的には、この案が現実的なのではないかと思います。
+
+<span class="quote1">&gt; 4.新しいエンコーディングutf16を導入する(残るのはutf8と新utf16)</span>
+<span class="quote1">&gt; </span>
+utf8 の問題は解決されないように思います。
+
+<span class="quote1">&gt; 森山さんご指摘のように、RFC3629ではUTF-8は4バイトまでで良くなっていることな</span>
+<span class="quote1">&gt; どから、</span>
+<span class="quote1">&gt; 6バイトでなく4バイトで良いと考えています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 先日のOSCでは1と2について話をしましたが、実際には3と4も検討されています。</span>
+<span class="quote1">&gt; 1が一番分かりやすいですが、既存環境との干渉が懸念されています。</span>
+<span class="quote1">&gt; 2は、2つのUTF-8系エンコーディングが並立することになるので、</span>
+<span class="quote1">&gt; クライアントアプリ等でどちらを使うかを意識しないといけないなどの課題がありま</span>
+<span class="quote1">&gt; す。</span>
+<span class="quote1">&gt; 吉岡さんのご指摘は、OSCでの私の説明を受けて、</span>
+<span class="quote1">&gt; 2ではなく1を取るべき、とされたものです。</span>
+<span class="quote1">&gt; 3は1と2の折衷案という位置づけです。</span>
+
+仕様変更に伴う非互換の問題を考えなくてよいのであれば、1 にするのが単純明
+解で良いですね。
+
+2 のような案が出てくるのは、仕様変更による非互換の問題を極力起こさせない
+ように考慮する場合と理解しています。
+
+スッキリとしない対応方法となってしまいますが、Oracle では UTF8 という名
+前で CESU-8 が実装されていて、AL32UTF8 で 4 バイト対応の UTF-8 が実装さ
+れている事を考えると、現実的な対応方法の 1 であろうとは思います。
+
+MySQL の utf8 が仕様変更される事によるインパクトと、MySQL の utf8 が RFC
+3629 の UTF-8 とは異なる事によるインパクトのどちらの方が大きいのかという
+事も考えないといけませんね。
+
+--
+森山 将之 &lt;moriyama@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="13826">[前]</a><a href="13828">[次]</a><a href="../list/13801-13900">[番号順一覧]</a><a href="../thread/13801-13900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13823">  13823 2007-03-26 07:21 [&quot;Yoshinori Matsunobu] MySQLの現行UTF-8の問題とその対処方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13826">  13826 2007-03-26 16:34 ┣[SUGAWARA Hajime &lt;sug]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="13827">  13827 2007-03-26 17:03 ┗[MORIYAMA Masayuki &lt;m]                                       </a></span>
+</pre>
+</body>
+</html>

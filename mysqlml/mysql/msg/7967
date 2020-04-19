@@ -1,0 +1,75 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7967</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="7966">[前]</a><a href="7968">[次]</a><a href="../list/7901-8000">[番号順一覧]</a><a href="../thread/7901-8000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7967
+</p>
+<div class="header">
+<p>
+From: Yoshitaka Ishiguro &lt;Yoshitaka Ishiguro &lt;ishi@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 27 Jun 2003 19:40:38 +0900<br>
+Subject: [mysql 07967] Lost connection to MySQL server during query<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+石黒です。
+
+MySQL4.0.12-logを使用しています。
+
+360万件のレコードが入ったテーブルに、FULLTEXTインデックスを張って
+あります。text型のカラム、a、b、cの三つに張ってあります。
+
+SQL1:
+select * from test_table where match(a) against('tako')
+or match(b) against('ika') or match(c) against('surume');
+
+というSQL文をプロンプトから打つと、
+
+Lost connection to MySQL server during query
+とでます。
+
+仮に
+SQL2:
+select * from test_table where match(a) against('tako')
+だけですと、表示されます。
+
+MLの過去ログで、Lost connection to MySQL server during query
+のエラーについては、このマニュアルのページとありましたので、
+<a href="http://www.mysql.gr.jp/jpdoc/4.0/manual.ja_Problems.html#Gone_away">http://www.mysql.gr.jp/jpdoc/4.0/manual.ja_Problems.html#Gone_away</a>
+
+読んでみたところ、おそらくSQL1:のケースですと、大きな結果行
+を返すことになるので、デフォルトの設定であるmax_query_sizeの1M
+を超えるのではと考えました。(クエリと結果行は違うとは思いますが、
+他に判断しようがなかったので、そう判断しました)
+
+しかしながら、mysqld_safe -O max_query_size=2MBとして起動しよう
+としてみたところ、max_query_sizeという変数はないと出て、
+show variablesをしてみたところ、ありませんでした。
+
+show variablesで関係がありそうな変数を探してみましたが、
+特にありませんでした。
+
+Lost connection to MySQL server during query
+と出るのは、20秒ぐらいで出てくるので、リソースを使い果たしたので
+はなく、何かの制限にひっかかってmysqldに切られたのだと思いますが、
+どうしたらよいかわからず、質問しました。
+
+どうぞよろしくお願いします。
+失礼します。
+
+</pre>
+</div>
+<p class="button"><a href="7966">[前]</a><a href="7968">[次]</a><a href="../list/7901-8000">[番号順一覧]</a><a href="../thread/7901-8000">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="7967">   7967 2003-06-27 19:40 [Yoshitaka Ishiguro &lt;] Lost connection to MySQL server during query</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7970">   7970 2003-06-28 08:35 ┗[A.K.I. &lt;aki@xxxxxxxx]                                       </a></span>
+</pre>
+</body>
+</html>

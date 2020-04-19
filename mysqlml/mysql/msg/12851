@@ -1,0 +1,131 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12851</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="12850">[前]</a><a href="12852">[次]</a><a href="../list/12801-12900">[番号順一覧]</a><a href="../thread/12801-12900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12851
+</p>
+<div class="header">
+<p>
+From: &quot;大野博子&quot; &lt;&quot;大野博子&quot; &lt;h-ohno@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 12 Mar 2006 19:30:25 +0900<br>
+Subject: [mysql 12851] mysql 3.23.58 + php  で結合クエリ実行時にLost connectionのエラー<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+大野と申します。
+
+MYSQLにデータを追加したところ、
+PHPを使った検索システムのMYSQLクエリ実行時に、
+下記のエラーが出て、MYSQLが落ちるという障害に悩んでおります。
+
+MYSQL 2013:Lost connection to MySQL server during query
+
+なにかご存じなかたがいらっしゃいましたら、
+どんなことでもかまいませんのでご教授願えませんでしょうか。
+
+−−−−−−−−−−−
+●環境：
+FreeBSD 4.10
+php 4.3.10
+mysql 3.23.58　（mysql-4.1にあげてみたのですが解決せず戻しました）
+−−−−−−−−−−−
+●実行時のクエリ
+select *
+from A,B,C
+where (A.id = B.id and B.code = C.code)
+and A.code_a = '01'
+and A.keyword like '%テスト%'
+and A.title like '%テスト%'
+and A.yomi like '%テスト%'
+group by A.id
+order by C.flg,C.yomi,A.code_a,A.toshi,A.id
+（joinでも試してみましたが同じエラーが出ました。）
+
+※　キーワードによる検索をとった、以下だと問題ないようです。
+（A.code_a・A.code_bにはインデックスが貼ってあります）
+select *
+from A,B,C
+where (A.id = B.id and B.code = C.code)
+and A.code_a = '01'
+and A.code_b = '01'
+group by A.id
+order by C.flg,C.yomi,A.code_a,A.toshi,A.id
+−−−−−−−−−−−
+●いままでの経緯
+・問題のＰＨＰとMYSQLのプログラムは一年間、運用していた。
+・そのときにメインの表は24000件程度データが入っていた。
+・5000件追加後、上記のエラーが出たので、my.confの設定を以下のように修正し
+た。
+[mysqld]
+set-variable	= key_buffer=256M
+set-variable	= max_allowed_packet=64M
+set-variable	= table_cache=512
+set-variable	= sort_buffer=5M
+set-variable	= record_buffer=5M
+set-variable	= myisam_sort_buffer_size=64M
+set-variable	= thread_cache=16
+set-variable    = long_query_time=10
+・その後、若干安定したものの、時々エラーが出る。
+（複数ウインドウでプログラムを実行したときなど）
+・その後、Aとリンクするテーブル（データー数4件）にvarchar(254)の項目を追加
+・また不安定に。
+
+・CSEやシェルから実行しても、おちることはない。
+
+・なんどもLost connectionすると、そのうちMYSQLのCPUの使用率が98％くらいに
+なってきて、
+MYSQLがハングアップしてしまう。
+
+以下はそのときのエラーログです。
+−−−−−−−−−−
+060227 10:28:25  mysqld restarted
+/usr/local/mysql/libexec/mysqld: ready for connections
+mysqld got signal 11;
+This could be because you hit a bug. It is also possible that this binary
+or one of the libraries it was linked against is corrupt, improperly built,
+or misconfigured. This error can also be caused by malfunctioning hardware.
+We will try our best to scrape up some info that will hopefully help
+diagnose
+the problem, but since we have already crashed, something is definitely
+wrong
+and this may fail
+
+key_buffer_size=268431360
+record_buffer=16773120
+sort_buffer=16777208
+max_used_connections=0
+max_connections=100
+threads_connected=1
+It is possible that mysqld could use up to
+key_buffer_size + (record_buffer + sort_buffer)*max_connections = 3538539 K
+bytes of memory
+Hope that's ok, if not, decrease some variables in the equation
+
+060227 10:28:34  mysqld restarted
+/usr/local/mysql/libexec/mysqld: ready for connections
+−−−−−−−−−−
+
+このままではデータの追加のたび、不安です。
+またどのあたりを調べればいいのかわからなくなってきました。
+なにかお気づきの点などありましたら、よろしくお願いいたします。
+ -----------------------------------------
+ 大野　博子
+
+
+</pre>
+</div>
+<p class="button"><a href="12850">[前]</a><a href="12852">[次]</a><a href="../list/12801-12900">[番号順一覧]</a><a href="../thread/12801-12900">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="12851">  12851 2006-03-12 19:30 [&quot;大野博子&quot; &lt;h-ohno@x] mysql 3.23.58 + php  で結合クエリ実行時にLost connectionのエラー</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12853">  12853 2006-03-12 22:55 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12856">  12856 2006-03-13 20:05 　┗[&quot;大野博子&quot; &lt;h-ohno@x]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,119 @@
+--- mysql-4.1.9.orig/client/client_priv.h.orig	2005-01-12 07:06:03.000000000 +0900
++++ mysql-4.1.9/client/client_priv.h	2005-01-19 17:36:15.000000000 +0900
+@@ -45,9 +45,9 @@
+   OPT_COMPATIBLE, OPT_RECONNECT, OPT_DELIMITER, OPT_SECURE_AUTH,
+   OPT_OPEN_FILES_LIMIT, OPT_SET_CHARSET, OPT_CREATE_OPTIONS,
+   OPT_START_POSITION, OPT_STOP_POSITION, OPT_START_DATETIME, OPT_STOP_DATETIME,
+-  OPT_SIGINT_IGNORE, OPT_HEXBLOB, OPT_ORDER_BY_PRIMARY
++  OPT_SIGINT_IGNORE, OPT_HEXBLOB, OPT_ORDER_BY_PRIMARY, OPT_HEXCHAR
+ #ifdef HAVE_NDBCLUSTER_DB
+   ,OPT_NDBCLUSTER,OPT_NDB_CONNECTSTRING
+ #endif
+-  ,OPT_IGNORE_TABLE
++  ,OPT_IGNORE_TABLE, OPT_CSV
+ };
+--- mysql-4.1.9.orig/client/mysqldump.c.orig	2005-01-12 07:06:02.000000000 +0900
++++ mysql-4.1.9/client/mysqldump.c	2005-01-19 18:37:30.000000000 +0900
+@@ -83,7 +83,7 @@
+ 		opt_autocommit=0,opt_disable_keys=1,opt_xml=0,
+ 		opt_delete_master_logs=0, tty_password=0,
+ 		opt_single_transaction=0, opt_comments= 0, opt_compact= 0,
+-		opt_hex_blob=0, opt_order_by_primary=0;
++		opt_hex_blob=0, opt_hex_char=0, opt_csv=0, opt_order_by_primary=0;
+ static ulong opt_max_allowed_packet, opt_net_buffer_length;
+ static MYSQL mysql_connection,*sock=0;
+ static char  insert_pat[12 * 1024],*opt_password=0,*current_user=0,
+@@ -215,6 +215,8 @@
+    "Allows utilization of the new, much faster INSERT syntax.",
+    (gptr*) &extended_insert, (gptr*) &extended_insert, 0, GET_BOOL, NO_ARG,
+    1, 0, 0, 0, 0, 0},
++  {"csv", OPT_CSV, "same as --fields-terminated-by=',' --fields-optionally-enclosed-by='\"' --lines-terminated-by='\\r\\n' .",
++   (gptr*) &opt_csv, (gptr*) &opt_csv, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
+   {"fields-terminated-by", OPT_FTB,
+    "Fields in the textfile are terminated by ...", (gptr*) &fields_terminated,
+    (gptr*) &fields_terminated, 0, GET_STR, REQUIRED_ARG, 0, 0, 0, 0, 0, 0},
+@@ -245,9 +247,12 @@
+    0, 0, 0, 0, 0, 0},
+   {"help", '?', "Display this help message and exit.", 0, 0, 0, GET_NO_ARG,
+    NO_ARG, 0, 0, 0, 0, 0, 0},
+-  {"hex-blob", OPT_HEXBLOB, "Dump binary strings (BINARY, "
+-    "VARBINARY, BLOB) in hexadecimal format.",
++  {"hex-blob", OPT_HEXBLOB, "Dump binary strings (BLOB) "
++    " in hexadecimal format.",
+    (gptr*) &opt_hex_blob, (gptr*) &opt_hex_blob, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
++  {"hex-char", OPT_HEXCHAR, "Dump binary strings (BINARY, "
++    "VARBINARY) in hexadecimal format.",
++   (gptr*) &opt_hex_char, (gptr*) &opt_hex_char, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
+   {"host", 'h', "Connect to host.", (gptr*) &current_host,
+    (gptr*) &current_host, 0, GET_STR_ALLOC, REQUIRED_ARG, 0, 0, 0, 0, 0, 0},
+   {"ignore-table", OPT_IGNORE_TABLE,
+@@ -721,6 +726,11 @@
+ 
+   if (opt_delayed)
+     opt_lock=0;				/* Can't have lock with delayed */
++
++  if (opt_csv) { /* by sakaik */
++    opt_enclosed ="\""; fields_terminated = ","; lines_terminated = "\\r\\n";
++  }
++
+   if (!path && (enclosed || opt_enclosed || escaped || lines_terminated ||
+ 		fields_terminated))
+   {
+@@ -1674,13 +1684,20 @@
+ 	   we have not a BLOB but a TEXT column. 
+ 	   we'll dump in hex only BLOB columns.
+ 	*/
+-        is_blob= (opt_hex_blob && field->charsetnr == 63 &&
+-                  (field->type == FIELD_TYPE_STRING ||
+-                   field->type == FIELD_TYPE_VAR_STRING ||
++        is_blob= (opt_hex_blob && 
++                  (
+                    field->type == FIELD_TYPE_BLOB ||
+                    field->type == FIELD_TYPE_LONG_BLOB ||
+                    field->type == FIELD_TYPE_MEDIUM_BLOB ||
+                    field->type == FIELD_TYPE_TINY_BLOB)) ? 1 : 0;
++
++        if (opt_hex_char && 
++                  (field->type == FIELD_TYPE_STRING ||
++		   field->type == FIELD_TYPE_VAR_STRING) ) {
++	  is_blob = 1;
++	}
++
++
+ 	if (extended_insert)
+ 	{
+ 	  ulong length = lengths[i];
+@@ -1708,9 +1725,9 @@
+ 		  error= EX_EOM;
+ 		  goto err;
+ 		}
+-                if (opt_hex_blob && is_blob)
++                if ( (opt_hex_blob || opt_hex_char) && is_blob)
+                 {
+-                  dynstr_append(&extended_row, "0x");
++                  if (extended_row.length > 0) { dynstr_append(&extended_row, "0x"); }
+                   extended_row.length+= mysql_hex_string(extended_row.str + 
+                                                          extended_row.length,
+                                                          row[i], length);
+@@ -1776,11 +1793,11 @@
+ 		print_quoted_xml(md_result_file, row[i], lengths[i]);
+ 		fputs("</field>\n", md_result_file);
+ 	      }
+-	      else if (opt_hex_blob && is_blob)
++	      else if ( (opt_hex_blob || opt_hex_char) && is_blob)
+               {
+                 /* sakaik got the idea to to provide blob's in hex notation. */
+                 char *ptr= row[i], *end= ptr+ lengths[i];
+-                fputs("0x", md_result_file);
++                if (lengths[i] > 0) { fputs("0x", md_result_file); }
+                 for (; ptr < end ; ptr++)
+                   fprintf(md_result_file, "%02X", *ptr);
+               }
+@@ -2201,6 +2218,7 @@
+     on old servers, but that's ok as it was already silently broken (it didn't
+     do a consistent read, so better tell people frankly, with the error).
+   */
++  (void) mysql_query_with_error_report(mysql_con, 0, "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ");
+   return (mysql_query_with_error_report(mysql_con, 0,
+                                         consistent_read_now ?
+                                         "START TRANSACTION "

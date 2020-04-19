@@ -1,0 +1,196 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9562</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9561">[前]</a><a href="9563">[次]</a><a href="../list/9501-9600">[番号順一覧]</a><a href="../thread/9501-9600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9562
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Mon, 07 Jun 2004 23:38:50 +0900<br>
+Subject: [mysql 09562] Re: MySQL 4.1.2 の日本語の扱い(Re: MySQLの問題点)<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+村上です。
+
+4.1.2 の問題なので、スレッド変えました。
+
+At Mon, 7 Jun 2004 22:22:59 +0900,
+TAKT Co.,ltd. wrote:
+<span class="quote1">&gt; 清川といいます</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; うろ覚えですし正確に調査したわけではないのですが</span>
+<span class="quote1">&gt; 以前3.23.58から4.1.1-alphaにUPしたとき、char型のデータの一部が消えたように見えました</span>
+<span class="quote1">&gt; 本当のところは消えていないのだと思いますが</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; データはそのままで、サーバ側プログラムのみのUPだったのですが、</span>
+<span class="quote1">&gt; どうやら3.23.58で、char(8)などとしているカラムがあると、4.1.1-alphaにUPすると</span>
+<span class="quote1">&gt; 自動的にchar(2)に変換されてしまうようです。で、変換されたことに気づかずに</span>
+<span class="quote1">&gt; 8桁のデータをINSERTをすると、当然8-(2*3)=2桁は挿入されませんでした</span>
+<span class="quote1">&gt; 表面上は問題なく動いていたので、桁が足りないと気づいた時には</span>
+<span class="quote1">&gt; 挿入したはずのデータは失われていました</span>
+
+
+次のようになります。
+
+#--- 3.23.58 -----
+% mysql --default-character-set=ujis test
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 1 to server version: 3.23.58
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql&gt; CREATE TABLE a (c char(8));
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; SHOW CREATE TABLE a;
++-------+-------------------------------------------------------------+
+<span class="quote1">| Table | Create Table                                                |</span>
++-------+-------------------------------------------------------------+
+<span class="quote1">| a     | CREATE TABLE `a` (</span>
+  `c` char(8) default NULL
+) TYPE=MyISAM |
++-------+-------------------------------------------------------------+
+1 row in set (0.00 sec)
+
+mysql&gt; INSERT INTO a VALUES ('あいうえ'); SELECT * FROM a;
+Query OK, 1 row affected (0.00 sec)
+
++----------+
+<span class="quote1">| c        |</span>
++----------+
+<span class="quote1">| あいうえ |</span>
++----------+
+1 row in set (0.00 sec)
+
+mysql&gt; Bye
+
+
+#--- 4.1.2 -----
+% mysql --default-character-set=ujis test
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2 to server version: 4.1.2-alpha
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql&gt; SHOW CREATE TABLE a;
++-------+------------------------------------------------------------------------------------+
+<span class="quote1">| Table | Create Table                                                                       |</span>
++-------+------------------------------------------------------------------------------------+
+<span class="quote1">| a     | CREATE TABLE `a` (</span>
+  `c` char(2) default NULL
+) ENGINE=MyISAM DEFAULT CHARSET=ujis |
++-------+------------------------------------------------------------------------------------+
+1 row in set (0.00 sec)
+
+mysql&gt; SELECT * FROM a;
++----------+
+<span class="quote1">| c        |</span>
++----------+
+<span class="quote1">| あいうえ |</span>
++----------+
+1 row in set (0.00 sec)
+
+mysql&gt; INSERT INTO a VALUES ('かきくけ'); SELECT * FROM a;
+Query OK, 1 row affected, 1 warning (0.00 sec)
+
++----------+
+<span class="quote1">| c        |</span>
++----------+
+<span class="quote1">| あいうえ |</span>
+<span class="quote1">| かき     |</span>
++----------+
+2 rows in set (0.00 sec)
+
+mysql&gt; Bye
+
+#----------------
+
+
+
++ 4.1 から、char() はバイト数ではなく、文字数に仕様変更された。
++ EUC-JP は、最大で 1 日本語文字に 3 バイト使用する。
+なので、
+int(8 / 3) = 2
+
+うーむ……
+
+
+================
+村上毅 takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="9561">[前]</a><a href="9563">[次]</a><a href="../list/9501-9600">[番号順一覧]</a><a href="../thread/9501-9600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9539">   9539 2004-06-07 13:23 [&quot;Ryuichiro Munechika] MySQLの問題点(PostgreSQLカンファレンスにて)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9540">   9540 2004-06-07 13:40 ┣[Hidekazu Ikeda &lt;hike]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9542">   9542 2004-06-07 17:01 ┃┗[&quot;Ryuichiro Munechika]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9543">   9543 2004-06-07 17:08 ┃　┣[&lt;yasuyuki@xxxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9544">   9544 2004-06-07 17:38 ┃　┃┗[&quot;Ryuichiro Munechika]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9545">   9545 2004-06-07 18:09 ┃　┃　┗[&lt;yasuyuki@xxxxxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9553">   9553 2004-06-07 21:22 ┃　┃　　┣[&quot;Ryuichiro Munechika]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9555">   9555 2004-06-07 22:02 ┃　┃　　┗[UNO Shintaro &lt;uno@xx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9546">   9546 2004-06-07 18:55 ┃　┗[Hidekazu Ikeda &lt;hike]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9552">   9552 2004-06-07 21:19 ┃　　┗[&quot;Ryuichiro Munechika]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9549">   9549 2004-06-07 20:46 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9551">   9551 2004-06-07 21:16 ┃┗[&quot;Ryuichiro Munechika]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9563">   9563 2004-06-07 23:44 ┃　┗[Sumito_Oda &lt;oda@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9554">   9554 2004-06-07 21:26 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9557">   9557 2004-06-07 22:12 ┃┣[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9558">   9558 2004-06-07 22:22 ┃┣[&quot;TAKT Co.,ltd.&quot; &lt;t@x]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="9562">   9562 2004-06-07 23:38 ┃┃┗[&lt;takeshi@xxxxxxxxxx&gt;] Re: MySQL 4.1.2 の日本語の扱い(Re: MySQLの問題点)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9579">   9579 2004-06-09 08:32 ┃┃　┣[Yukihiro KAWADA &lt;kaw]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9626">   9626 2004-06-13 18:18 ┃┃　┣[Hirofumi Fujiwara &lt;f] Re: MySQL 4.1.2 の日本語の扱い  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9688">   9688 2004-06-18 10:02 ┃┃　┗[&lt;takeshi@xxxxxxxxxx&gt;] MySQL 4.1.2 の char と日本語 (Re: MySQL 4.1.2 の日本語の扱い)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9700">   9700 2004-06-23 09:47 ┃┃　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9702">   9702 2004-06-23 10:39 ┃┃　　　┗[Hirofumi Fujiwara &lt;f] Re: MySQL 4.1.2 の char と日本語</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9703">   9703 2004-06-23 10:57 ┃┃　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9720">   9720 2004-06-29 18:27 ┃┃　　　　　┗[Hirofumi Fujiwara &lt;f]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9729">   9729 2004-07-01 11:40 ┃┃　　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9733">   9733 2004-07-01 16:24 ┃┃　　　　　　┃┗[Hirofumi Fujiwara &lt;f]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9730">   9730 2004-07-01 12:47 ┃┃　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;] 4.1 と UTF-8 (Re: MySQL 4.1.2 の char  と日本語)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9732">   9732 2004-07-01 15:04 ┃┃　　　　　　　┣[IWAMURO Motonori &lt;vm]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9735">   9735 2004-07-01 19:48 ┃┃　　　　　　　┃┗[Hirofumi Fujiwara &lt;f] Re: 4.1 と UTF-8  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9758">   9758 2004-07-02 22:26 ┃┃　　　　　　　┃　┣[&lt;takeshi@xxxxxxxxxx&gt;]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9760">   9760 2004-07-02 22:39 ┃┃　　　　　　　┃　┃┗[&quot;Ryuichiro Munechika]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9768">   9768 2004-07-03 18:06 ┃┃　　　　　　　┃　┃　┗[Hirofumi Fujiwara &lt;f]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9764">   9764 2004-07-03 06:24 ┃┃　　　　　　　┃　┗[Shuichi Tamagawa &lt;sh]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9774">   9774 2004-07-05 11:59 ┃┃　　　　　　　┃　　┗[Hirofumi Fujiwara &lt;f]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9734">   9734 2004-07-01 19:23 ┃┃　　　　　　　┣[Hirofumi Fujiwara &lt;f] Re: 4.1 と UTF-8    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9757">   9757 2004-07-02 21:19 ┃┃　　　　　　　┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9769">   9769 2004-07-03 19:27 ┃┃　　　　　　　┃　┗[Hirofumi Fujiwara &lt;f]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9806">   9806 2004-07-10 14:04 ┃┃　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9828">   9828 2004-07-12 17:19 ┃┃　　　　　　　　┣[Hirofumi Fujiwara &lt;f] Re: 4.1 と UTF-8  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9843">   9843 2004-07-13 15:31 ┃┃　　　　　　　　┗[Shuichi Tamagawa &lt;sh]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9865">   9865 2004-07-15 15:55 ┃┃　　　　　　　　　┗[Hirofumi Fujiwara &lt;f] Re: 4.1 と UTF-8</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9868">   9868 2004-07-16 03:52 ┃┃　　　　　　　　　　┗[Shuichi Tamagawa &lt;sh]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9559">   9559 2004-06-07 22:46 ┃┣[&quot;Ryuichiro Munechika]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9569">   9569 2004-06-08 09:40 ┃┃┣[Hidekazu Ikeda &lt;hike]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9577">   9577 2004-06-08 22:48 ┃┃┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9627">   9627 2004-06-13 22:02 ┃┃　┗[Hirofumi Fujiwara &lt;f]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9591">   9591 2004-06-10 22:47 ┃┗[Jun Moriya &lt;jmoriya@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9565">   9565 2004-06-08 08:59 ┗[yoshi &lt;yosihisa@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9566">   9566 2004-06-08 09:11 　┗[Hidekazu Ikeda &lt;hike]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9568">   9568 2004-06-08 09:32 　　┗[yoshi &lt;yosihisa@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9570">   9570 2004-06-08 09:47 　　　┗[Hidekazu Ikeda &lt;hike]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9571">   9571 2004-06-08 10:26 　　　　┗[yasuyuki &lt;yasuyuki@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9572">   9572 2004-06-08 10:37 　　　　　┗[Hidekazu Ikeda &lt;hike]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9574">   9574 2004-06-08 11:58 　　　　　　┗[えんどう &lt;yasuyuki@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9575">   9575 2004-06-08 15:22 　　　　　　　┣[&quot;Ryuichiro Munechika]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9613">   9613 2004-06-12 22:10 　　　　　　　┃┗[とみたまさひろ &lt;tomm]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9576">   9576 2004-06-08 20:19 　　　　　　　┗[Hidekazu Ikeda &lt;hike]                         </a></span>
+</pre>
+</body>
+</html>

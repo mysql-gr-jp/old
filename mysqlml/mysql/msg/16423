@@ -1,0 +1,98 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16423</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16422">[前]</a><a href="16424">[次]</a><a href="../list/16401-16500">[番号順一覧]</a><a href="../thread/16401-16500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16423
+</p>
+<div class="header">
+<p>
+From: Kentaro Hayashi &lt;Kentaro Hayashi &lt;hayashi@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 29 Aug 2017 17:31:13 +0900<br>
+Subject: [mysql 16423] [ANN] Mroonga 7.06 - MySQLで高速日本語全文検索<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、Mroongaプロジェクトの林です。
+
+Mroonga 7.06をリリースしました！
+
+  <a href="http://mroonga.org/ja/blog/2017/08/29/mroonga-7.06.html">http://mroonga.org/ja/blog/2017/08/29/mroonga-7.06.html</a>
+
+7.05からの変更点:
+  <a href="http://mroonga.org/ja/docs/news.html#release-7-06">http://mroonga.org/ja/docs/news.html#release-7-06</a>
+
+MroongaはMySQLで日本語全文検索を実現するストレージエンジンです。高速で
+あることや位置情報検索をサポートしていることなどが特徴です。詳細が気に
+なる方はドキュメントをご覧ください。
+
+  * Mroongaの特徴 ― Mroonga v7.06 documentation
+    <a href="http://mroonga.org/ja/docs/characteristic.html#what-is-mroonga">http://mroonga.org/ja/docs/characteristic.html#what-is-mroonga</a>
+
+
+さて、今月の主な変更点は次のとおりです。
+
+  * 生成カラム(Generated Column)のサポート
+
+### 生成カラム(Generated Column)のサポート
+
+今回のリリースでは、生成カラム(Generated Column)をMroongaでもサポート
+しました。 これは他のカラムの値を自動計算した結果を取り出すことのでき
+るカラムを定義できる機能です。
+
+たとえば、次のような定義でJSONの一部を取り出した結果を使って検索するこ
+とができるようになります。
+
+    CREATE TABLE logs (
+      id INT,
+      record JSON,
+      message VARCHAR(255) GENERATED ALWAYS AS (json_extract(`record`, '$.message')) STORED,
+      FULLTEXT INDEX(message) comment 'tokenizer &quot;TokenBigramSplitSymbolAlphaDigit&quot;'
+    ) ENGINE=Mroonga DEFAULT CHARSET=utf8mb4;
+
+
+上記の例だと、record の値の一部を message カラムの内容として定義してい
+ます。 すると、次のようなクエリでJSONの一部だけを全文検索することがで
+きます。
+
+    &gt; SELECT * FROM logs WHERE MATCH(message) AGAINST(&quot;ar&quot; IN BOOLEAN MODE);
+    +------+-----------------------------------------+-----------+
+    | id   | record                                  | message   |
+    +------+-----------------------------------------+-----------+
+    |    1 | {&quot;level&quot;: &quot;info&quot;, &quot;message&quot;: &quot;start&quot;}   | &quot;start&quot;   |
+    |    2 | {&quot;level&quot;: &quot;info&quot;, &quot;message&quot;: &quot;restart&quot;} | &quot;restart&quot; |
+    +------+-----------------------------------------+-----------+
+    2 rows in set (0.02 sec)
+
+実データを持たない VIRTUAL も定義できます。
+
+    CREATE TABLE logs (
+      id INT,
+      record JSON,
+      message VARCHAR(255) GENERATED ALWAYS AS (json_extract(`record`, '$.message')) VIRTUAL
+    ) ENGINE=Mroonga DEFAULT CHARSET=utf8mb4;
+
+ただし、この場合、FULLTEXT INDEX(message) を張ることはできません。
+
+
+--
+Kentaro Hayashi &lt;hayashi@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="http://www.mysql.gr.jp/mysqlml/mysql/msg/16423/0/"> [application/pgp-signature]</a>
+</ul>
+</div>
+<p class="button"><a href="16422">[前]</a><a href="16424">[次]</a><a href="../list/16401-16500">[番号順一覧]</a><a href="../thread/16401-16500">[スレッド一覧]</a></p>
+</body>
+</html>

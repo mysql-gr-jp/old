@@ -1,0 +1,119 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2864</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2863">[前]</a><a href="2865">[次]</a><a href="../list/2801-2900">[番号順一覧]</a><a href="../thread/2801-2900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2864
+</p>
+<div class="header">
+<p>
+From: &quot;Mitsuru Maruno&quot; &lt;&quot;Mitsuru Maruno&quot; &lt;maruno@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 14 Dec 2000 15:31:09 +0900<br>
+Subject: [mysql 02864] 処理速度について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめましてmarunoと申します。(MySQLビギナーです)
+実は、今度MySQLを使用する予定で、現在他のRDBMSとの比較を行ったり
+しています。それで、簡単なレコード取得テストを行っていますが、ど
+うしても、納得のいかない現象と遭遇した為、質問しました。
+
+テストの内容は、単純なテーブルを作成して(50万件のデータ)、この
+テーブルからSQL文で指定した条件にマッチするレコードを取得すると
+いうものです。SQLで指定する条件の数を、1,10,20,30・・・と増やして
+レコード取得の時間を計測します。
+
+SQLは以下のような物です。
+select * from test where id=5 and subid in (1,2,3,4,5・・・);
+
+&lt;テーブルは、1レコード長が102バイト(固定長)です。インデックス使用&gt;
+
+このテストをやっていると、条件を9〜15件指定した場合のみ処理速度が
+遅くなりました。ちなみに、このときの処理時間は、0.15〜0.20秒位です。
+1〜8件指定、16件以上指定の場合は、0.00〜0.01秒といったものです。
+(処理時間はpsqlの実行時に表示される時間を使用しています。）
+どうして、こんなに処理時間が異なるのでしょうかね・・・？
+指定する検索条件が増えるにつれて、速度が遅くなるハズ？なんでしょう
+けど・・・。
+
+このテスト環境は、
+サーバ
+CPU Pen2-266MHz
+MEM 128MB
+OS: RedHat Linux6.2J
+MySQL-3.23.28-1.src.rpmをrebuildしてインストール
+
+クライアント:
+CPU Pen3-600MHz
+MEM 128MB
+OS: Win2000sp1
+mysql-3.23.28-gamma-win.zip
+
+一応、以下の事を試してみました。
+・別のサーバマシン(RedHatLinux6.2J+MySQL-3.23.28-1.src.rpm)を使用。
+　(結果)同じ現象
+
+・サーバ、クライアントともにLinuxを使用(別マシン)
+　(結果)同じ現象
+
+・サーバにWin98(mysql-3.23.28-gamma-win.zip)を使用
+　(結果)処理速度の低下はなし
+
+Linuxサーバ側で、tcpdumpでパケットの内容をチェックしてみましたが、
+SQL文発行から、データを送り終えるまでのパケットの送信時間の長さが
+9〜15件指定のものと、その他のものでは約0.18秒程の差がありました。
+また、送られるパケットの順番も、何か違うような・・・。
+処理が早いものはまとめて(続けて)クライアント側へデータが送られて
+います。（この辺が関係しているのかなと・・・）
+
+(cl・・・クライアント、svr・・・サーバー)
+・9〜15件指定の場合
+　cl  -&gt; svr
+  svr -&gt; cl
+　cl  -&gt; svr    &lt;---このパケット送信が約0.18秒位遅れている
+  svr -&gt; cl
+　cl  -&gt; svr
+
+・16件〜件指定の場合
+　cl  -&gt; svr
+  svr -&gt; cl
+  svr -&gt; cl
+　cl  -&gt; svr    &lt;---最初のパケットから0.01秒もかかっていない
+
+・30件指定の場合
+　cl  -&gt; svr
+  svr -&gt; cl
+  svr -&gt; cl
+  svr -&gt; cl
+　cl  -&gt; svr    &lt;---最初のパケットから0.01秒もかかっていない
+　cl  -&gt; svr    &lt;---最初のパケットから約0.15秒
+
+どなたか、同じような現象を体験されている人はいないでしょうか？
+よろしくお願いします。
+
+0-------10--------20--------30--------40--------50--------60--------70
+    株式会社日本テレソフト　Maruno Mitsuru
+    maruno@xxxxxxxxxx
+    maruno@xxxxxxxxxx
+======================================================================
+
+
+
+</pre>
+</div>
+<p class="button"><a href="2863">[前]</a><a href="2865">[次]</a><a href="../list/2801-2900">[番号順一覧]</a><a href="../thread/2801-2900">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="2864">   2864 2000-12-14 15:31 [&quot;Mitsuru Maruno&quot; &lt;ma] 処理速度について                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2865">   2865 2000-12-14 17:50 ┗[&quot;Mitsuru Maruno&quot; &lt;ma]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2867">   2867 2000-12-14 20:56 　┗[Seiji Tateyama &lt;tate]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2871">   2871 2000-12-15 09:42 　　┗[&quot;Mitsuru Maruno&quot; &lt;ma]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2872">   2872 2000-12-15 10:50 　　　┗[&quot;Mitsuru Maruno&quot; &lt;ma]                                 </a></span>
+</pre>
+</body>
+</html>

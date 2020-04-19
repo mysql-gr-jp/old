@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5988</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="5987">[前]</a><a href="5989">[次]</a><a href="../list/5901-6000">[番号順一覧]</a><a href="../thread/5901-6000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5988
+</p>
+<div class="header">
+<p>
+From: KAWAJI Shinya &lt;KAWAJI Shinya &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 25 Aug 2002 01:53:11 +0900<br>
+Subject: [mysql 05988] Re: table_b のフィールド a の値が、 table_a のフィールド a にないレコードに関してだけ insert したい。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+かわじ、です。
+
+
+<span class="quote1">&gt; table_b のaの値が、table_a のaにないレコードに関してだけ、</span>
+<span class="quote1">&gt; table_b のa,c の値をtable_a のa,bにinsertしたいのですが、</span>
+<span class="quote1">&gt; うまい方法はないでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 気持ちとしては、</span>
+<span class="quote1">&gt; INSERT INTO table_a(a,b) select a,c from table_b;</span>
+<span class="quote1">&gt; としたいのですが、これだとすでにtable_aにあると</span>
+<span class="quote1">&gt; Duplicate entry エラーになってしまいます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; table_bのテーブルを一行づつチェックしてtable_aにないか確認して1行づつ</span>
+<span class="quote1">&gt; insertしていくしかないんでしょうか？</span>
+
+
+TEMPORARY TABLE を使う方法もあります。
+
+
+mysql&gt; CREATE TABLE table_a (
+    -&gt;   a char(200) NOT NULL,
+    -&gt;   b char(200),
+    -&gt;   PRIMARY KEY  (a)
+    -&gt; );
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; CREATE TABLE table_b (
+    -&gt;   a char(200) NOT NULL,
+    -&gt;   b char(200),
+    -&gt;   c char(200),
+    -&gt;   PRIMARY KEY  (a)
+    -&gt; );
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; INSERT table_a VALUES
+    -&gt;   ('a1', 'b1'),
+    -&gt;   ('a3', 'b3'),
+    -&gt;   ('a5', 'b5')
+    -&gt; ;
+Query OK, 3 rows affected (0.00 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql&gt; INSERT table_b VALUES
+    -&gt;   ('a1', 'b1', 'c1'),
+    -&gt;   ('a2', 'b2', 'c2'),
+    -&gt;   ('a3', 'b3', 'c3'),
+    -&gt;   ('a4', 'b4', 'c4'),
+    -&gt;   ('a5', 'b5', 'c5')
+    -&gt; ;
+Query OK, 5 rows affected (0.00 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql&gt; CREATE TEMPORARY TABLE tmp SELECT table_b.a, table_b.c FROM table_b
+    -&gt;   LEFT JOIN table_a USING (a) WHERE table_a.b IS NULL
+    -&gt; ;
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql&gt; INSERT table_a SELECT * FROM tmp;
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql&gt; SELECT * FROM table_a;
++----+------+
+<span class="quote1">| a  | b    |</span>
++----+------+
+<span class="quote1">| a1 | b1   |</span>
+<span class="quote1">| a3 | b3   |</span>
+<span class="quote1">| a5 | b5   |</span>
+<span class="quote1">| a2 | c2   |</span>
+<span class="quote1">| a4 | c4   |</span>
++----+------+
+5 rows in set (0.00 sec)
+
+
+--
+Shinya Kawaji
+
+
+
+</pre>
+</div>
+<p class="button"><a href="5987">[前]</a><a href="5989">[次]</a><a href="../list/5901-6000">[番号順一覧]</a><a href="../thread/5901-6000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="5987">   5987 2002-08-25 01:06 [takewo.k &lt;office@xxx] table_b のフィールド a の値が、 table_a  のフィールド a にないレコードに関してだけ insert したい。</a></span>
+<span class="current">-&gt;&nbsp;<a href="5988">   5988 2002-08-25 01:53 ┣[KAWAJI Shinya &lt;kawaj]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5990">   5990 2002-08-25 04:45 ┗[東海林 裕 &lt;shojihiro]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5991">   5991 2002-08-25 15:21 　┗[&lt;office@xxxxxxxxxx&gt; ]                                     </a></span>
+</pre>
+</body>
+</html>

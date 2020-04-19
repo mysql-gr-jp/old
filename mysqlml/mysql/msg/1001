@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1001</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1000">[前]</a><a href="1002">[次]</a><a href="../list/1001-1100">[番号順一覧]</a><a href="../thread/1001-1100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1001
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Sat, 17 Jul 1999 19:04:29 +0900<br>
+Subject: [mysql 01001] Cobalt Qube2<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+村上毅です
+
+Cobalt Qube2 上で、やっと mysqld が正常動作するようになりました。
+MySQL の問題ではなく、qube2 のスレッドライブラリーのバグでした。
+
+qube2 出荷時の pthread library にバグがあり、
+これを入れ換えない限りはまともに thread が動きません。
+このために、pthread を使用している mysqld は、この影響を受けます
+
+今晩中に、static link して作成した qube2 用のパッケージを
+ftp, web に上げておきます。(3.22.25 ujis)
+static link していますので、このまま install すれば
+出荷状態のバグあり pthread を持つ qube2 でも動作するでしょう
+
+
+how to:
+ 1. get next glibc packages. these are fixed pthread problems!
+   glibc-profile-2.0.7-29C2.mips.rpm
+   glibc-debug-2.0.7-29C2.mips.rpm
+   glibc-devel-2.0.7-29C2.mips.rpm
+   glibc-2.0.7-29C2.mips.rpm
+
+   site:
+     <a href="ftp://ftp.cobaltnet.com/pub/experimental/">ftp://ftp.cobaltnet.com/pub/experimental/</a>
+
+ 2. install new glibc
+   rpm -Uvh --force --nodeps glibc-*-29C2.mips.rpm
+
+   ldconfig
+
+ 3. get egcs &amp; libstdc++
+    egcs-1.0.2-9.mipsel.rpm
+    egcs-c++-1.0.2-9.mipsel.rpm
+    egcs-g77-1.0.2-9.mipsel.rpm
+    egcs-objc-1.0.2-9.mipsel.rpm
+    libstdc++-2.8.0-9.mipsel.rpm                                                             
+    libstdc++-devel-2.8.0-9.mipsel.rpm                                                               
+
+    site:
+      <a href="ftp://ftp.linux.sgi.com/pub/linux/mips/mipsel-linux/RPMS/mipsel/">ftp://ftp.linux.sgi.com/pub/linux/mips/mipsel-linux/RPMS/mipsel/</a>
+
+ 4. install egcs &amp; libstdc++
+     rpm -e gcc-objc
+     rpm -e gcc-c++
+     rpm -e gcc
+     rpm -Uvh egcs*-1.0.2-9.mipsel.rpm
+
+     rpm -e libg++-devel-2.7.2.8
+     rpm -i libstdc++*-2.8.0-9.mipsel.rpm
+
+
+ 5. build mysql
+  ./configure --with-debug \
+            --disable-assembler \
+            --enable-shared \
+            --disable-shared \
+            --with-mysqld-ldflags=&quot;-all-static&quot; \
+            --with-client-ldflags=&quot;-all-static&quot; \
+            --with-mysqld-user=mysql \
+            --with-unix-socket-path=/var/lib/mysql/mysql.sock \
+            --prefix=/ \
+            --exec-prefix=/usr \
+            --libexecdir=/usr/sbin \
+            --sysconfdir=/etc \
+            --datadir=/usr/share \
+            --localstatedir=/var/lib/mysql \
+            --infodir=/usr/info \
+            --includedir=/usr/include \
+            --mandir=/usr/man \
+            --with-charset=ujis \
+            mipsel-unknown-linux-gnu
+
+
+  7. check floating point
+     select MOD(29.0,9.0);
+     select ABS(-32.4);
+     select CEILING(1.23);
+     select CEILING(-1.23);
+     select FLOOR(-1.23);
+     select ROUND(-1.58);
+     select LEAST(34.0,3.0,5.0,767.0);
+     select CURDATE() + 0;
+     select CURTIME() + 0;
+     select FROM_UNIXTIME(875996580) + 0;
+
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+ PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
+ [ <a href="http://www.softagency.co.jp/mysql/">http://www.softagency.co.jp/mysql/</a> ]
+ [ MySQL ML: mysql-guide@xxxxxxxxxx ]
+
+</pre>
+</div>
+<p class="button"><a href="1000">[前]</a><a href="1002">[次]</a><a href="../list/1001-1100">[番号順一覧]</a><a href="../thread/1001-1100">[スレッド一覧]</a></p>
+</body>
+</html>

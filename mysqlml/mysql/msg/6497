@@ -1,0 +1,559 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6497</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6496">[前]</a><a href="6498">[次]</a><a href="../list/6401-6500">[番号順一覧]</a><a href="../thread/6401-6500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6497
+</p>
+<div class="header">
+<p>
+From: &lt;hogehoge@xxxxxxxxxx&gt;<br>
+Date: Thu, 31 Oct 2002 16:50:12 +0900<br>
+Subject: [mysql 06497] 一般ユーザ権限でのインストール<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、hogeと申します。
+
+早速質問させていただきますが、
+利用しているホストには、MySQLがインストールしてあるのですが、
+残念ながら、日本語に対応しておりません。
+
+そこで、一般ユーザで、MySQLをインストールしようとしているのですが、
+makeに失敗します。
+
+何か、原因がお分かりの方、いらっしゃいましたら、よろしくご教示の程
+お願い致します。
+
+下にconfigureのログと、次のメールにmakeのログを添付致します。(長大ですみません。)
+
+それから、makeに失敗しているglobal.hの713行目付近は・・・、
+
+712: #if !defined(bool) &amp;&amp; !defined(bool_defined) &amp;&amp; (!defined(HAVE_BOOL) || !defined(__cplusplus))
+713: typedef char		bool;	/* Ordinary boolean values 0 1 */
+714: #endif
+
+となっています。
+
+環境は、
+~$ uname -a
+Linux 2.2.20 #5 SMP Tue Nov 13 18:55:01 PST 2001 i686
+
+~$ ls -la /lib/libc*
+lrwxrwxrwx   1 root     root           13 Oct 19 01:15 /lib/libc.so.4 -&gt; libc
+.so.4.7.6*
+-rwxr-xr-x   1 root     wheel      634880 May 14  1997 /lib/libc.so.4.7.6*
+lrwxrwxrwx   1 root     root           14 Oct 19 01:15 /lib/libc.so.5 -&gt; libc
+.so.5.4.17*
+-rwxr-xr-x   1 bin      bin        583795 Apr 24  1996 /lib/libc.so.5.3.12*
+-rwxr-xr-x   1 root     root      1762708 May 14  1997 /lib/libc.so.5.4.17*
+lrwxrwxrwx   1 root     root           17 Oct 19 01:15 /lib/libcom_err.so.2 -
+<span class="quote1">&gt; libcom_err.so.2.0*</span>
+-rwxr-xr-x   1 root     root         6060 May 14  1997 /lib/libcom_err.so.2.0
+*
+lrwxrwxrwx   1 root     root           18 Oct 19 01:15 /lib/libcurses.so.0 -&gt;
+ libcurses.so.0.1.2*
+-rwxr-xr-x   1 bin      bin         49152 May 14  1997 /lib/libcurses.so.0.1.
+2*
+lrwxrwxrwx   1 root     root           18 Oct 19 01:15 /lib/libcurses.so.1 -&gt;
+ libcurses.so.1.0.0*
+-rwxr-xr-x   1 root     root        52641 May 14  1997 /lib/libcurses.so.1.0.
+0*
+
+~$ ls -la /lib/libpth*
+lrwxrwxrwx   1 root     root           17 Oct 19 01:15 /lib/libpthread.so.0 -
+<span class="quote1">&gt; libpthread.so.0.5*</span>
+-rwxr-xr-x   1 root     root        73364 Jun 30  1997 /lib/libpthread.so.0.5
+*
+
+~$ cat /etc/ld.so.conf
+/usr/local/lib
+/usr/X11R6/lib
+/usr/i486-linuxaout/lib
+/usr/openwin/lib
+/usr/X11/lib
+/usr/local/lib/mysql
+/usr/lib/glibc
+
+~$ gcc --version
+2.7.2
+
+~$ gcc -v
+Reading specs from /usr/lib/gcc-lib/i486-linux/2.7.2/specs
+gcc version 2.7.2
+
+~$ gcc -print-libgcc-file-name
+/usr/lib/gcc-lib/i486-linux/2.7.2/libgcc.a
+
+~$ gcc -print-search-dirs
+install: /usr/lib/gcc-lib/i486-linux/2.7.2/
+programs: /usr/lib/gcc-lib/i486-linux/2.7.2/:/usr/lib/gcc-lib/i486-linux/:/us
+r/lib/gcc/i486-linux/2.7.2/:/usr/lib/gcc/i486-linux/:/usr/i486-linux/bin/i486
+-linux/2.7.2/:/usr/i486-linux/bin/
+libraries: /usr/lib/gcc-lib/i486-linux/2.7.2/:/usr/lib/gcc/i486-linux/2.7.2/:
+/usr/i486-linux/lib/i486-linux/2.7.2/:/usr/i486-linux/lib/:/usr/lib/i486-linu
+x/2.7.2/:/usr/lib/:/lib/i486-linux/2.7.2/:/lib/:/usr/lib/i486-linux/2.7.2/:/u
+sr/lib/
+
+~$ perl -V
+Summary of my perl5 (5.0 patchlevel 4 subversion 1) configuration:
+  Platform:
+    osname=linux, osvers=2.0.30, archname=i686-linux
+    uname='linux he.net 2.0.30 #3 fri apr 11 08:01:28 pdt 1997 i686 '
+    hint=recommended, useposix=true, d_sigaction=define
+    bincompat3=y useperlio= d_sfio=
+  Compiler:
+    cc='cc', optimize='-O2', gccversion=2.7.2
+    cppflags='-Dbool=char -DHAS_BOOL -I/usr/local/include'
+    ccflags ='-Dbool=char -DHAS_BOOL -I/usr/local/include'
+    stdchar='char', d_stdstdio=define, usevfork=false
+    voidflags=15, castflags=0, d_casti32=define, d_castneg=define
+    intsize=4, alignbytes=4, usemymalloc=n, randbits=31
+  Linker and Libraries:
+    ld='cc', ldflags =' -L/usr/local/lib'
+    libpth=/usr/local/lib /lib /usr/lib
+    libs=-lndbm -lgdbm -ldbm -ldb -ldl -lm -lc
+    libc=/lib/libc.so.5.4.17, so=so
+    useshrplib=false, libperl=libperl.a
+  Dynamic Linking:
+    dlsrc=dl_dlopen.xs, dlext=so, d_dlsymun=, ccdlflags='-rdynamic'
+    cccdlflags='-fpic', lddlflags='-shared -L/usr/local/lib'
+
+
+Characteristics of this binary (from libperl):
+  Built under linux
+  Compiled at Jul 23 1997 18:02:08
+  @INC:
+    /usr/lib/perl5/i686-linux/5.00401
+    /usr/lib/perl5
+    /usr/lib/perl5/site_perl/i686-linux
+    /usr/lib/perl5/site_perl
+    .
+~$ env | grep -i path
+MANPATH=/usr/local/man:/usr/man/preformat:/usr/man
+PATH=/bin:/usr/bin:/usr/local/bin:/usr/games:.:/usr/local/jdk1.1.1/bin
+
+~$ env | grep -i library
+~$ 
+
+です。
+
+以下、configureのログです。(makeのログは、次のメールに添付します。)
+
+~$ cd mysql-3.23.53
+~/mysql-3.23.53$ ./configure --with-mysqld-user=hogehoge --prefix=$HOM
+E/mysql --exec-prefix=$HOME/mysql --with-unix-socket-path=$HOME/mysql/var/mys
+ql.sock --with-tcp-port=3333 --sysconfdir=$HOME/mysql/etc --with-charset=ujis
+ --without-docs --without-bench
+checking build system type... i686-pc-linux-gnu
+checking host system type... i686-pc-linux-gnu
+checking target system type... i686-pc-linux-gnu
+checking for a BSD compatible install... /usr/bin/ginstall -c
+checking whether build environment is sane... yes
+checking whether make sets ${MAKE}... yes
+checking for working aclocal... missing
+checking for working autoconf... missing
+checking for working automake... missing
+checking for working autoheader... missing
+checking for working makeinfo... found
+checking whether to enable maintainer-specific portions of Makefiles... no
+checking whether build environment is sane... yes
+checking whether make sets ${MAKE}... (cached) yes
+checking for mawk... no
+checking for gawk... gawk
+checking for gcc... gcc
+checking for C compiler default output... a.out
+checking whether the C compiler works... yes
+checking whether we are cross compiling... no
+checking for executable suffix...
+checking for object suffix... o
+checking whether we are using the GNU C compiler... yes
+checking whether gcc accepts -g... yes
+checking for g++... g++
+checking whether we are using the GNU C++ compiler... yes
+checking whether g++ accepts -g... yes
+checking how to run the C preprocessor... gcc -E
+checking &quot;C Compiler version&quot;... &quot;gcc 2.7.2&quot;
+checking &quot;C++ compiler version&quot;... &quot;g++ 2.7.2&quot;
+checking for ranlib... ranlib
+checking for ld used by GCC... /usr/i486-linux/bin/ld
+checking if the linker (/usr/i486-linux/bin/ld) is GNU ld... no
+checking for BSD-compatible nm... /usr/bin/nm -B
+checking whether ln -s works... yes
+loading cache /dev/null within ltconfig
+./ltconfig: .: /dev/null: not a regular file
+checking for object suffix... o
+checking for executable suffix... no
+checking for gcc option to produce PIC... -fPIC
+checking if gcc PIC flag -fPIC works... yes
+checking if gcc supports -c -o file.o... yes
+checking if gcc supports -c -o file.lo... yes
+checking if gcc supports -fno-rtti -fno-exceptions ... no
+checking if gcc static flag -static works... -static
+checking if the linker (/usr/i486-linux/bin/ld) is GNU ld... no
+checking whether the linker (/usr/i486-linux/bin/ld) supports shared librarie
+s... no
+checking command to parse /usr/bin/nm -B output... ok
+checking how to hardcode library paths into programs... unsupported
+checking for /usr/i486-linux/bin/ld option to reload object files... -r
+checking dynamic linker characteristics... Linux ld.so
+checking if libtool supports shared libraries... no
+checking whether to build shared libraries... no
+checking whether to build static libraries... yes
+checking for objdir... .libs
+creating libtool
+updating cache /dev/null
+checking for a BSD compatible install... /usr/bin/ginstall -c
+checking for bison... bison -y
+checking for pdftex... no
+checking for tex... no
+checking &quot;return type of sprintf&quot;... &quot;int&quot;
+checking for uname... /bin/uname
+checking operating system... Linux
+checking &quot;if we should use 'skip-locking' as default for linux-gnu&quot;... &quot;yes&quot;
+checking for ln... /bin/ln
+checking for ln... /bin/ln
+checking for mv... /bin/mv
+checking for rm... /bin/rm
+checking for cp... /bin/cp
+checking for sed... /usr/bin/sed
+checking for cmp... /usr/bin/cmp
+checking for chmod... /bin/chmod
+checking for hostname... /bin/hostname
+checking for gnutar... no
+checking for gtar... no
+checking for tar... tar
+checking for perl... /usr/bin/perl
+checking for ps... /bin/ps
+checking &quot;how to check if pid exists&quot;... &quot;/bin/ps p $$PID | grep mysqld &gt; /de
+v/null&quot;
+checking for kill... /bin/kill
+checking &quot;for kill switches&quot;... &quot;/bin/kill -0 $$PID &gt; /dev/null 2&gt; /dev/null&quot;
+checking for gcc option to accept ANSI C...
+checking if we should use assembler functions... no
+checking if we should use RAID... no
+checking if we should should enable LOAD DATA LOCAL by default... no
+checking for getconf... no
+checking for CFLAGS value to request large file support... no
+checking for LDFLAGS value to request large file support... no
+checking for LIBS value to request large file support... no
+checking for _FILE_OFFSET_BITS... no
+checking for _LARGEFILE_SOURCE... no
+checking for _LARGE_FILES... no
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... no
+checking for stdint.h... no
+checking for unistd.h... yes
+checking for size_t... yes
+checking for dirent.h that defines DIR... yes
+checking for opendir in -ldir... no
+checking for ANSI C header files... (cached) yes
+checking for sys/wait.h that is POSIX.1 compatible... yes
+checking for fcntl.h... yes
+checking for float.h... yes
+checking for floatingpoint.h... no
+checking for ieeefp.h... no
+checking for limits.h... yes
+checking for memory.h... (cached) yes
+checking for pwd.h... yes
+checking for select.h... no
+checking for stdlib.h... (cached) yes
+checking for stddef.h... yes
+checking for strings.h... (cached) yes
+checking for string.h... (cached) yes
+checking for synch.h... no
+checking for sys/mman.h... yes
+checking for sys/socket.h... yes
+checking for netinet/in.h... yes
+checking for arpa/inet.h... yes
+checking for sys/timeb.h... yes
+checking for sys/types.h... (cached) yes
+checking for sys/un.h... yes
+checking for sys/vadvise.h... no
+checking for sys/wait.h... (cached) yes
+checking for term.h... yes
+checking for unistd.h... (cached) yes
+checking for utime.h... yes
+checking for sys/utime.h... no
+checking for termio.h... yes
+checking for termios.h... yes
+checking for sched.h... yes
+checking for crypt.h... no
+checking for alloca.h... yes
+checking for sys/ioctl.h... yes
+checking for floor in -lm... yes
+checking for gethostbyname_r in -lnsl_r... no
+checking for gethostbyname_r in -lnsl... no
+checking for gethostbyname_r... no
+checking for setsockopt... yes
+checking for yp_get_default_domain... yes
+checking for p2open... no
+checking for p2open in -lgen... no
+checking for bind... yes
+checking for crypt in -lcrypt... no
+checking for crypt... yes
+checking for sem_init... no
+checking for  in -lposix4... no
+checking if libz with compress... no
+checking for atomic operations... atomic_add atomic_sub
+checking for int8... no
+checking &quot;LinuxThreads&quot;... &quot;Found&quot;
+checking &quot;named thread libs:&quot;... &quot;-lpthread&quot;
+checking for strtok_r in -lpthread... no
+checking for strtok_r in -lc_r... no
+checking for strtok_r... no
+checking for pthread_init... no
+checking for dlopen in -ldl... yes
+checking for unistd.h... (cached) yes
+checking for restartable system calls... no
+checking &quot;need of special linking flags&quot;... &quot;-rdynamic&quot;
+checking for gcc option to accept ANSI C... none needed
+checking for an ANSI C-conforming const... yes
+checking for inline... inline
+checking for off_t... yes
+checking for struct stat.st_rdev... yes
+checking whether time.h and sys/time.h may both be included... yes
+checking whether struct tm is in sys/time.h or time.h... time.h
+checking for char... yes
+checking size of char... 1
+checking for int... yes
+checking size of int... 4
+checking for long... yes
+checking size of long... 4
+checking for long long... yes
+checking size of long long... 8
+checking size of off_t... 4
+checking whether byte ordering is bigendian... no
+checking base type of last arg to accept... int
+checking stack direction for C alloca... -1
+checking for working alloca.h... (cached) yes
+checking for alloca... yes
+checking if struct timespec has a ts_sec member... no
+checking if we have tzname variable... yes
+checking for type ulong... yes
+checking for type uchar... no
+checking for type uint... yes
+checking for type fp_except... no
+checking if g++ supports bool types... no
+checking if conversion of longlong to float works... yes
+checking if pthread_yield takes zero arguments... yes
+checking if pthread_yield takes 1 argument... yes
+checking for varargs.h... yes
+checking for stdarg.h... yes
+checking for dirent.h... yes
+checking for locale.h... yes
+checking for ndir.h... no
+checking for sys/dir.h... yes
+checking for sys/file.h... yes
+checking for sys/ndir.h... no
+checking for sys/ptem.h... no
+checking for sys/pte.h... no
+checking for sys/select.h... no
+checking for sys/stream.h... no
+checking for sys/mman.h... (cached) yes
+checking for curses.h... yes
+checking for termcap.h... yes
+checking for termio.h... (cached) yes
+checking for termbits.h... no
+checking for asm/termbits.h... yes
+checking for grp.h... yes
+checking for paths.h... yes
+checking for lstat... yes
+checking for putenv... yes
+checking for select... yes
+checking for setenv... yes
+checking for setlocale... yes
+checking for strcoll... yes
+checking for tcgetattr... yes
+checking whether stat file-mode macros are broken... no
+checking return type of signal handlers... void
+checking for type of signal functions... posix
+checking whether programs are able to redeclare getpw functions... yes
+checking for TIOCGWINSZ in sys/ioctl.h... yes
+checking for FIONREAD in sys/ioctl.h... yes
+checking for TIOCSTAT in sys/ioctl.h... no
+checking if struct dirent has a d_ino member... yes
+checking whether signal handlers are of type void... yes
+checking for tgetent in -lncurses... yes
+checking for termcap functions library... -lncurses
+checking for stdlib.h... (cached) yes
+checking for unistd.h... (cached) yes
+checking for getpagesize... yes
+checking for working mmap... yes
+checking return type of signal handlers... (cached) void
+checking return type of qsort... void
+checking whether utime accepts a null argument... yes
+checking for vprintf... yes
+checking for _doprnt... no
+checking for alarm... yes
+checking for bmove... no
+checking for chsize... no
+checking for ftruncate... yes
+checking for rint... yes
+checking for finite... yes
+checking for isnan... yes
+checking for fpsetmask... no
+checking for fpresetsticky... no
+checking for cuserid... yes
+checking for fcntl... yes
+checking for fconvert... no
+checking for poll... no
+checking for getrusage... yes
+checking for getpwuid... yes
+checking for getcwd... yes
+checking for getrlimit... yes
+checking for getwd... yes
+checking for index... yes
+checking for stpcpy... yes
+checking for locking... no
+checking for longjmp... yes
+checking for perror... yes
+checking for pread... no
+checking for realpath... yes
+checking for readlink... yes
+checking for rename... yes
+checking for socket... yes
+checking for strnlen... no
+checking for madvise... no
+checking for mkstemp... yes
+checking for strtol... yes
+checking for strtoul... yes
+checking for strtoll... no
+checking for strtoull... no
+checking for snprintf... yes
+checking for tempnam... yes
+checking for thr_setconcurrency... no
+checking for gethostbyaddr_r... yes
+checking for gethostbyname_r... (cached) no
+checking for getpwnam... yes
+checking for bfill... no
+checking for bzero... yes
+checking for bcmp... yes
+checking for strstr... yes
+checking for strpbrk... yes
+checking for strerror... yes
+checking for tell... yes
+checking for atod... no
+checking for memcpy... yes
+checking for memmove... yes
+checking for setupterm... no
+checking for strcasecmp... yes
+checking for sighold... no
+checking for vidattr... no
+checking for lrand48... yes
+checking for localtime_r... yes
+checking for sigset... no
+checking for sigthreadmask... no
+checking for pthread_sigmask... yes
+checking for pthread_setprio... no
+checking for pthread_setprio_np... no
+checking for pthread_setschedparam... yes
+checking for pthread_attr_setprio... no
+checking for pthread_attr_setschedparam... yes
+checking for pthread_attr_create... no
+checking for pthread_getsequence_np... no
+checking for pthread_attr_setstacksize... no
+checking for pthread_condattr_create... no
+checking for rwlock_init... no
+checking for pthread_rwlock_rdlock... no
+checking for fchmod... yes
+checking for getpass... yes
+checking for getpassphrase... no
+checking for initgroups... yes
+checking for mlockall... yes
+checking for fseeko... no
+checking for dlopen... yes
+checking for dlerror... yes
+checking style of gethost* routines... other
+checking style of gethostname_r routines... other
+checking 3 argument to gethostname_r routines... char
+checking &quot;args to pthread_getspecific&quot;... POSIX
+checking &quot;args to pthread_mutex_init&quot;... POSIX
+checking &quot;args to readdir_r&quot;... POSIX
+checking &quot;style of sigwait&quot;... POSIX
+checking &quot;for pthread_attr_setscope&quot;... yes
+checking &quot;can netinet files be included&quot;... &quot;yes&quot;
+checking &quot;character sets&quot;... default: ujis; compiled in: ujis
+checking for BerkeleyDB... no
+Not using Berkeley DB
+checking for Innodb... Not using Innodb
+checking for Gemini DB... Not using Gemini DB
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating extra/Makefile
+config.status: creating mysys/Makefile
+config.status: creating isam/Makefile
+config.status: creating strings/Makefile
+config.status: creating regex/Makefile
+config.status: creating heap/Makefile
+config.status: creating bdb/Makefile
+config.status: creating myisam/Makefile
+config.status: creating myisammrg/Makefile
+config.status: creating man/Makefile
+config.status: creating os2/Makefile
+config.status: creating os2/include/Makefile
+config.status: creating os2/include/sys/Makefile
+config.status: creating readline/Makefile
+config.status: creating libmysql_r/Makefile
+config.status: creating libmysql/Makefile
+config.status: creating client/Makefile
+config.status: creating sql/Makefile
+config.status: creating sql/share/Makefile
+config.status: creating merge/Makefile
+config.status: creating dbug/Makefile
+config.status: creating scripts/Makefile
+config.status: creating include/Makefile
+config.status: creating sql-bench/Makefile
+config.status: creating tests/Makefile
+config.status: creating Docs/Makefile
+config.status: creating support-files/Makefile
+config.status: creating mysql-test/Makefile
+config.status: creating include/mysql_version.h
+config.status: creating config.h
+
+MySQL has a Web site at <a href="http://www.mysql.com/">http://www.mysql.com/</a> which carries details on the
+latest release, upcoming features, and other information to make your
+work or play with MySQL more productive. There you can also find
+information about mailing lists for MySQL discussion.
+
+Remember to check the platform specific part of the reference manual for
+hints about installing MySQL on your platform. Also have a look at the
+files in the Docs directory.
+
+Thank you for choosing MySQL!
+
+以上が、configureのログです。(次のメールにmakeのログを添付します。)
+
+</pre>
+</div>
+<p class="button"><a href="6496">[前]</a><a href="6498">[次]</a><a href="../list/6401-6500">[番号順一覧]</a><a href="../thread/6401-6500">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="6497">   6497 2002-10-31 16:50 [&lt;hogehoge@xxxxxxxxxx] 一般ユーザ権限でのインストール          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6498">   6498 2002-10-31 17:03 ┣[&lt;hogehoge@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6499">   6499 2002-10-31 17:26 ┣[&lt;hogehoge@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6500">   6500 2002-10-31 17:25 ┣[&lt;hogehoge@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6501">   6501 2002-10-31 17:26 ┣[&lt;hogehoge@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6502">   6502 2002-10-31 17:27 ┣[&lt;hogehoge@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6503">   6503 2002-10-31 17:30 ┣[&quot;Takashi Yamashita&quot; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6504">   6504 2002-10-31 17:35 ┃┣[&quot;Takashi Yamashita&quot; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6506">   6506 2002-10-31 18:04 ┃┃┗[&lt;hogehoge@xxxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6505">   6505 2002-10-31 17:45 ┃┗[&lt;hogehoge@xxxxxxxxxx] Re: 一般ユーザ権限でのインストール ( お詫び)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6507">   6507 2002-10-31 19:30 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6511">   6511 2002-11-01 01:43 　┣[Tatsuya Kondo &lt;konet]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6517">   6517 2002-11-01 13:17 　┃┗[&lt;hogehoge@xxxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6516">   6516 2002-11-01 13:16 　┗[&lt;hogehoge@xxxxxxxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

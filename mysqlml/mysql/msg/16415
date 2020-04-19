@@ -1,0 +1,126 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16415</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16414">[前]</a><a href="16416">[次]</a><a href="../list/16401-16500">[番号順一覧]</a><a href="../thread/16401-16500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16415
+</p>
+<div class="header">
+<p>
+From: Nobuhiro Hatano &lt;Nobuhiro Hatano &lt;mysql@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 29 Jun 2017 17:12:28 +0900<br>
+Subject: [mysql 16415] Re: _[mysql_16413]_ユーザ変数でRow_Number関数(ソートキーなし)の代用について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+＜メール送信に失敗していたので再送しています、複数届いた方おられましたらすみません＞
+
+
+明智さん
+
+
+
+波多野と申します。
+
+
+
+ユーザー変数評価順の面白い挙動を見つけましたのでご参考にして頂けると幸いです。
+
+
+
+SELECT @a:=0; SELECT @a FROM (SELECT 1) t WHERE @a:=1 AND @a = 1; 
+
+と
+
+SELECT @a:=1; SELECT @a FROM (SELECT 1) t WHERE @a:=1 AND @a = 1;
+
+
+
+上の方は２つめの SELECT は Empty でしたが、
+
+下の方は２つめの SELECT は 1 でした
+
+一つ目のクエリでの代入で、２つ目のクエリの WHERE が True になるかどうか影響を受けました
+
+
+
+それではということで WHERE での代入を 0 にすると、先行する SELECT @a:=1 はあっても
+
+True にならなくなりました
+
+
+
+SELECT @a:=1; SELECT @a FROM (SELECT 1) t WHERE @a:=0 AND @a = 1;
+
+
+
+さらに WHERE での代入を @a:=2 にしてみますと
+
+
+
+mysql&amp;gt; SELECT @a:=1; SELECT @a FROM (SELECT 1) t WHERE @a:=2 AND @a = 1; 
+
++-------+
+
+<span class="quote1">| @a:=1 |</span>
+
++-------+
+
+<span class="quote1">|     1 |</span>
+
++-------+
+
+1 row in set (0.00 sec)
+
+
+
++------+
+
+<span class="quote1">| @a   |</span>
+
++------+
+
+<span class="quote1">|    1 |</span>
+
++------+
+
+1 row in set (0.00 sec)
+
+
+
+成立するようになります。（@a:=2 関係ないのなら何故 := 0 で挙動が変わったのかw）
+
+このようなクエリを現実で書くことはないと思われますが、直観では結果を事前に予測することは難しかったです。
+
+
+
+今手元で使ってみたバージョンはこちらでした
+
+
+
+mysql  Ver 14.14 Distrib 5.6.25, for Linux (x86_64)
+
+
+ 
+
+
+
+
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="http://www.mysql.gr.jp/mysqlml/mysql/msg/16415/0/"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="16414">[前]</a><a href="16416">[次]</a><a href="../list/16401-16500">[番号順一覧]</a><a href="../thread/16401-16500">[スレッド一覧]</a></p>
+</body>
+</html>

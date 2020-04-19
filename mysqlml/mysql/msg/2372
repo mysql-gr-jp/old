@@ -1,0 +1,72 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2372</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2371">[前]</a><a href="2373">[次]</a><a href="../list/2301-2400">[番号順一覧]</a><a href="../thread/2301-2400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2372
+</p>
+<div class="header">
+<p>
+From: &quot;TOYOSHIMA,Masayuki&quot; &lt;&quot;TOYOSHIMA,Masayuki&quot; &lt;mtoyo@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 12 Aug 2000 12:44:53 +0900<br>
+Subject: [mysql 02372] 2 バイト文字の正規表現の問題<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+豊島(東京外国語大学アジア・アフリカ言語文化研究所)と申します。
+
+2バイト文字の正規表現がうまく働かないように見えます。
+
+3.23.22-beta を SunOS 5.5.1 (Sparc)で --with-charset=ujis でコンパイルし、
+-default-character-set=ujis で利用していますが、例えば、次のようになりま
+す。
+
+CREATE TABLE test (MKey VARCHAR(20), MValue VARCHAR(40));  として、
+INSERT INTO test (MKey, MValue) VALUES ('ぅう','ザザ');    とした後、
+
+SELECT * FROM test WHERE MKey RLIKE 'イ';
+SELECT * FROM test WHERE MValue RLIKE '競';  とすると
+
+どちらの SELECT に対しても、下記が返ります。
++------+--------+
+<span class="quote1">| Mkey | MValue |</span>
++------+--------+
+<span class="quote1">| ぅう | ザザ   |</span>
++------+--------+
+
+ujis でのコード値は
+	ぅう	a4a5a4a6
+	イ	  a5a4
+	ザザ	a5b6a5b6
+	競	  b6a5
+なので、文字境界をまたいでマッチしているようです。
+
+	SELECT * FROM test WHERE MValue LIKE '%イ%'; ( 又は LIKE '%競%')
+
+では、Empty set が戻る(マッチしない)ので、RLIKE (正規表現)のみの問題のよ
+うに見えます。
+
+当方のインストールの誤りなのでしょうか。
+
+豊島正之(とよしま まさゆき) mtoyo@xxxxxxxxxx
+<a href="http://jcs.aa.tufs.ac.jp/mtoyo/">http://jcs.aa.tufs.ac.jp/mtoyo/</a>
+東京外国語大学アジア・アフリカ言語文化研究所
+〒114-8580 東京都北区西ケ原4丁目
+
+</pre>
+</div>
+<p class="button"><a href="2371">[前]</a><a href="2373">[次]</a><a href="../list/2301-2400">[番号順一覧]</a><a href="../thread/2301-2400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2371">   2371 2000-08-12 05:38 [takashi yasutake &lt;fw] 漢字コードについて                      </a></span>
+<span class="current">-&gt;&nbsp;<a href="2372">   2372 2000-08-12 12:44 ┣[&quot;TOYOSHIMA,Masayuki&quot;] 2 バイト文字の正規表現の問題          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2373">   2373 2000-08-12 12:58 ┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2374">   2374 2000-08-12 09:14 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12817</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="12816">[前]</a><a href="12818">[次]</a><a href="../list/12801-12900">[番号順一覧]</a><a href="../thread/12801-12900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12817
+</p>
+<div class="header">
+<p>
+From: shuetsu &lt;shuetsu &lt;shuetsu@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 28 Feb 2006 10:55:26 +0900<br>
+Subject: [mysql 12817] Re: SELECTクエリの速度が安定しない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+伊藤です。
+
+すみません。
+遅いときは数秒というのは大げさでした。
+以下のような現象です。
+
+mysql&gt; select count(*) from hoge where foo &gt; 100;
+1 row in set (0.59 sec)
+mysql&gt; select count(*) from hoge where foo &gt; 100;
+1 row in set (0.08 sec)
+mysql&gt; select count(*) from fuga where bar &gt; 100;
+1 row in set (0.75 sec)
+mysql&gt; select count(*) from fuga where bar &gt; 100;
+1 row in set (0.08 sec)
+
+返す結果はhogeもfugaも約40000です。
+
+<span class="quote1">&gt; ・しばらくアクセスされないとディスクがスリープモードに入るために、</span>
+<span class="quote1">&gt;   １回目のアクセス時に時間がかかる</span>
+
+テーブルhogeへのクエリは速いのに、fugaへのクエリは遅い、
+なんてことが起きているので、ディスクは原因ではないと思っています。
+複数のディスクに分散してデータを配置しているということもありませんし、、、
+
+「テーブル毎」に、しばらく放っておくと一度だけ遅くなるという感じです。
+
+念のため、この後すぐに
+
+reset query cache;
+flush tables;
+
+を実行してから再びクエリを発行してみたのですが、
+遅くなるということはありませんでした。
+「時間を置く」以外に現象を再現する方法が見つかりません。
+
+また、開発作業を
+
+開発用サーバ Linux
+本番用サーバ FreeBSD
+
+の2台で行っているのですが、どちらのサーバでも同じような現象が発生します。
+
+<span class="quote1">&gt; ・２回目以降はOSのキャッシュにデータが乗ってしまうので応答が</span>
+<span class="quote1">&gt;   はやい</span>
+
+これが原因でこれほどパフォーマンスに差が出てしまうということは
+ありうるのでしょうか？
+
+--
+shuetsu ito &lt;shuetsu@xxxxxxxxxx&gt;
+
+
+
+</pre>
+</div>
+<p class="button"><a href="12816">[前]</a><a href="12818">[次]</a><a href="../list/12801-12900">[番号順一覧]</a><a href="../thread/12801-12900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12810">  12810 2006-02-27 17:46 [shuetsu &lt;shuetsu@xxx] SELECTクエリの速度が安定しない          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12811">  12811 2006-02-27 18:07 ┣[遠藤 俊裕 &lt;endo@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12812">  12812 2006-02-27 19:11 ┃┗[shuetsu &lt;shuetsu@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12815">  12815 2006-02-27 20:09 ┃　┗[遠藤 俊裕 &lt;endo@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12816">  12816 2006-02-28 08:33 ┃　　┗[shuetsu &lt;shuetsu@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12813">  12813 2006-02-27 19:43 ┣[Shuji Yamakawa &lt;hzv0]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12814">  12814 2006-02-27 19:45 ┗[SAKAI Kei &lt;sak@xxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="12817">  12817 2006-02-28 10:55 　┗[shuetsu &lt;shuetsu@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12818">  12818 2006-02-28 11:29 　　┣[tatematsu &lt;tatemax@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12819">  12819 2006-02-28 11:50 　　┃┗[tatematsu &lt;tatemax@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12820">  12820 2006-02-28 13:56 　　┃　┗[shuetsu &lt;shuetsu@xxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12821">  12821 2006-02-28 14:18 　　┃　　┗[tatematsu &lt;tatemax@x]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12822">  12822 2006-02-28 14:37 　　┃　　　┗[shuetsu &lt;shuetsu@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12823">  12823 2006-02-28 14:49 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12824">  12824 2006-02-28 17:13 　　　┗[shuetsu &lt;shuetsu@xxx]                                 </a></span>
+</pre>
+</body>
+</html>

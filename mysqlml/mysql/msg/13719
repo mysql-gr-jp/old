@@ -1,0 +1,144 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13719</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13718">[前]</a><a href="13720">[次]</a><a href="../list/13701-13800">[番号順一覧]</a><a href="../thread/13701-13800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13719
+</p>
+<div class="header">
+<p>
+From: Yasufumi Kinoshita &lt;Yasufumi Kinoshita &lt;kinoshita.yasufumi@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 08 Feb 2007 11:24:08 +0900<br>
+Subject: [mysql 13719] Re: オンラインバックアップデータのリカバリ時のエラーについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+木下です。
+
+Oracle についてのご理解はあるようですので、Oracleに例えて説明します。
+MySQL（少なくとも4.1）では、Oracleでいうところの
+「ALTER TABLESPACE xxx BEGIN BACKUP」−「ALTER TABLESPACE xxx END BACKUP」
+にあたる処理は実装されていませんので、MySQL動作中に普通にコピーや、
+たとえストレージの機能でデータファイル等のスナップショットを取っても、
+そのファイルから復元できる保障はありません。
+
+4.1では、オンラインでバックアップを行う場合は、mysqldumpを利用するか、
+データファイルのバックアップ
+<a href="http://dev.mysql.com/doc/refman/4.1/en/innodb-backup.html">http://dev.mysql.com/doc/refman/4.1/en/innodb-backup.html</a>
+にあるように「InnoDB Hot Backup」というソフト（有料）を使用する必要があります。
+
+というわけですので、
+ログを見ますと、「バックアップファイルからの復元」ではなく、
+「クラッシュからの復元」としての扱いを受けているのがわかると思います。
+
+回答になっていますでしょうか？
+
+hiraken wrote:
+<span class="quote1">&gt; こんばんは。はじめまして</span>
+<span class="quote1">&gt; たかひらと申します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 最近、OracleDBユーザから、MySQLユーザへ切り替わってきたものです。</span>
+<span class="quote1">&gt; このMLは、過去ログも含め、非常に参考になる情報ばかりで重宝しております。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; さて現在、バージョン4.1.12 をRed Hat Linux ES4上で稼動させた、</span>
+<span class="quote1">&gt; OLTP系のシステムの、バックアップ・リカバリ設計をしておりまして、</span>
+<span class="quote1">&gt; 以下の方法で、オンラインバックアップを行おうと考えています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 【バックアップ手順】</span>
+<span class="quote1">&gt; 　1. flush tables with read lock;</span>
+<span class="quote1">&gt; 　2. flush logs;</span>
+<span class="quote1">&gt; 　3. ストレージのスナップショット</span>
+<span class="quote1">&gt; 　4. reset master;</span>
+<span class="quote1">&gt; 　5. unlock tables;</span>
+<span class="quote1">&gt; 　6. 3で取得したスナップショットをテープ等へバックアップ</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; しかし、検証環境でリカバリ動作を確認したところ、データは戻し、MySQLを起 </span>
+<span class="quote1">&gt; 動することができたものの、</span>
+<span class="quote1">&gt; 下記リカバリ手順の2.のタイミングで、/var/log/mysqld.logにエラーが出力さ </span>
+<span class="quote1">&gt; れているのに気づきました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 【リカバリ手順】</span>
+<span class="quote1">&gt; 　1.バックアップデータを戻す</span>
+<span class="quote1">&gt; 　2.ネットワーク接続なしでMySQLを起動</span>
+<span class="quote1">&gt; 　3.バイナリログからロールフォワードリカバリ-&gt;MySQLを停止</span>
+<span class="quote1">&gt; 　4.MySQLを通常起動</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; =[リカバリ時のログ]===================================================== </span>
+<span class="quote1">&gt; ==========</span>
+<span class="quote1">&gt; 070206 15:10:45  mysqld started</span>
+<span class="quote1">&gt; 070206 15:10:45 [Warning] --innodb-safe-binlog is meaningful only if the </span>
+<span class="quote1">&gt; global sync_binlog variable</span>
+<span class="quote1">&gt; is 1; now setting it to 1.</span>
+<span class="quote1">&gt; 070206 15:10:45  InnoDB: Database was not shut down normally!</span>
+<span class="quote1">&gt; InnoDB: Starting crash recovery.</span>
+<span class="quote1">&gt; InnoDB: Reading tablespace information from the .ibd files...</span>
+<span class="quote1">&gt; InnoDB: Restoring possible half-written data pages from the doublewrite</span>
+<span class="quote1">&gt; InnoDB: buffer...</span>
+<span class="quote1">&gt; 070206 15:10:45  InnoDB: Starting log scan based on checkpoint at</span>
+<span class="quote1">&gt; InnoDB: log sequence number 0 44818.</span>
+<span class="quote1">&gt; InnoDB: Doing recovery: scanned up to log sequence number 0 44904</span>
+<span class="quote1">&gt; InnoDB: Last MySQL binlog file position 0 4, file name </span>
+<span class="quote1">&gt; /var/lib/mysql/binlog.000002</span>
+<span class="quote1">&gt; 070206 15:10:45  InnoDB: Flushing modified pages from the buffer pool...</span>
+<span class="quote1">&gt; 070206 15:10:45  InnoDB: Started; log sequence number 0 44904</span>
+<span class="quote1">&gt; 070206 15:10:45 [ERROR] After InnoDB crash recovery, checking if the </span>
+<span class="quote1">&gt; binary log</span>
+<span class="quote1">&gt; '/var/lib/mysql/binlog.000002' contains rolled back transactions which </span>
+<span class="quote1">&gt; must be removed from it...</span>
+<span class="quote1">&gt; /usr/libexec/mysqld: ready for connections.</span>
+<span class="quote1">&gt; Version: '4.1.12-log'  socket: '/var/lib/mysql/mysql.sock'  port: 0  </span>
+<span class="quote1">&gt; Source distribution</span>
+<span class="quote1">&gt; =[リカバリ時のログ]===================================================== </span>
+<span class="quote1">&gt; ==========</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [ERROR] After InnoDB crash recovery, checking if the binary log</span>
+<span class="quote1">&gt; '/var/lib/mysql/binlog.000002' contains rolled back transactions which </span>
+<span class="quote1">&gt; must be removed from it...</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; は、</span>
+<span class="quote1">&gt; 『InnoDBのクラッシュリカバリ後、binlog.000002がロールバックトランザク </span>
+<span class="quote1">&gt; ションを含むバイナリログならば、</span>
+<span class="quote1">&gt; チェックしなさい。』</span>
+<span class="quote1">&gt; という直訳で理解しましたが、binlog.000002自体が、</span>
+<span class="quote1">&gt; バックアップ手順の2.で、flush logsを実行した時にできた、</span>
+<span class="quote1">&gt; 最新バイナリログですので、中身に処理は記載されておりません。</span>
+<span class="quote1">&gt; 従いましてこの場合、このメッセージを無視していいものかどうか、迷っており </span>
+<span class="quote1">&gt; ます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; どなたか、同様のご経験をされた方がいらっしゃいましたら、何卒ご教授願いま </span>
+<span class="quote1">&gt; せんでしょうか。</span>
+<span class="quote1">&gt; 以上、よろしくお願い申し上げます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; / Takahira Ken</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+</pre>
+</div>
+<p class="button"><a href="13718">[前]</a><a href="13720">[次]</a><a href="../list/13701-13800">[番号順一覧]</a><a href="../thread/13701-13800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13712">  13712 2007-02-07 03:18 [&quot;hiraken&quot; &lt;hiraken@x] オンラインバックアップデータのリカバリ時のエラーについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13713">  13713 2007-02-07 10:26 ┣[&lt;ska_king2005@xxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13714">  13714 2007-02-07 17:38 ┃┣[&lt;kaidnu2@xxxxxxxxxx&gt;] MySQL GUI-tool （ Linux 版）インストール方法</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13715">  13715 2007-02-07 22:02 ┃┃┗[舘山 聖司 &lt;tateyan@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13716">  13716 2007-02-07 22:30 ┃┃　┗[&lt;kaidnu2@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13717">  13717 2007-02-08 01:54 ┃┗[&quot;hiraken&quot; &lt;hiraken@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13718">  13718 2007-02-08 10:07 ┃　┗[&lt;ska_king2005@xxxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="13719">  13719 2007-02-08 11:24 ┗[Yasufumi Kinoshita &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13720">  13720 2007-02-08 16:10 　┗[&lt;ska_king2005@xxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13721">  13721 2007-02-08 17:21 　　┗[Yasufumi Kinoshita &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13722">  13722 2007-02-09 01:33 　　　┗[&quot;hiraken&quot; &lt;hiraken@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13724">  13724 2007-02-14 02:05 　　　　┗[&quot;hiraken&quot; &lt;hiraken@x]                               </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15654</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15653">[前]</a><a href="15655">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15654
+</p>
+<div class="header">
+<p>
+From: ichikawa kenji &lt;ichikawa kenji &lt;ichikawa@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 11 Jan 2012 17:55:50 +0900<br>
+Subject: [mysql 15654] mysqldump からのリストアで Can't find any matching row in the user table<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+市川 健児 です。
+
+新たに MySQL サーバ を構築し、
+現在稼働中の MySQL サーバから mysqldump にて、すべてのデータベースをダンプし、
+新しい MySQL サーバにリストアしたのですが、MySQL への接続時に、
+「ERROR 1045 (28000): Access denied for user 'ichikawa'@'localhost'」、
+とのメッセージが出ております。
+
+[ichikawa@server ~]$ mysql -uroot -ppassword &lt; ./all_dump.sql
+[ichikawa@server ~]$ mysql -uichikawa -ppassword database
+ERROR 1045 (28000): Access denied for user 'ichikawa'@'localhost' (using password: YES)
+
+確認のため、show grants を実行すると、
+MySQL に接続するユーザの権限が新しい MySQL サーバに
+存在しておりませんでした。
+
+mysql&gt;  show grants for ichikawa@localhost;
+ERROR 1141 (42000): There is no such grant defined for user 'ichikawa' on host 'localhost'
+
+そこで、grants を用いて、権限を設定しようとしましたが、
+「Can't find any matching row in the user table」
+とのメッセージが出てしまい、
+ユーザ権限が設定できないようになっております。
+
+mysql&gt; grant all on database.* to ichikawa@localhost identified by 'password';
+ERROR 1133 (42000): Can't find any matching row in the user table
+
+結局、テーブル mysql.user から該当ユーザを削除して、
+新たに grant にてユーザ権限を設定しました。
+
+mysql&gt; delete from mysql.user where user = 'ichikawa';
+mysql&gt; grant all on database.* to ichikawa@localhost identified by 'password';
+mysql&gt; flush privileges;
+
+mysqldump によってダンプしたファイルで、
+新しい MySQL サーバにユーザの権限を移行することは可能なのでしょうか ?
+
+よろしくお願いいたします。
+
+[ichikawa@server ~]$ mysqladmin -uroot -ppassword version
+mysqladmin  Ver 8.41 Distrib 5.0.41, for pc-linux-gnu on i686
+Copyright (C) 2000-2006 MySQL AB
+This software comes with ABSOLUTELY NO WARRANTY. This is free software,
+and you are welcome to modify and redistribute it under the GPL license
+
+Server version          5.0.41
+Protocol version        10
+Connection              Localhost via UNIX socket
+UNIX socket             /tmp/mysql.sock
+Uptime:                 4 days 22 hours 56 min 40 sec
+
+Threads: 1  Questions: 17278  Slow queries: 0  Opens: 68  Flush tables: 1  Open tables: 12  Queries per second avg: 0.040
+
+
+
+
+
+----------------------------------------------------------------
+ichikawa kenji
+mailto:ichikawa@xxxxxxxxxx
+FAN Communications, Inc.
+Aoyama Diamond Building 8F, 1-1-8, Shibuya, Shibuya-ku, Tokyo 150-0002
+Phone : +081-3-6820-0818
+<a href="http://www.fancs.com/">http://www.fancs.com/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="15653">[前]</a><a href="15655">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+</body>
+</html>

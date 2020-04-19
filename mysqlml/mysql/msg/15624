@@ -1,0 +1,97 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15624</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15623">[前]</a><a href="15625">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15624
+</p>
+<div class="header">
+<p>
+From: HIRATSUKA Sadao &lt;HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 31 Aug 2011 12:33:06 +0900<br>
+Subject: [mysql 15624] Re: mysql 5.5.9でのset names sjisで性能低下<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、平塚です。
+
+On Tue, 30 Aug 2011 20:29:54 +0900 (LMT)
+Etsuo SUMIYA &lt;sumiya-e@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; &quot;set names sjis&quot;を実行すると、t2の</span>
+<span class="quote1">&gt; rowsが10となり、indexがきかず、全スキャンかかってしまうようです。</span>
+
+いただいたテストケースは
+MySQL 5.5.11で再現して、MySQL 5.5.12だと再現しませんでした。
+たぶん↓これです。
+<a href="http://bugs.mysql.com/bug.php?id=60625">http://bugs.mysql.com/bug.php?id=60625</a>
+
+ただそれとは別に
+最新のMySQL 5.5.15でも再現するケースを作れたので、バグ報告してみました。
+<a href="http://bugs.mysql.com/bug.php?id=62307">http://bugs.mysql.com/bug.php?id=62307</a>
+
+仕組みとしては、tm = '20:01'という検索条件を
+  CONVERT(tm USING SJIS sjis) = '20:01'
+に変換するわりと残念なロジックがMySQL 5.5から入っていて、
+これの発動条件の一つがcharacter_set_connection = ucs2あるいはsjis
+となっているようです。
+
+ucs2のためにはこのロジックがどうしても必要なようですが、
+sjisは巻き添えを喰らった感があります。
+
+このロジックが発動するとファンクションが挟まるため
+インデックスが使われなくなってしまいます。
+この挙動はEXPLAINではなくEXPLAIN EXTENDEDコマンドを使って、
+直後にSHOW WARNINGをすると確認できます。
+
+MySQL 5.5.12以降では、tm列をt1から持ってくる過程で
+運よくロジックの発動を回避できているようです。
+
+・対処案1
+  MySQL 5.5.9から変更できない場合、
+    SELECT t2.name, t1.tm, t2.v FROM t2, t1 WHERE t2.name = 'n1'
+    AND t2.tm = CAST(t1.tm AS UNSIGNED) AND DATE(t1.dt) = '2011-08-30';
+  とすると期待したSQL実行計画になります。
+  おすすめはしませんが…。
+
+・対処案2
+  sjisではなくて例えばcp932にすれば直ります。
+
+・対処案3
+  MySQL 5.5.12以上にすればとりあえずテストケースのクエリは良くなります。
+  ただ、t2を単独でSELECTすると発動してしまいます。
+    SELECT * FROM t2 WHERE name = 'n1' AND tm = '20:01';
+  これに対しては
+    SELECT * FROM t2 WHERE name = 'n1' AND tm = TIME('20:01');
+  とすると直ります。ちなみにMySQL 5.5.11では
+    SELECT * FROM t2 WHERE name = 'n1' AND tm = CAST(TIME('20:01') AS UNSIGNED);
+  とまでする必要があります。
+
+・対処案4
+  Bug#62307がVerifyされて直るまで待ちます。
+
+
+よろしくお願いいたします。
+
+-- 
+平塚貞夫 hiratsuka.sadao@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15623">[前]</a><a href="15625">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15623">  15623 2011-08-30 20:29 [Etsuo SUMIYA &lt;sumiya] mysql 5.5.9でのset names sjisで性能低下 </a></span>
+<span class="current">-&gt;&nbsp;<a href="15624">  15624 2011-08-31 12:33 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15625">  15625 2011-08-31 18:27 　┗[Etsuo SUMIYA &lt;sumiya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15626">  15626 2011-09-01 09:50 　　┗[HIRATSUKA Sadao &lt;hir]                                   </a></span>
+</pre>
+</body>
+</html>

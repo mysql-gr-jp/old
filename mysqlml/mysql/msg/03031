@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3031</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="3030">[前]</a><a href="3032">[次]</a><a href="../list/3001-3100">[番号順一覧]</a><a href="../thread/3001-3100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3031
+</p>
+<div class="header">
+<p>
+From: m.sasaki &lt;m.sasaki &lt;ccr60140@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 14 Jan 2001 23:10:53 +0900<br>
+Subject: [mysql 03031] 本日完了！！（その６） mysql-ruby-2.3.1 編<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+○mysql-ruby-2.3.1○
+
+MySQL+Rubyの環境にはMySQL/Rubyが必要です。
+インストール手順は結局のところP95のとおりです。
+
+しかし私の場合はここで大はまりでした。
+
+●まずP96に書かれているtest.rbのエラー発生。
+
+これは環境変数LD_LIBRARY_PATHを設定します。
+
+&lt;bashの場合&gt;
+.bachrcに
+export LD_LIBRARY_PATH=&quot;$LD_LIBRARY_PATH&quot;:&quot;/usr/local/lib/mysql&quot;
+
+&lt;tcshの場合&gt;
+.cshrcに
+setenv LD_LIBRARY_PATH &quot;$LD_LIBRARY_PATH&quot;:&quot;/usr/local/lib/mysql&quot;
+
+以上でmake installまで進みました。
+
+
+●サンプルプログラムのbboard.cgiがrequire'mysql'で落ちる。
+
+これは/etc/ld.so.confに
+
+/usr/local/lib/mysql
+
+を追加することで掲示板の画面を拝みました。
+先ほどのインストール時のエラーもここの１カ所で解決だと思います。
+この辺の設定の解説についてはシーラカンス本や
+PHP+Apache+PostgreSQLの雑誌記事の方が詳しくて親切だと思います。
+
+
+
+●サンプルプログラムのbboard.cgiをbboard.rbxに名前を変更
+して実行（=mod_rubyで実行）するとrequire'mysql'で落ちる。
+
+これが今回の最大の難関＆大タコでした。
+MLで調べてみて最初はmod_ruby&amp;mysql-rubyの組み合わせの問題だと思い、
+指示通り手パッチをあてようかとRuby側のソースを見ると、
+1.6.1ではすでにパッチ済みで配布されているようなので止めました。
+
+require'mysql'を使わない（つまりMySQLに接続しない）cgiを書いてみて
+動作を比較してみると*.cgiだと動くが*.rbxでは
+require'cgi'やrequire'cgi-lib'で落ちてしまうことがわかりました。
+httpd.confの設定ミスかと思い、SetenvやLoadFileなどいろいろ試しても
+全然ダメで「ギブアップ」寸前でした。
+ふと基本に戻ってバージョンを確認してみたのが幸いでした。
+
+今回『MySQL徹底入門』と一緒に『Rubyプログラミング入門』も購入
+していますので、mod_rubyはそちらのRuby本の付録CD-ROMから
+何の疑いもなくインストールしました。
+mod_ruby-0.1.4とeruby-0.0.4です。
+配布サイトを調べると最新版はmod_ruby-0.2.2，eruby-0.1.3
+になっているじゃありませんか。ルビー本体は1.6.1が収録されている
+ので明らかにmod_rubyとerubyは収録ミスだと思います。
+その他のライブラリについては調べていません。
+
+さて最新版をダウンロードしてインストールしました。
+require'cgi'やrequire'cgi-lib'は通過しましたが
+依然としてrequire'mysql'が使えません。
+再度、mysql-rubyをインストールし直した時に発見しました。
+make install時にmysql.soが古いバージョンのrubyのディレクトリに
+コピーされているのを。
+/usr/local/lib/ruby/1.6/i686-linux/にmysql.soを上書きコピーして
+require'mysql'を試すと・・・・・・・動いちゃいました。
+bboard.cgiを.rbxに変名してmod_rubyの動作も確認します。
+・・・・・・・・・全然問題ないです。とっても快適です。
+
+　　　　　　　　　　　　　　　　　　つづく
+
+****************
+ささき　まさとし
+    MyNA ROOKIE
+****************
+
+</pre>
+</div>
+<p class="button"><a href="3030">[前]</a><a href="3032">[次]</a><a href="../list/3001-3100">[番号順一覧]</a><a href="../thread/3001-3100">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="3031">   3031 2001-01-14 23:10 [m.sasaki &lt;ccr60140@x] 本日完了！！（その６） mysql-ruby-2.3.1 編</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3042">   3042 2001-01-16 23:46 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3074">   3074 2001-01-19 21:44 　┗[m.sasaki &lt;ccr60140@x]                                     </a></span>
+</pre>
+</body>
+</html>

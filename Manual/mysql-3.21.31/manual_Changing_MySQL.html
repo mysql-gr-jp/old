@@ -1,0 +1,89 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.texi on 20 June 1998 -->
+
+  <TITLE>MySQL Reference Manual for version 3.21.31. - MySQL への関数の追加</TITLE>
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Tools.html">previous</A>, <A HREF="manual_ODBC.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Changing MySQL" HREF="manual_toc.html#Changing MySQL"><STRONG>MySQL</STRONG> への関数の追加</A></H1>
+
+
+
+<H2><A NAME="Adding functions" HREF="manual_toc.html#Adding functions"><STRONG>MySQL</STRONG> への新しい関数の追加</A></H2>
+
+<P>
+mysql に新しい関数を追加するには2つの方法があります:
+
+<UL>
+<LI>新しい UDF インタフェースを通して関数を追加できます。
+
+ 「<A HREF="manual_Syntax.html#UDF functions">CREATE FUNCTION 構文</A>」節参照 
+<LI>ネイティブな <STRONG>MySQL</STRONG> 関数としてそれを追加できます。
+
+</UL>
+
+<P>
+(SOUNDEX() のような) 新しいネイティブ <STRONG>MySQL</STRONG> 関数を追加するには、
+次のことだけを行う必要があります:
+
+</P>
+
+<OL>
+<LI>
+
+<CODE>sql_lex.cc</CODE> 内の <CODE>sql_functions</CODE> 配列内に関数名を定義する1行
+を追加して下さい。
+<LI>
+
+<CODE>sql_yacc.y</CODE> に2行追加して下さい。プリプロセッサシンボルの定義上に 
+yacc が定義できます (これはファイルの最初に追加されるべきです)。それから
+関数パラメータを定義し、これらのパラメータで 'item' を作成します。例とし
+て、<CODE>sql_yacc.y</CODE> 内の SOUNDEX の全てのできごとをチェックしてくださ
+い。
+<LI>
+
+item_func.h 内で Item_num_func または Item_str_func からの継承クラスを宣
+言します。これはあなたの関数が数値と文字列のどちらを戻すかに依存します。
+<LI>
+
+<TT>`item_func.cc'</TT> 内に次を追加します: あなたが数値関数を定義している場
+合 <CODE>double *Item_func_newname::val()</CODE> または、文字列関数を定義して
+いる場合 <CODE>String *Item_func_newname::Str(String *str)</CODE>。
+<LI>
+
+あなたはおそらく次の関数も定義すべきです: <CODE>void
+Item_func_newname::fix_length_and_dec()</CODE> これは与えられた引数に基づいて
+少なくとも <CODE>max_length</CODE> を計算します。<CODE>max_length</CODE> は関数が返
+す最大文字数です。関数が <CODE>NULL</CODE> を返さない場合、<CODE>maybe_null =
+0</CODE> をセットすべきです。
+</OL>
+
+<P>
+文字列関数について:
+
+<OL>
+<LI>
+
+文字列関数では、<CODE>String *str</CODE> 引数が、結果を保持するために使用され
+る文字列バッファを提供します。
+<LI>
+
+文字列関数は結果を保持する文字列を返すべきです。
+<LI>
+
+現在の全ての文字列関数は、絶対に必要でなければメモリの割り当てを回避しよ
+うとします！
+</OL>
+
+<P>
+<A NAME="IDX291"></A>
+<A NAME="IDX292"></A>
+<P><HR><P>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Tools.html">previous</A>, <A HREF="manual_ODBC.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

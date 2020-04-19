@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12841</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="12840">[前]</a><a href="12842">[次]</a><a href="../list/12801-12900">[番号順一覧]</a><a href="../thread/12801-12900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12841
+</p>
+<div class="header">
+<p>
+From: &quot;ot&quot; &lt;&quot;ot&quot; &lt;shezo@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 7 Mar 2006 13:28:38 +0900<br>
+Subject: [mysql 12841] Windows2000とC API<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして。MySQL初心者の太田と申します。
+コマンドラインやQueryBrowserを使っての初歩的な操作は一通りできます。
+今回、Windows2000 pro VC++ で C APIを使ってMySQLを弄ろうと思い、以下のような
+コードを書いたのですが、
+
+{
+    MYSQL SQL;
+
+    mysql_init( &amp;SQL );
+
+    if( mysql_real_connect( &amp;SQL, HOST, USER, PASS, DB, PORT, NULL, 0 ) ==
+NULL ){
+        printf( &quot;Error %s\n&quot;, mysql_error( &amp;SQL ) );
+    };
+
+    mysql_close( &amp;SQL );
+}
+
+Error Can't create TCP/IP socket (10106)
+と言うエラーが帰ってきます。
+コマンドプロンプトで同じ情報を入力した場合には正常に動作します。
+
+そこで色々と調べて、これが正しい方法かは解らないのですが、
+NT系ではnamed-pipeを使うと上手く行くと言うような記事を見つけたので以下の様に
+修正したところ、
+
+{
+	MYSQL SQL;
+
+	mysql_init( &amp;SQL );
+	mysql_options( &amp;SQL ,MYSQL_OPT_NAMED_PIPE ,0 );
+
+	if( mysql_real_connect( &amp;SQL, &quot;.&quot;, USER, PASS, DB, PORT, &quot;MySQL&quot;, 0
+) == NULL ){
+		printf( &quot;Error %s\n&quot;, mysql_error( &amp;SQL ) );
+	}
+
+	mysql_close( &amp;SQL );
+}
+
+今度は、
+Error Can't open named pipe to host: .  pipe: MySQL (2)
+と言うエラーが帰ってきました。
+これはコマンドプロンプトの方でも出たので、調べたところhost=localhostを設定し
+ていないと正常に
+動作しないバグがあるらしく、
+
+mysql -h . -u user -p --host=localhost
+
+としたところ、正常に接続できました。
+
+そこで、Cの方でも同じ設定にするために、
+my.cnfをVC++プロジェクトのルートディレクトリに作成して、
+[client]
+host = localhost
+と書いて保存し、
+
+{
+    MYSQL SQL;
+
+    imysql_init( &amp;SQL );
+
+    mysql_options( &amp;SQL ,MYSQL_OPT_NAMED_PIPE ,0 );
+    mysql_options( &amp;SQL ,MYSQL_READ_DEFAULT_FILE ,     &quot;./my.cnf&quot; );
+    mysql_options (&amp;SQL ,MYSQL_READ_DEFAULT_GROUP , &quot;host&quot; );
+
+    if( mysql_real_connect( &amp;SQL, &quot;.&quot;, USER, PASS, DB, PORT, &quot;MySQL&quot;, 0 ) ==
+NULL ){
+        printf( &quot;Error %s\n&quot;, mysql_error( &amp;SQL ) );
+    }
+
+    mysql_close( &amp;SQL );
+}
+
+としたところ、やはり上と同じエラーが返ってきます。
+MySQLのところをNULLにしても結果は同じでした。
+
+これ以上は何を調べたら良いのかもわからないので、詳しい方がいらしゃいましたら
+ご教唆くださいm(_ _)m
+
+
+</pre>
+</div>
+<p class="button"><a href="12840">[前]</a><a href="12842">[次]</a><a href="../list/12801-12900">[番号順一覧]</a><a href="../thread/12801-12900">[スレッド一覧]</a></p>
+</body>
+</html>

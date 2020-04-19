@@ -1,0 +1,211 @@
+diff -ru php-5.0.4.orig/ext/mysql/php_mysql.c php-5.0.4/ext/mysql/php_mysql.c
+--- php-5.0.4.orig/ext/mysql/php_mysql.c	2005-02-22 23:59:30.000000000 +0900
++++ php-5.0.4/ext/mysql/php_mysql.c	2005-06-09 21:57:44.458699088 +0900
+@@ -169,6 +169,10 @@
+ 
+ 	PHP_FE(mysql_info,		            				NULL)
+ 	 
++#if MYSQL_VERSION_ID >= 40107 || (MYSQL_VERSION_ID >= 40022 && MYSQL_VERSION_ID < 40107)
++	PHP_FE(mysql_hex_string,	NULL)
++#endif
++
+ 	/* for downwards compatability */
+ 	PHP_FALIAS(mysql,				mysql_db_query,		NULL)
+ 	PHP_FALIAS(mysql_fieldname,		mysql_field_name,	NULL)
+@@ -340,6 +344,9 @@
+ 	STD_PHP_INI_ENTRY("mysql.default_socket",		NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysql_globals,		mysql_globals)
+ 	STD_PHP_INI_ENTRY("mysql.connect_timeout",		"60",	PHP_INI_ALL,		OnUpdateLong,		connect_timeout, 	zend_mysql_globals,		mysql_globals)
+ 	STD_PHP_INI_BOOLEAN("mysql.trace_mode",			"0",	PHP_INI_ALL,		OnUpdateLong,		trace_mode, 		zend_mysql_globals,		mysql_globals)
++ 	STD_PHP_INI_ENTRY("mysql.set_names",		NULL,	PHP_INI_ALL,		OnUpdateString,		set_names,	zend_mysql_globals,		mysql_globals)
++ 	STD_PHP_INI_ENTRY("mysql.load_group",		NULL,	PHP_INI_ALL,		OnUpdateString,		load_group,	zend_mysql_globals,		mysql_globals)
++ 	STD_PHP_INI_BOOLEAN("mysql.compress",			"0",	PHP_INI_ALL,		OnUpdateLong,		compress, 		zend_mysql_globals,		mysql_globals)
+ PHP_INI_END()
+ /* }}} */
+ 
+@@ -357,6 +364,8 @@
+ 	mysql_globals->connect_timeout = 0;
+ 	mysql_globals->trace_mode = 0;
+ 	mysql_globals->result_allocated = 0;
++	mysql_globals->set_names = NULL;
++	mysql_globals->load_group = NULL;
+ }
+ /* }}} */
+ 
+@@ -490,7 +499,12 @@
+ 	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL, **z_new_link=NULL, **z_client_flags=NULL;
+ 	zend_bool free_host=0, new_link=0;
+ 	long connect_timeout;
++	char buf[30], *load_group, *set_names;
++	long compress;
+ 
++	load_group = MySG(load_group);
++	set_names  = MySG(set_names);
++    compress   = MySG(compress);
+ 
+ 	connect_timeout = MySG(connect_timeout);
+ 
+@@ -647,6 +661,9 @@
+ 	mysql_port = port;
+ #endif
+ 
++			MYSQL *mymy;
++			char *charset_name = NULL;
++
+ 	if (!MySG(allow_persistent)) {
+ 		persistent=0;
+ 	}
+@@ -670,12 +687,27 @@
+ 			/* create the link */
+ 			mysql = (php_mysql_conn *) malloc(sizeof(php_mysql_conn));
+ 			mysql->active_result_id = 0;
++
+ #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
+ 			mysql_init(&mysql->conn);
+ 
++			if (NULL != load_group) {
++				mysql_options(&mysql->conn, MYSQL_READ_DEFAULT_GROUP, load_group);
++			}
++
++			if (compress > 0) {
++				mysql_options(&mysql->conn, MYSQL_OPT_COMPRESS, NULL);
++			}
++
+ 			if (connect_timeout != -1)
+ 				mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+ 
++#if MYSQL_VERSION_ID > 40102
++			if (set_names) {
++				mysql_options(&mysql->conn, MYSQL_SET_CHARSET_NAME, set_names);
++			}
++#endif
++
+ 			if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
+ #else
+ 			if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
+@@ -692,6 +724,17 @@
+ 				MYSQL_DO_CONNECT_RETURN_FALSE();
+ 			}
+ 
++#if MYSQL_VERSION_ID > 32330
++			mymy = &mysql->conn;
++			charset_name = mymy->options.charset_name;
++#else
++			charset_name = set_names;
++#endif
++			if (charset_name) {
++				snprintf(buf, 29, "SET NAMES %s", charset_name);
++				mysql_query(&mysql->conn, buf);
++			}
++
+ 			/* hash it up */
+ 			Z_TYPE(new_le) = le_plink;
+ 			new_le.ptr = mysql;
+@@ -729,6 +772,11 @@
+ 					efree(hashed_details);
+ 					MYSQL_DO_CONNECT_RETURN_FALSE();
+ 				}
++
++				if (set_names) {
++					snprintf(buf, 29, "SET NAMES %s", set_names);
++					mysql_query(&mysql->conn, buf);
++				}
+ 			}
+ #if MYSQL_VERSION_ID < 32231
+ 			signal(SIGPIPE, handler);
+@@ -778,9 +826,23 @@
+ #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
+ 		mysql_init(&mysql->conn);
+ 
++		if (NULL != load_group) {
++			mysql_options(&mysql->conn, MYSQL_READ_DEFAULT_GROUP, load_group);
++		}
++
++		if (compress > 0) {
++			mysql_options(&mysql->conn, MYSQL_OPT_COMPRESS, NULL);
++		}
++
+ 		if (connect_timeout != -1)
+ 				mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+ 
++#if MYSQL_VERSION_ID > 40102
++			if (set_names) {
++				mysql_options(&mysql->conn, MYSQL_SET_CHARSET_NAME, set_names);
++			}
++#endif
++
+ 		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
+ #else
+ 		if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
+@@ -797,6 +859,17 @@
+ 			MYSQL_DO_CONNECT_RETURN_FALSE();
+ 		}
+ 
++#if MYSQL_VERSION_ID > 32330
++			mymy = &mysql->conn;
++			charset_name = mymy->options.charset_name;
++#else
++			charset_name = set_names;
++#endif
++			if (charset_name) {
++				snprintf(buf, 29, "SET NAMES %s", charset_name);
++				mysql_query(&mysql->conn, buf);
++			}
++
+ 		/* add it to the list */
+ 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_link);
+ 
+@@ -2509,6 +2582,33 @@
+ }
+ /* }}} */
+ 
++
++#if MYSQL_VERSION_ID >= 40107 || (MYSQL_VERSION_ID >= 40022 && MYSQL_VERSION_ID < 40107)
++/* {{{ proto string mysql_hex_string(string to_be_escaped)
++	HEX Escape special characters in a string for use in a SQL statement, taking into account the current charset of the connection */
++PHP_FUNCTION(mysql_hex_string)
++{
++	zval *mysql_link = NULL;
++	char *str;
++	char *new_str;
++	int id = -1, str_len, new_str_len;
++	php_mysql_conn *mysql;
++
++
++	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &str, &str_len, &mysql_link) == FAILURE) {
++		return;
++	}
++
++	new_str = emalloc(str_len * 2 + 1);
++	new_str_len = mysql_hex_string(new_str, str, str_len);
++	new_str = erealloc(new_str, new_str_len + 1);
++
++	RETURN_STRINGL(new_str, new_str_len, 0);
++}
++/* }}} */
++#endif
++
++
+ #endif
+ 
+ /*
+diff -ru php-5.0.4.orig/ext/mysql/php_mysql.h php-5.0.4/ext/mysql/php_mysql.h
+--- php-5.0.4.orig/ext/mysql/php_mysql.h	2004-01-09 02:32:29.000000000 +0900
++++ php-5.0.4/ext/mysql/php_mysql.h	2005-06-09 21:55:49.215218760 +0900
+@@ -91,6 +91,7 @@
+ PHP_FUNCTION(mysql_thread_id);
+ PHP_FUNCTION(mysql_client_encoding);
+ PHP_FUNCTION(mysql_ping);
++PHP_FUNCTION(mysql_hex_string);
+ 
+ ZEND_BEGIN_MODULE_GLOBALS(mysql)
+ 	long default_link;
+@@ -105,6 +106,9 @@
+ 	long connect_timeout;
+ 	long result_allocated;
+ 	long trace_mode;
++	char *set_names;
++	char *load_group;
++	long compress;
+ ZEND_END_MODULE_GLOBALS(mysql)
+ 
+ #ifdef ZTS

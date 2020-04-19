@@ -1,0 +1,211 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.texi on 20 June 1998 -->
+
+  <TITLE>MySQL Reference Manual for version 3.21.31. - ODBC</TITLE>
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Changing_MySQL.html">previous</A>, <A HREF="manual_Problems.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="ODBC" HREF="manual_toc.html#ODBC">ODBC</A></H1>
+
+
+
+<H2><A NAME="Which ODBC OS" HREF="manual_toc.html#Which ODBC OS"><STRONG>MySQL</STRONG> ODBC をサポートするオペレーションシステムは？</A></H2>
+
+<P>
+<STRONG>MySQL</STRONG> ODBC は Windows95 と NT の 32ビット ODBC (2.50) level 0 
+ドライバです。我々は誰かがこれを Windows 3.x へ移植するのを希望します。
+
+</P>
+
+
+<H2><A NAME="ODBC Problems" HREF="manual_toc.html#ODBC Problems"><STRONG>MySQL</STRONG> ODBC での問題をどのように報告すべきか？</A></H2>
+
+<P>
+我々は Admndemo, いくつかの C プログラム, Msquery そして Excel でだけで
+ODBC をテストしました。
+
+</P>
+<P>
+問題についてのいくつかの光を与えるために、われわれは ODBC マネージャから
+のログファイル (ODBCADMIN からのログの要求時に得られるログ) と MYODBC ロ
+グを望みます。
+
+</P>
+<P>
+MYODBC ログを得るためには、MyODBC connect/configure screen 上で 'Options' 
+引数に 4 を足してください。
+
+</P>
+<P>
+ログはファイル <TT>`c:\tmp\myodbc.log'</TT> に書かれます。
+
+</P>
+
+
+<H2><A NAME="MyODBC clients" HREF="manual_toc.html#MyODBC clients">MyODBC で動作することが知られているプログラム</A></H2>
+
+<P>
+多くのプログラムが MyODBC で動作します。これらは我々自身がテストしたか、
+または何人かの他のユーザから動作するという確証を得たものです:
+
+</P>
+<DL COMPACT>
+
+<DT>Program
+<DD>
+Comment
+<DT>Access
+<DD>
+To make Access work:
+
+<UL>
+<LI>
+
+You should have a primary key in the table.
+<LI>
+
+You should have a timestamp.
+<LI>
+
+Only use double float fields. Access fails when comparing with single
+floats.
+<LI>
+
+Set 2 in the options field when connection to <STRONG>MySQL</STRONG>.
+</UL>
+
+<DT>Excel
+<DD>
+Works. Some tips
+
+<UL>
+<LI>
+
+If you have problems with dates try to select them as strings.
+
+<PRE>
+SELECT concat(sunrise_time), concat(sunset_time) FROM sunrise_sunset;
+</PRE>
+
+Values returned in this format (string) should be correctly recognised
+by Excel97 as time values.
+
+What <CODE>concat()</CODE> does in this case is that it fools ODBC to think
+the column is of 'string type'. Without the 'concat()' ODBC knows the
+column is of time type. Excel does not understand that.
+
+Note that this is a bug in Excel because it automaticly converts a
+string to a time. This would be great if the source was a text file, but
+this is plain stupid when the source is a ODBC connection which reports
+exact types for each column.
+</UL>
+
+<DT>odbcadmin
+<DD>
+Test program for ODBC.
+<DT>Delphi
+<DD>
+One must use DBE 3.2 or newer.
+<DT>C++Builder
+<DD>
+Tested with BDE 3.0. The only known problem is that when the table
+schema changes, query fields are not updated. BDE however does not seem
+to recognise primary keys, only the index PRIMARY, though this has not
+been a problem.
+</DL>
+
+
+
+<H2><A NAME="ODBC administrator" HREF="manual_toc.html#ODBC administrator">ODBC 管理プログラムの各種項目を埋めるには？</A></H2>
+
+<P>
+Windows95 上のサーバ名の記述には3つの可能性があります:
+
+</P>
+
+<OL>
+<LI>
+
+サーバの IP アドレスの使用。
+Use the IP.
+<LI>
+
+ファイル lmhosts への次の情報の追加: <CODE>ip hostname</CODE>
+例えば:
+
+<PRE>
+194.216.84.21 my
+</PRE>
+
+<LI>
+
+Configure the PC to use DNS.
+</OL>
+
+<P>
+'ODBC setup' を埋める方法の例。
+
+<PRE>
+Windows DNS name:   test
+Description:        This is my test database
+MySql Database:     test 
+Server:             194.216.84.21
+User:               monty
+Password:           my_password
+Port:
+</PRE>
+
+<P>
+The 'Windows DNS name' is any name that is unique in your windows
+ODBC setup.
+
+</P>
+<P>
+When you fill in the values in the ODBC setup, these will be used
+as default values when prompting for a Driver connect. You don't have to
+give 'server', 'user' or 'password' in the ODBC setup screen.
+
+</P>
+<P>
+ODBC ソースへの接続時に、server, user, password そして port を変更するた
+めのオプションを持ちます。
+
+</P>
+<P>
+If port is not given the default port (3306) is used.
+
+</P>
+
+
+<H2><A NAME="ODBC and last_insert_id" HREF="manual_toc.html#ODBC and last_insert_id">How to get the value of a AUTO_INCREMENT column in ODBC</A></H2>
+
+<P>
+A common problem is how to get the value of an automatically-generated id
+from an <CODE>INSERT</CODE>. With ODBC you can do something like this:
+
+</P>
+
+<PRE>
+INSERT INTO foo (auto,text) VALUES(NULL,'text')
+select LAST_INSERT_ID()
+</PRE>
+
+<P>
+or if you are just going to insert in into another table:
+
+</P>
+
+<PRE>
+INSERT INTO foo (auto,text) VALUES(NULL,'text')
+INSERT INTO foo2 (id,text) VALUES(LAST_INSERT_ID(),'text')
+</PRE>
+
+<P><HR><P>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Changing_MySQL.html">previous</A>, <A HREF="manual_Problems.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

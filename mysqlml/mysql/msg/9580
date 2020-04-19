@@ -1,0 +1,161 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9580</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9579">[前]</a><a href="9581">[次]</a><a href="../list/9501-9600">[番号順一覧]</a><a href="../thread/9501-9600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9580
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Wed, 09 Jun 2004 09:39:28 +0900<br>
+Subject: [mysql 09580] Re: MySQL 4.1.2 の日本語の扱い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+村上です。
+
+At Wed, 9 Jun 2004 08:05:25 +0900,
+とみたまさひろ wrote:
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; とみたです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; On Mon, 07 Jun 2004 19:25:07 +0900</span>
+<span class="quote1">&gt; takeshi@xxxxxxxxxx wrote:</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; ■3. どうすべき/どうあるべきか？</span>
+<span class="quote2">&gt; &gt; a. 自動変換はいるのか要らないのか</span>
+<span class="quote2">&gt; &gt; b. デフォルトで自動変換を ON にすべきか否か</span>
+<span class="quote2">&gt; &gt; c. mysql, myswldump 等のデフォルトの振る舞いをどうすべきか</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; 自動変換をスキップするオプションを追加するか、</span>
+<span class="quote2">&gt; &gt; デフォルトでは自動変換をしない仕様にして、変換したいときにオプションを追加するようにするか、</span>
+<span class="quote2">&gt; &gt; 自動変換そのものを削除するか、</span>
+<span class="quote2">&gt; &gt; ./configure 時のデフォルトに、クライアントも従うようにさせるか、</span>
+
+<span class="quote1">&gt; 「自動変換しない」という特別な charset を作ればいいような気もします。</span>
+<span class="quote1">&gt; --default-character-set=noconv とか。</span>
+
+それはいい手ですね。
+
+<span class="quote1">&gt; configure 時に指定した --with-charset はクライアントでも有効になるべき</span>
+<span class="quote1">&gt; でしょう。--with-client-charset とかオプションをつけてもいいかも。</span>
+
+これは有効になるべきだと思います。
+
+今のままだと、クライアントに設定するか接続時に余分なSQL文の実行をしないと
+文字が壊れて返ってくるので、3.x, 4.0 までのユーザーが upgrade したときに、
+不良とか壊れたとか思っても仕方がない
+
+<span class="quote1">&gt; そうすれば、configure --with-client-charset=noconv として作成されたク</span>
+<span class="quote1">&gt; ライアントを使用すれば従来通りになるんじゃないかと。</span>
+
+その時、サーバーは勝手に自動変換をしないようにしておけばいいですね。
+(? にするとか、フィールドのキャラクタセットに変換するとかを止めさせる)
+
+t1. --default-character-set=noconv 導入。(サーバー、クライアント共に)
+t2. クライアントは configure 時のキャラクタセットの指定を、
+    デフォルトのキャラクタセットとして使用すべき
+t3. クライアント configure 時のオプション --with-client-charset=noconv を導入。
+    これはクライアントが使用するデフォルトのキャラクタセットの指定。
+t4. クライアントが --default-character-set=noconv でサーバーに接続してきたとき、
+    サーバーは決して文字を自動変換しない。
+    クライアントから受け取った文字はそのままストレージエンジンに書き
+    ストレージエンジン内の文字をクライアントに返す時もそのまま返す。
+
+あと出た意見のなかで
+
+a1. クライアントに、サーバーのキャラクタセットに自動で従わせるオプションをつける
+
+a2. サーバーに自動変換を止めさせるオプションをつける。--skip-conv とか
+    サーバーは決して文字を自動変換しない。
+    クライアントから受け取った文字はそのままストレージエンジンに書き
+    ストレージエンジン内の文字をクライアントに返す時もそのまま返す。
+
+クライアントが noconv の時の escape 処理は別の問題として考える。
+ujis なら別段問題はなさそうだけど、SJIS 対応は考えないとならない
+
+
+mysql.cc と mysqldump.c では、たった一つの変数の値を入れ替えるだけの変更で
+とりあえずはコンパイル時の指定をデフォルトにして動きます。(後述)
+
+しかし、mysql.cc とか、mysqldump.c とか、それぞれのクライアントを
+変更する状態よりも、libmysqlclient14 そのものに、
+デフォルトのキャラクタセットを埋め込んでおいた方がよさそう。
+
+t5. クライアントが使用するデフォルトのキャラクタセットは、libmysqlclient14 に埋めておく
+
+
+==現行での対処==
+mysql.cc は
+              default_charset_used= 0, opt_secure_auth= 0,
+を
+              default_charset_used= 1, opt_secure_auth= 0,
+に変更。リコンパイル
+
+mysqldump.c は
+static char *default_charset= (char*) MYSQL_UNIVERSAL_CLIENT_CHARSET;
+を
+static char *default_charset= (char*) MYSQL_DEFAULT_CHARSET_NAME;
+に変更。リコンパイル
+
+PHP の mysql.c は
+mysql_real_connect() の前に、
+mysql_options(&amp;mysql-&gt;conn, MYSQL_READ_DEFAULT_GROUP, &quot;php&quot;);
+を入れて、/etc/my.cnf の [php] グループを読ませるようにし、リコンパイル。
+/etc/my.cnf の [php] グループで default-character-set 指定。
+
+MySQL/Ruby(libmysqlclient ラッパ)モジュールの場合は、
+MySQL/Ruby モジュールのソースを変更する必要は無く、
+Ruby スクリプトの方に、Mysql#options() メソッドを追加。
+
+クライアント毎に対処してたら大変
+
+================
+村上毅 takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="9579">[前]</a><a href="9581">[次]</a><a href="../list/9501-9600">[番号順一覧]</a><a href="../thread/9501-9600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9530">   9530 2004-06-03 23:28 [とみたまさひろ &lt;tomm] MySQL 4.1.2 の日本語の扱い              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9531">   9531 2004-06-04 01:51 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9533">   9533 2004-06-04 08:26 　┣[SUGAWARA Hajime &lt;sug]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9547">   9547 2004-06-07 19:25 　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9550">   9550 2004-06-07 21:09 　　┣[&quot;Ryuichiro Munechika]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9556">   9556 2004-06-07 22:02 　　┃┗[SUGAWARA Hajime &lt;sug]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9573">   9573 2004-06-08 11:51 　　┃　┗[Hirofumi Fujiwara &lt;f]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9586">   9586 2004-06-10 02:48 　　┃　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9628">   9628 2004-06-13 21:50 　　┃　　　┗[Hirofumi Fujiwara &lt;f]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9578">   9578 2004-06-09 08:05 　　┣[とみたまさひろ &lt;tomm]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="9580">   9580 2004-06-09 09:39 　　┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9592">   9592 2004-06-11 05:04 　　┗[&lt;shuichi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9596">   9596 2004-06-11 11:00 　　　┣[&lt;shuichi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9598">   9598 2004-06-12 00:16 　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9611">   9611 2004-06-12 21:55 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9687">   9687 2004-06-18 09:40 　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9699">   9699 2004-06-23 09:41 　　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9728">   9728 2004-07-01 11:18 　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9756">   9756 2004-07-02 21:14 　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9808">   9808 2004-07-10 16:55 　　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9839">   9839 2004-07-13 14:26 　　　　　　　　　┗[Shuichi Tamagawa &lt;sh]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9842">   9842 2004-07-13 15:12 　　　　　　　　　　┣[Hirofumi Fujiwara &lt;f]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9848">   9848 2004-07-14 09:35 　　　　　　　　　　┃┗[&lt;shuichi@xxxxxxxxxx&gt;]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9850">   9850 2004-07-14 09:56 　　　　　　　　　　┃　┗[&lt;takeshi@xxxxxxxxxx&gt;]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9852">   9852 2004-07-14 12:25 　　　　　　　　　　┃　　┗[Hirofumi Fujiwara &lt;f]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9854">   9854 2004-07-14 13:39 　　　　　　　　　　┃　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9858">   9858 2004-07-14 15:31 　　　　　　　　　　┃　　　┃┗[Hirofumi Fujiwara &lt;f]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9860">   9860 2004-07-14 16:35 　　　　　　　　　　┃　　　┃　┣[&lt;takeshi@xxxxxxxxxx&gt;]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9867">   9867 2004-07-16 02:16 　　　　　　　　　　┃　　　┃　┗[Shuichi Tamagawa &lt;sh]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9863">   9863 2004-07-15 11:34 　　　　　　　　　　┃　　　┗[&lt;shuichi@xxxxxxxxxx&gt;]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9847">   9847 2004-07-14 08:52 　　　　　　　　　　┗[&lt;shuichi@xxxxxxxxxx&gt;]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9849">   9849 2004-07-14 09:39 　　　　　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                 </a></span>
+</pre>
+</body>
+</html>

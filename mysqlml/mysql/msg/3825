@@ -1,0 +1,86 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3825</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="3824">[前]</a><a href="3826">[次]</a><a href="../list/3801-3900">[番号順一覧]</a><a href="../thread/3801-3900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3825
+</p>
+<div class="header">
+<p>
+From: とみたまさひろ &lt;とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 26 Jun 2001 06:47:11 +0900<br>
+Subject: [mysql 03825] Re: or 条件で、 Index が使われない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+とみたです。
+
+On Mon, 25 Jun 2001 18:41:44 +0900
+Seiji Tateyama &lt;tateyan@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; <a href="http://www.mysql.gr.jp/jpdoc/3.23/manual.ja_toc.html#MySQL_indexes">http://www.mysql.gr.jp/jpdoc/3.23/manual.ja_toc.html#MySQL_indexes</a></span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以下の WHERE 節はインデックスを使用しません： </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ... WHERE index_part2=1 AND index_part3=2  /* index_part_1 is not used */</span>
+<span class="quote1">&gt; ... WHERE index=1 OR A=10                  /* Index is not used in both AND parts */</span>
+<span class="quote1">&gt; ... WHERE index_part1=1 OR index_part2=10  /* No index spans all rows */</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 上記　２番目に該当</span>
+
+ん〜、このマニュアルの記述は多分 A にインデックスが設定されていない
+場合だと思います。その場合は、いくら index にインデックスが設定されて
+いても意味ないんで納得できるんですが、今回の場合は両方ともにインデックス
+が設定されているので、どちらかというとマニュアルの、
+
+	以下の WHERE 節はインデックスを使用します：
+	... WHERE index_part1=1 AND index_part2=2 AND other_column=3
+	... WHERE index=1 OR A=10 AND index=2      /* index = 1 OR index = 2 */
+	... WHERE index_part1='hello' AND index_part_3=5
+	          /* optimized like &quot;index_part1='hello'&quot; */
+	... WHERE index1=1 and index2=2 or index1=3 and index3=3;
+	          /* Can use index on index1 but not on index2 or index 3 */
+
+の2番目に該当するんではないかと。
+
+だから、実はインデックスが使用されないのはバグなんじゃないかと、
+密かに疑ってたりするんですが… (^^;
+
+--
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;
+日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a>
+
+</pre>
+</div>
+<p class="button"><a href="3824">[前]</a><a href="3826">[次]</a><a href="../list/3801-3900">[番号順一覧]</a><a href="../thread/3801-3900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3815">   3815 2001-06-25 16:13 [&quot;william&quot; &lt;william@x] or 条件で、 Index が使われない          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3816">   3816 2001-06-25 17:58 ┣[Akihiko Shinohara &lt;s]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3817">   3817 2001-06-25 18:39 ┃┗[&quot;william&quot; &lt;william@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3820">   3820 2001-06-25 19:08 ┃　┗[Akihiko Shinohara &lt;s]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3821">   3821 2001-06-25 19:31 ┃　　┗[&quot;MINOHATA Norio&quot; &lt;mi]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3828">   3828 2001-06-26 10:31 ┃　　　┗[&quot;william&quot; &lt;william@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3833">   3833 2001-06-27 10:33 ┃　　　　┗[&quot;MINOHATA Norio&quot; &lt;mi]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3834">   3834 2001-06-27 11:46 ┃　　　　　┣[&quot;西田 玄&quot; &lt;nishida@x] MyODBC で UPDATE ができない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3835">   3835 2001-06-27 12:53 ┃　　　　　┃┣[Kengo Jinno &lt;kengo@x]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3837">   3837 2001-06-27 13:59 ┃　　　　　┃┃┗[&quot;西田 玄&quot; &lt;nishida@x]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3839">   3839 2001-06-27 16:33 ┃　　　　　┃┃　┗[&quot;william&quot; &lt;william@x]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3840">   3840 2001-06-27 16:58 ┃　　　　　┃┃　　┗[&quot;西田 玄&quot; &lt;nishida@x]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3863">   3863 2001-06-29 12:01 ┃　　　　　┃┃　　　┗[&quot;西田 玄&quot; &lt;nishida@x]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3836">   3836 2001-06-27 13:22 ┃　　　　　┃┗[madara &lt;madara@xxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3838">   3838 2001-06-27 16:20 ┃　　　　　┗[Hiroshi Takiguchi &lt;t]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3818">   3818 2001-06-25 18:41 ┣[Seiji Tateyama &lt;tate]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3819">   3819 2001-06-25 19:00 ┃┣[&quot;william&quot; &lt;william@x]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="3825">   3825 2001-06-26 06:47 ┃┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3826">   3826 2001-06-26 09:36 ┃　┗[&quot;MINOHATA Norio&quot; &lt;mi]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3822">   3822 2001-06-25 20:36 ┗[Hiroshi Takiguchi &lt;t]                                       </a></span>
+</pre>
+</body>
+</html>

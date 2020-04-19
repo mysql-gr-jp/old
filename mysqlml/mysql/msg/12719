@@ -1,0 +1,133 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12719</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="12718">[前]</a><a href="12720">[次]</a><a href="../list/12701-12800">[番号順一覧]</a><a href="../thread/12701-12800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12719
+</p>
+<div class="header">
+<p>
+From: 川合孝典 &lt;川合孝典 &lt;gcd00051@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 3 Feb 2006 15:22:45 +0900 (JST)<br>
+Subject: [mysql 12719] Re: テーブルデータの正規化方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+川合孝典です。
+
+----- Original Message -----
+<span class="quote1">&gt;Date: Fri, 3 Feb 2006 13:52:35 +0900</span>
+<span class="quote1">&gt;From: &quot;saori&quot; &lt;hibiki@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt;Subject: <a href="12715">[mysql 12715]</a> Re: テーブルデータの正規化方法</span>
+<span class="quote1">&gt;To: &lt;ml@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt;</span>
+（中略）
+<span class="quote1">&gt;地域の検索方法は、段階として２段階での検索を</span>
+<span class="quote1">&gt;考えておりまして、</span>
+<span class="quote1">&gt;第一段階</span>
+<span class="quote1">&gt;○○市</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;んで、○○市をクリックで、</span>
+<span class="quote1">&gt;第二段階</span>
+<span class="quote1">&gt;○○区</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;にしたいのです。</span>
+（中略）
+
+この場合、
+「堺市」って「区」はないじゃないでしょうか？
+それに「大阪府」の扱いは？
+という疑問がありますけど。
+
+問題は「地域」ってものをどう捕らえるかではないですか？
+上の話からするとsaoriさんには「大阪市」と「福島区」との
+間に階層関係が見えているんでしょうけれども、それが
+テーブルに反映されていないのが問題ですよね？
+（関西限定で考えると）「府県」「市町村」「区」に
+わかれてるんでしょうか。
+
+ex. 
+ 大阪市浪速区　-&gt;　大阪府/大阪市/福島区
+ 京都府大山崎町　→　京都府/大山崎町/−
+
+#東京が入ると「千代田区」なんかは「東京都千代田区」ですから
+#「市区町村」でしょうけど。
+
+そうなると「府県」「市町村」「区」で別々のテーブルにすると
+いうのが素直かもですね。
+
+
+府県
+  府県  名称
+  ---------------------------------
+   1     大阪府 
+   2     京都府
+
+市町村
+  ID   府県   名称
+  ---------------------------------
+   1     1    大阪市
+   2     1    堺市
+
+区
+   ID  府県 市町村  名称
+  ---------------------------------
+   1     1     1   都島区
+   2     1     1   福島区
+
+配達地域
+
+  店舗KEY 府県  市町村  区
+  --------------------------
+     1      1     1     2      # 大阪市福島区
+     1      1     2     Null   # 堺市
+
+といった感じ。
+また1つのテーブルに入れるという考えもできるでしょう。
+
+地域
+
+  府県 市町村 区  名称       最下位
+  ---------------------------------
+   1     0    0   大阪府      False
+   1     1    0   大阪市      False
+   1     1    1   都島区      True
+   1     1    2   福島区      True
+   1     2    0   堺市        True
+
+ ※ 府県、市町村、区の3つの組み合わせでPRIMARY
+ このとき 「配達地域」の堺市の区はNULLではなく0
+「最下位」という項目を追加しましたが、下のレベルのあるなしを
+示しています。配達地域に指定するとき、一番下のレベルしか
+指定しちゃダメよ。とか検索のときに段階を分けるのに使うかな
+ってことで。
+
+このほか
+「都道府県はJISでもコードが振られているから別にするけど、
+市町村と区はまとめたほうがわかりやすい」と考えるかもしれません。
+テーブルの分け方は、そのものをどう見るかってことになるとは
+思うので、あくまでも1つの考えってことで。
+
+
+</pre>
+</div>
+<p class="button"><a href="12718">[前]</a><a href="12720">[次]</a><a href="../list/12701-12800">[番号順一覧]</a><a href="../thread/12701-12800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12710">  12710 2006-02-03 10:35 [&quot;saori&quot; &lt;hibiki@xxxx] テーブルデータの正規化方法              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12711">  12711 2006-02-03 11:59 ┣[小川 &lt;mcn010@xxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12712">  12712 2006-02-03 12:10 ┣[川合孝典 &lt;gcd00051@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12715">  12715 2006-02-03 13:52 ┃┗[&quot;saori&quot; &lt;hibiki@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12716">  12716 2006-02-03 14:18 ┃　┣[小川 &lt;mcn010@xxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12718">  12718 2006-02-03 15:17 ┃　┃┗[&quot;saori&quot; &lt;hibiki@xxxx]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="12719">  12719 2006-02-03 15:22 ┃　┗[川合孝典 &lt;gcd00051@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12721">  12721 2006-02-03 20:05 ┃　　┗[&quot;saori&quot; &lt;hibiki@xxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12713">  12713 2006-02-03 12:12 ┗[小川 &lt;mcn010@xxxxxxx]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13118</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13117">[前]</a><a href="13119">[次]</a><a href="../list/13101-13200">[番号順一覧]</a><a href="../thread/13101-13200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13118
+</p>
+<div class="header">
+<p>
+From: &quot;Akimasa&quot; &lt;&quot;Akimasa&quot; &lt;asamika2og@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 28 Jun 2006 13:20:09 +0900<br>
+Subject: [mysql 13118] 日付型・日付時刻型の比較について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+初めまして、大月と申します。
+
+長文になりすみません。
+MySQLの仕様について、理解できないところがあり、
+何かアドバイスを頂きたくメールさせてもらいました。
+
+＜環境＞
+MySQL5.0.21
+FedoraCore4
+
+＜質問＞
+CREATE TABLE hiduke_tb (
+  hiduke date NOT NULL
+);
+
+INSERT INTO hiduke_tb (hiduke) VALUES
+('2006-05-01'),
+('2006-05-10'),
+('2006-06-01'),
+('2006-06-10');
+
+という動作検証用のテーブルを用意して、
+以下のクエリを実行しました
+
+
+mysql&gt; SELECT * FROM hiduke_tb WHERE hiduke &gt;=
+2006-6-1';  ------------------(1)
++------------+
+<span class="quote1">| hiduke     |</span>
++------------+
+<span class="quote1">| 2006-06-01 |</span>
+<span class="quote1">| 2006-06-10 |</span>
++------------+
+2 rows in set (0.00 sec)
+
+mysql&gt; SELECT * FROM hiduke_tb WHERE CAST(hiduke AS date) &gt;=
+2006-6-1';  ----(2)
+Empty set (0.00 sec)
+
+mysql&gt; SELECT * FROM hiduke_tb WHERE CAST(hiduke AS date) &gt;=
+2006-06-1';  ---(3)
++------------+
+<span class="quote1">| hiduke     |</span>
++------------+
+<span class="quote1">| 2006-06-10 |</span>
++------------+
+1 row in set (0.00 sec)
+
+mysql&gt; SELECT * FROM hiduke_tb WHERE CAST(hiduke AS date) &gt;=
+2006-06-01';  --(4)
++------------+
+<span class="quote1">| hiduke     |</span>
++------------+
+<span class="quote1">| 2006-06-01 |</span>
+<span class="quote1">| 2006-06-10 |</span>
++------------+
+2 rows in set (0.00 sec)
+
+※(2)(3)(4)は、わざと日付型から日付型にCASTしています
+
+
+MySQL4.1日本語マニュアルでは、（英語読めないんで5.0のではなく4.1のですが）
+
+　「6.2.2.2. DATETIME、DATE、TIMESTAMP 型」より
+　日付部分の区切り記号を含む文字列として値を指定する場合、10 より少ない月ま
+たは日の値を 2 桁で指定する必要はありません。
+　'1979-6-9' は '1979-06-09' と同じ意味になります。同様に、時刻部分の区切り
+記号を含む文字列として値を指定する場合、10 より少ない時、分、または秒の値を
+2 桁で指定する必要はありません。'1979-10-30 1:2:3' は '1979-10-30 01:02:03'
+と同じです。
+
+　「6.3.1.2. 比較演算子」より
+　引数のどちらかが TIMESTAMP または DATETIME 型のカラムで、もう一方が定数の
+場合、定数は比較の実行前にタイムスタンプに変換される。これは ODBC との互換性
+を確保するために行われる。
+
+とあるので、
+(1)〜(4)の条件式は全て日付型として比較されることを期待していましたが、
+
+実際は、
+(1)の条件式では左右の値が日付型として比較され、
+(2)(3)(4)のように一度CAST関数を通した場合は文字列型で比較されているように見
+えます。
+これはそういう仕様なのでしょうか？
+
+他の方からのアドバイスで、
+hidukeカラムをCASTした値は「カラム」ではないから、上記マニュアルでの想定外に
+なり
+どの型で比較されるかは分からない・・
+ということかなとも思ったのですが、
+どこかにこの動作に関する仕様が明記されたマニュアルなどはないでしょうか？
+
+
+もともとは、日付時刻型のカラムを日付型に変換して
+CAST(datetime_column AS date) BETWEEN '2006-6-1' AND '2006-6-30'
+などのようなことを行おうと思って、ここで引っかかりました。
+それ自体は、別の書き方で回避できるのですが、
+MySQLの仕様がよく分からないので質問させてもらいました。
+
+どなたかご存知の方がいらっしゃいましたら、
+どうぞよろしくお願いします。
+
+--
+大月 昭昌 （おおつき あきまさ）
+
+--------------------------------------
+Let's start Yahoo! Auction  -  Free Campaign Now!
+<a href="http://pr.mail.yahoo.co.jp/auction/">http://pr.mail.yahoo.co.jp/auction/</a>
+
+</pre>
+</div>
+<p class="button"><a href="13117">[前]</a><a href="13119">[次]</a><a href="../list/13101-13200">[番号順一覧]</a><a href="../thread/13101-13200">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="13118">  13118 2006-06-28 13:20 [&quot;Akimasa&quot; &lt;asamika2o] 日付型・日付時刻型の比較について        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13119">  13119 2006-06-28 14:24 ┣[&quot;片寄白王&quot; &lt;katayose]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13120">  13120 2006-06-28 14:50 ┃┗[&quot;Akimasa&quot; &lt;asamika2o]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13122">  13122 2006-06-28 16:13 ┃　┗[&quot;片寄白王&quot; &lt;katayose]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13123">  13123 2006-06-28 16:29 ┃　　┗[&quot;Akimasa&quot; &lt;asamika2o]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13124">  13124 2006-06-28 17:16 ┃　　　┗[&quot;片寄白王&quot; &lt;katayose]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13125">  13125 2006-06-28 17:32 ┃　　　　┗[&quot;Akimasa&quot; &lt;asamika2o]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13126">  13126 2006-06-28 17:48 ┗[SUGAWARA Hajime &lt;sug]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13127">  13127 2006-06-28 18:37 　┗[&quot;Akimasa&quot; &lt;asamika2o]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13128">  13128 2006-06-28 19:16 　　┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13129">  13129 2006-06-28 19:49 　　　┣[&lt;milk_coffee_2004jp@]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13130">  13130 2006-06-28 22:48 　　　┗[&quot;Akimasa&quot; &lt;asamika2o]                                 </a></span>
+</pre>
+</body>
+</html>

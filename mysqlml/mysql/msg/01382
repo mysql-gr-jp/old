@@ -1,0 +1,274 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1382</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1381">[前]</a><a href="1383">[次]</a><a href="../list/1301-1400">[番号順一覧]</a><a href="../thread/1301-1400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1382
+</p>
+<div class="header">
+<p>
+From: Satoshi Koiwa &lt;Satoshi Koiwa &lt;koiwa@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 4 Dec 99 20:43:03 +0900<br>
+Subject: [mysql 01382] Re: perl DBD のインストールについて (No.3)<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+長文で申し訳ないです。
+やってみました。問題なくできました。
+
+
+■ TurboLinux Pro日本語版4.2でMySQLとperl
+
+ftp.turbolinux.comにはMySQLのrpmになったやつがあるんですが、SJISとかEUCとか
+の日本語オプションが有効になっているとは思えないので、TurboLinuxはRPM系のデ
+ィストリビューションではありますが全部ソースから起こしてみました。動きゃい
+いんです、とりあえず。
+「ここでは/xx/yy/zzに置きましたが、環境に合わせてどうぞ」という書き方はしま
+せん。環境に合わせて変えられるくらいなら苦労しないって。私の趣味でSJISにし
+たし/homeにデータを置くディレクトリを切ります。
+
+(1) TurboLinux Proをインストール
+&lt;すべて&gt;でインストールします。別に全て必要なわけじゃないけれど、考えなくて
+いいし。
+ログイン方法は「テキスト」を選択します。これも必要なわけじゃなくって、趣味
+の問題。
+
+以下、すべてrootでの作業です。rootでログインしてください。「rootでログイン
+」がわからない場合はもうちょっと修行が必要ですね。
+
+(2) /usr/srcに必要なものを落とす
+→ [root@probook /root]# cd /usr/src
+→ [root@probook src]# ftp ftp.database.ne.jp
+ここでビャーッと出るけど気にしない。止まったらそこで「anonymous」と打つ。
+→ Name (ftp.database.ne.jp:root): anonymous
+anonymousはタイプミスしやすいんだよねー。
+→ ftp&gt; cd /mysql/tcx/Downloads/MySQL-3.22
+→ 250 CWD command successful.
+これは問題ないはず。
+→ ftp&gt; get mysql-3.22.27.tar.gz
+→ local: mysql-3.22.27.tar.gz remote: mysql-3.22.27.tar.gz
+→ 200 PORT command successful.
+→ 150 Opening BINARY mode data connection for mysql-3.22.27.tar.gz 
+(4004168 bytes).
+→ 226 Transfer complete.
+→ 4004168 bytes received in 535 secs (7.3 Kbytes/sec)
+これ以外の必要なものもとってくる。
+→ ftp&gt; cd /mysql/tcx/Contrib
+→ 250 CWD command successful.
+→ ftp&gt; get DBI-1.13.tar.gz
+→ local: DBI-1.13.tar.gz remote: DBI-1.13.tar.gz
+→ 200 PORT command successful.
+→ 150 Opening BINARY mode data connection for DBI-1.13.tar.gz (168389 
+bytes).
+→ 226 Transfer complete.
+→ 168389 bytes received in 22.4 secs (7.3 Kbytes/sec)
+→ ftp&gt; get Data-Dumper-2.09.tar.gz
+→ local: Data-Dumper-2.09.tar.gz remote: Data-Dumper-2.09.tar.gz
+→ 200 PORT command successful.
+→ 150 Opening BINARY mode data connection for Data-Dumper-2.09.tar.gz 
+(36514 bytes).
+→ 226 Transfer complete.
+→ 36514 bytes received in 4.8 secs (7.4 Kbytes/sec)
+→ ftp&gt; get Msql-Mysql-modules-1.2209.tar.gz
+→ local: Msql-Mysql-modules-1.2209.tar.gz remote: 
+Msql-Mysql-modules-1.2209.tar.gz
+→ 200 PORT command successful.
+→ 150 Opening BINARY mode data connection for 
+Msql-Mysql-modules-1.2209.tar.gz (198538 bytes
+).
+→ 226 Transfer complete.
+→ 198538 bytes received in 26 secs (7.5 Kbytes/sec)
+→ ftp&gt;
+quitと叩けばftpは終わります。
+→ ftp&gt; quit
+→ 221-You have transferred 4004168 bytes in 1 files.
+→ 221-Total traffic for this session was 4014245 bytes in 5 transfers.
+→ 221-Thank you for using the FTP service on ns.shibahara.com.
+→ 221 Goodbye.
+→ [root@probook src]#
+
+
+
+(3) mysqlを/usr/localに展開してmysqlにシンボリックリンクする
+→ [root@probook src]# tar xvzf mysql-3.22.27.tar.gz -C /usr/local
+→ [root@probook src]# cd /usr/local
+→ [root@probook local]# ln -s mysql-3.22.27 mysql
+
+(4) configureする
+→ [root@probook local]# cd mysql
+→ [root@probook mysql]# ./configure --localstatedir=/home/mysql_data 
+--with-charset=sjis
+これで数分〜数十分処理が進む。終わると次のようなのが出る。
+→ Thank you for choosing MySQL!
+→ 
+→ [root@probook mysql]#
+
+(5) コンパイル
+→ [root@probook mysql]# make
+これでまた数分〜数十分処理が進みます。最後は次のようになるはず。
+→ make[2]: Leaving directory `/usr/local/mysql-3.22.27'
+→ make[1]: Leaving directory `/usr/local/mysql-3.22.27'
+→ [root@probook mysql]#
+
+(6) インストール
+→ [root@probook mysql]# make install
+これは数分程度で、ちょっと早い。最後は次のようになるはず。
+→ make[2]: Leaving directory `/usr/local/mysql-3.22.27'
+→ make[1]: Leaving directory `/usr/local/mysql-3.22.27'
+→ [root@probook mysql]#
+
+(7) 初期データベースの作成
+→ [root@probook mysql]# scripts/mysql_install_db
+これはあっさり終わるはず。/usr/local/bin/mysqladmin -u root password 
+'new-password'をやれというメッセージが出るが、MySQLのエンジン自体が動いてい
+ないとダメ。
+
+(8) データベースエンジンの始動
+→ root@probook mysql]# scripts/safe_mysqld &amp;
+最後のアンパーサント「&amp;」を忘れるとリターンを押したら何にも返ってこなくなっ
+ちゃうんですねー。そしたらよそからkillするとかしなければならないんだけれど
+、わかりにくい。リターンは2〜3回叩かないとプロンプトは返ってこない。
+
+(9) やっぱりrootユーザにパスワードを設定
+→ [root@probook mysql]# /usr/local/bin/mysqladmin -u root password 
+'root_passwd'
+この「root_passwd」がrootのパスワードになる。書き換えるなら書き換えるべし。
+ちなみにここでいうrootとはMySQL上でのデータベース管理者のこと。Oracleとかも
+そうだけれど、一般にデータベースシステムにとってのユーザとOSのユーザはまる
+っきり別管理。
+
+(10) /usr/srcに戻ってまずData-Dumperから
+→ [root@probook mysql]# cd /usr/src
+→ [root@probook src]# tar xvzf Data-Dumper-2.09.tar.gz
+10行ちょっとくらい出てプロンプトに戻るので、
+→ [root@probook src]# cd Data-Dumper-2.09
+→ [root@probook Data-Dumper-2.09]# perl Makefile.PL
+→ Checking if your kit is complete...
+→ Looks good
+→ Writing Makefile for Data::Dumper
+→ [root@probook Data-Dumper-2.09]# make
+ここでまた10行くらい。
+→ [root@probook Data-Dumper-2.09]# make test
+これは数行。
+→ [root@probook Data-Dumper-2.09]# make test
+これも数行。
+→ [root@probook Data-Dumper-2.09]# make install
+これも数行。これでData-Dumperはおしまい。99/12/4現在、2.101というのが最新だ
+と思うけれど、まぁ動きゃいいんだからいいってことにしよう。
+
+(11) 次はDBI
+→ [root@probook Data-Dumper-2.09]# cd ..
+→ [root@probook src]# tar xvzf DBI-1.13.tar.gz
+20行くらいかなぁ、出ます。
+→ [root@probook src]# cd DBI-1.13
+→ [root@probook DBI-1.13]# perl Makefile.PL
+これも20行くらい。
+→ [root@probook DBI-1.13]# make
+結構出ます。数分かかるはず。
+→ [root@probook DBI-1.13]# make test
+これも結構出ます。わりと早い。
+→ [root@probook DBI-1.13]# make install
+同じく結構出ます。わりと早い。
+
+(12) 最後はMsql-Mysql-modules
+→ [root@probook src]# tar xvzf Msql-Mysql-modules-1.2209.tar.gz
+どひゃーっと出ます。
+→ [root@probook src]# cd Msql-Mysql-modules-1.2209
+→ [root@probook Msql-Mysql-modules-1.2209]# perl Makefile.PL
+→ Which drivers do you want to install?
+→ 
+→     1)  MySQL only
+→     2)  mSQL only (either of mSQL 1 or mSQL 2)
+→     3)  MySQL and mSQL (either of mSQL 1 or mSQL 2)
+→ 
+→     4)  mSQL 1 and mSQL 2
+→     5)  MySQL, mSQL 1 and mSQL 2
+→ 
+→ Enter the appropriate number:  [3] 1
+MySQLしか使わないので1を選択。
+→ Do you want to install the MysqlPerl emulation? You might keep your old
+→ Mysql module (to be distinguished from DBD::mysql!) if you are 
+concerned
+→ about compatibility to existing applications! [n]
+旧版のソースなんてないので関係ないのでリターンでいい。
+→ Where is your MySQL installed? Please tell me the directory that
+→ contains the subdir 'include'. [/usr/local]
+リターンでいいです。
+→ Which database should I use for testing the MySQL drivers? [test]
+リターンでいいです。
+→ On which host is database test running (hostname, ip address
+→ or host:port) [localhost]
+リターンでいい。
+→ User name for connecting to database test? [undef] root
+まだrootユーザしかいないのでとりあえずrootにしておく。
+→ Password for connecting to database test? [undef] root_passwd
+上記(9)のところで設定したパスワードを入れてリターンすると数行出て終わる。
+→ [root@probook Msql-Mysql-modules-1.2209]# make
+数分かかるが、問題ないはず。
+→ [root@probook Msql-Mysql-modules-1.2209]# make test
+数分かかるけど、問題ないはず。最後のところは次のような感じ。
+→ All tests successful, 1 test skipped.
+→ Files=14,  Tests=276, 30 wallclock secs ( 8.66 cusr +  0.52 csys =  
+9.18 CPU)
+→ make[1]: Leaving directory `/usr/src/Msql-Mysql-modules-1.2209/mysql'
+ということで、インストールしてしまう。
+→ [root@probook Msql-Mysql-modules-1.2209]# make install
+あっさり終わるはず。
+
+(13) では軽くテスト
+→ [root@probook Msql-Mysql-modules-1.2209]# cd /usr/src
+→ [root@probook src]# cat &gt; test.pl
+→ #!/usr/bin/perl
+→ use DBI;
+→ $dbh = DBI-&gt;connect(&quot;dbi:mysql:test&quot;, &quot;root&quot;, &quot;root_passwd&quot;);
+最後の「root_passwd」は(9)で設定したやつ。
+→ $res = $dbh-&gt;selectrow_array(&quot;SELECT SYSDATE()&quot;);
+→ print &quot;$res\n&quot;;
+→ exit;
+とここまでタイプしたらCTRLを押しながらDを押す。もちろんviやmuleを使えばいい
+んだけれど、なんとなくこうしてみました。ははは。
+→ [root@probook src]# chmod 744 test.pl
+→ [root@probook src]# ./test.pl
+→ 1999-12-04 20:24:47
+→ [root@probook src]#
+ということで、めでたく「SELECT SYSDATE()」の結果が出ました。
+
+
+■ 結論 ■
+「TurboLinux Pro日本語版4.2」はソースから起こせば問題なくPerlからMySQLを呼
+べます。
+
+
+
+すいません、何度もdownloadして帯域使っちゃって……。
+ウチ、一応TurboLinuxのSIパートナーになってるんだよなー。
+
+
+
+有限会社ティー・アイ・シー・エス
+小岩　聡(こいわさとし)
+〒158-0084
+東京都世田谷区東玉川2-6-7丸善ビル4F
+TEL 03-3748-8011
+FAX 03-3748-8012
+<a href="http://www.amber.co.jp/">http://www.amber.co.jp/</a>
+koiwa@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="1381">[前]</a><a href="1383">[次]</a><a href="../list/1301-1400">[番号順一覧]</a><a href="../thread/1301-1400">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="1382">   1382 1999-12-04 20:43 [Satoshi Koiwa &lt;koiwa] Re: perl DBD のインストールについて (No.3)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1383">   1383 1999-12-05 07:30 ┗[kaz / Yasuhide OOMOR]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1384">   1384 1999-12-04 14:58 　┗[Satoshi Koiwa &lt;koiwa]                                     </a></span>
+</pre>
+</body>
+</html>

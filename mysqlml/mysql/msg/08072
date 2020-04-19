@@ -1,0 +1,335 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8072</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8071">[前]</a><a href="8073">[次]</a><a href="../list/8001-8100">[番号順一覧]</a><a href="../thread/8001-8100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8072
+</p>
+<div class="header">
+<p>
+From: とみたまさひろ &lt;とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 24 Jul 2003 10:15:55 +0900<br>
+Subject: [mysql 08072] Fw: MySQL 4.0.14 has been released<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+とみたです。
+
+MySQL 4.0.14 がリリースされています。
+
+アナウンス文にはありませんが、例の「ケンタッキー」「パンタロン」問題も
+解決されているようです :-)
+
+# 誰かが報告してくれたようです。…って、そんな他人まかせで良いのだろう
+# か、日本ユーザ会として… (^^;
+
+
+Begin forwarded message:
+
+Date: Tue, 22 Jul 2003 18:33:31 +0200 (CEST)
+From: Lenz Grimmer &lt;lenz@xxxxxxxxxx&gt;
+To: announce@xxxxxxxxxx
+Cc: mysql@xxxxxxxxxx, packagers@xxxxxxxxxx
+Subject: MySQL 4.0.14 has been released
+
+Hi,
+
+MySQL 4.0.14, a new version of the popular Open Source/Free Software
+Database, has been released. It is now available in source and binary form
+for a number of platforms from our download pages at
+<a href="http://www.mysql.com/downloads/">http://www.mysql.com/downloads/</a> and mirror sites.
+
+Note that not all mirror sites may be up to date at this point in time -
+if you can't find this version on some mirror, please try again later or
+choose another download site.
+
+This is a maintenance release for the current production version.
+
+Please refer to our bug database at <a href="http://bugs.mysql.com/">http://bugs.mysql.com/</a> for more
+details about the individual bugs fixed in this version.
+
+
+News from the ChangeLog:
+
+Functionality added or changed:
+
+   * A documentation change: Function `INTERVAL(NULL, ...)' returns
+     `-1'.
+
+   * Enabled `INSERT' from `SELECT' when the table into which the
+     records are inserted is also a table listed in the `SELECT'.
+
+   * Allow `CREATE TABLE' and `INSERT' from any `UNION'.
+
+   * The `SQL_CALC_FOUND_ROWS' option now always returns the total
+     number of rows for any `UNION'.
+
+   * Removed `--table' option from `mysqlbinlog' to avoid repeating
+     `mysqldump' functionality.
+
+   * Changed optimiser slightly to prefer index lookups over full table
+     scans.
+
+   * Added thread-specific `max_seeks_for_key' variable that can be
+     used to force the optimiser to use keys instead of table scans
+     even if the cardinality of the index is low.
+
+   * Added optimisation that converts `LEFT JOIN' to normal join in
+     some cases.
+
+   * A documentation change: added a paragraph about failover in
+     replication (how to use a surviving slave as the new master, how to
+     resume to the original setup). *Note Replication FAQ::.
+
+   * A documentation change: added warning notes about safe use of the
+     `CHANGE MASTER' command. *Note CHANGE MASTER TO::.
+
+   * MySQL now issues a warning (not an error, as in 4.0.13) when it
+     opens a table that was created with MySQL 4.1.
+
+   * Added `--nice' option to `mysqld_safe' to allow setting the
+     niceness of the `mysqld' process. (Thanks to Christian Hammers for
+     providing the initial patch.) (Bug #627)
+
+   * Added `--read-only' option to cause `mysqld' to allow no updates
+     except from slave threads or from users with the `SUPER' privilege.
+     (Original patch from Markus Benning).
+
+   * `SHOW BINLOG EVENTS FROM x' where `x' is strictly less than 4 now
+     silently converts `x' to 4 instead of printing an error. The same
+     change was done for `CHANGE MASTER TO MASTER_LOG_POS=x' and
+     `CHANGE MASTER TO RELAY_LOG_POS=x'.
+
+   * `mysqld' now only adds an interrupt handler for the `SIGINT' signal
+     if you start it with the new `--gdb' option.  This is because some
+     MySQL users encountered strange problems when they accidently sent
+     `SIGINT' to `mysqld' threads.
+
+   * `RESET SLAVE' now clears the `Last_errno' and `Last_error' fields
+     in the output of `SHOW SLAVE STATUS'.
+
+   * Added `max_relay_log_size' variable; the relay log will be rotated
+     automatically when its size exceeds `max_relay_log_size'. But if
+     `max_relay_log_size' is 0 (the default), `max_binlog_size' will be
+     used (as in older versions). `max_binlog_size' still applies to
+     binary logs in any case.
+
+   * `FLUSH LOGS' now rotates relay logs in addition to the other types
+     of logs it already rotated.
+
+
+Bugs fixed:
+
+   * Comparison/sorting for `latin1_de' character set was rewritten. The
+     old algorithm could not handle cases like `&quot;sa&quot;&quot; &gt; &quot;ssa&quot;'. *Note German
+     character set::. In rare cases it resulted in table corruption.
+
+   * Fixed a problem with the password prompt on Windows (Bug #683)
+
+   * `ALTER TABLE ... UNION=(...)' for `MERGE' table is now allowed
+     even if some underlying `MyISAM' tables are read-only. (Bug #702)
+
+   * Fixed a problem with `CREATE TABLE t1 SELECT x'41''. (Bug #801)
+
+   * Removed some incorrect lock warnings from the error log.
+
+   * Fixed memory overrun when doing `REPAIR' on a table with a multi-part
+     auto_increment key where one part was a packed `CHAR'.
+
+   * Fixed a probable race condition in the replication code that could
+     potentially lead to `INSERT' statements not being replicated in the
+     event of a `FLUSH LOGS' command or when the binary log exceeds
+     `max_binlog_size'. (Bug #791)
+
+   * Fixed a crashing bug in `INTERVAL' and `GROUP BY' or `DISTINCT'.
+     (Bug #807)
+
+   * Fixed bug in `mysqlhotcopy' so it actually aborts for unsuccessful
+     table copying operations.  Fixed another bug so that it succeeds
+     when there are thousands of tables to copy. (Bug #812)
+
+   * Fixed problem with `mysqlhotcopy' failing to read options from
+     option files. (Bug #808)
+
+   * Fixed bugs in optimiser that sometimes prevented MySQL from using
+     `FULLTEXT' indexes even though it was possible (for example, in
+     `SELECT * FROM t1 WHERE MATCH a,b AGAINST(&quot;index&quot;) &gt; 0').
+
+   * Fixed a bug with &quot;table is full&quot; in `UNION' operations.
+
+   * Fixed a security problem that enabled users with no privileges to
+     obtain information on the list of existing databases by using
+     `SHOW TABLES' and similar commands.
+
+   * Fixed a stack problem on UnixWare/OpenServer.
+
+   * Fixed a configuration problem on UnixWare/OpenUnix and OpenServer.
+
+   * Fixed a stack overflow problem in password verification.
+
+   * Fixed a problem with `max_user_connections'.
+
+   * `HANDLER' without an index now works properly when a table has
+     deleted rows. (Bug #787)
+
+   * Fixed a bug with `LOAD DATA' in `mysqlbinlog'. (Bug #670).
+
+   * Fixed that `SET CHARACTER SET DEFAULT' works. (Bug #462)
+
+   * Fixed `MERGE' table behaviour in `ORDER BY ... DESC' queries.
+     (Bug #515)
+
+   * Fixed server crash on `PURGE MASTER LOGS' or `SHOW MASTER LOGS'
+     when the binary log is off. (Bug #733)
+
+   * Fixed password-checking problem on Windows. (Bug #464)
+
+   * Fixed the bug in comparison of a `DATETIME' column and an integer
+     constant.  (Bug #504)
+
+   * Fixed remote mode of `mysqlbinlog'. (Bug #672)
+
+   * Fixed `ERROR 1105: Unknown error' that occurred for some `SELECT'
+     queries, where a column that was declared as `NOT NULL' was
+     compared with an expression that took `NULL' value.
+
+   * Changed timeout in `mysql_real_connect()' to use `poll()' instead
+     of `select()' to work around problem with many open files in the
+     client.
+
+   * Fixed incorrect results from `MATCH ... AGAINST' used with a `LEFT
+     JOIN' query.
+
+   * Fixed a bug that limited the maximum value for `mysqld' variables
+     to 4294967295 when they are specified on the command line.
+
+   * Fixed a bug that sometimes caused spurious &quot;Access denied&quot; errors
+     in `HANDLER ... READ' statements, when a table is referenced via
+     an alias.
+
+   * Fixed portability problem with `safe_malloc', which caused MySQL to
+     give &quot;Freeing wrong aligned pointer&quot; errors on SCO 3.2.
+
+   * `ALTER TABLE ... ENABLE/DISABLE KEYS' could cause a core dump when
+     done after an `INSERT DELAYED' statement on the same table.
+
+   * Fixed problem with conversion of localtime to GMT where some times
+     resulted in different (but correct) timestamps. Now MySQL should
+     use the smallest possible timestamp value in this case.  (Bug #316)
+
+   * Very small query cache sizes could crash `mysqld'. (Bug #549)
+
+   * Fixed a bug (accidentally introduced by us but present only in
+     version 4.0.13) that made `INSERT ... SELECT' into an
+     `AUTO_INCREMENT' column not replicate well. This bug is in the
+     master, not in the slave.  (Bug #490)
+
+   * Fixed a bug: When an `INSERT ... SELECT' statement inserted rows
+     into a non-transactional table, but failed at some point (for
+     example, due to a &quot;Duplicate key&quot; error), the query was not
+     written to the binlog.  Now it is written to the binlog, with its
+     error code, as all other queries are. About the
+     `slave-skip-errors' option for how to handle partially completed
+     queries in the slave, see *Note Replication Options::. (Bug #491)
+
+   * `SET FOREIGN_KEY_CHECKS=0' was not replicated properly.  The fix
+     probably will not be backported to 3.23.
+
+   * On a slave, `LOAD DATA INFILE' which had no `IGNORE' or `REPLACE'
+     clause on the master, was replicated with `IGNORE'.  While this is
+     not a problem if the master and slave data are identical (a `LOAD'
+     that produces no duplicate conflicts on the master will produce
+     none on the slave anyway), which is true in normal operation, it
+     is better for debugging not to silently add the `IGNORE'. That way,
+     you can get an error message on the slave and discover that for
+     some reason, the data on master and slave are different and
+     investigate why.  (Bug #571)
+
+   * On a slave, `LOAD DATA INFILE' printed an incomplete &quot;Duplicate
+     entry '%-.64s' for key %d&quot;' message (the key name and value were
+     not mentioned) in case of duplicate conflict (which does not
+     happen in normal operation).  (Bug #573)
+
+   * When using a slave compiled with `--debug', `CHANGE MASTER TO
+     RELAY_LOG_POS' could cause a debug assertion failure. (Bug #576)
+
+   * When doing a `LOCK TABLES WRITE' on an InnoDB table, commit could
+     not happen, if the query was not written to the binary log (for
+     example, if `--log-bin' was not used, or `binlog-ignore-db' was
+     used). (Bug #578)
+
+   * If a 3.23 master had open temporary tables that had been
+     replicated to a 4.0 slave, and the binlog got rotated, these
+     temporary tables were immediately dropped by the slave (which
+     caused problems if the master used them subsequently). This bug
+     had been fixed in 4.0.13, but in a manner which caused an unlikely
+     inconvenience: if the 3.23 master died brutally (power failure),
+     without having enough time to automatically write `DROP TABLE'
+     statements to its binlog, then the 4.0.13 slave would not notice
+     the temporary tables have to be dropped, until the slave `mysqld'
+     server is restarted. This minor inconvenience is fixed in 3.23.57
+     and 4.0.14 (meaning the master must be upgraded to 3.23.57 and the
+     slave to 4.0.14 to remove the inconvenience). (Bug #254)
+
+   * If `MASTER_POS_WAIT()' was waiting, and the slave was idle, and
+     the SQL slave thread terminated, `MASTER_POS_WAIT()' would wait
+     forever. Now when the SQL slave thread terminates,
+     `MASTER_POS_WAIT()' immediately returns `NULL' (&quot;slave stopped&quot;).
+     (Bug #651)
+
+   * After `RESET SLAVE; START SLAVE;', the `Relay_log_space' value
+     displayed by `SHOW SLAVE STATUS' was too big by four bytes. (Bug
+     #763)
+
+   * If a query was ignored on the slave (because of
+     `replicate-ignore-table' and other similar rules), the slave still
+     checked if the query got the same error code (0, no error) as on
+     the master. So if the master had an error on the query (for
+     example, &quot;Duplicate entry&quot; in a multiple-row insert), then the
+     slave stopped and warned that the error codes didn't match. (Bug
+     #797)
+
+
+Additional notes:
+
+   * In addition to Solaris 8/9 for SPARC, we now also offer binaries
+     for Sun Solaris 8 on the Intel x86 architecture.
+
+   * Binaries for FreeBSD 5.0 (sparc64) have been added (thanks to Ken
+     McKittrick for granting us access to such a system)
+
+   * Due to technical problems with the build hosts, we currently can not
+     offer binaries for Linux/s390 and binaries for AIX 4.3 (compiled with
+     gcc). These will be added as soon as these problems have been
+     resolved. We apologize for any inconveniences that may cause you.
+
+Bye,
+	LenZ
+- -- 
+ Lenz Grimmer &lt;lenz@xxxxxxxxxx&gt;
+ Senior Production Engineer
+ MySQL GmbH, <a href="http://www.mysql.de/">http://www.mysql.de/</a>
+ Hamburg, Germany
+
+ For technical support contracts, visit <a href="https://order.mysql.com/?ref=mlgr">https://order.mysql.com/?ref=mlgr</a>
+
+-- 
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;
+日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a>
+
+</pre>
+</div>
+<p class="button"><a href="8071">[前]</a><a href="8073">[次]</a><a href="../list/8001-8100">[番号順一覧]</a><a href="../thread/8001-8100">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="8072">   8072 2003-07-24 10:15 [とみたまさひろ &lt;tomm] Fw: MySQL 4.0.14 has been released      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8073">   8073 2003-07-24 12:52 ┗[きたぢま &lt;kitajima@x] Re: MySQL 4.0.14 has been released    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8076">   8076 2003-07-25 10:05 　┗[とみたまさひろ &lt;tomm] 日本ユーザ会として…                </a></span>
+</pre>
+</body>
+</html>

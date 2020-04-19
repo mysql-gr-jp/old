@@ -1,0 +1,72 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2633</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2632">[前]</a><a href="2634">[次]</a><a href="../list/2601-2700">[番号順一覧]</a><a href="../thread/2601-2700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2633
+</p>
+<div class="header">
+<p>
+From: NAKAJIMA Mutsuki &lt;NAKAJIMA Mutsuki &lt;muc@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 21 Oct 2000 18:54:26 +0900<br>
+Subject: [mysql 02633] Re: datetime - datetime<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+中嶋です。
+
+From: Hiroyuki Sato &lt;hiro@xxxxxxxxxx&gt;
+Date: Sat, 21 Oct 2000 16:59:38 +0900
+<span class="quote1">&gt; 質問 2.</span>
+<span class="quote1">&gt; 各レコードのdate1からdate2までの時間の差分を求め</span>
+<span class="quote1">&gt; その総計を計算し、人が見てわかりやすい表示をしたいのですが</span>
+<span class="quote1">&gt; なにか良い方法はありませんでしょうか?</span>
+<span class="quote1">&gt; 計算はSQLで行ないたいと考えています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 一つ考えたのは</span>
+<span class="quote1">&gt; つぎのようなSQLを実行すると</span>
+<span class="quote1">&gt; mysql&gt; select sum(date2 - date1) from date_test</span>
+<span class="quote1">&gt;     -&gt; go</span>
+<span class="quote1">&gt; +--------------------+</span>
+<span class="quote2">&gt; | sum(date2 - date1) |</span>
+<span class="quote1">&gt; +--------------------+</span>
+<span class="quote2">&gt; |            1355959 |</span>
+<span class="quote1">&gt; +--------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; と表示されるので、これをよりわかりやすく</span>
+<span class="quote1">&gt; 例えば2 day 11:59:59</span>
+<span class="quote1">&gt; というふうに表示する方法がないかと思っています。</span>
+
+datetime - datetimeのような演算を使用するよりも、いったん
+timestamp型に変換してから演算すべきでしょう。以下のように。
+
+select sum(unix_timestamp(date2)-unix_timestamp(date1)) 
+       from date_test;
+
+また、これをtimeに変換するために、
+
+select sec_to_time(sum(unix_timestamp(date2)-unix_timestamp(date1)))
+       from date_test;
+
+を実行すれば、正確な時間差の累計が出ると思います。
+
+--
+NAKAJIMA Mutsuki(muc@xxxxxxxxxx, <a href="http://www.isr.co.jp/~muc">http://www.isr.co.jp/~muc</a>)
+
+</pre>
+</div>
+<p class="button"><a href="2632">[前]</a><a href="2634">[次]</a><a href="../list/2601-2700">[番号順一覧]</a><a href="../thread/2601-2700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2630">   2630 2000-10-21 16:59 [Hiroyuki Sato &lt;hiro@] datetime - datetime                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="2633">   2633 2000-10-21 18:54 ┗[NAKAJIMA Mutsuki &lt;mu]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2642">   2642 2000-10-23 10:20 　┗[Hiroyuki Sato &lt;hiro@]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12632</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="12631">[前]</a><a href="12633">[次]</a><a href="../list/12601-12700">[番号順一覧]</a><a href="../thread/12601-12700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12632
+</p>
+<div class="header">
+<p>
+From: chewie &lt;chewie &lt;chewie365d@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 13 Jan 2006 17:28:02 +0900<br>
+Subject: [mysql 12632] mysql 4.1.16でscripts/mysql_install_dbがAbortする<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして
+chewieと申します。
+
+mysql 4.1.16でscripts/mysql_install_dbがAbortしていまいます。
+------------------------- ここから -------------------------
+# scripts/mysql_install_db
+Installing all prepared tables
+Fill help tables
+ERROR: 1064  You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '' at line 1
+060113 17:15:07 [ERROR] Aborting
+
+060113 17:15:07 [Note] ./bin/mysqld: Shutdown complete
+
+
+WARNING: HELP FILES ARE NOT COMPLETELY INSTALLED!
+------------------------- ここまで -------------------------
+ソースからコンパイルしてもmysql.comからTAR packages版をダウ
+ンロードし展開しても同様でした。
+
+TAR packages版なので不要かもしれませんが、mysqlbugは下記の通
+りです。
+------------------------- ここから -------------------------
+        &lt;machine, os, target, libraries (multiple lines)&gt;
+System: SunOS peekaboo 5.8 Generic_117350-26 sun4u sparc SUNW,Ultra-250
+Architecture: sun4
+
+Some paths:  /usr/bin/perl /usr/local/bin/make /usr/local/bin/gcc
+GCC: Reading specs from /usr/local/lib/gcc-lib/sparc-sun-solaris2.8/2.95.3/specs
+gcc version 2.95.3 20010315 (release)
+Compilation info: CC='cc-5.0'  CFLAGS='-xO3 -Xa -xstrconst -mt -D_FORTEC_ -xarch=v8'  CXX='CC'  CXXFLAGS='-xO3 -noex -mt -D_FORTEC_ -xarch=v8'  LDFLAGS=''  ASFLAGS='-xarch=v8'
+LIBC:
+-rw-r--r--   1 root     bin      1790756 Jun 16  2005 /lib/libc.a
+lrwxrwxrwx   1 root     root          11 Apr 20  2005 /lib/libc.so -&gt; ./libc.so.1
+-rwxr-xr-x   1 root     bin      1158072 Jun 16  2005 /lib/libc.so.1
+-rw-r--r--   1 root     bin      1790756 Jun 16  2005 /usr/lib/libc.a
+lrwxrwxrwx   1 root     root          11 Apr 20  2005 /usr/lib/libc.so -&gt; ./libc.so.1
+-rwxr-xr-x   1 root     bin      1158072 Jun 16  2005 /usr/lib/libc.so.1
+Configure command: ./configure '--prefix=/usr/local/mysql' '--localstatedir=/usr/local/mysql/data' '--libexecdir=/usr/local/mysql/bin' '--with-comment=MySQL Community Edition - Experimental (GPL)' '--with-extra-charsets=complex' '--with-server-suffix=-max' '--enable-thread-safe-client' '--enable-local-infile' '--enable-assembler' '--with-named-z-libs=no' '--with-named-curses-libs=-lcurses' '--disable-shared' '--with-zlib-dir=bundled' '--with-low-memory' '--with-big-tables' '--with-readline' '--with-embedded-server' '--with-archive-storage-engine' '--with-blackhole-storage-engine' '--with-ndbcluster' '--with-example-storage-engine' '--with-innodb' 'CC=cc-5.0' 'CFLAGS=-xO3 -Xa -xstrconst -mt -D_FORTEC_ -xarch=v8' 'CXXFLAGS=-xO3 -noex -mt -D_FORTEC_ -xarch=v8' 'CXX=CC'
+Perl: This is perl, version 5.005_03 built for sun4-solaris
+------------------------- ここまで -------------------------
+
+TAR packages版のfill_help_tables.sqlを見ると4.1.15と4.1.16で
+は行数が明らかに違いました。
+
+4.1.15では22行目は
+insert into help_category (help_category_id,name,parent_category_id) values (0,&quot;Polygon properties&quot;,24),(1,&quot;Column Types&quot;,15), -- 以下省略 --
+と結構長いのですが
+
+4.1.16での24行目(insert into help_categoryが始まる行)以降に
+    24  insert into help_category (help_category_id,name,parent_category_id,url) values
+    25  (1,&quot;Geographic&quot;,0,''),
+    26  (2,&quot;Polygon properties&quot;,27,''),
+    27  (3,&quot;Column Types&quot;,28,''),
+
+といった感じでした。
+
+ここで、疑問なのですが4.1.16のfill_help_tables.sqlはこの形で
+問題無いのでしょうか。
+
+ 1. 4.1.16のfill_help_tables.sqlに問題がある
+ 2. mysqldに問題があり、本来なら読めるハズのファイルが読めない
+
+のどちらになるのでしょうか。
+
+ちなみに、4.1.16のfill_help_tables.sqlを4.1.15のファイルのよ
+うな形式に修正したところ
+------------------------- ここから -------------------------
+# scripts/mysql_install_db
+Installing all prepared tables
+Fill help tables
+
+To start mysqld at boot time you have to copy support-files/mysql.server
+to the right place for your system
+
+PLEASE REMEMBER TO SET A PASSWORD FOR THE MySQL root USER !
+To do so, start the server, then issue the following commands:
+./bin/mysqladmin -u root password 'new-password'
+./bin/mysqladmin -u root -h peekaboo password 'new-password'
+See the manual for more instructions.
+------------------------- ここまで -------------------------
+ときちんと動くように見えました。
+                    ^^^^^^^^^
+
+以上です。
+よろしくお願いします。
+
+</pre>
+</div>
+<p class="button"><a href="12631">[前]</a><a href="12633">[次]</a><a href="../list/12601-12700">[番号順一覧]</a><a href="../thread/12601-12700">[スレッド一覧]</a></p>
+</body>
+</html>

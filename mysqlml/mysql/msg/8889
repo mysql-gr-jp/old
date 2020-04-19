@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8889</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8888">[前]</a><a href="8890">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8889
+</p>
+<div class="header">
+<p>
+From: ML account &lt;ML account &lt;ml@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 02 Mar 2004 23:40:55 +0900<br>
+Subject: [mysql 08889] Re: 整数フィールドの次の空きを探す sql は<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+　こんにちは。
+
+柴垣 &lt;akiro@xxxxxxxxxx&gt;さんの
+&lt;20040302164032.72C8.AKIRO@xxxxxxxxxx&gt;
+&quot;<a href="08888">[mysql 08888]</a> Re: 整数フィールドの次の空きを探すsql は&quot;
+
+
+<span class="quote2">&gt; &gt; そのシーケンシャルのテーブルを t_seq として</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; select min(t.id) from t_seq left join t using (id)</span>
+<span class="quote2">&gt; &gt; where t.id &gt; 2 and t_seq.id is null group by t.id;</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; で、いかがでしょう？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 　わたしも、似たような方向では考えてみているのですが、</span>
+<span class="quote1">&gt; （上のSQL文は、下記のようでしょうか？ t_seq が跳びの</span>
+<span class="quote1">&gt; ないシーケンシャルなファイルとすると、以下のように</span>
+<span class="quote1">&gt; なると思うのですが、シーケンシャルテーブルの意味が</span>
+<span class="quote1">&gt; 私の了解と違うのかもしれません。）</span>
+
+　かわじさんのやり方は、テーブルt_seqに全ての数をあらかじめ入れておくも
+ので、抜けを捜す段階でt_seqを作り直す、というものでは無いと思いますよ。
+
+
+<span class="quote1">&gt; 　ただし、この方法では、シーケンシャルテーブルをどう</span>
+<span class="quote1">&gt; やって作るかが、問題になります。例えば、整数１から</span>
+<span class="quote1">&gt; 整数２までのシーケンシャルテーブルを作るにはどうすれば</span>
+<span class="quote1">&gt; いいのでしょうか。はじめに auto increment のフィールドに</span>
+<span class="quote1">&gt; 整数１をいれ、その後、（整数２−整数１）個のnull データを</span>
+<span class="quote1">&gt; 追加する、といった方法しか今のところ思いつきません。</span>
+
+　プログラムを使えば良いと思います。 CでもPerlでもJavaでも、それこそ
+shellででも。
+
+    create table t_seq (id int not null primary key)
+
+なテーブルにidが０から100のレコードを挿入する事をshell(bash)で行
+うとすれば、
+
+    id=0; while [ $id -le 100 ]; \
+    do echo &quot;insert into t_seq(id) values($id)&quot; | mysql some-db; \
+    let id++;
+    done
+
+の様なものになると思います。
+
+
+<span class="quote2">&gt; &gt; 　何の目的で数字の抜けを捜さなければならないのか</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 　とりあえず、先方の要求なのですが、ランダムに使っている数字を</span>
+<span class="quote1">&gt; ムダなく使い切りたい、そのための候補を自動的に提示したい、</span>
+<span class="quote1">&gt; といった用途です。</span>
+
+　お客さんの要求、それは大変ですね。で、その「ムダなく使い切りたい」が本
+当に重要なんでしょうか。今となっては手遅れとも思いますが、本当にそうやら
+なければならないのかの調査が必要でしょう。
+
+　<a href="08885">[mysql 08885]</a>の(2)の方法は、ぼくの周辺では「スロット」と呼ばれるやり方
+です。一般に何と呼ばれているのかは知りません。かわじさんのleft joinの方
+法よりも (検索と更新で)速度的に有利と考えますが、テーブル設計を失敗する
+と一層のストレージの無駄が発生しかねない方法ですね。
+
+
+
+　　　　松枝知直　　　　&lt;tomom@xxxxxxxxxx&gt;
+　　　　　　　　　　　　<a href="http://www.argus.ne.jp/~tomom/">http://www.argus.ne.jp/~tomom/</a>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8888">[前]</a><a href="8890">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8880">   8880 2004-03-02 15:16 [柴垣　顕郎 &lt;akiro@xx] 整数フィールドの次の空きを探す sql は   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8882">   8882 2004-03-02 15:59 ┣[KAWAJI Shinya &lt;kawaj]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8883">   8883 2004-03-02 16:04 ┃┗[KAWAJI Shinya &lt;kawaj]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8888">   8888 2004-03-02 20:50 ┃　┗[柴垣 &lt;akiro@xxxxxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="8889">   8889 2004-03-02 23:40 ┃　　┗[ML account &lt;ml@xxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8890">   8890 2004-03-03 08:47 ┃　　　┗[KAWAJI Shinya &lt;kawaj]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8894">   8894 2004-03-03 09:28 ┃　　　　┣[柴垣 &lt;akiro@xxxxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8899">   8899 2004-03-03 12:54 ┃　　　　┃┗[Seiji Uramoto &lt;uramo]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8895">   8895 2004-03-03 10:11 ┃　　　　┣[ML account &lt;ml@xxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8898">   8898 2004-03-03 12:35 ┃　　　　┗[班石悦夫 &lt;madara@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8900">   8900 2004-03-03 14:44 ┃　　　　　┗[ML account &lt;ml@xxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8885">   8885 2004-03-02 16:19 ┣[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8886">   8886 2004-03-02 18:48 ┗[班石悦夫 &lt;madara@xxx]                                       </a></span>
+</pre>
+</body>
+</html>

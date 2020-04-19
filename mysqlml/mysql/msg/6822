@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6822</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6821">[前]</a><a href="6823">[次]</a><a href="../list/6801-6900">[番号順一覧]</a><a href="../thread/6801-6900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6822
+</p>
+<div class="header">
+<p>
+From: Shinya Kawaji &lt;Shinya Kawaji &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 09 Jan 2003 19:20:38 +0900<br>
+Subject: [mysql 06822] Re: 日付型の条件検索について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+かわじ、です。
+
+
+<span class="quote1">&gt; やってみないと分からないと思い、table3のやり方で現在奮闘中です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; table3のやり方だと、table2 に、新たにデータを更新すると、</span>
+<span class="quote1">&gt; もちろんtable3にもデータが更新されるのですが、</span>
+<span class="quote1">&gt; 更新するたんびに、日付データ（５年分）が入るって事ですよね？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 何かいっぺんに５年分のデータをINSERTするSQL文ってあるのでしょうか？</span>
+<span class="quote1">&gt; 現在、５年分の日付データを配列に入れて、ループにして１個づつINSERT</span>
+<span class="quote1">&gt; してます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 日付データだけ新たにテーブルを作ったら？との声がかかりそうですが、</span>
+<span class="quote1">&gt; 現在の方法でなんとかしたいと思います。</span>
+
+table2 って、人名とコードの対応ですよね？
+人名を増やすことと、「table3（日別の、コードとカウント数の対応）の
+内容を全て一新する」ことの関係がよく分からないのですが・・
+
+それはともかく、あのやり方は、
+「今後 table1 は table3 に置き換える（更新も含めて）」という前提なので、
+table1 形式でいくのなら、以下のようなやり方でどうでしょう。
+SQLが２回に分かれますし、さらに先ほど、table3の話をしておきながら
+申し訳ないのですが。
+
+
+まず、最初に table2 の内容を、プログラムの変数（ハッシュか配列）に
+入れておきます。これはこの次のSQLを生成するためのものです。
+
+mysql&gt; SELECT
+    -&gt;   *
+    -&gt; FROM
+    -&gt;   table2;
++------+------------+--------+
+<span class="quote1">| f_id | f_name     | f_code |</span>
++------+------------+--------+
+<span class="quote1">|    1 | あいうえお | aaa    |</span>
+<span class="quote1">|    2 | かきくけこ | bbb    |</span>
+<span class="quote1">|    3 | さしすせそ | ccc    |</span>
+<span class="quote1">|    4 | たちつてと | ddd    |</span>
+<span class="quote1">|    5 | なにぬねの | eee    |</span>
+<span class="quote1">|    6 | はひふへほ | fff    |</span>
++------+------------+--------+
+6 rows in set (0.00 sec)
+
+
+次に、table1 の内容を月別に集計します。
+EXTRACT(YEAR_MONTH FROM time) を使います。
+
+最も単純なのは、他の方もおっしゃっているように、SELECT文では月別を
+縦列にして、出力時に縦横変換するものです。
+sum(...) as ... の部分は、先ほどの変数を使って生成します。
+
+mysql&gt; SELECT
+    -&gt;   EXTRACT(YEAR_MONTH FROM f_date_time) as month,
+    -&gt;   sum(aaa) as 'あいうえお',
+    -&gt;   sum(bbb) as 'かきくけこ',
+    -&gt;   sum(ccc) as 'さしすせそ',
+    -&gt;   sum(ddd) as 'たちつてと',
+    -&gt;   sum(eee) as 'なにぬねの',
+    -&gt;   sum(fff) as 'はひふへほ'
+    -&gt; FROM
+    -&gt;   table1
+    -&gt; GROUP BY
+    -&gt;   month
+    -&gt; ORDER BY
+    -&gt;   month;
++--------+------------+------------+------------+------------+------------+------------+
+<span class="quote1">| month  | あいうえお | かきくけこ | さしすせそ | たちつてと | なにぬねの | はひふへほ |</span>
++--------+------------+------------+------------+------------+------------+------------+
+<span class="quote1">| 200301 |          3 |          6 |          4 |          8 |          9 |         11 |</span>
++--------+------------+------------+------------+------------+------------+------------+
+1 row in set (0.00 sec)
+
+
+これを、SQLで縦横逆にすることも可能かもしれませんが、かなり複雑なものに
+なりますので、プログラム側で考えた方が楽だと思います。
+
+--
+Shinya Kawaji
+
+
+
+</pre>
+</div>
+<p class="button"><a href="6821">[前]</a><a href="6823">[次]</a><a href="../list/6801-6900">[番号順一覧]</a><a href="../thread/6801-6900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="6807">   6807 2003-01-08 22:03 [&lt;lavlav@xxxxxxxxxx&gt; ] Re: 日付型の条件検索について            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6817">   6817 2003-01-09 16:51 ┣[Shinya Kawaji &lt;kawaj]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6820">   6820 2003-01-09 18:12 ┃┗[&lt;lavlav@xxxxxxxxxx&gt; ]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="6822">   6822 2003-01-09 19:20 ┃　┗[Shinya Kawaji &lt;kawaj]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6818">   6818 2003-01-09 17:38 ┗[谷中 &lt;yanakas@xxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6819">   6819 2003-01-09 18:03 　┗[&lt;lavlav@xxxxxxxxxx&gt; ]                                     </a></span>
+</pre>
+</body>
+</html>

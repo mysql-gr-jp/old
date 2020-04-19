@@ -1,0 +1,138 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2776</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2775">[前]</a><a href="2777">[次]</a><a href="../list/2701-2800">[番号順一覧]</a><a href="../thread/2701-2800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2776
+</p>
+<div class="header">
+<p>
+From: Satoshi Koiwa &lt;Satoshi Koiwa &lt;koiwa@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 01 Dec 2000 13:50:11 +0900<br>
+Subject: [mysql 02776] Re: インデックスの効果について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+「北海道」の方が「長野県」よりデータが多いので……。
+2値といっても分布は偏っています。
+
+mysql&gt; select flag1, count(*) from ken_all where ad1 = '北海道' group by
+flag1;
++-------+----------+
+<span class="quote1">| flag1 | count(*) |</span>
++-------+----------+
+<span class="quote1">| 0     |     7875 |</span>
+<span class="quote1">| 1     |      327 |</span>
++-------+----------+
+2 rows in set (1.67 sec)
+
+で、下記のごとくなりました。flag1が0に対する検索と1に対する検索でそれこそ
+「劇的」に違います。0の場合は「インデックスを張るだけ邪魔」状態です。
+ちなみに他の列には一切インデックスは張ってません。
+
+
+mysql&gt; select count(*) from ken_all where flag1 = '0' and ad1 = '北海道';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|     7875 |</span>
++----------+
+1 row in set (5.34 sec)
+
+mysql&gt; create index ken_all_01 on ken_all(ad1);
+Query OK, 120162 rows affected (42.07 sec)
+Records: 120162  Duplicates: 0  Warnings: 0
+
+mysql&gt; select count(*) from ken_all where flag1 = '0' and ad1 = '北海道';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|     7875 |</span>
++----------+
+1 row in set (1.05 sec)
+
+mysql&gt; drop index ken_all_01 on ken_all;
+Query OK, 120162 rows affected (16.05 sec)
+Records: 120162  Duplicates: 0  Warnings: 0
+
+mysql&gt; create index ken_all_01 on ken_all(flag1);
+Query OK, 120162 rows affected (42.98 sec)
+Records: 120162  Duplicates: 0  Warnings: 0
+
+mysql&gt; select count(*) from ken_all where flag1 = '0' and ad1 = '北海道';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|     7875 |</span>
++----------+
+1 row in set (5.73 sec)
+
+mysql&gt; drop index ken_all_01 on ken_all;
+Query OK, 120162 rows affected (14.50 sec)
+Records: 120162  Duplicates: 0  Warnings: 0
+
+mysql&gt; select count(*) from ken_all where flag1 = '1' and ad1 = '北海道';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|      327 |</span>
++----------+
+1 row in set (6.49 sec)
+
+mysql&gt; create index ken_all_01 on ken_all(ad1);
+Query OK, 120162 rows affected (42.47 sec)
+Records: 120162  Duplicates: 0  Warnings: 0
+
+mysql&gt; select count(*) from ken_all where flag1 = '1' and ad1 = '北海道';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|      327 |</span>
++----------+
+1 row in set (0.95 sec)
+
+mysql&gt; drop index ken_all_01 on ken_all;
+Query OK, 120162 rows affected (16.30 sec)
+Records: 120162  Duplicates: 0  Warnings: 0
+
+mysql&gt; create index ken_all_01 on ken_all(flag1);
+Query OK, 120162 rows affected (44.24 sec)
+Records: 120162  Duplicates: 0  Warnings: 0
+
+mysql&gt; select count(*) from ken_all where flag1 = '1' and ad1 = '北海道';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|      327 |</span>
++----------+
+1 row in set (0.30 sec)
+
+mysql&gt; drop index ken_all_01 on ken_all;
+Query OK, 120162 rows affected (15.61 sec)
+Records: 120162  Duplicates: 0  Warnings: 0
+
+mysql&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="2775">[前]</a><a href="2777">[次]</a><a href="../list/2701-2800">[番号順一覧]</a><a href="../thread/2701-2800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2736">   2736 2000-11-26 14:07 [&quot;Hiroshi Koishi&quot; &lt;pe] インデックスの効果について              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2739">   2739 2000-11-27 19:00 ┣[inano &lt;inano@xxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2740">   2740 2000-11-28 12:23 ┣[Yoshihiko Kobayashi ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2766">   2766 2000-11-29 22:33 ┗[Satoshi Koiwa &lt;koiwa]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2768">   2768 2000-11-30 00:43 　┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2771">   2771 2000-11-30 09:34 　　┣[Satoshi Tatsuoka &lt;sa]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2772">   2772 2000-11-30 10:06 　　┣[&quot;william&quot; &lt;william@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2775">   2775 2000-12-01 12:38 　　┣[Satoshi Koiwa &lt;koiwa]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="2776">   2776 2000-12-01 13:50 　　┗[Satoshi Koiwa &lt;koiwa]                                   </a></span>
+</pre>
+</body>
+</html>

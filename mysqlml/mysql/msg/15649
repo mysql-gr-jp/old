@@ -1,0 +1,100 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15649</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15648">[前]</a><a href="15650">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15649
+</p>
+<div class="header">
+<p>
+From: HIRATSUKA Sadao &lt;HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 06 Dec 2011 16:52:58 +0900<br>
+Subject: [mysql 15649] Re: mysqldumpの--lock-tablesオプションについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、平塚です。
+
+On Tue, 06 Dec 2011 14:56:33 +0900
+momoko@xxxxxxxxxx wrote:
+
+<span class="quote1">&gt; ■例</span>
+<span class="quote1">&gt; mysqldump --lock-tables -u user -p pass db_name db_tbl_name &gt; /root/dump.sql</span>
+
+一般クエリログという機能を使うと調べることができます。
+
+mysql&gt; set global general_log = 1;
+Query OK, 0 rows affected (0.04 sec)
+
+としてから
+
+$ mysqldump --lock-tables -u scott -p scott emp &gt; emp.sql
+
+とすると、datadir/hostname.log あたりに以下のようなログが出力されます。
+指定したテーブルに対してREADロックのみがかかることが分かると思います。
+
+よろしくお願いいたします。
+
+==
+
+/usr/sbin/mysqld, Version: 5.1.47-community-log (MySQL Community Server
+ (GPL)). started with:
+Tcp port: 3306  Unix socket: /var/lib/mysql/mysql.sock
+Time                 Id Command    Argument
+111206 16:46:02    10 Connect   scott@localhost on 
+           10 Query /*!40100 SET @@SQL_MODE='' */
+           10 Query /*!40103 SET TIME_ZONE='+00:00' */
+           10 Query SELECT LOGFILE_GROUP_NAME, FILE_NAME, TOTAL_EXTENTS
+, INITIAL_SIZE, ENGINE, EXTRA FROM INFORMATION_SCHEMA.FILES WHERE FILE_
+TYPE = 'UNDO LOG' AND FILE_NAME IS NOT NULL AND LOGFILE_GROUP_NAME IN (
+SELECT DISTINCT LOGFILE_GROUP_NAME FROM INFORMATION_SCHEMA.FILES WHERE 
+FILE_TYPE = 'DATAFILE' AND TABLESPACE_NAME IN (SELECT DISTINCT TABLESPA
+CE_NAME FROM INFORMATION_SCHEMA.PARTITIONS WHERE TABLE_SCHEMA='scott' A
+ND TABLE_NAME IN ('emp'))) GROUP BY LOGFILE_GROUP_NAME, FILE_NAME, ENGI
+NE ORDER BY LOGFILE_GROUP_NAME
+           10 Query SELECT DISTINCT TABLESPACE_NAME, FILE_NAME, LOGFILE
+_GROUP_NAME, EXTENT_SIZE, INITIAL_SIZE, ENGINE FROM INFORMATION_SCHEMA.
+FILES WHERE FILE_TYPE = 'DATAFILE' AND TABLESPACE_NAME IN (SELECT DISTI
+NCT TABLESPACE_NAME FROM INFORMATION_SCHEMA.PARTITIONS WHERE TABLE_SCHE
+MA='scott' AND TABLE_NAME IN ('emp')) ORDER BY TABLESPACE_NAME, LOGFILE
+_GROUP_NAME
+           10 Init DB   scott
+           10 Query SHOW TABLES LIKE 'emp'
+★ココ     10 Query LOCK TABLES `emp` READ /*!32311 LOCAL */
+           10 Query show table status like 'emp'
+           10 Query SET OPTION SQL_QUOTE_SHOW_CREATE=1
+           10 Query SET SESSION character_set_results = 'binary'
+           10 Query show create table `emp`
+           10 Query SET SESSION character_set_results = 'utf8'
+           10 Query show fields from `emp`
+           10 Query SELECT /*!40001 SQL_NO_CACHE */ * FROM `emp`
+           10 Query SET SESSION character_set_results = 'binary'
+           10 Query use `scott`
+           10 Query select @@collation_database
+           10 Query SHOW TRIGGERS LIKE 'emp'
+           10 Query SET SESSION character_set_results = 'utf8'
+           10 Query UNLOCK TABLES
+           10 Quit  
+111206 16:46:05     9 Query set global general_log = 0
+
+-- 
+平塚貞夫 hiratsuka.sadao@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15648">[前]</a><a href="15650">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15648">  15648 2011-12-06 14:56 [&lt;momoko@xxxxxxxxxx&gt; ] mysqldumpの--lock-tablesオプションについて</a></span>
+<span class="current">-&gt;&nbsp;<a href="15649">  15649 2011-12-06 16:52 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15650">  15650 2011-12-07 01:25 　┗[&lt;momoko@xxxxxxxxxx&gt; ]                                     </a></span>
+</pre>
+</body>
+</html>

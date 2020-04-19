@@ -1,0 +1,80 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15088</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15087">[前]</a><a href="15089">[次]</a><a href="../list/15001-15100">[番号順一覧]</a><a href="../thread/15001-15100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15088
+</p>
+<div class="header">
+<p>
+From: Mikiya Okuno &lt;Mikiya Okuno &lt;Mikiya.Okuno@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 03 Dec 2009 12:20:22 +0900<br>
+Subject: [mysql 15088] Re: パーティショニングについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+奥野です。
+
+Toshiaki Enami wrote, On 3/12/09 11:56 AM:
+<span class="quote1">&gt; 榎並と申します。</span>
+<span class="quote1">&gt; パーティショニングについて教えてください。</span>
+<span class="quote1">&gt; 現在、5.1.31を利用して、WebのアクセスログをMysqlに取り込み、分析する仕組みを動かしております。</span>
+<span class="quote1">&gt; データ量が大量になってきたため検索処理が顕著に遅くなってきたこともあり、過去のデータを別テーブルにしたり、</span>
+<span class="quote1">&gt; 場合によっては、データ削除などを検討しております。</span>
+<span class="quote1">&gt; 分析サービスとしては、それでもいいのですが、せっかく、パーティショニングの機能があるので、アクセスログの日時をRangeで</span>
+<span class="quote1">&gt; パーティショニングしてみようと思っていたのですが、知人から、パーティション化されたファイルを物理的に別なHDDにしない限り、</span>
+<span class="quote1">&gt; あまり効果がないのではないかと指摘されました。</span>
+<span class="quote1">&gt; 基本的には、1つのTBLのみ使っており、別TBLとのJoinなどはないです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 実際に試してみればいいのですが、いますぐに試せる環境がなかったため先にメールにてお伺いした次第です。</span>
+<span class="quote1">&gt; ちなみに、あまり考えず、Innodbを使ってます。この辺りも考えた方がいいかもしれません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; パーティショニングで効果がでた方のアドバイスなど頂ければ幸いです。</span>
+
+ひとつのディスクを利用している場合でもパーティショニングの効果は表れます。
+例えば日時を使ってRangeパーティショニングした場合、日時を検索条件に
+指定したクエリならばパーティショニングの刈り込みが効きますので、
+利用しているディスクの種類や数は関係ありません。
+
+ただし、日時を指定しないクエリはすべてのパーティションの中から該当する
+レコードを検索しないといけないので、その分オーバーヘッドが増えてしまいます。
+
+パーティショニングをすることで、レコード数が多くなったときに
+INSERT性能が低下しないという副次的な作用があります。
+
+パーティションを利用していると、パーティションを削除することで一括して
+そのパーティションに含まれるレコードも削除することが出来るので、
+削除がとても軽い処理になります。フラグメンテーションが発生することも
+ありません。
+
+ただし、InnoDBテーブルにパーティションの追加や削除すると、mysqldが
+クラッシュするというバグがありますのでご注意を。このバグは、次の
+バージョンであるMySQL 5.1.42で修正される予定です。バグの詳細は
+次のページを御覧下さい。
+
+<a href="http://bugs.mysql.com/45961">http://bugs.mysql.com/45961</a>
+
+--
+奥野 幹也
+MySQLサポートエンジニア
+サン・マイクロシステムズ株式会社
+<a href="http://www-jp.mysql.com/">http://www-jp.mysql.com/</a>
+
+MySQL公式Twitterアカウント登場！ <a href="http://twitter.com/mysql_jp">http://twitter.com/mysql_jp</a>
+Planet MySQL Twitterアカウント <a href="http://twitter.com/planetmysql_jp">http://twitter.com/planetmysql_jp</a>
+
+</pre>
+</div>
+<p class="button"><a href="15087">[前]</a><a href="15089">[次]</a><a href="../list/15001-15100">[番号順一覧]</a><a href="../thread/15001-15100">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15087">  15087 2009-12-03 11:56 [Toshiaki Enami &lt;tsh2] パーティショニングについて              </a></span>
+<span class="current">-&gt;&nbsp;<a href="15088">  15088 2009-12-03 12:20 ┗[Mikiya Okuno &lt;Mikiya]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13030</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13029">[前]</a><a href="13031">[次]</a><a href="../list/13001-13100">[番号順一覧]</a><a href="../thread/13001-13100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13030
+</p>
+<div class="header">
+<p>
+From: &quot;Takashi Yamashita&quot; &lt;&quot;Takashi Yamashita&quot; &lt;takasi@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 24 May 2006 21:54:05 +0900<br>
+Subject: [mysql 13030] Re: MyODBCで文字化け<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+Takashi Yamashitaです。
+
+<span class="quote1">&gt; 下記のコードでコンパイルエラーが出ます。</span>
+<span class="quote1">&gt; どうすればよいでしょうか？</span>
+<span class="quote1">&gt; mysql.hへのパスは通してあります。</span>
+<span class="quote1">&gt; たぶん、このコンパイルエラーなので、LIBは関係ないかなって</span>
+<span class="quote1">&gt; 思っています。</span>
+
+まず、libmysql.libとlibmySQL.dllは、
+ワークスペースのフォルダと同じフォルダ内に入っていますでしょうか。
+入っていなければコピーしてください。
+libmysql.libが存在しない場合は、ソース（mysql-4.1.xx-win-src.zip）をダウンロードし、
+libmysqlをビルドして、出来上がったlibmysql.libをコピーしてみて下さい。
+
+<a href="http://72.14.203.104/search?q=cache:46mpFhgPjsEJ:www.wistarian.net/mysql.html+libmysql.lib+pragma+comment&amp;hl=ja&amp;gl=jp&amp;ct=clnk&amp;cd=1&amp;lr=lang_ja">http://72.14.203.104/search?q=cache:46mpFhgPjsEJ:www.wistarian.net/mysql.html+libmysql.lib+pragma+comment&amp;hl=ja&amp;gl=jp&amp;ct=clnk&amp;cd=1&amp;lr=lang_ja</a>
+こちらの方のソースを参考にしたら、エラーが出なくなりました。。。
+
+瀧澤様のソースに、
+コネクションが失敗したらエラーダイアログを出す記述がありましたので、
+上記URLのソースを以下のように書き換えました（ほとんど変わらないですが）。
+
+---
+#include &lt;my_global.h&gt;
+#include &lt;mysql.h&gt;
+#pragma comment(lib,&quot;libmysql.lib&quot;)
+
+static char *opt_host_name = NULL;     // Server host (default=localhost)
+static char *opt_user_name = &quot;{ユーザ名}&quot;;     // username (default=login 
+name)
+static char *opt_password = &quot;{パスワード}&quot;;      // password (default=none)
+static unsigned int opt_port_num = 0;  // port number (use built-in value)
+static char *opt_socket_name = NULL;   // socket name (use built-in value)
+static char *opt_db_name = &quot;{データベース名}&quot;;       // database name 
+(default=none)
+static unsigned int opt_flags = 0;     // connection flags (none)
+static MYSQL *conn;                    // pointer to connection handler
+
+
+int main(int argc, char *argv[]) {
+  /* Initialize connection handler */
+  conn = mysql_init(NULL);
+  /* Conneect to Server */
+  mysql_real_connect(conn, opt_host_name, opt_user_name, opt_password, 
+opt_db_name, opt_port_num, opt_socket_name, opt_flags);
+  if(!conn) {
+    MessageBox(NULL, &quot;error&quot; , &quot;connect failed.&quot;, MB_OK);
+    return 0;
+  }
+  else {
+    MessageBox(NULL, &quot;not error&quot; , &quot;connect successed.&quot;, MB_OK);
+  }
+  /* Disconnect from server */
+  mysql_close(conn);
+  return 0;
+}
+---
+
+参考になるかどうか分かりませんが、どうぞ。。。
+
+---------------------------------------
+Takashi Yamashita
+takasi@xxxxxxxxxx
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="13029">[前]</a><a href="13031">[次]</a><a href="../list/13001-13100">[番号順一覧]</a><a href="../thread/13001-13100">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13021">  13021 2006-05-24 10:29 [&quot;ta-taki@xxxxxxxxxx&quot;] MyODBCで文字化け                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13022">  13022 2006-05-24 10:55 ┣[忠犬 KEN &lt;ken_ken_19]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13023">  13023 2006-05-24 12:04 ┃┗[&quot;ta-taki@xxxxxxxxxx&quot;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13024">  13024 2006-05-24 12:18 ┗[Kan Ishii &lt;kan-ishii]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13025">  13025 2006-05-24 17:06 　┗[&quot;ta-taki@xxxxxxxxxx&quot;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13026">  13026 2006-05-24 17:39 　　┣[Tetsuro IKEDA &lt;te.ik]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13028">  13028 2006-05-24 18:41 　　┃┗[&quot;ta-taki@xxxxxxxxxx&quot;]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="13030">  13030 2006-05-24 21:54 　　┃　┗[&quot;Takashi Yamashita&quot; ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13031">  13031 2006-05-24 22:06 　　┃　　┗[&quot;Takashi Yamashita&quot; ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13027">  13027 2006-05-24 18:39 　　┗[&quot;Takashi Yamashita&quot; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13029">  13029 2006-05-24 18:54 　　　┗[&quot;ta-taki@xxxxxxxxxx&quot;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13032">@ 13032 2006-05-25 00:55 　　　　┗[&lt;ska_king2005@xxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13033">  13033 2006-05-25 10:14 　　　　　┗[&quot;ta-taki@xxxxxxxxxx&quot;]                             </a></span>
+</pre>
+</body>
+</html>

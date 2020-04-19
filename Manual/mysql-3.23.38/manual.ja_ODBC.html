@@ -1,0 +1,832 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.ja.texi on 20 July 2001 -->
+
+  <TITLE>MySQL Reference Manual for version 3.23.38. - 19  MySQL ODBC Support</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Adding_procedures.html">previous</A>, <A HREF="manual.ja_Common_programs.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="ODBC" HREF="manual.ja_toc.html#ODBC">19  <STRONG>MySQL</STRONG> ODBC Support</A></H1>
+
+<P>
+<STRONG>MySQL</STRONG> は <STRONG>MyODBC</STRONG> プログラムで ODBC 機能を提供します。
+This chapter will teach you how to install <STRONG>MyODBC</STRONG>,
+and how to use it.  Here, you will also find a list of common programs that
+are known to work with <STRONG>MyODBC</STRONG>.
+
+</P>
+
+
+<H2><A NAME="Installing_MyODBC" HREF="manual.ja_toc.html#Installing_MyODBC">19.1  How To Install MyODBC</A></H2>
+
+<P>
+<STRONG>MyODBC</STRONG> は 32-bit ODBC (2.50) level 0 driver (with level 1 and level
+2 features) で、
+ODBC 化されたアプリケーションが <STRONG>MySQL</STRONG> に接続する場合に使用します。
+<STRONG>MyODBC</STRONG> は、Windows95, Windows98, NT とほとんどの UNIX で動きます。
+
+</P>
+<P>
+通常、<STRONG>MyODBC</STRONG> は Windows マシンにだけ、インストールします。
+、あなたのプログラムが ColdFusion のようにデータベースへの接続に
+ODBC だけを使用する場合に限り、UNIX に <STRONG>MyODBC</STRONG> が必要です。
+
+</P>
+<P>
+<STRONG>MyODBC</STRONG> はパブリック・ドメインで、最新の物は以下にあります：
+<a HREF="http://www.mysql.com/downloads/api-myodbc.html">http://www.mysql.com/downloads/api-myodbc.html</a>.
+
+</P>
+<P>
+日本語文字コードに対応させた物は：
+<a HREF="http://www.SoftAgency.co.jp/">http://www.SoftAgency.co.jp/</a>.
+
+</P>
+<P>
+If you have problem with <STRONG>MyODBC</STRONG> and your program also works
+with OLEDB, you should try the OLEDB driver that you can find in the
+Contrib section.   「<A HREF="manual.ja_Contrib.html#Contrib">D  Contributed Programs</A>」節参照.
+
+</P>
+<P>
+Normally you only need to install <STRONG>MyODBC</STRONG> on Windows machines.
+You only need <STRONG>MyODBC</STRONG> for Unix if you have a program like
+ColdFusion that is running on the Unix machine and uses ODBC to connect
+to the databases.
+
+</P>
+<P>
+もし、UNIX に <STRONG>MyODBC</STRONG> をインストールしたいなら、 <STRONG>ODBC</STRONG> 
+マネージャーも必要でしょう。 <STRONG>MyODBC</STRONG> は UNIX の ODBC マネージャー
+でも動作することが知られています。 <STRONG>MySQL</STRONG> useful links page の
+<STRONG>ODBC</STRONG>-related links 節に、見つけることができます。
+ 「<A HREF="manual.ja_Introduction.html#Useful_Links">1.10  便利な <STRONG>MySQL</STRONG> 関連リンク</A>」節参照.
+
+</P>
+<P>
+To install <STRONG>MyODBC</STRONG> on windows, you should download the
+appropriate <STRONG>MyODBC</STRONG> .zip file (for Windows or NT/Win2000),
+unpack it with <CODE>WINZIP</CODE>, or some similar program, and execute the
+<CODE>SETUP.EXE</CODE> file.
+
+</P>
+<P>
+Windows/NT の場合、<STRONG>MyODBC</STRONG> をインストール時にいかのような
+エラーになるかもしれません:
+
+</P>
+
+<PRE>
+An error occurred while copying C:\WINDOWS\SYSTEM\MFC30.DLL. Restart
+Windows and try installing again (before running any applications which
+use ODBC)
+</PRE>
+
+<P>
+The problem in this case is that some other program is using ODBC and
+because of how Windows is designed, you may not in this case be able to
+install a new ODBC drivers with Microsoft's ODBC setup program. In most
+cases you can continue by just pressing <CODE>Ignore</CODE> to copy the rest
+of the MyODBC files and the final installation should still work.  If
+this doesn't work,
+これを解決するには、一度 ’セーフモード’でコンピュータを立ち上げ直し、
+(windows リブート時に、F8キーを押すことで、セーフモードの選択が可能です)
+<STRONG>MyODBC</STRONG> をインストールして、リブートします:
+
+</P>
+
+<UL>
+<LI>
+
+Windows マシンから UNIX に ODBC アプリケーションを使用して接続するには、
+まず最初に Windows マシンに <STRONG>MyODBC</STRONG> をインストールしなくては
+なりません。
+<LI>
+
+UNIX 上の <STRONG>MySQL</STRONG> サーバーに対して、ユーザーと Windows マシンの
+アクセス許可を与えます。 これは、 <CODE>GRANT</CODE> コマンドで可能です。
+ 「<A HREF="manual.ja_Reference.html#GRANT">7.35  <CODE>GRANT</CODE> と <CODE>REVOKE</CODE> 構文</A>」節参照.
+<LI>
+
+ODBC DSN を以下のようにして作成しなくてはなりません：
+
+
+<UL>
+<LI>
+
+Windows マシンのコントロールパネルを開く
+<LI>
+
+ODBC アイコンをダブルクリック
+<LI>
+
+"ユーサーDSN" をクリック
+<LI>
+
+"追加..." ボタンをクリック
+<LI>
+
+新しいデータソース の画面から、<STRONG>MySQL</STRONG> を選び、完了ボタンをクリック。
+<LI>
+
+<STRONG>MySQL</STRONG> Driver のデフォルト設定が現れます。
+ 「<A HREF="manual.ja_ODBC.html#ODBC_administrator">19.2  ODBC 管理プログラムの各種項目を埋めるには？</A>」節参照.
+</UL>
+
+<LI>
+
+アプリケーションを起動し、コントロールパネルで設定した ODBC DSN を選びます
+</UL>
+
+<P>
+MyODBC の設定画面には、<STRONG>MySQL</STRONG> 接続時のオプションがいくつか
+設定できるようになっています。
+もし問題がある場合は、これらを試します。
+
+</P>
+
+<P>
+<A NAME="IDX1442"></A>
+
+
+<H2><A NAME="ODBC_administrator" HREF="manual.ja_toc.html#ODBC_administrator">19.2  ODBC 管理プログラムの各種項目を埋めるには？</A></H2>
+
+<P>
+Windows95 上のサーバ名の記述には3つの可能性があります:
+
+</P>
+
+<UL>
+<LI>
+
+サーバの IP アドレスの使用
+<LI>
+
+ファイル <TT>`\windows\lmhosts'</TT> への次の情報の追加:
+
+
+<PRE>
+ip hostname
+</PRE>
+
+例えば：
+
+
+<PRE>
+194.216.84.21 my
+</PRE>
+
+<LI>
+
+DNS を使用するように設定します。
+</UL>
+
+<P>
+<CODE>ODBC setup</CODE> を埋める方法の例:
+
+<PRE>
+Windows DSN name:   test
+Description:        This is my test database
+MySql Database:     test
+Server:             194.216.84.21
+User:               monty
+Password:           my_password
+Port:
+</PRE>
+
+<P>
+<CODE>Windows DSN name</CODE> 項目の値は、あなたのwindows ODBC setup における
+一意の名前です。
+
+</P>
+<P>
+ODBC setup 画面で、<CODE>Server</CODE>, <CODE>User</CODE>, <CODE>Password</CODE>, <CODE>Port</CODE>
+ フィールドを設定する必要はありません。
+しかし、ここで設定をすると、後でサーバーに接続する際に、
+設定した値がデフォルト値として使用されます。
+使用時に値を変更するオプションはあります。
+
+</P>
+<P>
+ポート番号が設定されていないなら、デフォルトポート (3306) が使用されます。
+
+</P>
+<P>
+もしオプションを <CODE>Read options from C:\my.cnf</CODE> にすると, 
+<CODE>client</CODE> と <CODE>odbc</CODE> グループは <TT>`C:\my.cnf'</TT> ファイルから読まれます。
+<CODE>mysql_options()</CODE> で使用できる全てのオプションが利用可能です。
+ 「<A HREF="manual.ja_Clients.html#mysql_options">24.1.3.159  <CODE>mysql_options()</CODE></A>」節参照.
+
+</P>
+
+
+
+<H2><A NAME="MyODBC_connect_parameters" HREF="manual.ja_toc.html#MyODBC_connect_parameters">19.3  Connect parameters for MyODBC</A></H2>
+
+<P>
+One can specify the following parameters for <STRONG>MyODBC</STRONG> on
+the <CODE>[Servername]</CODE> section of an <CODE>ODBC.INI</CODE> file or
+through  the <CODE>InConnectionString</CODE> argument in the
+<CODE>SQLDriverConnect()</CODE> call.
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>Parameter</STRONG> </TD><TD> <STRONG>Default value</STRONG> </TD><TD> <STRONG>Comment</STRONG>
+</TR NOSAVE>
+<TR><TD>user </TD><TD> ODBC (on windows) </TD><TD> The username used to connect to <STRONG>MySQL</STRONG>.
+</TR NOSAVE>
+<TR><TD>server </TD><TD> localhost </TD><TD> The hostname of the <STRONG>MySQL</STRONG> server.
+</TR NOSAVE>
+<TR><TD>database </TD><TD> </TD><TD> The default database
+</TR NOSAVE>
+<TR><TD>option </TD><TD> 0 </TD><TD> A integer by which you can specify how <STRONG>MyODBC</STRONG> should work. See below.
+</TR NOSAVE>
+<TR><TD>port </TD><TD> 3306 </TD><TD> The TCP/IP port to use if <CODE>server</CODE> is not <CODE>localhost</CODE>.
+</TR NOSAVE>
+<TR><TD>stmt </TD><TD> </TD><TD> A statement that will be executed when connection to <CODE>MySQL</CODE>.
+</TR NOSAVE>
+<TR><TD>password </TD><TD> </TD><TD> The password for the <CODE>server</CODE> <CODE>user</CODE> combination.
+</TR NOSAVE>
+<TR><TD>socket </TD><TD> </TD><TD> The socket or windows pipe to connect to.
+</TR>
+</TABLE>
+
+<P>
+The option argument is used to tell <STRONG>MyODBC</STRONG> that the client isn't 100%
+ODBC compliant. On windows, one normally sets the option flag by
+toggling the different options on the connection screen but one can also
+set this in the opton argument. The following options are listed in the
+same order as they appear in the <STRONG>MyODBC</STRONG> connect screen:
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>Bit</STRONG> </TD><TD> <STRONG>Meaning</STRONG>
+</TR NOSAVE>
+<TR><TD>1 </TD><TD> The client can't handle that <STRONG>MyODBC</STRONG> returns the real width of a column.
+</TR NOSAVE>
+<TR><TD>2 </TD><TD> The client can't handle that MySQL returns the true value of affected rows.  If this flag is set then MySQL returns 'found rows' instead.  One must have MySQL 3.21.14 or newer to get this to work.
+</TR NOSAVE>
+<TR><TD>4 </TD><TD> Make a debug log in c:\myodbc.log.  This is the same as putting <CODE>MYSQL_DEBUG=d:t:O,c::\myodbc.log</CODE> in <TT>`AUTOEXEC.BAT'</TT>
+</TR NOSAVE>
+<TR><TD>8 </TD><TD> Don't set any packet limit for results and parameters.
+</TR NOSAVE>
+<TR><TD>16 </TD><TD> Don't prompt for questions even if driver would like to prompt
+</TR NOSAVE>
+<TR><TD>32 </TD><TD> Simulate a ODBC 1.0 driver in some context.
+</TR NOSAVE>
+<TR><TD>64 </TD><TD> Ignore use of database name in 'database.table.column'.
+</TR NOSAVE>
+<TR><TD>128 </TD><TD> Force use of ODBC manager cursors (experimental).
+</TR NOSAVE>
+<TR><TD>256 </TD><TD> Disable the use of extended fetch (experimental)
+</TR NOSAVE>
+<TR><TD>512 </TD><TD> Pad CHAR fields to full column length.
+</TR NOSAVE>
+<TR><TD>1024 </TD><TD> SQLDescribeCol() will return fully qualifed column names
+</TR NOSAVE>
+<TR><TD>2048 </TD><TD> Use the compressed server/client protocol
+</TR NOSAVE>
+<TR><TD>4096 </TD><TD> Tell server to ignore space after function name and before <CODE>'('</CODE> (needed by PowerBuilder).  This will make all function names keywords!
+</TR NOSAVE>
+<TR><TD>8192 </TD><TD> Connect with named pipes to a mysqld server running on NT.
+</TR NOSAVE>
+<TR><TD>16384 </TD><TD> Change LONGLONG columns to INT columns (Some applications can't handle LONGLONG).
+</TR NOSAVE>
+<TR><TD>32768 </TD><TD> Return 'user' as Table_qualifier and Table_owner from SQLTables (experimental)
+</TR NOSAVE>
+<TR><TD>65536 </TD><TD> Read parameters from the <CODE>client</CODE> and <CODE>odbc</CODE> groups from <CODE>my.cnf</CODE>
+</TR NOSAVE>
+<TR><TD>131072 </TD><TD> Add some extra safety checks (should not bee needed but...)
+</TR>
+</TABLE>
+
+<P>
+If you want to have many options, you should add the above flags!  For
+example setting option to 12 (4+8) gives you debugging without package
+limits!
+
+</P>
+<P>
+The default <TT>`MYODBC.DLL'</TT> is compiled for optimal performance.  If
+you want to to debug <STRONG>MyODBC</STRONG> (for example to enable tracing),
+you should instead use <CODE>MYODBCD.DLL</CODE>.  To install this file, copy
+<TT>`MYODBCD.DLL'</TT> over the installed <CODE>MYODBC.DLL</CODE> file.
+
+</P>
+
+
+<H2><A NAME="ODBC_Problems" HREF="manual.ja_toc.html#ODBC_Problems">19.4  <STRONG>MyODBC</STRONG>での問題をどのように報告すべきか？</A></H2>
+
+<P>
+<STRONG>MyODBC</STRONG> は以下でテストされました： Access, Admndemo.exe, C++-Builder,
+Borland Builder 4, Centura Team Developer (formerly Gupta SQL/Windows),
+ColdFusion (on Solaris and NT with svc pack 5), Crystal Reports,
+DataJunction, Delphi, ERwin, Excel, iHTML, FileMaker Pro, FoxPro, Notes
+4.5/4.6, SBSS, Perl DBD-ODBC, Paradox, Powerbuilder, Powerdesigner 32
+bit, VC++, and Visual Basic.
+
+</P>
+<P>
+<STRONG>MyODBC</STRONG> で動作する他のアプリケーションについても知っているなら、
+<a HREF="mailto:myodbc@lists.mysql.com">myodbc@lists.mysql.com</a> までメールをください！
+
+</P>
+<P>
+With some programs you may get an error like:
+<CODE>Another user has modifies the record that you have modified</CODE>. In most
+cases this can be solved by doing one of the following things:
+
+</P>
+
+<UL>
+<LI>
+
+Add a primary key for the table if there isn't one already.
+<LI>
+
+Add a timestamp column if there isn't one already.
+<LI>
+
+Only use double float fields. Some programs may fail when they compare
+single floats.
+</UL>
+
+<P>
+If the above doesn't help, you should do a <CODE>MyODBC</CODE> trace file and
+try to figure out why things go wrong.
+
+</P>
+
+
+<H2><A NAME="MyODBC_clients" HREF="manual.ja_toc.html#MyODBC_clients">19.5  <STRONG>MyODBC</STRONG>で動作することが知られているプログラム</A></H2>
+
+<P>
+多くのプログラムが  <STRONG>MyODBC</STRONG> で動作します。これらは我々自身がテストしたか、
+または何人かの他のユーザから動作するという確証を得たものです:
+
+</P>
+<DL COMPACT>
+
+<DT><STRONG>Program</STRONG>
+<DD>
+<STRONG>Comment</STRONG>
+<A NAME="IDX1443"></A>
+<DT>Access
+<DD>
+Access を動作させるには:
+
+<UL>
+<LI>
+
+If you are using Access 2000, you should get and install the newest
+Microsoft MDAC (<CODE>Microsoft Data Access Components</CODE>) from
+<a HREF="http://www.microsoft.com/data">http://www.microsoft.com/data</a>.  This will fix the following bug
+in Access: when you export data to <STRONG>MySQL</STRONG>, the table and column
+names aren't specified.  Another way to around this bug is to upgrade to
+MyODBC Version 2.50.33 and <STRONG>MySQL</STRONG> Version 3.23.x, which together
+provide a workaround for this bug!
+
+Note that if you are using <STRONG>MySQL</STRONG> Version 3.22, you must to apply the
+MDAC patch and use MyODBC 2.50.32 or 2.50.34 and above to go around
+this problem.
+<LI>
+
+Set the ``Return matching rows'' MyODBC option field when connecting to
+<STRONG>MySQL</STRONG>.
+<LI>
+
+テーブルにプライマリキーを設定しなければなりません。;  If not, new or updated rows
+may show up as <CODE>#Deleted#</CODE>.
+<LI>
+
+更新可能なテーブルの全てに、timestamp を持たせなければなりません。
+For maximum portability <CODE>TIMESTAMP(14)</CODE> or simple <CODE>TIMESTAMP</CODE>
+is recommended instead of other <CODE>TIMESTAMP(X)</CODE> variations.
+<LI>
+
+ダブルフロート型だけが(実数に)使用できます。Accessではシングルフロートと比較は失敗します。
+The symptom usually is that new or updated rows may show up as <CODE>#Deleted#</CODE>
+or that you can't find or update rows.
+<LI>
+
+If you still get the error <CODE>Another user has changed your data</CODE> after
+adding a <CODE>TIMESTAMP</CODE> column, the following trick may help you:
+
+Don't use <CODE>table</CODE> data sheet view. Create instead a form with the
+fields you want, and use that <CODE>form</CODE> data sheet view.  You should
+set the <CODE>DefaultValue</CODE> property for the <CODE>TIMESTAMP</CODE> column to
+<CODE>NOW()</CODE>.  It may be a good idea to hide the <CODE>TIMESTAMP</CODE> column
+from view so your users are not confused.
+<LI>
+
+NT 上の Access は <CODE>BLOB</CODE> フィールドを <CODE>OLE OBJECTS</CODE> と認識します。
+もし <CODE>MEMO</CODE> フィールドを代わりに使用したいなら、 <CODE>ALTER TABLE</CODE> を使って、
+<CODE>TEXT</CODE> 型にフィールドを変更しなくてはなりません。
+<LI>
+
+Access は <CODE>DATE</CODE> フィールドをいつも正しく扱うことが出来ません。
+もしこれらの問題があった場合、フィールド型を <CODE>DATETIME</CODE> に変えてください。
+<LI>
+
+アクセスは、<STRONG>MySQL</STRONG> が理解できない間違った SQL クエリを
+作成するかもしれません。 これはアクセスのメニューから
+<CODE>"Query|SQLSpecific|Pass-Through"</CODE> を選択すれば
+直すことが可能です。
+<LI>
+
+If you have in Access a column defined as BYTE, Access will try to export this
+as <CODE>TINYINT</CODE> instead of <CODE>TINYINT UNSIGNED</CODE>.  This will give you
+problems if you have values &#62; 127 in the column!
+<LI>
+
+If you are using Access 7.0, You should use the option flag <CODE>Return
+matching rows</CODE>.
+<LI>
+
+If you are using Access 2.0, You should use the option flags <CODE>Return
+matching rows</CODE> and <CODE>Simulate ODBC 1.0</CODE>.
+</UL>
+
+<A NAME="IDX1444"></A>
+<DT>ADO
+<DD>
+When you are coding with the ADO API and <STRONG>MyODBC</STRONG> you need to put
+attention in some default properties that aren't supported by the
+<STRONG>MySQL</STRONG> server.  For example, using the <CODE>CursorLocation
+Property</CODE> as <CODE>adUseServer</CODE> will return for the <CODE>RecordCount
+Property</CODE> a result of -1. To have the right value, you need to set this
+property to <CODE>adUseClient</CODE>, like is showing in the VB code below:
+
+
+<PRE>
+Dim myconn As New ADODB.Connection
+Dim myrs As New Recordset
+Dim mySQL As String
+Dim myrows As Long
+
+myconn.Open "DSN=MyODBCsample"
+mySQL = "SELECT * from user"
+myrs.Source = mySQL
+Set myrs.ActiveConnection = myconn
+myrs.CursorLocation = adUseClient
+myrs.Open
+myrows = myrs.RecordCount
+
+myrs.Close
+myconn.Close
+</PRE>
+
+Another workaround is to use a <CODE>SELECT COUNT(*)</CODE> statement
+for a similar query to get the correct row count.
+
+<DT>Active server pages (ASP)
+<DD>
+You should use the option flag <CODE>Return matching rows</CODE>.
+
+<DT>BDE applications
+<DD>
+To get these to work, you should set the option flags
+<CODE>Don't optimize column widths</CODE> and <CODE>Return matching rows</CODE>.
+
+<A NAME="IDX1445"></A>
+<DT>Borland Builder 4
+<DD>
+When you start a query you can use the property <CODE>Active</CODE> or use the
+method <CODE>Open</CODE>.  Note that <CODE>Active</CODE> will start by automatically
+issuing a <CODE>SELECT * FROM ...</CODE> query that may not be a good thing if
+your tables are big!
+<DT>ColdFusion (On Unix)
+<DD>
+The following information is taken from the ColdFusion documentation:
+
+Use the following information to configure ColdFusion Server for Linux
+to use the unixODBC driver with <STRONG>MyODBC</STRONG> for <STRONG>MySQL</STRONG> data
+sources.  Allaire has verified that <STRONG>MyODBC</STRONG> Version 2.50.26
+works with <STRONG>MySQL</STRONG> Version 3.22.27 and ColdFusion for Linux. (Any
+newer version should also work.) You can download <STRONG>MyODBC</STRONG> at
+<a HREF="http://www.mysql.com/downloads/api-myodbc.html">http://www.mysql.com/downloads/api-myodbc.html</a>
+
+<A NAME="IDX1446"></A>
+ColdFusion Version 4.5.1 allows you to us the ColdFusion Administrator
+to add the <STRONG>MySQL</STRONG> data source. However, the driver is not
+included with ColdFusion Version 4.5.1. Before the <STRONG>MySQL</STRONG> driver
+will appear in the ODBC datasources drop-down list, you must build and
+copy the <STRONG>MyODBC</STRONG> driver to
+<TT>`/opt/coldfusion/lib/libmyodbc.so'</TT>.
+
+The Contrib directory contains the program mydsn-xxx.zip which allows
+you to build and remove the DSN registry file for the MyODBC driver
+on Coldfusion applications.
+
+<A NAME="IDX1447"></A>
+<DT>DataJunction
+<DD>
+You have to change it to output <CODE>VARCHAR</CODE> rather than <CODE>ENUM</CODE>, as
+it exports the latter in a manner that causes <STRONG>MySQL</STRONG> grief.
+<A NAME="IDX1448"></A>
+<DT>Excel
+<DD>
+動作。Some tips:
+
+<UL>
+<LI>
+
+日付に問題が起きた場合、<CODE>CONCAT()</CODE> 関数を使用し、文字として SELECT してみてください。
+例えば：
+
+<PRE>
+select CONCAT(rise_time), CONCAT(set_time)
+    from sunrise_sunset;
+</PRE>
+
+この方法で文字として返ってきた値を、Excel97 で時間として扱うようにすべきです。
+
+この例の <CODE>CONCAT()</CODE> の目的は、フィールドの型が文字列であると ODBC をだますことです。
+<CODE>CONCAT()</CODE> がなければ、ODBC はフィールドの型が日付とわかるので、
+Excel が今度はそれを理解できなくなります。
+
+これは Excel のバグです。なぜなら文字を自動で日付に直すのですから。
+これは単にテキストファイルの情報を扱う場合ならばいいのですが、
+各項目の型を知らせる ODBC 接続の情報を扱う場合は、とても愚かな方法です。
+</UL>
+
+<A NAME="IDX1449"></A>
+<DT>Word
+<DD>
+To retrieve data from <STRONG>MySQL</STRONG> to Word/Excel documents, you need to
+use the <CODE>MyODBC</CODE> driver and the Add-in Microsoft Query help.
+
+For example, create a db with a table containing 2 columns of text:
+
+
+<UL>
+<LI>
+
+Insert rows using the mysql client command-line tool.
+<LI>
+
+Create a DSN file using the MyODBC driver, for example, my for the db above.
+<LI>
+
+Open the Word application.
+<LI>
+
+Create a blank new documentation.
+<LI>
+
+Using the tool bar called Database, press the button insert database.
+<LI>
+
+Press the button Get Data.
+<LI>
+
+At the right hand of the screen Get Data, press the button Ms Query.
+<LI>
+
+In the Ms Query create a New Data Source using the DSN file my.
+<LI>
+
+Select the new query.
+<LI>
+
+Select the columns that you want.
+<LI>
+
+Make a filter if you want.
+<LI>
+
+Make a Sort if you want.
+<LI>
+
+Select Return Data to Microsoft Word.
+<LI>
+
+Click Finish.
+<LI>
+
+Click Insert data and select the records.
+<LI>
+
+Click OK and you see the rows in your Word document.
+</UL>
+
+<A NAME="IDX1450"></A>
+<DT>odbcadmin
+<DD>
+ODBC のテストプログラム.
+<A NAME="IDX1451"></A>
+<DT>Delphi
+<DD>
+DBE 3.2 以上を必ず使用してください。
+<STRONG>MySQL</STRONG> に接続する際には、'Don't optimize column width' オプションをセットします。
+
+ODBCエントリとBDEエントリの両方をセットアップするおりに役に立つであろう
+ Delphi のコード例を示します
+( BDE は Delphi Super Page から無償で得られる BDE Alias Editor が必要です)。
+:  (Thanks to Bryan Brunton <a HREF="mailto:bryan@flesherfab.com">bryan@flesherfab.com</a> for this)
+
+
+<PRE>
+fReg:= TRegistry.Create;
+  fReg.OpenKey('\Software\ODBC\ODBC.INI\DocumentsFab', True);
+  fReg.WriteString('Database', 'Documents');
+  fReg.WriteString('Description', ' ');
+  fReg.WriteString('Driver', 'C:\WINNT\System32\myodbc.dll');
+  fReg.WriteString('Flag', '1');
+  fReg.WriteString('Password', '');
+  fReg.WriteString('Port', ' ');
+  fReg.WriteString('Server', 'xmark');
+  fReg.WriteString('User', 'winuser');
+  fReg.OpenKey('\Software\ODBC\ODBC.INI\ODBC Data Sources', True);
+  fReg.WriteString('DocumentsFab', 'MySQL');
+  fReg.CloseKey;
+  fReg.Free;
+
+  Memo1.Lines.Add('DATABASE NAME=');
+  Memo1.Lines.Add('USER NAME=');
+  Memo1.Lines.Add('ODBC DSN=DocumentsFab');
+  Memo1.Lines.Add('OPEN MODE=READ/WRITE');
+  Memo1.Lines.Add('BATCH COUNT=200');
+  Memo1.Lines.Add('LANGDRIVER=');
+  Memo1.Lines.Add('MAX ROWS=-1');
+  Memo1.Lines.Add('SCHEMA CACHE DIR=');
+  Memo1.Lines.Add('SCHEMA CACHE SIZE=8');
+  Memo1.Lines.Add('SCHEMA CACHE TIME=-1');
+  Memo1.Lines.Add('SQLPASSTHRU MODE=SHARED AUTOCOMMIT');
+  Memo1.Lines.Add('SQLQRYMODE=');
+  Memo1.Lines.Add('ENABLE SCHEMA CACHE=FALSE');
+  Memo1.Lines.Add('ENABLE BCD=FALSE');
+  Memo1.Lines.Add('ROWSET SIZE=20');
+  Memo1.Lines.Add('BLOBS TO CACHE=64');
+  Memo1.Lines.Add('BLOB SIZE=32');
+
+  AliasEditor.Add('DocumentsFab','MySQL',Memo1.Lines);
+</PRE>
+
+<A NAME="IDX1452"></A>
+<DT>C++Builder
+<DD>
+BDE 3.0で,テストされました。唯一の知られた問題は、
+テーブルスキーマが変化する時、クエリフィールドが更新されないことです。
+BDE は、index PRIMARY だけを認識し、プライマリーキーは認識していないように思えます。これはさほど問題ではないですが。
+
+<DT>Vision
+<DD>
+You should use the option flag <CODE>Return matching rows</CODE>.
+
+<A NAME="IDX1453"></A>
+<DT>Visual Basic
+<DD>
+テーブルの更新を可能にするため、テーブルにプライマリーキーを作成しなくてはなりません。
+
+Visual Basic with ADO can't handle big integers. This means that some queries
+like <CODE>SHOW PROCESSLIST</CODE> will not work properly.  The fix is to set
+add the option <CODE>OPTION=16834</CODE> in the ODBC connect string or set
+the <CODE>Change BIGINT columns to INT</CODE> option in the MyODBC connect screen.
+You may also want to set the <CODE>Return matching rows</CODE> option.
+
+<DT>VisualInterDev
+<DD>
+If you get the error <CODE>[Microsoft][ODBC Driver Manager] Driver does
+not support this parameter</CODE> the reason may be that you have a
+<CODE>BIGINT</CODE> in your result.  Try setting the <CODE>Change BIGINT
+columns to INT</CODE> option in the MyODBC connect screen.
+
+<DT>Visual Objects
+<DD>
+You should use the option flag <CODE>Don't optimize column widths</CODE>.
+</DL>
+
+<P>
+<A NAME="IDX1454"></A>
+
+
+<H2><A NAME="ODBC_and_last_insert_id" HREF="manual.ja_toc.html#ODBC_and_last_insert_id">19.6  <CODE>AUTO_INCREMENT</CODE> フィールドの値を ODBC で得る方法</A></H2>
+
+<P>
+共通の問題は、<CODE>INSERT</CODE> で自動的に生成されるIDの値を得ることです。
+ODBCでは、以下のようにします( 例中の <CODE>auto</CODE> が <CODE>AUTO_INCREMENT</CODE> フィールドです)：
+
+</P>
+
+<PRE>
+INSERT INTO foo (auto,text) VALUES(NULL,'text');
+SELECT LAST_INSERT_ID();
+</PRE>
+
+<P>
+もしくは、他のテーブルにIDを挿入するだけなら以下のようにします：
+
+</P>
+
+<PRE>
+INSERT INTO foo (auto,text) VALUES(NULL,'text');
+INSERT INTO foo2 (id,text) VALUES(LAST_INSERT_ID(),'text');
+</PRE>
+
+<P>
+ 「<A HREF="manual.ja_Clients.html#Getting_unique_ID">24.1.4.3  最後に挿入された行のユニーク ID をどのように得られるか？</A>」節参照.
+
+</P>
+<P>
+いくつかのODBCアプリケーション(少なくともDelphiとAccess)は、
+新しく挿入された行を見つけるのに、以下のクエリが使用できます：
+
+<PRE>
+SELECT * FROM tbl_name WHERE auto IS NULL;
+</PRE>
+
+<P>
+<A NAME="IDX1455"></A>
+<A NAME="IDX1456"></A>
+<A NAME="IDX1457"></A>
+
+
+<H2><A NAME="MyODBC_bug_report" HREF="manual.ja_toc.html#MyODBC_bug_report">19.7  Reporting Problems with MyODBC</A></H2>
+
+<P>
+もし <STRONG>MyODBC</STRONG> 使用時に難しい問題にあたった場合、
+ODBC マネージャのログファイル (ODBCADMIN からリクエストしたときのログ)
+と <STRONG>MyODBC</STRONG> のログを取り始めるべきです。
+これはいかなる問題にも解決の糸口になるはずです。
+
+</P>
+<P>
+<STRONG>MyODBC</STRONG> のログを取るには、以下のように行ないます：
+
+</P>
+
+<OL>
+<LI>
+
+Ensure that you are using <CODE>myodbcd.dll</CODE> and not <CODE>myodbc.dll</CODE>.
+The easiest way to do this is to get <CODE>myodbcd.dll</CODE> from the MyODBC
+distribution and copy it over the <CODE>myodbc.dll</CODE>, which is probably
+in your <CODE>C:\windows\system32</CODE> or <CODE>C:\winnt\system32</CODE> directory.
+
+Note that you probably want to restore the old myodbc.dll file when you
+have finished testing, as this is a lot faster than <CODE>myodbcd.dll</CODE>.
+
+<LI>
+
+<STRONG>MyODBC</STRONG> connect/configure 画面の
+'Trace MyODBC' オプションをチェックします。
+ログは <TT>`C:\myodbc.log'</TT> に書き出されます。
+
+If the trace option is not remembered when you are going back to the
+above screen, it means that you are not using the <CODE>myodbcd.dll</CODE>
+driver (see above).
+
+<LI>
+
+Start your application and try to get it to fail.
+</OL>
+
+<P>
+Check the <CODE>MyODBC trace file</CODE>, to find out what could be wrong.
+You should be able to find out the issued queries by searching after
+the string <CODE>&#62;mysql_real_query</CODE> in the <TT>`myodbc.log'</TT> file.
+
+</P>
+<P>
+また、MyODBC か <STRONG>MySQL</STRONG> のエラーを見つけるためには、
+同じコマンドを、<CODE>mysql</CODE> コマンドや <CODE>admndemo</CODE> でも試すべきです。
+
+</P>
+<P>
+もし、問題を発見したなら、関係する行を（最大40行） <a HREF="mailto:myodbc@lists.mysql.com">myodbc@lists.mysql.com</a> に
+送ってください。 MyODBC や ODBC のログファイル全てを送らないように
+してください！
+
+</P>
+<P>
+もし問題を見つけることが出来なかった場合、MyODBC トレースファイル、
+ODBC ログファイル、問題の説明する README ファイルを含んだ
+アーカイブ(tar か zip) を作成します。
+これを <a HREF="ftp://support.mysql.com/pub/mysql/secret">ftp://support.mysql.com/pub/mysql/secret</a>. に送ります。
+<STRONG>MySQL AB</STRONG> だけが、アップロードされたファイルにアクセスできます。
+
+</P>
+<P>
+もし問題を見るためのプログラムも作っているなら、それも同時に送ります。
+
+</P>
+<P>
+もしそのプログラムが他の SQL サーバーで動くなら、
+他の SQL サーバーで同じことをした場合の ODBC ログファイルを作成すべきです。
+
+</P>
+<P>
+多くの情報をあなたが提供すれば、我々は問題を解決しやすくなることを
+念頭においてください。
+
+</P>
+<P><HR><P>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Adding_procedures.html">previous</A>, <A HREF="manual.ja_Common_programs.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

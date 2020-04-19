@@ -1,0 +1,162 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9946</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9945">[前]</a><a href="9947">[次]</a><a href="../list/9901-10000">[番号順一覧]</a><a href="../thread/9901-10000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9946
+</p>
+<div class="header">
+<p>
+From: ML account &lt;ML account &lt;ml@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 05 Aug 2004 13:30:56 +0900<br>
+Subject: [mysql 09946] Re: データのロックについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+　こんにちは。
+
+seiji takegata &lt;takegata@xxxxxxxxxx&gt;さんの
+&lt;200408051126.HDJ78986.LUHUBBBF@xxxxxxxxxx&gt;
+&quot;<a href="09945">[mysql 09945]</a> Re: データのロックについて&quot;
+
+
+<span class="quote1">&gt; ウェブのアプリケーションで排他処理にトランザクションや</span>
+<span class="quote1">&gt; ロックを使おうとしてもうまくいかないことが多くないです</span>
+<span class="quote1">&gt; か？</span>
+
+　それは多分に処理を間違えているだけ、と言うか、相当にまずい処理をやって
+いるんだと思いますよ。
+
+　DBについて言えば、ロックやトランザクションの使い方を間違えているとか、
+複数のDBセッション(DB接続-&gt;クエリ発行-&gt; DB切断)を跨いでの排他制御の様な、
+不適当な用途に無理矢理ロックやトランザクションを使っているとか、そういう
+のがあります。
+
+　あぁ、InnoDBに関してなら、トランザクションを使う事自体が間違っているの
+では、と思いますけど。またOracle8に関して言えば、条件によってはテーブル
+ロックが効かない場合もあります。トランザクション(非ネスト)を大量に使うと、
+MS-SQL7が吹っ飛んだりトランザクションが機能しなくなる事があります。こう
+いうのはトランザクションがちゃんと動かない事の例ですけど、ここでは除外し
+ます。
+
+
+<span class="quote1">&gt; たとえば、あるレコードをAという人が読み出して、その直後</span>
+<span class="quote1">&gt; にBという人が同じレコードを更新してしまったとします。A</span>
+<span class="quote1">&gt; はそれに気づかずにこのレコードを更新してしまうかも知れ</span>
+<span class="quote1">&gt; ません。その場合、Bが更新した内容は上書きされてしまう</span>
+<span class="quote1">&gt; かも知れません。</span>
+
+　それは当たり前の事でしょう。DBからデータを引っ張って後で書き戻す、対策
+(排他制御)無しでこれを行うのは禁じ手です。やっちゃいけない事をやっている
+のですから、起こるべくして起こる事が当然の様に起こってしまう、当たり前の
+事ですね。
+
+
+<span class="quote1">&gt; Aが読み出して更新が完了するまでの間レコードをロックして</span>
+<span class="quote1">&gt; しまえばいいと思われるかも知れませんが、なんらかの理由で</span>
+<span class="quote1">&gt; セッションが切れてしまうと、タイムアウトするまでロックを</span>
+<span class="quote1">&gt; 解除できなくなってしまいますし、誰かが開けっぱなしにして</span>
+<span class="quote1">&gt; いるレコードを他の人が更新できないというのも不便です。</span>
+
+　次のアクションが何時来るか分からないWebベースシステムで、ボクならロッ
+ク/トランザクションは使いませんね。大体、使えないかも知れないし。テーブ
+ル /レコードをロックする場合、そのロック時間は最小に止めるのは鉄則です。
+ロックを掛けっぱなしにするエンジニアも、それを許す/見過ごすデザイナ(アナ
+リスト、 PM、 SE)も、市中引き回しの上、磔獄門でしょう。
+
+　ロックを掛けた後、あるいはイン・トランザクションで、処理プログラムがあ
+ぼーんとなってしまうと、確かにロックが残って誰も触れなくなる様なDBMSはあ
+ります。 Oracleとかね。だから、適切なタイムアウト値の測定や設定が必要な
+んです。MySQLに関して言えば、処理プログラムがあぼーんしてDBサーバとの接
+続が切れれば、テーブルロックは解除されます。
+
+
+<span class="quote1">&gt; こういう可能性がある場合、私はレコードが更新される度に</span>
+<span class="quote1">&gt; カウントアップされるカラムを用意しておいて、読み出した</span>
+<span class="quote1">&gt; ときの値と更新するときの値をチェックし、同じでなければ</span>
+<span class="quote1">&gt; エラーとして処理するようにしています。読み出される頻度</span>
+<span class="quote1">&gt; が多く、たまに更新されるようなアプリケーションではこん</span>
+<span class="quote1">&gt; なやり方で十分な場合が多いと思います。</span>
+
+　そういうやり方もあるでしょう。更新中インジケータをテーブル定義に含めて
+排他制御を行う、テーブルアクセス制御テーブルを使用する、等も定番、定石で
+すね。
+
+
+　それと余談ながら、テーブルロックよりもトランザクションの方がシステムへ
+の処理速度的なインパクト/ダメージが小さい、は常識化している事ですが、
+DBMSの種類や分離レベル如何では、逆の結果になる事があります。
+
+
+
+　　　　松枝知直　　　　&lt;tomom@xxxxxxxxxx&gt;
+　　　　　　　　　　　　<a href="http://www.argus.ne.jp/~tomom/">http://www.argus.ne.jp/~tomom/</a>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="9945">[前]</a><a href="9947">[次]</a><a href="../list/9901-10000">[番号順一覧]</a><a href="../thread/9901-10000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9940">   9940 2004-08-04 13:17 [&quot;Mamiya Masataka&quot; &lt;x] データのロックについて                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9943">   9943 2004-08-05 10:06 ┣[&quot;Mamiya Masataka&quot; &lt;x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9944">   9944 2004-08-05 10:36 ┗[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9945">   9945 2004-08-05 11:26 　┣[seiji takegata &lt;take]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="9946">   9946 2004-08-05 13:30 　┃┣[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9949">   9949 2004-08-05 15:24 　┃┃┗[EBIHARA Yuichiro &lt;ui]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9951">   9951 2004-08-05 23:09 　┃┃　┗[ML account &lt;ml@xxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9952">   9952 2004-08-05 23:19 　┃┃　　┣[&quot;TAKAHASHI, Tomohiro]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9953">   9953 2004-08-06 05:37 　┃┃　　┃┗[ML account &lt;ml@xxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9954">   9954 2004-08-06 05:51 　┃┃　　┃　┗[ML account &lt;ml@xxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9955">   9955 2004-08-06 11:25 　┃┃　　┃　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9957">   9957 2004-08-06 13:30 　┃┃　　┃　　　┗[ML account &lt;ml@xxxxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9958">   9958 2004-08-06 14:04 　┃┃　　┃　　　　┣[SUGAWARA Hajime &lt;sug]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9959">   9959 2004-08-06 14:17 　┃┃　　┃　　　　┣[とみたまさひろ &lt;tomm]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9960">   9960 2004-08-06 16:50 　┃┃　　┃　　　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9962">   9962 2004-08-07 16:49 　┃┃　　┃　　　　　┗[ML account &lt;ml@xxxxx]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9969">   9969 2004-08-09 18:24 　┃┃　　┃　　　　　　┣[&lt;kuyo@xxxxxxxxxx&gt;   ]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9970">   9970 2004-08-10 00:20 　┃┃　　┃　　　　　　┃┗[&quot;akira&quot; &lt;akrst@xxxxx]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9975">   9975 2004-08-10 09:30 　┃┃　　┃　　　　　　┃　┗[ML account &lt;ml@xxxxx]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9976">   9976 2004-08-10 10:48 　┃┃　　┃　　　　　　┃　　┣[&quot;TAKAHASHI, Tomohiro]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9997">   9997 2004-08-11 13:03 　┃┃　　┃　　　　　　┃　　┗[&lt;akrst@xxxxxxxxxx&gt;  ]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9983">   9983 2004-08-10 18:28 　┃┃　　┃　　　　　　┣[とみたまさひろ &lt;tomm]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9987">   9987 2004-08-10 20:28 　┃┃　　┃　　　　　　┃┗[ML account &lt;ml@xxxxx]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9988">   9988 2004-08-10 21:26 　┃┃　　┃　　　　　　┃　┣[&lt;kuyo@xxxxxxxxxx&gt;   ]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9994">   9994 2004-08-11 11:38 　┃┃　　┃　　　　　　┃　┃┗[ML account &lt;ml@xxxxx]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10004">  10004 2004-08-12 01:03 　┃┃　　┃　　　　　　┃　┃　┗[Tomoyuki Ishino &lt;ish]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10006">  10006 2004-08-12 08:54 　┃┃　　┃　　　　　　┃　┃　　┗[ML account &lt;ml@xxxxx]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10012">  10012 2004-08-13 12:52 　┃┃　　┃　　　　　　┃　┃　　　┗[Tomoyuki Ishino &lt;ish]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10014">  10014 2004-08-13 20:08 　┃┃　　┃　　　　　　┃　┃　　　　┗[ML account &lt;ml@xxxxx] </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9989">   9989 2004-08-10 23:39 　┃┃　　┃　　　　　　┃　┗[とみたまさひろ &lt;tomm]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9992">   9992 2004-08-11 10:54 　┃┃　　┃　　　　　　┃　　┣[&quot;Tomo Ikehara&quot; &lt;tomo]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9995">   9995 2004-08-11 12:08 　┃┃　　┃　　　　　　┃　　┃┣[&quot;TAKAHASHI, Tomohiro]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10001">  10001 2004-08-11 16:16 　┃┃　　┃　　　　　　┃　　┃┃┣[&quot;TAKAHASHI, Tomohiro] Re: データのロックについて(余談:START TRANSACTION)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10003">  10003 2004-08-12 00:51 　┃┃　　┃　　　　　　┃　　┃┃┃┗[とみたまさひろ &lt;tomm]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10011">  10011 2004-08-13 11:06 　┃┃　　┃　　　　　　┃　　┃┃┗[&quot;Tomo Ikehara&quot; &lt;tomo]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9999">   9999 2004-08-11 15:40 　┃┃　　┃　　　　　　┃　　┃┗[EBIHARA Yuichiro &lt;ui]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10017">  10017 2004-08-13 22:42 　┃┃　　┃　　　　　　┃　　┃　┗[&quot;Tomo Ikehara&quot; &lt;tomo]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9993">   9993 2004-08-11 11:38 　┃┃　　┃　　　　　　┃　　┗[ML account &lt;ml@xxxxx]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10000">  10000 2004-08-11 15:53 　┃┃　　┃　　　　　　┃　　　┣[EBIHARA Yuichiro &lt;ui]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10008">  10008 2004-08-12 10:30 　┃┃　　┃　　　　　　┃　　　┃┗[ML account &lt;ml@xxxxx]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10009">  10009 2004-08-12 11:57 　┃┃　　┃　　　　　　┃　　　┃　┗[&lt;kuyo@xxxxxxxxxx&gt;   ]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10013">  10013 2004-08-13 20:07 　┃┃　　┃　　　　　　┃　　　┃　　┗[ML account &lt;ml@xxxxx] </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10016">  10016 2004-08-13 22:02 　┃┃　　┃　　　　　　┃　　　┃　　　┣[とみたまさひろ &lt;tomm]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10018">  10018 2004-08-14 19:58 　┃┃　　┃　　　　　　┃　　　┃　　　┗[&lt;kuyo@xxxxxxxxxx&gt;   ]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10005">  10005 2004-08-12 01:32 　┃┃　　┃　　　　　　┃　　　┗[とみたまさひろ &lt;tomm]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10010">  10010 2004-08-13 01:25 　┃┃　　┃　　　　　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9956">   9956 2004-08-06 11:44 　┃┃　　┗[EBIHARA Yuichiro &lt;ui]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9974">   9974 2004-08-10 09:30 　┃┃　　　┗[ML account &lt;ml@xxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9982">   9982 2004-08-10 16:41 　┃┃　　　　┗[EBIHARA Yuichiro &lt;ui]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9986">   9986 2004-08-10 20:25 　┃┃　　　　　┗[ML account &lt;ml@xxxxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9950">   9950 2004-08-05 16:20 　┃┗[HAMAI Kyoichi &lt;k-ham]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9947">   9947 2004-08-05 13:35 　┗[&quot;Mamiya Masataka&quot; &lt;x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9948">   9948 2004-08-05 15:03 　　┗[ML account &lt;ml@xxxxx]                                   </a></span>
+</pre>
+</body>
+</html>

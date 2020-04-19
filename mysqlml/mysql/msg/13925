@@ -1,0 +1,155 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13925</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13924">[前]</a><a href="13926">[次]</a><a href="../list/13901-14000">[番号順一覧]</a><a href="../thread/13901-14000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13925
+</p>
+<div class="header">
+<p>
+From: goungoun &lt;goungoun &lt;gounx2@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 26 Apr 2007 18:20:58 +0900<br>
+Subject: [mysql 13925] Re: Access2002+MyODBCでエラー<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。
+
+On Thu, 26 Apr 2007 12:18:15 +0900
+&quot;T.Hirotsu&quot; &lt;hirotsu@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; こんにちは。　広津です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; どうも一連のレスポンスを拝見してますと、'\' は MyODBC が付加してるようですね、、、</span>
+
+多分そうです。
+prepare.c の SQLPrepare関数 かと思います。
+でも、ちゃんとcp932と認識していれば、無用な\エスケープは行わない
+ロジックになってるようなんですけどね。
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; しかし、リンクテーブルの操作などで Access に生成させた SQL の場合は付加するのに、</span>
+<span class="quote1">&gt; ADO から投げる SQL だと付加しないというのは、この両者でキャラクタ関係の何かが異なると</span>
+<span class="quote1">&gt; いうことなのかと。　ん〜、、、？？？</span>
+
+いろいろやってみた結果、
+Access経由で使ったときは（Initial Statement は関係なく）
+my.cnfのキャラクタセットでエスケープ処理をしてるように見えるんですけど。
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 逆にADO から '十' を Insert / Update したときに、MyODBC が '\' を付加してサーバーに投げる</span>
+<span class="quote1">&gt; ケースが特定できれば面白そうではありますが、テスト環境がありません、、、（汗）</span>
+
+ADO経由の場合は、
+・my.cnf
+・ODBC設定のInitial Statement
+・set names 
+のどれで設定しても正常に動作します。
+逆に、誤ったキャラクタセットを設定したときは、エラーやおかしなデータの
+インサートになってくれます。
+
+で、Accessのときと比較すれば何かわかるかな。と思い
+ODBCのトレースログ、mysqlサーバのクエリーログ を見たのですが
+わかりませんでした。
+
+参考までに、ADO経由の検証に使ったスクリプト張っておきます。
+
+select（テーブル参照なし） でプリペアドステートメント
+-------------------------------------------------------------
+var conn = new ActiveXObject(&quot;ADODB.Connection&quot;);
+var rs   = new ActiveXObject(&quot;ADODB.Recordset&quot;);
+var cmd  = new ActiveXObject(&quot;ADODB.Command&quot;);
+var prm1 = new ActiveXObject(&quot;ADODB.Parameter&quot;);
+conn.Open(&quot;Provider=MSDASQL; Data Source=mysql&quot;);
+//conn.Execute(&quot;set names sjis;&quot;);
+cmd.ActiveConnection  = conn;
+cmd.CommandText = &quot;SELECT ? AS item1&quot;;
+prm1 = cmd.CreateParameter(&quot;Type&quot;, 200, 1, 10, &quot;&lt;十&gt;&quot;);
+cmd.Parameters.Append(prm1);
+rs = cmd.Execute();
+WScript.Echo(rs.Fields(&quot;item1&quot;).Value);
+rs.Close();
+conn.Close();
+-------------------------------------------------------------
+
+insert でプリペアドステートメント
+-------------------------------------------------------------
+conn = new ActiveXObject(&quot;ADODB.Connection&quot;);
+rs   = new ActiveXObject(&quot;ADODB.Recordset&quot;);
+cmd  = new ActiveXObject(&quot;ADODB.Command&quot;);
+prm1 = new ActiveXObject(&quot;ADODB.Parameter&quot;);
+conn.Open(&quot;Provider=MSDASQL; Data Source=mysql&quot;);
+//conn.Execute(&quot;set names sjis;&quot;);
+cmd.ActiveConnection  = conn;
+cmd.CommandText = &quot;INSERT INTO t_test (item1) values (?)&quot;;
+prm1 = cmd.CreateParameter(&quot;Type&quot;, 200, 1, 10, &quot;&lt;十&gt;&quot;);
+cmd.Parameters.Append(prm1);
+cmd.Execute();
+conn.Close();
+-------------------------------------------------------------
+
+select（テーブル参照あり） でプリペアドステートメント
+-------------------------------------------------------------
+conn = new ActiveXObject(&quot;ADODB.Connection&quot;);
+rs   = new ActiveXObject(&quot;ADODB.Recordset&quot;);
+cmd  = new ActiveXObject(&quot;ADODB.Command&quot;);
+prm1 = new ActiveXObject(&quot;ADODB.Parameter&quot;);
+conn.Open(&quot;Provider=MSDASQL; Data Source=mysql&quot;);
+//conn.Execute(&quot;set names sjis;&quot;);
+cmd.ActiveConnection  = conn;
+cmd.CommandText = &quot;SELECT item1 FROM t_test WHERE item1 = ?&quot;;
+prm1 = cmd.CreateParameter(&quot;Type&quot;, 200, 1, 10, &quot;&lt;十&gt;&quot;);
+cmd.Parameters.Append(prm1);
+rs = cmd.Execute();
+WScript.Echo(rs.Fields(&quot;item1&quot;).Value);
+rs.Close();
+conn.Close();
+-------------------------------------------------------------
+
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; リンクテーブルの方は、実際に作って試して見ようと思いましたら、ウチの Access からは</span>
+<span class="quote1">&gt; リンクテーブルが作成できなくなってました？？？（汗）</span>
+<span class="quote1">&gt; メニューからテーブルのリンクを選択すると表示されるファイル選択ダイアログボックスの、</span>
+<span class="quote1">&gt; ファイルの種類で「ODBCデータベース」を選択すると、以前は、ODBC データソース アドミニストレータ</span>
+<span class="quote1">&gt; のウインドウが表示されていたように思うのですが、今は、何もウインドウが表示されず、</span>
+<span class="quote1">&gt; ファイル選択ダイアログボックス自体が閉じてしまいます。　ん〜、、、？？？</span>
+
+なんか壊れてそうですね（汗
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; goungoun さんがご紹介のページにあります <a href="11985">[mysql 11985]</a> も試してみたかったのですが、、、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; という訳でゴミレスです。（汗）</span>
+<span class="quote1">&gt; </span>
+
+
+
+
+-- 
+goungoun &lt;gounx2@xxxxxxxxxx&gt;
+<a href="http://goungoun.dip.jp/app/">http://goungoun.dip.jp/app/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="13924">[前]</a><a href="13926">[次]</a><a href="../list/13901-14000">[番号順一覧]</a><a href="../thread/13901-14000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13906">  13906 2007-04-25 11:32 [&lt;t-fujita@xxxxxxxxxx] Re: Access2002+MyODBCでエラー           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13919">  13919 2007-04-26 00:34 ┗[goungoun &lt;gounx2@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13920">  13920 2007-04-26 08:45 　┣[&quot;fujita&quot; &lt;t-fujita@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13923">  13923 2007-04-26 12:18 　┃┣[&quot;T.Hirotsu&quot; &lt;hirotsu]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="13925">  13925 2007-04-26 18:20 　┃┃┗[goungoun &lt;gounx2@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13924">  13924 2007-04-26 17:04 　┃┗[goungoun &lt;gounx2@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13926">  13926 2007-04-27 09:58 　┃　┣[&quot;fujita&quot; &lt;t-fujita@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13927">  13927 2007-04-27 17:20 　┃　┗[ezaki &lt;kjc_post@xxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13921">  13921 2007-04-26 11:25 　┗[ezaki &lt;kjc_post@xxxx]                                     </a></span>
+</pre>
+</body>
+</html>

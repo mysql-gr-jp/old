@@ -1,0 +1,102 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:161</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="160">[前]</a><a href="162">[次]</a><a href="../list/101-200">[番号順一覧]</a><a href="../thread/101-200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:161
+</p>
+<div class="header">
+<p>
+From: Tamon Nomura &lt;Tamon Nomura &lt;tamon@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 27 May 1998 21:20:49 +0900<br>
+Subject: [mysql 161] Re[2]: MyODBC でトラブル<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+tamonです。MyODBCの話がでたんでちょっと。
+
+<span class="quote1">&gt; [utility.c]</span>
+<span class="quote1">&gt; void remove_escape(char *name)</span>
+<span class="quote1">&gt; [prepare.c]</span>
+<span class="quote1">&gt; RETCODE my_SQLPrepare(HSTMT hstmt,UCHAR FAR *szSqlStr, SDWORD cbSqlStr)</span>
+<span class="quote1">&gt; [execute.c]</span>
+<span class="quote1">&gt; static char *insert_param(NET *net,char *to,PARAM_BIND *param)</span>
+
+ばっちり出来ました。変更したソースなんかみせていただけるとうれしいです。
+ちなみに私は
+void remove_escape(char *name)
+{
+  char *to;
+
+  for (to=name ; *name ; name++)
+  {
+      if (*name == '\\' &amp;&amp; name[1]){
+         name++;
+      }
+      if( *name &gt;= 0){
+         *to++= *name;
+      }else{
+         *to++= *name;
+         *to++= *name;
+      }
+  }
+  *to=0;
+}
+など、コードが128以上（とゆうか以下とゆうか）の場合、強制的に
+SJISとみなし、２バイトコピーしたり
+RETCODE my_SQLPrepare(HSTMT hstmt,UCHAR FAR *szSqlStr, SDWORD cbSqlStr)
+{
+では
+   int li_sjis;
+を宣言しておいて
+  li_sjis = 0;
+  for (pos=stmt-&gt;query; *pos ; pos++)
+  {
+    if (*pos == '\\' &amp;&amp; pos[1] &amp;&amp; li_sjis == 0)
+   （ループ・・・）
+    if ( *pos &lt; 0 &amp;&amp; li_sjis == 0 ) {
+       li_sjis = 1;
+    }else{
+       li_sjis = 0;
+    }
+  }
+など、かなりあいまいなコード判定だったりします。
+
+ところで、MyODBC 2.50.16bを使っていらっしゃるようですが
+DATEのカラムがおかしくなりませんか？
+こちらの環境では、DATEのパラメータ渡しがおかしいようで
+insertしても0000-00-00になってしまい、update時も0000-00-00
+としてupdateしようとし、レコードが無いので、他のユーザーが
+更新中でupdate出来ませんでした、といわれてしまいます。(Access97)
+
+しょうがないので2.50.15aのソースをどっか（笑）から拾ってきて
+使っているんですが、この辺も直されたのでしょうか？
+
+tamon
+mailto: tamon@xxxxxxxxxx
+
+
+</pre>
+</div>
+<p class="button"><a href="160">[前]</a><a href="162">[次]</a><a href="../list/101-200">[番号順一覧]</a><a href="../thread/101-200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="159">    159 1998-05-27 13:36 [&quot;Toshiyuki Fujii&quot; &lt;f] MyODBCでトラブル                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="160">    160 1998-05-27 14:16 ┗[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="161">    161 1998-05-27 21:20 　┣[Tamon Nomura &lt;tamon@] Re[2]: MyODBC でトラブル            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="162">    162 1998-05-27 21:59 　┃┗[Kengo Jinno &lt;kengo@x] Re: MyODBC でトラブル             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="163">    163 1998-05-27 22:50 　┃　┗[Tamon Nomura &lt;tamon@]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="164">    164 1998-05-27 23:15 　┃　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="166">    166 1998-05-28 01:40 　┗[Hiroshi Marui &lt;bant@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="169">    169 1998-05-28 15:16 　　┗[Kengo Jinno &lt;kengo@x] SJIS&amp;lt;--&amp;gt;UJIS on MyODBC ( Re: MyODBCでトラブル )</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="172">    172 1998-05-28 15:54 　　　┣[&quot;民斗 &quot; &lt;tommy@xxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="175">    175 1998-05-29 01:32 　　　┗[Hiroshi Marui &lt;bant@]                                 </a></span>
+</pre>
+</body>
+</html>

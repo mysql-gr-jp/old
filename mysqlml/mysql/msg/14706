@@ -1,0 +1,191 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14706</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14705">[前]</a><a href="14707">[次]</a><a href="../list/14701-14800">[番号順一覧]</a><a href="../thread/14701-14800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14706
+</p>
+<div class="header">
+<p>
+From: &quot;玉越大輝&quot; &lt;&quot;玉越大輝&quot; &lt;hiroki.tamakoshi@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 11 Dec 2008 19:49:28 +0900<br>
+Subject: [mysql 14706] UNIONしたテーブルとJOINする際にインデックスが使われずテーブルスキャンになるのを回避する方法をご存じの方はご教示いただけますと幸いです。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。
+株式会社ビービットの玉越です。
+
+UNIONで悩んでいます。
+たぶん解決不能と思うのですが、解決不能なのかどうかご存じの方はご教示いただけますと幸いです。
+長文で失礼致します。
+
+■前提
+構造の異なるテーブルtableA, tableBがあります。
+これらとtableCをJOINする必要があります。
+インデックスは適切に張っています。
+
+tableA
+ id
+ C_id
+ time
+ description
+
+tableB
+ id
+ C_id
+ time
+           (←descriptionがない)
+
+tableC
+ id
+ time
+
+■問題例1
+
+SELECT
+ union_table.description
+FROM
+ ( SELECT
+    tableA.C_id,
+    tableA.description
+   FROM
+    tableA
+  UNION ALL
+   SELECT
+    tableB.C_id,
+    NULL
+   FROM
+    tableB
+ ) AS union_table,
+ tableC
+WHERE
+ union_table.C_id = tableC.id
+
+union_table.C_idは、tableA.C_idかtableB.C_idのどちらかです。
+なので、インデックスを効果的に使ってくれると期待します。
+ところが、この方法ではtableA, tableBをテーブルスキャンするようです。
+
+( .. UNION ALL .. )をすると、その中までは見てくれなくなるようです。
+
+<a href="http://q.hatena.ne.jp/1198431011">http://q.hatena.ne.jp/1198431011</a>にも同様のことがあります。
+
+■解決案1
+
+上記にある通り、下記のようにすればよいようです（これから実験します）
+
+SELECT
+ tableA.time
+FROM
+ tableA,
+ tableC
+WHERE
+ tableA.C_id = tableC.id
+UNION ALL
+SELECT
+ tableB.time
+FROM
+ tableB,
+ tableC
+WHERE
+ tableB.C_id = tableC.id
+
+一度まとめテーブルを作るのではなく、結果をそれぞれ作ってからまとめる、
+という方法です。
+
+■解きたい問題
+
+上記だけであれば問題は解決するのですが、私が行いたいのは下記です。
+
+SELECT
+ union_table.description
+FROM
+ ( SELECT
+    tableA.C_id,
+    tableA.time,
+    tableA.description
+   FROM
+    tableA
+  UNION ALL
+   SELECT
+    tableB.C_id,
+    tableB.time,
+    NULL
+   FROM
+    tableB
+ ) AS union_table,
+ tableC
+WHERE
+ union_table.C_id = tableC.id
+ AND tableC.time - union_table.time = (
+  SELECT
+   MIN( tableC2.time - union_table2.time )
+  FROM
+   ( SELECT
+      tableA.C_id,
+      tableA.time,
+     FROM
+      tableA
+     UNION ALL
+     SELECT
+      tableB.C_id,
+      tableB.time,
+     FROM
+      tableB
+   ) AS union_table2,
+   tableC AS tableC2
+  WHERE
+   union_table2.C_id = tableC.id
+   AND tableC2.id = tableC.id
+
+tableC.timeから見て、tableAとtableBのtimeのうち、一番近いものを一つだけ持ってくる
+という操作です。
+
+これを解決案1のようにしてしまうと、別々に持ってきたものをUNION ALLするので、
+一つだけではなく二つ持ってきてしまうことになります。
+
+解決は無理そうと思っていますが、もし可能だよ、という情報をご存じの方がいらっしゃいましたらご教示いただけますと幸いです。
+また、不可能だよ、という情報ももしいただけますと、これ以上悩まなくて済むので同様にありがたいです。
+
+よろしくお願い致します。
+
+
+-- 
+-------------------------------------------------------
+◆ビービットはチームマイナス6%に参画しています◆
+-------------------------------------------------------
+株式会社ビービット　玉越 大輝
+ユーザビリティ コンサルタント
+beBit,Inc. Tamakoshi Hiroki hiroki.tamakoshi@xxxxxxxxxx
+--------------------------------------------------------
+
+◆◆9月29日(月)より下記に移転いたしました◆◆
+
+〒102-0071 東京都千代田区富士見2-14-37　FUJIMI EAST 1F
+TEL: 03-5210-3891 / FAX: 03-5210-3895
+URL: <a href="http://www.bebit.co.jp/">http://www.bebit.co.jp/</a>
+--------------------------------------------------------
+◆◆◆お知らせ◆◆◆
+・ユーザビリティ実践メモ(毎週月曜日更新)
+ <a href="http://www.bebit.co.jp/memo/">http://www.bebit.co.jp/memo/</a>
+
+・ビービット書籍 『ユーザ中心ウェブサイト戦略』発売中
+ <a href="http://www.amazon.co.jp/gp/product/4797333529/">http://www.amazon.co.jp/gp/product/4797333529/</a>
+
+</pre>
+</div>
+<p class="button"><a href="14705">[前]</a><a href="14707">[次]</a><a href="../list/14701-14800">[番号順一覧]</a><a href="../thread/14701-14800">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="14706">  14706 2008-12-11 19:49 [&quot;玉越大輝&quot; &lt;hiroki.t] UNIONしたテーブルとJOINする際にインデックスが使われずテーブルスキャンになるのを回避する方法をご存じの方はご教示いただけますと幸いです。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14707">  14707 2008-12-11 20:19 ┗[chuuken kenkou &lt;ken_]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14708">  14708 2008-12-11 20:52 　┗[&quot;玉越大輝&quot; &lt;hiroki.t]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14709">  14709 2008-12-12 13:24 　　┗[&quot;玉越大輝&quot; &lt;hiroki.t]                                   </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7869</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="7868">[前]</a><a href="7870">[次]</a><a href="../list/7801-7900">[番号順一覧]</a><a href="../thread/7801-7900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7869
+</p>
+<div class="header">
+<p>
+From: &quot;Takashi Yamashita&quot; &lt;&quot;Takashi Yamashita&quot; &lt;takasi@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 3 Jun 2003 18:06:58 +0900<br>
+Subject: [mysql 07869] Re: ワイルドカードを使用した権限の与え方<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+お世話になっております。
+
+もし、
+mysql.tables_privに現存する全テーブルの権限が反映される
+仕組みでしたら可能だと思いますが、
+実際に、
+select * from mysql.tables_priv
+を実行してみるとEmpty setになっていました。
+したがって、現状ではワイルドカードを使用することは
+難しいと思います。
+
+ただし、最初の一回だけ、
+<span class="quote1">&gt; grant select on test.aaa to foo@localhost;</span>
+<span class="quote1">&gt; grant select on test.aaa_111 to foo@localhost;</span>
+<span class="quote1">&gt; grant select on test.aaa_222 to foo@localhost;</span>
+<span class="quote1">&gt; grant select on test.aaa_333 to foo@localhost;</span>
+逐次、権限を与えればmysql.tables_privに
+権限情報がinsertされると思いますので、
+二回目以降はワイルドカードが使用できると思います。
+
+例えばこんな感じでしょうか（自信ないですが。。。）？
+=============================================
+use mysql
+update tables_priv set Table_priv='select,update,.............'
+    where Host='localhost' and Db='test' and User='foo'
+            and Table_name='aaa' and Grantor='root';
+flush privileges;
+=============================================
+
+間違っていたらすみません。
+宜しくお願いします。
+
+------------------------------------------------
+山下高司
+takasi@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="7868">[前]</a><a href="7870">[次]</a><a href="../list/7801-7900">[番号順一覧]</a><a href="../thread/7801-7900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7868">   7868 2003-06-03 04:59 [Takeshi Nishioka &lt;ml] ワイルドカードを使用した権限の与え方    </a></span>
+<span class="current">-&gt;&nbsp;<a href="7869">   7869 2003-06-03 18:06 ┗[&quot;Takashi Yamashita&quot; ]                                       </a></span>
+</pre>
+</body>
+</html>

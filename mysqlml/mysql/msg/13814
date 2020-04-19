@@ -1,0 +1,141 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13814</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13813">[前]</a><a href="13815">[次]</a><a href="../list/13801-13900">[番号順一覧]</a><a href="../thread/13801-13900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13814
+</p>
+<div class="header">
+<p>
+From: &lt;ml_mysql@xxxxxxxxxx&gt;<br>
+Date: Thu, 22 Mar 2007 20:32:14 +0900<br>
+Subject: [mysql 13814] Mysql　の出力を、UTF8に変換できない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは
+
+石川と申します。
+
+多国化する必要があり、とりあえず
+UTF-8について勉強しています。
+
+現在　EUC-JPで格納されているフィールドを読み、UTF8に変換し、
+出力しようとしたところ、
+(本番は、出力のHTMLに、中国語や韓国語と日本語が混じるため、事前に
+このようなテストをしています。）
+
+$test_2 = Encode::decode(&quot;Guess&quot;, $test_2);
+の所で、
+euc-cn or shiftjis or euc-jp at 
+/usr/lib/perl5/5.8.0/i386-linux-thread-multi/Encode.pm line 162, referer: 
+<a href="http://192.168.1.17/ss/test/utf-8_test_db.html">http://192.168.1.17/ss/test/utf-8_test_db.html</a>
+
+と言うエラーになってしまいます。
+
+どの様にすれば、UTF8に変換できるか、教えてください。
+よろしくお願いします。
+
+Redhat Linux 3.0ES
+Perl　5.8.0　　近い将来バージョンアップするつもりです。
+MySQL version 4.1.14
+
+Mysql のセット内容　　-------------------------
+character_set_client latin1
+character_set_connection latin1
+character_set_database latin1
+character_set_results latin1
+character_set_server latin1
+character_set_system
+collation_connection latin1_swedish_ci
+collation_database latin1_swedish_ci
+collation_server latin1_swedish_ci
+（全てUTF8にすれば簡単ですが、関連するソフトが多いため、
+先に、重要なところだけ、出力のみUTF-8にしようと思っています。）
+
+テーブル　-------------------------------------
+test_1 int(8)  主キー  auto_increment
+test_2 longblob
+
+test_2 には、[longblob の内容です。] という文字が入っています。
+
+テストしたスクリプト　-------------------------
+#!/usr/bin/perl
+use utf8;
+use Encode;
+use Encode::Guess;
+binmode STDOUT, &quot;:utf8&quot;;
+Encode::Guess-&gt;set_suspects(qw/euc-jp shiftjis 7bit-jis utf8 gb2312 euc-cn/);
+print &quot;Content-type: text/html\n\n&quot;;
+use DBI;
+use strict;
+
+my $test_1;
+my $test_2;
+
+my $dbh = DBI-&gt;connect('DBI:mysql:present','ID','PASS');
+my $query = &quot;SELECT test_1, test_2 FROM curriculam_kanri.curriculum_naiyou 
+ORDER BY curriculum_naiyou_no  LIMIT 1&quot;;
+
+my $out = $dbh-&gt;prepare($query);
+$out-&gt;execute;
+$out-&gt;bind_col(1,\$test_1);
+$out-&gt;bind_col(2,\$test_2);
+$out-&gt;fetch;
+$out-&gt;finish();
+$dbh -&gt;disconnect();
+
+$test_2 = Encode::decode(&quot;Guess&quot;, $test_2); # ここでエラーになります。
+
+&amp;head;
+print &quot;$test_1 $test_2 &lt;br&gt;&quot;;
+&amp;foot;
+exit;
+
+
+sub head{
+         print &quot;Content-type: text/html\n\n&quot;;
+         print &quot;&lt;!DOCTYPE HTML PUBLIC \&quot;-//W3C//DTD HTML 4.01 
+Transitional//EN\&quot; \&quot;<a href="http://www.w3.org/TR/html4/loose.dtd">http://www.w3.org/TR/html4/loose.dtd</a>\&quot;&gt;\n&quot;;
+         print &quot;&lt;html&gt;\n&quot;;
+         print &quot;&lt;head&gt;\n&quot;;
+         print &quot;&lt;meta http-equiv=\&quot;Content-Type\&quot; content=\&quot;text/html; 
+charset=utf-8\&quot;&gt;\n&quot;;
+         print &quot;&lt;title&gt;UTF8 DB多国語テスト１&lt;/title&gt;\n&quot;;
+         print &quot;&lt;/head&gt;\n&quot;;
+         print &quot;&lt;body&gt;\n&quot;;
+
+}
+
+sub foot{
+         print &quot;&lt;/body&gt;\n&quot;;
+         print &quot;&lt;/html&gt;\n&quot;;
+
+}
+
+よろしくお願いします。 
+
+
+</pre>
+</div>
+<p class="button"><a href="13813">[前]</a><a href="13815">[次]</a><a href="../list/13801-13900">[番号順一覧]</a><a href="../thread/13801-13900">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="13814">  13814 2007-03-22 20:32 [&lt;ml_mysql@xxxxxxxxxx] Mysql　の出力を、UTF8に変換できない     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13815">  13815 2007-03-22 21:24 ┗[&quot;TOYOSHIMA,Masayuki&quot;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13816">  13816 2007-03-23 15:55 　┗[Tecchi &lt;mugen_ml@xxx] テーブルのロックについて            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13817">  13817 2007-03-23 21:30 　　┣[&quot;T.Hirotsu&quot; &lt;hirotsu]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13818">  13818 2007-03-24 02:51 　　┃┗[Tecchi &lt;mugen_ml@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13824">  13824 2007-03-26 08:47 　　┗[YuGo &lt;yu.gotou@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13830">  13830 2007-03-26 18:12 　　　┗[Tecchi &lt;mugen_ml@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13831">  13831 2007-03-26 22:01 　　　　┣[&quot;T.Hirotsu&quot; &lt;hirotsu]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13832">  13832 2007-03-27 15:11 　　　　┗[YuGo &lt;yu.gotou@xxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13833">  13833 2007-03-27 19:14 　　　　　┗[Tecchi &lt;mugen_ml@xxx]                             </a></span>
+</pre>
+</body>
+</html>

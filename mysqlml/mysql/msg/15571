@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15571</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15570">[前]</a><a href="15572">[次]</a><a href="../list/15501-15600">[番号順一覧]</a><a href="../thread/15501-15600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15571
+</p>
+<div class="header">
+<p>
+From: ram &lt;ram &lt;ram@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 15 Apr 2011 09:05:47 +0900<br>
+Subject: [mysql 15571] Re: [free:00880]  列数が増えるとクロス集計ができない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+自己レスです。
+
+原因が少し判りました。
+浅はかでしたが、これはSQLの実行結果の問題ではなく、
+phpの関数の仕様？であることが判りました。
+
+mysql_fetch_arrayという関数で、配列に入った列名と列数を取得しているので
+すが、
+その時の列数がselect文で定義されている列の数と合致していないようです。
+phpのほうで解決すべき問題だと判りました。
+
+大変お騒がせしました。
+
+while ($item = mysql_fetch_array($rs)) {
+// MySQL 見出処理開始
+if ($init) {
+// MySQL レコード項目数参照
+$clct = count($item) &gt;&gt; 1;
+print &quot;レコード項目数= $clct&lt;BR&gt;\n&quot;;
+// MySQL 項目名参照
+print '&lt;table&gt;';
+print '&lt;tr&gt;';
+reset($item);
+for ($i = 0; $i &lt; $clct; $i++) {
+$tmp = each($item); // 添字キー読み飛ばしダミー
+$tmp = each($item);
+list($mds, $dmy) = $tmp;
+print &quot;&lt;th class='a'&gt;$mds&lt;/th&gt;&quot;;
+}
+print &quot;&lt;/tr&gt;\n&quot;;
+
+
+(2011/04/13 16:13), ram wrote:
+<span class="quote1">&gt; MYSQL初心者です。お知恵を拝借できればありがたいです。</span>
+<span class="quote1">&gt; （MYSQL5.1.41　Windows2003/R3）</span>
+<span class="quote1">&gt; 年月日の入ったレコードから日付別のレコード件数を抽出する、いわゆるクロス</span>
+<span class="quote1">&gt; 集計のSQLを実行しようとしたところ、列数が増えてくると、動きがおかしくな</span>
+<span class="quote1">&gt; るような現象が出ています。</span>
+<span class="quote1">&gt; 対象テーブル　TBL</span>
+<span class="quote1">&gt; 日付　npdate char(8) yyyymmddの形式で数字が入る</span>
+<span class="quote1">&gt; コード１　tkcd char(5)</span>
+<span class="quote1">&gt; コード２　tksc char(4)</span>
+<span class="quote1">&gt; 名称３　tknm char(40)</span>
+<span class="quote1">&gt; phpで以下のようなSQLを作成しています。</span>
+<span class="quote1">&gt; $sql=&quot;select a.tkcd,a.tksc,a.tknm,&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='01' then 1 else 0 end) '01',&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='02' then 1 else 0 end) '02',&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='03' then 1 else 0 end) '03',&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='04' then 1 else 0 end) '04',&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='05' then 1 else 0 end) '05',&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='05' then 1 else 0 end) '06',&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='05' then 1 else 0 end) '07',&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='05' then 1 else 0 end) '08',&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='05' then 1 else 0 end) '09',&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='05' then 1 else 0 end) '10',&quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;sum(case when a.mm='05' then 1 else 0 end) '11',&quot;;</span>
+<span class="quote1">&gt; （以下略 '31'まで）</span>
+<span class="quote1">&gt; $sql.=&quot;from (select tkcd,tksc,tknm,substr(npdate,7,2) as mm from TBL &quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;where tknm &lt;&gt; '' and npdate &gt;= '20110101' and npdate &lt;=</span>
+<span class="quote1">&gt; '20110131') as a &quot;;</span>
+<span class="quote1">&gt; $sql.=&quot;group by a.tkcd,a.tksc,a.tknm&quot;;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 下記の例でいうと、列名が01〜09あたりまでは、正確に件数がカウントされた列</span>
+<span class="quote1">&gt; が作成されるのですが、列名10は列自体がカウントされず、また列数を少なくし</span>
+<span class="quote1">&gt; て10までにすると、列名10が作成されず、定義もしていない列11ができたりする</span>
+<span class="quote1">&gt; 現象がおきています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 列数の制約としてもたかだか20も超えない程度ですし、データベース自体のテー</span>
+<span class="quote1">&gt; ブル数も5つほどしかありません。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 最初はsubstrを直接case文の中に書いたり、sumをcountに変えたり、列名の前に</span>
+<span class="quote1">&gt; asを付けてみたりしましたが結果は同じです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 書き方に誤りがあるのか、もしくは、他にクロス集計の方法がありましたら、ご</span>
+<span class="quote1">&gt; 教授頂けたら幸いです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 初穂太郎</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="15570">[前]</a><a href="15572">[次]</a><a href="../list/15501-15600">[番号順一覧]</a><a href="../thread/15501-15600">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15571">  15571 2011-04-15 09:05 [ram &lt;ram@xxxxxxxxxx&gt;] Re: [free:00880]  列数が増えるとクロス集計ができない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15572">  15572 2011-04-15 09:40 ┗[Masaaki Matsuyama &lt;m]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15574">  15574 2011-04-15 10:53 　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+</pre>
+</body>
+</html>

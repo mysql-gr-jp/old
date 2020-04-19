@@ -1,0 +1,120 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8255</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8254">[前]</a><a href="8256">[次]</a><a href="../list/8201-8300">[番号順一覧]</a><a href="../thread/8201-8300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8255
+</p>
+<div class="header">
+<p>
+From: 遠藤 俊裕 &lt;遠藤 俊裕 &lt;endo_t@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 07 Oct 2003 17:09:12 +0900<br>
+Subject: [mysql 08255] Re: index が壊れる。。。。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+どもども遠藤です。
+
+Thu, 2 Oct 2003 01:09:46 +0900 に、
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt; さんは書きました:
+
+と&gt; # 最近本業が妙に忙しくて何もできない…。
+と&gt; # あ、気が付いたら、関西オープンソース+フリーウェア2003 の BOF の締め
+と&gt; # 切りがすぎてる…。っていうか、そもそも行けるのかな…。
+
+これ、ねぇ。。。。(^^;
+
+と&gt; Windows というところがちょっとアレですな… (^^;
+
+それは目をつぶってください。(^^;
+
+と&gt; かなりハードな使い方ですね (^^;;
+
+やっぱりそうですか？(^^;
+
+と&gt; しかし、1000レコード/秒の追加ができるというのは凄いですね。
+
+私もすごいと思っています。
+アトミックな処理だから大丈夫！って感じなのかな？
+
+と&gt; UNIX や Linux でも raid オプションはソースからコンパイルしないと使えな
+と&gt; かったと思います。
+
+と言うことで、コンパイルしてみました。
+で、RAID にもなったようです。テストはまだですが。。。
+ただ、問題点があります。
+
+まず、mysys\mysys_priv.h を以下のように修正する必要があります。
+# これってバグなのかな？
+
+そして USE_RAID を付けてリコンパイル。これで使用できるようです。
+
+#ifdef THREAD
+#include &lt;my_pthread.h&gt;
+C_MODE_START
+extern pthread_mutex_t THR_LOCK_malloc, THR_LOCK_open, THR_LOCK_keycache;
+extern pthread_mutex_t THR_LOCK_lock, THR_LOCK_isam, THR_LOCK_net;
+extern pthread_mutex_t THR_LOCK_charset;
+C_MODE_END
+#else
+#include &lt;my_no_pthread.h&gt;
+#endif
+
+ところが、以下のようになります。
+
+C:\mysql\bin&gt;mysql -u root test
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 1 to server version: 4.0.15-max-debug
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql&gt; create table aa ( a int ) raid_type=1 raid_chunks=3;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; create table bb ( a int ) raid_type=1 raid_chunks=3;
+ERROR 1005: Can't create table '.\test\bb.frm' (errno: 17)
+mysql&gt;
+
+で、
+
+  error=table.file-&gt;create(name,&amp;table,create_info);
+  VOID(closefrm(&amp;table));
+  if (error)
+  {
+    if (table.db_type == DB_TYPE_INNODB)
+    {
+      /* Creation of InnoDB table cannot fail because of an OS error:
+	 put error as the number */
+      my_error(ER_CANT_CREATE_TABLE,MYF(ME_BELL+ME_WAITTANG),name,error);
+    }
+    else
+      my_error(ER_CANT_CREATE_TABLE,MYF(ME_BELL+ME_WAITTANG),name,my_errno);  &lt;------
+  }
+
+ここいらで何かが起こっているのは判るのですが。。。
+まだこれ以上は追っかけてません。
+
+何かご存じですか？
+
+とっても大変なんです(T_T)
+
+-- 
+遠藤俊裕 &lt;endo_t@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="8254">[前]</a><a href="8256">[次]</a><a href="../list/8201-8300">[番号順一覧]</a><a href="../thread/8201-8300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8248">   8248 2003-10-01 18:55 [遠藤 俊裕 &lt;endo_t@xx] index が壊れる。。。。                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8250">   8250 2003-10-02 01:09 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="8255">   8255 2003-10-07 17:09 　┗[遠藤 俊裕 &lt;endo_t@xx]                                     </a></span>
+</pre>
+</body>
+</html>

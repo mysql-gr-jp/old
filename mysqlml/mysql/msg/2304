@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2304</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2303">[前]</a><a href="2305">[次]</a><a href="../list/2301-2400">[番号順一覧]</a><a href="../thread/2301-2400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2304
+</p>
+<div class="header">
+<p>
+From: Yasuhide OOMORI / 大森保英 &lt;Yasuhide OOMORI / 大森保英 &lt;dasen@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 25 Jul 2000 00:17:02 +0900<br>
+Subject: [mysql 02304] Re: Cannot build Msql-Mysql-modules-1.2214<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+大森保英です。お世話になっております。
+
+On Mon, Jul 24, 2000 at 08:17:21AM +0900,
+takeshi@xxxxxxxxxx wrote:
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; cc -c -I/usr/lib/perl5/site_perl/5.005/i386-linux/auto/DBI -I/usr/include/mysql -I../dbd -I/usr/lib/perl5/site_perl/5.005/i386-linux/auto/DBI -I/usr/lib/perl5/5.00503/i386-linux -Dbool=car -DHAS_BOOL -O2    -DVERSION=\&quot;2.0414\&quot; -DXS_VERSION=\&quot;2.0414\&quot; -fpic -I/usr/lib/perl5/5.00503/i386-linux/CORE -DDBD_MYSQL mysql.c</span>
+<span class="quote2">&gt;&gt; Running Mkbootstrap for DBD::mysql ()</span>
+<span class="quote2">&gt;&gt; cmod 644 mysql.bs</span>
+<span class="quote2">&gt;&gt; LD_RUN_PATH=&quot;/usr/lib/mysql:/lib:/usr/lib/gcc-lib/i386-redat-linux/egcs-2.91.66&quot; cc -o ../blib/arc/auto/DBD/mysql/mysql.so  -sared -L/usr/local/lib dbdimp.o mysql.o -L/usr/lib/mysql    -L/usr/lib/mysql -lmysqlclient -lm -L/usr/lib/gcc-lib/i386-redat-linux/egcs-2.91.66 -lgcc </span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;後に示されている ldd の結果から見ると、</span>
+<span class="quote1">&gt;-L/usr/lib/mysql -lmysqlclient -lm</span>
+<span class="quote1">&gt;の指定では、ライブラリが足りないです。</span>
+<span class="quote1">&gt;ldd の結果に示されているライブラリを追加します。</span>
+<span class="quote1">&gt;ldd の結果を見ると、</span>
+<span class="quote1">&gt;-lm -lz -lnsl -lcrypt を、mysql.so コンパイル時に追加しておけば</span>
+<span class="quote1">&gt;よいでしょう。</span>
+<span class="quote1">&gt;または、LD_RUN_PATH の指定に、/usr/lib も追加してみます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;備：</span>
+<span class="quote1">&gt;mysqlbug の結果を見ると、この MySQL は TcX のバイナリのようですが、</span>
+<span class="quote1">&gt;TcX バイナリの MySQL-devel-*.rpm は、</span>
+<span class="quote1">&gt;libmysqlclient.a を /usr/lib/mysql/ に配置し、</span>
+<span class="quote1">&gt;MySQL-shared-*.rpm では</span>
+<span class="quote1">&gt;libmysqlclient.so を /usr/lib/ に配置しています。</span>
+<span class="quote1">&gt;そのため、コンパイル時の指定には、</span>
+<span class="quote1">&gt;コンパイラが .so を見るのか、.a を見るのかを</span>
+<span class="quote1">&gt;少し注意する必要があります。</span>
+
+perl Makefile.PL の実行後に、Msql-Mysql-modules-1.2214/mysql/Makefile
+を手で以下のように修正し、御指摘のライブラリをリンクさせ、
+libmysqlclient.so を明示的に指定しました。
+
+(before)
+EXTRALIBS =  /usr/lib/mysql/libmysqlclient.a -lm -L/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66 -lgcc
+LDLOADLIBS =  /usr/lib/mysql/libmysqlclient.a -lm -L/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66 -lgcc
+
+(after)
+EXTRALIBS = -lm -lz -lnsl -lcrypt -lmysqlclient -lm -L/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66 -lgcc
+LDLOADLIBS = -lm -lz -lnsl -lcrypt -lmysqlclient -lm -L/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66 -lgcc
+
+その結果、
+
+[yasuhide@localhost Msql-Mysql-modules-1.2214]$ make test
+make[1]: Entering directory `/var/tmp/Msql-Mysql-modules-1.2214/mysql'
+make[1]: Leaving directory `/var/tmp/Msql-Mysql-modules-1.2214/mysql'
+make[1]: Entering directory `/var/tmp/Msql-Mysql-modules-1.2214/mysql'
+PERL_DL_NONLAZY=1 /usr/bin/perl -I../blib/arch -I../blib/lib -I/usr/lib/perl5/5.00503/i386-linux -I/usr/lib/perl5/5.00503 -e 'use Test::Harness qw(&amp;runtests $verbose); $verbose=0; runtests @ARGV;' t/*.t
+t/00base............ok
+t/10dsnlist.........ok
+t/20createdrop......ok
+t/30insertfetch.....ok
+t/40bindparam.......ok
+t/40blobs...........ok
+t/40listfields......ok
+t/40nulls...........ok
+t/40numrows.........ok
+t/50chopblanks......ok
+t/50commit..........ok
+t/60leaks...........skipping test on this platform
+t/ak-dbd............ok
+t/dbdadmin..........ok
+All tests successful, 1 test skipped.
+Files=14,  Tests=276, 26 wallclock secs ( 4.24 cusr +  0.57 csys =  4.81 CPU)
+make[1]: Leaving directory `/var/tmp/Msql-Mysql-modules-1.2214/mysql'
+[yasuhide@localhost Msql-Mysql-modules-1.2214]$ 
+
+という具合で、make test は通りました。これから色々と試してみようと思い
+ます。
+
+<span class="quote1">&gt;egcs-1.1.x は、MySQL 本体をコンパイルするとき少し不具合があるので、</span>
+<span class="quote1">&gt;できるなら gcc-2.95.2 以上を使用した方がいいでしょう</span>
+
+もしコンパイラをアップデートした場合には、Perl も再コンパイルすべきな
+のでしょうか?
+# コンパイラのアップデートは未体験なので、ちょっと避けたいところですが…。
+-- 
+大森保英
+
+</pre>
+</div>
+<p class="button"><a href="2303">[前]</a><a href="2305">[次]</a><a href="../list/2301-2400">[番号順一覧]</a><a href="../thread/2301-2400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2292">   2292 2000-07-24 00:41 [Yasuhide OOMORI / 大] Cannot build Msql-Mysql-modules-1.2214  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2295">   2295 2000-07-24 08:17 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="2304">   2304 2000-07-25 00:17 　┣[Yasuhide OOMORI / 大]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2307">   2307 2000-07-25 12:22 　┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2315">   2315 2000-07-27 01:24 　┗[Yasuhide OOMORI / 大] gcc-2.95.2 (Re: Cannot build Msql-Mysql-modules-1.2214)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2316">   2316 2000-07-27 08:37 　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2318">   2318 2000-07-27 10:20 　　　┗[とみたまさひろ &lt;tomm]                                 </a></span>
+</pre>
+</body>
+</html>

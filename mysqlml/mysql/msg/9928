@@ -1,0 +1,128 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9928</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9927">[前]</a><a href="9929">[次]</a><a href="../list/9901-10000">[番号順一覧]</a><a href="../thread/9901-10000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9928
+</p>
+<div class="header">
+<p>
+From: Hirofumi Fujiwara &lt;Hirofumi Fujiwara &lt;fuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 29 Jul 2004 14:57:37 +0900 (JST)<br>
+Subject: [mysql 09928] 日本語カラム名を使用した時の参照制約について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+藤原です
+
+  カラム名に日本語を使用した場合、INNODB では参照制約がうまくいかない
+  場合があるようです。
+
+<a href="http://dev.mysql.com/doc/mysql/en/InnoDB_foreign_key_constraints.html">http://dev.mysql.com/doc/mysql/en/InnoDB_foreign_key_constraints.html</a>
+にある最初のサンプル、および Paul DuBoisのMySQL本 p.248 を参考に以下の
+ようなSQL文を作って、テーブル作成を試みました。
+
+------------------------------------------------------------------------
+original SQL statements                                  This works well
+------------------------------------------------------------------------
+create table parent (
+  par_id	INT NOT NULL,
+  PRIMARY KEY	(par_id)
+) TYPE = INNODB;
+
+create table child (
+  par_id	INT NOT NULL,
+  child_id 	INT NOT NULL,
+  PRIMARY KEY   (par_id,child_id),
+  FOREIGN KEY (par_id) REFERENCES parent(par_id) ON DELETE CASCADE
+) TYPE = INNODB;
+
+------------------------------------------------------------------------
+child_id is replaced as 子供                             This works well
+------------------------------------------------------------------------ 
+create table parent (
+  par_id	INT NOT NULL,
+  PRIMARY KEY	(par_id)
+) TYPE = INNODB;
+
+create table child (
+  par_id	INT NOT NULL,
+  子供 	INT NOT NULL,
+  PRIMARY KEY   (par_id,子供),
+  FOREIGN KEY (par_id) REFERENCES parent(par_id) ON DELETE CASCADE
+) TYPE = INNODB;
+
+------------------------------------------------------------------------
+par_id is replaced as 親                               This doesn't work
+------------------------------------------------------------------------ 
+create table parent (
+  親	INT NOT NULL,
+  PRIMARY KEY	(親)
+) TYPE = INNODB;
+
+create table child (
+  親	INT NOT NULL,
+  child_id 	INT NOT NULL,
+  PRIMARY KEY   (親,child_id),
+  FOREIGN KEY (親) REFERENCES parent(親) ON DELETE CASCADE
+) TYPE = INNODB;
+
+
+mysql&gt; create table parent (
+    -&gt;   親    INT NOT NULL,
+    -&gt;   PRIMARY KEY   (親)
+    -&gt; ) TYPE = INNODB;
+Query OK, 0 rows affected, 1 warning (0.07 sec)
+
+mysql&gt; create table child (
+    -&gt;   親    INT NOT NULL,
+    -&gt;   child_id      INT NOT NULL,
+    -&gt;   PRIMARY KEY   (親,child_id),
+    -&gt;   FOREIGN KEY (親) REFERENCES parent(親) ON DELETE CASCADE
+    -&gt; ) TYPE = INNODB;
+ERROR 1005 (HY000): Can't create table './test/child.frm' (errno: 150)
+
+------------------------------------------------------------------------
+
+ujisで実行した場合は、上記のようなエラーになって、作成できませんでした。
+後からALTERで制約を加えようとしても、そのときにエラーが発生しました。  
+
+なお、utf8 にて実行した場合は、OKでした。
+
+ということは、SQL文のメタデータであるカラム名を取得するとき、何らかの
+変換ミスが発生しているのでしょうか？
+
+このレベルは調べ難いので、MySQL側で調査してもらえると助かります。また、
+日本語カラム名を使いたがっている人もいるので、是非対応して欲しいです。
+
+# 今のところは、日本語カラム名を使わないというのが一応安全策ではありま
+# すが、あまり望ましいことではないですね。
+
+------------------------------------------------------------------
+株式会社 タイムインターメディア       藤原 博文 fuji@xxxxxxxxxx
+本社 160-0002 東京都新宿区坂町26-27 ＩＰＢビル    TEL 03-5362-9009
+URL  <a href="http://www.timedia.co.jp/">http://www.timedia.co.jp/</a>                    FAX 03-5362-9008
+地図 <a href="http://www.timedia.co.jp/company/map/">http://www.timedia.co.jp/company/map/</a>     新宿線曙橋駅徒歩5分
+------------------------------------------------------------------
+♪  Puzzle Japan  <a href="http://www.puzzle.jp/">http://www.puzzle.jp/</a>  毎日新作パズルで遊ぼう ♪
+------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="9927">[前]</a><a href="9929">[次]</a><a href="../list/9901-10000">[番号順一覧]</a><a href="../thread/9901-10000">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="9928">   9928 2004-07-29 14:57 [Hirofumi Fujiwara &lt;f] 日本語カラム名を使用した時の参照制約について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9929">   9929 2004-07-29 16:30 ┣[&lt;akebi.yaji@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9930">   9930 2004-07-29 16:51 ┃┗[Hirofumi Fujiwara &lt;f]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9932">   9932 2004-07-30 06:30 ┃　┗[&quot;Shuichi Tamagawa&quot; &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9931">   9931 2004-07-30 05:57 ┗[&quot;Shuichi Tamagawa&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9934">   9934 2004-07-30 14:53 　┗[Hirofumi Fujiwara &lt;f]                                     </a></span>
+</pre>
+</body>
+</html>

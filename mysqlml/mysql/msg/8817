@@ -1,0 +1,246 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8817</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8816">[前]</a><a href="8818">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8817
+</p>
+<div class="header">
+<p>
+From: zai &lt;zai &lt;zai91210@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 19 Feb 2004 06:26:38 +0900<br>
+Subject: [mysql 08817] Re: 機種の変更に伴う不具合<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+zaiです、毎度。
+
+とみたさん、ありがとうございます。
+ 
+<span class="quote1">&gt; # 新規の話題は古いメッセージへの返信にしない方が良いです。</span>
+
+　はい、気をつけます。
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; On Sat, 14 Feb 2004 01:48:15 +0900</span>
+<span class="quote1">&gt; zai &lt;zai91210@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; 　現在も、問題なく、使えるシステム（Windows2000Pro)のデータを、コピーし</span>
+<span class="quote2">&gt; &gt; て、新しいパソコン（WindowsXP Pro）に移しました。具体的には、WEBサーバー</span>
+<span class="quote2">&gt; &gt; も、PHPもMySQLも、全く同じ物をインストールしました（MySQLのデータベース</span>
+<span class="quote2">&gt; &gt; も、PHPのスクリプトも全て、同一にしました、異なるのは、パソコンとOSが違</span>
+<span class="quote2">&gt; &gt; うことです）。PHPでMySQLデータの表示などは、問題なくできるのですが、新規</span>
+<span class="quote2">&gt; &gt; データの追加ができません。問題のPHPは、以下のものです。</span>
+
+　削除もできません。
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 同じクエリを mysql コマンドで試してみるのが良いと思います。問題が PHP </span>
+<span class="quote1">&gt; なのか MySQL なのかはっきりししますし、エラーになった場合は原因も表示</span>
+<span class="quote1">&gt; されますし。</span>
+
+　確かに、そうですね。
+　mysqlコマンドでは、問題なく追加処理が出来ました。また、近藤さんのアド
+バイスで、PHPでも追加できましたが、質問のPHPは、追加処理だけのものでした
+が、現実は、少し複雑（と言うか、複雑になってしまった）です。と、言うこと
+で、mysql か PHP か切り分けることが、私には出来ません。
+
+大変長いPHP（読みやすい短いものにしたい意志はあるのですが、まだ出来ずに
+おります。時間もそうですが、能力の方がなくてすみません）です。id（ここで
+はfname[0]）が、取れていないのかと考え、GET送信に変えて確認をしておりま
+す。GET送信文を読んでも問題はなく、勿論オリジナルのコピー元のほうでは、
+GETでもPOSTでも追加ができます。
+
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=Shift_JIS&quot;&gt;
+&lt;title&gt;診療圏&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;診療圏
+&lt;?php
+function cnv_dispstr2($string) {
+  $string = nl2br($string);
+  return $string;
+}
+$svname = &quot;localhost&quot;;
+$dbname = &quot;RESE&quot;;
+$tbname = &quot;ken&quot;;
+$usname = &quot;root&quot;;
+$psname = &quot;****&quot;;
+$mycon = mysql_connect($svname, $usname, $psname) or die(mysql_error());
+$cnt      = 0;
+$COL_DATS = array();
+$result   = mysql_list_fields( $dbname, $tbname, $mycon);
+while ( $cnt &lt; mysql_num_fields( $result)) {
+  $fdname[$cnt]            = mysql_fieldname( $result, $cnt);
+  $COL_DATS[$fdname[$cnt]] = ${$fdname[$cnt]};
+  ++$cnt;
+}
+mysql_select_db($dbname) or die(mysql_error());
+
+if ($submit) {
+  if (${$fdname[0]}) {
+    $where = &quot;$fdname[0]=&quot;.${$fdname[0]};
+    $i=0;
+    $set = ' SET ';
+    foreach ($COL_DATS as $key =&gt; $dat){
+      $set .= (strlen($dat) == 0)? &quot;{$key}=NULL,&quot;: &quot;{$key}='{$dat}',&quot;;
+      $i++;
+    }
+    $set = chop($set, ',');
+    $sql  = 'UPDATE '.$tbname.$set.' where '.$where;
+  } else {
+    if (${$fdname[1]}==&quot;&quot; || ${$fdname[2]}==&quot;&quot; ) exit();
+    $set1=&quot;&quot;; $set2=&quot;&quot;;
+    $set1 = ' ( ';
+    $set2 = ' VALUES ( ';
+    foreach ($COL_DATS as $key =&gt; $dat){
+      $set1 .= (strlen($dat) == 0)? &quot;&quot;: &quot;{$key},&quot;;
+      $set2 .= (strlen($dat) == 0)? &quot;&quot;: &quot;'{$dat}',&quot;;
+    }
+    $set1 = chop($set1, ',');
+    $set1 .= &quot; ) &quot;;
+    $set2 = chop($set2, ',');
+    $set2 .= &quot; ) &quot;;
+    $sql  = 'INSERT INTO '.$tbname.$set1.$set2;
+  }
+  // DBに対してSQL実行
+  $result = mysql_query($sql, $mycon) or die(mysql_error());
+  echo &quot;updated/edited sql文の確認: $sql&lt;p&gt;&quot;;
+} elseif ($delete) {
+  // レコードの削除SQL実行
+  $where = &quot;$fdname[0]=&quot;.${$fdname[0]};
+  $sql = &quot;DELETE FROM $tbname WHERE &quot;.$where;
+  $result = mysql_query($sql, $mycon) or die(mysql_error());
+  echo &quot;deleted sql文の確認: $sql&lt;p&gt;&quot;;
+} else {  // submitを押してないときに、全レコードを編集できるように表示
+  if (!${$fdname[0]}) {
+    $sql = &quot;SELECT * FROM $tbname ORDER BY &quot;.$fdname[0];
+    $result = mysql_query($sql, $mycon) or die(mysql_error());
+?&gt;
+&lt;table border=&quot;1&quot;&gt;
+&lt;tr&gt;
+&lt;td colspan=2 bgcolor=&quot;#b00023&quot;&gt;ID&lt;/td&gt;
+&lt;td colspan=1 bgcolor=&quot;#b00023&quot;&gt;診療圏コード&lt;/td&gt;
+&lt;td colspan=1 bgcolor=&quot;#b00023&quot;&gt;診療圏&lt;/td&gt;
+&lt;td colspan=1 bgcolor=&quot;#b00023&quot;&gt;操作&lt;/td&gt;
+
+&lt;/tr&gt;
+  &lt;?php
+    while ($myrow = mysql_fetch_array($result, MYSQL_ASSOC)) {
+  ?&gt;
+     &lt;tr&gt;
+     &lt;form method=&quot;GET&quot; action=&quot;&lt;?php echo $_SERVER['PHP_SELF']; ?&gt;&quot;&gt;
+     &lt;td&gt;&lt;input type=&quot;submit&quot; value=&quot;SYUSEI&quot;&gt;&lt;/td&gt;
+     &lt;input type=&quot;hidden&quot; name=&quot;&lt;?php echo $fdname[0]; ?&gt;&quot; value=&quot;&lt;?php echo cnv_dispstr2($myrow[$fdname[0]]) ?&gt;&quot;&gt;
+     &lt;td&gt;&lt;?php echo cnv_dispstr2($myrow[$fdname[0]]); ?&gt;&lt;/td&gt;
+
+     &lt;?php
+     for ($i=1; $i&lt;3; $i++) { ?&gt;
+      &lt;td&gt;
+      &lt;input type=&quot;text&quot; name =&quot;&lt;?php echo $fdname[$i]; ?&gt;&quot; value=&quot;&lt;?php echo cnv_dispstr2($myrow[$fdname[$i]]) ?&gt;&quot;&gt;
+      &lt;/td&gt;
+     &lt;?php
+     }
+     ?&gt;
+    &lt;/form&gt;
+
+    &lt;form method=&quot;GET&quot; action=&quot;&lt;?php echo $_SERVER['PHP_SELF'] ?&gt;&quot;&gt;
+    &lt;td&gt;&lt;input type=&quot;submit&quot; value=&quot;SAKUJO&quot; name=&quot;delete&quot;&gt;&lt;/td&gt;
+    &lt;input type=&quot;hidden&quot; name=&quot;&lt;?php echo $fdname[0]; ?&gt;&quot; value=&quot;&lt;?php echo cnv_dispstr2($myrow[$fdname[0]]); ?&gt;&quot;&gt;
+    &lt;/form&gt;
+    &lt;/tr&gt;
+    &lt;?php
+    }
+    ?&gt;
+    &lt;?php
+  }
+  ?&gt;
+
+  &lt;form method=&quot;GET&quot; action=&quot;&lt;?php echo $_SERVER['PHP_SELF'] ?&gt;&quot;&gt;
+  &lt;?php
+  if (${$fdname[0]}) {
+    // レコードを選択できるように編集
+    $sql = &quot;SELECT * FROM $tbname WHERE &quot;.$where;
+    $result = mysql_query($sql, $mycon) or die(mysql_error());
+    $myrow = mysql_fetch_array($result, MYSQL_ASSOC);
+    for ($i=0; $i&lt;$cnt; $i++) {
+      ${$fdname[$i]}=$myrow[$fdname[$i]];
+    }
+    // 編集用のidは非表示
+    ?&gt;
+    &lt;input type=&quot;hidden&quot; name=&quot;&lt;?php echo $fdname[0]; ?&gt;&quot; value=&quot;&lt;?php echo cnv_dispstr2($myrow[$fdname[0]]) ?&gt;&quot;&gt;
+  &lt;?php
+  }
+  ?&gt;
+    &lt;tr&gt;
+    &lt;td colspan=2&gt;&lt;input type=&quot;submit&quot; value=&quot;TUIKA&quot; name=&quot;submit&quot;&gt;&lt;/td&gt;
+    &lt;?php
+    for ($i=1; $i&lt;3; $i++) { ?&gt;
+      &lt;td&gt;
+      &lt;input type=&quot;text&quot; name =&quot;&lt;?php echo $fdname[$i]; ?&gt;&quot; value=&quot;&lt;?php echo cnv_dispstr(${$myrow[$fdname[$i]]}) ?&gt;&quot;&gt;
+      &lt;/td&gt;
+    &lt;?php
+    }
+  ?&gt;
+  &lt;td&gt;&lt;input type=&quot;reset&quot; name=&quot;cancel&quot; value=&quot;CANCEL&quot;&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;/table&gt;
+  &lt;/form&gt;
+  &lt;?php
+}
+mysql_close($mycon);
+?&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+
+　どうしても、解決できません。もう、不思議の世界です！
+　アドバイスをよろしくお願いいたします。
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; 日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a></span>
+
+-- 
+zai &lt;zai91210@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="8816">[前]</a><a href="8818">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8558">   8558 2004-01-07 02:39 [zai &lt;zai91210@xxxxxx] count(*) の合計の仕方                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8559">   8559 2004-01-07 04:59 ┣[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8561">   8561 2004-01-07 15:29 ┃┗[zai &lt;zai91210@xxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8562">   8562 2004-01-07 15:56 ┃　┣[&lt;lavlav@xxxxxxxxxx&gt; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8563">   8563 2004-01-07 16:00 ┃　┃┗[&lt;lavlav@xxxxxxxxxx&gt; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8565">   8565 2004-01-07 16:37 ┃　┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8566">   8566 2004-01-07 16:46 ┃　　┗[ML account &lt;ml@xxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8564">   8564 2004-01-07 16:22 ┣[Kazuhiro Yoshida &lt;mo]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8790">   8790 2004-02-14 01:48 ┗[zai &lt;zai91210@xxxxxx] 機種の変更に伴う不具合                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8791">   8791 2004-02-14 15:43 　┣[Seto &lt;seto@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8792">   8792 2004-02-14 20:09 　┣[&lt;konet218@xxxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8793">   8793 2004-02-15 03:21 　┃┗[zai &lt;zai91210@xxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8794">   8794 2004-02-15 03:43 　┃　┣[&lt;konet218@xxxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8816">   8816 2004-02-19 05:35 　┃　┃┗[zai &lt;zai91210@xxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8796">   8796 2004-02-15 06:28 　┃　┗[Seto &lt;seto@xxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8818">   8818 2004-02-19 06:35 　┃　　┗[zai &lt;zai91210@xxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8795">   8795 2004-02-15 04:18 　┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="8817">   8817 2004-02-19 06:26 　　┗[zai &lt;zai91210@xxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8819">   8819 2004-02-19 09:47 　　　┣[Seto &lt;seto@xxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8820">   8820 2004-02-19 15:29 　　　┃┣[&lt;lavlav@xxxxxxxxxx&gt; ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8824">   8824 2004-02-19 21:12 　　　┃┃┗[zai &lt;zai91210@xxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8823">   8823 2004-02-19 21:02 　　　┃┗[zai &lt;zai91210@xxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8826">   8826 2004-02-19 21:57 　　　┃　┗[bon &lt;bon@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8827">   8827 2004-02-20 02:19 　　　┃　　┗[zai &lt;zai91210@xxxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8821">   8821 2004-02-19 18:52 　　　┗[Hiroto Tsubaki &lt;jak@]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8825">   8825 2004-02-19 21:46 　　　　┗[zai &lt;zai91210@xxxxxx] Re: 機種の変更に伴う不具合（大感謝）</a></span>
+</pre>
+</body>
+</html>

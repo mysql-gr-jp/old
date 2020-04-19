@@ -1,0 +1,257 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1790</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1789">[前]</a><a href="1791">[次]</a><a href="../list/1701-1800">[番号順一覧]</a><a href="../thread/1701-1800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1790
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Tue, 21 Mar 2000 20:18:42 +0900<br>
+Subject: [mysql 01790] sjis &amp; order by<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+MySQL を --with-charset=sjis で作成して、
+char 型(binary 属性はつけない)に sjis データを入れた時、
+order by が一部、正しく出なかったのを修正するパッチです。
+検証してみてください。
+3.22.32用のパッチです
+
+現在の MySQL のコードでは、char 型に代入された SJIS 文字の
+2byte 目が 0x41-0x5a (=[a-z]), 0x61-0x7a (=[A-Z]) の時に、
+2byte 目が ケース非依存でソートされてしまいます。
+これを正しく処理するパッチです
+
+EUC は、2byte 目も 8bit 文字なので、この問題はおきません。
+
+なお、本パッチは、2バイトコードの SJIS しか考慮していません。
+半角かなの場合の処理は手つかずです。
+
+ソースコードは、ほとんど GBK 用のソースのコピーです.
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+
+--- include/m_ctype.h.in.orig	Tue Mar 21 16:43:54 2000
++++ include/m_ctype.h.in	Tue Mar 21 15:03:51 2000
+@@ -138,6 +138,8 @@
+ #define ismbhead(c)	issjishead(c)
+ #define mbcharlen(c)	(issjishead(c)? 2: 0)
+ #define MBMAXLEN	2
++#undef USE_STRCOLL 
++#define USE_STRCOLL 
+ #endif
+ 
+ /* Support for Chinese(BIG5) characters, by jou@xxxxxxxxxx
+--- strings/ctype-sjis.c.orig	Tue Mar 21 16:44:12 2000
++++ strings/ctype-sjis.c	Tue Mar 21 17:55:23 2000
+@@ -1,7 +1,15 @@
+ /* This file is for Shift JIS charset, and created by tommy@xxxxxxxxxx.
+  */
++#include &lt;stdio.h&gt;
+ #include &lt;global.h&gt;
+ #include &quot;m_string.h&quot;
++#include &quot;m_ctype.h&quot;
++
++#define issjiscode(c,d) (issjishead(c) &amp;&amp; issjistail(d))
++#define gbkcode(c,d)   (((uchar)(c) &lt;&lt;8) | (uchar)(d))
++#define gbkhead(e)     ((uchar)(e&gt;&gt;8))
++#define gbktail(e)     ((uchar)(e&amp;0xff))
++
+ 
+ uchar NEAR ctype_sjis[257] =
+ {
+@@ -37,7 +45,7 @@
+     0020, 0020, 0020, 0020, 0020, 0020, 0020, 0020,
+     0020, 0020, 0020, 0020, 0020, 0020, 0020, 0020,
+     0020, 0020, 0020, 0020, 0020, 0020, 0020, 0020,
+-    0020, 0020, 0020, 0020, 0020, 0000, 0000, 0000,
++    0020, 0020, 0020, 0020, 0020, 0000, 0000, 0000
+ };
+ 
+ uchar NEAR to_lower_sjis[]=
+@@ -73,7 +81,7 @@
+   '\340','\341','\342','\343','\344','\345','\346','\347',
+   '\350','\351','\352','\353','\354','\355','\356','\357',
+   '\360','\361','\362','\363','\364','\365','\366','\367',
+-  '\370','\371','\372','\373','\374','\375','\376','\377',
++  '\370','\371','\372','\373','\374','\375','\376','\377'
+ };
+ 
+ uchar NEAR to_upper_sjis[]=
+@@ -109,7 +117,7 @@
+   '\340','\341','\342','\343','\344','\345','\346','\347',
+   '\350','\351','\352','\353','\354','\355','\356','\357',
+   '\360','\361','\362','\363','\364','\365','\366','\367',
+-  '\370','\371','\372','\373','\374','\375','\376','\377',
++  '\370','\371','\372','\373','\374','\375','\376','\377'
+ };
+ 
+ uchar NEAR sort_order_sjis[]=
+@@ -145,5 +153,146 @@
+   '\340','\341','\342','\343','\344','\345','\346','\347',
+   '\350','\351','\352','\353','\354','\355','\356','\357',
+   '\360','\361','\362','\363','\364','\365','\366','\367',
+-  '\370','\371','\372','\373','\374','\375','\376','\377',
++  '\370','\371','\372','\373','\374','\375','\376','\377'
+ };
++
++/*
++uint16 gbksortorder(uint16 i)
++{
++  uint index=gbktail(i);
++  if (index&gt;0x7f) index-=0x41;
++  else index-=0x40;
++  index+=(gbkhead(i)-0x81)*0xbe;
++  return 0x8100+gbk_order[index];
++}
++*/
++
++uint16 sjissortorder(uint16 i)
++{ 
++  return (i);
++} 
++
++uint MY_STRXFRM_MULTIPLY=1;
++
++int my_strnncoll(const uchar * s1, int len1, const uchar * s2, int len2)
++{
++  uint len,c1,c2; 
++
++  len = min(len1,len2);
++  while (len--)
++  {
++    if ((len &gt; 0) &amp;&amp; issjiscode(*s1,*(s1+1)) &amp;&amp; issjiscode(*s2, *(s2+1)))
++    {
++      c1=gbkcode(*s1,*(s1+1));
++      c2=gbkcode(*s2,*(s2+1));
++      if (c1!=c2)
++        return ((int) sjissortorder(c1) - (int) sjissortorder(c2));
++      s1+=2;
++      s2+=2;
++      --len;
++    } else if (my_sort_order[(uchar) *s1++] != my_sort_order[(uchar) *s2++])
++      return ((int) my_sort_order[(uchar) s1[-1]] -
++	      (int) my_sort_order[(uchar) s2[-1]]);
++  }
++  return (int) (len1-len2);
++}
++
++int my_strcoll(const uchar * s1, const uchar * s2)
++{
++  return my_strnncoll(s1,strlen(s1),s2,strlen(s2));
++}
++
++int my_strnxfrm(uchar * dest, uchar * src, int len, int srclen)
++{
++  uint16 e;
++
++  len = srclen;
++  while (len--)
++  {
++    if ((len &gt; 0) &amp;&amp; issjiscode(*src, *(src+1)))
++    {
++      e = sjissortorder(gbkcode(*src, *(src+1)));
++      *dest++ = gbkhead(e);
++      *dest++ = gbktail(e);
++      src+=2;
++      len--;
++    } else 
++      *dest++ = my_sort_order[(uchar) *src++];
++  }
++  return srclen;
++}
++  
++int my_strxfrm(uchar * dest, uchar * src, int len)
++{
++  return my_strnxfrm(dest,src,len,strlen(src));
++}
++ 
++/*
++** Calculate min_str and max_str that ranges a LIKE string.
++** Arguments:
++** ptr		Pointer to LIKE string.
++** ptr_length	Length of LIKE string.
++** escape	Escape character in LIKE.  (Normally '\').
++**		All escape characters should be removed from min_str and max_str
++** res_length   Length of min_str and max_str.
++** min_str      Smallest case sensitive string that ranges LIKE.
++**		Should be space padded to res_length.
++** max_str	Largest case sensitive string that ranges LIKE.
++**		Normally padded with the biggest character sort value.
++**
++** The function should return 0 if ok and 1 if the LIKE string can't be
++** optimized !
++*/
++
++#define max_sort_char 255
++#define wild_one '_'
++#define wild_many '%'
++
++extern my_bool my_like_range(const char *ptr,uint ptr_length,pchar escape,
++                      uint res_length, char *min_str,char *max_str,
++                      uint *min_length,uint *max_length)
++{
++  const char *end=ptr+ptr_length;
++  char *min_org=min_str;
++  char *min_end=min_str+res_length;
++
++  for (; ptr != end &amp;&amp; min_str != min_end ; ptr++)
++  {
++    if (ptr+1 != end &amp;&amp; issjiscode(ptr[0],ptr[1]))
++    {
++      *min_str++= *max_str++ = *ptr++;
++      *min_str++= *max_str++ = *ptr;
++      continue;
++    }
++    if (*ptr == escape &amp;&amp; ptr+1 != end)
++    {
++      ptr++;				/* Skipp escape */
++      *min_str++= *max_str++ = *ptr;
++      continue;
++    }
++    if (*ptr == wild_one)		/* '_' in SQL */
++    {
++      *min_str++='\0';			/* This should be min char */
++      *max_str++=max_sort_char;
++      continue;
++    }
++    if (*ptr == wild_many)		/* '%' in SQL */
++    {
++      *min_length= (uint) (min_str - min_org);
++      *max_length= res_length;
++      do {
++	*min_str++ = '\0';		/* Because if key compression */
++	*max_str++ = max_sort_char;
++      } while (min_str != min_end);
++      return 0;
++    }
++    *min_str++= *max_str++ = *ptr;
++  }
++  *min_length= *max_length = (uint) (min_str - min_org);
++  while (min_str != min_end)
++  {
++    *min_str++ = ' ';			/* Because if key compression */
++    *max_str++ = ' ';
++  }
++  return 0;
++}
+
+</pre>
+</div>
+<p class="button"><a href="1789">[前]</a><a href="1791">[次]</a><a href="../list/1701-1800">[番号順一覧]</a><a href="../thread/1701-1800">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="1790">   1790 2000-03-21 20:18 [&lt;takeshi@xxxxxxxxxx&gt;] sjis &amp;amp; order by                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1792">   1792 2000-03-22 01:52 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1794">   1794 2000-03-22 04:23 　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+</pre>
+</body>
+</html>

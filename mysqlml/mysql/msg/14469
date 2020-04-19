@@ -1,0 +1,144 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14469</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14468">[前]</a><a href="14470">[次]</a><a href="../list/14401-14500">[番号順一覧]</a><a href="../thread/14401-14500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14469
+</p>
+<div class="header">
+<p>
+From: 浅野 義幸 &lt;浅野 義幸 &lt;asano@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 24 Apr 2008 19:06:50 +0900<br>
+Subject: [mysql 14469] Re: InnoDBのホットバックアップ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+浅野です。
+
+
+<span class="quote1">&gt; はじめまして。加藤と申します。</span>
+<span class="quote1">&gt;   </span>
+はじめまして。
+
+<span class="quote2">&gt;&gt;  「InnoDBホットバックアップ」というソフトがベストなんだとは思うのですが、</span>
+<span class="quote2">&gt;&gt;  お金をかけずに行いたいです。</span>
+<span class="quote2">&gt;&gt;     </span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 昨年MySQL5.0.45＋InnoDB Hotbackupでサイトを構築したのですが、</span>
+<span class="quote1">&gt; この際、それ以外のバックアップの方式をいくつか検討しました。</span>
+<span class="quote1">&gt; データサイズの規模次第ですが、それほど大きなサイズでなければ</span>
+<span class="quote1">&gt; mysqldumpでのオンラインバックアップを検討されてはいかがでしょうか？</span>
+<span class="quote1">&gt;   </span>
+mysqldumpでのバックアップではバックアップに数時間、リカバリに5時間ほどか
+かり、とても現実的ではありません。
+ファイルをコピーするだけなら、5分程度で完了し、今まででしたら、ここから
+myisamchkをして、全部で30分ほどでバックアップが完了しており、同じくらい
+の時間でなんとかならないか検討してます。
+
+<span class="quote1">&gt; また、使用可能な余剰サーバがあるのであればレプリケーションを行い、</span>
+<span class="quote1">&gt; バックアップ時にはスレーブを切り離しOSコマンドによりオフラインバックアップを</span>
+<span class="quote1">&gt; 取るのがよいのではないかと思います。</span>
+<span class="quote1">&gt;   </span>
+この方法はいいですね。サーバーはなんとかなります。レプリケーションを行う
+ことで、常にバックアップがあるという安心もありますし。
+ただ・・・レプリケーションってやったことないんです（＾＾；
+バックアップ時に切り離してインスタンスを停止してからファイルをコピーする
+のはいいのですが、コピー中にマスターのＤＢに対して起こった変更をバイナリ
+ログから復元するということをするのですよね？
+やったことがないので、これらの作業が自動でできるのか？ということと、どこ
+かで整合性がマスターとの整合性がとれなくなるのではないかという不安が・・・
+
+myisamchkのInnoDB版はないのでしょうか？
+それとも、InnoDBは構造上、修復の必要がないとか？
+
+無知ですみませんm(_ _)m
+
+
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;   </span>
+<span class="quote2">&gt;&gt;  今のところテスト環境でしかやっていないので、実質稼働していても止まってい</span>
+<span class="quote2">&gt;&gt;  る状態に近いため検証がし辛いです。</span>
+<span class="quote2">&gt;&gt;     </span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 08/04/24 に 浅野 義幸&lt;asano@xxxxxxxxxx&gt; さんは書きました:</span>
+<span class="quote1">&gt;   </span>
+<span class="quote2">&gt;&gt; はじめまして、浅野と申します。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  MySQLのバージョンを3.23から5.0.45にアップグレードしようとしております。</span>
+<span class="quote2">&gt;&gt;  データの移行に関しては、文字コードなどでだいぶ苦労しましたが無事移動でき</span>
+<span class="quote2">&gt;&gt;  ました。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  今まではMyISAMを使用しており、毎日DBは可動したままファイルをrsyncで別</span>
+<span class="quote2">&gt;&gt;  サーバーにコピーし、</span>
+<span class="quote2">&gt;&gt;  コピー後、myisamchkで修復を行ってから、バックアップ先のMySQLを起動してお</span>
+<span class="quote2">&gt;&gt;  りました。</span>
+<span class="quote2">&gt;&gt;  この方法で数年間、問題が起きたことはありませんでした。</span>
+<span class="quote2">&gt;&gt;  最初の頃は修復していなかったので、たびたびバックアップ先のMySQLで検索を</span>
+<span class="quote2">&gt;&gt;  使用とするとできないことがありましたが</span>
+<span class="quote2">&gt;&gt;  myisamchkで修復するようになってからは、問題は起きておりません。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  今度、新しくMyISAMからInnoDBにDBを変更することになりました。</span>
+<span class="quote2">&gt;&gt;  コールドバックアップはできたのですが、バックアップ元は稼働させたままホッ</span>
+<span class="quote2">&gt;&gt;  トバックアップしたいのです。</span>
+<span class="quote2">&gt;&gt;  「InnoDBホットバックアップ」というソフトがベストなんだとは思うのですが、</span>
+<span class="quote2">&gt;&gt;  お金をかけずに行いたいです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  今のところテスト環境でしかやっていないので、実質稼働していても止まってい</span>
+<span class="quote2">&gt;&gt;  る状態に近いため検証がし辛いです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  バックアップ元を稼働させながら、rsyncでファイルをバックアップし、その後</span>
+<span class="quote2">&gt;&gt;  テーブルの整合性を修復するにはどうしたらいいのでしょうか？</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  他にもっと効率のいいやり方はありますでしょうか？</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  アドバイスいただけると助かります。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  以上、よろしくお願いいたします。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;     </span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;   </span>
+
+
+-- 
+−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−
+　アイブリッジ株式会社　システム開発部　システム開発室
+
+　室長　浅野義幸
+　E-Mail:asano@xxxxxxxxxx
+
+　〒150-0002　渋谷区渋谷3-11-7第2ミネギシビル4F
+　TEL:03-5468-0084 FAX:03-5468-0085
+−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−
+
+
+</pre>
+</div>
+<p class="button"><a href="14468">[前]</a><a href="14470">[次]</a><a href="../list/14401-14500">[番号順一覧]</a><a href="../thread/14401-14500">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14466">  14466 2008-04-24 16:40 [浅野 義幸 &lt;asano@xxx] InnoDBのホットバックアップ              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14467">  14467 2008-04-24 16:55 ┗[g-kato &lt;g-kato@xxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14469">  14469 2008-04-24 19:06 　┗[浅野 義幸 &lt;asano@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14470">  14470 2008-04-24 19:48 　　┗[g-kato &lt;g-kato@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14471">  14471 2008-04-25 13:32 　　　┗[浅野 義幸 &lt;asano@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14472">  14472 2008-04-25 14:23 　　　　┣[g-kato &lt;g-kato@xxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14474">  14474 2008-04-25 15:20 　　　　┃┗[浅野 義幸 &lt;asano@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14476">  14476 2008-04-25 15:53 　　　　┃　┗[g-kato &lt;g-kato@xxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14473">  14473 2008-04-25 14:38 　　　　┗[Tomohiro 'Tomo-p' KA]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14475">  14475 2008-04-25 15:41 　　　　　┗[浅野 義幸 &lt;asano@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14477">  14477 2008-04-25 16:16 　　　　　　┣[SASAKI Katuhiro &lt;sah]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14479">  14479 2008-04-28 11:41 　　　　　　┃┗[浅野 義幸 &lt;asano@xxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14478">  14478 2008-04-25 16:50 　　　　　　┗[Tomohiro 'Tomo-p' KA]                           </a></span>
+</pre>
+</body>
+</html>

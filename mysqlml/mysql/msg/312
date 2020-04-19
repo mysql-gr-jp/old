@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:312</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="311">[前]</a><a href="313">[次]</a><a href="../list/301-400">[番号順一覧]</a><a href="../thread/301-400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:312
+</p>
+<div class="header">
+<p>
+From: Seiji tateyama &lt;Seiji tateyama &lt;tarosa@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 23 Oct 1998 18:51:42 +0900<br>
+Subject: [mysql 312] Re: MySQL logging sendmail-8.9.1<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+舘山です
+
+さっそく バグありました (^_^;)
+
+mailstatの出力が
+Statistics from Fri Oct 23 18:10:11 1998
+ M   msgsfr  bytes_from   msgsto    bytes_to  msgsrej msgsdis  Mailer
+ 3       14         56K       14         56K        0       0  local
+ 8        1          1K        1          1K        0       0  smtpf
+=============================================================
+ T       15         57K       15         57K        0       0
+
+となってたとき
++----------+-+-------+----------+------+--------+--------+-------
+<span class="quote1">|date      |M|msgsfr |bytes_from|msgsto|bytes_to|imsgsrej|msgsdis</span>
++----------+-+-------+----------+------+--------+--------+-------
+<span class="quote1">|1998-10-23|3|    14 |        56|   14 |     56 |      0 |      0</span>
+<span class="quote1">|1998-10-23|8|     1 |        1 |    1 |      1 |      0 |      0</span>
++----------+-+-------+----------+------+--------+--------+--------
+となるべきだったんですが
+
+create table sendmail (
+date DATE NOT NULL PRIMARY KEY,
+M TINYINT UNSIGNED NOT NULL,
+msgsfr MEDIUMINT UNSIGNED,
+bytes_from MEDIUMINT UNSIGNED,
+msgsto MEDIUMINT UNSIGNED,
+bytes_to MEDIUMINT UNSIGNED,
+imsgsrej MEDIUMINT UNSIGNED,
+msgsdis MEDIUMINT UNSIGNED,
+UNIQUE (m)
+);
+
+と設定してたので
+
+Replace した場合一つの項目
+
++----------+-+-------+----------+------+--------+--------+-------
+<span class="quote1">|date      |M|msgsfr |bytes_from|msgsto|bytes_to|imsgsrej|msgsdis</span>
++----------+-+-------+----------+------+--------+--------+-------
+<span class="quote1">|1998-10-23|8|     1 |        1 |    1 |      1 |      0 |      0</span>
++----------+-+-------+----------+------+--------+--------+--------
+
+のみデータとして更新されてしましました(^_^;)
+
+結局私は date と M を合体した文字列として扱うことにしました
+こんな感じでもいいのかなぁ？
+
+create table sendmail (
+dateM char(12) DEFAULT '0000-00-00-0' PRIMARY KEY,
+msgsfr MEDIUMINT UNSIGNED,
+bytes_from MEDIUMINT UNSIGNED,
+msgsto MEDIUMINT UNSIGNED,
+bytes_to MEDIUMINT UNSIGNED,
+imsgsrej MEDIUMINT UNSIGNED,
+msgsdis MEDIUMINT UNSIGNED
+);
+
+
+--------
+舘山　聖司　tarosa@xxxxxxxxxx
+
+
+</pre>
+</div>
+<p class="button"><a href="311">[前]</a><a href="313">[次]</a><a href="../list/301-400">[番号順一覧]</a><a href="../thread/301-400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="306">    306 1998-10-23 01:31 [Seiji tateyama &lt;taro] Re: MySQL logging sendmail-8.9.1        </a></span>
+<span class="current">-&gt;&nbsp;<a href="312">    312 1998-10-23 18:51 ┗[Seiji tateyama &lt;taro]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="313">    313 1998-10-23 19:32 　┗[Seiji tateyama &lt;taro]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="314">    314 1998-10-23 19:48 　　┣[Satoshi Tatsuoka &lt;sa]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="315">    315 1998-10-25 23:46 　　┗[Seiji tateyama &lt;taro] 公開  MySQL logging sendmail-8.9.1</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="316">    316 1998-10-26 00:22 　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="317">    317 1998-10-26 02:35 　　　┗[Seiji tateyama &lt;taro]                                 </a></span>
+</pre>
+</body>
+</html>

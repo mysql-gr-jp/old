@@ -1,0 +1,2367 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.texi on 20 June 1998 -->
+
+  <TITLE>MySQL Reference Manual for version 3.21.31. - MySQL change history</TITLE>
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Credits.html">previous</A>, <A HREF="manual_Bugs.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="News" HREF="manual_toc.html#News"><STRONG>MySQL</STRONG> change history</A></H1>
+
+
+
+<H2><A NAME="News-3.22.x" HREF="manual_toc.html#News-3.22.x">Changes in release 3.22.x (Alpha version)</A></H2>
+
+<P>
+The 3.22 version has a faster and safer connect code and a lot of new nice
+enhancements.  This reason for not including these changes in the 3.21 version
+is mainly because we are trying to avoid big changes to 3.21 to keep is as
+stable as possible.  As there isn't really any MAJOR changes, upgrading to
+3.22 should be very easy and painless.
+
+</P>
+<P>
+3.22 includes also the new DBD-mysql (1.1830) driver that can use the
+new connect protocol!
+
+</P>
+
+
+
+<H3><A NAME="News-3.22.1" HREF="manual_toc.html#News-3.22.1">Changes in release 3.22.1</A></H3>
+
+
+<UL>
+<LI>
+
+Added new C-API function: mysql_ping().
+<LI>
+
+Added new API functions: mysql_init() and mysql_options().
+One MUST now call mysql_init() before one calls mysql_real_connect().
+One doesn't have to call mysql_init() if one only uses mysql_connect().
+<LI>
+
+Added mysql_option(..,MYSQL_OPT_CONNECT_TIMEOUT) so one can set a
+timeout for connecting to a server.
+<LI>
+
+Added --timeout argument to mysqladmin (as a test of mysql_options()).
+<LI>
+
+Added options AFTER column and FIRST to ALTER TABLE ... ADD columns.
+This makes is possible to add a new column at some specific location
+in an old table.
+<LI>
+
+WEEK() now takes an optional argument to allow handling of weeks when
+week starts on Monday (Some European countries), or Sunday.
+The default WEEK() assumes week start on Sunday().
+<LI>
+
+TIME columns wasn't stored properly (bug in MySQL 3.22.0).
+<LI>
+
+UPDATE now returns a update information about how many rows was
+matched, updated and if one got any 'warnings' when doing the update.
+<LI>
+
+Fixed wrong result from 'format(-100,2)'.
+<LI>
+
+enum() and set() columns was compared binary; Changed to be case insensitive.
+</UL>
+
+
+
+<H3><A NAME="News-3.22.0" HREF="manual_toc.html#News-3.22.0">Changes in release 3.22.0</A></H3>
+
+
+<UL>
+<LI>
+
+New (backward compatible) connect protocol that allows one to
+specify the database to use when connecting to get much faster
+onnections to a specific database.
+
+
+<PRE>
+  mysql_real_connect() call is changed to:
+
+  mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
+		     const char *passwd, const char *db,
+		     uint port, const char *unix_socket,uint client_flag)
+</PRE>
+
+<LI>
+
+Each connection is handled by it's own thread, instead by the
+master accept() thread.  This fixes permanently the telnet bug
+that was a topic on the mail list some time ago.
+<LI>
+
+All TCP/IP connections are now checked with backward resolving of
+the hostname to get better security. mysqld has now a local hostname
+resolve cache so connections should actually be faster than before
+even with this feature.
+<LI>
+
+A site will automaticly be blocked from future connections if one
+repeatedly connects with a 'improper header' (like when one uses telnet)
+<LI>
+
+One can now reference to tables in different databases with:
+table@database or database.table.  This makes it possible to give a users
+read access to some tables and write access to others by simple keeping
+them in different databases!
+<LI>
+
+If mysqld is started as root, it can now change to be run as another user
+with the new --user option.
+<LI>
+
+Added cacheing of users &#38; access rights (for faster access rights checking)
+<LI>
+
+Normal users (not anonymous ones) can change ones password with
+mysqladmin password 'new_password'.  This uses crypted passwords
+that are not logged in the normal mysql log!
+<LI>
+
+All important string functions are now coded in assembler for x86 Linux
+machines.  This gives a speedup of 10% in many cases.
+<LI>
+
+For tables that have many columns the column names are now hashed for
+much faster column name lookup (this will speed up some benchmark
+tests a lot!)
+<LI>
+
+Some benchmarks are changed for get better individual timing.
+(Some loops was so short that a specific test took &#60; 2 seconds. The
+loops has been changed to take about 20 seconds to make it easier
+to compare different databases. 1 &#60;-&#62; 2  before is now 11 &#60;-&#62; 24
+which is much better)
+<LI>
+
+Re-arranged select code to handle some very specific queries
+involving group functions (like COUNT(*)) without a GROUP BY but
+with HAVING. The following now works.
+
+SELECT count(*) as C from TABLE HAVING C &#62; 1
+<LI>
+
+Changed the protocol for field functions to be faster and avoid some
+mallocs().
+<LI>
+
+Added flag -T32 to mysqld for running all queries under the main thread.
+This makes it possible to debug mysqld under Linux with gdb!
+<LI>
+
+Added optimization of 'not_null_column IS NULL' (needed for some Access
+queries)
+<LI>
+
+Allow one to use STRAIGHT_JOIN between two tables to force the optimizer
+to join them in a specific order.
+<LI>
+
+String functions now return VARCHAR() instead of CHAR() and 
+the column type is now VARCHAR() for fields saved as VARCHAR().
+This should make the MyODBC driver better, but may break some old
+MySQL clients that doesn't handle FIELD_TYPE_VARCHAR identical as
+FIELD_TYPE_CHAR.
+<LI>
+
+CREATE INDEX and DROP INDEX are now implemented trough ALTER TABLE.
+CREATE TABLE is still the recommended (fast) way to create indexes.
+<LI>
+
+Added option wait_timeout to mysqld.
+<LI>
+
+Added time column to 'mysqladmin processes' to show how long a query
+has taken or how long a thread has sleeped.
+<LI>
+
+Lots of new varibles to 'show variables' and some new to 'show status'
+<LI>
+
+Added new type: YEAR. YEAR is stored on 1 byte with range 0, 1901-2155.
+<LI>
+
+Added new DATE type that is stored on 3 bytes instead of 4. All new
+tables will created with the new date type if one doesn't use
+--old-protocol.
+<LI>
+
+Fixed bug in record caches;  One could get 'Error from table handler: #'
+on some OS from some queries.
+<LI>
+
+New configure option for x86 machines (tested on Linux + gcc):
+--enable-assembler.  This will enable assembler functions for the most
+important string functions for more speed!
+</UL>
+
+
+
+<H2><A NAME="News-3.21.x" HREF="manual_toc.html#News-3.21.x">Changes in release 3.21.x</A></H2>
+
+
+
+<H3><A NAME="News-3.21.31" HREF="manual_toc.html#News-3.21.31">Changes in release 3.21.30</A></H3>
+
+<UL>
+<LI>
+
+Fixed a sign extension problem for the type 'tiny' on IRIX.
+<LI>
+
+Fixed problem with left("constant_string",function).
+<LI>
+
+Fixed problem with find_in_set().
+<LI>
+
+LEFT JOIN core dumped if the second table is used with a constant
+WHERE/ON expression with uniquely identifies one record.
+<LI>
+
+Fixed problems with date_format() and wrong dates.
+date_format() now ignores '%' to make it possible to extend it more easily in
+the future.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.30" HREF="manual_toc.html#News-3.21.30">Changes in release 3.21.30</A></H3>
+
+<UL>
+<LI>
+
+'mysql' now returns a exit code &#62; 0 if the query returned an error.
+<LI>
+
+Save of command line history to file in mysql client.
+by Tommy Larsen &#60;tommy@mix.hive.no&#62;
+<LI>
+
+Fixed problem with empty lines that was ignored in mysql.cc
+<LI>
+
+Save the pid of the signal handler thread in the pid file instead
+of the pid of the main thread.
+<LI>
+
+Added patch by tommy@valley.ne.jp to support Japanese characters
+SJIS and UJIS.
+<LI>
+
+Changed safe_mysqld to redirect startup messages to 'hostname'.err instead
+of 'hostname'.log to reclaim file space on 'mysqladmin refresh'
+<LI>
+
+enum() had always the first entry as default value.
+<LI>
+
+ALTER TABLE wrote two entires to the update log.
+<LI>
+
+sql_acc() now closes the mysql privilige tables after a reload to
+save table space and memory.
+<LI>
+
+Changed LOAD DATA to use less memory with tables and blobs.
+<LI>
+
+Sorting on a function which made a division / 0 produced a wrong set
+in some cases.
+<LI>
+
+Fixed select problem with LEFT() when using the czech character set.
+<LI>
+
+Fixed problem in isamchk; It couldn't repair a packed table in a very
+unusual case.
+<LI>
+
+Selects with &#38; or | (bit functions) failed on columns with NULL values.
+<LI>
+
+When comparing a field = field, where one of the fields was a part key,
+only the length of the part key was compared.  
+</UL>
+
+
+
+<H3><A NAME="News-3.21.29" HREF="manual_toc.html#News-3.21.29">Changes in release 3.21.29</A></H3>
+
+<UL>
+<LI>
+
+LOCK TABLES + 'DELETE from table' never removed locks properly.
+<LI>
+
+Fixed problem when grouping on a OR function.
+<LI>
+
+Fixed permission problem with umask() and creating new databases.
+<LI>
+
+Fixed permission problem on result file with SELECT ... INTO OUTFILE...
+<LI>
+
+Fixed problem in range optimizer (core dump) for a very complex query.
+<LI>
+
+Fixed problem when using MIN(integer) or MAX(integer) in GROUP BY.
+<LI>
+
+Fixed bug on Alpha when using integer keys. (Other keys worked on Alpha).
+<LI>
+
+Fixed bug in WEEK("XXXX-xx-01").
+</UL>
+
+
+
+<H3><A NAME="News-3.21.28" HREF="manual_toc.html#News-3.21.28">Changes in release 3.21.28</A></H3>
+
+<UL>
+<LI>
+
+Fixed socket permission (clients couldn't connect to unix socket on Linux).
+<LI>
+
+Fixed bug in record caches;  One could get 'Error from table handler: #'
+on some OS from some queries.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.27" HREF="manual_toc.html#News-3.21.27">Changes in release 3.21.27</A></H3>
+
+<UL>
+<LI>
+
+Added user level locks:  GET_LOCK(string,timeout), RELEASE_LOCK(string)
+<LI>
+
+Added opened_tables to 'show status'.
+<LI>
+
+Changed connect timeout to 3 seconds to make it somewhat harder
+for crackers to kill mysqld trough telnet + TCP/IP.
+<LI>
+
+Fixed bug in range optimizer when using:
+WHERE key_part_1 &#62;= something and key_part_2 &#60;= something_else
+<LI>
+
+Changed configure for detection of FreeBSD 3.0 9803xx and above
+<LI>
+
+WHERE with string-column-key = constant-string didn't always find all rows
+if the column had many values differing only with characters of the same sort
+value (like e and -Aé).$)B
+<LI>
+
+Strings keys looked up with 'ref' was not compared case sensitively.
+<LI>
+
+Added umask() to make log_files non-readable for normal users.
+<LI>
+
+Ignore users with old password (8 byte) on startup if not using
+--old-protocol.
+<LI>
+
+select which matched all key fields returned the values in the same
+case as the matched values instead of the found values. (Minor problem)
+</UL>
+
+
+
+<H3><A NAME="News-3.21.26" HREF="manual_toc.html#News-3.21.26">Changes in release 3.21.26</A></H3>
+
+<UL>
+<LI>
+
+from_days(0) now returns "0000-00-00"
+<LI>
+
+In DATE_FORMAT() PM and AM was swapped for hours 00 and 12.
+<LI>
+
+Extended the default max key size to 256.
+<LI>
+
+Fixed bug when using BLOB/TEXT in GROUP BY with many tables.
+<LI>
+
+A enum field that is not declared NOT NULL has NULL as default value.
+(Before the default value was the first enum option)
+<LI>
+
+Fixed bug in the join optimizer code when using many part keys
+on the same key:  INDEX (Organisation,Surname(35),Initials(35)).
+<LI>
+
+Added some tests to the table order optimizer to get some cases with 'SELECT ...
+FROM many_tables' much faster.
+<LI>
+
+Added a retry loop around accept() to possible fix some problems on some
+Linux machines.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.25" HREF="manual_toc.html#News-3.21.25">Changes in release 3.21.25</A></H3>
+
+<UL>
+<LI>
+
+Changed typedef 'string' to 'my_string' for better portability.
+<LI>
+
+One can now kill threads that are waiting for 'disk full'.
+<LI>
+
+Fixed some problems with UDF functions.
+<LI>
+
+Added long options for isamchk. Try isamchk --help.
+<LI>
+
+Fixed a bug when using 8 bytes long (alpha); filesort() didn't work.
+Affects DISTINCT, ORDER BY and GROUP BY on 64 bit processors.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.24" HREF="manual_toc.html#News-3.21.24">Changes in release 3.21.24</A></H3>
+
+<UL>
+<LI>
+
+Dynamic loadable functions. Based on source from Alexis Mikhailov.
+<LI>
+
+One couldn't delete from a table if no one had done a select on the table.
+<LI>
+
+Fixed problem with range optimizer which many OR's on key parts inside
+each other.
+<LI>
+
+Recoded min() and max() to work properly with strings and HAVING.
+<LI>
+
+Changed default umask for new files from 0664 to 0660.
+<LI>
+
+Fixed problem with LEFT JOIN and constant expressions in the ON part.
+<LI>
+
+Added Italian error messages from <a HREF="mailto:brenno@3cord.philips.nl">brenno@3cord.philips.nl</a>
+<LI>
+
+configure now works better on OSF1 (tested on 4.0D).
+<LI>
+
+Added hooks to allow LIKE optimization with international character support.
+<LI>
+
+Upgraded DBI to 0.93
+</UL>
+
+
+
+<H3><A NAME="News-3.21.23" HREF="manual_toc.html#News-3.21.23">Changes in release 3.21.23</A></H3>
+
+<UL>
+<LI>
+
+Fixed that the following symbols are not reserved words:
+TIME DATE TIMESTAMP TEXT BIT ENUM NO ACTION CHECK YEAR MONTH DAY HOUR
+MINUTE SECOND STATUS VARIABLES.
+<LI>
+
+Setting a TIMSTAMP to NULL in LOAD DATA INFILE... didn't set the current
+time for the TIMESTAMP.
+<LI>
+
+Fix that BETWEEN recognizes binary strings. Now BETWEEN is case
+sensitive.
+<LI>
+
+Added switch --skip-thread-priority for systems where mysqld's thread
+scheduling doesn't work properly (BSDI 3.1).
+<LI>
+
+Added ODBC functions DAYNAME() and MONTHNAME().
+<LI>
+
+Added function TIME_FORMAT().  This works like DATE_FORMAT() but takes
+a time string (HH:MM:DD) as argument.
+<LI>
+
+Fixed unlikely(?) key optimizer bug when using ORs of key parts inside ANDs.
+<LI>
+
+Added command 'variables' to mysqladmin.
+<LI>
+
+A lot of small changes to the binary releases.
+<LI>
+
+Fixed a bug in the new protocol from <STRONG>MySQL</STRONG> 3.21.20.
+<LI>
+
+Changed ALTER TABLE to work with WIN32 (Win32 can't rename open files).
+Fixed also a couple of small bugs in the WIN32 version.
+<LI>
+
+All standard <STRONG>MySQL</STRONG> clients are now ported to MySQL-win32.
+<LI>
+
+MySQL can now be started as a service on NT.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.22" HREF="manual_toc.html#News-3.21.22">Changes in release 3.21.22</A></H3>
+
+<UL>
+<LI>
+
+Starting with this version all <STRONG>MySQL</STRONG> distributions will be configured,
+compiled and tested with crash-me and the benchmarks on the following
+platforms: SunOS 5.6 sun4u, SunOS 5.5.1 sun4u, SunOS 4.14 sun4c,
+SunOS 5.6 i86pc, IRIX 6.3 mips5k, HP-UX 10.20 hppa, AIX 4.2.1 ppc,
+OSF1 V4.0 alpha, FreeBSD 2.2.2 i86pc and BSDI 3.1 i386.
+<LI>
+
+Fix of count(*) problems when the WHERE clause didn't match any records.
+(Bug from 3.21.17)
+<LI>
+
+Removed that NULL = NULL is true.  Now one must use IS NULL or IS NOT NULL
+to test if a value is NULL. (This is according to ANSI SQL but may break
+old applications that are ported from mSQL)
+One can get the old behaviour by compiling with -DmSQL_COMPLIANT
+<LI>
+
+Fixed bug that core dumped when using many LEFT OUTER JOIN's.
+<LI>
+
+Fixed bug in ORDER BY on string formula with possible NULL values.
+<LI>
+
+Fixed problem in range optimizer when &#60;= on sub index.
+<LI>
+
+Added functions DAYOFYEAR(), DAYOFMONTH(), MONTH(), YEAR(), WEEK(),
+QUARTER(), HOUR(), MINUTE(), SECOND() and FIND_IN_SET().
+<LI>
+
+Added command SHOW VARIABLES.
+<LI>
+
+Added support of 'long constant strings' from ANSI SQL:
+select 'first ' 'second';  -&#62; 'first second';
+<LI>
+
+Upgraded mSQL-Mysql-modules to 1.1825
+<LI>
+
+Upgraded mysqlaccess to 2.02
+<LI>
+
+Fixed problem with Russian character set and LIKE.
+<LI>
+
+Ported to openbsd 2.1
+<LI>
+
+New Dutch error messages
+</UL>
+
+
+
+<H3><A NAME="News-3.21.21a" HREF="manual_toc.html#News-3.21.21a">Changes in release 3.21.21a</A></H3>
+
+<UL>
+<LI>
+
+Configure changes for some OS.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.21" HREF="manual_toc.html#News-3.21.21">Changes in release 3.21.21</A></H3>
+
+<UL>
+<LI>
+
+Fixed optimizer bug when using
+'WHERE data_field=date_field2 and date_field2=constant'
+<LI>
+
+Added command 'show status'
+<LI>
+
+Removed manual.ps from the source distribution to make it smaller.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.20" HREF="manual_toc.html#News-3.21.20">Changes in release 3.21.20</A></H3>
+
+<UL>
+<LI>
+
+Changed maximum table name and column name lengths from 32 to 64.
+<LI>
+
+Aliases can now be of 'any' length.
+<LI>
+
+Fixed that 'mysqladmin stat' returns right number of queries.
+<LI>
+
+Changed protocol (downward compatible) to mark if a column is
+auto_increment or a timestamp. This is needed for the new Java driver.
+<LI>
+
+Added hebrew sorting order by Zeev Suraski.
+<LI>
+
+Solaris 2.6: Fixed configure bugs and increased maximum table size from 2G to 4G
+</UL>
+
+
+
+<H3><A NAME="News-3.21.19" HREF="manual_toc.html#News-3.21.19">Changes in release 3.21.19</A></H3>
+
+<UL>
+<LI>
+
+Upgraded DBD to 1823. This version implements mysql_use_result in DBD-Mysql.
+<LI>
+
+Benchmarks updated for empress (by Luuk)
+<LI>
+
+Fixed a case of slow range searching.
+<LI>
+
+Configure fixes (Docs directory).
+<LI>
+
+Added function <CODE>REVERSE()</CODE> (by Zeev Suraski)
+</UL>
+
+
+
+<H3><A NAME="News-3.21.18" HREF="manual_toc.html#News-3.21.18">Changes in release 3.21.18</A></H3>
+
+<UL>
+<LI>
+
+Give error message if client C functions are called in wrong order.
+<LI>
+
+Added automatic reconnect to the libmysql.c library. If a write command
+fails a automatic reconnect is done.
+<LI>
+
+Small sort sets doesn't use temporary files anymore.
+<LI>
+
+Upgraded DBI to 0.91
+<LI>
+
+Fixed a couple of problems with LEFT OUTER JOIN.
+<LI>
+
+Added CROSS JOIN syntax. CROSS is now a reserved word.
+<LI>
+
+Recoded yacc/bison stack allocation to be even safer and allow <STRONG>MySQL</STRONG>
+to handle even bigger expressions.
+<LI>
+
+Fixed a couple of problems with the update log.
+<LI>
+
+ORDER BY was slow when used with key ranges.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.17" HREF="manual_toc.html#News-3.21.17">Changes in release 3.21.17</A></H3>
+
+<UL>
+<LI>
+
+Changed documentation string of --with-unix-socket-path to avoid confusion.
+<LI>
+
+Added ODBC and ANSI SQL style <CODE>LEFT OUTER JOIN</CODE>.
+<LI>
+
+The following are new reserved words: <CODE>LEFT</CODE>, <CODE>NATURAL</CODE>,
+<CODE>USING</CODE>
+<LI>
+
+The client library is now using the environment variable
+<CODE>MYSQL_HOST</CODE> as the default host if it's defined.
+<LI>
+
+<CODE>SELECT column, SUM(expr)</CODE> now returns <CODE>NULL</CODE> for column when
+there are matching rows.
+<LI>
+
+Fixed problem with compare of binary strings and blobs with ASCII
+characters over 127. 
+<LI>
+
+Fixed lock problem: When freeing a read lock on a table with multiple
+read locks, a thread waiting for write lock would have given the lock.
+This shouldn't affect data integrity, but could possible make mysqld
+to restart if one thread was reading data that another thread modified.
+<LI>
+
+LIMIT offset,count didn't work in INSERT ... SELECT.
+<LI>
+
+Optimized key block caching. This will be quicker than the old one when
+using bigger key caches.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.16" HREF="manual_toc.html#News-3.21.16">Changes in release 3.21.16</A></H3>
+
+
+<UL>
+<LI>
+
+Added ODBC 2.0 &#38; 3.0 functions: <CODE>POWER()</CODE>, <CODE>SPACE()</CODE>,
+<CODE>COT()</CODE>, <CODE>DEGREES()</CODE>, <CODE>RADIANS()</CODE>, <CODE>ROUND(2 arg)</CODE>
+and <CODE>TRUNCATE()</CODE>.
+<LI>
+
+<STRONG>WARNING INCOMPATIBLE CHANGE!!</STRONG>. <CODE>LOCATE()</CODE> parameters where
+swapped according to ODBC standard. Fixed.
+<LI>
+
+Added function <CODE>TIME_TO_SEC()</CODE>.
+<LI>
+
+In some cases default values was not used for <CODE>NOT NULL</CODE> fields.
+<LI>
+
+Timestamp wasn't updated in <CODE>UPDATE SET ...</CODE> if the timestamp was
+used as.
+<LI>
+
+Allow empty strings as default values for <CODE>BLOB</CODE> and <CODE>TEXT</CODE> to
+be compatible with mysqldump.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.15" HREF="manual_toc.html#News-3.21.15">Changes in release 3.21.15</A></H3>
+
+
+<UL>
+<LI>
+
+<STRONG>WARNING INCOMPATIBLE CHANGE!!</STRONG> mysqlperl is now from
+Msql-Mysql-modules. This means that the connect() now takes
+host,database,user,password ! The old version took
+host,database,password,user.
+<LI>
+
+Allow <CODE>DATE '1997-01-01'</CODE>, <CODE>TIME '12:10:10'</CODE> and
+<CODE>TIMESTAMP '1997-01-01 12:10:10'</CODE> formats required by ANSI SQL.
+<STRONG>WARNING INCOMPATIBLE CHANGE!!</STRONG> This has the unfortunate
+side-effect that one can't have columns named <CODE>DATE</CODE>, <CODE>TIME</CODE>
+or <CODE>TIMESTAMP</CODE> anymore :( Old columns can still be accessed trough
+'tablename.columnname'!
+<LI>
+
+Changed Makefiles to hopefully work better with BSD systems. Also
+manual.dvi is now included in the distribution to avoid having stupid
+makes trying to rebuild it.
+<LI>
+
+Readline library upgraded to version 2.1
+<LI>
+
+A new sortorder german-1. That is a normal iso-latin1 with a german sort
+order.
+<LI>
+
+Perl DBI/DBD is now included in the distribution. DBI is now the
+recommended way to connect to <STRONG>MySQL</STRONG> from perl.
+<LI>
+
+New portable benchmark suite with DBD, with test results from mSQL 2.0.3,
+<STRONG>MySQL</STRONG>, PostgreSQL 6.2.1 and Solid server 2.2.
+<LI>
+
+crash-me is now included with the benchmarks; This is a perl program
+designed to find as many limits as possible in a SQL server. Tested with
+mSQL, postgreSQL, Solid and <STRONG>MySQL</STRONG>.
+<LI>
+
+Fixed bug in range-optimiser that crashed mysql on some queries.
+<LI>
+
+Table and column name completion for mysql command line tool, by Zeev
+Suraski and Andi Gutmans.
+<LI>
+
+Added new command <CODE>REPLACE</CODE>, which works like <CODE>INSERT</CODE> but
+replaces conflicting records with the new record. <CODE>REPLACE INTO
+TABLE ... SELECT ...</CODE> works also.
+<LI>
+
+Added new commands: <CODE>CREATE DATABASE db_name</CODE> and <CODE>DROP
+DATABASE db_name</CODE>.
+<LI>
+
+Added <CODE>RENAME</CODE> option to <CODE>ALTER TABLE</CODE>: <CODE>ALTER TABLE name
+RENAME AS new_name</CODE>.
+<LI>
+
+make_binary_distribution now includes libgcc.a in libmysqlclient.a. This
+should make linking work for people without gcc.
+<LI>
+
+Changed <CODE>net_write()</CODE> to <CODE>my_net_write()</CODE> because of name
+conflict with sybase.
+<LI>
+
+New function <CODE>DAYOFWEEK()</CODE> compatible with ODBC.
+<LI>
+
+Stack checking and bison memory overrun checking to get <STRONG>MySQL</STRONG>
+safer with weird queries.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.14b" HREF="manual_toc.html#News-3.21.14b">Changes in release 3.21.14b</A></H3>
+
+
+<UL>
+<LI>
+
+Fixed a couple of small configure problems on some platforms.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.14a" HREF="manual_toc.html#News-3.21.14a">Changes in release 3.21.14a</A></H3>
+
+
+<UL>
+<LI>
+
+Ported to SCO Openserver 5.0.4  with FSU-threads.
+<LI>
+
+HP/UX 10.20 should work.
+<LI>
+
+Added new functions DATE_FORMAT() and DATE_ADD_MM()..
+<LI>
+
+Added NOT IN.
+<LI>
+
+Added automatic removal of 'ODBC function conversions': {fn now() }
+<LI>
+
+Handle ODBC 2.50.3 option flags.
+<LI>
+
+Fixed compare of DATE and TIME with NULL. 
+<LI>
+
+Changed language name from germany to german to be consistent with
+the other language names.
+<LI>
+
+Fixed sorting problem on functions returning a float. Before the values
+was converted to a int before sorting.
+<LI>
+
+Fixed slow sorting when sorting on key field when using KEY_COLUMN=constant.
+<LI>
+
+SORTING on calculated DOUBLE values sorted on integer results instead.
+<LI>
+
+'mysql' doesn't need a database argument anymore.
+<LI>
+
+Changed the place where HAVING should be. According to ANSI it should be
+after GROUP BY but before ORDER BY. <STRONG>MySQL</STRONG> 3.20 had it wrongly
+last.
+<LI>
+
+Added Sybase command: USE DATABASE to start using another database.
+<LI>
+
+Added automatic adjusting of number of connections and table cache size
+if the maximum number of files that can be opened are less than needed.
+This should fix that mysqld doesn't crash even if one hasn't done a
+ulimit -n 256 before starting mysqld.
+<LI>
+
+Added lots of limit checks to make it safer when running with too little
+memory or when doing weird queries.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.13" HREF="manual_toc.html#News-3.21.13">Changes in release 3.21.13</A></H3>
+
+
+<UL>
+<LI>
+
+Added retry of interrupted reads and clearing of errno.
+This makes Linux systems much safer!
+<LI>
+
+Fixed locking bug when using many alias on the same table in the same select.
+<LI>
+
+Fixed bug with LIKE on number key.
+<LI>
+
+New error message so one can check if the connection was lost while
+the command was running or if the connection was down from the start.
+<LI>
+
+Added --table option to mysql to print in table format.
+Moved time and row information after query result.
+Added automatic reconnect of lost connections.
+<LI>
+
+Added != as an alias for &#60;&#62;.
+<LI>
+
+Added function VERSION() to make easier logs.
+<LI>
+
+New multi-user test 'tests/fork_test.pl' to put some strain on the
+thread library.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.12" HREF="manual_toc.html#News-3.21.12">Changes in release 3.21.12</A></H3>
+
+
+<UL>
+<LI>
+
+Fixed ftruncate() call in MIT-threads. This made isamchk() destroy the .ISM
+files on (Free)BSD systems 2.#
+<LI>
+
+Fixed broken __P_ patch in MIT-threads
+<LI>
+
+Many memory overrun checks. All string functions now return <CODE>NULL</CODE>
+if the returned string should be longer than <CODE>max_allowed_packet</CODE>.
+<LI>
+
+Changed the name if the <CODE>INTERVAL</CODE> type to <CODE>ENUM</CODE>, because
+<CODE>INTERVAL</CODE> is used in ANSI SQL.
+<LI>
+
+In some cases doing a JOIN + GROUP + INTO OUTFILE, the result wasn't
+grouped.
+<LI>
+
+LIKE with '_' as last character didn't work. Fixed
+<LI>
+
+Added extended ANSI SQL <CODE>TRIM()</CODE> function.
+<LI>
+
+Added <CODE>CURTIME()</CODE>.
+<LI>
+
+Added <CODE>ENCRYPT()</CODE> function by Zeev Suraski.
+<LI>
+
+Fixed better <CODE>FOREIGN KEY</CODE> syntax skipping. New reserved words:
+<CODE>MATCH</CODE>, <CODE>FULL</CODE>, <CODE>PARTIAL</CODE>
+<LI>
+
+mysqld now allows ip and hostname to the <CODE>--bind-address</CODE> option.
+<LI>
+
+Added "SET OPTION CHARACTER SET cp1251_koi8" to enable conversions off
+data to/from cp1251_koi8.
+<LI>
+
+Lots of changes for Win95 port. In theory this version should now be
+easily portable to Win95.
+<LI>
+
+Changed the create column syntax off <CODE>NOT NULL</CODE> to be after the
+<CODE>DEFAULT</CODE> value as specified in the ANSI SQL standard. This will
+make mysqldump with <CODE>NOT NULL</CODE> and default values incompatible with
+<STRONG>MySQL</STRONG> 3.20.
+<LI>
+
+Added a lot of function name alias so one can use the functions with
+ODBC or ANSI SQL92 syntax.
+<LI>
+
+Fixed <CODE>ALTER TABLE person ALTER COLUMN phone SET DEFAULT NULL</CODE>
+syntax.
+<LI>
+
+Added CHAR and BIT as a synonyms for CHAR(1)
+<LI>
+
+Fixed core dump when updating as user with only select privilege.
+<LI>
+
+INSERT ... SELECT ... GROUP BY didn't work in some cases. On got
+'Invalid use of group function'
+<LI>
+
+When using LIMIT, SELECT now always uses keys instead of record scan.
+This will give better performance on SELECT and a WHERE that matches many
+rows.
+<LI>
+
+Added Russian error messages.
+<LI>
+
+In some cases doing a join + group + INTO OUTFILE, the result wasn't
+grouped.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.11" HREF="manual_toc.html#News-3.21.11">Changes in release 3.21.11</A></H3>
+
+
+<UL>
+<LI>
+
+Configure changes.
+<LI>
+
+MySQL new works with the new thread library on BSD/OS 3.0.
+<LI>
+
+Added new group functions: BIT_OR() and BIT_AND().
+<LI>
+
+Added compatibility functions: CHECK, REFERENCES. CHECK is now a
+reserved word.
+<LI>
+
+Added BIT as a synonym for CHAR(1) to get better compatibility.
+<LI>
+
+Added option ALL to GRANT for better compatibility. (GRANT is still
+a dummy fuction.
+<LI>
+
+Added partly translated dutch messages.
+<LI>
+
+Fixed bug in ORDER BY and GROUP BY with NULL columns
+<LI>
+
+Added function last_insert_id() to retreive last auto_increment value.
+This is for clients to ODBC that can't use the mysql_insert_id API function,
+but can be used by any client.
+<LI>
+
+Added option '--flush-logs' to mysqladmin.
+<LI>
+
+Added command 'status' to mysql.
+<LI>
+
+Fixed problem with order/group by because of bug in gcc.
+<LI>
+
+Fixed problem with INSERT ... SELECT .. GROUP BY.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.10" HREF="manual_toc.html#News-3.21.10">Changes in release 3.21.10</A></H3>
+
+
+<UL>
+<LI>
+
+New mysqlaccess.
+<LI>
+
+CREATE supports now all ODBC types and the mSQL <CODE>TEXT</CODE> type. All
+ODBC 2.5 functions is also supported (added REPAT). This gives better
+portability.
+<LI>
+
+Added text types: <CODE>TINYTEXT</CODE>, <CODE>TEXT</CODE>, <CODE>MIDDLETEXT</CODE> and
+<CODE>LONGTEXT</CODE>.  These are actually blobs, but all searching is done
+case independent.
+<LI>
+
+All old <CODE>BLOB</CODE> fields are now <CODE>TEXT</CODE> fields.  This only
+changes that all searching on strings are case independent. One have to
+do a ALTER TABLE and change the field to BLOB if one wants to have tests
+done case dependent.
+<LI>
+
+Fixed some configure issues.
+<LI>
+
+Made the locking code a bit safer. Fixed very unlikely
+dead lock situation.
+<LI>
+
+Fixed a couple of bugs in the range optimiser. Now the new range benchmark
+test-select works.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.9" HREF="manual_toc.html#News-3.21.9">Changes in release 3.21.9</A></H3>
+
+
+<UL>
+<LI>
+
+Added --enable-unix-socket=pathname arg to configure.
+<LI>
+
+Fixed a couple of portable problems with include files.
+<LI>
+
+Fixed bug in range calculation that could return empty
+set when searching on multiple key with only one entry (very rare).
+<LI>
+
+Most things ported to FSU threads, which should allow <STRONG>MySQL</STRONG> to
+run on SCO.  ¡Ö<A HREF="manual_Installing.html#SCO">SCO notes.</A>¡×Àá»²¾È .
+</UL>
+
+
+
+<H3><A NAME="News-3.21.8" HREF="manual_toc.html#News-3.21.8">Changes in release 3.21.8</A></H3>
+
+
+<UL>
+<LI>
+
+Works now in Solaris 2.6
+<LI>
+
+Added handling of calculation of sum() functions.
+One can now use for example: SUM(column)/COUNT(column)
+<LI>
+
+Added handling of trigometric functions: PI(), ACOS(), ASIN(), ATAN(),
+COS(), SIN() and TAN().
+<LI>
+
+New languages: norwegian, norwegian-ny and portuguese.
+<LI>
+
+Fixed parameter bug in net_print in procedure.cc.
+<LI>
+
+Fixed a cople of memory leaks.
+<LI>
+
+Now allow also the old SELECT ... INTO OUTFILE syntax.
+<LI>
+
+Fixed bug with group by and select on key with many values.
+<LI>
+
+mysql_fetch_lengths() returned sometimes wrong lengths when one used
+mysql_use_result(). This affected at least some cases of mysqldump --quick.
+<LI>
+
+Fixed bug in optimisation of WHERE const op field.
+<LI>
+
+Fixed problem when sorting on NULL fields.
+<LI>
+
+Fixed a couple of 64bit (Alpha) problems
+<LI>
+
+Added option --pid-file=# to mysqld
+<LI>
+
+Added date formating to from_unixtime(), originally by Zeev Suraski.
+<LI>
+
+Fixed bug in BETWEEN in range optimiser (Did only test = of the first
+argument).
+<LI>
+
+Added machine dependent files for mit-pthreads i386-SCO. There is probably
+more to do to get this to work on SCO 3.5. 
+</UL>
+
+
+
+<H3><A NAME="News-3.21.7" HREF="manual_toc.html#News-3.21.7">Changes in release 3.21.7</A></H3>
+
+
+<UL>
+<LI>
+
+Changed to Makefile.am to take advantage of automake 1.2.
+<LI>
+
+Added the beginnings of a benchmark suite.
+<LI>
+
+Added more secure password handling.
+<LI>
+
+Added new client function: mysql_errno() to get the error number of
+the error message. This makes error checking in the client much easier.
+This makes the new server incompatible with the 3.20.# server when running
+without --old-protocol.  The client code is backward compatible.
+More information can be found in the README file!
+<LI>
+
+Fixed some problems when using very long, illegal names.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.6" HREF="manual_toc.html#News-3.21.6">Changes in release 3.21.6</A></H3>
+
+
+<UL>
+<LI>
+
+Fixed more portability issues (wrong sigwait and sigset define)
+<LI>
+
+configure should now be able to detect the last argument to accept().
+</UL>
+
+
+
+<H3><A NAME="News-3.21.5" HREF="manual_toc.html#News-3.21.5">Changes in release 3.21.5</A></H3>
+
+
+<UL>
+<LI>
+
+Should now work at FreeBSD 3.0, if one used the FreeBSD-3.0-libc_r-1.0.diff
+which can be found at <a HREF="http://www.tcx.se/Download/Patches">http://www.tcx.se/Download/Patches</a>
+<LI>
+
+Added new option to mysqld: -O tmp_table_size=#
+<LI>
+
+New function from_unixtime(timestamp) which returns a date string in
+YYYY-MM-DD HH:MM:DD format.
+<LI>
+
+New function sec_to_time(seconds) which returns a string in H:MM:SS format.
+<LI>
+
+new function: substring_index(), originally by Zeev Suraski.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.4" HREF="manual_toc.html#News-3.21.4">Changes in release 3.21.4</A></H3>
+
+
+<UL>
+<LI>
+
+Should now configure and compile on OSF1 4.0 with the Dec compiler.
+<LI>
+
+configure and compile on BSD/OS 3.0 works, but due to some bugs in
+BSD/OS 3.0, mysqld doesn't work on it yet.
+<LI>
+
+configure and compile on FreeBSD 3.0, but I couldn't get pthread_create to
+work.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.3" HREF="manual_toc.html#News-3.21.3">Changes in release 3.21.3</A></H3>
+
+
+<UL>
+<LI>
+
+Added reverse check lookup of hostnames to get better security.
+<LI>
+
+Fixed some possible buffer overflows if one uses too long filenames.
+<LI>
+
+mysqld doesn't accept hostnames that starts with digits followed by a '.'
+because the hostname may look like a IP.
+<LI>
+
+Added option --skip-networking to only allow socket connections.
+(This will not work with MIT threads!)
+<LI>
+
+Added check of too long table names for alias.
+<LI>
+
+Added check if database name is okey.
+<LI>
+
+Addded check if too long table names.
+<LI>
+
+Removed wrong free() that killed the server on 'create/drop database'.
+<LI>
+
+Changed the name of some mysqld -O options to better names.
+<LI>
+
+Added option '-O join_cache_size=#'.
+<LI>
+
+Added option '-O max_join_size=#' to be able to set a limit how big
+queries (in this case big = slow) one should be able to handle without
+specifying 'SQL_OPTION OPTION_BIG_SELECTS=1'.  A # = is about 10
+examined records. The default is 'unlimited'.
+<LI>
+
+When comparing a TIME, DATE, DATETIME or TIMESTAMP column to a 
+constant the constant is converted to a time value before comparing.
+This will make it easier to get ODBC and particularly Access97 to work with
+the above types. It should also make dates easier to use and the compares
+should be quicker than before.
+<LI>
+
+Applied patch from Jochen Wiedmann that fixes that query() in mysqlperl
+now can take queries with \0 in it.
+<LI>
+
+Store of timestamp with 2 digit year YYMMDD didn't work.
+<LI>
+
+Fix that timestamp isn't automaticly updated if set in a update clause.
+<LI>
+
+Now the automatic timestamp field is the FIRST timestamp field.
+<LI>
+
+SELECT * INTO OUTFILE, which didn't correctly if the outfile already existed.
+<LI>
+
+'mysql' now shows thread id when starting or doing a reconnect.
+<LI>
+
+Changed the default sort buffer size from 2M to 1M.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.2" HREF="manual_toc.html#News-3.21.2">Changes in release 3.21.2</A></H3>
+
+
+<UL>
+<LI>
+
+The range optimiser is cooded, but only 85% tested. It can be enabled with
+--new, but it crashes core a lot yet...
+<LI>
+
+More portable. Should compile one AIX and alpha-digital.
+At least the isam library should be relative 64 bit clean.
+<LI>
+
+New isamchk which can detect and fix more problems.
+<LI>
+
+New options for isamlog.
+<LI>
+
+Using new version of automake
+<LI>
+
+Many small portability changes (from the AIX and alpha-digital port)
+Better checking of pthread(s) library.
+<LI>
+
+czech error messages by snajdr@pvt.net
+<LI>
+
+'mysql' now shows thread id when starting or doing a reconnect.
+<LI>
+
+Decresed some buffers to get less problems on system with little memory.
+Also added more checks to handle 'out of memory' problems
+<LI>
+
+mysqladmin: One can now do 'mysqladmin kill 5,6,7,8'
+<LI>
+
+When the max connection limit is reached, one extra connection by a user with
+the PROCESS_ACL privilege is granted.
+<LI>
+
+Added new mysqld option: -O backlog=#
+<LI>
+
+Increased max packet size from 512K to 1024K for client.
+<LI>
+
+Almost all of the functions code is now tested in the intern test suite.
+<LI>
+
+ALTER TABLE now returns warnings from field conversions.
+<LI>
+
+Port changed to 3306 (got it reserved from ISI).
+<LI>
+
+Added a fix for Visual Fox Base so that any schema name from a table
+specification is automaticly removed.
+<LI>
+
+New function ASCII.
+<LI>
+
+Removed the between() function. On should use the 'col BETWEEN a AND b'
+syntax instead.
+<LI>
+
+MySQL now doesn't anymore have to use a extra temporary table when sorting
+on functions or SUM functions.
+<LI>
+
+Fixed bug that one couldn't use 'table_name.field_name' in UPDATE.
+<LI>
+
+Fixed SELECT DISTINCT when using 'hidden group'. For example:
+SELECT DISTINCT MOD(some_field,10) FROM test GROUP BY some_field;
+Note: some_field is normally in the select part. ANSI SQL should require
+it.
+</UL>
+
+
+
+<H3><A NAME="News-3.21.0" HREF="manual_toc.html#News-3.21.0">Changes in release 3.21.0</A></H3>
+
+
+<UL>
+<LI>
+
+New keywords used: INTERVAL, EXPLAIN, READ, WRITE, BINARY
+<LI>
+
+Added ODBC functions CHAR(num,...) and ASCII(string).
+<LI>
+
+Removed function BETWEEN(a,b,c). One should use the standard ANSI SYNTAX:
+expr BETWEEN expr AND expr.
+<LI>
+
+New operator IN. This uses a binary search to find a match.
+<LI>
+
+New command <CODE>LOCK TABLES table_name [AS alias] (READ | WRITE), ...</CODE>
+<LI>
+
+New server option <CODE>mysqld --log-update</CODE> to get a log suitable for
+incremental updates
+<LI>
+
+new command: EXPLAIN SELECT ... to get info about how the optimzier
+will do the join.
+<LI>
+
+For easier client code, the client shouldn't anymore use
+<CODE>FIELD_TYPE_TINY_BLOB</CODE>, <CODE>FIELD_TYPE_MEDIUM_BLOB</CODE>,
+<CODE>FIELD_TYPE_LONG_BLOB</CODE> or <CODE>FIELD_TYPE_VAR_STRING</CODE> (as
+previously returned by mysql_list_fields).  One should instead only use
+<CODE>FIELD_TYPE_BLOB</CODE> or <CODE>FIELD_TYPE_STRING</CODE>.  If one wants exact
+types one should use the command <CODE>SHOW FIELDS</CODE> .
+<LI>
+
+Added varbinary syntax: <CODE>0x######</CODE> which can be used as a string
+(default) or a number.
+<LI>
+
+<CODE>FIELD_TYPE_CHAR</CODE> is renamed to <CODE>FIELD_TYPE_TINY</CODE>.
+<LI>
+
+Changed all fields to C++ classes.
+<LI>
+
+Removed FORM struct.
+<LI>
+
+A field with a <CODE>DEFAULT</CODE> doesn't have to be <CODE>NOT NULL</CODE>
+anymore.
+<LI>
+
+New field types:
+<DL COMPACT>
+
+<DT><CODE>ENUM</CODE>
+<DD>
+A string with only can take a couple of defined values. The value is
+stored as a 1-3 byte number that automaticly is mapped to a string.
+This is sorted according to string positions!
+<DT><CODE>SET</CODE>
+<DD>
+A string with may have one or many string values separated with ','.
+The string is stored as a 1,2,3,4 or 8 byte number where each bit stands
+for a specific string.  This is sorted according to unsigned value
+of the stored packed number.
+</DL>
+<LI>
+
+Now all function calculation is done with double or long long.  This
+will give one the full 64 bits range with bit functions and fix some
+conversions that previously could give precision losses.  One should
+avoid using 'unsigned long long' columns with full 64 bits range
+(numbers bigger than 9223372036854775807) because calculations is done
+with signed long long.
+<LI>
+
+ORDER BY will now put NULL fields first. GROUP BY will also work with NULL.
+<LI>
+
+Full WHERE with expressions.
+<LI>
+
+New range optimiser with can resolve ranges when some prefix keypart is
+constant. Example:
+SELECT * FROM table_name WHERE key_part_1="customer" and key_part_2 &#62;= 10 AND
+key_part_2 &#60;= 10)
+</UL>
+
+
+
+<H2><A NAME="News-3.20.x" HREF="manual_toc.html#News-3.20.x">Changes in release 3.20.x</A></H2>
+
+<P>
+Changes from 3.20.18 to 3.20.32b are not documented here since the the
+3.21 release bransched here. And the relevant changes are also
+documented as changes to the 3.21 version.
+
+</P>
+
+
+
+<H3><A NAME="News-3.20.18" HREF="manual_toc.html#News-3.20.18">Changes in release 3.20.18</A></H3>
+
+
+<UL>
+<LI>
+
+Added -p# (remove # directories from path) to isamlog.
+All files are written with a relative path from the database directory
+Now mysqld shouldn't crash on shutdown when using --log-isam. 
+<LI>
+
+New mysqlperl version. Is now compatible with msqlperl-0.63.
+<LI>
+
+New DBD module available in Contrib/
+<LI>
+
+Added group function STD() (standard derivation).
+<LI>
+
+The mysql server is now by default compiled without debugging information.
+This will make the daemon smaller and faster.
+<LI>
+
+Now one usually only have to give --basedir to mysqld. All other paths
+are relative in a normal installation.
+<LI>
+
+BLOBs contained sometimes garbage when used with a SELECT on more than
+one table and ORDER BY.
+<LI>
+
+Fixed that calculations that are not in GROUP BY works as expected.
+(ANSI SQL extension)
+Example: SELECT id,id+1 FROM table GROUP BY id
+<LI>
+
+The test of using MYSQL_PWD was reversed. Now MYSQL_PWD is enabled as default
+in the default release.
+<LI>
+
+Fixed convert bug which got mysqld to core dump with Aritmetic error on
+Sparc-386
+<LI>
+
+Added option --unbuffered to mysql. (For new mysqlaccess)
+<LI>
+
+When using overlapping (unnecessary keys) and join over many tables
+the optimiser could get confused and return 0 records.
+</UL>
+
+
+
+<H3><A NAME="News-3.20.17" HREF="manual_toc.html#News-3.20.17">Changes in release 3.20.17</A></H3>
+
+
+<UL>
+<LI>
+
+One can now use BLOBs columns and the functions IS NULL and IS NOT NULL
+in the WHERE clause.
+<LI>
+
+All communication packages and row buffers are now alloced dynamicly on
+demand. The default <CODE>max_allowed_packet</CODE> is now 65K for the server
+and 512K for the client. This is mainly used to catch wrong packets that
+could trash all memory. The server limit may be changed when it is
+started.
+<LI>
+
+Changed stack usage to use less memory.
+<LI>
+
+Changed safe_mysqld to check for running daemon.
+<LI>
+
+The <CODE>ELT()</CODE> function is renamed to <CODE>FIELD()</CODE>.  The new
+<CODE>ELT()</CODE> function returns a value based on an index: <CODE>FIELD()</CODE>
+is the invers of <CODE>ELT()</CODE> Example: <CODE>ELT(2,"A","B","C")</CODE> returns
+<CODE>"B"</CODE>. <CODE>FIELD("B","A","B","C")</CODE> returns <CODE>2</CODE>;
+<LI>
+
+COUNT(field) where field could have a NULL value now works.
+<LI>
+
+A couple of bug fixed in SELECT .. GROUP BY.
+<LI>
+
+Fixed memory overrun bug in WHERE with many unoptimisable brace levels.
+<LI>
+
+Fixed some small bugs in the grant code.
+<LI>
+
+If hostname isn't found by get_hostname, only the IP is checked. Before one
+one got 'Access denies'
+<LI>
+
+Inserts of timestamps with values didn't always work.
+<LI>
+
+INSERT INTO ... SELECT .. WHERE could give the error
+'Dupplicated field'
+<LI>
+
+Added some tests to safe_mysqld to make it 'safer'
+<LI>
+
+LIKE was case sensitive in some places and case insensitive in other.
+Now <CODE>LIKE</CODE> is always case insensitive.
+<LI>
+
+mysql.cc; Allow '#' anywhere on the line.
+<LI>
+
+New command 'SET OPTION SQL_SELECT_LIMIT=#'. Se the FAQ for more details.
+<LI>
+
+New version of the mysqlaccess script
+<LI>
+
+Change from_days() and weekday() to also take a full timestamp or
+a datetime as argument. Before they only took a number of type YYYYMMDD or
+YYMMDD.
+<LI>
+
+Added new function unix_timestamp(timestamp_column);
+</UL>
+
+
+
+<H3><A NAME="News-3.20.16" HREF="manual_toc.html#News-3.20.16">Changes in release 3.20.16</A></H3>
+
+
+<UL>
+<LI>
+
+More changes in MIT threads to get them safer. Fixed also some link
+bugs at least in SUNOS.
+<LI>
+
+Changed mysqld to go around a bug in MIT threads. This makes multiple
+small selects 20 times faster. Now lock_test.pl should work.
+<LI>
+
+Added mysql_FetchHash(handle) to mysqlperl
+<LI>
+
+The mysqlbug script is now distributed built to allow for reporting
+bugs that appear during the build with it.
+<LI>
+
+Changed libmysql.c to prefer to use getpwuid() insted of cuserid().
+<LI>
+
+Fixed bug in select optimiser when using many tables with the same
+column used as key to different tables.
+<LI>
+
+mysql.cc; Allow '#' anywhere on the line.
+<LI>
+
+Added new latin2 and Russian KOI8 character tables.
+<LI>
+
+Added support for a dummy GRANT command satisfy Powerbuilder.
+</UL>
+
+
+
+<H3><A NAME="News-3.20.15" HREF="manual_toc.html#News-3.20.15">Changes in release 3.20.15</A></H3>
+
+
+<UL>
+<LI>
+
+Fixed fatal bug 'packets out of order' when using MIT threads. 
+<LI>
+
+Removed possible loop when thread waits for command from client
+and fcntl() fails. Thanks to Mike Bretz for finding this bug 
+<LI>
+
+Changed alarm loop in mysqld.cc because shutdown didn't always
+succeed in Linux.
+<LI>
+
+Removed use of termbits from mysql.cc  This conflicted with glibc 2.0
+<LI>
+
+Fixed some syntax errors for at least BSD and Linux.
+<LI>
+
+Fixed bug when doing a select as superuser without a database.
+<LI>
+
+Fixed bug when doing SELECT with group calculation to outfile.
+</UL>
+
+
+
+<H3><A NAME="News-3.20.14" HREF="manual_toc.html#News-3.20.14">Changes in release 3.20.14</A></H3>
+
+
+<UL>
+<LI>
+
+If one gives '-p' or -password to mysql without an argument,
+the password will be asked from the tty.
+<LI>
+
+Added default password from MYSQL_PWD. (by Elmar Haneke)
+<LI>
+
+Added commando 'kill' to mysqladmin to kill a specific mysql thread.
+<LI>
+
+Sometimes when doing a reconnect on a down connection this succeeded
+first on second try.
+<LI>
+
+Fixed adding a auto_increment key with ALTER_TABLE.
+<LI>
+
+AVG() gave too small value on some selects with GROUP BY and ORDER BY.
+<LI>
+
+Added new DATETIME type (by Giovanni Maruzzelli &#60;maruzz@matrice.it&#62;)
+<LI>
+
+Fixed that define 'DONT_USE_DEFAULT_FIELDS' works
+<LI>
+
+Changed to use a thread to handle alarms instead of signals on Solaris to
+avoid race conditions.
+<LI>
+
+Fixed default length of signed numbers. (George Harvey &#60;georgeh@pinacl.co.uk&#62;)
+<LI>
+
+Allow anything for CREATE INDEX.
+<LI>
+
+Add prezeros when packing numbers to DATE, TIME and TIMESTAMP.
+<LI>
+
+Fixed a bug in OR of multiple tables (Gave empty set).
+<LI>
+
+Added many patches to MIT threads. This fixes at least one lookup bug.
+</UL>
+
+
+
+<H3><A NAME="News-3.20.13" HREF="manual_toc.html#News-3.20.13">Changes in release 3.20.13</A></H3>
+
+
+<UL>
+<LI>
+
+Added ANSI SQL94 DATE and TIME types.
+<LI>
+
+Fixed bug in select with and-or levels.
+<LI>
+
+Added support for Slovenian characters. The Contrib directory contains
+source and instructions to add other character sets.
+<LI>
+
+Fixed bug with limit and order by.
+<LI>
+
+Allow order and group on items that isn't in the select list.
+(Thanks to Wim Bonis &#60;bonis@kiss.de&#62; for pointing this out) 
+<LI>
+
+Allow setting of timestamp values in INSERT.
+<LI>
+
+Fixed bug with SELECT ... WHERE ... = NULL.
+<LI>
+
+Added changes for glibc 2.0. To get glibc to work one should add the
+gibc-2.0-sigwait-patch before compiling glibc.
+<LI>
+
+Fixed bug in alter table when changeing a not null field to allow NULLs.
+<LI>
+
+Added some ANS92 synonyms as field types to CREATE TABLE.
+CREATE TABLE now allows FLOAT(4) and FLOAT(8) to mean FLOAT and DOUBLE.
+<LI>
+
+new utility program mysqlaccess by Yves.Carlier@rug.ac.be.
+This program shows the access rights for a specific user and the grant
+rows which determinate this grant.
+<LI>
+
+Added WHERE const op field (by bonis@kiss.de)
+</UL>
+
+
+
+<H3><A NAME="News-3.20.11" HREF="manual_toc.html#News-3.20.11">Changes in release 3.20.11</A></H3>
+
+
+<UL>
+<LI>
+
+When using SELECT ... INTO OUTFILE all temporary tables are ISAM instead of
+HEAP to allow big dumps.
+<LI>
+
+Changed date functions to be 'string functions'. This fixed some 'funny'
+side effects when sorting on dates.
+<LI>
+
+Extended ALTER TABLE according to SQL92.
+<LI>
+
+Some minor compability changes.
+<LI>
+
+Added --port and --socket to all utility programs and mysqld.
+<LI>
+
+Fixed MIT threads readdir_r(). Now mysqladmin create database and drop
+database should work.
+<LI>
+
+Changed MIT threads to use our tempnam. This should fix the 'sort aborted' bug.
+<LI>
+
+Added sync of records count in sql_update. This fixed slow updates on first
+connection. (Thanks to Vaclav Bittner for the test)
+</UL>
+
+
+
+<H3><A NAME="News-3.20.10" HREF="manual_toc.html#News-3.20.10">Changes in release 3.20.10</A></H3>
+
+
+<UL>
+<LI>
+
+New insert type: INSERT INTO ... SELECT ...
+<LI>
+
+mediumblob fixed.
+<LI>
+
+Fixed bug in ALTER TABLE and BLOBs.
+<LI>
+
+SELECT ... INTO OUTFILE now creates the file in the current database directory.
+<LI>
+
+DROP TABLE can now take a list of tables.
+<LI>
+
+Oracle synonym DESCRIBE (DESC)
+<LI>
+
+Changes to make_binary_distribution
+<LI>
+
+Added some comments about conifgures c++ link test to installation
+instructions.
+<LI>
+
+Added --without-perl to configure.
+<LI>
+
+Lot's of small portability changes.
+</UL>
+
+
+
+<H3><A NAME="News-3.20.9" HREF="manual_toc.html#News-3.20.9">Changes in release 3.20.9</A></H3>
+
+
+<UL>
+<LI>
+
+Alter table didn't copy null bit. This resulted that NULL fields where
+always NULL.
+<LI>
+
+CREATE didn't take numbers as DEFAULT.
+<LI>
+
+Some compatibility changes for SunOS.
+<LI>
+
+Removed config.cache from old distribution.
+</UL>
+
+
+
+<H3><A NAME="News-3.20.8" HREF="manual_toc.html#News-3.20.8">Changes in release 3.20.8</A></H3>
+
+
+<UL>
+<LI>
+
+Fixed bug with ALTER TABLE and multi part keys.
+</UL>
+
+
+
+<H3><A NAME="News-3.20.7" HREF="manual_toc.html#News-3.20.7">Changes in release 3.20.7</A></H3>
+
+
+<UL>
+<LI>
+
+New commands: ALTER TABLE, SELECT ... INTO OUTFILE and LOAD DATA INFILE.
+<LI>
+
+New functions: NOW()
+<LI>
+
+Added new field: file_priv to mysql/user table.
+<LI>
+
+New scripts 'add_file_priv' which add the new field 'file_priv'
+to the user table. This scripts must be executed if one wants to
+use the new SELECT ... INTO and LOAD DATA INFILE...  commands
+with a version of mysql less than 3.20.7.
+<LI>
+
+Fixed bug in locking code, with made lock_test.pl test fail.
+<LI>
+
+new files NEW and BUGS
+<LI>
+
+Changed select_test.c and insert_test.c to include config.h
+<LI>
+
+Added command 'status' to mysqladmin for short logging.
+<LI>
+
+Increased max keys to 16 and max key parts to 15.
+<LI>
+
+Use of sub keys. A key may now be a prefix of a string field.
+<LI>
+
+Added option -k for mysqlshow to get key info for table.
+<LI>
+
+Added long options to mysqldump.
+</UL>
+
+
+
+<H3><A NAME="News-3.20.6" HREF="manual_toc.html#News-3.20.6">Changes in release 3.20.6</A></H3>
+
+
+<UL>
+<LI>
+
+Portable to more systems because of MIT threads. This will
+automatically be used is configure can not find a -lpthreads library.
+<LI>
+
+GNU style long options to almost all programs. Test with 'program --help'.
+<LI>
+
+Some shared library support for linux.
+<LI>
+
+The FAQ is now in .texi format and is available in .html, .text, .ps,
+<LI>
+
+Added new sql function RAND([init])
+<LI>
+
+Changed sql_lex to handle \0 unquoted, but the client can't send
+the query through the C api, because it takes a str pointer.
+one have to use mysql_real_query() to send the query.
+<LI>
+
+Added API function: mysql_get_client_info
+<LI>
+
+mysqld now uses the N_MAX_KEY_LENGTH from nisam.h as the max allowed key
+length.
+<LI>
+
+The following now works: "select filter_nr,filter_nr from filter order by
+filter_nr"
+Before you got the error: "Column: 'filter_nr' in order clause is ambiguous"
+<LI>
+
+mysql now outputs \0 \t \n and \\ when writing tab separated output.
+when encountering ascii 0, tab, newline or \. This is to allow printing of
+binary data in a portable format.
+To get old behavior use -r (or --raw).
+<LI>
+
+Added german error messages (60 of 80 error messages translated)
+<LI>
+
+Added new api function: mysql_fetch_lengths(MYSQL_RES *) which
+returns a array of of column lengths (of type uint).
+<LI>
+
+Fixed bug with IS NULL in where clause.
+<LI>
+
+Changed the optimiser a little to get better results when searching on a key
+part.
+<LI>
+
+Added select option STRAIGHT_JOIN to tell the optimiser that it should join
+tables in the given order.
+<LI>
+
+Added support of comment starting with '--' in mysql.cc (Postgres syntax)
+<LI>
+
+You can have select_expressions and table columns in a select which
+are not used in the group part. This makes it efficient to implement lookups.
+The used column should be a constant for each group because the value is
+calculated only calculated once for the first found row in a group.
+
+<PRE>
+SELECT id,lookup.text,sum(*) FROM test,lookup
+WHERE test.id=lookup.id group by id;
+</PRE>
+
+<LI>
+
+Fixed bug in SUM(function) (Could make core dump)
+<LI>
+
+Changed auto_increment according to SQL_SYNTAX:
+INSERT into table (auto_field) values (0) inserted 0, but the SQL_SYNTAX
+stated it should insert a auto_increment value.
+<LI>
+
+mysqlshow.c: Added number of records in table. Had to change the
+client code a little to fix this.
+<LI>
+
+mysql now allows double '' or "" in strings for embedded ' or ".
+<LI>
+
+New math functions:  EXP, LOG, SQRT, ROUND, CEILING
+</UL>
+
+
+
+<H3><A NAME="News-3.20.3" HREF="manual_toc.html#News-3.20.3">Changes in release 3.20.3</A></H3>
+
+
+<UL>
+<LI>
+
+The configure source now compiles a thread free client library
+<CODE>-lmysqlclient</CODE>. This is the only library that needs to be linked
+with client applications.  When using the binary releases one have to
+link with <CODE>-lmysql -lmysys -ldbug -lstrings</CODE> as before.
+<LI>
+
+New readline from bash-2.0.
+<LI>
+
+LOTS of small changes to configure and makefiles (and related source).
+<LI>
+
+There should now be possible to compile in another directory using
+vpath. Tested with GNU Make 3.75.
+<LI>
+
+safe_mysqld and mysql.server changed to be more compatible between
+the source and the binary releases.
+<LI>
+
+LIMIT takes now one or two numerical arguments.
+If one argument the argument indicates the maximum number of rows in
+a result. If two arguments the first arguments says the offset to
+the first row to return, the second is the maximum number of rows.
+With this it's easy to do a poor mans next page/previous page www
+application.
+<LI>
+
+Changed name of SQL function FIELDS to ELT.
+Changed sql function INTERVALL() to INTERVAL().
+<LI>
+
+Made SHOW COLUMNS a synonym for SHOW FIELDS.
+Added compatibility syntax FRIEND KEY to create table. This creates in mysql
+a non unique key on the given columns.
+<LI>
+
+Added CREATE INDEX and DROP INDEX as compatibility functions. In mysql 
+CREATE INDEX only checks if the index exists and gives an error if it doesn't
+exists. DROP INDEX always succeeds.
+<LI>
+
+mysqladmin.c: Added client version to version info.
+<LI>
+
+Fixed core dump bug in sql_acl (core on new connection).
+<LI>
+
+Removed host,user and db tables from database test in the distribution.
+<LI>
+
+FIELD_TYPE_CHAR can now be signed (-128 - 127) or unsigned (0 - 255)
+Before it was always unsigned.
+<LI>
+
+Bug fixes in concat(), weekday()
+<LI>
+
+Changed a lot of source to get mysqld to be compiled with SUNPRO
+compiler.
+<LI>
+
+SQL functions must now have a '(' directly after the function name.
+user '(' is now regarded as an identifier and a '('
+</UL>
+
+
+
+<H3><A NAME="News-3.20.0" HREF="manual_toc.html#News-3.20.0">Changes in release 3.20.0</A></H3>
+
+
+<UL>
+<LI>
+
+The source distribution is done with configure and automake:
+It will make porting much easier.  Readline is included in the
+distribution.
+<LI>
+
+Separate client compilation:
+The client code should be very easy to compile on system which
+doesn't have threads.
+<LI>
+
+The old perl interface code is automaticly compiled and installed.
+Automatic compiling of DBD will follow when the new DBD code is ported.
+<LI>
+
+Dynamic language support: mysqld can now be started with Swedish
+or English (default) error messages.
+<LI>
+
+new functions: INSERT(),RTRIM(),LTRIM() and FORMAT(). 
+<LI>
+
+mysqldump now works correctly for all field types (even
+auto_increment). The format for 'show fields from table' is changed
+so the 'type' column contains info suitable for 'CREATE TABLE'.
+In previous releases some CREATE TABLE info had to be patched to
+when recreating tables
+<LI>
+
+Some parser bugs from 3.19.5 (blob and timestamp) are corrected.
+Timestamp now returns different date info depending of it's
+create length.
+<LI>
+
+Changed parser to allow a database name, table name and field name to
+start with a number or '_'.
+<LI>
+
+All old C code from UNIREG changed to c++ and cleaned up. This makes
+the daemon a little smaller and easier to understand.
+<LI>
+
+A lot of small bug fixes done.
+<LI>
+
+New INSTALL files (not final version) and some info regarding porting.
+</UL>
+
+
+
+<H2><A NAME="News-3.19.x" HREF="manual_toc.html#News-3.19.x">Changes in release 3.19.x</A></H2>
+
+
+
+<H3><A NAME="News-3.19.5" HREF="manual_toc.html#News-3.19.5">Changes in release 3.19.5</A></H3>
+
+
+<UL>
+<LI>
+
+Some new functions, some more optimisation on joins.
+<LI>
+
+Should now compile clean on Linux (2.0.x)
+<LI>
+
+Added functions DATABASE(),USER(),POW(),LOG10() (needed for ODBC).
+<LI>
+
+In a WHERE with a ORDER BY on fields from only one table the table is
+now preferred as first table in a multi-join.
+<LI>
+
+HAVING and IS NULL or IS NOT NULL now works.
+<LI>
+
+A group on one column and a sort on a group function (SUM,AVG...)
+didn't work together. Fixed.
+<LI>
+
+mysqldump: Didn't send password to server.
+</UL>
+
+
+
+<H3><A NAME="News-3.19.4" HREF="manual_toc.html#News-3.19.4">Changes in release 3.19.4</A></H3>
+
+
+<UL>
+<LI>
+
+Fixed horrible locking bug when inserting in one thread and reading
+on another thread.
+<LI>
+
+Fixed one-off decimal bug.  1.00 was output as 1.0
+<LI>
+
+Added attribute 'Locked' to process list as info if a query is
+locked by another query.
+<LI>
+
+Fixed full magic timestamp. Timestamp length may now be 14,12,10,8,6,4 or 2.
+<LI>
+
+sort on some number functions could be sorted wrong on last number.
+<LI>
+
+if(arg,syntax_error,syntax_error) crashed.
+<LI>
+
+added functions ceiling() and round(), exp(), log() and sqrt()
+<LI>
+
+enchanted BETWEEN to handle strings.
+</UL>
+
+
+
+<H3><A NAME="News-3.19.3" HREF="manual_toc.html#News-3.19.3">Changes in release 3.19.3</A></H3>
+
+
+<UL>
+<LI>
+
+Fixed that select with grouping on blob's doesn't return wrong blob
+info. grouping, sorting and distinct on blobs will not yet work as
+expected (Probably it will group/sort by the first 7 characters in the
+blob). Groping on formulas with a fixed string size (use mid on blob)
+should work.
+<LI>
+
+When doing a full join (no direct keys) on multiple tables with blob
+fields, the blob was garbage on output.
+<LI>
+
+Fixed distinct with calculated columns.
+</UL>
+
+<P><HR><P>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Credits.html">previous</A>, <A HREF="manual_Bugs.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:962</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="961">[前]</a><a href="963">[次]</a><a href="../list/901-1000">[番号順一覧]</a><a href="../thread/901-1000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:962
+</p>
+<div class="header">
+<p>
+From: &quot;MINOHATA Norio&quot; &lt;&quot;MINOHATA Norio&quot; &lt;minohata@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 10 Jun 1999 13:26:51 +0900<br>
+Subject: [mysql 00962] Re: [Q] 分割列による SELECT のスピード比較<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+箕畑＠旭紙業です。
+既に誰かが同じことを投稿されたかもしれませんが、
+
+<span class="quote1">&gt; ■OR連結の場合のEXPLAINの結果</span>
+<span class="quote1">&gt; +---------+------+-------------------+------+---------+------+--------+------------+</span>
+<span class="quote2">&gt; | table   | type | possible_keys     | key  | key_len | ref  | rows   | Extra      |</span>
+<span class="quote1">&gt; +---------+------+-------------------+------+---------+------+--------+------------+</span>
+<span class="quote2">&gt; | keytbls | ALL  | key01,key02,key03 | NULL |    NULL | NULL | 195744 | where used |</span>
+<span class="quote1">&gt; +---------+------+-------------------+------+---------+------+--------+------------+</span>
+
+を見ると、どうやらMySQLは
+「インデックス使っても効果なさそうだから使わない」
+ということで結審しちゃったようですね。
+# 間違ってたらごめんなさい。
+この判決を覆すには、多分MySQLのソースに手を加えるしかなさそうです。
+その代わりに、次のようにテーブルの定義から見直されると如何でしょう。
+
+
+main
++--+--------+
+<span class="quote1">|id|  data  |</span>
++--+--------+
+<span class="quote1">| 1|     ***|</span>
+<span class="quote1">| 2|     ???|</span>
+<span class="quote1">| 3|     +++|</span>
+...
+
+keywords
++--+-----------+
+<span class="quote1">|id|  keyword  |</span>
++--+-----------+
+<span class="quote1">| 1|       Perl|</span>
+<span class="quote1">| 1|         is|</span>
+<span class="quote1">| 2|         an|</span>
+<span class="quote1">| 3|interpreted|</span>
+<span class="quote1">| 3|   language|</span>
+<span class="quote1">| 3|  optimized|</span>
+...
+
+というふうに2つのテーブルに分割して、
+キーワード検索の場合は、
+
+SELECT DISTINCT main.data
+   FROM main, keywords
+   WHERE keywords.keyword LIKE 'i%' AND keywords.id=main.id
+
+というふうにテーブルを結合するようにすれば、
+1レコードあたりのキーワード数を3個(あるいは12個と)
+固定する必要がなくなります。
+
+また、検索に必要なインデックスは
+  mainテーブルの id項(UNIQUE)
+  keywordsテーブルの keyword項
+の2つです。
+# 頻繁にDELETEやUPDATEする場合は、
+# keywordsテーブルのid項 にもインデックスを
+# 作っておいた方がいいでしょう。
+
+
+--
+有限会社アイピーシー/旭紙業株式会社
+箕畑典男
+minohata@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="961">[前]</a><a href="963">[次]</a><a href="../list/901-1000">[番号順一覧]</a><a href="../thread/901-1000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="955">    955 1999-06-10 00:26 [Takashi YAMAMOTO &lt;ya] [Q] 分割列による SELECT のスピード比較  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="956">    956 1999-06-10 09:25 ┣[KATSURO Tomokazu &lt;to]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="957">    957 1999-06-10 10:47 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="958">    958 1999-06-10 11:03 　┗[Takashi YAMAMOTO &lt;ya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="959">    959 1999-06-10 11:12 　　┣[&lt;endo@xxxxxxxxxx&gt;   ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="960">    960 1999-06-10 13:01 　　┃┗[民斗 &lt;tommy@xxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="963">    963 1999-06-10 13:16 　　┃　┗[&lt;endo@xxxxxxxxxx&gt;   ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="961">    961 1999-06-10 13:17 　　┣[民斗 &lt;tommy@xxxxxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="962">    962 1999-06-10 13:26 　　┗[&quot;MINOHATA Norio&quot; &lt;mi]                                   </a></span>
+</pre>
+</body>
+</html>

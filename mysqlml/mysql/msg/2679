@@ -1,0 +1,81 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2679</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2678">[前]</a><a href="2680">[次]</a><a href="../list/2601-2700">[番号順一覧]</a><a href="../thread/2601-2700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2679
+</p>
+<div class="header">
+<p>
+From: とみたまさひろ &lt;とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 6 Nov 2000 00:17:29 +0900<br>
+Subject: [mysql 02679] Re: 空白文字の扱い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+とみたです。
+
+[moeru@xxxxxxxxxx (moeru)さんが]
+[&quot;<a href="02677">[mysql 02677]</a> 空白文字の扱い&quot; で曰く]
+
+<span class="quote1">&gt; 以下のフィールドを作成しました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;    title varchar(80) NOT NULL,</span>
+<span class="quote1">&gt;    KEY title (title),</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; このとき、$titleに半角スペースが入ると</span>
+<span class="quote1">&gt; 半角スペース以降の文字列が切られてデータベースに格納されてしまいます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; $sql = &quot;insert into item (itemid,title) values ('$itemid','$title')&quot;;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Artist Name</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; だと、Artistだけしかデータベースに入りません。</span>
+
+そんなことはないはずです。PHP を介していると、PHP の問題の可能性も
+考えられるので、そういうのは極力排して mysql から直接試してみては
+いかがでしょうか？
+
+<span class="quote1">&gt; ＊それで、データ型をtinytextに変更しようとしたら</span>
+<span class="quote1">&gt; 　KEY title (title),がじゃましているのか変更できないです。</span>
+<span class="quote1">&gt; 　このとき、このインデックスを削除してデータ型を変更すれば</span>
+<span class="quote1">&gt; 　うまくいくような気もするのですが</span>
+<span class="quote1">&gt; 　インデックスは、削除してデータ型を変更した後、</span>
+<span class="quote1">&gt; 　自動的に再作成してくれるんでしょうか？</span>
+
+インデックスを削除したら削除されたまんまです。自動的に作成なんか
+されたら困ります (^^;
+
+TEXT とか BLOB にインデックスを設定したい場合は、長さも指定しないと
+いけません。今回の例だと、こんな風に。
+
+	KEY title (title(80))
+
+作成済みのテーブルを ALTER TABLE で変更するんなら、
+
+	ALTER TABLE item MODIFY title TINYTEXT, DROP INDEX title, ADD INDEX title (title(80));
+
+こんな感じで。
+
+---
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt; <a href="http://www.tmtm.org">http://www.tmtm.org</a>
+日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a>
+
+</pre>
+</div>
+<p class="button"><a href="2678">[前]</a><a href="2680">[次]</a><a href="../list/2601-2700">[番号順一覧]</a><a href="../thread/2601-2700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2677">   2677 2000-11-05 23:09 [&lt;moeru@xxxxxxxxxx&gt;  ] 空白文字の扱い                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2678">   2678 2000-11-06 00:08 ┣[tateyan &lt;tateyan@xxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="2679">   2679 2000-11-06 00:17 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2680">   2680 2000-11-06 00:32 ┗[Ko Tanikawa &lt;dev@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2682">   2682 2000-11-06 02:05 　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                                     </a></span>
+</pre>
+</body>
+</html>

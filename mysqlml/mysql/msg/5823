@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5823</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="5822">[Á°]</a><a href="5824">[¼¡]</a><a href="../list/5801-5900">[ÈÖ¹æ½ç°ìÍ÷]</a><a href="../thread/5801-5900">[¥¹¥ì¥Ã¥É°ìÍ÷]</a></p>
+<p class="id">
+mysql:5823
+</p>
+<div class="header">
+<p>
+From: (Matsuzaki Takaharu) &lt;&lt;PH5T-MTZK@xxxxxxxxxx&gt;&gt;<br>
+Date: 19 Jul 2002 19:55:35 +0900<br>
+Subject: [mysql 05823] $BBgNL%G!&lt;%?$N(Jimport$B$K$D$$$F(J<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+¤¤¤Ä¤âÈó¾ï¤ËÍ­±×¤Ê¾ðÊó¡¢¤È¤Æ¤â´¶¼Õ¤·¤Æ¤ª¤ê¤Þ¤¹¡£
+»Ï¤á¤Æ¤ÎÅê¹Æ¤È¤Ê¤ê¤Þ¤¹¾¾ºê¤È¿½¤·¤Þ¤¹¡£
+ÂçÎÌ¥Ç¡¼¥¿¤Îimport¤Ë¤Ä¤¤¤Æ¼ÁÌä¤µ¤»¤Æ²¼¤µ¤¤¡£
+
+¸½ºß¡ÖM£ùSQL 3.22.32¡×¤Ç°Ê²¼¤Î¤è¤¦¤Ê¥·¥§¥ë¤òÍÑ¤¤¤ÆDB¡ÖDB01¡×¤«¤é
+¡ÖDB02¡×¤Ø¥Æ¡¼¥Ö¥ë¡Ötable01¡×¤ò¥³¥Ô¡¼¤·¤Æ¤¤¤Þ¤¹¡£
+
+¡Úisam·¿¥Õ¥¡¥¤¥ë¤Ø¤Î¥Ç¡¼¥¿importÍÑ¥·¥§¥ë¡¿¥µ¡¼¥Ð£±¡Û
+#!/bin/bash
+mysql -e &quot;drop table table01&quot; DB02
+mysqldump -q --tab=/home/user01 --fields-terminated-by=&quot;\t&quot; --lines-terminated-by=&quot;\n&quot; DB01 table01
+mysql DB02 &lt; /home/user01/table01.sql
+isamchk --keys-used=0 -rq /usr/local/mysql/var/DB02/table01
+mysqlimport DB02 /home/user01/table01.txt
+isamchk -r -q /usr/local/mysql/var/DB02/table01
+mysqladmin flush-tables
+
+¤³¤Î¥·¥§¥ë¤Ï¡Ö2»þ´Ö¡×ÄøÅÙ¤Ç´°Î»¤·¤Þ¤¹¡£
+
+º£ÅÙ¡¢ÊÌ¥µ¡¼¥Ð¤ÇM£ùSQL¤ò²ÔÆ°¤µ¤»¤ë¤³¤È¤Ë¤Ê¤ê¡¢¤Ä¤¤¤Ç¤Ë¡ÖMySQL
+ 3.23.41¡×¤Ë¥Ð¡¼¥¸¥ç¥ó¥¢¥Ã¥×¤·¤Þ¤·¤¿¡£
+¾åµ­¤Î¥·¥§¥ë¤òmyisamÍÑ¤ËÊÑ¹¹¤·¼Â¹Ô¤¹¤ë¤È¡¢¤Ê¤¼¤«¡Ö15»þ´Ö¡×°Ê¾å
+¤â¤«¤«¤Ã¤Æ¤·¤Þ¤¤¤Þ¤¹¡£
+
+¤Á¤Ê¤ß¤ËMyISAM·¿¤Ø¥í¡¼¥É¤¹¤ëºÝ¤Î¥Ç¡¼¥¿¤Ï¡¢isam·¿¤Î¾ì¹ç¤ÈÆ±¤¸
+¥Ç¡¼¥¿¤ò»ÈÍÑ¤·¤Æ¤¤¤Þ¤¹¡£
+
+¡ÚMyISAM·¿¥Õ¥¡¥¤¥ë¤Ø¤Î¥Ç¡¼¥¿importÍÑ¥·¥§¥ë¡¿¥µ¡¼¥Ð£²¡Û
+#!/bin/bash
+mysql -e &quot;drop table table01&quot; DB02
+myisamchk --keys-used=0 -rq /var/lib/mysq/DB02/table01
+mysql DB02 &lt; /home/user01/table01.sql
+mysqlimport --local DB02 /home/user01/table01.txt
+myisamchk -r -q /var/lib/mysq/DB02/table01
+mysqladmin flush-tables
+
+
+¼ç¤Ê´Ä¶­Åù¤Ï°Ê²¼¤ÎÄÌ¤ê¤Ç¤¹¡£
+¡Ú¥µ¡¼¥Ð£±¡Û
+¡¦OS¡§RedHatLinux6.2
+¡¦MySQL¡§mysql  Ver 9.38 Distrib 3.22.32, for pc-linux-gnu (i686)
+
+¡Ú¥µ¡¼¥Ð2¡Û
+¡¦OS¡§RedHatLinux7.2
+¡¦MySQL¡§mysql  Ver 11.15 Distrib 3.23.41, for redhat-linux-gnu (i386)
+
+¡Ú¥í¡¼¥É¥Ç¡¼¥¿¡Û
+¡¦¥È¡¼¥¿¥ë¥Ç¡¼¥¿¥µ¥¤¥º¡§ 2.5Gbyte
+¡¦¥È¡¼¥¿¥ë¥Ç¡¼¥¿·ï¿ô¡¡¡§ 26601040 ¥ì¥³¡¼¥É
+
+¢ã¼ÁÌäÆâÍÆ¢ä
+¡Ê£±¡Ë ¤Ê¤ë¤Ù¤¯Áá¤¯import¤¹¤ë¤¿¤á¤Ë¡Öindex¥¹¥È¥Ã¥×¡×¢ª¡Öimport¡×¢ª¡ÖindexºÆ
+¡¡¡¡¡¡ºîÀ®¡×¤ò¤ª¤³¤Ê¤Ã¤Æ¤¤¤ë¤Ë¤â´Ø¤ï¤é¤º¡¢¤Ê¤¼¡Ö15»þ»þ´Ö°Ê¾å¡×¤â¤«¤«¤ë
+¡¡¡¡¡¡¤Î¤Ç¤·¤ç¤¦¤«¡©
+(£²¡Ë  ¤Þ¤¿¡Öindex¤ò --keys-used=0 -rq¡×¤Ç¥¹¥È¥Ã¥×¤·¤¿¾õÂÖ¤Çimport¤·¤¿¤Ë¤â
+¡¡¡¡¡¡´Ø¤ï¤é¤º¡¢Ä¹»þ´Ö¡Ötable01.MYI¡×¤Î¥µ¥¤¥º¤¬Áý¸º¤·¤Æ¤¤¤Þ¤·¤¿¡£
+¡¡¡¡¡¡MySQL3.23¤Ç¤Ï¡Ö --keys-used=0 -rq¡×¤ò¹Ô¤Ã¤Æ¤â°ÕÌ£¤¬¤Ê¤¤¤Î¤Ç
+¡¡¡¡¡¡¤·¤ç¤¦¤«¡©
+¡Ê£³¡Ë ¤Á¤Ê¤ß¤Ë¡ÖMySQL3.23¡×¤ÎMySQL¤Î¥Õ¥¡¥¤¥ë¥¿¥¤¥×¤ò¡Öisam·¿¡×¤Ë¤·¤Æ
+¡¡¡¡¡¡import¤·¤Æ¤ß¤¿¤È¤³¤íindex¤ÎºîÀ®¤Þ¤Ç¹þ¤ß¤Ç1»þ30Ê¬ÄøÅÙ¤Ç½ªÎ»¤·¤Þ
+¡¡¡¡¡¡¤·¤¿¡£MyISAM¥¿¥¤¥×¤Ï¥á¥ê¥Ã¥È¤â¤¢¤ë¤¬¡¢indexºîÀ®¤Ë»þ´Ö¤¬¤«¤«¤ëÅù
+¡¡¡¡¡¡¤Î¥Ç¥á¥ê¥Ã¥È¤¬¤¢¤ë¤Î¤Ç¤·¤ç¤¦¤«¡©
+
+¡ØÈ÷¹Í¡Ù
+¡¦¡ÖMySQL¡õmSQL¡Ê¥ª¥é¥¤¥ê¡¼¡Ë¡×¤ò»²¹Í¤Ë¤·¤Æ¡¢myisamchk»þ¤Ë¡ÖMySQL¡×
+¡¡¤ò¥¹¥È¥Ã¥×¤·¤Æ¤â·ë²Ì¤ËÊÑ²½¤Ï¸«¤é¤ì¤Þ¤»¤ó¤Ç¤·¤¿¡£
+¡¦isam·¿¤Çimport¤·¤¿¸å¤Ë¡Öalter table table01 type=myisam¡×¤ÇMyISAM
+¡¡·¿¤ËÊÑ¹¹¤·¤Æ¤â¡¢¤½¤ì¤À¤±¡Êalter table¤Î½èÍý¤Î¤ß¡Ë¤Ç15»þ´Ö¤«¤«¤ê¤Þ¤·¤¿¡£
+
+Ä¹¤¯¤Ê¤Ã¤Æ¤·¤Þ¤¤¿½¤·Ìõ¤¢¤ê¤Þ¤»¤ó¡£
+¤â¤¦Æó¥ö·î¤Û¤ÉÇº¤ó¤Ç¤Þ¤¹¡£¡ÊÈá¡Ë
+¤É¤Ê¤¿¤«¤´°Õ¸«¤ä²ò·èÊýË¡¤¬¤¢¤ì¤Ð¶µ¤¨¤Æ²¼¤µ¤¤¡£
+¤è¤í¤·¤¯¤ª´ê¤¤¤·¤Þ¤¹¡£
+
+
+</pre>
+</div>
+<p class="button"><a href="5822">[Á°]</a><a href="5824">[¼¡]</a><a href="../list/5801-5900">[ÈÖ¹æ½ç°ìÍ÷]</a><a href="../thread/5801-5900">[¥¹¥ì¥Ã¥É°ìÍ÷]</a></p>
+</body>
+</html>

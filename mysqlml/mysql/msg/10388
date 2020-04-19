@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10388</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10387">[前]</a><a href="10389">[次]</a><a href="../list/10301-10400">[番号順一覧]</a><a href="../thread/10301-10400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10388
+</p>
+<div class="header">
+<p>
+From: &lt;shin-1@xxxxxxxxxx&gt;<br>
+Date: Fri, 05 Nov 2004 16:52:01 +0900<br>
+Subject: [mysql 10388] Re: mysql.sock<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+  こんにちは。野元です。
+
+ありがとうございます。最初のメールで十分理解できました。
+mysql_configという設定周りを回答してくれるスクリプトが
+準備されていたのですね。
+
+Makefile.PLの中を見るとたしかにmysql_configを呼び出して
+いました。またmysqld_configを実行してみると/tmp/mysql.sock
+と表示されました。
+
+早速、mysql_configをviで書き換えてmysql_config --socket で
+/var/lib/mysql/mysql.sock と表示される事を確認したのですが
+make realclean したあと perl Makefile.PL から make → make test
+としてみたのですが、やはりmake test で/tmp/mysql.sock が
+見つからないとエラーが出てダメでした。
+
+そもそも、今回の問題にぶつかる前段階で
+..install_driver(mysql) failed: Can't load '〜/DBD/mysql/mysql.so'
+ for module DBD::mysql: libmysqlclient.so.12: cannot open shared object file: No such file or directory at /usr/lib/perl5/5.8.3/i3
+86-linux-thread-multi/DynaLoader.pm line 229.
+とmysql.soの読み込み失敗が出ていたので
+<a href="http://dev.mysql.com/doc/mysql/ja/Perl_support_problems.html">http://dev.mysql.com/doc/mysql/ja/Perl_support_problems.html</a>
+を参考に export LD_RUN_PATH=/usr/local/mysql/lib/mysql
+を行ってからmakeしていたのですが、そのもこのmysql.sockの問題
+に関係するのでしょうか。
+
+mysql.sockの問題はまだ解決できていないのですが、他のSE
+がサーバ環境を触り始めたのでこれ以上追試ができません。
+
+また再開できるようになりましたらもうちょっと原因を調査
+してみようと思います。
+ひとまず、ありがとうございました。
+
+<span class="quote1">&gt;たてやんっす　（不親切な言い方かも知れないと　反省）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;mysql_config　（=shellスクリプトです）の中に</span>
+<span class="quote1">&gt;socket='/tmp/mysql.sock'</span>
+<span class="quote1">&gt;などと記述されている行があると思いますので、これを</span>
+<span class="quote1">&gt;socket='/var/lib/mysql/mysql.sock'</span>
+<span class="quote1">&gt;に置き換えれば良いと思います</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;今回のケースでperlで変換しちゃうならスーパーユーザになって</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;perl -pi.bak \</span>
+<span class="quote1">&gt; -e&quot;s#socket='/tmp/mysql.sock'#socket='/var/lib/mysql/mysql.sock'#&quot; \</span>
+<span class="quote1">&gt; `which mysql_config`</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;で変更できるかな</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;題名「<a href="10386">[mysql 10386]</a> Re: mysql.sock」のメールからの引用です</span>
+<span class="quote2">&gt;&gt; たてやんっす</span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; perl Makefile.PL の実行では</span>
+<span class="quote2">&gt;&gt; mysql_config --socket</span>
+<span class="quote2">&gt;&gt; を参考にしているようですので</span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; which mysql_config </span>
+<span class="quote2">&gt;&gt; でmysql_configのパスが出てきますので　この内容を</span>
+<span class="quote2">&gt;&gt; /var/lib/mysql/mysql.sock　に置き換えてから　perl Makefile.PL</span>
+<span class="quote2">&gt;&gt; からやり直してはいかがでしょう？</span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="quote1">&gt;  彡彡从        たてやんっす</span>
+<span class="quote1">&gt; d□/□-ｂ      &lt;tateyan@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; ヽ&quot;ー&quot;丿</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;Key fingerprint = 5D56 8EA3 B9FE A721 4866  FB4A 0041 672C 08DD C33A</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="10387">[前]</a><a href="10389">[次]</a><a href="../list/10301-10400">[番号順一覧]</a><a href="../thread/10301-10400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="10385">  10385 2004-11-04 15:49 [&lt;shin-1@xxxxxxxxxx&gt; ] mysql.sock                              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10386">  10386 2004-11-04 21:35 ┗[tateyan &lt;tateyan@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10387">  10387 2004-11-04 21:51 　┗[tateyan &lt;tateyan@xxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="10388">  10388 2004-11-05 16:52 　　┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10450">  10450 2004-11-20 00:18 　　　┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
+</pre>
+</body>
+</html>

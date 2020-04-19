@@ -1,0 +1,278 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15753</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15752">[前]</a><a href="15754">[次]</a><a href="../list/15701-15800">[番号順一覧]</a><a href="../thread/15701-15800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15753
+</p>
+<div class="header">
+<p>
+From: ram &lt;ram &lt;ram@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 23 Apr 2012 15:39:04 +0900<br>
+Subject: [mysql 15753] Re: 行列変換を行う処理を高速化するには？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+田中様　お返事が遅れまして済みませんでした。
+コメント有難うございました。
+
+教えて頂いたSQLですが、
+この処理はバッチ処理的なレポートではなく、リアル表示の照会画面で使用する
+ものです。
+そもそもこれだけの処理時間が掛かることを想定せず、なんとかなるだろう位の
+考えで、
+DB設計をしていたのが間違いかもしれません。
+
+早速、教えて頂いたSQLをサーバー上で実行してみました。
+さすがに、31回のLEFTJOINは非力なサーバーでは厳しかったようです。
+10分位、反応がありませんでした。
+
+使用している言語も、COLDFUSIONというアプリケーションサーバーを使っている
+のも、
+ネックになっているのかもしれません。PHPよりは遅いという情報もあります。
+
+それから、npdt という列は、CHAR(8)で、yyyymmddの形式で入っているため、止
+むなく
+Mid(CAST(npdt AS CHAR),7,2)で切りだしています。
+
+ご丁寧なコメント、感謝致します。
+-----------------------------------------------
+初穂太郎
+
+
+(2012/04/21 2:05), Tsubasa Tanaka wrote:
+<span class="quote1">&gt; 何度も申し訳ありません。</span>
+<span class="quote1">&gt; 間違いに気付きました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; SELECT nm,h101,h102,...,h131</span>
+<span class="quote2">&gt;&gt; FROM (</span>
+<span class="quote2">&gt;&gt;  SELECT nm,COUNT(nm) AS h101</span>
+<span class="quote2">&gt;&gt;  FROM nippo</span>
+<span class="quote2">&gt;&gt;  WHERE npdt &gt;= #from_ymd# AND npdt &lt; #to_ymd# AND sycd = #sycd# AND</span>
+<span class="quote2">&gt;&gt; DAY(npdt) = 1</span>
+<span class="quote2">&gt;&gt;  GROUP BY nm</span>
+<span class="quote2">&gt;&gt; ) AS t101</span>
+<span class="quote2">&gt;&gt; ...</span>
+<span class="quote1">&gt; SELECT d.nm,h101,h102,...,h131</span>
+<span class="quote1">&gt; FROM (</span>
+<span class="quote1">&gt;  SELECT DISTINCT nm AS nm</span>
+<span class="quote1">&gt;  FROM nippo</span>
+<span class="quote1">&gt;  WHERE npdt &gt;= #from_ymd# AND npdt &lt; #to_ymd# AND sycd = #sycd#</span>
+<span class="quote1">&gt; ) AS d</span>
+<span class="quote1">&gt; LEFT JOIN (</span>
+<span class="quote1">&gt;  SELECT nm,COUNT(nm) AS h101</span>
+<span class="quote1">&gt;  FROM nippo</span>
+<span class="quote1">&gt;  WHERE npdt &gt;= #from_ymd# AND npdt &lt; #to_ymd# AND sycd = #sycd# AND</span>
+<span class="quote1">&gt; DAY(npdt) = 1</span>
+<span class="quote1">&gt;  GROUP BY nm</span>
+<span class="quote1">&gt; ) AS t101 USING(nm)</span>
+<span class="quote1">&gt; LEFT JOIN ...</span>
+<span class="quote1">&gt; でした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; h101の列を作るサブクエリの前に全nmを取ってこないと、DAY(npdt) = 1の時のnm以外が</span>
+<span class="quote1">&gt; JOINしても現れてきませんでした。。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; また、Accessのサブクエリは()ではなく[].(ピリオドつき)で囲まなければならなかったりした気がします。</span>
+<span class="quote1">&gt; 確かバージョンによっては()で囲ってもいけた気がしますが、手元にAccessがないのでごめんなさい。</span>
+<span class="quote1">&gt; &quot;access from句 サブクエリ&quot;などで検索していただければ出てくると思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; また、訪問回数が0の時の値がNULLになるので、</span>
+<span class="quote1">&gt; 0にしたければCOUNT(nm)をIIF(ISNULL(COUNT(nm)),0,COUNT(nm))などに書き換えればいけるかなと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よく考えてから投稿する様に致します。</span>
+<span class="quote1">&gt; お騒がせ致しました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ts. tanaka//</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 2012年4月21日1:06 Tsubasa Tanaka &lt;yoku0825@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt;&gt; たびたび田中です。</span>
+<span class="quote2">&gt;&gt; こんばんは。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 無理矢理INDEXを利かせる様なSQLを考えてみました。</span>
+<span class="quote2">&gt;&gt; INDEX(npdt,sycd,nm)が定義されている前提です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; SELECT nm,h101,h102,...,h131</span>
+<span class="quote2">&gt;&gt; FROM (</span>
+<span class="quote2">&gt;&gt;  SELECT nm,COUNT(nm) AS h101</span>
+<span class="quote2">&gt;&gt;  FROM nippo</span>
+<span class="quote2">&gt;&gt;  WHERE npdt &gt;= #from_ymd# AND npdt &lt; #to_ymd# AND sycd = #sycd# AND</span>
+<span class="quote2">&gt;&gt; DAY(npdt) = 1</span>
+<span class="quote2">&gt;&gt;  GROUP BY nm</span>
+<span class="quote2">&gt;&gt; ) AS t101</span>
+<span class="quote2">&gt;&gt; LEFT JOIN (</span>
+<span class="quote2">&gt;&gt;  SELECT nm,COUNT(nm) AS h102</span>
+<span class="quote2">&gt;&gt;  FROM nippo</span>
+<span class="quote2">&gt;&gt;  WHERE npdt &gt;= #from_ymd# AND npdt &lt; #to_ymd# AND sycd = #sycd# AND</span>
+<span class="quote2">&gt;&gt; DAY(npdt) = 2</span>
+<span class="quote2">&gt;&gt;  GROUP BY nm</span>
+<span class="quote2">&gt;&gt; ) AS t102 USING(nm)</span>
+<span class="quote2">&gt;&gt; LEFT JOIN (</span>
+<span class="quote2">&gt;&gt; ...</span>
+<span class="quote2">&gt;&gt; ) AS t131 USING(nm);</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; npdtがDATE型、DATETIME型、TIMESTAMP型のいずれかと仮定して、</span>
+<span class="quote2">&gt;&gt; Mid(CAST(npdt AS CHAR),7,2)='xx'</span>
+<span class="quote2">&gt;&gt; を</span>
+<span class="quote2">&gt;&gt; DAY(npdt) = xx に置き換えています。</span>
+<span class="quote2">&gt;&gt; ご参考までに。。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; …が、経験則としては一度MySQLからデータをインポートしてAccess上にテーブルを作ってあげて、</span>
+<span class="quote3">&gt;&gt;&gt; そのテーブルを見に行くクエリにした方がずっと速いと思います。</span>
+<span class="quote2">&gt;&gt; 書きそびれてしまいましたが、インポート後にインデックスを貼るのをお忘れなく。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; それでは。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ts. tanaka//</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 2012年4月20日22:05 Tsubasa Tanaka &lt;yoku0825@xxxxxxxxxx&gt;:</span>
+<span class="quote3">&gt;&gt;&gt; はじめまして、田中と申します。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; id    select_type    table    type    possible_keys    key    key_len    ref    rows    Extra</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 1    SIMPLE    t@nippod    range    idx1    idx1    26    NULL    111    Using where; Using temporary; Using filesort</span>
+<span class="quote3">&gt;&gt;&gt; Using temporaryはテンポラリテーブルを推奨されているのではなく、</span>
+<span class="quote3">&gt;&gt;&gt; クエリ処理中にメモリ内に収まらなかったので、テンポラリテーブルを作りましたよという事後報告です。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 一番はメモリ内にクエリの結果が全て収まることですが、</span>
+<span class="quote3">&gt;&gt;&gt; テンポラリテーブルはまずはメモリ上に作られますので、この段階であればそこまで遅くなりません。</span>
+<span class="quote3">&gt;&gt;&gt; 最悪のシナリオはテンポラリテーブルもメモリ内に収まらず、</span>
+<span class="quote3">&gt;&gt;&gt; DISK上にテンポラリテーブルが作られてしまうことです。</span>
+<span class="quote3">&gt;&gt;&gt; ただし、メモリ上で済んだのかDISKまで書いてしまったのかはEXPLAINの結果からだけでは判断できません。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; MyISAMテーブルの場合、</span>
+<span class="quote3">&gt;&gt;&gt; read_buffer_size &gt; 結果セットの大きさ　の場合にはテンポラリテーブルは使われません。</span>
+<span class="quote3">&gt;&gt;&gt; InnoDBテーブルの場合は明示的なステータスは無かった様な気がしますが、</span>
+<span class="quote3">&gt;&gt;&gt; innodb_buffer_pool_sizeという変数が大きく関連しています。</span>
+<span class="quote3">&gt;&gt;&gt; まずはどちらのテーブルを使っているかで、これらの値を（可能ならば）大きくして下さい。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 結果セットの大きさを知る方法は無いので、適当に大きくして下さい。</span>
+<span class="quote3">&gt;&gt;&gt; DB専用のサーバであれば、read_buffer_sizeは全メモリの25%〜50%、</span>
+<span class="quote3">&gt;&gt;&gt; innodb_buffer_pool_sizeは全メモリの80%が目安といわれています。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; …が、経験則としては一度MySQLからデータをインポートしてAccess上にテーブルを作ってあげて、</span>
+<span class="quote3">&gt;&gt;&gt; そのテーブルを見に行くクエリにした方がずっと速いと思います。</span>
+<span class="quote3">&gt;&gt;&gt; 月に1度の集計であれば、この方法はどうでしょうか？</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; may your problem is solved!</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; ts. tanaka//</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 2012年4月20日17:58 ram &lt;ram@xxxxxxxxxx&gt;:</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 中川様</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 重ね重ねコメント有難うございます。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; お使いのSELECT文のEXPLAINの結果は出せますか？</span>
+<span class="quote4">&gt;&gt;&gt;&gt; EXPLAINは使ったことが無いのですが、</span>
+<span class="quote4">&gt;&gt;&gt;&gt; SELECT文の先頭にEXPLAINと付けて、リダイレクトで実行した結果、以下のように出ます。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; t@nippod というのが実テーブル名で、</span>
+<span class="quote4">&gt;&gt;&gt;&gt; idx1というのが今張ってあるインデックスです。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; id    select_type    table    type    possible_keys    key    key_len    ref    rows    Extra</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 1    SIMPLE    t@nippod    range    idx1    idx1    26    NULL    111    Using where; Using temporary; Using filesort</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; idx1は　WHERE句の中に含まれている列とソートの順である　sycd, npdt, nm　です。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; この Using temporary が気になりますが、CREATE TEMPORARY TABLEで、</span>
+<span class="quote4">&gt;&gt;&gt;&gt; テンポラリテーブルを使ったほうが処理が効率的という意味なんですね？</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 後、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; read_buffer_size</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; read_rnd_buffer_size</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; sort_buffer_size</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; はそれぞれどんな値を設定されていますか？</span>
+<span class="quote4">&gt;&gt;&gt;&gt; read_buffer_size    65536</span>
+<span class="quote4">&gt;&gt;&gt;&gt; read_rnd_buffer_size    262144</span>
+<span class="quote4">&gt;&gt;&gt;&gt; sort_buffer_size    262144</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; で、デフォルトから変更していません。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; ------------------------------------------</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 初穂　太郎</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; (2012/04/20 15:24), 中川 貴 wrote:</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; (2012/04/20 13:58), ram wrote:</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; 中川様　コメント有難うございました。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; このインデックスは設定済みですが、ほとんど効果がありませんでした。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; 情報がお伝え足りなくて申し訳ないです。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; もう一度、外してから、その前後でパフォーマンス比較をしましたが、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; 平均応答時間は、ほとんど変わっていませんでした。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; また、先に件数を絞り込んだほうがよいかと思い、サブクエリーで抽出した後に、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; GROUP BYを行ってもみましたが、これも、ほとんど変わらず、どちらかというと、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; わずかにパフォーマンスが落ちました。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; SELECT x.nm,</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; sum(case when x.dd = '01' then 1 else 0 end) as 'h101',</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; sum(case when x.dd = '02' then 1 else 0 end) as 'h102',</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; （中略）</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; sum(case when x.dd = '31' then 1 else 0 end) as 'h131'</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; FROM (SELECT nm,Mid(CAST(npdt AS CHAR),7,2) as dd</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; FROM nippo</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; WHERE sycd = #ck_sycd# and npdate&gt;= #from_ymd# and npdate&lt;  #to_ymd# ) as x</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; GROUP BY x.nm ORDER BY x.nm</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; お使いのSELECT文のEXPLAINの結果は出せますか？</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 後、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; read_buffer_size</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; read_rnd_buffer_size</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; sort_buffer_size</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; はそれぞれどんな値を設定されていますか？</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; ****************************************</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; コープ情報システム株式会社</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 運用事業部</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; コーププラザサービスデスクグループ</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 中川　貴</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 175-0094</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 東京都渋谷区渋谷3-29-8 コーププラザ5F</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; TEL 03-5778-8010</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; E-MAIL takashi.nakagawa@xxxxxxxxxx</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; ****************************************</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="15752">[前]</a><a href="15754">[次]</a><a href="../list/15701-15800">[番号順一覧]</a><a href="../thread/15701-15800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15742">  15742 2012-04-20 09:36 [ram &lt;ram@xxxxxxxxxx&gt;] 行列変換を行う処理を高速化するには？    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15743">  15743 2012-04-20 11:12 ┣[中川 貴 &lt;takashi.nak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15744">  15744 2012-04-20 13:58 ┃┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15745">  15745 2012-04-20 15:24 ┃　┗[中川 貴 &lt;takashi.nak]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15747">  15747 2012-04-20 17:58 ┃　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15748">  15748 2012-04-20 22:05 ┃　　　┣[Tsubasa Tanaka &lt;yoku]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15749">  15749 2012-04-21 01:06 ┃　　　┃┗[Tsubasa Tanaka &lt;yoku]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15750">  15750 2012-04-21 02:05 ┃　　　┃　┗[Tsubasa Tanaka &lt;yoku]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="15753">  15753 2012-04-23 15:39 ┃　　　┃　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15756">  15756 2012-04-25 14:54 ┃　　　┗[中川 貴 &lt;takashi.nak]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15758">  15758 2012-04-25 16:34 ┃　　　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15759">  15759 2012-04-25 17:09 ┃　　　　　┗[中川 貴 &lt;takashi.nak]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15760">  15760 2012-04-25 17:18 ┃　　　　　　┗[Tomohiro 'Tomo-p' KA]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15761">  15761 2012-04-25 18:25 ┃　　　　　　　┗[中川 貴 &lt;takashi.nak]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15762">  15762 2012-04-25 19:05 ┃　　　　　　　　┗[Tomohiro 'Tomo-p' KA]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15752">  15752 2012-04-23 14:17 ┗[&lt;gotou1213@xxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15754">  15754 2012-04-23 19:53 　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15755">  15755 2012-04-24 13:50 　　┗[&lt;gotou1213@xxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15757">  15757 2012-04-25 15:39 　　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15765">  15765 2012-04-26 14:12 　　　　┗[&lt;gotou1213@xxxxxxxxx]                               </a></span>
+</pre>
+</body>
+</html>

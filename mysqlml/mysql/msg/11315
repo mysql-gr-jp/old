@@ -1,0 +1,165 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11315</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11314">[前]</a><a href="11316">[次]</a><a href="../list/11301-11400">[番号順一覧]</a><a href="../thread/11301-11400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11315
+</p>
+<div class="header">
+<p>
+From: HORI &lt;HORI &lt;john.smith@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 07 Apr 2005 01:39:51 +0900<br>
+Subject: [mysql 11315] Re: turbolinux10のmysql5はありあまか？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+堀です。
+返信ありがとう御座います。
+
+<span class="quote1">&gt; 川合孝典です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 私の場合、やはり環境よりもあなたのコードのほうを疑いますけども。</span>
+<span class="quote1">&gt; 普通にSELECTができたと書かれていたと思いますが、</span>
+<span class="quote1">&gt; mysql（ユーティリティの）を使って直接ストアド・プロシージャを</span>
+<span class="quote1">&gt; 書いたらどうなったんでしょうか？それでもFUNCTIONと書いたところで</span>
+<span class="quote1">&gt; PROCEDUREにRETURNはないといったエラーメッセージが</span>
+<span class="quote1">&gt; 出たのでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; またDBD::mysqlのビルドの問題かもしれません。</span>
+<span class="quote1">&gt; #どのクライアントライブラリを使って作ったかということです</span>
+<span class="quote1">&gt; 私の場合、前のバージョンでビルドしたDBD::mysqlを使っていても</span>
+<span class="quote1">&gt; まったく問題はでていませんけど。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 私の使っているOSはturblinux10 desktop Basic　ですが、</span>
+<span class="quote1">&gt; 下記のとおりMySQLバージョンを表示させるように改造したものを</span>
+<span class="quote1">&gt; 使いましたけど、見たところきちんと動作しているようです。</span>
+<span class="quote1">&gt; #堀さんがメールに書いてあったスクリプトもそのまま動かしましたけど</span>
+<span class="quote1">&gt; #特に問題がなかったようです（エラーは出てこないし）</span>
+<span class="quote1">&gt;</span>
+川合さんはturbolinux10 desktop Basicなんですね。私の方は
+turbolinux10 server ですが、turbolinux10で動いた実績があるなら
+もう１度セットアップからやってみます。
+
+私の環境ではサーバーがおかしそうです。
+debianからturbolinux10に繋いだ時のログを張り付けます。
+hori@debian:~$ mysql -h 192.168.11.6 -u root -p
+Enter password:
+Welcome to the MySQL monitor. Commands end with ; or \g.
+Your MySQL connection id is 306 to server version: 5.0.3-beta-standard
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql&gt; select db,name,type,param_list from mysql.proc;
++------+------------+-----------+----------------+
+<span class="quote1">| db | name | type | param_list |</span>
++------+------------+-----------+----------------+
+<span class="quote1">| test | simpleproc | PROCEDURE | OUT param1 INT |</span>
+<span class="quote1">| test | hello | FUNCTION | s VARCHAR(20) |</span>
++------+------------+-----------+----------------+
+2 rows in set (0.00 sec)
+
+mysql&gt; select test.hello(&quot;AA&quot;);
++------------------+
+<span class="quote1">| test.hello(&quot;AA&quot;) |</span>
++------------------+
+<span class="quote1">| やぁAA調子どう？ |</span>
++------------------+
+1 row in set (0.00 sec)
+
+mysql&gt; call test.sipleproc(@a); ← ここでサーバーダウンか？
+ERROR 2013 (HY000): Lost connection to MySQL server during query
+mysql&gt; call test.sipleproc(@a);
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id: 2
+Current database: *** NONE ***
+
+ERROR 2013 (HY000): Lost connection to MySQL server during query
+mysql&gt; select test.hello(&quot;AA&quot;);
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id: 1
+Current database: *** NONE ***
+
++------------------+
+<span class="quote1">| test.hello(&quot;AA&quot;) |</span>
++------------------+
+<span class="quote1">| やぁAA調子どう？ |</span>
++------------------+
+1 row in set (0.26 sec)
+
+mysql&gt; select test.hello(&quot;AA&quot;);
++------------------+
+<span class="quote1">| test.hello(&quot;AA&quot;) |</span>
++------------------+
+<span class="quote1">| やぁAA調子どう？ |</span>
++------------------+
+1 row in set (0.00 sec)
+
+mysql&gt; select test.simpleproc(&quot;AA&quot;); ← 意味不明
++-----------------------+
+<span class="quote1">| test.simpleproc(&quot;AA&quot;) |</span>
++-----------------------+
+<span class="quote1">| やぁAA調子どう？ |</span>
++-----------------------+
+1 row in set (0.00 sec)
+
+mysql&gt; call test.sipleproc(@a);
+ERROR 2013 (HY000): Lost connection to MySQL server during query
+mysql&gt; drop function test.hello;
+ERROR 2006 (HY000): MySQL server has gone away
+No connection. Trying to reconnect...
+Connection id: 5
+Current database: *** NONE ***
+
+Query OK, 0 rows affected (0.20 sec)
+
+mysql&gt; drop function test.hello;
+ERROR 1305 (42000): FUNCTION test.hello does not exist
+mysql&gt; call test.sipleproc(@a); ← function helloをdropすると
+Query OK, 0 rows affected (0.11 sec) プロシジャーをcallできる。
+
+mysql&gt; select @a;
++------+
+<span class="quote1">| @a |</span>
++------+
+<span class="quote1">| 10 |</span>
++------+
+1 row in set (0.00 sec)
+
+mysql&gt;
+
+こんな感じでmysqldがおかしそうですのでmysqldのセットアップを
+もう１度やってみます。ちなみに川合さんはどれをセットアップ
+されましたか？
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="11314">[前]</a><a href="11316">[次]</a><a href="../list/11301-11400">[番号順一覧]</a><a href="../thread/11301-11400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11294">  11294 2005-03-31 21:33 [HORI &lt;john.smith@xxx] turbolinux10のmysql5はありあまか？      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11295">  11295 2005-03-31 22:11 ┣[&quot;Ryuichiro Munechika]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11296">  11296 2005-03-31 22:50 ┃┗[HORI &lt;john.smith@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11298">  11298 2005-04-01 07:01 ┃　┗[&quot;Ryuichiro Munechika]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11299">  11299 2005-04-01 09:21 ┃　　┗[&quot;HORI&quot; &lt;john.smith@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11300">  11300 2005-04-01 19:12 ┃　　　┗[川合孝典 &lt;gcd00051@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11301">  11301 2005-04-01 20:35 ┃　　　　┗[HORI &lt;john.smith@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11305">  11305 2005-04-02 16:34 ┃　　　　　┗[&quot;Ryuichiro Munechika]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11306">  11306 2005-04-02 18:08 ┃　　　　　　┗[HORI &lt;john.smith@xxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11312">  11312 2005-04-06 08:15 ┃　　　　　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="11315">  11315 2005-04-07 01:39 ┃　　　　　　　　┗[HORI &lt;john.smith@xxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11318">  11318 2005-04-07 07:09 ┃　　　　　　　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11319">  11319 2005-04-08 15:51 ┃　　　　　　　　　　┗[HORI &lt;john.smith@xxx]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11320">  11320 2005-04-09 10:42 ┗[HORI &lt;john.smith@xxx]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,513 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4230</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="4229">[前]</a><a href="4231">[次]</a><a href="../list/4201-4300">[番号順一覧]</a><a href="../thread/4201-4300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4230
+</p>
+<div class="header">
+<p>
+From: &quot;tamuzin2&quot; &lt;&quot;tamuzin2&quot; &lt;tamuzin@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 27 Aug 2001 15:22:02 +0900<br>
+Subject: [mysql 04230] 画像を表示<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+田中です。
+
+画像をアップロードしてデータベースに挿入させて、
+そのデータベースのデータを表示させるPerl DBIを組んでいるのですが、
+なにせ初心者な者でなかなか上手くいきません。
+
+下記のようなプログラムでアップロードさせて、
+
+#!perl
+
+##《設定》
+#データベースインターフェースのドライバ指定
+$db_db=&quot;DBI:mysql:shopping:localhost&quot;;
+
+#MySQLのユーザーネーム
+$db_usnm=&quot;root&quot;;
+
+#MySQLのパスワード
+$db_pw=&quot;cq3jfgc&quot;;
+
+#プログラムタイトル
+$pg_title=&quot;kanrigamen&quot;;
+
+#ページの背景色
+$pg_haikei=&quot;#FFFFFF&quot;;
+
+#ページの見出し
+$pg_midasi=&quot;◆ショッピング管理ページ◆&quot;;
+
+#ページの見出しの位置
+$pg_mdaichi=&quot;center&quot;;
+
+#フォームの属性
+$zokusei=&quot;post&quot;;
+
+#フォームを処理するプログラム指定
+$form_pg=&quot;syouhin_kanri.cgi&quot;;
+
+#フォームテーブルの外枠の幅
+$tb_haba=&quot;70&quot;;
+
+#フォームテーブルの外枠の太さ
+$tb_futosa=&quot;3&quot;;
+
+#フォームテーブルの内枠の太さ
+$tb_futosa2=&quot;4&quot;;
+
+#フォームテーブルの枠の余白
+$tb_yohaku=&quot;5&quot;;
+
+#フォームテーブルの位置
+$tb_ichi=&quot;center&quot;;
+
+#フォーム記入漏れ
+$taipumisu=&quot;記入漏れがあります。&quot;;
+
+#モジュール＆ライブラリの指定
+require&quot;jcode.pl&quot;;
+use DBI;
+use CGI_Lite;
+use File::Copy;
+
+#CGI_Liteをライブラリ関数をコールする為の宣言
+$cgi= new CGI_Lite();
+
+#受け取ったフォームデータを置くディレクトリを指定
+$cgi-&gt;set_directory(&quot;./tmp&quot;) || die $!;
+
+#フォームデータを受け取り連想配列(%in)に代入
+%in=$cgi-&gt;parse_form_data();
+
+#商品画像2を別のフォルダに移動
+move(&quot;./tmp/$in{'SH_gazou2'}&quot;, &quot;./img&quot;);
+
+#$dns：データベースインターフェース基本形となるドライバ部分
+#my($dns) = &quot;DBI:ドライバ名:アクセスするデータベース名:ホスト名&quot;;
+my($dns) = &quot;$db_db&quot;;
+
+#MySQLのユーザーネーム
+my($username) = &quot;$db_usnm&quot;;
+
+#MySQLのパスワード
+my($password) = &quot;cq3jfgc&quot;;
+
+#$dbh：はMySQLへのコネクション。$sthはMySQLコマンドの実行
+my($dbh,$sth);
+
+#MySQLコマンドが情報を出力する場合は、その情報を詰める為の値
+my(@ary);
+
+#入力日時の表示
+	$ENV{'TZ'} = &quot;JST-9&quot;;
+	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+	$year += 1900;
+	$mon++;
+	if ($mon  &lt; 10) { $mon  = &quot;0$mon&quot;;  }
+	if ($mday &lt; 10) { $mday = &quot;0$mday&quot;; }
+	if ($hour &lt; 10) { $hour = &quot;0$hour&quot;; }
+	if ($min  &lt; 10) { $min  = &quot;0$min&quot;;  }
+
+#商品の新規登録
+if($in{'mode'} eq 'new'){
+
+#フォームの入力ミス時のエラー表示
+&amp;form_error;
+
+#ここではEUCコードでデータを挿入してみる事にする。表示はSJISを利用
+&amp;mozihenkan;
+
+#日時の取得
+&amp;zikan;
+
+#$dbhでMySQLに接続
+$dbh = DBI -&gt; connect ($dns,$username,$password) or &amp;Error(&quot;データベースへア
+クセスできません。&quot;);
+
+#MySQLコマンドの実行
+#insert：レコードの挿入　insert into テーブル名 values(&quot;各フィールドの変数名&quot;)
+$sth = $dbh-&gt;prepare(qq{insert into syouhin
+values(&quot;$Categori&quot;,&quot;$in{'SH_gazou1'}&quot;,&quot;$in{'SH_gazou2'}&quot;,&quot;$senmon&quot;,&quot;$SH_url&quot;
+,&quot;$Syoukaibun&quot;,&quot;$Kakaku&quot;,&quot;$SH_name&quot;,&quot;$SH_kikan_mae&quot;,&quot;$SH_kikan_syuu&quot;,&quot;$Nyu_n
+icizi&quot;)});
+
+#MySQLのエラー出力
+$sth -&gt; execute() or &amp;Error(&quot;MySQL INSERT コマンドを実行できません。&quot;);
+
+#MySQLコマンドの終了
+$sth -&gt; finish();
+
+#MySQLへのコネクションを閉じる
+$dbh -&gt; disconnect();
+
+}#商品の新規登録はここまで
+
+#《商品管理画面HTML》
+#Perl内でHTML分を使用時に必要な指定文
+print&quot;Content-type: text/html\n\n&quot;;
+print&lt;&lt;&quot;__HTML__&quot;;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;$pg_title&lt;/title&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=Shift_JIS&quot;&gt;
+&lt;/head&gt;
+
+&lt;body bgcolor=&quot;$pg_haikei&quot;&gt;
+&lt;table width=&quot;32%&quot; border=&quot;0&quot; cellspacing=&quot;1&quot; cellpadding=&quot;1&quot;
+align=&quot;center&quot;&gt;
+  &lt;tr&gt;
+    &lt;td&gt;
+      &lt;h2 align=&quot;center&quot;&gt;$pg_midasi&lt;/h2&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;form method=$zokusei action=$form_pg enctype=multipart/form-data&gt;
+  &lt;table width=&quot;$tb_haba%&quot; border=&quot;$tb_futosa&quot; cellspacing=&quot;$tb_futosa2&quot;
+cellpadding=&quot;$tb_yohaku&quot; align=&quot;$tb_ichi&quot;&gt;
+    &lt;tr&gt;
+      &lt;td width=&quot;21%&quot; bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;カテゴリー&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td width=&quot;79%&quot; bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;select name=&quot;Categori&quot;&gt;
+          &lt;option&gt;映像機器&lt;/option&gt;
+          &lt;option&gt;記憶装置&lt;/option&gt;
+          &lt;option&gt;ディスプレイ&lt;/option&gt;
+          &lt;option&gt;ネットワーク機器&lt;/option&gt;
+          &lt;option&gt;入力装置&lt;/option&gt;
+          &lt;option&gt;ＰＣ本体&lt;/option&gt;
+          &lt;option&gt;プリンター&lt;/option&gt;
+          &lt;option&gt;音声機器&lt;/option&gt;
+          &lt;option&gt;ソフト&lt;/option&gt;
+          &lt;option&gt;スキャナー&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td width=&quot;21%&quot; bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;専門分野&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td width=&quot;79%&quot; bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;select name=&quot;senmon&quot;&gt;
+          &lt;option&gt;娯楽用&lt;/option&gt;
+          &lt;option&gt;仕事用&lt;/option&gt;
+          &lt;option&gt;娯楽兼仕事用&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;製品の関連ＵＲＬ
+&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;input type=&quot;text&quot; name=&quot;SH_url&quot; value=&quot;http://&quot; maxlength=&quot;64&quot;
+size=&quot;80&quot;&gt;
+        &lt;font size=&quot;1&quot; color=&quot;#FF3333&quot;&gt;(半角英数)&lt;/font&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;製品の紹介文&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;textarea name=&quot;Syoukaibun&quot; rows=&quot;5&quot; cols=&quot;60&quot;&gt;&lt;/textarea&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;価　　格&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;input type=&quot;text&quot; name=&quot;Kakaku&quot; size=&quot;10.&quot; maxlength=&quot;8&quot;&gt;
+        &lt;b&gt;&lt;font size=&quot;3&quot;&gt;円&lt;/font&gt;&lt;/b&gt; &lt;font size=&quot;1&quot; color=&quot;#FF3333&quot;&gt;(半角
+数字)&lt;/font&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;製　品　名&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;input type=&quot;text&quot; name=&quot;SH_name&quot; maxlength=&quot;80&quot; size=&quot;90&quot;&gt;
+        &lt;font size=&quot;1&quot; color=&quot;#FF3333&quot;&gt;(全角)&lt;/font&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;製品出品期間
+(始)&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;input type=&quot;text&quot; name=&quot;mae_nen&quot; size=&quot;6&quot; maxlength=&quot;4&quot;&gt;
+        &lt;b&gt;&lt;font size=&quot;3&quot;&gt;年&lt;/font&gt;&lt;/b&gt;
+        &lt;input type=&quot;text&quot; name=&quot;mae_tuki&quot; size=&quot;4&quot; maxlength=&quot;2&quot;&gt;
+        &lt;b&gt;&lt;font size=&quot;3&quot;&gt;月
+        &lt;input type=&quot;text&quot; name=&quot;mae_hi&quot; size=&quot;4&quot; maxlength=&quot;2&quot;&gt;
+        日
+        &lt;input type=&quot;text&quot; name=&quot;mae_zi&quot; size=&quot;4&quot; maxlength=&quot;2&quot;&gt;
+        時
+        &lt;input type=&quot;text&quot; name=&quot;mae_fun&quot; size=&quot;4&quot; maxlength=&quot;2&quot;&gt;
+        分&lt;/font&gt;&lt;/b&gt;&lt;font size=&quot;1&quot; color=&quot;#FF3333&quot;&gt;(半角数字)西暦
+&lt;/font&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;製品出品期間
+(終)&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;input type=&quot;text&quot; name=&quot;syuu_nen&quot; size=&quot;6&quot; maxlength=&quot;4&quot;&gt;
+        &lt;b&gt;&lt;font size=&quot;3&quot;&gt;年&lt;/font&gt;&lt;/b&gt;
+        &lt;input type=&quot;text&quot; name=&quot;syuu_tuki&quot; size=&quot;4&quot; maxlength=&quot;2&quot;&gt;
+        &lt;b&gt;&lt;font size=&quot;3&quot;&gt;月
+        &lt;input type=&quot;text&quot; name=&quot;syuu_hi&quot; size=&quot;4&quot; maxlength=&quot;2&quot;&gt;
+        日
+        &lt;input type=&quot;text&quot; name=&quot;syuu_zi&quot; size=&quot;4&quot; maxlength=&quot;2&quot;&gt;
+        時
+        &lt;input type=&quot;text&quot; name=&quot;syuu_fun&quot; size=&quot;4&quot; maxlength=&quot;2&quot;&gt;
+        分&lt;/font&gt;&lt;/b&gt;&lt;font size=&quot;1&quot; color=&quot;#FF3333&quot;&gt;(半角数字)西暦
+&lt;/font&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;商品画像１&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;input type=file name=SH_gazou1&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;商品画像２&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;input type=&quot;file&quot; name=&quot;SH_gazou2&quot;&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td bgcolor=&quot;#99CCFF&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;&lt;font size=&quot;3&quot;&gt;&lt;b&gt;入力日時&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;
+      &lt;/td&gt;
+      &lt;td bgcolor=&quot;#FDF9C1&quot;&gt;
+        &lt;input type=&quot;text&quot; name=&quot;nyuu_nen&quot; size=&quot;6&quot; maxlength=&quot;4&quot;
+value=&quot;$year&quot;&gt;
+        &lt;b&gt;&lt;font size=&quot;3&quot;&gt;年&lt;/font&gt;&lt;/b&gt;
+        &lt;input type=&quot;text&quot; name=&quot;nyuu_tuki&quot; size=&quot;4&quot; maxlength=&quot;2&quot;
+value=&quot;$mon&quot;&gt;
+        &lt;b&gt;&lt;font size=&quot;3&quot;&gt;月
+        &lt;input type=&quot;text&quot; name=&quot;nyuu_hi&quot; size=&quot;4&quot; maxlength=&quot;2&quot;
+value=&quot;$mday&quot;&gt;
+        日
+        &lt;input type=&quot;text&quot; name=&quot;nyuu_zi&quot; size=&quot;4&quot; maxlength=&quot;2&quot;
+value=&quot;$hour&quot;&gt;
+        時
+        &lt;input type=&quot;text&quot; name=&quot;nyuu_fun&quot; size=&quot;4&quot; maxlength=&quot;2&quot;
+value=&quot;$min&quot;&gt;
+        分&lt;/font&gt;&lt;/b&gt;&lt;font size=&quot;1&quot; color=&quot;#FF3333&quot;&gt;(半角数字)西暦
+&lt;/font&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td colspan=&quot;2&quot;&gt;
+        &lt;div align=&quot;center&quot;&gt;
+          &lt;input type=submit name=submit value=&quot;送信&quot;&gt;
+        &lt;/div&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;input type=&quot;hidden&quot; name=&quot;mode&quot; value=&quot;new&quot;&gt;
+  &lt;/table&gt;
+  &lt;br&gt;
+&lt;/form&gt;
+&lt;br&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+__HTML__
+
+##《サブルーチンエリア》
+#EUCコードでデータを挿入
+sub mozihenkan{
+ $Categori=$in{'Categori'};
+ &amp;jcode'convert(*Categori,&quot;euc&quot;);
+ $senmon=$in{'senmon'};
+ &amp;jcode'convert(*senmon,&quot;euc&quot;);
+ $SH_url=$in{'SH_url'};#パスワードは半角英数のみなのでこのまま
+ $Syoukaibun=$in{'Syoukaibun'};
+ &amp;jcode'convert(*Syoukaibun,&quot;euc&quot;);
+ $Kakaku=$in{'Kakaku'};#価格は半角数字のみなのでこのまま
+ $SH_name=$in{'SH_name'};
+ &amp;jcode'convert(*SH_name,&quot;euc&quot;);
+ $mae_nen=$in{'mae_nen'};#年月日時間は半角数字のみなのでこのまま
+ $mae_tuki=$in{'mae_tuki'};
+ $mae_hi=$in{'mae_hi'};
+ $mae_zi=$in{'mae_zi'};
+ $mae_fun=$in{'mae_fun'};
+ $syuu_nen=$in{'syuu_nen'};
+ $syuu_tuki=$in{'syuu_tuki'};
+ $syuu_hi=$in{'syuu_hi'};
+ $syuu_zi=$in{'syuu_zi'};
+ $syuu_fun=$in{'syuu_fun'};
+ $nyuu_nen=$in{'nyuu_nen'};
+ $nyuu_tuki=$in{'nyuu_tuki'};
+ $nyuu_hi=$in{'nyuu_hi'};
+ $nyuu_zi=$in{'nyuu_zi'};
+ $nyuu_fun=$in{'nyuu_fun'};
+}
+
+#フォームの入力ミス時のエラー表示
+sub form_error{
+ &amp;Error(&quot;$taipumisu&quot;) unless $in{'Categori'};
+ &amp;Error(&quot;$taipumisu&quot;) unless $in{'senmon'};
+ &amp;Error(&quot;$taipumisu&quot;) unless $in{'Syoukaibun'};
+ &amp;Error(&quot;$taipumisu&quot;) unless $in{'Kakaku'};
+ &amp;Error(&quot;$taipumisu&quot;) unless $in{'SH_name'};
+ #&amp;Error(&quot;$taipumisu&quot;) unless $in{'SH_kikan_mae'};
+ #&amp;Error(&quot;$taipumisu&quot;) unless $in{'SH_kikan_syuu'};
+ &amp;Error(&quot;$taipumisu&quot;) unless $in{'SH_gazou1'};
+ #&amp;Error(&quot;$taipumisu&quot;) unless $in{'Nyu_nicizi'};
+
+}
+
+#MySQLのエラー処理
+sub Error{
+print&quot;Content-type: text/html\n\n&quot;;
+print $_[0];
+print qq(&lt;br&gt;&lt;a href=&quot;javascript:history.back(1)&quot;&gt;戻る&lt;/a&gt;);
+exit;
+}
+
+#日時の取得
+sub zikan{
+$ENV{'TZ'} = &quot;JST-9&quot;;
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$year += 1900;
+$mon++;
+if ($mon  &lt; 10) { $mon  = &quot;0$mon&quot;;  }
+if ($mday &lt; 10) { $mday = &quot;0$mday&quot;; }
+if ($hour &lt; 10) { $hour = &quot;0$hour&quot;; }
+if ($min  &lt; 10) { $min  = &quot;0$min&quot;;  }
+
+$SH_kikan_mae=sprintf(&quot;%04d-%02d-%02d
+%02d:%02d:%02d&quot;,$mae_nen,$mae_tuki,$mae_hi,$mae_zi,$mae_fun);
+$SH_kikan_syuu=sprintf(&quot;%04d-%02d-%02d
+%02d:%02d:%02d&quot;,$syuu_nen,$syuu_tuki,$syuu_hi,$syuu_zi,$syuu_fun);
+$Nyu_nicizi=sprintf(&quot;%04d-%02d-%02d
+%02d:%02d:%02d&quot;,$nyuu_nen,$nyuu_tuki,$nyuu_hi,$nyuu_zi,$nyuu_fun);
+
+}
+
+そして、そのダウンロードされた画像を表示させるといったPerl DBIは、
+下記の様に組んで見たのですが駄目でした(このプログラムは全く自身がありませ
+ん)。
+
+#!perl
+
+#モジュール＆ライブラリの指定
+use DBI;
+
+##《設定》
+#データベースインターフェースのドライバ指定
+$db_db=&quot;DBI:mysql:shopping:localhost&quot;;
+
+#MySQLのユーザーネーム
+$db_usnm=&quot;root&quot;;
+
+#MySQLのパスワード
+$db_pw=&quot;cq3jfgc&quot;;
+
+#プログラムタイトル
+$pg_title=&quot;syoppu&quot;;
+
+
+#$dns：データベースインターフェース基本形となるドライバ部分
+#my($dns) = &quot;DBI:ドライバ名:アクセスするデータベース名:ホスト名&quot;;
+my($dns) = &quot;$db_db&quot;;
+
+#MySQLのユーザーネーム
+my($username) = &quot;$db_usnm&quot;;
+
+#MySQLのパスワード
+my($password) = &quot;cq3jfgc&quot;;
+
+#$dbh：はMySQLへのコネクション。$sthはMySQLコマンドの実行
+my($dbh,$sth);
+
+#MySQLコマンドが情報を出力する場合は、その情報を詰める為の値
+my(@ary);
+
+#$dbhでMySQLに接続
+$dbh = DBI -&gt; connect ($dns,$username,$password) or &amp;Error(&quot;データベースへア
+クセスできません。&quot;);
+
+#MySQLコマンドの実行
+#select：データの閲覧　select フィールド名1,フィールド名1,… from テーブル名 where フィールド
+名
+#like&quot;検索内容&quot;
+$sth=$dbh-&gt;prepare(qq{select SH_gazou1 from shopping});
+
+#MySQLのエラー出力
+$sth -&gt; execute() or &amp;Error(&quot;MySQL select コマンドを実行できません。&quot;);
+
+#《ショップサイトHTML》
+#Perl内でHTML分を使用時に必要な指定文
+print&quot;Content-type: text/html\; charset=shift_jis\n\n&quot;;
+print&lt;&lt;&quot;__HTML__&quot;;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;ショッピングサイトTOP&lt;/title&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=Shift_JIS&quot;&gt;
+&lt;/head&gt;
+
+&lt;body bgcolor=&quot;#00CCCC&quot;&gt;
+__HTML__
+while(@ary=$sth-&gt;fetchrow_array()){
+binmode($ary[1]);
+print $ary[1];
+&lt;img src=&quot;<a href="http://localhost/~shopping/test/tmp/">http://localhost/~shopping/test/tmp/</a>$ary[0]&quot; width=&quot;115&quot;
+height=&quot;125&quot;&gt;
+}
+print&lt;&lt;&quot;__HTMLEND__&quot;;
+&lt;/body&gt;
+&lt;/html&gt;
+__HTMLEND__
+
+#MySQLコマンドの終了
+$sth -&gt; finish();
+
+#MySQLへのコネクションを閉じる
+$dbh -&gt; disconnect();
+
+exit;
+
+#MySQLのエラー処理
+sub Error{
+print&quot;Content-type: text/html\n\n&quot;;
+print $_[0];
+exit;
+}
+
+大変長いメールになってしまい申し訳ございません。
+どなたか宜しければ教えてください。
+宜しくお願いします。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="4229">[前]</a><a href="4231">[次]</a><a href="../list/4201-4300">[番号順一覧]</a><a href="../thread/4201-4300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="4222">   4222 2001-08-27 00:00 [e-oohira &lt;e-oohira@x]                                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4226">   4226 2001-08-27 12:15 ┗[とみたまさひろ &lt;tomm] スレッド表示について                  </a></span>
+<span class="current">-&gt;&nbsp;<a href="4230">   4230 2001-08-27 15:22 　┗[&quot;tamuzin2&quot; &lt;tamuzin@] 画像を表示                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4232">   4232 2001-08-27 16:30 　　┗[&quot;Kawai,Takanori&quot; &lt;GC]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4256">   4256 2001-08-30 14:57 　　　┗[&quot;tamuzin2&quot; &lt;tamuzin@] Re: 画像を表示【解決】          </a></span>
+</pre>
+</body>
+</html>

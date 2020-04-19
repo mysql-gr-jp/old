@@ -1,0 +1,82 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3806</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="3805">[前]</a><a href="3807">[次]</a><a href="../list/3801-3900">[番号順一覧]</a><a href="../thread/3801-3900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3806
+</p>
+<div class="header">
+<p>
+From: Kentaro Furukawa &lt;Kentaro Furukawa &lt;furukawa@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 22 Jun 2001 17:41:49 +0900<br>
+Subject: [mysql 03806] Re: 含まれていない ID をみつけだすような SQL<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+古川と申します。
+
+<span class="quote1">&gt; ここであるひとつのSQLを用いて、1から7までのうち空いているIDを出力とする、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote2">&gt; | id   |</span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote2">&gt; |     4|</span>
+<span class="quote2">&gt; |     6|</span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; という結果が欲しいときは、どういうSQLを書くのが高速でしょうか？</span>
+
+これをそのまま取得できるわけではないですが、少なくとも「存在する数値全部
+を取得して抜けているのをチェックする」ようなマネはしなくてすむ方法、なら
+思いつきました。
+
+前提条件として、最初と最後の数値（この例の場合は１と７）が番兵として必ず
+存在するものとします（そうと限らなければ、０と８を INSERT しておくとよい
+でしょう）。存在する数値列を昇順に並べた時、隣り合った数値が２以上離れて
+いればその間が抜けていることになりますから、
+
+SELECT
+  MAX(h1.id) AS prev,
+  h2.id AS curr
+<span class="quote1">&gt;FROM</span>
+  hoge h1,
+  hoge h2
+WHERE
+  h1.id &lt; h2.id
+GROUP BY
+  curr
+HAVING
+  prev+1 &lt; curr
+
+で、
+
+prev curr 
+---------
+ 3   5
+ 5   7
+
+を得て、prev+1 で始まり curr-1 で終わる数値列を作成していけば抜けている数
+値列を求められます。
+お役に立てていただければ幸いです。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="3805">[前]</a><a href="3807">[次]</a><a href="../list/3801-3900">[番号順一覧]</a><a href="../thread/3801-3900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3798">   3798 2001-06-21 02:07 [Kengo Nakajima &lt;ring] 含まれていない ID をみつけだすような SQL</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3803">   3803 2001-06-22 15:34 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3805">   3805 2001-06-22 17:39 ┃┗[&lt;endo_t@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3804">   3804 2001-06-22 16:20 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="3806">   3806 2001-06-22 17:41 ┣[Kentaro Furukawa &lt;fu]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3807">   3807 2001-06-22 18:58 ┗[松嶋祥文 &lt;mats@xxxxx]                                       </a></span>
+</pre>
+</body>
+</html>

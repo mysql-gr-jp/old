@@ -1,0 +1,1222 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.ja.texi on 22 May 2000 -->
+
+  <TITLE>MySQL Reference Manual for version 3.23.16-alpha. - 15  Maintaining a MySQL installation</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Tools.html">previous</A>, <A HREF="manual.ja_Adding_functions.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Maintenance" HREF="manual.ja_toc.html#Maintenance">15  Maintaining a <STRONG>MySQL</STRONG> installation</A></H1>
+
+
+
+<H2><A NAME="Table_maintenance" HREF="manual.ja_toc.html#Table_maintenance">15.1  テーブルのメンテナンス、クラッシュからの修復のための <CODE>myisamchk</CODE> 使用</A></H2>
+
+<P>
+Starting with <STRONG>MySQL</STRONG> 3.23.13, you can check tables MyISAM with the
+<CODE>CHECK TABLE</CODE> command.  「<A HREF="manual.ja_Reference.html#CHECK_TABLE">7.11  <CODE>CHECK TABLE</CODE> 構文</A>」節参照.  You can repair tables
+with the <CODE>REPAIR TABLE</CODE> command.  「<A HREF="manual.ja_Reference.html#REPAIR_TABLE">7.12  <CODE>REPAIR TABLE</CODE> 構文</A>」節参照.
+
+</P>
+<P>
+MyISAM テーブル (<CODE>.MYI</CODE> and <CODE>.MYD</CODE>) の検査・修復には <CODE>myisamchk</CODE> を
+使用します。
+ISAM テーブル (<CODE>.ISM</CODE> and <CODE>.ISD</CODE>) の検査・修復には <CODE>isamchk</CODE> を
+使用します。
+ 「<A HREF="manual.ja_Table_types.html#Table_types">8  MySQL table types</A>」節参照.
+
+</P>
+<P>
+以下の文は <CODE>myisamchk</CODE> について述べていますが、<CODE>isamchk</CODE> にもすべて
+当てはまります。
+
+</P>
+<P>
+<CODE>myisamchk</CODE> ユーティリティは、データベースのテーブルの情報を得たり、
+チェックしたり、テーブルの修復や最適化に使用します。
+以下のセクションでは、 <CODE>myisamchk</CODE> の起動方法(オプションの説明も含む)、
+テーブルの保守スケジュールのたて方、
+<CODE>myisamchk</CODE> の色々な機能の使い方を述べます。
+
+</P>
+<P>
+もし <CODE>mysqld</CODE> を <CODE>--skip-locking</CODE> で走らせているなら、
+(これは Linux など、いくつかのシステムでデフォルトです)、
+<CODE>mysqld</CODE> があるテーブルを使用しているとき、あなたは同じテーブルに対して
+ <CODE>myisamchk</CODE> で確実に検査できません。もし <CODE>myisamchk</CODE> 中に、
+だれも <CODE>mysqld</CODE> を通してそのテーブルをアクセスしないのが確実なら、
+テーブルを検査する前に <CODE>mysqladmin flush-tables</CODE> を行うべきです。
+そうでない場合、テーブルの検査中は <CODE>mysqld</CODE> を落とすべきです。
+もし <CODE>mysqld</CODE> がテーブルを更新中に <CODE>myisamchk</CODE> を実行した場合、
+テーブルが変更された旨のワーニングがでるでしょう。
+
+</P>
+<P>
+もし <CODE>--skip-locking</CODE> を使用していないなら、いつでも <CODE>myisamchk</CODE> は
+使用できます。これを実行している間、全てのテーブルを更新するクライアントは
+<CODE>myisamchk</CODE> が準備できるまで待ちます。
+
+</P>
+<P>
+もし <CODE>myisamchk</CODE> をテーブルの修復、最適化に使用するなら、その最中に、
+<CODE>mysqld</CODE> がそのテーブルを絶対に使用しないようにしなければ
+なりません。これは <CODE>--skip-locking</CODE> を使用している場合に起こりえます。
+もし <CODE>mysqld</CODE> をダウンさせていないなら、最低 <CODE>myisamchk</CODE> 実行前に、
+ <CODE>mysqladmin flush-tables</CODE> を実行すべきです。
+
+</P>
+<P>
+テーブルの修復と最適化のために、ほとんどの場合、 <CODE>OPTIMIZE TABLES</CODE> 
+コマンドが使用できます。しかしこれは <CODE>myisamchk</CODE> に比べて、
+遅くて確実でもありません。(fatal error発生時の場合)。これは
+その反面、使用方法が簡単でテーブルのフラッシュを気にかける必要がありません。
+ 「<A HREF="manual.ja_Reference.html#OPTIMIZE_TABLE">7.10  <CODE>OPTIMIZE TABLE</CODE>構文</A>」節参照.
+
+</P>
+
+
+
+<H2><A NAME="myisamchk_syntax" HREF="manual.ja_toc.html#myisamchk_syntax">15.2  <CODE>myisamchk</CODE> 起動構文</A></H2>
+
+<P>
+<CODE>myisamchk</CODE> は以下のようにして起動します:
+
+</P>
+
+<PRE>
+shell&#62; myisamchk [options] tbl_name
+</PRE>
+
+<P>
+<CODE>options</CODE> に、あなたが <CODE>myisamchk</CODE> にさせたいことを指定します。
+その説明は後述します。(<CODE>myisamchk --help</CODE> と実行すれば、オプションの一覧が取れます)。
+オプションがなければ、 <CODE>myisamchk</CODE> は単にテーブルを検査するだけです。
+より多くの情報を得たい、あるいは、 <CODE>myisamchk</CODE> に誤り訂正の行動を取らせる事については、後述します。
+
+</P>
+<P>
+<CODE>tbl_name</CODE> は検査したいテーブル名です。
+もしどこか違うディレクトリにあるデータベースに対して <CODE>myisamchk</CODE> を走らせたいなら、
+ <CODE>myisamchk</CODE> にはファイルがどこにあるかわからないので、
+ファイルのパスを指定しなければなりません。
+実際、 <CODE>myisamchk</CODE> はあなたが使用しているファイルがデータベースのディレクトリにあるかどうかは考慮しません；
+ほかの場所にデータベーステーブルのファイルをコピーし、そのコピーしたファイルに対して
+回復操作を実行することができます。
+
+</P>
+<P>
+<CODE>myisamchk</CODE> コマンドラインには、複数のテーブル名が指定できます。
+また、インデックスファイル名(<TT>`.MYI'</TT> 接尾語のついたファイル)も指定でき、
+さらに <TT>`*.MYI'</TT> とすれば、ディレクトリ内の全てのテーブルが指定できます。
+例えば、現在のカレントディレクトリがデーターベースディレクトリならば、
+そのディレクトリ内の全てのテーブルは、以下のようにして検査できます：
+
+</P>
+
+<PRE>
+shell&#62; myisamchk *.MYI
+</PRE>
+
+<P>
+データベースディレクトリに入っていない場合、
+パスを指定することにより全てのテーブルが検査できます：
+
+</P>
+
+<PRE>
+shell&#62; myisamchk /path/to/database_dir/*.MYI
+</PRE>
+
+<P>
+<STRONG>MySQL</STRONG> データディレクトリのパスにワイルドカードを使用することにより、
+データベースの全てのテーブルも検査できます：
+
+</P>
+
+<PRE>
+shell&#62; myisamchk /path/to/datadir/*/*.MYI
+</PRE>
+
+<P>
+<CODE>myisamchk</CODE> は以下のオプションを持ちます:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>-a, --analyze</CODE>
+<DD>
+キーの分布(配置)を分析します。
+これは <STRONG>MySQL</STRONG> のいくつかの結合を速くします。
+
+<DT><CODE>-#, --debug=debug_options</CODE>
+<DD>
+デバッグログの出力。
+<CODE>debug_options</CODE> はよく <CODE>'d:t:o,filename'</CODE> とされます。
+
+<DT><CODE>-d, --description</CODE>
+<DD>
+テーブルに関するいくらかの情報を表示します
+
+<DT><CODE>-e, --extend-check</CODE>
+<DD>
+テーブルを非常に徹底的に検査します。
+極端な場合にだけで必要とされます。
+通常 <CODE>myisamchk</CODE> は、このオプションなしで全てのエラーを見つけるはずです。
+
+<DT><CODE>-f, --force</CODE>
+<DD>
+古い一時的なファイルを上書きします。
+<CODE>myisamchk</CODE> を <CODE>-r</CODE> なしで走らせてテーブルを検査しているときに、
+<CODE>-f</CODE> を使用するならば、
+<CODE>myisamchk</CODE> はチャックでエラーが出たテーブルに対して、
+自動的に <CODE>-r</CODE> を伴って、検査を再開します。
+
+<DT><CODE>--help</CODE>
+<DD>
+ヘルプを表示して終了。
+
+<DT><CODE>-i, --information</CODE>
+<DD>
+検査されたテーブルの統計情報を表示。
+
+<DT><CODE>-k #, --keys-used=#</CODE>
+<DD>
+<CODE>-r</CODE> と共に使用します。
+NISAM テーブルハンドラーに最初の <CODE>#</CODE> インデックスだけを更新するように指示します。
+If you are using MyISAM tells which keys to use, where each
+binary bit stands for one key (First key is bit 0).
+これはインサートを速くします！
+非アクティブになったインデックスは、<CODE>myisamchk -r</CODE> を使用すれば再びアクティブになります。
+
+<DT><CODE>-l, --no-symlinks</CODE>
+<DD>
+修復時にシンボリックリンクを追いません。
+通常、<CODE>myisamchk</CODE> はシンボリックリンクが指し示すテーブルも修復します。
+
+<DT><CODE>-q, --quick</CODE>
+<DD>
+<CODE>-r</CODE> と共に使用され、修復を早く行います。
+通常、オリジナルのデータファイルは検査されません；
+二回 <CODE>-q</CODE> を指定すると、強制的にオリジナルのデータファイルも使用します。
+
+<DT><CODE>-r, --recover</CODE>
+<DD>
+修復モード。
+Can fix almost anything except unique keys that aren't unique
+(which is a extremely unlikely error with ISAM/MyISAM tables).
+If you want to recover a table, this is the option to try first. Only if
+myisamchk reports that the table can't be recovered by <CODE>-r</CODE>, you
+should then try <CODE>-o</CODE>.  (Note that in the unlikely case that <CODE>-r</CODE>
+fails, the data file is still intact).
+
+<DT><CODE>-o, --safe-recover</CODE>
+<DD>
+修復モード。
+古い修復方法を使用します (reads through all rows in order and updates
+all index trees based on the found rows)；
+これは <CODE>-r</CODE> よりも遅いですが、 <CODE>-r</CODE> が扱えないものも扱えます。
+Normally one should always first repair with
+<CODE>-r</CODE> and only if this fails use <CODE>-o</CODE>.
+
+<DT><CODE>-O var=option, --set-variable var=option</CODE>
+<DD>
+変数に値を入れます。可能な変数は後述します。
+
+<DT><CODE>-s, --silent</CODE>
+<DD>
+静粛モード。
+エラーのみを出力します。
+二度 <CODE>-s</CODE> を指定すると(<CODE>-ss</CODE>)、<CODE>myisamchk</CODE> は
+ほとんど出力をしなくなります。
+
+<DT><CODE>-S, --sort-index</CODE>
+<DD>
+インデックスブロックのソート。
+これは、アプリケーションでの ``read-next'' を速くします。
+
+<DT><CODE>-R index_num, --sort-records=index_num</CODE>
+<DD>
+インデックスに従ってソート。
+これはあなたのデータをよりよく配置し、このインデックスへの
+ <CODE>SELECT</CODE>, <CODE>ORDER BY</CODE> オペレーションを速くします。
+(この操作の最初のソートは非常に遅くなるかもしれません！)
+テーブルのインデックスの番号をみつけるには <CODE>SHOW INDEX</CODE> を使用しますが、
+これは <CODE>myisamchk</CODE> がテーブルのインデックスを見つけるのと同じ順序で行います。
+インデックス番号は 1 から始まります。
+
+<DT><CODE>-u, --unpack</CODE>
+<DD>
+<CODE>pack_isam</CODE> でパックされたテーブルをアンパックします。
+
+<DT><CODE>-U, --update-status</CODE>
+<DD>
+Store in the <TT>`.MYI'</TT> file when the table was checked and if the table was
+crashed.  This should be used to get full benefit of the <CODE>--fast</CODE>
+option, but you shouldn't use this if option if the <CODE>mysqld</CODE> server is
+using the table and you are running <CODE>mysqld</CODE> with
+<CODE>--skip-locking</CODE>.
+
+<DT><CODE>-v, --verbose</CODE>
+<DD>
+冗長モード。より多く情報を出力します。
+<CODE>-d</CODE> と <CODE>-e</CODE> オプションと共に使用できます。
+<CODE>-v</CODE> を複数指定すると(<CODE>-vv</CODE>, <CODE>-vvv</CODE>)、もっと出力が多くなります！
+
+<DT><CODE>-V, --version</CODE>
+<DD>
+<CODE>myisamchk</CODE> バージョンを表示して終了。
+
+<DT><CODE>-w, --wait</CODE>
+<DD>
+テーブルがロックされていたら待ちます。
+</DL>
+
+<P>
+<CODE>--set-variable</CODE> (<CODE>-O</CODE>) オプションで可能な変数：
+
+</P>
+
+<PRE>
+key_buffer_size       current value: 16776192
+read_buffer_size      current value: 262136
+write_buffer_size     current value: 262136
+sort_buffer_size      current value: 2097144
+sort_key_blocks       current value: 16
+decode_bits           current value: 9
+</PRE>
+
+<P>
+<CODE>key_buffer_size</CODE> is only used when you check the table with <CODE>-e</CODE> or
+repair it with <CODE>-o</CODE>.
+<CODE>sort_buffer_size</CODE> is used when you repair the table with <CODE>-r</CODE>.
+
+</P>
+<P>
+If you want a faster repair, set the above variables to about 1/4 of your
+available memory.  You can set both variables to big values as only one
+of the above buffers will be used at at time.
+
+</P>
+
+
+<H2><A NAME="myisamchk_memory" HREF="manual.ja_toc.html#myisamchk_memory">15.3  <CODE>myisamchk</CODE> メモリ使用</A></H2>
+
+<P>
+<CODE>myisamchk</CODE> を走らす上でメモリーの配分は重要です。
+<CODE>myisamchk</CODE> は <CODE>-O</CODE> オプションで定義した以上のメモリは使用しません。
+とても大きなファイルのたいして <CODE>myisamchk</CODE> をかけたいなら、
+メモリーをどれくらい使用するかを最初に決めなくてはなりません。
+デフォルトは固定で約 3M だけを使用します。大きな値を使用することで、
+<CODE>myisamchk</CODE> をより速く動作できます。
+例えば、32MBytesのRAMがあるなら、以下のように指定できます
+(他のオプションも指定して):
+
+</P>
+
+<PRE>
+shell&#62; myisamchk -O sort=16M -O key=16M -O read=1M -O write=1M ...
+</PRE>
+
+<P>
+<CODE>-O sort=16M</CODE> の使用は多くの場合おそらく十分でしょう。
+
+</P>
+<P>
+しかし、<CODE>myisamchk</CODE> は <CODE>TMPDIR</CODE> 内に一時ファイルを使用します。
+<CODE>TMPDIR</CODE> がメモリファイルシステムを指している場合は、簡単に out of
+memory エラーを得るでしょう。
+If this happens, set <CODE>TMPDIR</CODE> to point at some directory
+with more space and restart <CODE>myisamchk</CODE>
+
+</P>
+
+
+
+<H2><A NAME="Maintenance_regimen" HREF="manual.ja_toc.html#Maintenance_regimen">15.4  テーブルの保守体制の設定</A></H2>
+
+<P>
+問題が発生するまで待つより、定期的にテーブルを検査する方がよりよい考えです。
+保守目的には、<CODE>myisamchk -s</CODE> でテーブルを検査するのがよいでしょう。
+<CODE>-s</CODE> オプションはサイレントモードなので、エラーが起きた場合にだけメッセージを出力します。
+
+</P>
+<P>
+<A NAME="IDX672"></A>
+サーバーを開始するときにテーブルを検査するのもよい考えです。
+例えば、更新最中にマシンがリブートされたなら、全てのテーブルに関して
+その影響がないか検査する必要があります。（これは``expected crashed table''です）
+リブート後にもし古い <TT>`.pid'</TT> ファイル(プロセスID) があるならば、
+24時間以内に変更されたテーブルに対して <CODE>myisamchk</CODE> を走らせて検査させるように、
+<CODE>safe_mysqld</CODE> にテストを追加しても構いません。
+(<TT>`.pid'</TT> ファイルは <CODE>mysqld</CODE> 起動時に作られ、通常修了時に消されます。
+スタート時に <TT>`.pid'</TT> ファイルが存在するなら <CODE>mysqld</CODE> が異常終了したことを示します。)
+
+</P>
+<P>
+良いテストは、<TT>`.pid'</TT> ファイルの作成時間以降に変更された
+全てのテーブルを検査するテストです。
+
+</P>
+<P>
+通常のシステム運用中にもテーブルを検査すべきです。
+TcX では、週に一度、 <CODE>cron</CODE> を使用して重要なテーブルを検査しています。
+<TT>`crontab'</TT> ファイルには以下のように記述します：
+
+</P>
+
+<PRE>
+35 0 * * 0 /path/to/myisamchk -s /path/to/datadir/*/*.MYI
+</PRE>
+
+<P>
+これは壊れたテーブルの情報を出力しますので、必要とあらば検査、修復が行えるわけです。
+
+</P>
+<P>
+予想外の事故で壊れたテーブル(ハードウェアのトラブルが原因で崩壊)を除き、
+2,3年間、テーブルは壊れたことはありません(これは本当に本当です)。
+ので、一週間に一度のチェックでも十分です。
+
+</P>
+<P>
+24時間以内に変更された全てのテーブルに対して、
+<CODE>myisamchk -s</CODE> を毎晩実行する事を勧めます。
+そうすれば、あなたは我々と同じぐらいに <STRONG>MySQL</STRONG> を
+信頼することになります。
+
+</P>
+
+
+
+<H2><A NAME="Table-info" HREF="manual.ja_toc.html#Table-info">15.5  テーブル情報取得</A></H2>
+
+<P>
+テーブルから詳細/統計を得るためには、次の方法を使用します。後でさらに詳細な情
+報をいくつか説明します。
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>myisamchk -d tbl_name</CODE>
+<DD>
+<CODE>myisamchk</CODE> を ``describe mode'' で実行し、テーブルの説明記述を作ります。
+<CODE>--skip-locking</CODE> を指定して <STRONG>MySQL</STRONG> サーバーを起動した場合、
+<CODE>myisamchk</CODE> は myisamchk 実行中に更新されたテーブルについてエラーを報告します.
+しかし <CODE>myisamchk</CODE> は describe mode ではテーブルを変えないので、
+データを破壊する危険性はありません。
+
+<DT><CODE>myisamchk -d -v tbl_name</CODE>
+<DD>
+<CODE>myisamchk</CODE> がしていることに関する、より多くの情報を作り出すには、
+<CODE>-v</CODE> をつけて冗長モードで走らせるようにします。
+
+<DT><CODE>myisamchk -eis tbl_name</CODE>
+<DD>
+テーブルから最も重要な情報だけを示します。
+テーブル全体を読まなければならないので、遅いです。
+
+<DT><CODE>myisamchk -eiv tbl_name</CODE>
+<DD>
+<CODE>-eis</CODE> と似ているが、何を行っているかを表示します。
+</DL>
+
+<P>
+<CODE>myisamchk -d</CODE> 出力の例:
+
+<PRE>
+ISAM file:     company.MYI
+Data records:           1403698  Deleted blocks:         0
+Recordlength:               226
+Record format: Fixed length
+
+table description:
+Key Start Len Index   Type
+1   2     8   unique  double
+2   15    10  multip. text packed stripped
+3   219   8   multip. double
+4   63    10  multip. text packed stripped
+5   167   2   multip. unsigned short
+6   177   4   multip. unsigned long
+7   155   4   multip. text
+8   138   4   multip. unsigned long
+9   177   4   multip. unsigned long
+    193   1           text
+</PRE>
+
+<P>
+<CODE>myisamchk -d -v</CODE> 出力の例:
+
+<PRE>
+ISAM file:     company.MYI
+Isam-version:  2
+Creation time: 1996-08-28 11:44:22
+Recover time:  1997-01-12 18:35:29
+Data records:           1403698  Deleted blocks:              0
+Datafile: Parts:        1403698  Deleted data:                0
+Datafilepointer (bytes):      3  Keyfile pointer (bytes):     3
+Max datafile length: 3791650815  Max keyfile length: 4294967294
+Recordlength:               226
+Record format: Fixed length
+
+table description:
+Key Start Len Index   Type                      Root Blocksize Rec/key
+1   2     8   unique  double                15845376      1024       1
+2   15    10  multip. text packed stripped  25062400      1024       2
+3   219   8   multip. double                40907776      1024      73
+4   63    10  multip. text packed stripped  48097280      1024       5
+5   167   2   multip. unsigned short        55200768      1024    4840
+6   177   4   multip. unsigned long         65145856      1024    1346
+7   155   4   multip. text                  75090944      1024    4995
+8   138   4   multip. unsigned long         85036032      1024      87
+9   177   4   multip. unsigned long         96481280      1024     178
+    193   1           text
+</PRE>
+
+<P>
+<CODE>myisamchk -eis</CODE> 出力の例:
+
+<PRE>
+Checking ISAM file: company.MYI
+Key:  1:  Keyblocks used:  97%  Packed:    0%  Max levels:  4
+Key:  2:  Keyblocks used:  98%  Packed:   50%  Max levels:  4
+Key:  3:  Keyblocks used:  97%  Packed:    0%  Max levels:  4
+Key:  4:  Keyblocks used:  99%  Packed:   60%  Max levels:  3
+Key:  5:  Keyblocks used:  99%  Packed:    0%  Max levels:  3
+Key:  6:  Keyblocks used:  99%  Packed:    0%  Max levels:  3
+Key:  7:  Keyblocks used:  99%  Packed:    0%  Max levels:  3
+Key:  8:  Keyblocks used:  99%  Packed:    0%  Max levels:  3
+Key:  9:  Keyblocks used:  98%  Packed:    0%  Max levels:  4
+Total:    Keyblocks used:  98%  Packed:   17%
+
+Records:          1403698    M.recordlength:     226   Packed:             0%
+Recordspace used:     100%   Empty space:          0%  Blocks/Record:   1.00
+Recordblocks:     1403698    Deleteblocks:         0
+Recorddata:     317235748    Deleted data:         0
+Lost space:             0    Linkdata:             0
+
+User time 1626.51, System time 232.36
+Maximum resident set size 0, Integral resident set size 0
+Non physical pagefaults 0, Physical pagefaults 627, Swaps 0
+Blocks in 0 out 0, Messages in 0 out 0, Signals 0
+Voluntary context switches 639, Involuntary context switches 28966
+</PRE>
+
+<P>
+<CODE>myisamchk -eiv</CODE> 出力の例:
+
+<PRE>
+Checking ISAM file: company.MYI
+Data records: 1403698   Deleted blocks:       0
+- check file-size
+- check delete-chain
+index  1:
+index  2:
+index  3:
+index  4:
+index  5:
+index  6:
+index  7:
+index  8:
+index  9:
+No recordlinks
+- check index reference
+- check data record references index: 1
+Key:  1:  Keyblocks used:  97%  Packed:    0%  Max levels:  4
+- check data record references index: 2
+Key:  2:  Keyblocks used:  98%  Packed:   50%  Max levels:  4
+- check data record references index: 3
+Key:  3:  Keyblocks used:  97%  Packed:    0%  Max levels:  4
+- check data record references index: 4
+Key:  4:  Keyblocks used:  99%  Packed:   60%  Max levels:  3
+- check data record references index: 5
+Key:  5:  Keyblocks used:  99%  Packed:    0%  Max levels:  3
+- check data record references index: 6
+Key:  6:  Keyblocks used:  99%  Packed:    0%  Max levels:  3
+- check data record references index: 7
+Key:  7:  Keyblocks used:  99%  Packed:    0%  Max levels:  3
+- check data record references index: 8
+Key:  8:  Keyblocks used:  99%  Packed:    0%  Max levels:  3
+- check data record references index: 9
+Key:  9:  Keyblocks used:  98%  Packed:    0%  Max levels:  4
+Total:    Keyblocks used:   9%  Packed:   17%
+
+- check records and index references
+[LOTS OF ROW NUMBERS DELETED]
+
+Records:          1403698    M.recordlength:     226   Packed:             0%
+Recordspace used:     100%   Empty space:          0%  Blocks/Record:   1.00
+Recordblocks:     1403698    Deleteblocks:         0
+Recorddata:     317235748    Deleted data:         0
+Lost space:             0    Linkdata:             0
+
+User time 1639.63, System time 251.61
+Maximum resident set size 0, Integral resident set size 0
+Non physical pagefaults 0, Physical pagefaults 10580, Swaps 0
+Blocks in 4 out 0, Messages in 0 out 0, Signals 0
+Voluntary context switches 10604, Involuntary context switches 122798
+</PRE>
+
+<P>
+上で使用されたテーブルのデータファイルサイズをここに示します:
+
+</P>
+
+<PRE>
+-rw-rw-r--   1 monty    tcx     317235748 Jan 12 17:30 company.ISD
+-rw-rw-r--   1 davida   tcx      96482304 Jan 12 18:35 company.ISM
+-rw-rw-r--   1 monty    tcx     317235748 Jan 12 17:30 company.MYD
+-rw-rw-r--   1 davida   tcx      96482304 Jan 12 18:35 company.MYI
+</PRE>
+
+<P>
+<CODE>myisamchk</CODE> が生成する情報の説明を以下に示します。
+``keyfile'' はインデックスファイルです。
+``Record'' と ``row'' は同義です。
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>ISAM file</CODE>
+<DD>
+ISAM (index) ファイルの名前
+
+<DT><CODE>Isam-version</CODE>
+<DD>
+ISAM 形式のバージョン。現在は常に 2 。
+
+<DT><CODE>Creation time</CODE>
+<DD>
+データファイルが生成された時。
+
+<DT><CODE>Recover time</CODE>
+<DD>
+インデックス/データファイルが最後に再構築された時。
+
+<DT><CODE>Data records</CODE>
+<DD>
+レコード/行の数。
+
+<DT><CODE>Deleted blocks</CODE>
+<DD>
+予約された領域をまだ持っている削除ブロック数。
+このスペースを最小にするために自分のテーブルを最適化することができます。
+ 「<A HREF="manual.ja_Maintenance.html#Optimization">15.6.3  テーブルの最適化</A>」節参照.
+
+<DT><CODE>Datafile: Parts</CODE>
+<DD>
+動的なレコード形式にいくつのデータブロックがあるかを表示します。
+分割なしで最適化されたテーブルでは <CODE>Data records</CODE> と同じです。
+
+<DT><CODE>Deleted data</CODE>
+<DD>
+改善されていない削除データのバイト数。
+このスペースを最小にするために自分のテーブルを最適化することができます。
+ 「<A HREF="manual.ja_Maintenance.html#Optimization">15.6.3  テーブルの最適化</A>」節参照.
+
+<DT><CODE>Datafile pointer</CODE>
+<DD>
+データファイルポインタの大きさ(バイト数)。これは普通 2, 3, 4 または 5 バ
+イトです。多くのテーブルは 2 バイトで管理されますが、これはまだ 
+<STRONG>MySQL</STRONG> から制御できません。固定テーブルではこれはレコードアドレ
+スです。動的テーブルではこれはバイトアドレスです。
+
+<DT><CODE>Keyfile pointer</CODE>
+<DD>
+データファイルポインタのバイト数。これは普通 1, 2 または 3 バイトです。
+多くのテーブルは 2 バイトで管理されますが、これは <STRONG>MySQL</STRONG> では自動的に
+計算されます。これは常にブロックアドレスです。
+
+<DT><CODE>Max datafile length</CODE>
+<DD>
+テーブルのデータファイル (<CODE>.MYD</CODE> ファイル) が獲得できる長さ (バイト数)。
+
+<DT><CODE>Max keyfile length</CODE>
+<DD>
+テーブルのキーファイル (<CODE>.MYI</CODE> ファイル) が獲得できる長さ (バイト数)。
+
+<DT><CODE>Recordlength</CODE>
+<DD>
+各レコード/行が使用する領域の大きさ(バイト数)。
+
+<DT><CODE>Record format</CODE>
+<DD>
+各テーブルの行が持つ形式。この例では <CODE>Fixed length</CODE> を使用します。
+他の値で可能な物は<CODE>圧縮</CODE>、<CODE>パック</CODE>します。
+
+<DT><CODE>table description</CODE>
+<DD>
+テーブル内の全てのキーのリスト。各キーについて、いくつかの低レベル情報が提供さ
+れます:
+
+<DL COMPACT>
+
+<DT><CODE>Key</CODE>
+<DD>
+このキー番号。
+
+<DT><CODE>Start</CODE>
+<DD>
+このインデックス部が開始するレコード/行内の位置。
+
+<DT><CODE>Len</CODE>
+<DD>
+インデックス部の長さ。パックされた数値では、これは常に項目の完全な長さになります。
+
+文字型においては、文字型の項目の頭の部分にインデックスがつく事になりますので、
+インデックス項目の最大長さよりもこの値は短くなるでしょう。
+
+<DT><CODE>Index</CODE>
+<DD>
+<CODE>unique</CODE> or <CODE>multip.</CODE> (multiple). このインデックス内では1つの値が複数
+回存在し得ます。
+
+<DT><CODE>Type</CODE>
+<DD>
+このインデックス部が持つデータ型。
+これは NISAM データ型で、
+<CODE>packed</CODE>, <CODE>stripped</CODE> か <CODE>empty</CODE> オプションを持ちます。
+
+<DT><CODE>Root</CODE>
+<DD>
+ルートインデックスブロックのアドレス。
+
+<DT><CODE>Blocksize</CODE>
+<DD>
+各インデックスブロックのサイズ。これはデフォルトでは 1024 ですが、コンパ
+イル時に変更できます。
+
+<DT><CODE>Rec/key</CODE>
+<DD>
+これはオプティマイザによって使用される統計値です。このキーの値ごとのレコー
+ド数を知らせます。ユニークキーは常に1の値を持ちます。これはテーブルがロードさ
+れた(または大きく変更された)後に <CODE>myisamchk -a</CODE> で更新されます。これ
+が全く更新されない場合はデフォルト値の 30 が与えられます。
+</DL>
+
+<DT><CODE></CODE>
+<DD>
+上の最初の例では、9番目のキーは2つの部分をもったマルチパートキーです。
+
+<DT><CODE>Keyblocks used</CODE>
+<DD>
+使用されたキーブロックのパーセンテージ。このテーブルは <CODE>myisamchk</CODE> で再配置
+されるため、値はとても高くなります (理論的な最大にとても近くなります)。
+
+<DT><CODE>Packed</CODE>
+<DD>
+<STRONG>MySQL</STRONG> は一般の接尾辞でキーのパックを試みます。これは
+<CODE>CHAR</CODE>/<CODE>VARCHAR</CODE>/<CODE>DECIMAL</CODE> キーでだけ使用できます。名前の
+ような長い文字列では、これは使用領域を顕著に減らします。上の三番目の例では4番目
+のキーが10文字長で、領域の60%の減少を得ます。
+
+<DT><CODE>Max levels</CODE>
+<DD>
+このキーの Btree の深さ。長いキーを持つ大きなテーブルは高い値を得ます。
+
+<DT><CODE>Records</CODE>
+<DD>
+テーブルが持っている行数。
+
+<DT><CODE>M.recordlength</CODE>
+<DD>
+平均の行長。固定テーブルでは、これはレコード長です。
+
+<DT><CODE>Packed</CODE>
+<DD>
+<STRONG>MySQL</STRONG> は文字列の最後から空白を除きます。これによって節約された
+パーセンテージを <CODE>Packed</CODE> は示します。
+
+<DT><CODE>Recordspace used</CODE>
+<DD>
+データファイルが使用されたパーセンテージ。
+
+<DT><CODE>Empty space</CODE>
+<DD>
+データファイルが使用されていないパーセンテージ。
+
+<DT><CODE>Blocks/Record</CODE>
+<DD>
+レコード毎のブロック数 (i.e., 断片化レコードの構成数)。
+これは固定形式テーブルでは常に1です。この値は可能な限
+り 1.0 に留まります。これが大きすぎる場合は、<CODE>myisamchk</CODE> でテーブルを再配置できます。
+ 「<A HREF="manual.ja_Maintenance.html#Optimization">15.6.3  テーブルの最適化</A>」節参照.
+
+<DT><CODE>Recordblocks</CODE>
+<DD>
+使用されたブロック (links) 数。固定型式ではこれはレコード数と同じです。
+
+<DT><CODE>Deleteblocks</CODE>
+<DD>
+削除されたブロック (links) 数。
+
+<DT><CODE>Recorddata</CODE>
+<DD>
+データファイル中にある実際のユーザデータのバイト数。
+
+<DT><CODE>Deleted data</CODE>
+<DD>
+データファイル中にある削除された(unused)データのバイト数。 
+
+<DT><CODE>Lost space</CODE>
+<DD>
+レコードがより短い長さに更新された場合、いくつかの領域が失われます。これ
+はそのような消失の全ての合計です。in bytes.
+
+<DT><CODE>Linkdata</CODE>
+<DD>
+動的形式の使用時、ブロックはポインタ(4〜7バイト)にリンクされます。<CODE>Linkdata</CODE>は
+そのポインタの全ての合計です。
+</DL>
+
+<P>
+テーブルが <CODE>pack_isam</CODE> で圧縮されているなら、<CODE>myisamchk -d</CODE> は
+それぞれのテーブルコラムに関する追加情報を出力します。
+ 「<A HREF="manual.ja_Tools.html#myisampack">14.7  <STRONG>MySQL</STRONG> の圧縮された読み込み専用テーブルジェネレータ　( <CODE>myisampack</CODE> ・ <CODE>pack_isam</CODE> )</A>」節. を参照してください。
+この情報例と説明記述の意味があります。
+
+</P>
+
+
+<H2><A NAME="Crash_recovery" HREF="manual.ja_toc.html#Crash_recovery">15.6  Using <CODE>myisamchk</CODE> for crash recovery</A></H2>
+
+<P>
+<STRONG>MySQL</STRONG> がデータ格納に使用するファイル形式は、
+広範囲にわたってテストされました。が、データベースのテーブルが
+破壊されるかもしれない外的状況があります:
+
+</P>
+
+<UL>
+<LI>
+
+<CODE>mysqld</CODE> プロセスが書き込み再中に killed された場合
+<LI>
+
+予期せぬコンピュータの停止(例えば電源が切られた場合)
+<LI>
+
+ハードウェアエラー
+</UL>
+
+<P>
+本節では、<STRONG>MySQL</STRONG> のデータの扱い方、検査の方法を述べます。
+もしテーブルがたくさんダメになるのであれば、
+あなたは、この理由を見つけるよう試みるべきです!
+ 「<A HREF="manual.ja_Porting.html#Debugging_server">H.1  MySQL server のデバッグ</A>」節参照.
+
+</P>
+<P>
+破壊からの修復をする場合、”データベース内のそれぞれのテーブル <CODE>tbl_name</CODE> は、
+データベースディレクトリ内にある三つのファイルに一致する”、これを理解する事は
+とても重要です：
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><STRONG>File</STRONG> </TD><TD> <STRONG>Purpose</STRONG>
+</TR NOSAVE>
+<TR><TD><TT>`tbl_name.frm'</TT> </TD><TD> Table definition (form) file
+</TR NOSAVE>
+<TR><TD><TT>`tbl_name.MYD'</TT> </TD><TD> Data file
+</TR NOSAVE>
+<TR><TD><TT>`tbl_name.MYI'</TT> </TD><TD> Index file
+</TR>
+</TABLE>
+
+<P>
+これら三つのファイルは様々な方法で破壊を受ける事がありますが、
+この場合最も問題が起こりやすいのは、データファイルとインデックスファイルです。
+
+</P>
+<P>
+<CODE>myisamchk</CODE> は <TT>`.MYD'</TT> ファイル(データ)のコピーを一行一行おこないます。
+この修理過程の最後に、古い <TT>`.MYD'</TT> ファイルを消し、新しいファイルをオリジナルの名前に変更します。
+もし <CODE>--quick</CODE> オプションを使用したなら、<CODE>myisamchk</CODE> は
+ <TT>`.MYD'</TT> ファイルの一時ファイルを作りません。そのかわり、<TT>`.MYD'</TT> ファイル
+が正しいと仮定して新しいインデックスファイルだけを作ります。
+この時 <TT>`.MYD'</TT> ファイルはいじりません。
+この場合、<CODE>myisamchk</CODE> は自動で <TT>`.MYD'</TT> ファイルの間違いを検出して
+修復を中止するので、安全です。
+
+</P>
+<P>
+<CODE>myisamchk</CODE> に二つ <CODE>--quick</CODE> オプションを指定することもできます。
+この場合、<CODE>myisamchk</CODE> はいくつかのエラー(キーの重複とか)では中止はしません。
+かわりに <TT>`.MYD'</TT> ファイルを変更します。
+
+</P>
+<P>
+通常の修理を実行するためにディスクのスペースの空きが少ししか無い場合に限って、
+ <CODE>--quick</CODE> の二回指定が役に立ちます。
+この場合,あなたは <CODE>myisamchk</CODE> を走らせる前にバックアップを
+少なくともとるべきです。
+
+</P>
+
+<P>
+<A NAME="IDX673"></A>
+
+
+<H3><A NAME="Check" HREF="manual.ja_toc.html#Check">15.6.1  テーブルのエラーチェック方法</A></H3>
+
+<P>
+テーブルをチェックするには,以下のコマンドを使用してください:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>myisamchk tbl_name</CODE>
+<DD>
+これはすべての誤りの99.99%を見つけます。
+これが見つけることができない物は、データファイルの破壊<STRONG>だけ</STRONG>です
+(これは非常にまれ)。もしテーブルをチェックしたいなら、オプションなしで
+ <CODE>myisamchk</CODE> を走らすか、<CODE>-s</CODE> or <CODE>--silent</CODE> オプションをつけます。
+
+<DT><CODE>myisamchk -m tbl_name</CODE>
+<DD>
+This finds 99.999% of all errors. It checks first all index for errors and
+then it reads through all rows. It calculates a checksum for all keys in
+the rows and verifies that they checksum matches the checksum for the keys
+in the index tree.
+
+<DT><CODE>myisamchk -e tbl_name</CODE>
+<DD>
+これは全てのデータを完璧に徹底的にチェックします。
+(<CODE>-e</CODE> は ``extended check'' の意)。
+全てのキーについて、それらがさす行が正しいかを確認するために、
+読み込みチェックを行います。
+これはたくさんのキーがある大きなテーブルでは、凄く時間がかかります。
+<CODE>myisamchk</CODE> は通常、最初のエラーが見つかった時点で止まります。
+もしより情報が得たいなら、<CODE>--verbose</CODE> (<CODE>-v</CODE>) オプションを加えます。
+これは <CODE>myisamchk</CODE> をエラーが20個出るまで動作させ続けます。
+普通に使用する場合は、<CODE>myisamchk</CODE> だけで十分です。(テーブル名以外の引数は一切無し)
+
+<DT><CODE>myisamchk -e -i tbl_name</CODE>
+<DD>
+前のコマンドと似ていますが、 <CODE>-i</CODE> オプションは <CODE>myisamchk</CODE> にいくらかの
+統計情報を出させるようにします。
+</DL>
+
+
+
+<H3><A NAME="Repair" HREF="manual.ja_toc.html#Repair">15.6.2  テーブルの修復方法</A></H3>
+
+<P>
+テーブル破壊の兆しとして、クエリが予期せず中断したり、以下のようなエラーが出たりします：
+
+</P>
+
+<UL>
+<LI>
+
+<TT>`tbl_name.frm'</TT> is locked against change
+<LI>
+
+Can't find file <TT>`tbl_name.MYI'</TT> (Errcode: ###)
+<LI>
+
+Got error ### from table handler (Error 135 is an exception in this case)
+<LI>
+
+Unexpected end of file
+<LI>
+
+Record file is crashed
+</UL>
+
+<P>
+これらの場合、あなたは自分のテーブルを修理しなければなりません。
+<CODE>myisamchk</CODE> はほとんどの問題を見つけ出し修正します。
+
+</P>
+<P>
+修復過程は以下で記述する最大4つの段階を踏みます。
+これを始める前に、あなたはデータベースディレクトリに <CODE>cd</CODE> して
+テーブルファイルのパーミッションを確認すべきです。
+これらファイルは <CODE>mysqld</CODE> を実行しているUnixユーザーが読み込み可能
+であるようにしてください(検査のするのにあなたにファイルのアクセス権も必要)。
+もしファイルの変更をする必要があるならば、ファイルへの書き込み許可も必要です。
+
+</P>
+<P>
+If you are using <STRONG>MySQL</STRONG> 3.23.16 and above you can (and should) use the
+<CODE>CHECK</CODE> and <CODE>REPAIR</CODE> commands to check and repair <CODE>MyISAM</CODE>
+tables.  「<A HREF="manual.ja_Reference.html#CHECK_TABLE">7.11  <CODE>CHECK TABLE</CODE> 構文</A>」節参照.  「<A HREF="manual.ja_Reference.html#REPAIR_TABLE">7.12  <CODE>REPAIR TABLE</CODE> 構文</A>」節参照. 
+
+</P>
+<P>
+The manual section about table maintenence includes the options to
+<CODE>isamchk</CODE>/<CODE>myisamchk</CODE>.  「<A HREF="manual.ja_Maintenance.html#Table_maintenance">15.1  テーブルのメンテナンス、クラッシュからの修復のための <CODE>myisamchk</CODE> 使用</A>」節参照.
+
+</P>
+<P>
+The following section is for the cases where the above command fails or
+if you want to use the extended features that isamchk/myisamchk provides.
+
+</P>
+<P>
+If you are going to repair a table from the command line, you must first
+take down the <CODE>mysqld</CODE> server. Note that when you do
+<CODE>mysqladmin shutdown</CODE> on a remote server, the <CODE>mysqld</CODE> server
+will still be alive for a while after <CODE>mysqladmin</CODE> returns until
+all queries are stopped and all keys have been flushed to disk.
+
+</P>
+<P>
+<STRONG>Stage 1: テーブルをチェックする</STRONG>
+
+</P>
+<P>
+<CODE>myisamchk *.MYI</CODE> (時間がかかってもよいなら <CODE>myisamchk -e *.MYI</CODE>)
+を実行します。
+<CODE>-s</CODE> (silent) オプションは不要な情報の出力をおさえます。
+
+</P>
+<P>
+If the mysqld server is done you should use the --update option to tell
+<CODE>myisamchk</CODE> to mark the table as 'checked'.
+
+</P>
+<P>
+<CODE>myisamchk</CODE> がエラーを返した場合にだけ、テーブルを修復する必要があります。
+この場合、Stage 2 へ進みます。
+
+</P>
+<P>
+チェック時に奇妙なエラー(<CODE>out of memory</CODE> エラーのような) が起きた場合、
+あるいは <CODE>myisamchk</CODE> が落ちた場合、Stage 3 に進んでください。
+
+</P>
+<P>
+<STRONG>Stage 2: 簡単で安全な修復</STRONG>
+
+</P>
+<P>
+まず最初に <CODE>myisamchk -r -q tbl_name</CODE> を試みてください
+(<CODE>-r -q</CODE> は ``quick recovery mode''の意)。
+これはデータファイルに触れないでインデックスファイルの修理を試みます。
+もしデータファイルが全てとデータファイル中の正しい場所での削除リンクポイントを
+含んでいるなら、これは動作してテーブルを修復します。
+成功後、次のテーブルの修復に進んでください。
+失敗した場合は、以下の手順で試みてください：
+
+</P>
+
+<OL>
+<LI>
+
+続ける前にデータファイルをバックアップしてください。
+
+<LI>
+
+<CODE>myisamchk -r tbl_name</CODE> を使用します(<CODE>-r</CODE> は ``recovery mode''の意)。
+これは不正なレコードと削除されたレコードをデータファイルから消去し、
+インデックスファイル(.MYI)を再構築します。
+
+<LI>
+
+上記が失敗した場合、<CODE>myisamchk --safe-recover tbl_name</CODE> を使用して下さい。
+Safe recovery モードは古い方法を使用して修復します。
+これは普通の修復モードでは行わない操作をいくつかもっています。(遅いですが)
+</OL>
+
+<P>
+チェックまたは修復時に、メモリ不足のような妙なエラーがでた場合、または 
+<CODE>myisamchk</CODE> がクラッシュした場合は、Stage 3 に進んでください。
+
+</P>
+<P>
+<STRONG>Stage 3: 難しい修復</STRONG>
+
+</P>
+<P>
+インデックスファイル(.MYI)の最初の 16K ブロックが破壊された場合、
+または不正な情報を含む場合、またはインデックスファイルがない場合にだけ、
+本修復段階を経ます。
+この場合、新しいインデックスファイルファイルを作成する必要があります。
+次のようにしてください:
+
+</P>
+
+<OL>
+<LI>
+
+データファイル .MYD ファイルをどこか安全場所に移動します。
+
+<LI>
+
+新しい空のデータとインデックスファイルを作るために、
+テーブルディスクリプタファイルを使用します：
+
+
+<PRE>
+shell&#62; mysql db_name
+mysql&#62; DELETE FROM tbl_name;
+mysql&#62; quit
+</PRE>
+
+<LI>
+
+古いデータファイルを新しく作ったデータファイルにコピーします。
+(古いデータファイルを move してはいけません；なんら頭の問題が起きます)
+</OL>
+
+<P>
+Stage 2 に戻ってください。 <CODE>myisamchk -r -q</CODE> は既に動作します。
+(これは無限ループにはなりません).
+
+</P>
+<P>
+<STRONG>Stage 4: とても難しい修復</STRONG>
+
+</P>
+<P>
+これは、ディスクリプタファイル(.frm)もクラッシュした場合にだけ発生します。
+これは発生することはありません。なぜならディスクリプタファイルは
+テーブルが生成された後に書かれることはないからです。
+
+</P>
+
+<OL>
+<LI>
+
+ディスクリプタファイルをバックアップからリストアして、Stage 3 に戻ってください。
+インデックスファイルのリストアもできます。そして Stage 2 に戻ってください。
+後者の場合、<CODE>myisamchk -r</CODE> で開始すべきです。
+
+<LI>
+
+バックアップを持っていなくても、テーブルがどのように作成されたかを正確に知って
+いれば、他のデータベース内にテーブルのコピーを生成します。
+新しいデータファイルを削除し、先ほど作ったデータベースの中の
+ディスクリプタファイルとインデックスファイルを、壊れたデータベース内に
+移動します。これは新しいディスクリプタファイルとインデックスファイルを
+与えることになりますが、データファイルはそのまま残っています。
+Stage 2 に進み、インデックスファイルの修復を行ってください。
+</OL>
+
+
+
+<H3><A NAME="Optimization" HREF="manual.ja_toc.html#Optimization">15.6.3  テーブルの最適化</A></H3>
+
+<P>
+断片化されたレコードの結合と、
+レコードの削除と更新から生じる無駄なスペースの排除、
+これら行うには、修復モード(recovery mode)で <CODE>myisamchk</CODE> を実行します：
+
+</P>
+
+<PRE>
+shell&#62; myisamchk -r tbl_name
+</PRE>
+
+<P>
+SQL <CODE>OPTIMIZE TABLE</CODE> でも同様にテーブルを最適化できます。
+<CODE>OPTIMIZE TABLE</CODE> は簡単ですが、 <CODE>myisamchk</CODE> の方が速いです。
+
+</P>
+
+<P>
+<CODE>myisamchk</CODE> には、あなたがテーブルの性能を向上させるのに使用することができる
+他の多くのオプションがあります:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>-S, --sort-index</CODE>
+<DD>
+インデックスツリーブロックのソート。降順にソートします。
+これはシーク(seek)を最適化し、キーを使用したテーブルの走査(scan)を速くします。
+
+<DT><CODE>-R index_num, --sort-records=index_num</CODE>
+<DD>
+インデックスによるソート。これはあなたのデータをより良く配置し、
+このインデックスを使用した <CODE>SELECT</CODE> , <CODE>ORDER BY</CODE> 操作を速くします。
+(最初にこれを実行してソートするときは時間がとてもかかります！)
+テーブルのインデックス番号を見つけるために、 <CODE>SHOW INDEX</CODE> を使用します。
+これは <CODE>myisamchk</CODE> が行うのと同様の順でテーブルのインデックスを表示します。
+インデックス番号は 1 から開始されます。
+
+<DT><CODE>-a, --analyze</CODE>
+<DD>
+テーブル内のキー配置の分析。
+このテーブルからレコードを取得する際に、
+結合(join)のパフォーマンスを向上させます。
+</DL>
+
+<P>
+For a full description of the option see  「<A HREF="manual.ja_Maintenance.html#myisamchk_syntax">15.2  <CODE>myisamchk</CODE> 起動構文</A>」節.
+
+</P>
+
+
+<H2><A NAME="Log_files" HREF="manual.ja_toc.html#Log_files">15.7  Log file maintenance</A></H2>
+
+<P>
+<STRONG>MySQL</STRONG> をログファイルとともに使用する場合、
+あなたは、時々古いログファイルを リムーブ/バックアップ し、
+ <STRONG>MySQL</STRONG> に新しいファイルにログを取るように指示したいと思うことでしょう。
+ 「<A HREF="manual.ja_Common_problems.html#Update_log">21.3  更新ログ</A>」節参照.
+
+</P>
+<P>
+<CODE>Redhat</CODE> Linux においては、<CODE>mysql-log-rotate</CODE> スクリプトを
+これに使用できます。 もし RPM ディストリビューションの <STRONG>MySQL</STRONG> を
+インストールしたなら、このスクリプトは自動でインストールされているはずです。
+
+</P>
+<P>
+他のシステムでは、自分自身で短いスクリプトをインストールします。
+<CODE>cron</CODE> でログファイルを扱うようにします。
+
+</P>
+<P>
+<CODE>mysqladmin flush-logs</CODE> コマンドか <CODE>FLUSH LOGS</CODE> SQL文で、
+<STRONG>MySQL</STRONG> に新しいログファイルを使用させることが出来ます。
+もしあなたが <STRONG>MySQL</STRONG> 3.21 を使用しているなら、
+ <CODE>mysqladmin refresh</CODE> を使用しなくてはなりません。
+
+</P>
+<P>
+上記のコマンドは、以下のように動作します：
+
+</P>
+
+<UL>
+<LI>
+
+もし通常のログ (<CODE>--log</CODE>) が使用されているならば、このログファイルを
+一度閉じてから再び開きます。
+(<TT>`mysql.log'</TT> がデフォルトのログファイル).
+<LI>
+
+もし更新ログ (<CODE>--log-update</CODE>) を使用しているなら、
+更新ログを閉じ、新しいログファイルを開きます。そのさい、
+ログファイルについている番号は増えます。
+</UL>
+
+<P>
+もし更新ログだけを使用しているなら、あなたは、ログを flush するだけでよくて、
+その時、バックアップのため古い更新ログファイルを移動します。
+ もし普通のログを使っていれば、あなたは以下のようにすることができます: 
+
+</P>
+
+<PRE>
+shell&#62; cd mysql-data-directory
+shell&#62; mv mysql.log mysql.old
+shell&#62; mysqladmin flush-tables
+</PRE>
+
+<P>
+こうしておいて、<TT>`mysql.old'</TT> をバックアップし削除します。.
+
+</P>
+<P><HR><P>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Tools.html">previous</A>, <A HREF="manual.ja_Adding_functions.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

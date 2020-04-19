@@ -1,0 +1,129 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10639</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10638">[前]</a><a href="10640">[次]</a><a href="../list/10601-10700">[番号順一覧]</a><a href="../thread/10601-10700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10639
+</p>
+<div class="header">
+<p>
+From: MORIYAMA Masayuki &lt;MORIYAMA Masayuki &lt;msyk@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 9 Dec 2004 13:05:47 +0900<br>
+Subject: [mysql 10639] Re: 新規キャラクタセットの名称<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、森山と申します。
+
+glibc, libiconv に cp932 修正, eucJP-ms 追加のパッチを作成した者です。
+
+Windows の文字セットの対応を求められている開発者にとっては、MySQL での 
+cp932, eucJP-ms 対応は朗報ではないかと思っております。
+
+実装する上で、いくつか注意点を。
+
+(1) ユーザ定義文字
+
+  <a href="http://www.microsoft.com/globaldev/reference/dbcs/932.htm">http://www.microsoft.com/globaldev/reference/dbcs/932.htm</a>
+  このマッピングを元にするとの事ですが、これにはユーザ定義文字(0xF040〜
+  0xF9FC) が定義されていません。
+
+  cp932, eucJP-ms では、ユーザ定義文字のマッピングは次のようになってい
+  ます。
+
+  cp932               Unicode
+  0xF040〜0xF9FC      U+E000〜U+E757  (94文字x20区=1880文字)
+
+  eucJP-ms            Unicode
+    0xF5A1〜  0xFEFE  U+E000〜U+E3AB  (94文字x10区=940文字)
+  0x8F5FA1〜0x8FFEFE  U+E3AC〜U+E757  (94文字x10区=940文字)
+                                                ----------
+                                                計1880文字
+
+  Unicode とユーザ定義文字・ベンダ定義文字に関する問題点と解決策
+  TOG/JVC CDE/Motif 技術検討 WG
+  <a href="http://www.opengroup.or.jp/jvc/cde/ucs-conv.html">http://www.opengroup.or.jp/jvc/cde/ucs-conv.html</a>
+
+(2) 重複符号化されている文字
+
+  NEC選定IBM拡張文字とIBM拡張文字ののように同じ文字が重複して定義され
+  ていものに関して、cp932 → Unicode の変換では、1 つのコードポイント
+  に集約されます。
+
+  上記のページにマッピングですと、逆の変換の Unicode → cp932 では、ど
+  ちらのコードポイントに変換するのかという事が明確ではありません。
+
+  次のマッピングと同じにする事が望まれます。
+
+  マイクロソフト サポート技術情報 - JP170559
+  [PRB] SHIFT - JIS と Unicode 間の変換問題
+  <a href="http://support.microsoft.com/default.aspx?scid=kb">http://support.microsoft.com/default.aspx?scid=kb</a>;ja;JP170559
+  # FireFox では、レイアウトがくずれるので、Internet Exploer で閲覧し
+  # てください。
+
+  Windows-31J の重複符号化文字と Unicode
+  <a href="http://www2d.biglobe.ne.jp/~msyk/charcode/cp932/uni2sjis.html">http://www2d.biglobe.ne.jp/~msyk/charcode/cp932/uni2sjis.html</a>
+
+(3) eucJP-ms の変換
+
+  TOG/JVC の変換表だけでは、Unicode → eucJP-ms の変換を一意に決めるこ
+  とが出来ません。
+
+  glibc, libiconv のパッチでの eucJP-ms の変換は、次のページにまとめて
+  ありますので参考にしてください。
+  <a href="http://www2d.biglobe.ne.jp/~msyk/charcode/cp932/eucJP-ms.html">http://www2d.biglobe.ne.jp/~msyk/charcode/cp932/eucJP-ms.html</a>
+
+(4) Windowsの日本語EUCと eucJP-ms
+
+  Windowsの日本語EUC は、Microsoft Windows Codepage 51932 というものな
+  のですが、これは一部、eucJP-ms とは互換性がありません。
+
+  LAMP(Linux,Apache,MySQL,PHP)環境のように Web ブラウザから受け取った
+  日本語を DB に格納する場合、HTML の文字コードに、eucJP-ms を使ってし
+  まうと、文字コード変換で文字化けが発生するので注意が必要となります。
+
+  具体的な違いは次の通りです。
+
+    ※印がついている所が、Codepage 51932 と eucJP-ms とでバッティング
+    しています。Codepage 51932 の NEC選定IBM拡張文字 のコード領域が 
+    eucJP-ms では、ユーザ定義文字(1) となってしまいます。CP932 や 
+    UTF-8 などに変換する際に問題になるでしょう。
+
+                                            eucJP-ms Codepage 51932
+    NEC特殊文字           0xADA1〜  0xADFC     ○         ○       
+  ※NEC選定IBM拡張文字    0xF9A1〜  0xFCFE     ×         ○       
+    IBM拡張文字(1)      0x8FA1A1〜0x8FEDFE     ○         ×       
+    IBM拡張文字(2)      0x8FF3F3〜0x8FF4FE     ○         ×       
+  ※ユーザ定義文字(1)     0xF5A1〜  0xFEFE     ○         ×       
+    ユーザ定義文字(2)   0x8FF5A1〜0x8FFEFE     ○         ×       
+
+    IBM拡張文字(1) : JIS X 0212 に定義されている文字
+    IBM拡張文字(2) : JIS X 0212 に定義されていない文字
+
+‖森山 将之 (MORIYAMA Masayuki)
+‖e-mail: msyk@xxxxxxxxxx
+‖Web: <a href="http://www2d.biglobe.ne.jp/~msyk/">http://www2d.biglobe.ne.jp/~msyk/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="10638">[前]</a><a href="10640">[次]</a><a href="../list/10601-10700">[番号順一覧]</a><a href="../thread/10601-10700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="10615">  10615 2004-12-07 16:41 [&quot;Shuichi Tamagawa&quot; &lt;] 新規キャラクタセットの名称              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10617">  10617 2004-12-08 10:28 ┗[EBIHARA Yuichiro &lt;ui]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10625">  10625 2004-12-08 14:16 　┣[SATOH Fumiyasu &lt;fumi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10635">  10635 2004-12-09 01:49 　┃┗[EBIHARA Yuichiro &lt;ui]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10636">  10636 2004-12-09 07:02 　┗[Shuichi Tamagawa &lt;sh]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="10639">  10639 2004-12-09 13:05 　　┗[MORIYAMA Masayuki &lt;m]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10640">  10640 2004-12-09 15:52 　　　┗[&quot;Shuichi Tamagawa&quot; &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10641">  10641 2004-12-10 01:20 　　　　┗[MORIYAMA Masayuki &lt;m]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10643">  10643 2004-12-10 09:38 　　　　　┗[Shuichi Tamagawa &lt;sh]                             </a></span>
+</pre>
+</body>
+</html>

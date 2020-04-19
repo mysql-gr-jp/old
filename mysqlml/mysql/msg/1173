@@ -1,0 +1,126 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1173</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1172">[前]</a><a href="1174">[次]</a><a href="../list/1101-1200">[番号順一覧]</a><a href="../thread/1101-1200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1173
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Sat, 28 Aug 1999 12:15:08 +0900<br>
+Subject: [mysql 01173] Re: 更新系クエリーが応答なしの時、テーブルがロックされる？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+毅です
+
+At Sat, 28 Aug 1999 10:37:13 +0900,
+奥田  典子 &lt;okud_no@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 奥田です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 今年の５月より、会社の業務でMySQL を使い始めました。</span>
+<span class="quote1">&gt; PerlのWin32::ODBC経由でMySQL データベースの更新を行うもので、日々</span>
+<span class="quote1">&gt; 運用しております。データベースには、複数のテーブルがありますが、</span>
+<span class="quote1">&gt; 全体で60万件程度、これに対し、毎日、1000〜3000件の更新を行います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 運用を開始してから、月に１〜２回の頻度で発生する問題に悩まされて</span>
+<span class="quote1">&gt; います。処理の冒頭でupdate/delete 等の更新系クエリーが挫折??し、</span>
+<span class="quote1">&gt; 何の応答もないまま、Perlスクリプトが途中で止まったままになります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; このような状況に陥りますと、他の照会系クエリーも、全く実行できない</span>
+<span class="quote1">&gt;  (同じようにウェイトして結果が返ってこない) 状態になるため、とりあ</span>
+<span class="quote1">&gt; えず、mydb e → mydb s  でMySQL を起動し直すのですが、再起動後も、</span>
+<span class="quote1">&gt; 照会系クエリーは正常に動作しますが、更新系クエリーは、相変わらずウ</span>
+<span class="quote1">&gt; ェイトしてしまい、テーブルがロックされたような状態です。</span>
+<span class="quote1">&gt;  (アプリケーションで、LOCK TABLES/ UNLOCK TABLES  は行っていません)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; このテーブルのロック状態は、データベースディレクトリをrenameすると</span>
+<span class="quote1">&gt; 解除されるということが最近判りました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 更新系クエリーが何らかの原因で中断された場合、テーブルがロックされ</span>
+<span class="quote1">&gt; たような状態が残ってしまうのでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; また、データベースディレクトリをrenameすると、この状態が解除される</span>
+<span class="quote1">&gt; というのは、何故なのか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 何か情報がありましたら教えていただきたいと思います。</span>
+<span class="quote1">&gt; よろしくお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 実行環境は、以下のとおりです。</span>
+<span class="quote1">&gt; Windows95/NT 3.51</span>
+<span class="quote1">&gt; myodbc.dll  2.50.2100  TCX DataKonsult AB</span>
+<span class="quote1">&gt; Jperl       5.003 Build316</span>
+<span class="quote1">&gt; MySQL       3.21.30</span>
+
+
+いろいろ重なっているようなきもしますが、
+原因の切り分けとして
+
+Server が原因なら：
+ 1. Server を 3.22.x に upgrade してみる
+ 2. 現象が出たときに、mysqladmin processlist と ps してみる
+ 3. 更新前、更新後に isamchk をかけてみる
+ 4. mysqld --log は多くの情報を出します
+ 5. debug でコンパイルされているなら mysqld --debug も助けになるかも
+    え、もしかして サーバーは Windows ?
+ 6. なら UNIX のサーバーでも同じことが起きるでしょうか？
+ 7. 実行前と実行後で mysqladmin variables か
+     mysqladmin extended-status の結果はどうなっているのか
+
+MyODBC が原因なら：
+ 1. myodbc.dll を 2.50.25 で試すとどうか
+   (いまのところきれいに動くのは英語版 と SJIS 版)
+ 2. Windows からではなく、同じ作業を UNIX から行ってみるとどうなるのか
+ 3. mysql コマンドで行ってみるとどうなるのか
+
+OS のスレッドの問題なら：
+ 1. あたらし目のスレッドライブラリは出ていないかチェック
+    あれば入れかえてコンパイルし直し
+    ( UNIX なら )
+
+
+更新作業は他に優先されます。
+大きな更新をしているとき、mysqladmin で何が起きているか見えます.
+更新時に、リネームすれば、命令を完遂しようとしているスレッドは
+更新すべきテーブルがない、ってエラーで落ちているような気もします
+
+たぶんに、この前の&quot;インデックス作成...&quot;あたりと同じような
+感じもしますが
+( 親プロセスだけ止めても命令途中の子スレッドがまだ働いているとか )
+
+# odbc の問題なら、直接たたけばいいのですが、
+# perl のモジュールで 直接 mysqlclient をたたいているのは無いし。
+# となると、odbc を使用せず win+perl で実行するには
+# fork しまくりますが、perl から mysql コマンドをたたけば...
+# 凄く遅そうですね
+
+# やはり、perl にしろ、ASP にしろ、ODBC ではなくて直接たたくクライアント
+# がないと, きついなぁ、と思っていますが...
+# ruby は cygwin 要る上にまだ mysql モジュール出来ないしで...
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+ Soft Agency Co., Ltd. TEL +81-48-661-1527
+ PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
+ [ <a href="http://www.softagency.co.jp/mysql/">http://www.softagency.co.jp/mysql/</a> ]
+ [ MySQL ML: mysql-guide@xxxxxxxxxx ]
+
+</pre>
+</div>
+<p class="button"><a href="1172">[前]</a><a href="1174">[次]</a><a href="../list/1101-1200">[番号順一覧]</a><a href="../thread/1101-1200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1172">   1172 1999-08-28 10:37 [奥田  典子 &lt;okud_no@] 更新系クエリーが応答なしの時、テーブルがロックされる？</a></span>
+<span class="current">-&gt;&nbsp;<a href="1173">   1173 1999-08-28 12:15 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1174">   1174 1999-08-28 12:58 　┗[奥田  典子 &lt;okud_no@]                                     </a></span>
+</pre>
+</body>
+</html>

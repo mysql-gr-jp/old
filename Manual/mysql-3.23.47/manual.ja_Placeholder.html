@@ -1,0 +1,837 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.ja.texi on 30 December 2001 -->
+
+  <TITLE>MySQL Reference Manual for version 3.23.47. - M  Pieces of the manual in transit</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
+  </HEAD>
+  <BODY BGCOLOR=silver TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_LGPL_license.html">previous</A>, <A HREF="manual.ja_Function_Index.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Placeholder" HREF="manual.ja_toc.html#Placeholder">M  Pieces of the manual in transit</A></H1>
+
+
+
+<H2><A NAME="Installing_binary" HREF="manual.ja_toc.html#Installing_binary">M.1  Installing a MySQL Binary Distribution</A></H2>
+
+<P>
+<A NAME="IDX1817"></A>
+<A NAME="IDX1818"></A>
+
+</P>
+
+<P>
+MySQL の バイナリ配布プログラムをインストールする際は以下のツールが必要になります：
+
+</P>
+
+<UL>
+<LI>
+
+GNU の圧縮解凍ツール <CODE>gunzip</CODE>。ソースを解凍するのに必要です。
+
+<LI>
+
+ファイルアーカイバ<CODE>tar</CODE>。これもソースを解凍するのに必要です。
+GNU <CODE>tar</CODE>の動作は確認されています。Sun <CODE>tar</CODE>の使用には問題があります。
+</UL>
+
+<P>
+<A NAME="IDX1819"></A>
+<A NAME="IDX1820"></A>
+zipやtarを使った方法とは別の形式、RPM(RedHat Package Manager)を使った配布も行われています。
+ 「<A HREF="manual.ja_Installing.html#Linux-RPM">2.1.1  Installing MySQL on Linux</A>」節参照.
+
+</P>
+<P>
+もしもこの問題にぶつかってしまった場合は <CODE>mysqlbug</CODE> を使用してください。
+質問等は <a HREF="mailto:mysql@lists.mysql.com">mysql@lists.mysql.com</a> に送ってください。
+問題点がバグに該当しなくても <CODE>mysqlbug</CODE> は情報を集めていますので解決の
+手助けになることと思います。 <CODE>mysqlbug</CODE> を使用すれば問題の解決方法を得る
+確率が増します。<CODE>mysqlbug</CODE> は解凍されたプログラムの <TT>`bin'</TT> 以下にあります。
+ 「<A HREF="manual.ja_Introduction.html#Bug_reports">1.2.22.3  バグや問題を報告する方法</A>」節参照.
+
+</P>
+<P>
+<A NAME="IDX1821"></A>
+バイナリ配布プログラムのインストール及び立ち上げまでに必要となる基本操作は以下の通りです。
+
+</P>
+
+<PRE>
+shell&#62; groupadd mysql
+shell&#62; useradd -g mysql mysql
+shell&#62; cd /usr/local
+shell&#62; gunzip &#60; /path/to/mysql-VERSION-OS.tar.gz | tar xvf -
+shell&#62; ln -s mysql-VERSION-OS mysql
+shell&#62; cd mysql
+shell&#62; scripts/mysql_install_db
+shell&#62; chown -R root  /usr/local/mysql
+shell&#62; chown -R mysql /usr/local/mysql/data
+shell&#62; chgrp -R mysql /usr/local/mysql
+shell&#62; chown -R root /usr/local/mysql/bin
+shell&#62; bin/safe_mysqld --user=mysql &#38;
+</PRE>
+
+<P>
+<A NAME="IDX1822"></A>
+<A NAME="IDX1823"></A>
+<A NAME="IDX1824"></A>
+
+</P>
+<P>
+新しいユーザを追加するには <CODE>bin/mysql_setpermission</CODE> スクリプトを
+使用できます。使用の際は<CODE>DBI</CODE>と<CODE>Msql-Mysql-modules</CODE>の
+Perlモジュールをインストールする必要があります。
+
+</P>
+<P>
+より詳細な情報をここから示します。
+
+</P>
+<P>
+バイナリ配布のプログラムをインストールする際は以下に従ってください。
+その後、 「<A HREF="manual.ja_Installing.html#Post-installation">2.4  インストール後の設定とテスト</A>」節に進んでインストールの終了処理と動作試験を行ってください。
+
+</P>
+
+<OL>
+<LI>
+
+バイナリ配布プログラムを解凍するためのディレクトリを用意してください。
+そして、そこにバイナリ配布ファイルを置いてください。
+以下の例では <TT>`/usr/local'</TT> にファイルを解凍し、<TT>`/usr/local/mysql'</TT> に
+MySQLをインストールします。（従って以下の例では操作するユーザが
+<TT>`/usr/local'</TT> に対して書き込み権限を持つことを前提としています。
+もしも <TT>`/usr/local'</TT> への書き込みが禁じられている場合は
+<CODE>root</CODE>としてインストールを行う必要があります。
+
+<LI>
+
+プログラムの配布は以下のサイトから行ってください。
+ 「<A HREF="manual.ja_Installing.html#Getting_MySQL">2.2.1  MySQL を得る方法</A>」節.
+
+MySQLのバイナリ配布は圧縮された <CODE>tar</CODE> 形式で行われており、
+<TT>`mysql-VERSION-OS.tar.gz'</TT> のような形式の名前が付けられています。
+ここで、<CODE>VERSION</CODE> はバージョン番号（例えば <CODE>3.21.15</CODE>）を
+<CODE>OS</CODE> はプラットホームとなるOS（例えば <CODE>pc-linux-gnu-i586</CODE>）を示します。
+
+<LI>
+
+バイナリ配布ファイルに <CODE>-max</CODE> という表示があるものがありますが、
+これはこのプログラムが transaction-safe 機能やその他の機能をサポート
+していることを示しています。 「<A HREF="manual.ja_MySQL_Database_Administration.html#mysqld-max">4.7.5  mysqld-max, An extended mysqld server</A>」節参照。
+全てのバイナリプログラムは同じソースファイルからmakeされたものです。
+
+<LI>
+
+<CODE>mysqld</CODE>が動作するためのユーザとグループを作成してください。
+
+
+<PRE>
+shell&#62; groupadd mysql
+shell&#62; useradd -g mysql mysql
+</PRE>
+
+これらのコマンドは <CODE>mysql</CODE> グループと <CODE>mysql</CODE> ユーザを作成するものです。
+<CODE>useradd</CODE> や <CODE>groupadd</CODE> というコマンドもありますが、
+これらは使用プラットホームによって使い方が若干異なります。
+また、<CODE>adduser</CODE> や <CODE>addgroup</CODE> と呼ばれる場合もあります。
+<CODE>mysql</CODE> 以外のユーザやグループでも使用できます。
+
+<LI>
+
+インストール先のディレクトリを変更する場合は以下のようにします。
+まずディレクトリを移動します。
+
+
+<PRE>
+shell&#62; cd /usr/local
+</PRE>
+
+<LI>
+
+以下のように移動したディレクトリ上でプログラムの解凍を行い
+インストールディレクトリを作成してください。
+
+
+<PRE>
+shell&#62; gunzip &#60; /path/to/mysql-VERSION-OS.tar.gz | tar xvf -
+shell&#62; ln -s mysql-VERSION-OS mysql
+</PRE>
+
+最初のコマンドで <TT>`mysql-VERSION-OS'</TT> という名前のディレクトリを作成します。
+次のコマンドはそのディレクトリへのシンボリックリンクを作成し、
+ユーザに単純な <TT>`/usr/local/mysql'</TT> という名前での利用を可能にします。
+
+<LI>
+
+以下のようにインストールディレクトリへ移動します。
+
+
+<PRE>
+shell&#62; cd mysql
+</PRE>
+
+複数のファイルが <CODE>mysql</CODE> 以下のディレクトリに展開されているのが
+おわかりになると思います。 中でもインストールに重要な役目を果たすものは
+<TT>`bin'</TT> と <TT>`scripts'</TT> のサブディレクトリにあります。
+
+<DL COMPACT>
+
+<DT><TT>`bin'</TT>
+<DD>
+<A NAME="IDX1825"></A>
+<A NAME="IDX1826"></A>
+このディレクトリにはサーバ本体やクライアントプログラムなどシェルから
+使用するために <CODE>PATH</CODE> 変数に追加する必要のあるものが置いてあります。
+ 「<A HREF="manual.ja_Environment_variables.html#Environment_variables">H  Environment Variables</A>」節参照.
+
+<DT><TT>`scripts'</TT>
+<DD>
+このディレクトリには <CODE>mysql_install_db</CODE> という <CODE>mysql</CODE> への
+アクセス管理を行うデータベースを初期化するためのスクリプトが置いてあります。
+</DL>
+
+<LI>
+
+<CODE>mysqlaccess</CODE>を使う必要があり、なおかつ、標準ディレクトリとは異なる場所に
+インストールを行いたい場合は、<CODE>mysqlaccess</CODE> が <CODE>mysql</CODE>クライアントを
+起動できるように環境設定を行う必要があります。
+<TT>`bin/mysqlaccess'</TT>の18行目位にある以下のような行を変更してください。
+
+
+<PRE>
+$MYSQL     = '/usr/local/bin/mysql';    # path to mysql executable
+</PRE>
+
+これを実際に <CODE>mysql</CODE> がインストールされているディレクトリに変更してください。
+これをしないと <CODE>mysqlaccess</CODE> を使う際に <CODE>Broken pipe</CODE> エラーが発生します。
+
+<LI>
+
+以下のようにすることによりアクセス管理データベースを作ることができます（初めてMySQLをインストールする時だけ必要）。
+
+<PRE>
+shell&#62; scripts/mysql_install_db
+</PRE>
+
+使用する MySQL のバージョンが 3.22.10 より古い場合はこの操作をする時に MySQL サーバが
+立ち上がっている必要がありましたが、現在のバージョンでは必要ありません。
+
+<LI>
+
+データディレクトリ以下のファイルの所有者を <CODE>mysql</CODE> に、
+それ以外のファイルの所有者を <CODE>root</CODE> にする手順は以下のようになります。
+
+
+<PRE>
+shell&#62; chown -R root  /usr/local/mysql
+shell&#62; chown -R mysql /usr/local/mysql/data
+shell&#62; chgrp -R mysql /usr/local/mysql
+</PRE>
+
+最初のコマンドによって全てのファイルの <CODE>owner</CODE> 属性が <CODE>root</CODE> になります。
+二行目のコマンドによってデータディレクトリ以下のファイル全ての <CODE>owner</CODE> 属性が
+<CODE>mysql</CODE> になります。
+最後のコマンドによって全てのファイルの <CODE>group</CODE> 属性が <CODE>mysql</CODE> になります。
+
+<LI>
+
+Perlモジュール<CODE>DBI</CODE>、<CODE>DBD</CODE>のインストールが必要なら 「<A HREF="manual.ja_Placeholder.html#Perl_support">M.2  Perl Installation Comments</A>」節の項をご覧下さい。
+
+<LI>
+
+MySQL を OS のブート時に自動的に起動したい場合は <CODE>support-files/mysql.server</CODE> を
+貴方のシステムの的確な場所にコピーして使用できます。
+より詳しい情報は <CODE>support-files/mysql.server</CODE> のスクリプト自体や  「<A HREF="manual.ja_Installing.html#Automatic_start">2.4.3  MySQL の自動起動と自動停止</A>」節 にあります。
+
+</OL>
+
+<P>
+全てのファイルの解凍とインストールが終了したら初期化と稼動試験を行います。
+
+</P>
+<P>
+以下のようにしてMySQLサーバを立ち上げることができます。
+
+</P>
+
+<PRE>
+shell&#62; bin/safe_mysqld --user=mysql &#38;
+</PRE>
+
+<P>
+ 「<A HREF="manual.ja_MySQL_Database_Administration.html#safe_mysqld">4.7.2  safe_mysqld, the wrapper around mysqld</A>」節参照.
+
+</P>
+<P>
+ 「<A HREF="manual.ja_Installing.html#Post-installation">2.4  インストール後の設定とテスト</A>」節参照.
+
+</P>
+
+
+
+<H2><A NAME="Perl_support" HREF="manual.ja_toc.html#Perl_support">M.2  Perl Installation Comments</A></H2>
+
+<P>
+<A NAME="IDX1827"></A>
+<A NAME="IDX1828"></A>
+
+</P>
+
+
+
+<H3><A NAME="Perl_installation" HREF="manual.ja_toc.html#Perl_installation">M.2.1  Installing Perl on Unix</A></H3>
+
+<P>
+MySQLのPerlでの使用に関するサポートは
+<CODE>DBI</CODE>/<CODE>DBD</CODE>クライアントインターフェスの提供で行なわれます。
+ 「<A HREF="manual.ja_Clients.html#Perl">8.2  MySQL Perl API</A>」節参照.
+<CODE>DBI</CODE>/<CODE>DBD</CODE>はPerl5.004かそれ以上のバージョンが必要になります。
+古いバージョンのPerlでは<STRONG>動きません</STRONG>。
+
+</P>
+<P>
+MySQL の Perl support にはここまでで既にインストールが済んでいる筈の
+MySQL のクライアントプログラミングサポートが必要となります。
+もしも RPM ファイルからインストールをされているのならば
+クライアントプログラムはクライアントRPMにあるものの、
+クライアントプログラミングサポートはデベロッパー RPM にあります。
+まずデベロッパー RPM をインストールされたがどうかお確かめ下さい。
+
+</P>
+<P>
+バージョン3.22.8からは Perl support がメインの MySQL 配布ファイルとは別になっています。
+もし Perl support が必要であれば <a HREF="http://www.mysql.com/Downloads/Contrib/">http://www.mysql.com/Downloads/Contrib/</a> からお取りください。
+
+</P>
+<P>
+Perl関係プログラムのの配布は<CODE>tar</CODE>形式圧縮ファイルとして行われており、
+ファイル名が <TT>`MODULE-VERSION.tar.gz'</TT> の形式になっています。
+ここで、<CODE>MODULE</CODE>はモジュール名称、<CODE>VERSION</CODE>はバージョン番号を表しています。
+<CODE>Data-Dumper</CODE>、<CODE>DBI</CODE>、及び、<CODE>Msql-Mysql-modules</CODE>を入手してインストールしてください。
+インストール手順は以下に示す通りです。なお、ここでは<CODE>Data-Dumper</CODE>のみの手順が示されていますが、
+他のモジュールについても同様な手順でインストールできます。
+
+</P>
+
+<OL>
+<LI>
+
+以下のようにして作業ディレクトリで配布ファイルを解凍展開してください。
+
+<PRE>
+shell&#62; gunzip &#60; Data-Dumper-VERSION.tar.gz | tar xvf -
+</PRE>
+
+This command creates a directory named <TT>`Data-Dumper-VERSION'</TT>.
+
+<LI>
+
+解凍先のトップディレクトリーに移動します。
+
+<PRE>
+shell&#62; cd Data-Dumper-VERSION
+</PRE>
+
+<LI>
+
+コンパイル＆ビルドを行います。
+
+<PRE>
+shell&#62; perl Makefile.PL
+shell&#62; make
+shell&#62; make test
+shell&#62; make install
+</PRE>
+
+</OL>
+
+<P>
+出来上がったモジュールの動作を確認するために<CODE>make test</CODE>のコマンドは重要になってきます。
+このコマンドを<CODE>Msql-Mysql-modules</CODE>をインストールしている時に使ってみてください。
+MySQLサーバが動いていなければ失敗することになります。
+
+</P>
+<P>
+MySQLをバージョンアップした際に <CODE>DBI</CODE> が core ダンプした場合は
+必ず <CODE>Msql-Mysql-modules</CODE> を再コンパイルしてインストールしなおしてください。
+そうでなくても MySQL のバージョンを変更した場合は再コンパイルしたほうが賢明です。
+
+</P>
+<P>
+貴方のユーザ権限ではPerlのモジュールをインストールできない場合でも
+以下の例のようにしてローカルディレクトリにモジュールをインストールできます。
+
+</P>
+
+<PRE>
+<a HREF="http://www.iserver.com/support/contrib/perl5/modules.html">http://www.iserver.com/support/contrib/perl5/modules.html</a>
+</PRE>
+
+<P>
+<CODE>Installing New Modules that Require Locally Installed Modules</CODE>.という見出しの文書をご覧下さい。
+
+</P>
+
+
+
+<H3><A NAME="ActiveState_Perl" HREF="manual.ja_toc.html#ActiveState_Perl">M.2.2  Installing ActiveState Perl on Windows</A></H3>
+
+<P>
+<A NAME="IDX1829"></A>
+<A NAME="IDX1830"></A>
+<A NAME="IDX1831"></A>
+
+</P>
+<P>
+<CODE>DBD</CODE>モジュールとActiveState Perlをインストールするには以下の手順で行います。
+
+</P>
+
+<UL>
+<LI>
+
+ActiveState Perlはこのサイトからダウンロードできます。
+<a HREF="http://www.activestate.com/Products/ActivePerl/index.html">http://www.activestate.com/Products/ActivePerl/index.html</a>
+
+<LI>
+
+先ず、DOSのシェルを立ち上げてください。
+
+<LI>
+
+必要であれば次のようにHTTP_proxy変数をセットしてください。
+
+
+<PRE>
+set HTTP_proxy=my.proxy.com:3128
+</PRE>
+
+<LI>
+
+次のようにPPMプログラムを立ち上げます。
+
+
+<PRE>
+C:\&#62; c:\perl\bin\ppm.pl
+</PRE>
+
+<LI>
+
+<CODE>DBI</CODE>がインストールされていなければインストールします。
+
+
+<PRE>
+ppm&#62; install DBI
+</PRE>
+
+<LI>
+
+ここまで来たら次のようなコマンドを実行してください。
+
+
+<PRE>
+install ftp://ftp.de.uu.net/pub/CPAN/authors/id/JWIED/DBD-mysql-1.2212.x86.ppd
+</PRE>
+
+</UL>
+
+<P>
+以上でActiveState Perlのバージョン5.6がとりあえず動くことになります。
+
+</P>
+<P>
+もしも動作しない場合は次のように <STRONG>MyODBC</STRONG> ドライバーをインストールして
+ODBC経由でMySQLサーバに接続する必要があります。
+
+</P>
+
+<PRE>
+use DBI;
+$dbh= DBI-&#62;connect("DBI:ODBC:$dsn","$user","$password") ||
+  die "Got error $DBI::errstr when connecting to $dsn\n";
+</PRE>
+
+
+
+<H3><A NAME="Windows_Perl" HREF="manual.ja_toc.html#Windows_Perl">M.2.3  Installing the MySQL Perl Distribution on Windows</A></H3>
+
+<P>
+MySQL Perlの配布パッケージには<CODE>DBI</CODE>、<CODE>DBD:MySQL</CODE>、そして、<CODE>DBD:ODBC</CODE>が含まれています。
+
+</P>
+
+<UL>
+<LI>
+
+Perlの配布パッケージをこのサイトからダウンロードしてください。
+<a HREF="http://www.mysql.com/download.html">http://www.mysql.com/download.html</a>.
+
+<LI>
+
+<CODE>C:</CODE>で配布パッケージを解凍してください。<TT>`C:\PERL'</TT>に必要なファイルが現れます。
+
+<LI>
+
+次にコマンドパスに<TT>`C:\PERL\BIN'</TT>を追加してください。
+
+<LI>
+
+ディレクトリ、<TT>`C:\PERL\BIN\MSWIN32-x86-thread'</TT> か <TT>`C:\PERL\BIN\MSWIN32-x86'</TT> もコマンドパスに追加してください。
+
+<LI>
+
+<CODE>perl -v</CODE>と入力して<CODE>perl</CODE>の起動をチェックしてみましょう。
+</UL>
+
+
+
+<H3><A NAME="Perl_support_problems" HREF="manual.ja_toc.html#Perl_support_problems">M.2.4  Problems Using the Perl <CODE>DBI</CODE>/<CODE>DBD</CODE> Interface</A></H3>
+
+<P>
+<A NAME="IDX1832"></A>
+<A NAME="IDX1833"></A>
+
+</P>
+<P>
+Perl が "<TT>`../mysql/mysql.so'</TT>を見つけられない" というメッセージを出した場合、
+それは多分 Perl のシェアードライブラリ <TT>`libmysqlclient.so'</TT> を見つけることが出来ないのでしょう。
+
+</P>
+<P>
+これは以下のような方法で解決できます。
+
+</P>
+
+<UL>
+<LI>
+
+<CODE>Msql-Mysql-modules</CODE>は通常、<CODE>perl Makefile.PL</CODE> とコンパイルされますが、
+<CODE>perl Makefile.PL -static -config</CODE>とコンパイルしてください。
+
+<LI>
+
+<CODE>libmysqlclient.so</CODE>をシェアードライブラリが置いてあるディレクトリにコピーしてください
+(通常は<TT>`/usr/lib'</TT>や<TT>`/lib'</TT>といったディレクトリになるはずです)。
+
+<LI>
+
+Linux の場合は <TT>`/etc/ld.so.conf'</TT> ファイルを使って <TT>`libmysqlclient.so'</TT> のあるディレクトリを
+パスに追加することが出来ます。
+
+<A NAME="IDX1834"></A>
+<A NAME="IDX1835"></A>
+<LI>
+
+<TT>`libmysqlclient.so'</TT>のあるディレクトリを<CODE>LD_RUN_PATH</CODE>に追加することによって
+そこへのパスが追加されます。
+</UL>
+
+<P>
+<CODE>DBD-mysql</CODE> が次のようなエラーを発生する場合があります。
+この原因の一つは <CODE>gcc</CODE>(又は<CODE>gcc</CODE>でコンパイルされた古いバイナリ配布パッケージ)をお使いのケースです。
+
+</P>
+
+<PRE>
+/usr/bin/perl: can't resolve symbol '__moddi3'
+/usr/bin/perl: can't resolve symbol '__divdi3'
+</PRE>
+
+<P>
+<TT>`mysql.so'</TT> ライブラリをビルドする時に <CODE>-L/usr/lib/gcc-lib/... -lgcc</CODE> を
+リンクコマンドに追加してください(<CODE>make</CODE>コマンド実行時の出力をチェックすれば確認できます。)。
+オプション<CODE>-L</CODE>で指定されるのは<CODE>libgcc.a</CODE>のあるディレクトリになります。
+
+</P>
+<P>
+もう一つの原因はPerlとMySQLのどちからが<CODE>gcc</CODE>でコンパイルされており、どちらかがそうでない場合です。
+この場合はどちらも<CODE>gcc</CODE>でコンパイルし、この不一致を解消すれば解決します。
+
+</P>
+<P>
+<CODE>Msql-Mysql-modules</CODE>がテストで次のようなエラーを出した時、
+
+</P>
+
+<PRE>
+t/00base............install_driver(mysql) failed: Can't load '../blib/arch/auto/DBD/mysql/mysql.so' for module DBD::mysql: ../blib/arch/auto/DBD/mysql/mysql.so: undefined symbol: uncompress at /usr/lib/perl5/5.00503/i586-linux/DynaLoader.pm line 169.
+</PRE>
+
+<P>
+これは、ファイル圧縮用ライブラリ -lz へのパスを追加すれば解決いたします。
+<TT>`lib/DBD/mysql/Install.pm'</TT> に以下のような変更を行ってください。
+
+</P>
+
+<PRE>
+$sysliblist .= " -lm";
+
+to
+
+$sysliblist .= " -lm -lz";
+</PRE>
+
+<P>
+このあと'make realclean'を実行し、最初からインストールをやり直す必要があります。
+
+</P>
+<P>
+SCOのようなダイナミックリンクが使用できないシステムで Perl モジュールを使用する際は
+<CODE>DBI</CODE>や<CODE>DBD-mysql</CODE>をスタティックリンクしたバージョンのPerlを作成する必要があります。
+<CODE>DBD</CODE>をスタティックにリンクするには、Perlのインストールディレクトリに
+<CODE>DBI</CODE>のプログラムを置き<CODE>DBD</CODE>をリンクし、インストールします。
+
+</P>
+<P>
+SCOでは以下のような環境変数をセットする必要があります。
+
+</P>
+
+<PRE>
+shell&#62; LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib:/usr/progressive/lib
+or
+shell&#62; LD_LIBRARY_PATH=/usr/lib:/lib:/usr/local/lib:/usr/ccs/lib:/usr/progressive/lib:/usr/skunk/lib
+shell&#62; LIBPATH=/usr/lib:/lib:/usr/local/lib:/usr/ccs/lib:/usr/progressive/lib:/usr/skunk/lib
+shell&#62; MANPATH=scohelp:/usr/man:/usr/local1/man:/usr/local/man:/usr/skunk/man:
+</PRE>
+
+<P>
+<CODE>DBI</CODE> をスタティックにリンクしたPerlを作成するためには、
+先ず以下のコマンドを <CODE>DBI</CODE> がインストールされているディレクトリで実行してください。
+
+</P>
+
+<PRE>
+shell&#62; perl Makefile.PL -static -config
+shell&#62; make
+shell&#62; make install
+shell&#62; make perl
+</PRE>
+
+<P>
+次に新しいPerlをインストールします。
+通常 <CODE>make perl</CODE> でインストールに必要なファイル類を作成しますが、
+SCOの場合は <CODE>make -f Makefile.aperl inst_perl MAP_TARGET=perl</CODE> のように行う必要があります。
+
+</P>
+<P>
+次に、ここで作成された Perl で目的の <CODE>DBD::mysql</CODE> をスタティックにリンクされた Perl を作成するために使います。
+<CODE>Msql-Mysql-modules</CODE> がインストールされたディレクトリで以下のようなコマンドを実行してください。
+
+</P>
+
+<PRE>
+shell&#62; perl Makefile.PL -static -config
+shell&#62; make
+shell&#62; make install
+shell&#62; make perl
+</PRE>
+
+<P>
+最後に、この新しいPerlプログラムをインストールしてください。
+<CODE>make perl</CODE>で必要なコマンドを再確認することができます。
+
+</P>
+
+
+
+<H2><A NAME="Group_by_functions" HREF="manual.ja_toc.html#Group_by_functions">M.3  Functions for Use with <CODE>GROUP BY</CODE> Clauses</A></H2>
+
+<P>
+<A NAME="IDX1836"></A>
+<A NAME="IDX1837"></A>
+
+</P>
+<P>
+<CODE>GROUP BY</CODE>節を含まない文でグループ関数を使用すると
+全てのレコードについてグループされたものとみなされます。
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>COUNT(expr)</CODE>
+<DD>
+<A NAME="IDX1838"></A>
+ 
+Returns a count of the number of non-<CODE>NULL</CODE> values in the rows
+retrieved by a <CODE>SELECT</CODE> statement:
+<CODE>SELECT</CODE>文により選択されたレコードから<CODE>NULL</CODE>ではないものの数を返します。
+
+
+<PRE>
+mysql&#62; select student.student_name,COUNT(*)
+           from student,course
+           where student.student_id=course.student_id
+           GROUP BY student_name;
+
+</PRE>
+
+<CODE>COUNT(*)</CODE>は<CODE>NULL</CODE>を含むかどうかで選択されたレコードの数を返すだけです。
+
+<CODE>COUNT(*)</CODE>は一つのテーブルから一つだけカラムが選択され、
+尚且つ<CODE>WHERE</CODE>節が使用されていない場合に最適化され、高速に動作します。
+例えば以下のように使います。
+
+
+<PRE>
+mysql&#62; select COUNT(*) from student;
+</PRE>
+
+<A NAME="IDX1839"></A>
+<A NAME="IDX1840"></A>
+<DT><CODE>COUNT(DISTINCT expr,[expr...])</CODE>
+<DD>
+これは<CODE>NULL</CODE>値では無い値を持つデータの数を区別して返すことが出来ます。
+
+
+<PRE>
+mysql&#62; select COUNT(DISTINCT results) from student;
+</PRE>
+
+複数の選択されたデータ群から<CODE>NULL</CODE>を含まないデータの総数算出が必要な場合、
+MySQLでは必要な選択リストを与えることによって得ることが出来ます。
+一方でANSIのSQLではその選択一つ一つについて<CODE>CODE(DISTINCT ..)</CODE>を使う必要があります。
+
+<A NAME="IDX1841"></A>
+<DT><CODE>AVG(expr)</CODE>
+<DD>
+<CODE>expr</CODE>で得られる値の平均値を返します。
+
+
+<PRE>
+mysql&#62; select student_name, AVG(test_score)
+           from student
+           GROUP BY student_name;
+</PRE>
+
+<A NAME="IDX1842"></A>
+<A NAME="IDX1843"></A>
+<DT><CODE>MIN(expr)</CODE>
+<DD>
+<DT><CODE>MAX(expr)</CODE>
+<DD>
+<CODE>expr</CODE>で得られる値の最大値、最小値を返します。
+<CODE>MIN()</CODE>と<CODE>MAX()</CODE>の引数は文字列を取ることもできます。
+この際は文字列の値の大小を比較し、最大と最小を返します。 「<A HREF="manual.ja_MySQL_Optimization.html#MySQL_indexes">5.4.3  MySQL はどのようにインデックスを使用するか？</A>」節.
+
+
+<PRE>
+mysql&#62; select student_name, MIN(test_score), MAX(test_score)
+           from student
+           GROUP BY student_name;
+</PRE>
+
+<A NAME="IDX1844"></A>
+<DT><CODE>SUM(expr)</CODE>
+<DD>
+<CODE>expr</CODE>で得られる値の総計を返します。
+もしも得られるレコードが見つからない場合は<CODE>NULL</CODE>が返ってきます。
+
+<A NAME="IDX1845"></A>
+<A NAME="IDX1846"></A>
+<A NAME="IDX1847"></A>
+<A NAME="IDX1848"></A>
+<DT><CODE>STD(expr)</CODE>
+<DD>
+<DT><CODE>STDDEV(expr)</CODE>
+<DD>
+<CODE>expr</CODE>で得られる値の標準偏差を返します。
+これはANSI SQLの格調になっています。
+関数としての<CODE>STDDEV()</CODE>の形はOracleのものと互換性があります。
+
+<A NAME="IDX1849"></A>
+<DT><CODE>BIT_OR(expr)</CODE>
+<DD>
+<CODE>expr</CODE>で得られる値のビット和(<CODE>OR</CODE>)を返します。
+計算は64-bit(<CODE>BIGINT</CODE>)の精度で行われます。
+
+<A NAME="IDX1850"></A>
+<DT><CODE>BIT_AND(expr)</CODE>
+<DD>
+<CODE>expr</CODE>で得られる値のビット積(<CODE>AND</CODE>)を返します。
+計算は64-bit(<CODE>BIGINT</CODE>)の精度で行われます。
+
+</DL>
+
+<P>
+<A NAME="IDX1851"></A>
+MySQLの<CODE>GROUP BY</CODE>は拡張された使い方が可能です。
+<CODE>SELECT</CODE>で使用したフィールド名や計算式を<CODE>GROUP BY</CODE>には使用しない、
+という使い方が可能です。
+このことは<EM>グループにはどんな値も使用可能</EM>ということを表しています。
+データの並べ替えやグループ分けに適さない要素を排除することによって
+より良好なパフォーマンスを得ることが出来ます。
+例えば、次のようなクエリで<CODE>customer.name</CODE>についてのグループ分けをする必要はありません。
+
+</P>
+
+<PRE>
+mysql&#62; select order.custid,customer.name,max(payments)
+       from order,customer
+       where order.custid = customer.custid
+       GROUP BY order.custid;
+</PRE>
+
+<P>
+ANSI SQLでは<CODE>customer.name</CODE>を<CODE>GROUP BY</CODE>のところに追加する必要があります。
+MySQLではANSIモードで動かしていない限り余計な記述の必要はありません。
+
+</P>
+<P>
+<CODE>GROUP BY</CODE>で省略するフィールドはグループ内でユニークでなくてはいけません。
+もしそうでない場合は結果は予想もしないようなものになるでしょう。
+
+</P>
+<P>
+たとえユニークでは無くても特定のフィールドの値を得るために
+<CODE>MIN()</CODE>や<CODE>MAX()</CODE>を使用できるケースもあります。
+次の例は<CODE>sort</CODE>フィールド中の最小値を持つレコードから
+特定の<CODE>column</CODE>の値を取り出します。
+
+</P>
+
+<PRE>
+substr(MIN(concat(rpad(sort,6,' '),column)),7)
+</PRE>
+
+<P>
+ 「<A HREF="manual.ja_Tutorial.html#example-Maximum-column-group-row">3.5.4  The Rows Holding the Group-wise Maximum of a Certain Field</A>」節参照.
+
+</P>
+<P>
+<A NAME="IDX1852"></A>
+<A NAME="IDX1853"></A>
+<A NAME="IDX1854"></A>
+<A NAME="IDX1855"></A>
+<A NAME="IDX1856"></A>
+<A NAME="IDX1857"></A>
+MySQLの3.22以前のバージョンをお使いであるか、ANSI SQLに沿っての使用をされる場合は
+<CODE>GROUP BY</CODE>と<CODE>ORDER BY</CODE>内に選択表現を記述してはいけません。
+この制限を守った上で作業を進めるにはエイリアスを使用します。
+
+</P>
+
+<PRE>
+mysql&#62; SELECT id,FLOOR(value/100) AS val FROM tbl_name
+           GROUP BY id,val ORDER BY val;
+</PRE>
+
+<P>
+MySQLのバージョン3.23では次のようにも記述できます。
+
+</P>
+
+<PRE>
+mysql&#62; SELECT id,FLOOR(value/100) FROM tbl_name ORDER BY RAND();
+</PRE>
+
+<P><HR><P>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_LGPL_license.html">previous</A>, <A HREF="manual.ja_Function_Index.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15005</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15004">[前]</a><a href="15006">[次]</a><a href="../list/15001-15100">[番号順一覧]</a><a href="../thread/15001-15100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15005
+</p>
+<div class="header">
+<p>
+From: goto &lt;goto &lt;gotou1213@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 1 Sep 2009 00:53:02 +0900<br>
+Subject: [mysql 15005] １行も削除されないDELETE文によるロック<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんばんは。ごとうと申します。
+
+INNODBで下の様な主キーが複合のテーブルに対して、
+・第１キーを指定して一括DELETE
+・同じ第１キーで複数件INSERT
+という処理を１トランザクションで行おうとしています。
+
+--
+CREATE TABLE test
+(
+  a INT NOT NULL,
+  b INT NOT NULL,
+
+  PRIMARY KEY (a, b)
+) TYPE = INNODB;
+
+BEGIN;
+DELETE FROM test WHERE a = 1;
+
+INSERT INTO test (a, b) VALUES (1, 1);
+INSERT INTO test (a, b) VALUES (1, 2);
+...
+COMMIT;
+--
+
+この処理が↓のような順番で２接続で同時に実行されたとき、デッドロックしました。
+
+--
+接続1&gt; BEGIN;
+接続1&gt; DELETE FROM test WHERE a = 1;            &lt;-- 該当行なし
+
+接続2&gt; BEGIN;
+接続2&gt; DELETE FROM test WHERE a = 2;            &lt;-- 該当行なし
+接続2&gt; INSERT INTO test (a, b) VALUES (2, 1);   &lt;-- ブロックされる
+
+接続1&gt; INSERT INTO test (a, b) VALUES (1, 1);   &lt;-- デッドロック
+ERROR 1213 (40001): Deadlock found when trying to get lock; try
+restarting transaction
+--
+
+詳しく調べたところ、上の両方のDELETEで１行も削除されなかったときだけ
+(テーブルが空だった場合など)デッドロックが発生するようでした。
+接続1は a=1 のみ処理し、接続2は a=2 のみ処理しているので問題ないように思うのですが・・・
+
+ひとまず、DELETEの前に SELECT 〜 FOR UPDATE で行が存在するかを確認するようにすると
+デッドロックはしなくなりましたが、上記のような「一括削除→複数挿入」の
+処理をする場合、どのようにするのが一般的でしょうか？
+
+
+
+また、色々実験してみたところ、
+↓の様な、主キーが一つだけのテーブルでも同じ現象が発生しました。
+
+--
+CREATE TABLE test
+(
+  id INT NOT NULL,
+  PRIMARY KEY (id)
+) TYPE = INNODB;
+
+接続1&gt; BEGIN;
+接続1&gt; DELETE FROM test WHERE id = 1; &lt;-- 該当行なし
+
+接続2&gt; BEGIN;
+接続2&gt; DELETE FROM test WHERE id = 2; &lt;-- 該当行なし
+接続2&gt; INSERT INTO test VALUES (2);   &lt;-- ブロックされる
+
+接続1&gt; INSERT INTO test VALUES (1);   &lt;-- デッドロック
+ERROR 1213 (40001): Deadlock found when trying to get lock; try
+restarting transaction
+--
+
+これも削除される行があればデッドロックはしなかったので、
+DELETE文で削除される行がある場合は、その行のみロックされ、
+削除される行が無い場合はそのテーブル全体へのINSERTがブロックされる
+ような気がするのですが、そういうものなのでしょうか？
+
+
+MySQLのバージョンは「5.0.51a」と「5.1.32」で試しています。
+トランザクション隔離レベルは最初デフォルトの「REPEATABLE READ」で試していましたが、
+「READ UNCOMMITTED」でも同じ結果になりました。
+
+よろしくお願いします。
+
+</pre>
+</div>
+<p class="button"><a href="15004">[前]</a><a href="15006">[次]</a><a href="../list/15001-15100">[番号順一覧]</a><a href="../thread/15001-15100">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15005">  15005 2009-09-01 00:53 [goto &lt;gotou1213@xxxx] １行も削除されないDELETE文によるロック  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15006">  15006 2009-09-01 10:01 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15007">  15007 2009-09-01 22:42 　┗[&lt;gotou1213@xxxxxxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

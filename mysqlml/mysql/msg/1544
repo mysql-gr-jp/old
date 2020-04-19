@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1544</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1543">[前]</a><a href="1545">[次]</a><a href="../list/1501-1600">[番号順一覧]</a><a href="../thread/1501-1600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1544
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Sat, 05 Feb 2000 12:20:13 +0900<br>
+Subject: [mysql 01544] Re: Radius+MySQL について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Fri, 4 Feb 2000 20:54:15 +0900,
+NOGUCHI Masatoshi &lt;marlan@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; 念のため、mysqladmin reloadで更新し、</span>
+<span class="quote1">&gt; 最後に/etc/raddb/sqlserverを作成してradiusdを起動させました。</span>
+<span class="quote1">&gt; 以下がそのときの出力結果です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; knock# /usr/local/bin/radiusd &amp;</span>
+<span class="quote1">&gt; [1] 89303</span>
+<span class="quote1">&gt; knock# Feb 4 19:15:31.482 radiusd[89303] mysql init : mysql_use = yes</span>
+<span class="quote1">&gt; Feb 4 19:15:31.482 radiusd[89303] mysql init : server = localhost</span>
+<span class="quote1">&gt; Feb 4 19:15:31.483 radiusd[89303] mysql init : login = dbadmin</span>
+<span class="quote1">&gt; Feb 4 19:15:31.483 radiusd[89303] mysql init : password = dbpass</span>
+<span class="quote1">&gt; Feb 4 19:15:31.483 radiusd[89303] mysql init : db = radius_auth</span>
+<span class="quote1">&gt; Feb 4 19:15:31.484 radiusd[89303] mysql init : table = mysql_auth</span>
+<span class="quote1">&gt; Feb 4 19:15:31.484 radiusd[89303] mysql init : passwd_option = yes</span>
+<span class="quote1">&gt; Feb 4 19:15:31.484 radiusd[89303] mysql init : acct_on = yes</span>
+<span class="quote1">&gt; Feb 4 19:15:31.485 radiusd[89303] mysql init : acct_server = localhost</span>
+<span class="quote1">&gt; Feb 4 19:15:31.485 radiusd[89303] mysql init : acct_login = dbadmin</span>
+<span class="quote1">&gt; Feb 4 19:15:31.485 radiusd[89303] mysql init : acct_password = dbpass</span>
+<span class="quote1">&gt; Feb 4 19:15:31.486 radiusd[89303] mysql init : acct_db = logdb</span>
+<span class="quote1">&gt; Feb 4 19:15:31.486 radiusd[89303] mysql init : acct_table = radacct</span>
+<span class="quote1">&gt; Feb 4 19:15:31.486 radiusd[89303] mysql init : acct_detail_file = yes</span>
+<span class="quote1">&gt; Feb 4 19:15:31.487 radiusd[89303] mysql init : acct_split_table = yes</span>
+<span class="quote1">&gt; Feb 4 19:15:31.487 radiusd[89303] mysql init : exit_when_cant_log = yes</span>
+<span class="quote1">&gt; Feb 4 19:15:31.513 radiusd[89303] My_Mysql_Query: mysql server error : Unknown column 'field' in 'field list'</span>
+
+この最後のメッセージは
+
+SELECT attr,field FROM radius_acct_attr
+に引っかかっています。
+
+account log を MySQL に記録するように指定すると、
+何のアカウントを記録するべきかを知るために、radiusd は
+起動時にまず radius_acct_attr テーブルを見にいきます。
+
+radius_acct_attr テーブルと radacct テーブルのフィールドが
+一致していないか、radius_acct_attr テーブルの構造がミスっているかです
+
+mysqld --log
+radiusd -x
+
+として、MySQL はログを吐くようにし、radiusd を debug mode で動かして
+実験してみてください。
+
+
+<span class="quote1">&gt; [1]    Done                          /usr/local/bin/radiusd</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; エラーを出すものの、なんとか起動しています。</span>
+<span class="quote1">&gt; 最後の行に表示されるメッセージがよく理解できておりません。</span>
+<span class="quote1">&gt; 一応デーモンとしては起動されているので、</span>
+<span class="quote1">&gt; DTC拡張のRadiusで作成したradpingコマンドを引っ張ってきて</span>
+<span class="quote1">&gt; 認証を行ってみたのですが、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; knock# radping -u user01/userpass</span>
+<span class="quote1">&gt; sending rqst to 7f000001:1645</span>
+<span class="quote1">&gt; Feb 4 19:21:37.262 radiusd[89314] Authenticate:</span>
+<span class="quote1">&gt; localhost.tokyo.ksi.ne.jp.1025,\</span>
+<span class="quote1">&gt;  id=225: Neither User Nor Default Name: user01 times= 21 ms : Rejected.</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; という具合にみごとに弾かれてしまいます。</span>
+<span class="quote1">&gt; こちらは必要フィールドを抜いたテーブルでもradpingを実行してみましたが、</span>
+<span class="quote1">&gt; &quot;フィールドがない&quot;というエラーメッセージを表示することから</span>
+<span class="quote1">&gt; 一応MySQLに問いあわせしているものと考えています。</span>
+
+認証時に出る reject は、今度は radius_acct_attr とは全く別のところで
+引っかかっています。
+
+これは MySQL のログと、radiusd のデバッグ出力で追います
+
+mysql.c で全て行っています。
+
+Linux では動いてますが、(PortMaster3, MAX2000,4000,6000)
+FreeBSD では動かしたことないのです。
+もし、radiusd -x の出力が、どうも正しい値でないというのであれば、
+バグかもしれません。
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="1543">[前]</a><a href="1545">[次]</a><a href="../list/1501-1600">[番号順一覧]</a><a href="../thread/1501-1600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1541">   1541 2000-02-04 20:54 [&quot;NOGUCHI Masatoshi&quot; ] Radius+MySQL について                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="1544">   1544 2000-02-05 12:20 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1554">   1554 2000-02-07 21:18 　┗[&quot;NOGUCHI Masatoshi&quot; ] Radius+MySQL 成功しました           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1556">   1556 2000-02-08 08:41 　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+</pre>
+</body>
+</html>

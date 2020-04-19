@@ -1,0 +1,128 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7814</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="7813">[前]</a><a href="7815">[次]</a><a href="../list/7801-7900">[番号順一覧]</a><a href="../thread/7801-7900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7814
+</p>
+<div class="header">
+<p>
+From: &quot;Kana Tobata&quot; &lt;&quot;Kana Tobata&quot; &lt;ktobata@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 23 May 2003 12:52:20 +0900<br>
+Subject: [mysql 07814] Re: PC 起動と同時に  MySQL   起動（ Macintosh <br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+久保田様、かわはらづか様、Tsubaki様
+レスをありがとうございます。
+
+まずは、Tsubaki様に教えていただいた
+/Library/StartupItems/MySQL/
+の中のMySQLの中身を確認しました。
+内容は以下のようになってました。
+
+-----------------------------------------------------
+
+#!/bin/sh
+
+. /etc/rc.common
+
+##
+# Start up the MySQL database server on Mac OS X / Darwin
+#
+
+if [ &quot;${MYSQL:=-YES-}&quot; = &quot;-YES-&quot; ]; then
+
+    ConsoleMessage &quot;Starting MySQL database server&quot;
+
+ # Some mysql scripts will not work in the /usr/local/mysql
+ # symlinked directory, only in the real one with the
+ # version number. 
+ #
+ # To prevent having to change this script every time the
+ # version changes, we use perl to read out the actual symlink
+ # value of /usr/local/mysql and cd to that directory.
+ # Everything will work from there.
+ #
+ cd /usr/local/
+ REALDIR=`perl -e 'print readlink &quot;mysql&quot;'`
+ cd $REALDIR
+
+ # We have to find out if we're starting a 3.x or a 4.x
+ # MySQL database server
+ #
+ if [ -e ./bin/safe_mysqld ]
+ then
+
+  # This is version 3.x
+  #
+  ./bin/safe_mysqld --user=mysql &amp;
+
+ elif [ -e ./bin/mysqld_safe ]
+ then
+
+  # This is version 4.x
+  #
+  ./bin/mysqld_safe --user=mysql &amp;
+
+ else
+
+  # Don't know what version this is
+  #
+  ConsoleMessage &quot;Found neither safe_mysqld nor mysqld_safe&quot;
+
+ fi
+
+fi
+
+-----------------------------------------------------
+現在MySQLを、/Users/tobata/mysql 
+以下に保存しているため
+
+ディレクトリの移動の部分である
+
+cd /usr/local/
+を
+cd /Users/tobata/
+
+または
+
+ cd /usr/local/
+ REALDIR=`perl -e 'print readlink &quot;mysql&quot;'`
+ cd $REALDIR
+を
+cd /Users/tobata/mysql
+
+に単純に書き換えました。
+
+すると今度は、OS起動時のメッセージにも何も
+でなくなりました。もちろん、MySQLも起動していません。
+
+
+対処法がありましたら教えてください。
+
+
+----------------------------
+φ（株）キューリン　
+   φシステム部　戸畑佳奈
+      φE-mail ktobata@xxxxxxxxxx
+----------------------------
+
+
+</pre>
+</div>
+<p class="button"><a href="7813">[前]</a><a href="7815">[次]</a><a href="../list/7801-7900">[番号順一覧]</a><a href="../thread/7801-7900">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="7814">   7814 2003-05-23 12:52 [&quot;Kana Tobata&quot; &lt;ktoba] Re: PC 起動と同時に  MySQL   起動（ Macintosh</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7816">   7816 2003-05-23 19:19 ┗[Hiroto Tsubaki &lt;jak@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7820">   7820 2003-05-24 13:02 　┗[&quot;Kana Tobata&quot; &lt;ktoba]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7821">   7821 2003-05-24 20:47 　　┗[Hiroto Tsubaki &lt;jak@] Re: PC 起動と同時に  MySQL      起動（ M</a></span>
+</pre>
+</body>
+</html>

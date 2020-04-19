@@ -1,0 +1,92 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8300</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8299">[前]</a><a href="8301">[次]</a><a href="../list/8201-8300">[番号順一覧]</a><a href="../thread/8201-8300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8300
+</p>
+<div class="header">
+<p>
+From: &quot;Kawaji, Shinya&quot; &lt;&quot;Kawaji, Shinya&quot; &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 20 Oct 2003 13:46:30 +0900<br>
+Subject: [mysql 08300] Re: SELECT でローテーション出力したい<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+かわじ、です。
+
+
+一つの考え方に過ぎませんが・・・
+
+
+<span class="quote1">&gt; 【目的】</span>
+<span class="quote1">&gt; 1回のアクセス事に、順番に1レコードをブラウザに出力したい。</span>
+<span class="quote1">&gt; また、「text_*」の部分もローテーション表示されたい。</span>
+
+要するにセッション毎に違うデータ（次のデータ）を取り出したい、ということ
+でしたら、もうひとつ数字のフィールドを増やして、表示毎にインクリメントす
+るというやり方もあると思います。
+
+まず、そのフィールドを増やします。
+
+ALTER TABLE text_tb ADD view_count UNSIGNED NOT NULL DEFAULT 0;
+
+そして表示毎に
+
+SELECT *, @tc := text_count FROM text_tb
+ORDER BY view_count,text_id LIMIT 1;
+
+とし、これで取得した text_id を用いて、
+
+UPDATE text_tb SET view_count = view_count + 1 WHERE text_id = @tc;
+
+として、view_count を増やします。
+
+簡単に言えばこんな感じですが、view_count が溢れたときのための対策が
+必要なのと、上記の SELECT と UPDATE の間にはタイムラグが発生し得るので、
+厳密に順序毎に表示したい場合は LOCK をかけたりする必要があります。
+
+# view_count を数字型ではなく、他の種類の型にするという工夫も
+# あり得るかも・・・
+
+
+フィールドを増やせないのなら、単純にその情報を入れるだけのテーブルを
+作ってもいいかもしれません。
+
+CREATE TABLE view (
+  text_id BIGINT UNSIGNED NOT NULL
+);
+
+INSERT view values (0);
+
+表示毎に
+
+UPDATE view set text_id = text_id + 1;
+
+SELECT *, @vc := view.text_id FROM text_tb LEFT JOIN view using (text_id)
+WHERE view.text_id is not null;
+
+最初の UPDATE の際に、text_db.text_id &lt; view.text_id となっていたら
+1 に戻すなりの工夫が必要です。
+
+
+# きっと、もっとスマートな解があるに違いない
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8299">[前]</a><a href="8301">[次]</a><a href="../list/8201-8300">[番号順一覧]</a><a href="../thread/8201-8300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8297">   8297 2003-10-20 05:22 [&quot;Tatsuya Kondo&quot; &lt;kon] SELECT でローテーション出力したい       </a></span>
+<span class="current">-&gt;&nbsp;<a href="8300">   8300 2003-10-20 13:46 ┗[&quot;Kawaji, Shinya&quot; &lt;ka]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8301">   8301 2003-10-20 14:11 　┗[&lt;lavlav@xxxxxxxxxx&gt; ]                                     </a></span>
+</pre>
+</body>
+</html>

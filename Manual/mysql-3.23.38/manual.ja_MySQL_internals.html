@@ -1,0 +1,303 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.ja.texi on 20 July 2001 -->
+
+  <TITLE>MySQL Reference Manual for version 3.23.38. - 26  MySQL Internals</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Comparisons.html">previous</A>, <A HREF="manual.ja_Environment_variables.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="MySQL_internals" HREF="manual.ja_toc.html#MySQL_internals">26  MySQL Internals</A></H1>
+
+<P>
+This chapter describes a lot of things that you need to know when
+working on the <STRONG>MySQL</STRONG> code. If you plan to contribute to MySQL
+development, want to have access to the bleeding-edge in-between
+versions code, or just want to keep track of development, follow the
+instructions in  「<A HREF="manual.ja_Installing.html#Installing_source_tree">4.8  開発ソースツリーからのインストール</A>」節参照.  If you are interested in MySQL
+internals, you should also subscribe to <a HREF="mailto:internals@lists.mysql.com">internals@lists.mysql.com</a>.
+This is a relatively low traffic list, in comparison with 
+<a HREF="mailto:mysql@lists.mysql.com">mysql@lists.mysql.com</a>.
+
+</P>
+
+
+
+<H2><A NAME="MySQL_threads" HREF="manual.ja_toc.html#MySQL_threads">26.1  MySQL Threads</A></H2>
+
+<P>
+<STRONG>MySQL</STRONG> サーバーは以下のスレッドを作成します：
+
+</P>
+
+<UL>
+<LI>
+
+TCP/IP 接続ハンドルは、全ての接続要求を扱い、さらに、
+認証を行うためのスレッドSQLクエリを処理するスレッドを生成します
+
+<LI>
+
+Windows NTでは、名前付きパイプ(named pipe)・ハンドラー・スレッドがあります。
+これはネームド・パイプの接続要求に対し、TCP/IP接続スレッドと同様に動きます。
+
+<LI>
+
+シグナルスレッドは、全てのシグナルを扱います。
+This thread also normally handles
+alarms and calls <CODE>process_alarm()</CODE> to force timeouts on connections
+that have been idle too long.
+
+<LI>
+
+If <CODE>mysqld</CODE> is compiled with <CODE>-DUSE_ALARM_THREAD</CODE>, a dedicated 
+thread that handles alarms is created.  This is only used on some systems where
+there are problems with <CODE>sigwait()</CODE> or if one wants to use the
+<CODE>thr_alarm()</CODE> code in ones application without a dedicated signal
+handling thread.
+
+<LI>
+
+もし <CODE>--flush-time=#</CODE> オプションを使用したなら、
+全てのテーブルを一定期間でフラッシュするためだけのスレッドを作ります。
+
+<LI>
+
+Every connection has its own thread.
+
+<LI>
+
+Every different table on which one uses <CODE>INSERT DELAYED</CODE> gets its
+own thread.
+
+<LI>
+
+If you use <CODE>--master-host</CODE>, a slave replication thread will be
+started to read and apply updates from the master.
+</UL>
+
+<P>
+<CODE>mysqladmin processlist</CODE> only shows the connection, <CODE>INSERT DELAYED</CODE>,
+and replication threads.
+
+</P>
+<P>
+<CODE>mysqladmin processlist</CODE> only shows the connection and <CODE>INSERT
+DELAYED</CODE> threads.
+
+</P>
+<P>
+<A NAME="IDX1723"></A>
+<A NAME="IDX1724"></A>
+
+
+<H2><A NAME="MySQL_test_suite" HREF="manual.ja_toc.html#MySQL_test_suite">26.2  MySQL Test Suite</A></H2>
+
+<P>
+Until recently, our main full-coverage test suite was based on proprietary 
+customer data and for that reason has not been publicly available. The only 
+publicly available part of our testing process consisted of the <CODE>crash-me</CODE>
+test, a Perl DBI/DBD benchmark found in the <CODE>sql-bench</CODE> directory, and 
+miscellaneous tests located in <CODE>tests</CODE> directory. The lack of a 
+standardized publicly available test suite has made it difficult for our users,
+as well developers, to do regression tests on the <STRONG>MySQL</STRONG> code. To 
+address this problem, we have created a new test system that is included in
+the source and binary distributions starting in Version 3.23.29.
+
+</P>
+<P>
+The test system consist of a test language interpreter (<CODE>mysqltest</CODE>),
+a shell script to run all tests(<CODE>mysql-test-run</CODE>), the actual test cases
+written in a special test language, and their expected results.  To run the
+test suite on your system after a build, type <CODE>mysql-test/mysql-test-run</CODE>
+from the source root.  If you have installed a binary distribution, <CODE>cd</CODE>
+to the install root (eg. <CODE>/usr/local/mysql</CODE>), and do
+<CODE>scripts/mysql-test-run</CODE>.  All tests should succeed.  If they do not,
+use <CODE>mysqlbug</CODE> to send a bug report to <a HREF="mailto:bugs@lists.mysql.com">bugs@lists.mysql.com</a>.
+Make sure to include the output of <CODE>mysql-test-run</CODE>, as well as
+contents of all <CODE>.reject</CODE> files in <CODE>mysql-test/r</CODE> directory.
+
+</P>
+<P>
+If you have a copy of <CODE>mysqld</CODE> running on the machine where you want to
+run the test suite you do not have to stop it, as long as it is not using
+ports <CODE>9306</CODE> and <CODE>9307</CODE>.  If one of those ports is taken, you should
+edit <CODE>mysql-test-run</CODE> and change the values of the master and/or slave
+port to one that is available.
+
+</P>
+<P>
+The current set of test cases is far from comprehensive, as we have not yet
+converted all of our private tests to the new format.  However, it should 
+already catch most obvious bugs in the SQL processing code, OS/library issues,
+and is quite thorough in testing replication.  Our eventual goal is to have 
+the tests cover 100% of the code.  We welcome contributions to our test suite.
+You may especially want to contribute tests that examine the functionality 
+critical to your system, as this will ensure that all future <STRONG>MySQL</STRONG> 
+releases will work well with your applications.
+
+</P>
+<P>
+You can use the <CODE>mysqltest</CODE> language to write your own test cases.
+Unfortunately, we have not yet written full documentation for it - we plan to
+do this shortly.  You can, however, look at our current test cases and use 
+them as an example.  The following points should help you get started:
+
+</P>
+
+<UL>
+
+<LI>
+
+The tests are located in <CODE>mysql-test/t/*.test</CODE>
+
+<LI>
+
+You can run one individual test case with
+<CODE>mysql-test/mysql-test-run test_name</CODE>
+removing <CODE>.test</CODE> extension from the file name
+
+<LI>
+
+A test case consists of <CODE>;</CODE> terminated statements and is similar to the
+input of <CODE>mysql</CODE> command line client.  A statement by default is a query
+to be sent to <STRONG>MySQL</STRONG> server, unless it is recognized as internal
+command ( eg. <CODE>sleep</CODE> ).
+
+<LI>
+
+All queries that produce results, e.g. <CODE>SELECT</CODE>, <CODE>SHOW</CODE>,
+<CODE>EXPLAIN</CODE>, etc., must be preceded with <CODE>@/path/to/result/file</CODE>.  The
+file must contain the expected results.  An easy way to generate the result 
+file is to run <CODE>mysqltest -r &#60; t/test-case-name.test</CODE> from 
+<CODE>mysql-test</CODE> directory, and then edit the generated result files, if 
+needed, to adjust them to the expected output.  In that case, be very careful 
+about not adding or deleting any invisible characters - make sure to only 
+change the text and/or delete lines.  If you have to insert a line, make sure
+the fields are separated with a hard tab, and there is a hard tab at the end.  
+You may want to use <CODE>od -c</CODE> to make sure your text editor has not messed 
+anything up during edit.  We, of course, hope that you will never have to edit
+the output of <CODE>mysqltest -r</CODE> as you only have to do it when you find a 
+bug.
+
+<LI>
+
+To be consistent with our setup, you should put your result files in
+<CODE>mysql-test/r</CODE> directory and name them <CODE>test_name.result</CODE>.  If the
+test produces more than one result, you should use <CODE>test_name.a.result</CODE>,
+<CODE>test_name.b.result</CODE>, etc.
+
+<LI>
+
+Failed test results are put in a file with the same base name as the
+result file with the <CODE>.reject</CODE> extension.  If your test case is
+failing, you should do a diff on the two files.  If you cannot see how
+they are different, examine both with <CODE>od -c</CODE> and also check their
+lengths.
+
+<LI>
+
+You can prefix a query with <CODE>!</CODE> if the test can continue after that query
+returns an error.
+
+<LI>
+
+If you are writing a replication test case, you should on the first line of
+the test file, put <CODE>source include/master-slave.inc;</CODE>.  To switch between
+master and slave, use <CODE>connection master;</CODE> and <CODE>connection slave;</CODE>. 
+If you need to do something on an alternate connection, you can do 
+<CODE>connection master1;</CODE> for the master, and <CODE>connection slave1;</CODE> for
+the slave.
+
+<LI>
+
+If you need to do something in a loop, you can use something like this:
+
+<PRE>
+let $1=1000;
+while ($1)
+{
+ # do your queries here
+ dec $1;
+}
+</PRE>
+
+<LI>
+
+To sleep between queries, use the <CODE>sleep</CODE> command. It supports fractions
+of a second, so you can do <CODE>sleep 1.3;</CODE>, for example, to sleep 1.3 
+seconds.
+
+<LI>
+
+To run the slave with additional options for your test case, put them
+in the command-line format in <CODE>mysql-test/t/test_name-slave.opt</CODE>. For
+the master, put them in <CODE>mysql-test/t/test_name-master.opt</CODE>.
+
+<LI>
+
+If you have a question about the test suite, or have a test case to contribute,
+e-mail to <a HREF="mailto:internals@lists.mysql.com">internals@lists.mysql.com</a>. As the list does not accept 
+attachments, you should ftp all the relevant files to:
+<A HREF="ftp://support.mysql.com/pub/mysql/Incoming">ftp://support.mysql.com/pub/mysql/Incoming</A>
+
+</UL>
+
+<P>
+If your <STRONG>MySQL</STRONG> version doesn't pass the test suite you should
+do the following:
+
+</P>
+
+<UL>
+<LI>
+
+Don't send a bug report before you have found out as much as possible of
+what when wrong!  When you do it, please use the <CODE>mysqlbug</CODE> script
+so that we can get information about your system and <CODE>MySQL</CODE>
+version.  「<A HREF="manual.ja_Questions.html#Bug_reports">2.3  バグや問題を報告する方法</A>」節参照.
+<LI>
+
+If you have compiled <STRONG>MySQL</STRONG> yourself, check our manual for how
+to compile <STRONG>MySQL</STRONG> on your platform or, preferable, use one of
+the binaries we have compiled for you at
+<a HREF="http://www.mysql.com/downloads/">http://www.mysql.com/downloads/</a>.  All our standard binaries should
+pass the test suite !
+
+<LI>
+
+If you get an error, like <CODE>Result length mismatch</CODE> or <CODE>Result
+content mismatch</CODE> it means that the output of the test didn't match
+exactly the expected output. This could be a bug in <STRONG>MySQL</STRONG> or
+that your mysqld version produces slight different results under some
+circumstances. In this case you should compare the <CODE>.test</CODE>
+and <CODE>.reject</CODE> file in the <CODE>mysql-test/r</CODE> sub directory to
+see if this is something to worry about.
+
+<LI>
+
+If a test fails totally, you should check the logs file in the
+<CODE>mysql-test/var/log</CODE> directory for hints of what went wrong.
+
+<LI>
+
+If you have compiled <STRONG>MySQL</STRONG> with debugging you can try to debug this
+with the <CODE>--gdb</CODE> and <CODE>--debug</CODE> options to <CODE>mysql-test-run</CODE>.
+ 「<A HREF="manual.ja_Porting.html#Making_trace_files">I.1.2  Creating trace files and using gdb on mysqld</A>」節参照.
+
+If you have not compiled <STRONG>MySQL</STRONG> for debugging you should probably
+do that.  Just specify the <CODE>--with-debug</CODE> options to <CODE>configure</CODE>!
+ 「<A HREF="manual.ja_Installing.html#Installing_source">4.7  <STRONG>MySQL</STRONG> ソースディストリビューションのインストール</A>」節参照.
+
+</UL>
+
+<P>
+<A NAME="IDX1725"></A>
+<P><HR><P>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Comparisons.html">previous</A>, <A HREF="manual.ja_Environment_variables.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

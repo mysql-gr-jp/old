@@ -1,0 +1,105 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7514</title>
+<link rel=stylesheet type="text/css" href="../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="mysql/msg/7513">[前]</a><a href="mysql/msg/7515">[次]</a><a href="mysql/list/7501-7600">[番号順一覧]</a><a href="mysql/thread/7501-7600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7514
+</p>
+<div class="header">
+<p>
+From: Masahiro Fukuda &lt;Masahiro Fukuda &lt;masahif-ml@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 17 Apr 2003 00:56:15 +0900<br>
+Subject: [mysql 07514] 日本語文字列の一部で group by した場合の挙動について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。Ynotの福田です。
+
+日本語の文字列の一部分を切り出して、group by した場合に
+正しく動作しないという状況が起きています。
+
+具体的には、下記のような状況です。
+--------------------------------------------------------
+CREATE TABLE mojilist (
+  moji varchar(10)
+);
+
+insert into mojilist values('あお');
+insert into mojilist values('あか');
+
+で、テーブルを作り....
+
+mysql&gt; select left(moji, 1) as moji1 from mojilist;
++-------+
+<span class="quote1">| moji1 |</span>
++-------+
+<span class="quote1">| あ    |</span>
+<span class="quote1">| あ    |</span>
++-------+
+2 rows in set (0.00 sec)
+　→ 文字列の1文字目だけが正しく取り出せている
+
+mysql&gt; select left(moji, 1) as moji1 from mojilist group by moji1;
++-------+
+<span class="quote1">| moji1 |</span>
++-------+
+<span class="quote1">| ・    |</span>
++-------+
+1 row in set (0.01 sec)
+　→ どうやら1バイト目だけが取り出されている？
+
+
+mysql&gt; select left(moji, 2) as moji1 from mojilist group by moji1;
++-------+
+<span class="quote1">| moji1 |</span>
++-------+
+<span class="quote1">| あ    |</span>
++-------+
+1 row in set (0.00 sec)
+  → どうやら2文字でなく、2バイト取り出されている？
+--------------------------------------------------------
+
+といった形で、日本語文字列の一部を取り出した結果を group by すると、
+正しく、動作していないように感じるのです。
+
+テストした環境は...
+ OS: RedHat7.3
+ MySQL: 3.23.56(www.mysql.comよりダウンロードしたバイナリ)
+
+ /etc/my.cnf の中身
+ -------------------------------------
+ [mysql]
+ default-character-set=sjis
+
+ [mysqldump]
+ default-character-set=sjis
+
+ [mysqld]
+ default-character-set=sjis
+ datadir=/dbdata/mysql
+ set-variable = max_connections=8192
+ -------------------------------------
+
+です。
+
+もし、同様の問題の解決方法をご存じの方がいらっしゃいましたら、
+教えていただけないでしょうか？
+
+よろしくお願いします。
+
+
+-- 
+Masahiro Fukuda mailto:masahif-ml@xxxxxxxxxx
+
+
+</pre>
+</div>
+<p class="button"><a href="mysql/msg/7513">[前]</a><a href="mysql/msg/7515">[次]</a><a href="mysql/list/7501-7600">[番号順一覧]</a><a href="mysql/thread/7501-7600">[スレッド一覧]</a></p>
+</body>
+</html>

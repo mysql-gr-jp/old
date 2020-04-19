@@ -1,0 +1,54 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9063</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="9062">[前]</a><a href="9064">[次]</a><a href="../list/9001-9100">[番号順一覧]</a><a href="../thread/9001-9100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9063
+</p>
+<div class="header">
+<p>
+From: &quot;Iso, Toshitaka&quot; &lt;&quot;Iso, Toshitaka&quot; &lt;toshitaka.iso@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 25 Mar 2004 01:10:14 +0900<br>
+Subject: [mysql 09063] Re: JOIN で結合すると遅くなります<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+いそです。
+
+おせわになっております。
+
+<span class="quote1">&gt;また、いそさんの指摘された方法</span>
+<span class="quote1">&gt;でも 7 min 52.37 sec かかりました。</span>
+
+すみません。説明が悪かったです。
+
+ SELECT count(*) as cnt
+   FROM denpyou, denpyoumeisai
+  WHERE T_Code = '123456' AND KikakuBangou = 'ABCD-1234'
+    AND denpyou.DenpyouNo = denpyuoumeisai.DenpyouNo;
+
+ではなく、
+
+select count(*) from 
+(select * from denpyou T_Code = '123456' AND KikakuBangou = 'ABCD-1234' ) A   ← 先に絞り込んだ結果をAという表イメージとし、
+inner join denpyoumeisai A.DenpyouNo = denpyoumeisai.DenpyouNo;    ← 表イメージAとdenpyoumeisai.DenpyouNoで結合
+
+という意味です。紛らわしい表現でした。ごめんなさい。
+（試す環境がないため、SQLの構文エラーが出たすみません…）
+
+ちなみにこの方法でオプティマイザの判断が変わったというのはMySQLではなく、
+PostgreSQLです。ご参考になれば幸いです。。
+
+／いそ＠日本hp
+
+</pre>
+</div>
+<p class="button"><a href="9062">[前]</a><a href="9064">[次]</a><a href="../list/9001-9100">[番号順一覧]</a><a href="../thread/9001-9100">[スレッド一覧]</a></p>
+</body>
+</html>

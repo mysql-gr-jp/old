@@ -1,0 +1,138 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15386</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15385">[前]</a><a href="15387">[次]</a><a href="../list/15301-15400">[番号順一覧]</a><a href="../thread/15301-15400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15386
+</p>
+<div class="header">
+<p>
+From: こんにちは伊藤です &lt;こんにちは伊藤です &lt;ito.takahiro.cp@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 26 Aug 2010 10:35:45 +0900<br>
+Subject: [mysql 15386] SP中でのVARCHARの比較について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+Akio Imai 様
+
+返信ありがとうございました。
+伊藤です。
+実行環境MySQL5.0.67です。
+
+やはり問題ないですよね？
+ほかの要素だと思ってます。もうちょっと調べます。
+検証までやって頂きありがとうございました。
+
+
+
+
+
+On Thu, 26 Aug 2010 10:22:18 +0900
+Akio Imai &lt;suzuro2045@xxxxxxxxxx&gt; 様から以下のようなメールをいただきました。。:
+
+<span class="quote1">&gt; 初めまして。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; プロシージャの実行環境が明記されていませんが</span>
+<span class="quote1">&gt; MySQL 5.0.77</span>
+<span class="quote1">&gt; で実行してみたところ、自分の環境では特に問題が発生しませんでした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以下、ちょっと煩雑ですが、実行したクエリと結果になります。</span>
+<span class="quote1">&gt; CREATE TABLE `test` (`id` int(11) NOT NULL auto_increment, `txt`</span>
+<span class="quote1">&gt; varchar(16) NOT NULL, KEY `idx_test_id`(`id`)) ENGINE=InnoDB;</span>
+<span class="quote1">&gt; insert into test values (0,'a'),(0,'b'),(0,'c');</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; DROP PROCEDURE IF EXISTS proc_test;</span>
+<span class="quote1">&gt; delimiter //</span>
+<span class="quote1">&gt; CREATE PROCEDURE proc_test(</span>
+<span class="quote1">&gt;  in_exec_kbn  varchar(16)</span>
+<span class="quote1">&gt; )</span>
+<span class="quote1">&gt; BEGIN</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;  select count(*) into @my_count from test where txt=in_exec_kbn;</span>
+<span class="quote1">&gt;  select @my_count;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; END;</span>
+<span class="quote1">&gt; //</span>
+<span class="quote1">&gt; delimiter ;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; call proc_test('a');</span>
+<span class="quote1">&gt; +-----------+</span>
+<span class="quote2">&gt; | @my_count |</span>
+<span class="quote1">&gt; +-----------+</span>
+<span class="quote2">&gt; | 1         |</span>
+<span class="quote1">&gt; +-----------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 2010年8月26日9:28 こんにちは伊藤です &lt;ito.takahiro.cp@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt; &gt; 最近MySQLのストアドに取り組み始めました。</span>
+<span class="quote2">&gt; &gt; 伊藤です。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ストアド中のSQL文で分からない点がありますので質問させてください。</span>
+<span class="quote2">&gt; &gt; たぶん単純なことだと思います。</span>
+<span class="quote2">&gt; &gt; 下記のようなvarchar型のTBL.colに変数をそのまま比較させると落ちるようです。</span>
+<span class="quote2">&gt; &gt; INT型なら同じようなことはありません。varcharはそのままの比較って出来なかっ</span>
+<span class="quote2">&gt; &gt; たりするのでしょうか？</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 落ちる方</span>
+<span class="quote2">&gt; &gt; CREATE PROCEDURE test(</span>
+<span class="quote2">&gt; &gt; ?in_exec_kbn ?varchar(16)</span>
+<span class="quote2">&gt; &gt; )</span>
+<span class="quote2">&gt; &gt; BEGIN</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ?select count(*) into @my_count from TBL where col=in_exec_kbn;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; END;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 落ちない方(あたり前ですが)もちろん意図した結果は得られません。</span>
+<span class="quote2">&gt; &gt; CREATE PROCEDURE test(</span>
+<span class="quote2">&gt; &gt; ?in_exec_kbn ?varchar(16)</span>
+<span class="quote2">&gt; &gt; )</span>
+<span class="quote2">&gt; &gt; BEGIN</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ?select count(*) into @my_count from TBL where col='in_exec_kbn';</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; END;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; -------------------------------------------------</span>
+<span class="quote2">&gt; &gt; 伊藤崇洋</span>
+<span class="quote2">&gt; &gt; ito.takahiro.cp@xxxxxxxxxx</span>
+<span class="quote2">&gt; &gt; -------------------------------------------------</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+
+
+
+
+-------------------------------------------------
+伊藤崇洋
+ito.takahiro.cp@xxxxxxxxxx
+-------------------------------------------------
+
+
+</pre>
+</div>
+<p class="button"><a href="15385">[前]</a><a href="15387">[次]</a><a href="../list/15301-15400">[番号順一覧]</a><a href="../thread/15301-15400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15384">  15384 2010-08-26 09:28 [こんにちは伊藤です &lt;] SP中でのVARCHARの比較について           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15385">  15385 2010-08-26 10:22 ┗[Akio Imai &lt;suzuro204] Re: [mysql 15384] SP中でのVARCHARの比較について</a></span>
+<span class="current">-&gt;&nbsp;<a href="15386">  15386 2010-08-26 10:35 　┗[こんにちは伊藤です &lt;] SP中でのVARCHARの比較について       </a></span>
+</pre>
+</body>
+</html>

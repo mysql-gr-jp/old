@@ -1,0 +1,206 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14287</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14286">[前]</a><a href="14288">[次]</a><a href="../list/14201-14300">[番号順一覧]</a><a href="../thread/14201-14300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14287
+</p>
+<div class="header">
+<p>
+From: &quot;kondo&quot; &lt;&quot;kondo&quot; &lt;nobuaki3.kondo@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 1 Nov 2007 13:11:55 +0900<br>
+Subject: [mysql 14287] mysqldumpでDEFAULT CHARSET=latin1になってしまう。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+近藤です。
+初めての投稿になります。
+
+サーバのリプレースでEUCの環境からUTF-8になるため、
+PHPで作ったシステムがUTF-8の環境で使えるか確認中です。
+PHPからとりあえず使えてるっぽいのですが、バックアップでちょっと
+戸惑ってます。
+Redhat9の環境からmysqldumpで得たファイルをEUCからUTF-8に
+変換して新しい環境（実環境はRedHatEL4ですが、テスト環境なので
+VMWareのCentoOS4.5）に持っていき、インポートしました。
+
+CentOSにログインし、コマンドラインからmysqlコマンドでアクセスし、
+selectコマンドでデータを見てみると、日本語部分のデータが文字化
+けせずに表示されました。
+UTF-8で文字化けせずに表示されたことだと思います。
+改めてCentOSでmysqldumpすると、
+CREATE TABLEの最後の部分がENGINE=MyISAM DEFAULT CHARSET=latin1;
+になとなり、日本語の部分が文字化けしました。
+（最初のインポートする際のdumpだとCREATE TABLEの最後はTYPE=MyISAM;のみ）
+
+インターネットや、このMLの過去ログなどを探して
+[mysqldump]
+default-character-set=binary
+とすることで、日本語部分の文字化けはなくなりましたが、あいかわらず
+CREATE TABLEの最後の部分がENGINE=MyISAM DEFAULT CHARSET=latin1;
+です。
+mysqldumpのオプションに--compatible=mysql323を指定すると最初のインポートと
+同様にTYPE=MyISAM;のみになりました。
+ENGINE=MyISAM DEFAULT CHARSET=UTF-8することって出来ないでしょうか？
+ENGINE=MyISAM DEFAULT CHARSET=UTF-8にする必要は特に無いでしょうか。
+
+よろしくお願いします。
+
+以下は、必要かと思われる情報を載せておきます。
+
+移行前：RedHat9
+Mysql3.23.58-1.9
+＜my.cnf＞
+--------------------------------------------
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+
+[mysql.server]
+user=mysql
+basedir=/var/lib
+
+[safe_mysqld]
+err-log=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+--------------------------------------------
+
+移行先：CentOS4.5
+mysqlclient10-3.23.58-4.RHEL4.1
+mysql-4.1.20-2.RHEL4.1.0.1
+mysql-devel-4.1.20-2.RHEL4.1.0.1
+libdbi-dbd-mysql-0.6.5-10.RHEL4.1
+php-mysql-4.3.9-3.22.9
+mysql-server-4.1.20-2.RHEL4.1.0.1
+
+＜my.cnfの一部＞
+--------------------------------------------
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+# Default to using old password format for compatibility with mysql 3.x
+# clients (those using the mysqlclient10 compatibility package).
+old_passwords=1
+default-character-set=utf8＜−−−追加しました
+
+[mysql.server]
+user=mysql
+basedir=/var/lib
+default-character-set=utf8
+
+[mysqld_safe]
+err-log=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+default-character-set=utf8＜−−−追加しました
+
+[mysqldump]＜−−−追加しました
+#default-character-set=utf8＜−−−追加しました（あとでコメント化）
+default-character-set=binary＜−−−追加しました
+--------------------------------------------
+
+＜mysqlbug実行結果＞
+（よく分からないですが、emacsが立ち上がったのでその中身です。）
+
+File Edit Options Buffers Tools Help
+SEND-PR: -*- send-pr -*-
+SEND-PR: Lines starting with `SEND-PR' will be removed automatically, as
+SEND-PR: will all comments (text enclosed in `&lt;' and `&gt;').
+SEND-PR:
+From: root
+To: mysql@xxxxxxxxxx
+Subject: [50 character or so descriptive subject here (for reference)]
+
+<span class="quote1">&gt;Description:</span>
+        &lt;precise description of the problem (multiple lines)&gt;
+<span class="quote1">&gt;How-To-Repeat:</span>
+        &lt;code/input/activities to reproduce the problem (multiple lines)&gt;
+<span class="quote1">&gt;Fix:</span>
+        &lt;how to correct or work around the problem, if known (multiple 
+lines)&gt;
+
+<span class="quote1">&gt;Submitter-Id:  &lt;submitter ID&gt;</span>
+<span class="quote1">&gt;Originator:    root</span>
+<span class="quote1">&gt;Organization:</span>
+ &lt;organization of PR author (multiple lines)&gt;
+<span class="quote1">&gt;MySQL support: [none | licence | email support | extended email support ]</span>
+<span class="quote1">&gt;Synopsis:      &lt;synopsis of the problem (one line)&gt;</span>
+<span class="quote1">&gt;Severity:      &lt;[ non-critical | serious | critical ] (one line)&gt;</span>
+<span class="quote1">&gt;Priority:      &lt;[ low | medium | high ] (one line)&gt;</span>
+<span class="quote1">&gt;Category:      mysql</span>
+<span class="quote1">&gt;Class:         &lt;[ sw-bug | doc-bug | change-request | support ] (one line)&gt;</span>
+<span class="quote1">&gt;Release:       mysql-4.1.20 (Source distribution)</span>
+
+<span class="quote1">&gt;C compiler:    gcc (GCC) 3.4.6 20060404 (Red Hat 3.4.6-8)</span>
+<span class="quote1">&gt;C++ compiler:  g++ (GCC) 3.4.6 20060404 (Red Hat 3.4.6-8)</span>
+<span class="quote1">&gt;Environment:</span>
+        &lt;machine, os, target, libraries (multiple lines)&gt;
+System: Linux dmz-test 2.6.9-55.0.9.EL #1 Thu Sep 27 18:10:45 EDT 2007 i686 
+i68\
+6 i386 GNU/Linux
+Architecture: i686
+
+Some paths:  /usr/bin/perl /usr/bin/make /usr/bin/gmake /usr/bin/gcc 
+/usr/bin/c\
+c
+GCC: /usr/lib/gcc/i386-redhat-linux/3.4.6/specs から spec を読み込み中
+コンフィグオプション: 
+../configure --prefix=/usr --mandir=/usr/share/man --info\
+dir=/usr/share/info --enable-shared --enable-threads=posix --disable-checking 
+ -\
+-with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable\
+-java-awt=gtk --host=i386-redhat-linux
+スレッドモデル: posix
+gcc バージョン 3.4.6 20060404 (Red Hat 3.4.6-8)
+Configure command: ./configure '--build=i686-redhat-linux-gnu' 
+'--host=i686-red\
+hat-linux-gnu' '--target=i386-redhat-linux-gnu' '--program-prefix=' 
+'--prefix=/\
+usr' '--exec-prefix=/usr' '--bindir=/usr/bin' '--sbindir=/usr/sbin' 
+'--sysconfd\
+ir=/etc' '--datadir=/usr/share' '--includedir=/usr/include' 
+'--libdir=/usr/lib'\
+ '--libexecdir=/usr/libexec' '--localstatedir=/var' 
+'--sharedstatedir=/usr/com'\
+ '--mandir=/usr/share/man' '--infodir=/usr/share/info' '--with-readline' 
+'--wit\
+h-vio' '--with-openssl' '--without-debug' '--enable-shared' '--with-bench' 
+'--l\
+ocalstatedir=/var/lib/mysql' 
+'--with-unix-socket-path=/var/lib/mysql/mysql.sock\
+' '--with-mysqld-user=mysql' '--with-extra-charsets=all' '--with-innodb' 
+'--wit\
+h-isam' '--with-berkeley-db' '--enable-local-infile' 
+'--enable-large-files=yes'\
+ '--enable-largefile=yes' '--enable-thread-safe-client' 
+'--disable-dependency-t\
+racking' '--with-named-thread-libs=-lpthread' 
+'CFLAGS=-O2 -g -pipe -m32 -march=\
+i386 -mtune=pentium4 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE 
+ -\
+fno-strict-aliasing' 
+'CXXFLAGS=-O2 -g -pipe -m32 -march=i386 -mtune=pentium4 -D\
+_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -fno-strict-aliasing  
+-fn\
+o-rtti -fno-exceptions' 
+'FFLAGS=-O2 -g -pipe -m32 -march=i386 -mtune=pentium4' \
+'build_alias=i686-redhat-linux-gnu' 'host_alias=i686-redhat-linux-gnu' 
+'target_\
+alias=i386-redhat-linux-gnu'
+
+
+
+</pre>
+</div>
+<p class="button"><a href="14286">[前]</a><a href="14288">[次]</a><a href="../list/14201-14300">[番号順一覧]</a><a href="../thread/14201-14300">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="14287">  14287 2007-11-01 13:11 [&quot;kondo&quot; &lt;nobuaki3.ko] mysqldumpでDEFAULT CHARSET=latin1になってしまう。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14288">  14288 2007-11-01 13:15 ┗[&quot;kondo&quot; &lt;nobuaki3.ko]                                       </a></span>
+</pre>
+</body>
+</html>

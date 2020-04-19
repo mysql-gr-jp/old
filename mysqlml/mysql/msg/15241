@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15241</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15240">[前]</a><a href="15242">[次]</a><a href="../list/15201-15300">[番号順一覧]</a><a href="../thread/15201-15300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15241
+</p>
+<div class="header">
+<p>
+From: MATSUNAGA Ichiro &lt;MATSUNAGA Ichiro &lt;vikke.bsd@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 14 Apr 2010 13:28:27 +0900<br>
+Subject: [mysql 15241] repair tableで修復出来ない状態<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+松永です。
+
+FreeBSD 7.0 無印
+mysql 5.1.35 をportsでinstall
+を使ってます。
+
+MyISAMのテーブルに対するmysqldumpが出来なく、困っています。
+
+
+mysqldumpでdumpしようとした所、下記のようなエラーが発生しました。
+
+$ mysqldump -u hogeuser -p -h hogehost hogehoge &gt; hogehoge.backup.sql
+mysqldump: Error 1194: Table 'hogehoge' is marked as crashed and should be repaired when dumping table `hogehoge` at row: 0
+
+動作を見るために、mysqlでloginして該当テーブルに対して色々selectのquery(pkでの一件検索や、pkのmin, max, countを取ってみるなど)や、show create tableを投げましたが、問題無くsqlは結果を返してました。
+その後、repair tableを行ないました。
+
+mysql&gt; repair table hogehoge;
++---------------+--------+----------+----------+
+<span class="quote1">| Table         | Op     | Msg_type | Msg_text |</span>
++---------------+--------+----------+----------+
+<span class="quote1">| hoge.hogehoge | repair | status   | OK       |</span>
++---------------+--------+----------+----------+
+1 row in set (3 min 19.39 sec)
+
+ところが、再度mysqldumpを実行しても状況が変わりませんでした。
+
+何度かdumpとrepairを行なっていた時に、一度だけ、show create tableがエラーを返し(エラーは失念)、repairの結果も下記のような
++---------------+--------+----------+-----------------------------------------+
+<span class="quote1">| Table         | Op     | Msg_type | Msg_text                                |</span>
++---------------+--------+----------+-----------------------------------------+
+<span class="quote1">| hoge.hogehoge | repair | warning  | Number of rows changed from 0 to 407997 |</span>
+<span class="quote1">| hoge.hogehoge | repair | status   | OK                                      |</span>
++---------------+--------+----------+-----------------------------------------+
+2 rows in set (3 min 3.99 sec)
+となった事もあります。
+メッセージ的にはこちらの方が、ある意味正しい気(エラーがあったのを修正しているので)もしますが。。。
+
+
+なんにせよ、何度かmysqldumpとrepairを繰り替えしましたが、mysqldumpの結果は変わっていません。
+なにかしら解決の糸口があれば、ご教示願います。
+
+
+-- 
+MATSUNAGA Ichiro
+e-mail: vikke.bsd@xxxxxxxxxx
+/.j: <a href="http://slashdot.jp/~vikke/">http://slashdot.jp/~vikke/</a>
+last.fm: <a href="http://www.lastfm.jp/user/vikke_bsd/">http://www.lastfm.jp/user/vikke_bsd/</a>
+twitter: <a href="http://twitter.com/vikke">http://twitter.com/vikke</a>
+
+Just remember - when you think all is lost, the future remains.
+-- Robert H. Goddard
+
+GPG fingerprint = DCEF C86E 2930 45D0 0941  E977 4DCE A95F 3914 4BED
+
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="http://www.mysql.gr.jp/mysqlml/mysql/msg/15241/0/"> [application/pgp-signature]</a>
+</ul>
+</div>
+<p class="button"><a href="15240">[前]</a><a href="15242">[次]</a><a href="../list/15201-15300">[番号順一覧]</a><a href="../thread/15201-15300">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15241">@ 15241 2010-04-14 13:28 [MATSUNAGA Ichiro &lt;vi] repair tableで修復出来ない状態          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15242">  15242 2010-04-14 15:11 ┣[遠藤 俊裕 &lt;endo@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15243">@ 15243 2010-04-14 17:11 ┃┗[MATSUNAGA Ichiro &lt;vi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15244">  15244 2010-04-14 17:26 ┃　┗[Masaaki Matsuyama &lt;m]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15247">@ 15247 2010-04-15 01:02 ┃　　┗[MATSUNAGA Ichiro &lt;vi]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15249">  15249 2010-04-15 08:54 ┃　　　┣[&quot;sugimoto&quot; &lt;sugimoto]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15251">  15251 2010-04-15 14:34 ┃　　　┗[遠藤 俊裕 &lt;endo@xxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15245">  15245 2010-04-14 19:16 ┗[大垣 靖男 &lt;yohgaki@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15246">@ 15246 2010-04-15 00:58 　┗[MATSUNAGA Ichiro &lt;vi]                                     </a></span>
+</pre>
+</body>
+</html>

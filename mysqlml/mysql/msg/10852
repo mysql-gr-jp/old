@@ -1,0 +1,94 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10852</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10851">[前]</a><a href="10853">[次]</a><a href="../list/10801-10900">[番号順一覧]</a><a href="../thread/10801-10900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10852
+</p>
+<div class="header">
+<p>
+From: toki &lt;toki &lt;toki@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 30 Jan 2005 17:00:29 +0900<br>
+Subject: [mysql 10852] インポート時のエラー出力と、InnoDB：MyISAMでのソートについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+はじめまして。
+MySQLを使い始めた toki と申します。
+よろしくお願いします。
+
+手応え等を感じるために、
+Apaceh+PHP+MySQL で実際に組んで見ました。
+
+その時に出てきた疑問点や、問題点があるので、
+先人のお知恵を拝借頂きたく存じます。
+
+
+１) mysqlimport時に、-v を使って以下のような出力が出るのですが、
+　　この　Warnings　の内容を知りたいのです。
+　　何か方法がありますでしょうか。
+
+  Connecting to localhost
+  Selecting database データベース名
+  Loading data from SERVER file: ファイル名 into テーブル名
+  ファイル名: レコード数: 5479  削除: 0  Skipped: 1021  Warnings: 1
+  Disconnecting from localhost
+
+　　※Skipped はPrimaryKey 複数指定の
+　　　　重複カットインポート利用の為に多く出ています。
+
+
+2) 当初InnoDBを利用してDB構築をしていたのですが、
+　　order by によるソートが巧くできませんでした。
+
+　[テーブル詳細]
+　 CREATE TABLE `test` (
+　   `Date` date NOT NULL default '0000-00-00',
+　   `Id` text NOT NULL,
+　   `Name` text NOT NULL,
+　   `Age` int(11) unsigned NOT NULL default '0',
+　   PRIMARY KEY  (`Date`,`Id`(9),`Name`(9))
+　 ) ENGINE=InnoDB DEFAULT CHARSET=ujis;
+
+　○
+　mysql&gt; select * from test order by date limit 30;
+　mysql&gt; select * from test order by 1 limit 30;
+　×
+　mysql&gt; select * from test order by Id limit 30;
+　ERROR 1032 (HY000): 'test'のなかにレコードが見付かりません
+　×
+　mysql&gt; select * from test order by 2 limit 30;
+　ERROR 1032 (HY000): 'test'のなかにレコードが見付かりません
+
+
+MyISAM　に切り替えたら、今までの苦労がなんだったのか
+わからなくなるぐらい、あっさりできるようになりました。
+
+InnoDBには、ソーティングが出来なくなるバグもしくは仕様が
+あるのでしょうか。
+
+
+ご存じの方、ポインタなど頂きたく存じます。
+
+
+-- 
+toki mailto:toki@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="10851">[前]</a><a href="10853">[次]</a><a href="../list/10801-10900">[番号順一覧]</a><a href="../thread/10801-10900">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="10852">  10852 2005-01-30 17:00 [toki &lt;toki@xxxxxxxxx] インポート時のエラー出力と、InnoDB：MyISAMでのソートについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10853">  10853 2005-01-30 17:14 ┣[toki &lt;toki@xxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10902">  10902 2005-02-08 09:55 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10905">  10905 2005-02-08 11:20 　┗[toki &lt;toki@xxxxxxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

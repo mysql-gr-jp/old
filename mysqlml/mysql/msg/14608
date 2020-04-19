@@ -1,0 +1,102 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14608</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14607">[前]</a><a href="14609">[次]</a><a href="../list/14601-14700">[番号順一覧]</a><a href="../thread/14601-14700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14608
+</p>
+<div class="header">
+<p>
+From: nobu &lt;nobu &lt;mininobu@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 30 Jul 2008 11:30:32 +0900<br>
+Subject: [mysql 14608] 2段階以上の外部結合のやり方<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+近藤（nobu）と申します。
+MySQLでの外部結合の方法について、質問があります。
+
+今、次のようなSQLがあります。
+
+SELECT
+    rh1.id,
+    rh1.recipe_name,
+    rh1.category,
+    cg.category_name,
+    rh1.image,
+    rm.id as mid,
+    rm.no as mno,
+    rm.material,
+    rm.unit_id,
+    ut.unit_name
+FROM
+    recipe_header rh1 left outer join category cg        on
+(rh1.category = cg.id)
+                      left outer join recipe_material rm on (rh1.id = rm.id),
+    unit ut
+where
+    rm.unit_id = ut.id
+
+このSQLでは、&quot;recipe_header(rh1) &quot;と&quot;category(cg)&quot;、&quot;recipe_material(rm)&quot;を
+外部結合しており、&quot;recipe_material(rm)&quot;と&quot;unit(ut)&quot;を通常の結合をしています。
+
+今回、&quot;recipe_material(rm)&quot;と&quot;unit(ut)&quot;の結合を外部結合に変更したく、試行錯誤
+したところ次のようなSQLで想定の結果が取得できました。
+
+SELECT
+    rh1.id,
+    rh1.recipe_name,
+    rh1.category,
+    cg.category_name,
+    rh1.image,
+    rm.id as mid,
+    rm.no as mno,
+    rm.material,
+    rm.unit_id,
+    ut.unit_name
+FROM
+    recipe_header rh1   left outer join category cg        on
+(rh1.category = cg.id)
+                        left outer join recipe_material rm on (rh1.id = rm.id),
+    recipe_material rm2 left outer join unit ut            on
+(rm2.unit_id = ut.id)
+where
+    rm.id = rm2.id
+and rm.no = rm2.no
+
+方法としては、&quot;recipe_material(rm2)&quot; というrecipe_materialの別名テーブルを用意
+し、&quot;recipe_material(rm2)&quot;と&quot;unit(ut)&quot;外部結合させ、rmとrm2を再帰的結合すること
+で実現しています。
+
+2段以上の外部結合（ちょっと日本語おかしいかも）をする場合、このようなやり方で
+よろしいのでしょうか？なんか冗長的な気がして、やり方に疑問を持っています。
+
+検索してみたのですが、このようにテーブルを結合させるようなサンプルが見つから
+なかったので、質問させて頂きました。何かご存知の方がいらっしゃいましたら、
+アドバイスをお願い致します。
+
+</pre>
+</div>
+<p class="button"><a href="14607">[前]</a><a href="14609">[次]</a><a href="../list/14601-14700">[番号順一覧]</a><a href="../thread/14601-14700">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="14608">  14608 2008-07-30 11:30 [nobu &lt;mininobu@xxxxx] 2段階以上の外部結合のやり方             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14609">  14609 2008-07-30 11:44 ┗[岡本　基 &lt;okamoto@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14610">  14610 2008-07-30 11:53 　┗[IIDA Yosiaki &lt;y-iida]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14611">  14611 2008-07-30 11:59 　　┣[岡本　基 &lt;okamoto@xx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14612">  14612 2008-07-30 12:02 　　┗[nobu &lt;mininobu@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14613">  14613 2008-07-30 12:44 　　　┗[&quot;Shuji Watanabe&quot; &lt;sh]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14614">  14614 2008-07-30 12:57 　　　　┗[nobu &lt;mininobu@xxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14615">  14615 2008-07-30 13:51 　　　　　┗[IIDA Yosiaki &lt;y-iida]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14616">  14616 2008-07-30 14:30 　　　　　　┗[&quot;Shuji Watanabe&quot; &lt;sh]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14617">  14617 2008-07-30 14:51 　　　　　　　┣[nobu &lt;mininobu@xxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14618">  14618 2008-07-30 14:58 　　　　　　　┃┗[岡本　基 &lt;okamoto@xx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14619">  14619 2008-07-30 17:19 　　　　　　　┗[chuuken kenkou &lt;ken_]                         </a></span>
+</pre>
+</body>
+</html>

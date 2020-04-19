@@ -1,0 +1,256 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.ja.texi on 1 December 1999 -->
+
+  <TITLE>MySQL Reference Manual for version 3.22.21. - H  MySQL の正規表現の文法について</TITLE>
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Porting.html">previous</A>, <A HREF="manual.ja_Unireg.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Regexp" HREF="manual.ja_toc.html#Regexp">H  MySQL の正規表現の文法について</A></H1>
+
+<P>
+A regular expression (regex) is a powerful way of specifying a complex search.
+
+</P>
+<P>
+<STRONG>MySQL</STRONG> uses regular Henry Spencer's inplementation of regular
+expressions. And that is aimed to conform to POSIX
+1003.2. <STRONG>MySQL</STRONG> uses the extended version.
+
+</P>
+<P>
+This is a simplistic reference that skips the details. To get more exact
+information, see Henry Spencer's <CODE>regex(7)</CODE> manual page that is
+included in the source distribution.  「<A HREF="manual.ja_Credits.html#Credits">C  Contributors to MySQL</A>」節参照.
+
+</P>
+<P>
+A regular expression describes a set of strings. The simplest regexp is
+one that has no special characters in it. For example, the regexp
+<CODE>hello</CODE> matches <CODE>hello</CODE> and nothing else.
+
+</P>
+<P>
+Nontrivial regular expressions use certain special constructs so that
+they can match more than one string. For example, the regexp
+<CODE>hello|word</CODE> matches either the string <CODE>hello</CODE> or the string
+<CODE>word</CODE>.
+
+</P>
+<P>
+As a more complex example, the regexp <CODE>B[an]*s</CODE> matches any of the
+strings <CODE>Bananas</CODE>, <CODE>Baaaaas</CODE>, <CODE>Bs</CODE> and any other string
+starting with a <CODE>B</CODE>, ending with an <CODE>s</CODE>, and containing any
+number of <CODE>a</CODE> or <CODE>n</CODE> characters in between.
+
+</P>
+<P>
+A regular expression may use any of the following special
+characters/constructs:
+<DL COMPACT>
+
+<DT><CODE>^</CODE>
+<DD>
+Match the beginning of a string.
+
+<PRE>
+mysql&#62; select "fo\nfo" REGEXP "^fo$";           -&#62; 0
+mysql&#62; select "fofo" REGEXP "^fo";              -&#62; 1
+</PRE>
+
+<DT><CODE>$</CODE>
+<DD>
+Match the end of a string.
+
+<PRE>
+mysql&#62; select "fo\no" REGEXP "^fo\no$";         -&#62; 1
+mysql&#62; select "fo\no" REGEXP "^fo$";            -&#62; 0
+</PRE>
+
+<DT><CODE>.</CODE>
+<DD>
+Match any character (including newline).
+
+<PRE>
+mysql&#62; select "fofo" REGEXP "^f.*";             -&#62; 1
+mysql&#62; select "fo\nfo" REGEXP "^f.*";           -&#62; 1
+</PRE>
+
+<DT><CODE>a*</CODE>
+<DD>
+Match any sequence of zero or more <CODE>a</CODE> characters.
+
+<PRE>
+mysql&#62; select "Ban" REGEXP "^Ba*n";             -&#62; 1
+mysql&#62; select "Baaan" REGEXP "^Ba*n";           -&#62; 1
+mysql&#62; select "Bn" REGEXP "^Ba*n";              -&#62; 1
+</PRE>
+
+<DT><CODE>a+</CODE>
+<DD>
+Match any sequence of one or more <CODE>a</CODE> characters.
+
+<PRE>
+mysql&#62; select "Ban" REGEXP "^Ba+n";             -&#62; 1
+mysql&#62; select "Bn" REGEXP "^Ba+n";              -&#62; 0
+</PRE>
+
+<DT><CODE>a?</CODE>
+<DD>
+Match either zero or one <CODE>a</CODE> character.
+
+<PRE>
+mysql&#62; select "Bn" REGEXP "^Ba?n";              -&#62; 1
+mysql&#62; select "Ban" REGEXP "^Ba?n";             -&#62; 1
+mysql&#62; select "Baan" REGEXP "^Ba?n";            -&#62; 0
+</PRE>
+
+<DT><CODE>de|abc</CODE>
+<DD>
+Match either of the sequences <CODE>de</CODE> or <CODE>abc</CODE>.
+
+<PRE>
+mysql&#62; select "pi" REGEXP "pi|apa";             -&#62; 1
+mysql&#62; select "axe" REGEXP "pi|apa";            -&#62; 0
+mysql&#62; select "apa" REGEXP "pi|apa";            -&#62; 1
+mysql&#62; select "apa" REGEXP "^(pi|apa)$";        -&#62; 1
+mysql&#62; select "pi" REGEXP "^(pi|apa)$";         -&#62; 1
+mysql&#62; select "pix" REGEXP "^(pi|apa)$";        -&#62; 0
+</PRE>
+
+<DT><CODE>(abc)*</CODE>
+<DD>
+Match zero or more instances of the sequence <CODE>abc</CODE>.
+
+<PRE>
+mysql&#62; select "pi" REGEXP "^(pi)*$";            -&#62; 1
+mysql&#62; select "pip" REGEXP "^(pi)*$";           -&#62; 0
+mysql&#62; select "pipi" REGEXP "^(pi)*$";          -&#62; 1
+</PRE>
+
+<DT><CODE>{1}</CODE>
+<DD>
+<DT><CODE>{2,3}</CODE>
+<DD>
+The is a more general way of writing regexps that match many
+occurrences of the previous atom.
+<DL COMPACT>
+
+<DT><CODE>a*</CODE>
+<DD>
+Can be written as <CODE>a{0,}</CODE>.
+<DT><CODE>a+</CODE>
+<DD>
+Can be written as <CODE>a{1,}</CODE>.
+<DT><CODE>a?</CODE>
+<DD>
+Can be written as <CODE>a{0,1}</CODE>.
+</DL>
+To be more precise, an atom followed by a bound containing one integer
+<CODE>i</CODE> and no comma matches a sequence of exactly <CODE>i</CODE> matches of
+the atom. An atom followed by a bound containing one integer <CODE>i</CODE>
+and a comma matches a sequence of <CODE>i</CODE> or more matches of the atom.
+An atom followed by a bound containing two integers <CODE>i</CODE> and
+<CODE>j</CODE> matches a sequence of <CODE>i</CODE> through <CODE>j</CODE> (inclusive)
+matches of the atom.
+
+Both arguments must <CODE>0 &#62;= value &#60;= RE_DUP_MAX (default 255)</CODE>.
+If there are two arguments, the second must be greater than or equal to the
+first.
+<DT><CODE>[a-dX]</CODE>
+<DD>
+<DT><CODE>[^a-dX]</CODE>
+<DD>
+Matches
+any character which is (or is not, if ^ is used) either <CODE>a</CODE>, <CODE>b</CODE>,
+<CODE>c</CODE>, <CODE>d</CODE> or <CODE>X</CODE>. To include a literal <CODE>]</CODE> character,
+it must immediately follow the opening bracket <CODE>[</CODE>.  To include a
+literal <CODE>-</CODE> character, it must be written first or last. So
+<CODE>[0-9]</CODE> matches any decimal digit. Any character that does not have
+a defined meaning inside a <CODE>[]</CODE> pair has no special meaning and
+matches only itself.
+
+<PRE>
+mysql&#62; select "aXbc" REGEXP "[a-dXYZ]";         -&#62; 1
+mysql&#62; select "aXbc" REGEXP "^[a-dXYZ]$";       -&#62; 0
+mysql&#62; select "aXbc" REGEXP "^[a-dXYZ]+$";      -&#62; 1
+mysql&#62; select "aXbc" REGEXP "^[^a-dXYZ]+$";     -&#62; 0
+mysql&#62; select "gheis" REGEXP "^[^a-dXYZ]+$";    -&#62; 1
+mysql&#62; select "gheisa" REGEXP "^[^a-dXYZ]+$";   -&#62; 0
+</PRE>
+
+<DT><CODE>[[.characters.]]</CODE>
+<DD>
+The sequence of characters of that collating element. The sequence is a
+single element of the bracket expression's list. A bracket expression
+containing a multi-character collating element can thus match more than
+one character, e.g., if the collating sequence includes a <CODE>ch</CODE>
+collating element, then the regular expression <CODE>[[.ch.]]*c</CODE> matches the
+first five characters of <CODE>chchcc</CODE>.
+
+<DT><CODE>[=character_class=]</CODE>
+<DD>
+An equivalence class, standing for the sequences of characters of all
+collating elements equivalent to that one, including itself.
+
+For example, if <CODE>o</CODE> and <CODE>(+)</CODE> are the members of an
+equivalence class, then <CODE>[[=o=]]</CODE>, <CODE>[[=(+)=]]</CODE>, and
+<CODE>[o(+)]</CODE> are all synonymous. An equivalence class may not be an
+endpoint of a range.
+
+<DT><CODE>[:character_class:]</CODE>
+<DD>
+Within a bracket expression, the name of a character class enclosed in
+<CODE>[:</CODE> and <CODE>:]</CODE> stands for the list of all characters belonging
+to that class. Standard character class names are:
+
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD>alnum </TD><TD> digit </TD><TD> punct
+</TR NOSAVE>
+<TR><TD>alpha </TD><TD> graph </TD><TD> space
+</TR NOSAVE>
+<TR><TD>blank </TD><TD> lower </TD><TD> upper
+</TR NOSAVE>
+<TR><TD>cntrl </TD><TD> print </TD><TD> xdigit
+</TR>
+</TABLE>
+
+These stand for the character classes defined in the <CODE>ctype(3)</CODE> manual
+page. A locale may provide others. A character class may not be used as an
+endpoint of a range.
+
+<PRE>
+mysql&#62; select "justalnums" REGEXP "[[:alnum:]]+";       -&#62; 1
+mysql&#62; select "!!" REGEXP "[[:alnum:]]+";               -&#62; 0
+</PRE>
+
+<DT><CODE>[[:&#60;:]]</CODE>
+<DD>
+<DT><CODE>[[:&#62;:]]</CODE>
+<DD>
+These match the null string at the beginning and end of a word
+respectively.  A word is defined as a sequence of word characters which
+is neither preceded nor followed by word characters. A word character is
+an alnum character (as defined by <CODE>ctype(3)</CODE>) or an underscore
+(<CODE>_</CODE>).
+
+<PRE>
+mysql&#62; select "a word a" REGEXP "[[:&#60;:]]word[[:&#62;:]]";      -&#62; 1
+mysql&#62; select "a xword a" REGEXP "[[:&#60;:]]word[[:&#62;:]]";     -&#62; 0
+</PRE>
+
+</DL>
+
+
+<PRE>
+mysql&#62; select "weeknights" REGEXP "^(wee|week)(knights|nights)$"; -&#62; 1
+</PRE>
+
+<P><HR><P>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Porting.html">previous</A>, <A HREF="manual.ja_Unireg.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

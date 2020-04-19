@@ -1,0 +1,113 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15601</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15600">[前]</a><a href="15602">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15601
+</p>
+<div class="header">
+<p>
+From: Seiichirou Hiraoka &lt;Seiichirou Hiraoka &lt;flathill@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 06 Jun 2011 10:56:48 +0900 (JST)<br>
+Subject: [mysql 15601] レプリケーション用スレーブの構築方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+平岡と申します。
+
+2 台の MySQL でマスタ、スレーブ運用をしております。スレーブで何らかの問題
+が起きて再度スレーブを構築する手順についてコメントを頂けますと幸いです。
+
+- 環境
+  
+. server1 (マスタ)
+  OS: CentOS 5.5 (共通)
+  MySQL 5.5.12 (共通) (手動でコンパイル)
+  /etc/my.cnf
+
+server-id      = 1001
+
+  レプリケーション用ユーザ repl を登録。
+
+. server2 (スレーブ)
+  /etc/my.cnf
+
+server-id      = 1002
+
+  レプリケーション用ユーザ repl を登録。
+
+- 手順
+  時間を短縮するため、mysqldump によるダンプリストアではなくディレクトリを直接
+  コピーする方法で以下のようにテストを行っています。
+
+1) スレーブ
+  MySQL を停止。
+    /etc/init.d/mysql top
+
+2) マスタ
+  FLUSH TABLES WITH READ LOCK;
+
+3) マスタ
+  Filename と Position を確認。
+    SHOW MASTER STATUS;
+  
+4) スレーブ
+  データベースディレクトリを削除。
+    rm -Rf /usr/local/mysql/data
+
+5) スレーブ
+  バックアップをスレーブにコピー
+    ssh master &quot;(cd /usr/local/mysql; tar cvfp - data)&quot; | (cd /usr/local; tar xvfp -)
+
+6) マスタ
+  UNLOCK TABLES;  
+
+7) スレーブ
+  不要なファイルを削除。
+    rm /usr/local/mysql/data/*.err
+    rm /usr/local/mysql/data/*.pid
+
+8) スレーブ
+  MySQL を起動。
+    /etc/init.d/mysql start
+
+9) スレーブ
+  バイナリログの適用。                            ← (a)
+    /usr/local/mysql/bin/mysqlbinlog /usr/local/mysql/data/mysql-bin.0* | \
+      /usr/local/mysql/bin/mysql -u root -p
+
+10) スレーブ
+  STOP SLAVE;
+  CHANGE MASTER TO .... (上で確認した Filename と Position を指定)
+  SET GLOBAL READ_ONLY = 1;
+  START SLAVE;
+
+このようにする事でうまく動いているように見えますが、上記 (a) の箇所に
+ついてコメントを頂きたく思います。
+
+(a) の箇所にて、バイナリログを適用する必要はあるのでしょうか。
+バイナリログに記録されている内容は既にデータベースに反映されているので
+あれば、二重に適用するようになってしまうと考えています。
+
+その他手順中で問題と思われる箇所がありましたら、教えて下さい。
+
+以上、よろしくお願いします。
+
+- flathill
+
+
+</pre>
+</div>
+<p class="button"><a href="15600">[前]</a><a href="15602">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15601">  15601 2011-06-06 10:56 [Seiichirou Hiraoka &lt;] レプリケーション用スレーブの構築方法    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15602">  15602 2011-06-06 14:02 ┗[Seiichirou Hiraoka &lt;]                                       </a></span>
+</pre>
+</body>
+</html>

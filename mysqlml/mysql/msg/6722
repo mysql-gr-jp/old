@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6722</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6721">[Á°]</a><a href="6723">[¼¡]</a><a href="../list/6701-6800">[ÈÖ¹æ½ç°ìÍ÷]</a><a href="../thread/6701-6800">[¥¹¥ì¥Ã¥É°ìÍ÷]</a></p>
+<p class="id">
+mysql:6722
+</p>
+<div class="header">
+<p>
+From: (sumino) &lt;&lt;sumino@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 17 Dec 2002 18:32:57 +0900<br>
+Subject: [mysql 06722] ¥·¥Õ¥È JIS ¤ÎÊ¸»ú²½¤±<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+Win2000¾å¤Ç Java + MySQL¤Î¥¢¥×¥ê¥±¡¼¥·¥ç¥ó¤òºîÀ®¤·¤Æ¤¤¤ë¤Î¤Ç¤¹¤¬¡¢
+JDBC Type4 ¥É¥é¥¤¥Ð¤ò»ÈÍÑ¤·¤ÆINSERT¤·¤¿¤È¤­¤ËÊ¸»ú²½¤±¤·¤Æ¤·¤Þ¤¤¤Þ¤¹¡£
+²ò·èÊýË¡¤ò¤´Â¸ÃÎ¤ÎÊý¤Ï¶µ¤¨¤Æ¤¯¤À¤µ¤¤¡£
+
+¡ÖßÀùõ¡×¢ª¡ÖßÀ?¡×
+¡Öüñüòüóüôüõ¡×¢ª¡Ö?????¡×¤È¤Ê¤Ã¤Æ¤·¤Þ¤¤¤Þ¤¹¡£
+
+»ÈÍÑ¤·¤¿JDBC¥É¥é¥¤¥Ð
+    gweMysqlJDBC_extra4
+    gweMysqlJDBC_extra3    gwe.sql.gweMysqlDriver
+    mysql-connector-java-2.0.14
+    mysql-connector-java-3.0.2-beta    org.gjt.mm.mysql.Driver
+
+sun¤ÎJDBC Type1 ¥É¥é¥¤¥Ð sun.jdbc.odbc.JdbcOdbcDriver ¤À¤È¡¢¤¦¤Þ¤¯¤¤¤­¤Þ¤¹¡£
+JDBC¥É¥é¥¤¥Ð¤ò»ÈÍÑ¤»¤º¤Ë¡¢¥³¥Þ¥ó¥É¤«¤éÄ¾ÀÜÆþÎÏ¤·¤¿¾ì¹ç¤âÊ¸»ú²½¤±¤¹¤ë¤³¤È¤Ê
+¤¯¡¢INSERT¤Ç¤­¤Þ¤¹¡£
+SELECT¤Ï¤¦¤Þ¤¯¤¤¤­¤Þ¤¹¡£
+
+¤¿¤À¡¢¡ÖÉ½¡×¤ÏÊ¸»ú²½¤±¤·¤Þ¤»¤ó¡£¡Ê²áµî¤Ë²¿ÅÙ¤âÏÃÂê¤Ë¤Ê¤Ã¤¿¡Ö\¡×ÌäÂê¤Ç¤Ï¤Ê¤¤
+¤È»×¤¤¤Þ¤¹¡£¡Ë
+
+»ÈÍÑ´Ä¶­
+    windows 2000 pro sp3
+    mysql 3.23.51-nt
+    ¥í¡¼¥«¥ë¥Û¥¹¥È¤Ç»ÈÍÑ¤·¤Æ¤¤¤Þ¤¹¡£
+    j2sdk1.4.0_01
+
+°Ê²¼¥µ¥ó¥×¥ë¥½¡¼¥¹
+    1 import java.sql.*;
+    2
+    3 public class JDBCBatch{
+    4  public static void main(String[] args) {
+    5   Connection con = null;
+    6   Statement stmt = null;
+    7   String dburl =
+&quot;jdbc:mysql://localhost:3306/TestDB?useUnicode=true&amp;characterEncoding=SJIS&quot;;
+    8
+    9   try {
+   10    // ¥É¥é¥¤¥Ð¥¯¥é¥¹¤ò¥í¡¼¥É
+   11 //   Class.forName(&quot;com.mysql.jdbc.Driver&quot;);
+   12 //   Class.forName(&quot;gwe.sql.gweMysqlDriver&quot;);
+   13    Class.forName(&quot;org.gjt.mm.mysql.Driver&quot;);
+   14 //   Class.forName(&quot;sun.jdbc.odbc.JdbcOdbcDriver&quot;);
+   15
+   16    // ¥Ç¡¼¥¿¥Ù¡¼¥¹¤ØÀÜÂ³
+   17 //   con = DriverManager.getConnection(&quot;jdbc:odbc:TestDB&quot;, &quot;&quot;, &quot;&quot;);
+   18    con = DriverManager.getConnection(dburl,&quot;root&quot;,&quot;masterkey&quot;);
+   19    // ¥¹¥Æ¡¼¥È¥á¥ó¥È¥ª¥Ö¥¸¥§¥¯¥È¤òÀ¸À®
+   20    stmt = con.createStatement();
+   21
+   22    /**½èÍý£±**/
+   23    stmt.addBatch(&quot;INSERT INTO Test (No,Ì¾Á°) VALUES('00004','üñüòüóüô
+ùõ')&quot;);
+   24
+   25    // ¥Ð¥Ã¥Á¤ò¼Â¹Ô¤·¤Þ¤¹
+   26    stmt.executeBatch();
+   27
+   28   } catch (Exception e) {
+   29    e.printStackTrace();
+   30   } finally {
+   31    // ¥Ç¡¼¥¿¥Ù¡¼¥¹¤Ø¤ÎÀÜÂ³¤ò¥¯¥í¡¼¥º¤·¤Þ¤¹
+   32    try {
+   33     if (stmt!=null) {
+   34      stmt.close();
+   35     }
+   36     if (con!=null) {
+   37      con.close();
+   38     }
+   39    } catch (SQLException e) {
+   40     e.printStackTrace();
+   41    }
+   42   }
+   43  }
+   44 }
+
+ ------------------------------------------------------------
+ Name      : Sumino Hiroshi
+ E-Mail    : sumino@xxxxxxxxxx
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="6721">[Á°]</a><a href="6723">[¼¡]</a><a href="../list/6701-6800">[ÈÖ¹æ½ç°ìÍ÷]</a><a href="../thread/6701-6800">[¥¹¥ì¥Ã¥É°ìÍ÷]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="6722">   6722 2002-12-17 18:32 [&lt;sumino@xxxxxxxxxx&gt; ] ¥·¥Õ¥È JIS ¤ÎÊ¸»ú²½¤±                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6723">   6723 2002-12-17 22:56 ¨²[&quot;¾ë&quot; &lt;sora_iro@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6724">   6724 2002-12-17 23:16 ¨±[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6725">   6725 2002-12-18 11:21 ¡¡¨±[&lt;sumino@xxxxxxxxxx&gt; ]                                     </a></span>
+</pre>
+</body>
+</html>

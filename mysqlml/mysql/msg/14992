@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14992</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14991">[前]</a><a href="14993">[次]</a><a href="../list/14901-15000">[番号順一覧]</a><a href="../thread/14901-15000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14992
+</p>
+<div class="header">
+<p>
+From: &lt;shin-1@xxxxxxxxxx&gt;<br>
+Date: Wed, 22 Jul 2009 14:53:28 +0900<br>
+Subject: [mysql 14992] Re: 文字化けたダンプデータの救済<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+柳本さん、たけさん、こんにちは
+
+<span class="quote1">&gt;早速ですが、こちらでいかがでしょうか？</span>
+<span class="quote1">&gt;<a href="http://c-brains.jp/blog/wsg/07/06/26-184612.php">http://c-brains.jp/blog/wsg/07/06/26-184612.php</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;外していたらゴメンなさい^^;</span>
+
+ありがとうございます。柳本さんのコメントを見てから、諦め気分で
+色々キーワードを変えて検索していたところ、私もちょうどその記事
+に行き着いたところでした。
+
+おかげさまで、文字化けデータは読めるようになりました。
+いまは、MySQLへ放り込むところで、つまづいています。
+
+latin1→utf8の強制変換が掛かっていたという事で、その記事に
+あったように（多少違いますが）
+　1.秀丸でutf8ファイルとして強制的に開く（警告でるけど無視）
+　2.名前をつけて保存で、latin1（欧文）を指定して保存
+　3.再度開くと元のDBに格納されていた文字コードで開ける
+という手順で読めるデータに戻すことができました。格納されていたのは
+Shift_JISだったようです。
+（3.で開くときは警告無しでしたので完全に戻せたようです）
+
+今は、このShift_JISのテキストデータを、きちんとShift_JISのテーブル
+として、MySQLに放り込もうとmy.cnfや、DEFAULT CHARSET=の記載など
+を色々変えて試してみているところです。
+
+DEFAULT CHARSET=latin1の箇所をDEFAULT CHARSET=sjis;に書き換え
+
+[mysqld]
+default-character-set=sjis
+skip-character-set-client-handshake
+と変えておいて、サーバ再起動。
+
+create database を行い。mysqlプロンプト上でset names sjisを行って
+から、source /home/〜.dump とやったのですが、selectを掛けてみると
+?????と文字化けしています。
+
+show variables like &quot;char%&quot;; を見てみると
+<span class="quote1">| character_set_system     | utf8</span>
+と、systemだけがutf8になっています。これは4.1ではutf8固定との事ですし。
+他は全てsjisになっているし、テキストファイルもSJISで記載されていれば
+問題ないと思ったのですが、手順がどこか間違っているのでしょうか？
+
+</pre>
+</div>
+<p class="button"><a href="14991">[前]</a><a href="14993">[次]</a><a href="../list/14901-15000">[番号順一覧]</a><a href="../thread/14901-15000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14988">  14988 2009-07-22 01:38 [&lt;shin-1@xxxxxxxxxx&gt; ] 文字化けたダンプデータの救済            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14989">  14989 2009-07-22 12:17 ┣[Yoshiaki Yanagimoto ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14990">  14990 2009-07-22 14:17 ┗[たけ &lt;zon1966@xxxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14992">  14992 2009-07-22 14:53 　┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14994">  14994 2009-07-22 18:24 　　┗[&quot;N.K.&quot; &lt;nakai.kanako]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14995">  14995 2009-07-22 18:53 　　　┣[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14996">  14996 2009-07-22 19:30 　　　┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
+</pre>
+</body>
+</html>

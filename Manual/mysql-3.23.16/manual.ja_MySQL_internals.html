@@ -1,0 +1,79 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.ja.texi on 22 May 2000 -->
+
+  <TITLE>MySQL Reference Manual for version 3.23.16-alpha. - 24  MySQL internals</TITLE>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Comparisons.html">previous</A>, <A HREF="manual.ja_Environment_variables.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="MySQL_internals" HREF="manual.ja_toc.html#MySQL_internals">24  MySQL internals</A></H1>
+
+<P>
+This chapter describes a lot of things that you need to know when
+working on the <STRONG>MySQL</STRONG> code.
+
+</P>
+
+
+
+<H2><A NAME="MySQL_threads" HREF="manual.ja_toc.html#MySQL_threads">24.1  MySQL threads</A></H2>
+
+<P>
+<STRONG>MySQL</STRONG> サーバーは以下のスレッドを作成します：
+
+</P>
+
+<UL>
+<LI>
+
+TCP/IP 接続ハンドルは、全ての接続要求を扱い、さらに、
+認証を行うためのスレッドSQLクエリを処理するスレッドを生成します
+<LI>
+
+NTでは、ネームド・パイプ・ハンドラー・スレッドがあります。
+これはネームド・パイプの接続要求に対し、TCP/IP接続スレッドと同様に動きます。
+<LI>
+
+シグナルスレッドは、全てのシグナルを扱います。
+This thread also normally handles
+alarms and calls <CODE>process_alarm()</CODE> to force timeouts on connections
+that have been idle too long.
+<LI>
+
+If compiled with <CODE>-DUSE_ALARM_THREAD</CODE>, a dedicated thread that
+handles alarms is created. This is only used on some systems where
+there are some problems with <CODE>sigwait()</CODE> or if one wants to use the
+<CODE>thr_alarm()</CODE> code in ones application without a dedicated signal
+handling thread.
+<LI>
+
+もし <CODE>--flush-time</CODE> オプションを使用したなら、
+全てのテーブルを一定期間でフラッシュするためだけのスレッドを作ります。
+<LI>
+
+Every connection has its own thread.
+<LI>
+
+Every different table on which one uses <CODE>INSERT DELAYED</CODE> gets its
+own thread
+<LI>
+
+If you use <CODE>--master-host</CODE> , slave replication thread will be started to read and apply
+updates from the master.
+</UL>
+
+<P>
+<CODE>mysqladmin processlist</CODE> only shows the connection and <CODE>INSERT
+DELAYED</CODE> threads.
+
+</P>
+
+<P><HR><P>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Comparisons.html">previous</A>, <A HREF="manual.ja_Environment_variables.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

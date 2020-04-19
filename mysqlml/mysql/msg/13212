@@ -1,0 +1,147 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13212</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13211">[前]</a><a href="13213">[次]</a><a href="../list/13201-13300">[番号順一覧]</a><a href="../thread/13201-13300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13212
+</p>
+<div class="header">
+<p>
+From: Seiichirou Hiraoka &lt;Seiichirou Hiraoka &lt;flathill@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 05 Aug 2006 13:14:25 +0900<br>
+Subject: [mysql 13212] Re: 4.0.20 から 4.1.20 への更新について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+平岡です。
+
+正常に動作するようになりましたので御報告致します。
+個人的にメールを頂きました方、どうもありがとうございました。
+
+結果として、Solaris 9 の echo, sed, (sh) コマンドの挙動に問題が
+ありましたので、以下のようにする事で正常に動作しました。
+
+o GNU から shtool-2.0.6 を取得してインストール
+o GNU から texinfo-4.8 を取得してインストール
+  これは sed をコンパイルする際に必要
+o GNU から sed-4.1.4 を取得してインストール
+  最新の 4.1.5 は make に失敗する
+o スクリプトを以下のように修正
+
+% diff -ruN mysql_change_char_len.sh.ORG mysql_change_char_len.sh
+--- mysql_change_char_len.sh.ORG        2006-08-04 18:07:42.735885000 +0900
++++ mysql_change_char_len.sh    2006-08-05 13:06:44.208085000 +0900
+@@ -1,10 +1,10 @@
+-#!/bin/sh
++#!/bin/bash
+
+-MYSQL=&quot;mysql -AB&quot;  ;  # mysqlコマンドの指定。パスが通っていない場合は変更
++MYSQL=&quot;/usr/local/mysql/bin/mysql -AB&quot;  ;  # mysqlコマンドの指定。パスが通っていない場合は変更
+ MYOPT=&quot;&quot;
+
+-ECHO=/bin/echo ; # echo -n ができる echo コマンドの指定
+-SED=sed        ; # sed -e ができる sed コマンドの指定
++ECHO=&quot;/usr/local/bin/shtool echo&quot; ; # echo -n ができる echo コマンドの指定
++SED=&quot;/usr/local/bin/sed&quot;        ; # sed -e ができる sed コマンドの指定
+
+ FIX=0
+
+以上の変更により、正常に動作するようになりました。
+どうもありがとうございました。
+
+- flathill
+
+From: Seiichirou Hiraoka &lt;flathill@xxxxxxxxxx&gt;
+Subject: <a href="13211">[mysql 13211]</a> 4.0.20 から 4.1.20 への更新について
+Date: Fri, 04 Aug 2006 23:31:42 +0900
+Message-ID: &lt;20060804233142K.flathill@xxxxxxxxxx&gt;
+
+<span class="quote1">&gt; はじめまして、平岡と申します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Solaris 9 SPARC 上で MySQL 4.0.20 を利用しております。</span>
+<span class="quote1">&gt; この度、4.1.20 に更新すべく調査を行なっておりますが、不明な</span>
+<span class="quote1">&gt; 点がございますので御教示頂けますと幸いですl。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; CHAR の扱いが変わると言う事で、インストール後に</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   <a href="../../../frame/modules/bwiki/index.html?Contrib#content_1_2">http://www.mysql.gr.jp/frame/modules/bwiki/?Contrib#content_1_2</a></span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; にて提供されている ALTER_change_char_len.sh を実行しようと</span>
+<span class="quote1">&gt; しておりますが、うまく動作致しません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 具体的には</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   ./mysql_change_char_len.sh --fix --user=Username --password=Password</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; のように実行すると以下のようなメッセージが出力されます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   ----- mdl_grade_category : 7 -----</span>
+<span class="quote1">&gt;         C: mdl_grade_category CREATE TABLE mdl_grade_category (  id</span>
+<span class="quote1">&gt; int(10) unsigned NOT NULL auto_increment,  name varchar(21) default</span>
+<span class="quote1">&gt; NULL,  courseid int(10) unsigned NOT NULL default '0',  drop_x_lowest</span>
+<span class="quote1">&gt; int(10) unsigned NOT NULL default '0',  bonus_points int(10) unsigned</span>
+<span class="quote1">&gt; NOT NULL default '0',  hidden int(10) unsigned NOT NULL default '0',</span>
+<span class="quote1">&gt; weight decimal(4,2) default '0.00',  PRIMARY KEY  (id),  KEY courseid</span>
+<span class="quote1">&gt; (courseid)) ENGINE=MyISAM DEFAULT CHARSET=ujis -&gt; CREATE TABLE</span>
+<span class="quote1">&gt; mdl_grade_category ( id int(10) unsigned NOT NULL auto_increment, name</span>
+<span class="quote1">&gt; varCHAR(65) default NULL, courseid int(10) unsigned NOT NULL default</span>
+<span class="quote1">&gt; '0', drop_x_lowest int(10) unsigned NOT NULL default '0', bonus_points</span>
+<span class="quote1">&gt; int(10) unsigned NOT NULL default '0', hidden int(10) unsigned NOT</span>
+<span class="quote1">&gt; NULL default '0', weight decimal(4,2) default '0.00', PRIMARY KEY</span>
+<span class="quote1">&gt; (id), KEY courseid (courseid)) ENGINE=MyISAM DEFAULT CHARSET=ujis</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;     ALTER TABLE mdl_grade_category  CHANGE mdl_grade_category</span>
+<span class="quote1">&gt; mdl_grade_category CREATE TABLE mdl_grade_category ( id int(10)</span>
+<span class="quote1">&gt; unsigned NOT NULL auto_increment, name varCHAR(65) default NULL,</span>
+<span class="quote1">&gt; courseid int(10) unsigned NOT NULL default '0', drop_x_lowest int(10)</span>
+<span class="quote1">&gt; unsigned NOT NULL default '0', bonus_points int(10) unsigned NOT NULL</span>
+<span class="quote1">&gt; default '0', hidden int(10) unsigned NOT NULL default '0', weight</span>
+<span class="quote1">&gt; decimal(4,2) default '0.00', PRIMARY KEY (id), KEY courseid</span>
+<span class="quote1">&gt; (courseid)) ENGINE=MyISAM DEFAULT CHARSET=ujis</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ERROR 1064 (42000) at line 1: You have an error in your SQL syntax;</span>
+<span class="quote1">&gt; check the manual that corresponds to your MySQL server version for the</span>
+<span class="quote1">&gt; right syntax to use near 'CREATE TABLE mdl_grade_category ( id int(10)</span>
+<span class="quote1">&gt; unsigned NOT NULL auto_increment, n' at line 1</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 全てのテーブルについてこれと同じメッセージが出力されます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 念の為、手動で mysql に接続して同じ SQL 文を発行しても同じメッセージ</span>
+<span class="quote1">&gt; が出力されますので、SQL 文の誤りかと考えておりますが、どなたかお気づき</span>
+<span class="quote1">&gt; の点はございますでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ちなみに、手動で</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   /ul/mysql/bin/mysql -u Username -p -N Database -e &quot;ALTER TABLE mdl_grade_category MODIFY name varchar(63)&quot; ;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; のようにすると</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; |          name |      varchar(63) | YES |     | NULL |</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; のように正しく反映されます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これは、スクリプトで記述している SQL 文の問題でしょうか。もしくは</span>
+<span class="quote1">&gt; 当方の環境や操作に問題がございますでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 全てのテーブルを手動で反映するのは時間がかかり、またミスが発生する</span>
+<span class="quote1">&gt; 可能性が高い為スクリプトを利用したいと考えております。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以上、よろしくお願い致します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; - flathill</span>
+
+</pre>
+</div>
+<p class="button"><a href="13211">[前]</a><a href="13213">[次]</a><a href="../list/13201-13300">[番号順一覧]</a><a href="../thread/13201-13300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13211">  13211 2006-08-04 23:31 [Seiichirou Hiraoka &lt;] 4.0.20 から 4.1.20 への更新について     </a></span>
+<span class="current">-&gt;&nbsp;<a href="13212">  13212 2006-08-05 13:14 ┗[Seiichirou Hiraoka &lt;]                                       </a></span>
+</pre>
+</body>
+</html>

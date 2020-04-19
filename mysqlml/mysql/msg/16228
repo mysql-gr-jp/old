@@ -1,0 +1,200 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16228</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16227">[前]</a><a href="16229">[次]</a><a href="../list/16201-16300">[番号順一覧]</a><a href="../thread/16201-16300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16228
+</p>
+<div class="header">
+<p>
+From: 二見　修康[ＤＮＰデジタルコム] &lt;二見　修康[ＤＮＰデジタルコム] &lt;futami-n2@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 10 Apr 2015 16:02:40 +0900 (JST)<br>
+Subject: [mysql 16228] Re: _[mysql_16226]_Re:_[m ysql_16224]_大量なデータの扱いについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+yoku ts.様
+二見です、お世話になっております
+
+下記の件
+
+ご教授ありがとうございます
+参考にさせて頂き、色々試してみます！
+
+以上、よろしくお願いいたします
+
+On Thu, 9 Apr 2015 01:49:33 +0900
+&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; あ、追伸です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; CREATE TABLE文の中では</span>
+<span class="quote1">&gt; 「もともとプライマリーキーだった」serial_codeにUNIQUE制約がありませんでしたが、</span>
+<span class="quote2">&gt; &gt; index idxserial_mst_serial_code ( serial_code )</span>
+<span class="quote1">&gt; UNIQUE KEYの場合fast index</span>
+<span class="quote1">&gt; creationが効かなくなりますので、innodb-sort-buffer-sizeはいじっても効果がないです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; yoku0825,</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 2015年4月9日 1:13 yoku ts. &lt;yoku0825@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt; &gt; こんばんは、yoku0825といいます。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ぱっと思いつくところをつらつらと。。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; MySQLは好きに再起動できる、データロードは初期データのロードだけで、その後はバルクロードされることはない、と仮定しての話です。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ## あとでもとに戻すもの</span>
+<span class="quote2">&gt; &gt; * skip-innodb-doublewrite # ロード中にクラッシュしたらやり直す</span>
+<span class="quote2">&gt; &gt; * innodb-flush-log-trx-commit= 0 # 同上</span>
+<span class="quote2">&gt; &gt; * innodb-log-buffer-size= 256M # もうちょっと大きくてもいいかも</span>
+<span class="quote2">&gt; &gt; * innodb-log-file-size= 2G, innodb-log-files-in-group= 4 くらい #ログファイル大きめ</span>
+<span class="quote2">&gt; &gt; * innodb-sort-buffer-size= 64M # ALTER TABLE用</span>
+<span class="quote2">&gt; &gt; * innodb-adaptive-hash-index= 0 # I/Oバウンドならこれで良いかと</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ## 様子を見ながら</span>
+<span class="quote2">&gt; &gt; * innodb-io-capacity= innodb-io-capacity-max #</span>
+<span class="quote2">&gt; &gt; I/Oが遊んでいるようであれば増やす(HDD1玉ならデフォルトのままでもいいかと)</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ## 効果があるかはわからないですが</span>
+<span class="quote2">&gt; &gt; * innodb-autoextend-increment= 256M # .ibdファイルの拡張単位,</span>
+<span class="quote2">&gt; &gt; innodb-file-per-table= 0の時にibdata1を大きめに初期化するのと同じ考え</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; でMySQLを起動して、</span>
+<span class="quote2">&gt; &gt; * セカンダリーキーはつけないでCREATE TABLE</span>
+<span class="quote2">&gt; &gt; * LOAD DATA INFILE (handlersocketとか使ってみるのもよさそうな予感がします)</span>
+<span class="quote2">&gt; &gt; * ALTER TABLE serial_mst ADD KEY .. (serial_code);</span>
+<span class="quote2">&gt; &gt; ここでパラメーターを戻して再起動、とわたしならこうやります。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 前にやった時の記事が出てきました（もともとの目的は違いましたがバルクロードの速度比較みたいになってる）</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 日々の覚書: MySQLインスタンス間でテーブルを移行する投げ遣りベンチマーク</span>
+<span class="quote2">&gt; &gt; <a href="http://yoku0825.blogspot.jp/2013/11/mysql.html">http://yoku0825.blogspot.jp/2013/11/mysql.html</a></span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; その他、手前味噌なものも含めてご参考までに。。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 漢(オトコ)のコンピュータ道: たった3秒でInnoDBのデータローディングが快適になるライフハック</span>
+<span class="quote2">&gt; &gt; <a href="http://nippondanji.blogspot.jp/2010/03/innodb.html">http://nippondanji.blogspot.jp/2010/03/innodb.html</a></span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; MySQL 5.6における大量データロード時の考慮点 - SH2の日記</span>
+<span class="quote2">&gt; &gt; <a href="http://d.hatena.ne.jp/sh2/20131007">http://d.hatena.ne.jp/sh2/20131007</a></span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 忙しい人のための MySQL 5.7.6 DMR における InnoDB Flushing の変更点について | GREE Engineers' Blog</span>
+<span class="quote2">&gt; &gt; <a href="http://labs.gree.jp/blog/2015/03/13735/">http://labs.gree.jp/blog/2015/03/13735/</a></span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 日々の覚書: MySQL 5.6.4で実装されたinnodb-sort-buffer-sizeの値</span>
+<span class="quote2">&gt; &gt; <a href="http://yoku0825.blogspot.jp/2014/05/mysql-564innodb-sort-buffer-size.html">http://yoku0825.blogspot.jp/2014/05/mysql-564innodb-sort-buffer-size.html</a></span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; yoku0825,</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 2015年4月8日 21:39 二見　修康[ＤＮＰデジタルコム] &lt;futami-n2@xxxxxxxxxx&gt;:</span>
+<span class="quote3">&gt; &gt;&gt; 二見と申します、お世話になっております</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 久しぶりの投稿となります（2009年以来？）</span>
+<span class="quote3">&gt; &gt;&gt; ちょっと皆様のご意見を伺いたいのですが・・・</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 下記の様な環境にて</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;Red Hat Enterprise 5.6</span>
+<span class="quote4">&gt; &gt;&gt;&gt;MySQL 5.6</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;create table serial_mst (</span>
+<span class="quote4">&gt; &gt;&gt;&gt; serial_code     varchar(16) not null,</span>
+<span class="quote4">&gt; &gt;&gt;&gt; serial_seq       bigint(16) unsigned zerofill auto_increment not null,</span>
+<span class="quote4">&gt; &gt;&gt;&gt; update_date  timestamp,</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt; primary key ( serial_seq ),</span>
+<span class="quote4">&gt; &gt;&gt;&gt; index idxserial_mst_serial_code ( serial_code )</span>
+<span class="quote4">&gt; &gt;&gt;&gt;) TYPE = InnoDB;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; シリアルコードを500万件毎にLOAD DATAしております</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; メモリは8GありMySQLで5G使用しているとの事です</span>
+<span class="quote3">&gt; &gt;&gt;　 ＃サーバ設定のチームに聞いた情報です、曖昧ですみません</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 3億とか4億コードくらい入れるつもりなのですが</span>
+<span class="quote3">&gt; &gt;&gt; 件数が増えるごとに登録が徐々に遅くなり</span>
+<span class="quote3">&gt; &gt;&gt; １億3000万件越えた辺りから極端に遅くなってきます</span>
+<span class="quote3">&gt; &gt;&gt;       0　⇒  500万　1分13秒</span>
+<span class="quote3">&gt; &gt;&gt; 3000万⇒3500万　2分57秒</span>
+<span class="quote3">&gt; &gt;&gt; 9000万⇒9500万　4分48秒</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 11500万⇒12000万　10分11秒</span>
+<span class="quote3">&gt; &gt;&gt; 12500万⇒13000万　37分18秒</span>
+<span class="quote3">&gt; &gt;&gt; 13500万⇒14000万　73分</span>
+<span class="quote3">&gt; &gt;&gt; 14500万⇒15000万　96分</span>
+<span class="quote3">&gt; &gt;&gt; 15500万⇒16000万　112分</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 19500万⇒20000万　157分</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; プライマリキーをserial_code⇒serial_seqに変更した事で</span>
+<span class="quote3">&gt; &gt;&gt; トータルの登録時間が</span>
+<span class="quote3">&gt; &gt;&gt; 2億件で75時間⇒30時間に多少早くなりました</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; メモリを増やす事で</span>
+<span class="quote3">&gt; &gt;&gt; １億3000万件の遅延ポイントを遅らせる事は出来そうですが</span>
+<span class="quote3">&gt; &gt;&gt; （例えばメモリを倍に増やしてMySQLを10Gにすれば2億6000万近くになると思わ</span>
+<span class="quote3">&gt; &gt;&gt; れる）</span>
+<span class="quote3">&gt; &gt;&gt; 何か他に良い方法は無いでしょうか？</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; まだ試して無いですが、</span>
+<span class="quote3">&gt; &gt;&gt; Indexを無効にして３〜４億データを作成後Indexを貼るとか</span>
+<span class="quote3">&gt; &gt;&gt; （その場合Indexの生成にもの凄く時間が掛かるとかはちょっと怖いのですが）</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 何か良い方法をご存知でしたらお教え頂けると有り難いです</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 宜しくお願い致します</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; ※部署名が変わりました</span>
+<span class="quote3">&gt; &gt;&gt; -------------------------------------------------------</span>
+<span class="quote3">&gt; &gt;&gt;   DNP DIGITALCOM</span>
+<span class="quote3">&gt; &gt;&gt;　 システムソリューション本部</span>
+<span class="quote3">&gt; &gt;&gt;   第１システム開発室　第２グループ</span>
+<span class="quote3">&gt; &gt;&gt;　　　 二見　修康</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;   〒141-8001</span>
+<span class="quote3">&gt; &gt;&gt;     品川区西五反田3-5-20 ＤＮＰ五反田ビル5Ｆ</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;     TEL 03-6431-6324 内線 6324</span>
+<span class="quote3">&gt; &gt;&gt;     FAX 03-6431-6193</span>
+<span class="quote3">&gt; &gt;&gt;　   Mail: Futami-N2@xxxxxxxxxx</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+
+※部署名が変わりました
+-------------------------------------------------------
+  DNP DIGITALCOM
+　システムソリューション本部
+  第１システム開発室　第２グループ
+　　　二見　修康
+
+  〒141-8001
+    品川区西五反田3-5-20 ＤＮＰ五反田ビル5Ｆ
+
+    TEL 03-6431-6324 内線 6324
+    FAX 03-6431-6193
+　  Mail: Futami-N2@xxxxxxxxxx
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="16227">[前]</a><a href="16229">[次]</a><a href="../list/16201-16300">[番号順一覧]</a><a href="../thread/16201-16300">[スレッド一覧]</a></p>
+</body>
+</html>

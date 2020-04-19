@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6064</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6063">[前]</a><a href="6065">[次]</a><a href="../list/6001-6100">[番号順一覧]</a><a href="../thread/6001-6100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6064
+</p>
+<div class="header">
+<p>
+From: &quot;Takashi Yamashita&quot; &lt;&quot;Takashi Yamashita&quot; &lt;takasi@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 2 Sep 2002 19:02:03 +0900<br>
+Subject: [mysql 06064] Re: jdbc: UTF-8 文字列の INSERT<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+お世話になっております。
+
+補足説明です。
+
+<span class="quote1">&gt;データベースへ格納する時は「−」から「-」に置換し、</span>
+具体的には、
+try {
+st.setString(1,
+  (new String(
+    USQL.getPropertyAsString(
+      element, &quot;@varAtt&quot;).getBytes(&quot;8859_1&quot;),&quot;UTF-8&quot;)).replace(
+
+(char)0xff0d,(char)0x2212));
+      :
+      :
+      :
+st.exectute();
+}
+です。
+
+<span class="quote1">&gt;データベースから取り出す時は「-」から「−」に置換しなければならない</span>
+具体的には、
+&lt;xsl:call-template name=&quot;replace-text&quot;&gt;
+  &lt;xsl:with-param name=&quot;valueText&quot; select=&quot;@vaAtt&quot; /&gt;
+  &lt;xsl:with-param name=&quot;findStr&quot;&gt;&amp;#x2212;&lt;/xsl:with-param&gt;
+  &lt;xsl:with-param name=&quot;replaceStr&quot;&gt;&amp;#xFF0E;&lt;/xsl:with-param&gt;
+&lt;/xsl:call-template&gt;
+
+&lt;!--置換用サブテンプレート--&gt;
+&lt;xsl:template name=&quot;replace-text&quot;&gt;
+  &lt;xsl:param name=&quot;valueText&quot; /&gt;
+  &lt;xsl:param name=&quot;findStr&quot; /&gt;
+  &lt;xsl:param name=&quot;replaceStr&quot; /&gt;
+  &lt;xsl:choose&gt;
+  &lt;xsl:when test=&quot;contains($valueText,$findStr)&quot;&gt;
+    &lt;xsl:value-of select=&quot;substring-before($valueText,$findStr)&quot; /&gt;
+    &lt;xsl:value-of select=&quot;$replaceStr&quot; /&gt;
+    &lt;xsl:call-template name=&quot;replace-text&quot;&gt;
+      &lt;xsl:with-param name=&quot;valueText&quot;
+select=&quot;substring-after($valueText,$findStr)&quot; /&gt;
+      &lt;xsl:with-param name=&quot;findStr&quot; select=&quot;$findStr&quot; /&gt;
+      &lt;xsl:with-param name=&quot;replaceStr&quot; select=&quot;$replaceStr&quot; /&gt;
+    &lt;/xsl:call-template&gt;
+  &lt;/xsl:when&gt;
+  &lt;xsl:otherwise&gt;
+    &lt;xsl:value-of select=&quot;$valueText&quot; /&gt;
+  &lt;/xsl:otherwise&gt;
+&lt;/xsl:choose&gt;
+&lt;/xsl:template&gt;
+です。
+
+宜しくお願いします。
+
+---------------------------------------------------------------
+山下高司
+takasi@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="6063">[前]</a><a href="6065">[次]</a><a href="../list/6001-6100">[番号順一覧]</a><a href="../thread/6001-6100">[スレッド一覧]</a></p>
+</body>
+</html>

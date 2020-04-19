@@ -1,0 +1,56 @@
+diff -ru mysql-4.1.4-gamma.orig/client/client_priv.h mysql-4.1.4-gamma/client/client_priv.h
+--- mysql-4.1.4-gamma.orig/client/client_priv.h	2004-08-27 06:46:41.000000000 +0900
++++ mysql-4.1.4-gamma/client/client_priv.h	2004-09-30 13:01:03.000000000 +0900
+@@ -44,5 +44,6 @@
+   OPT_SHARED_MEMORY_BASE_NAME, OPT_FRM, OPT_SKIP_OPTIMIZATION,
+   OPT_COMPATIBLE, OPT_RECONNECT, OPT_DELIMITER, OPT_SECURE_AUTH,
+   OPT_OPEN_FILES_LIMIT, OPT_SET_CHARSET, OPT_CREATE_OPTIONS,
+-  OPT_START_POSITION, OPT_STOP_POSITION, OPT_START_DATETIME, OPT_STOP_DATETIME
++  OPT_START_POSITION, OPT_STOP_POSITION, OPT_START_DATETIME, OPT_STOP_DATETIME,
++  OPT_HEXBLOB
+ };
+diff -ru mysql-4.1.4-gamma.orig/client/mysqldump.c mysql-4.1.4-gamma/client/mysqldump.c
+--- mysql-4.1.4-gamma.orig/client/mysqldump.c	2004-08-27 06:46:39.000000000 +0900
++++ mysql-4.1.4-gamma/client/mysqldump.c	2004-09-30 14:47:24.000000000 +0900
+@@ -81,7 +81,7 @@
+                 opt_alldbs=0,opt_create_db=0,opt_first_slave=0,opt_set_charset,
+ 		opt_autocommit=0,opt_master_data,opt_disable_keys=1,opt_xml=0,
+ 		opt_delete_master_logs=0, tty_password=0,
+-		opt_single_transaction=0, opt_comments= 0, opt_compact= 0;
++		opt_single_transaction=0, opt_comments= 0, opt_compact= 0, opt_hex=0;
+ static ulong opt_max_allowed_packet, opt_net_buffer_length;
+ static MYSQL mysql_connection,*sock=0;
+ static char  insert_pat[12 * 1024],*opt_password=0,*current_user=0,
+@@ -316,6 +316,8 @@
+   {"comments", 'i', "Write additional information.",
+    (gptr*) &opt_comments, (gptr*) &opt_comments, 0, GET_BOOL, NO_ARG,
+    1, 0, 0, 0, 0, 0},
++  {"hex-blob", OPT_HEXBLOB, "HEXdump BLOB data. this mode does not work with extended-insert",
++   (gptr*) &opt_hex, (gptr*) &opt_hex, 0, GET_BOOL, NO_ARG, 0, 0, 0, 0, 0, 0},
+   {0, 0, 0, 0, 0, 0, GET_NO_ARG, NO_ARG, 0, 0, 0, 0, 0, 0}
+ };
+ 
+@@ -1590,6 +1592,23 @@
+ 		print_quoted_xml(md_result_file, row[i], lengths[i]);
+ 		fputs("</field>\n", md_result_file);
+ 	      }
++	      else if (opt_hex && (
++				   field->type == FIELD_TYPE_BLOB
++				   || FIELD_TYPE_LONG_BLOB == field->type
++				   || FIELD_TYPE_MEDIUM_BLOB == field->type
++				   || FIELD_TYPE_TINY_BLOB == field->type
++				  )
++		      )
++	      { /* sakaik got this idea. */
++		ulong counter;
++		char xx[4];
++		unsigned char *ptr = row[i];
++		fputs("0x", md_result_file);
++		for (counter = 0; counter < lengths[i]; counter++) {
++		  sprintf(xx, "%02X", ptr[counter]);
++		  fputs(xx, md_result_file);
++		}
++	      }
+ 	      else
+ 		unescape(md_result_file, row[i], lengths[i]);
+ 	    }

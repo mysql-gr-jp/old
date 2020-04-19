@@ -1,0 +1,96 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12505</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="12504">[前]</a><a href="12506">[次]</a><a href="../list/12501-12600">[番号順一覧]</a><a href="../thread/12501-12600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12505
+</p>
+<div class="header">
+<p>
+From: Shinya Kawaji &lt;Shinya Kawaji &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 23 Nov 2005 08:45:27 +0900<br>
+Subject: [mysql 12505] Re: SELECT文で日付を比較<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+かわじ、です。
+
+
+<span class="quote1">&gt; SELECT分でTIMESTAMP型のフィールドを利用して、</span>
+<span class="quote1">&gt; その日付以上もデータを参照したいのですが、良い方法ありますでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; closeDateのフィールドに20051115000000のデータが入っており、</span>
+<span class="quote1">&gt; 現在の日付を過ぎたら、表示しないのが理想です。</span>
+
+えっと、つまり、TIMESTAMP型のフィールドを日付とみなして（キャストして）、
+今日の日付と比較したい、ということでしょうか。
+
+MySQL では、DATE型と TIMESTAMP型の比較の場合、DATE型の時刻部分を 00:00:00
+と見做すので、
+
+-- 日付を跨る 3つの時刻
+mysql&gt; select * from test_table order by closeDate;
++----------------+
+<span class="quote1">| closeDate      |</span>
++----------------+
+<span class="quote1">| 20051122235959 |</span>
+<span class="quote1">| 20051123000000 |</span>
+<span class="quote1">| 20051123000001 |</span>
++----------------+
+3 rows in set (0.00 sec)
+
+-- 今日の日付
+mysql&gt; select CURRENT_DATE;
++--------------+
+<span class="quote1">| CURRENT_DATE |</span>
++--------------+
+<span class="quote1">| 2005-11-23   |</span>
++--------------+
+1 row in set (0.00 sec)
+
+-- 今日よりも前
+mysql&gt; select * from test_table where closeDate &lt; CURRENT_DATE;
++----------------+
+<span class="quote1">| closeDate      |</span>
++----------------+
+<span class="quote1">| 20051122235959 |</span>
++----------------+
+1 row in set (0.00 sec)
+
+-- 今日と同じ（00:00:00ちょうど）
+mysql&gt; select * from test_table where closeDate = CURRENT_DATE;
++----------------+
+<span class="quote1">| closeDate      |</span>
++----------------+
+<span class="quote1">| 20051123000000 |</span>
++----------------+
+1 row in set (0.00 sec)
+
+-- 今日以降
+mysql&gt; select * from test_table where closeDate &gt; CURRENT_DATE;
++----------------+
+<span class="quote1">| closeDate      |</span>
++----------------+
+<span class="quote1">| 20051123000001 |</span>
++----------------+
+1 row in set (0.00 sec)
+
+と、普通に比較して大丈夫と思います。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="12504">[前]</a><a href="12506">[次]</a><a href="../list/12501-12600">[番号順一覧]</a><a href="../thread/12501-12600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12457">  12457 2005-11-15 11:23 [&quot;Tsuyoshi Oshima&quot; &lt;t] SELECT文で日付を比較                    </a></span>
+<span class="current">-&gt;&nbsp;<a href="12505">  12505 2005-11-23 08:45 ┗[Shinya Kawaji &lt;kawaj]                                       </a></span>
+</pre>
+</body>
+</html>

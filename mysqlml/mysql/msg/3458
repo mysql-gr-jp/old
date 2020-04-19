@@ -1,0 +1,188 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3458</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="3457">[前]</a><a href="3459">[次]</a><a href="../list/3401-3500">[番号順一覧]</a><a href="../thread/3401-3500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3458
+</p>
+<div class="header">
+<p>
+From: Shinichiro HIDA &lt;Shinichiro HIDA &lt;shinichiro@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 28 Mar 2001 01:30:04 +0900<br>
+Subject: [mysql 03458] Re: root ユーザでアクセスできるようにする方法は？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、
+飛田と申します。
+
+全然解ってはいないのですが(徹底入門は買いました^^/)、このスレッドが面白
+そうだったので、たった今 Debian potato(2.2r2 kernel 2.2.18pre21) にイン
+ストールして試してみました。
+
+# 不謹慎でごめんなさい。&amp;&amp; ちょっと長いです。_o_
+
+At Tue, 27 Mar 2001 22:50:20 +0900,
+Kazufumi Hase wrote:
+<span class="quote1">&gt; </span>
+(snip)
+<span class="quote1">&gt; リモートなので下手にkillすると大変なので．．．</span>
+
+<span class="quote1">&gt; $ mysql</span>
+<span class="quote1">&gt; Welcome to the MySQL monitor.  Commands end with ; or \g.</span>
+<span class="quote1">&gt; Your MySQL connection id is 22 to server version: 3.22.32</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Type 'help' for help.</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ここでデータベースを見ると</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; show databases;</span>
+<span class="quote1">&gt; +----------+</span>
+<span class="quote2">&gt; | Database |</span>
+<span class="quote1">&gt; +----------+</span>
+<span class="quote2">&gt; | mysql    |</span>
+<span class="quote2">&gt; | test     |</span>
+<span class="quote1">&gt; +----------+</span>
+<span class="quote1">&gt; 2 rows in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; となって間違いなく datadirは /var/lib/mysql を指しているかと</span>
+<span class="quote1">&gt; 思います。しかし、使おうとすると</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; use mysql</span>
+<span class="quote1">&gt; ERROR 1044: Access denied for user: '@localhost' to database 'mysql'</span>
+
+インストールした直後(設定とかなにもやってません)に同じことをやってみまし
+た。(telnet では入れません &amp;&amp; ssh まだ勉強中なので ローカルからですが)
+
+で、Hase さんと同じ結果も出ました。
+
+# やったのは一般ユーザーです。
+
+そこで、(上記 ERROR 1044: で弾かれた後)
+
+mysql&gt; use test
+
+としてみるとどうでしょう?
+で、弾かれなかったら、、
+
+mysql&gt; status
+
+としてみるとか。
+
+ちなみに私の結果は次のようです。
+
+mysql&gt; use mysql
+ERROR 1044: Access denied for user: '@localhost' to database 'mysql'
+mysql&gt; use test
+Database changed
+mysql&gt; status
+--------------
+mysql  Ver 9.38 Distrib 3.22.32, for pc-linux-gnu (i686)
+
+Connection id:          4
+Current database:       test
+Current user:           shinichiro@localhost
+Server version          3.22.32-log
+Protocol version        10
+Connection              Localhost via UNIX socket
+UNIX socket             /var/run/mysqld/mysqld.sock
+Uptime:                 17 min 47 sec
+
+Threads: 1  Questions: 17  Slow queries: 0  Opens: 7  Flush tables: 1  Open tables: 3
+--------------
+
+で、次に、su して、サンプルの .my.cnf を /root/.my.cnf へコピーして編集
+してみました。
+
+[client]
+password        = hogehoge         &lt;- ここと 
+(snip)
+
+[mysqld]
+#user           = mysql            &lt;- ここの行頭に # をつけてコメントアウト
+user            = root             &lt;- この行を追加
+(snip)
+
+で、chmod 600 .my.cnf して su ユーザでトライしてみると、、
+
+dim:~# mysql
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 24 to server version: 3.22.32-log
+
+Type 'help' for help.
+
+mysql&gt; show databases;
++----------+
+<span class="quote1">| Database |</span>
++----------+
+<span class="quote1">| mysql    |</span>
+<span class="quote1">| test     |</span>
++----------+
+2 rows in set (0.00 sec)
+
+mysql&gt; use mysql
+Database changed
+
+mysql&gt; status
+--------------
+mysql  Ver 9.38 Distrib 3.22.32, for pc-linux-gnu (i686)
+
+Connection id:          24
+Current database:       mysql
+Current user:           root@localhost
+Server version          3.22.32-log
+Protocol version        10
+Connection              Localhost via UNIX socket
+UNIX socket             /var/run/mysqld/mysqld.sock
+Uptime:                 51 min 43 sec
+
+Threads: 1  Questions: 34  Slow queries: 0  Opens: 7  Flush tables: 1  Open tables: 3
+--------------
+
+mysql&gt; 
+
+という結果になりました。
+
+# 実はこれがどういう事だか、全然良く解っていないのですが、、^^;
+# 御参考になりましたら、、
+
+--
+  Shinichiro HIDA
+  mailto:shinichiro@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="3457">[前]</a><a href="3459">[次]</a><a href="../list/3401-3500">[番号順一覧]</a><a href="../thread/3401-3500">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3436">   3436 2001-03-27 14:26 [Kazufumi Hase &lt;kazuf] root ユーザでアクセスできるようにする方法は？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3437">   3437 2001-03-27 14:54 ┗[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3438">   3438 2001-03-27 15:17 　┗[Kazufumi Hase &lt;kazuf]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3439">   3439 2001-03-27 15:51 　　┣[Kengo Jinno &lt;kengo@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3441">   3441 2001-03-27 16:04 　　┃┣[Akihiko Shinohara &lt;s]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3443">   3443 2001-03-27 16:43 　　┃┃┗[Kazufumi Hase &lt;kazuf]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3444">   3444 2001-03-27 17:08 　　┃┃　┗[Akihiko Shinohara &lt;s]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3448">   3448 2001-03-27 19:18 　　┃┃　　┗[Kazufumi Hase &lt;kazuf]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3450">   3450 2001-03-27 19:48 　　┃┃　　　┣[とみたまさひろ &lt;tomm]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3453">   3453 2001-03-27 20:53 　　┃┃　　　┃┗[Kazufumi Hase &lt;kazuf]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3455">   3455 2001-03-27 21:42 　　┃┃　　　┃　┣[Tomohiro 'Tomo-p' KA]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3457">   3457 2001-03-27 22:50 　　┃┃　　　┃　┃┗[Kazufumi Hase &lt;kazuf]                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="3458">   3458 2001-03-28 01:30 　　┃┃　　　┃　┃　┗[Shinichiro HIDA &lt;shi]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3460">   3460 2001-03-28 14:22 　　┃┃　　　┃　┃　　┗[&lt;endo_t@xxxxxxxxxx&gt; ]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3464">   3464 2001-03-28 14:57 　　┃┃　　　┃　┃　　　┗[Tomohiro 'Tomo-p' KA]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3456">   3456 2001-03-27 22:44 　　┃┃　　　┃　┗[とみたまさひろ &lt;tomm]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3480">   3480 2001-03-29 01:33 　　┃┃　　　┃　　┗[Kazufumi Hase &lt;kazuf] Re: root ユーザでアクセスできました !</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3510">   3510 2001-04-07 15:08 　　┃┃　　　┃　　　┗[Bine平井  &lt;hirai@xxx] MySQL での漢字設定でエラーが出てしまいます。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3512">   3512 2001-04-07 18:49 　　┃┃　　　┃　　　　┗[とみたまさひろ &lt;tomm]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3452">   3452 2001-03-27 19:53 　　┃┃　　　┗[Yoshihiro Wada &lt;hero]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3454">   3454 2001-03-27 21:16 　　┃┃　　　　┗[Kazufumi Hase &lt;kazuf]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3442">   3442 2001-03-27 16:10 　　┃┗[Kazufumi Hase &lt;kazuf]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3440">   3440 2001-03-27 15:57 　　┗[&lt;endo_t@xxxxxxxxxx&gt; ]                                   </a></span>
+</pre>
+</body>
+</html>

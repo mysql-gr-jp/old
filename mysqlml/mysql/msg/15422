@@ -1,0 +1,167 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15422</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15421">[前]</a><a href="15423">[次]</a><a href="../list/15401-15500">[番号順一覧]</a><a href="../thread/15401-15500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15422
+</p>
+<div class="header">
+<p>
+From: Yuya Takeyama &lt;Yuya Takeyama &lt;sign.of.the.wolf.pentagram@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 11 Nov 2010 22:00:40 +0900<br>
+Subject: [mysql 15422] Re: FULLTEXT インデックス使用時のクエリキャッシュについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+奥野さん、ご返答ありがとうございます。
+
+教えていただいた方法で確認した所、
+クエリキャッシュは効いていないようであることを確認しました。
+
+しかし、クエリの実行時間についは、やはり 2 回目移行で大幅に短縮されるよ
+うです。
+クエリキャッシュ以外の要因が、何か別にあるということでしょうか。
+
+とはいえ、今回は個人的な興味の上でのベンチマークを行っているだけで、
+特に実務で困っているわけでもないので、この場での質問は止めにしようと思い
+ます。
+
+ありがとうございました。
+
+
+-----
+
+Yuya Takeyama
+
+
+(2010年11月08日 17:21), Mikiya Okuno wrote:
+<span class="quote1">&gt; 奥野です。こんにちは。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 手元のマシンで試してみましたが、SQL_NO_CACHEを使用すると</span>
+<span class="quote1">&gt; 仕様通りクエリキャッシュが使われませんでした。クエリキャッシュが</span>
+<span class="quote1">&gt; 使われているかどうかは</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; SHOW GLOBAL STATUS LIKE 'Qcache%';</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; で確認できますので、まずはこちらを実行してみてください。</span>
+<span class="quote1">&gt; クエリキャッシュにエントリが追加されたときはQcache_insertsが増え、</span>
+<span class="quote1">&gt; SQL_NO_CACHEが効いたときはQcache_not_cachedが増えます。</span>
+<span class="quote1">&gt; ヒットしたときはQcache_hitsですね。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 既知のバグもひと通り見ましたが、特にめぼしいのはありませんでした。</span>
+<span class="quote1">&gt; まずは現状どうなっているかを確認して頂けますでしょうか。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ではでは。</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; 奥野 幹也 </span>
+<span class="quote1">&gt; <a href="http://www.google.com/profiles/mikiya.okuno">http://www.google.com/profiles/mikiya.okuno</a> </span>
+<span class="quote1">&gt; <a href="http://nippondanji.blogspot.com/">http://nippondanji.blogspot.com/</a> </span>
+<span class="quote1">&gt; <a href="http://twitter.com/nippondanji">http://twitter.com/nippondanji</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; On 11/08/2010 11:11 AM, Yuya Takeyama wrote:</span>
+<span class="quote1">&gt;   </span>
+<span class="quote2">&gt;&gt; こんにちは。竹山と申します。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; FULLTEXT インデックス使用時に、 SQL_NO_CACHE を使用しても、</span>
+<span class="quote2">&gt;&gt; クエリキャッシュが効いてしまっている ? という事象に悩まされています。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 以下のページを参考に、 12 万件ほどのテーブルを作ってみました。</span>
+<span class="quote2">&gt;&gt; MySQL FULLTEXT + Ngram : LIKE検索より数十倍高速な、お手軽 日本語全文検索</span>
+<span class="quote2">&gt;&gt; について</span>
+<span class="quote2">&gt;&gt; <a href="http://www.tatamilab.jp/rnd/archives/000390.html">http://www.tatamilab.jp/rnd/archives/000390.html</a></span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 日本郵便から郵便番号・住所のデータをダウンロードして、</span>
+<span class="quote2">&gt;&gt; 以下のような定義で作っています。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; CREATE TABLE `addresses` (</span>
+<span class="quote2">&gt;&gt; `id` int(11) NOT NULL AUTO_INCREMENT,</span>
+<span class="quote2">&gt;&gt; `zip` int(7) unsigned zerofill NOT NULL,</span>
+<span class="quote2">&gt;&gt; `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,</span>
+<span class="quote2">&gt;&gt; `name_bigram` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,</span>
+<span class="quote2">&gt;&gt; PRIMARY KEY (`id`),</span>
+<span class="quote2">&gt;&gt; FULLTEXT KEY `name_bigram` (`name_bigram`)</span>
+<span class="quote2">&gt;&gt; ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 郵便番号、住所、そして住所を 2-gram に分かち書きしたデータを入れています。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 「福岡市」という単語で検索するときは、以下のような SQL を使います。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; SELECT SQL_NO_CACHE SQL_CALC_FOUND_ROWS *</span>
+<span class="quote2">&gt;&gt; FROM addresses</span>
+<span class="quote2">&gt;&gt; WHERE MATCH (name_bigram) AGAINST ('+福岡 +岡市' IN BOOLEAN MODE)</span>
+<span class="quote2">&gt;&gt; LIMIT 3</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; このような形で、「福岡市」という単語での検索を 3 回行うと、</span>
+<span class="quote2">&gt;&gt; 実行時間は以下のような結果になりました。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 36msec</span>
+<span class="quote2">&gt;&gt; 14msec</span>
+<span class="quote2">&gt;&gt; 6msec</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 「鹿児島市」ではこうです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 61msec</span>
+<span class="quote2">&gt;&gt; 10msec</span>
+<span class="quote2">&gt;&gt; 4msec</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; さらに、「戸田市」。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 25msec</span>
+<span class="quote2">&gt;&gt; 3msec</span>
+<span class="quote2">&gt;&gt; 3msec</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; いずれも、 2 回目以降が不自然に速くなっています。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; SQL には SQL_NO_CACHE オプションが付いているので、</span>
+<span class="quote2">&gt;&gt; 通常であれば、クエリキャッシュは使用されない物だとおもいます。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 念のため name LIKE '%福岡市%' といった形での測定もしましたが、</span>
+<span class="quote2">&gt;&gt; こちらはちゃんとクエリキャッシュが効いているようでした。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 「福岡市」</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 112msec</span>
+<span class="quote2">&gt;&gt; 93msec</span>
+<span class="quote2">&gt;&gt; 144msec</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 「鹿児島市」</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 127msec</span>
+<span class="quote2">&gt;&gt; 122msec</span>
+<span class="quote2">&gt;&gt; 89msec</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 「戸田市」</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 108msec</span>
+<span class="quote2">&gt;&gt; 119msec</span>
+<span class="quote2">&gt;&gt; 124msec</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 上記をまとめると、「FULLTEXT インデックス使用時は SQL_NO_CACHE が効かない」</span>
+<span class="quote2">&gt;&gt; といったことがあるのでは、と考えられるのですが、どうでしょうか。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 詳しくご存知の方がいらしたら、ご教示いただければ幸いです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 以上、長文失礼致しました。</span>
+<span class="quote2">&gt;&gt; よろしくお願いします。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; -----</span>
+<span class="quote2">&gt;&gt; Yuya Takeyama</span>
+<span class="quote2">&gt;&gt;     </span>
+
+</pre>
+</div>
+<p class="button"><a href="15421">[前]</a><a href="15423">[次]</a><a href="../list/15401-15500">[番号順一覧]</a><a href="../thread/15401-15500">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15419">  15419 2010-11-08 11:11 [Yuya Takeyama &lt;sign.] FULLTEXT インデックス使用時のクエリキャッシュについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15420">  15420 2010-11-08 17:21 ┗[Mikiya Okuno &lt;mikiya]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="15422">  15422 2010-11-11 22:00 　┗[Yuya Takeyama &lt;sign.]                                     </a></span>
+</pre>
+</body>
+</html>

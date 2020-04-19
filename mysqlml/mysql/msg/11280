@@ -1,0 +1,105 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11280</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11279">[前]</a><a href="11281">[次]</a><a href="../list/11201-11300">[番号順一覧]</a><a href="../thread/11201-11300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11280
+</p>
+<div class="header">
+<p>
+From: Hirokazu Aoyama &lt;Hirokazu Aoyama &lt;aoyama@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 27 Mar 2005 03:15:21 +0900<br>
+Subject: [mysql 11280] Re: selectで<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+青山です。
+
+マニュアルにはあんまりまとまった記述がなさそうなので、
+ついでなのでこのへんも。
+
+# どちらかというとMySQLの話というよりRDBの一般的な話です。
+# OracleやDB2やPostgreSQLをよく知っている人は特に読まなくても
+# よいと思います。
+
+
+<span class="quote1">&gt; ＫＫ＠ＩＢです</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; また、1個または数個のデータにアクセスしたい場合には常に</span>
+<span class="quote2">&gt; &gt; ランダムアクセスの方が効率がよいのかというと、必ずしもそうではなく、</span>
+<span class="quote2">&gt; &gt; 行数に比べてキー値の種類が少ない列(=カーディナリティが低い列)</span>
+<span class="quote2">&gt; &gt; については、検索結果データの絶対数とディスク上の分布によって、</span>
+<span class="quote2">&gt; &gt; どちらの方法が速いのかが変わってきます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これは非常に重要な指摘ですね。</span>
+<span class="quote1">&gt; 最速の検索は、データの内容によって変化します。</span>
+<span class="quote1">&gt; 上記のような場合は、キーが意味をなさない状態です。</span>
+<span class="quote1">&gt; 別のキーがない場合、同じキー値の中でシークエンシャルアクセスで</span>
+<span class="quote1">&gt; データを探す状態になりますから。</span>
+
+キーが意味をなさない、ということではなく、
+検索条件に指定するキー値によって、インデックスの使用が適切だったり、
+適切でなかったりする、という言い方が正しいでしょう。
+
+インデックスを張っており、かつカーディナリティが低い列の例として、
+例えば、値の大半が 1 で、まれに 0 が入っているような列(col_x)を考えます。
+行数はある程度多い(数万とか数十万とか)ものとし、かつ、0の割合が
+全体の数%くらいであると仮定します(ここが重要)。
+
+この場合は、WHERE col_x = 1 という条件では、インデックスを使わずに
+FULL SCANする方が速いです。
+一方、WHERE col_x = 0 という条件では、インデックスを使った方が
+速いでしょう。
+
+しかし、InnoDBの場合、mysqldは、col_xが2値しか持たず、かつ
+0が少なくて1が多いということは知りません。
+
+# [注意] MyISAMやBDBの場合は自動的に統計データが収集されるため、
+# この記述は当てはまりません。
+
+このため、実際には、WHERE col_x = 1 と指定した場合でも、DBは
+インデックスを使って検索しようとしてしまいます。
+
+# [注意] これも、InnoDBの場合は、です。
+# MyISAM,BDBの場合は、col_x = 1 と指定した場合は自動的に
+# インデックスを使わないFULL SCANを選択してくれます。
+
+InnoDBは今のところコストベースのオプティマイザを持たないようなので、
+(MySQLのサイトを見ると、開発予定も今のところなし？)
+上記の問題を解決するにはヒントを使ってインデックスを強制的に
+無視するように指示するしかありません。
+
+SELECT * FROM table_name IGNORE INDEX (index_name_of_col_x) 
+WHERE col_x = 1
+
+このあたりについてはMySQLはまだまだ発展途上ですね。
+普段コストベースオプティマイザにまかせて何気なくSQL文を
+書いてしまっている人にはMySQLを使いこなすのは少々大変かもしれません。。
+
+# まあ、基本的な性能が高いのでそれほど気にはならないかもしれませんが。
+
+-- 
+Hirokazu Aoyama &lt;aoyama@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="11279">[前]</a><a href="11281">[次]</a><a href="../list/11201-11300">[番号順一覧]</a><a href="../thread/11201-11300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11272">  11272 2005-03-26 01:58 [&lt;hiromitsu.narimasu_] Re: selectで                            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11274">  11274 2005-03-26 10:49 ┗[Hirokazu Aoyama &lt;aoy]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11275">  11275 2005-03-26 12:56 　┣[Hirokazu Aoyama &lt;aoy]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11276">  11276 2005-03-26 16:12 　┃┗[深海水草 &lt;VYG01106@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11277">  11277 2005-03-26 17:21 　┗[&quot;KKuji_Y2&quot; &lt;kkuji@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11278">  11278 2005-03-26 19:35 　　┣[Hirokazu Aoyama &lt;aoy]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11281">  11281 2005-03-27 05:04 　　┃┗[&quot;KKuji_Y2&quot; &lt;kkuji@xx]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="11280">  11280 2005-03-27 03:15 　　┗[Hirokazu Aoyama &lt;aoy]                                   </a></span>
+</pre>
+</body>
+</html>

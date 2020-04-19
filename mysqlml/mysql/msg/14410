@@ -1,0 +1,86 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14410</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14409">[前]</a><a href="14411">[次]</a><a href="../list/14401-14500">[番号順一覧]</a><a href="../thread/14401-14500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14410
+</p>
+<div class="header">
+<p>
+From: &quot;Nobukazu Echizenya&quot; &lt;&quot;Nobukazu Echizenya&quot; &lt;echizenya.nbb@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 10 Mar 2008 22:05:23 +0900<br>
+Subject: [mysql 14410] バイナリログにデータベース切り替え(use)が出力されない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+いつもお世話になっております。
+バイナリログに関する質問です。
+
+下記のtempデータベースをmysqldumpによって、バックアップしました。
+
+DB:temp
+temp内のテーブル：T_TEST
+
+mysqldumpのオプション
+default-character-set  = ujis
+flush-log
+single-transaction
+master-data  = 2
+quick
+add-locks
+extended-insert
+add-drop-database
+
+ダンプファイルの内容を要約すると
+
+1 drop database if exists temp;
+2 create database temp character set ujis;
+3 use temp
+4 create table T_TEST(C_UID varchar(10)) engine=InnoDB default charset=ujis;
+
+となります。
+
+このダンプファイルをリダイレクトで２回実行する。
+mysql &lt; ダンプファイル　←２回
+
+２回実行しているので、
+1 drop database if exists temp;
+2 create database temp character set ujis;
+3 use temp
+4 create table T_TEST(C_UID varchar(10)) engine=InnoDB default charset=ujis;
+5 drop database if exists temp;
+6 create database temp character set ujis;
+7 use temp
+8 create table T_TEST(C_UID varchar(10)) engine=InnoDB default charset=ujis;
+の８つのSQLが実行されたことになります。
+
+しかし、バイナリログをみると、7行目のuse tempが出力されていません。
+そのためバイナリログを
+ mysqlbinlog　my_binlog.000001 | mysql
+のように実行すると、
+ERROR 1046 (3D000) at line 35: No database selected
+となってしまいます。
+
+回避する方法として
+　１．drop database後のuse データベースをバイナリログへ出力する方法
+　２．mysqldump出力時のcreate table にデータベース名を追記する方法
+があるかと探してみましたが、今のところ探しきれていません。
+どなたかよい回避策をご存知の方いらっしゃるでしょうか？
+
+mysqlバージョン：5.0.45
+OS：Solaris 10
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="14409">[前]</a><a href="14411">[次]</a><a href="../list/14401-14500">[番号順一覧]</a><a href="../thread/14401-14500">[スレッド一覧]</a></p>
+</body>
+</html>

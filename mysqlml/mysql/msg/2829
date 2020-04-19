@@ -1,0 +1,243 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2829</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2828">[前]</a><a href="2830">[次]</a><a href="../list/2801-2900">[番号順一覧]</a><a href="../thread/2801-2900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2829
+</p>
+<div class="header">
+<p>
+From: 松並 &lt;松並 &lt;matunami@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 07 Dec 2000 15:36:08 +0900<br>
+Subject: [mysql 02829] Re: Ｃ言語でのクエリー発行<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは松並＠横浜です。
+一連のスレッドを読ませていただきました。
+CからMySQLを使ったことはありませんがC言語は仕事で使っていますので、
+私の感じたことをご参考までに書かせていただきます。
+
+外れているかもしれません。参考になれれば幸いです。
+
+それと以下に、質問の仕方についてテクニックを書いておきました。
+文句などではないので、誤解なきようお願いします。
+あくまで議論がスムーズに流れるためのテクニックです。：−＞
+
+＝＝＝概要＝＝＝
+
+結論としては、MySQLの使い方というよりは、C言語での文字列処理などに
+不備があるのでは？という感じがしました。
+
+理由としては
+（１）ご提示されているmysql関連関数の呼び出し手順については、
+　　　どなたも間違いを指摘されていません。
+（２）浅野さんより、問題となっているソースコードそのものの
+　　　ご提示がありません。
+です。
+
+MLへの転送を考慮されて、ソースコードを簡素化されてのご提示だと思いますが、
+問題の部分を浅野さんが発見されていない以上、浅野さんが簡素化された
+ソースコードへの議論は無関係なところを議論していることになりかねません（よね？）
+
+でも巨大なソースコードだと、何かしら考えないといけませんね。＾。＾
+
+＝＝＝個別の気になるところ＝＝＝
+
+On Thu, 07 Dec 2000 11:15:23 +0900
+Yoshiyuki Asano &lt;asano@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; ちなみに、Segmentation fault が出るのは、sprintfを実行したときで</span>
+<span class="quote1">&gt; クエリーを発行するところではありません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; しかしながら、クエリー発行の行をコメントにすると、最後まで問題なく</span>
+<span class="quote1">&gt; 動作しますので、クエリーを発行しているところで何らかのことが起こっている</span>
+<span class="quote1">&gt; ということは予測できるのですが、原因がわかりません。</span>
+
+クエリー発行の行をコメントにすると、最後まで問題なく動作すると
+思っていらっしゃいますが、たまたまエラーとして現れないということが
+よくあります。特にＣ言語では。
+
+例えばC言語のローレベルな話をしますと、
+mysql_query()を呼ぶ／呼ばないの違いは、スタック上にゴミが書き込まれる・
+書き込まれないの違いがあります。具体的には
+
+/* sample untested */
+#include &lt;stdio.h&gt;
+int function();
+int function2();
+
+int function()
+{
+  char buf[10];
+  sprintf(buf, &quot;%s&quot;, &quot;12345678901234567890&quot;);
+  function2();   /* &lt;=== これを呼ぶと次のprintf()の表示文字列が変化します */
+  printf(&quot;%s\n&quot;, buf);
+}
+
+int function2()
+{
+  printf(&quot;function2() gets called!\n&quot;);
+}
+
+通常CPUのメモリ確保はページ単位（４ＫＢなど）で行われますので、
+たとえbuf[10]をオーバーして読み書きしたりしても、４ＫＢの壁を越えるまで
+Segmentation faultはおきません。
+ですので上記sprintf()はbufのサイズをオーバーして書き込んでいますが、
+ほとんどの環境ではSegmentation faultは発生しません。
+function2()を呼ぶと、戻り番地の記録のため、bufの11バイト以降、
+（おそらく12バイトか16バイト）に、戻り番地などが書き込まれます。
+このようにbufの領域を越えた部分にゴミが書き込まれます。
+もちろんfunction2()をコメントアウトするとbufに書き込んだ文字列は
+そのまま変化しません。
+printf()文はbufのサイズなぞ関知しませんので\0があるところまで、
+表示しようとします。mysql_query()へ渡すquery文もこの例に入るかもしれません。
+
+余談
+質問時のテクニックですが、「クエリー発行の行をコメント」という日本語文よりは、
+「mysql_query()」のように具体的に書きましょう。グッと誤解が減りますよ！
+
+On Thu, 07 Dec 2000 14:05:54 +0900
+Yoshiyuki Asano &lt;asano@xxxxxxxxxx&gt; wrote:
+
+<span class="quote3">&gt; &gt; &gt; ちなみに、Segmentation fault が出るのは、sprintfを実行したときで</span>
+<span class="quote3">&gt; &gt; &gt; クエリーを発行するところではありません。</span>
+
+（１）クエリー発行するところではなくsprintfのところでSegmentation fault
+　　　になる
+（２）クエリー発行しないと、Segmentation faultは起きない（、けどバグが
+　　　露呈されないだけかも？）
+
+といった動きはメモリ破壊、具体的にはmalloc()などで取得したメモリ領域への
+アクセス時の不手際、スタック上に確保したバッファへのアクセス時の不手際の
+可能性が高いのではと思われます。
+
+＝＝＝個別その２＝＝
+
+On Thu, 07 Dec 2000 14:05:54 +0900
+Yoshiyuki Asano &lt;asano@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; えっと、説明が足りませんでした。</span>
+
+説明より、「具体的なモノ」がもっとも雄弁です。
+お仕事で後輩が書いたプログラムが動かない場合に、「とにかくソースを見せろ！」
+ということがありますよね！　：−＞
+
+＝＝＝個別その３＝＝
+
+<span class="quote1">&gt; 直接、打ち込んでもなることが確認できましたので、ソースにはそちらを使用しました。</span>
+直接、（何処に）（何を）、打ち込んでも（どう）なる
+
+言葉が足りませんよね。というより、説明しようとすると非常に疲れます。
+「具体的なモノ」を提示するのが楽＆正確ですね。
+
+<span class="quote1">&gt; クエリーを発行しているところで、メモリ破壊が起こっているのは明らかだと思いましたので。</span>
+<span class="quote1">&gt; ちなみに、sprintfで書き込んでいる、char型のワークをbzeroで初期化しているのですが、</span>
+<span class="quote1">&gt; 初期化するだけでもこけてしまいます。しかもそのワークは初期化以外何もしていないのです</span>
+
+「こける」という表現は
+ワークをbzero()で初期化してSegmentation faultがおこるということでしょうか。
+ワークはmalloc()やcalloc()などで取得していませんでしょうか？
+またbzero()で指定するワークサイズは正しいものでしょうか？
+
+＝＝個別その４＝＝
+
+<span class="quote1">&gt; 早速、試してみました。</span>
+<span class="quote1">&gt; 結果は Duplicate entry '0' for key 1　とありました。</span>
+<span class="quote1">&gt; プライマリーキーを設定しているので、その関係のエラーだと思うのですが．．．</span>
+<span class="quote1">&gt; 違います？</span>
+
+私はちょいとこれは分かりません。
+
+＝＝最後に＝＝＝
+
+PHPならこんなことで仕事の進捗を妨げたりすることは少ないですよ　（＾。＾）
+
+-- 
+松並＠横浜 &lt;matunami@xxxxxxxxxx&gt;
+<a href="http://putyou.matwerks.com/">http://putyou.matwerks.com/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="2828">[前]</a><a href="2830">[次]</a><a href="../list/2801-2900">[番号順一覧]</a><a href="../thread/2801-2900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2788">   2788 2000-12-06 14:56 [&quot;Y. Tsutsui&quot; &lt;tutui@] 関東支部会合について                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2789">   2789 2000-12-06 15:17 ┣[Tatsuo Hiramatsu &lt;ta]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2790">   2790 2000-12-06 15:37 ┃┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2791">   2791 2000-12-06 15:43 ┃　┗[Michiaki Mitachi &lt;mi]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2793">   2793 2000-12-06 16:35 ┃　　┗[&lt;endo_t@xxxxxxxxxx&gt; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2795">   2795 2000-12-06 17:29 ┗[Tatsuo Hiramatsu &lt;ta]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2796">   2796 2000-12-06 17:35 　┣[&quot;Y. Tsutsui&quot; &lt;tutui@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2798">   2798 2000-12-06 17:46 　┃┣[&lt;ikezawa@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2807">   2807 2000-12-06 18:47 　┃┗[Tatsuo Hiramatsu &lt;ta]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2814">   2814 2000-12-06 20:58 　┃　┗[&lt;ikezawa@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2815">   2815 2000-12-06 21:06 　┃　　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2880">   2880 2000-12-18 17:56 　┃　　　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2881">   2881 2000-12-19 10:32 　┃　　　　┣[Tatsuo Hiramatsu &lt;ta]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2884">   2884 2000-12-20 18:19 　┃　　　　┃┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2885">   2885 2000-12-20 21:27 　┃　　　　┃　┗[&lt;ikezawa@xxxxxxxxxx&gt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2890">   2890 2000-12-22 02:41 　┃　　　　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2892">   2892 2000-12-22 11:50 　┃　　　　　┗[Tatsuo Hiramatsu &lt;ta]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2893">   2893 2000-12-22 13:49 　┃　　　　　　┗[&lt;ikezawa@xxxxxxxxxx&gt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2797">   2797 2000-12-06 17:33 　┗[Yoshiyuki Asano &lt;asa] Ｃ言語でのクエリー発行              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2799">   2799 2000-12-06 18:12 　　┣[Kayama Yoichi &lt;yoich]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2801">   2801 2000-12-06 18:13 　　┃┗[Yoshiyuki Asano &lt;asa]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2803">   2803 2000-12-06 18:40 　　┃　┣[Kayama Yoichi &lt;yoich]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2804">   2804 2000-12-06 18:33 　　┃　┃┗[Yoshiyuki Asano &lt;asa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2806">   2806 2000-12-06 18:40 　　┃　┗[Kengo Jinno &lt;kengo@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2809">   2809 2000-12-06 18:51 　　┃　　┣[Yoshiyuki Asano &lt;asa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2810">   2810 2000-12-06 18:55 　　┃　　┗[荒井　哲三  &lt;tetsumi]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2812">   2812 2000-12-06 19:35 　　┃　　　┗[Kengo Jinno &lt;kengo@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2813">   2813 2000-12-06 20:04 　　┃　　　　┣[UNO Shintaro &lt;uno@xx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2830">   2830 2000-12-07 15:57 　　┃　　　　┗[荒井　哲三  &lt;tetsumi]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2800">   2800 2000-12-06 18:02 　　┣[Kengo Jinno &lt;kengo@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2802">   2802 2000-12-06 18:20 　　┃┣[Yoshiyuki Asano &lt;asa]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2805">   2805 2000-12-06 18:40 　　┃┃┗[Kengo Jinno &lt;kengo@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2808">   2808 2000-12-06 18:49 　　┃┃　┗[Yoshiyuki Asano &lt;asa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2811">   2811 2000-12-06 19:35 　　┃┃　　┗[Kengo Jinno &lt;kengo@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2843">   2843 2000-12-08 11:54 　　┃┗[Yoshiyuki Asano &lt;asa] MySQL のＣ言語用のライブラリって．．．</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2844">   2844 2000-12-08 13:19 　　┃　┗[Kengo Jinno &lt;kengo@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2845">   2845 2000-12-08 13:52 　　┃　　┣[Tomohiro KATO &lt;tomop]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2846">   2846 2000-12-08 14:14 　　┃　　┃┗[Kengo Jinno &lt;kengo@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2847">   2847 2000-12-08 15:18 　　┃　　┃　┗[Yoshiyuki Asano &lt;asa]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2852">   2852 2000-12-11 10:59 　　┃　　┗[Yoshiyuki Asano &lt;asa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2853">   2853 2000-12-11 11:28 　　┃　　　┗[Kengo Jinno &lt;kengo@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2854">   2854 2000-12-11 11:54 　　┃　　　　┗[Yoshiyuki Asano &lt;asa]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2856">   2856 2000-12-11 12:41 　　┃　　　　　┗[Kengo Jinno &lt;kengo@x]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2857">   2857 2000-12-11 17:36 　　┃　　　　　　┗[Yoshiyuki Asano &lt;asa] MySQL サーバーに接続の仕方</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2858">   2858 2000-12-11 19:20 　　┃　　　　　　　┗[Tomohiro KATO &lt;tomop]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2873">   2873 2000-12-15 11:03 　　┃　　　　　　　　┗[Yoshiyuki Asano &lt;asa] MySQL  サーバーにリモート接続</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2874">   2874 2000-12-15 14:26 　　┃　　　　　　　　　┗[Tomohiro KATO &lt;tomop]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2886">   2886 2000-12-21 11:32 　　┃　　　　　　　　　　┗[Yoshiyuki Asano &lt;asa]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2887">   2887 2000-12-21 12:27 　　┃　　　　　　　　　　　┗[Kengo Jinno &lt;kengo@x]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2888">   2888 2000-12-21 12:45 　　┃　　　　　　　　　　　　┗[Yoshiyuki Asano &lt;asa]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2889">   2889 2000-12-21 13:01 　　┃　　　　　　　　　　　　　┗[Kengo Jinno &lt;kengo@x]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2891">   2891 2000-12-22 09:18 　　┃　　　　　　　　　　　　　　┗[Yoshiyuki Asano &lt;asa]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2817">   2817 2000-12-06 23:50 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2820">   2820 2000-12-07 11:15 　　　┗[Yoshiyuki Asano &lt;asa]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2823">   2823 2000-12-07 13:21 　　　　┗[Kengo Jinno &lt;kengo@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2824">   2824 2000-12-07 14:05 　　　　　┗[Yoshiyuki Asano &lt;asa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2826">   2826 2000-12-07 14:38 　　　　　　┣[Kengo Jinno &lt;kengo@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2827">   2827 2000-12-07 15:31 　　　　　　┣[Kayama Yoichi &lt;yoich]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2828">   2828 2000-12-07 15:34 　　　　　　┣[Tomohiro KATO &lt;tomop]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="2829">   2829 2000-12-07 15:36 　　　　　　┣[松並 &lt;matunami@xxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2831">   2831 2000-12-07 15:58 　　　　　　┃┣[松並 &lt;matunami@xxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2833">   2833 2000-12-07 16:11 　　　　　　┃┣[UNO Shintaro &lt;uno@xx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2834">   2834 2000-12-07 16:39 　　　　　　┃┗[Yoshiyuki Asano &lt;asa]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2836">   2836 2000-12-07 17:46 　　　　　　┃　┣[Tomohiro KATO &lt;tomop]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2837">   2837 2000-12-07 18:54 　　　　　　┃　┃┣[Yoshiyuki Asano &lt;asa]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2839">   2839 2000-12-07 21:21 　　　　　　┃　┃┗[Satoshi Tatsuoka &lt;sa]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2842">   2842 2000-12-08 09:25 　　　　　　┃　┃　┗[Yoshiyuki Asano &lt;asa]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2838">   2838 2000-12-07 19:44 　　　　　　┃　┣[松並 &lt;matunami@xxxxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2841">   2841 2000-12-08 09:00 　　　　　　┃　┗[UNO Shintaro &lt;uno@xx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2832">   2832 2000-12-07 16:05 　　　　　　┗[&lt;endo_t@xxxxxxxxxx&gt; ]                           </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14089</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14088">[前]</a><a href="14090">[次]</a><a href="../list/14001-14100">[番号順一覧]</a><a href="../thread/14001-14100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14089
+</p>
+<div class="header">
+<p>
+From: &quot;Yoshinori Matsunobu&quot; &lt;&quot;Yoshinori Matsunobu&quot; &lt;ymatsunobu@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 4 Jul 2007 00:45:43 +0900<br>
+Subject: [mysql 14089] Re: レプリケーションが一瞬だけ遅れる<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+松信です。
+
+<span class="quote2">&gt; &gt; ところで、MySQLのオンラインのマニュアルでは、</span>
+<span class="quote2">&gt; &gt; 「マスタとスレーブで同一の時計を使用していなくても問題ない。」</span>
+<span class="quote2">&gt; &gt; とあるのですが、</span>
+<span class="quote2">&gt; &gt; <a href="http://dev.mysql.com/doc/refman/4.1/ja/show-slave-status.html">http://dev.mysql.com/doc/refman/4.1/ja/show-slave-status.html</a></span>
+<span class="quote2">&gt; &gt; これは、今回のような場合には当てはまらないのですかね？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 5.0.41のソースでSeconds_Behind_Masterを算出する部分は以下のようになってい</span>
+ます。
+<span class="quote1">&gt; sql/slave.cc 2520行目</span>
+<span class="quote1">&gt; ---</span>
+<span class="quote1">&gt; long time_diff= ((long)((time_t)time((time_t*) 0)</span>
+<span class="quote1">&gt;                               - mi-&gt;rli.last_master_timestamp)</span>
+<span class="quote1">&gt;                        - mi-&gt;clock_diff_with_master);</span>
+<span class="quote1">&gt; ---</span>
+<span class="quote1">&gt; 大ざっばに言うと、</span>
+<span class="quote1">&gt; (スレーブの現在時刻)-(現在スレーブのSQLスレッドで実行中のSQLがマスタで発行</span>
+された時刻)-(マスタとスレーブの時刻差)
+<span class="quote1">&gt; という式です。</span>
+<span class="quote1">&gt; なので、マスタとスレーブの時刻差は考慮されているはずなのですが…。</span>
+
+(マスタとスレーブの時刻差)は、レプリケーションの開始時点での時刻差になるの
+で、
+開始時点でのマスターとスレーブの時刻の同期が取れていて、
+運用後の長期経過のうちに時間が大きくずれれば、
+今回のような現象はあり得ます。
+
+興味があれば、slave.ccの、
+pthread_handler_t handle_slave_io(void *arg)
+の中のget_master_version_and_clock(mysql, mi)や、
+そのすぐ後のwhile文を見てみてください。
+
+----
+Yoshinori Matsunobu
+Senior Consultant
+MySQL AB, www.mysql.com
+
+MySQL Consulting Services:
+<a href="http://www-jp.mysql.com/consulting/">http://www-jp.mysql.com/consulting/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="14088">[前]</a><a href="14090">[次]</a><a href="../list/14001-14100">[番号順一覧]</a><a href="../thread/14001-14100">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14084">  14084 2007-07-02 21:15 [&quot;橋本健太&quot; &lt;kem@xxxx] レプリケーションが一瞬だけ遅れる        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14085">  14085 2007-07-03 16:46 ┗[&quot;Katsuyuki Sakai&quot; &lt;s]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14086">  14086 2007-07-03 21:08 　┗[&quot;橋本健太&quot; &lt;kem@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14087">  14087 2007-07-03 22:07 　　┗[&quot;Katsuyuki Sakai&quot; &lt;s]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14088">  14088 2007-07-03 22:45 　　　┣[&lt;kenrouse@xxxxxxxxxx]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="14089">  14089 2007-07-04 00:45 　　　┗[&quot;Yoshinori Matsunobu]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14090">  14090 2007-07-04 01:51 　　　　┗[&quot;Katsuyuki Sakai&quot; &lt;s]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14096">  14096 2007-07-05 00:45 　　　　　┗[&quot;橋本健太&quot; &lt;kem@xxxx]                             </a></span>
+</pre>
+</body>
+</html>

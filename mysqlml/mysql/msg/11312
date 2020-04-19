@@ -1,0 +1,131 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11312</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11311">[前]</a><a href="11313">[次]</a><a href="../list/11301-11400">[番号順一覧]</a><a href="../thread/11301-11400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11312
+</p>
+<div class="header">
+<p>
+From: &quot;KAWAI,Takanori&quot; &lt;&quot;KAWAI,Takanori&quot; &lt;GCD00051@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 6 Apr 2005 08:15:38 +0900<br>
+Subject: [mysql 11312] Re: turbolinux10のmysql5はありあまか？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+川合孝典です。
+
+----- Original Message ----- 
+From: &quot;HORI&quot; &lt;john.smith@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Saturday, April 02, 2005 6:08 PM
+Subject: <a href="11306">[mysql 11306]</a> Re: turbolinux10のmysql5はありあまか？
+
+
+<span class="quote1">&gt; 堀です。</span>
+（中略）
+<span class="quote1">&gt; 紛らわしい書き方をしましたがturboLinux10の方はMySQL5.0.2のバイナリー</span>
+<span class="quote1">&gt; も5.0.3のバイナリー、ソース、RPMパッケージとも全ておんなじ現象</span>
+<span class="quote1">&gt; でした。それでカーネルのバージョンの問題かなと思い始めています。</span>
+<span class="quote1">&gt; 私以外にturbo10で動いた、動かないの実績無いでしょうかね？</span>
+私の場合、やはり環境よりもあなたのコードのほうを疑いますけども。
+普通にSELECTができたと書かれていたと思いますが、
+mysql（ユーティリティの）を使って直接ストアド・プロシージャを
+書いたらどうなったんでしょうか？それでもFUNCTIONと書いたところで
+PROCEDUREにRETURNはないといったエラーメッセージが
+出たのでしょうか？
+
+またDBD::mysqlのビルドの問題かもしれません。
+#どのクライアントライブラリを使って作ったかということです
+私の場合、前のバージョンでビルドしたDBD::mysqlを使っていても
+まったく問題はでていませんけど。
+
+私の使っているOSはturblinux10 desktop Basic　ですが、
+下記のとおりMySQLバージョンを表示させるように改造したものを
+使いましたけど、見たところきちんと動作しているようです。
+#堀さんがメールに書いてあったスクリプトもそのまま動かしましたけど
+#特に問題がなかったようです（エラーは出てこないし）
+
+
+[使ったスクリプト]
+use strict;
+use DBI;
+my $hDb = DBI-&gt;connect('dbi:mysql:database=test', 'root', '',
+             {RaiseError =&gt; 1, PrintError=&gt; 0, AutoCommit =&gt; 1});
+# 先に削除
+eval {$hDb-&gt;do('DROP PROCEDURE simpleproc');};
+eval {$hDb-&gt;do('DROP FUNCTION  hello');};
+eval {$hDb-&gt;do('CREATE TABLE t (name varchar(80))');};
+# プロシージャ、ファンクションを作成
+eval {
+$hDb-&gt;do(
+'CREATE PROCEDURE simpleproc (OUT param1 INT)
+ BEGIN
+   SELECT COUNT(*) INTO param1 FROM t;
+   SET param1 = param1 + 10;
+ END');
+$hDb-&gt;do(
+q{CREATE FUNCTION hello (s VARCHAR(20))
+  RETURNS VARCHAR(50)
+ BEGIN
+  RETURN CONCAT('やぁ', s , '調子どう？');
+ END});
+};
+die $@ if($@);
+#0.2 バージョンの確認
+my @aVer = $hDb-&gt;selectrow_array(&quot;SHOW VARIABLES LIKE 'version'&quot;);
+print join(' : ', @aVer) . &quot;\n&quot;;
+# 1. simpleprocを実行して戻り値をSELECT
+$hDb-&gt;do('call simpleproc(@rtnVal)');
+my $iVal = $hDb-&gt;selectrow_array('SELECT @rtnVal');
+print &quot;戻り値:&quot; . $iVal . &quot;\n&quot;;
+
+# 2.
+my $hSt = $hDb-&gt;prepare(q{SELECT hello(?)});
+$hSt-&gt;execute('堀さん');
+while (my $raRes = $hSt-&gt;fetchrow_arrayref()) {
+  print join(',', @$raRes) . &quot;\n&quot;;
+}
+
+[実行結果]
+version : 5.0.3-beta-standard
+戻り値:10
+やぁ堀さん調子どう？
+
+===================================================
+川合 孝典 (Hippo2000)
+   DBI日本語メーリングリスト管理人、Kansai.pm所属
+   kwitknr@xxxxxxxxxx GCD00051@xxxxxxxxxx
+   <a href="http://homepage3.nifty.com/hippo2000/">http://homepage3.nifty.com/hippo2000/</a>、<a href="http://www.hippo2000.info/">http://www.hippo2000.info/</a>
+perldocの日本語情報ならperldocjp：翻訳してみませんか？
+  <a href="http://perldocjp.sourceforge.jp/">http://perldocjp.sourceforge.jp/</a>
+=================================================== 
+
+
+</pre>
+</div>
+<p class="button"><a href="11311">[前]</a><a href="11313">[次]</a><a href="../list/11301-11400">[番号順一覧]</a><a href="../thread/11301-11400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11294">  11294 2005-03-31 21:33 [HORI &lt;john.smith@xxx] turbolinux10のmysql5はありあまか？      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11295">  11295 2005-03-31 22:11 ┣[&quot;Ryuichiro Munechika]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11296">  11296 2005-03-31 22:50 ┃┗[HORI &lt;john.smith@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11298">  11298 2005-04-01 07:01 ┃　┗[&quot;Ryuichiro Munechika]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11299">  11299 2005-04-01 09:21 ┃　　┗[&quot;HORI&quot; &lt;john.smith@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11300">  11300 2005-04-01 19:12 ┃　　　┗[川合孝典 &lt;gcd00051@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11301">  11301 2005-04-01 20:35 ┃　　　　┗[HORI &lt;john.smith@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11305">  11305 2005-04-02 16:34 ┃　　　　　┗[&quot;Ryuichiro Munechika]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11306">  11306 2005-04-02 18:08 ┃　　　　　　┗[HORI &lt;john.smith@xxx]                         </a></span>
+<span class="current">-&gt;&nbsp;<a href="11312">  11312 2005-04-06 08:15 ┃　　　　　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11315">  11315 2005-04-07 01:39 ┃　　　　　　　　┗[HORI &lt;john.smith@xxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11318">  11318 2005-04-07 07:09 ┃　　　　　　　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11319">  11319 2005-04-08 15:51 ┃　　　　　　　　　　┗[HORI &lt;john.smith@xxx]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11320">  11320 2005-04-09 10:42 ┗[HORI &lt;john.smith@xxx]                                       </a></span>
+</pre>
+</body>
+</html>

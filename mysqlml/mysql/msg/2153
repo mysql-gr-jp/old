@@ -1,0 +1,156 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2153</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2152">[前]</a><a href="2154">[次]</a><a href="../list/2101-2200">[番号順一覧]</a><a href="../thread/2101-2200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2153
+</p>
+<div class="header">
+<p>
+From: &quot;N.Yoshida&quot; &lt;&quot;N.Yoshida&quot; &lt;yosh_no@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 02 Jun 2000 11:39:40 +0900<br>
+Subject: [mysql 02153] mysql デーモンの負荷テストで不可解な現象<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+  吉田です。
+  MySQLを使用したシステムを本運用しようとしてMySQLデーモンの負荷テスト
+をしていたところ次のような現象が発生し困っています。何か解決のヒントが
+あれば教えていただきたいと思っています。
+
+【環境】
+         DBサーバ                         APLサーバ
+    ┌────────┐             ┌────────┐
+    │                │             │                │
+    │    MySQL←───────────テストスクリプト│
+    │                │             │                │
+    │                │             │                │
+    └────────┘             └────────┘
+
+  (DBサーバ)
+   OS     Slackware 3.5ベースのLinux kernel(2.2.15)
+   MySQL  3.22.32(3.22.30で発生したのでエンハンスしたが同じ現象発生)
+   Linuxthread-0.6
+   Data-Dumper-2.09
+   DBI-1.13
+   Msql-Mysql-modules-1.2209(1.2214でも同じ現象発生)
+   Perl5.005_03 + jperl5.005_03-990403.pat
+
+  (APLサーバ)
+   OS     TurboLinux 6.0ベースのLinux kernel(2.2.15)
+   他はDBサーバと同じ
+
+【現象】
+     MySQLへコネクトし、テーブルに対してselect *をかけて結果をフェッチ
+   しディスコネクトする処理を無限に繰り返すPERLスクリプトを6多重で実行
+   したところ10分程度でMySQLデーモンが落ちた。(アベンドまでの時間はさ
+   まざま) 
+     傾向としては多重度を上げればデーモンアベンドする時間が短くなるよう
+   です。
+
+     Topでmysqldを見ているとSIZEの値が徐々に増加し、4XXX位になるとデー
+   モンがアベンドするようにみえます。デーモンのメモリ上のデータが壊れて
+   起きているのではとも推測できますが....(SIZE値はテーブルでさまざま)
+
+     デーモンアベンドに際して、クライアントプログラムではfetchやexecute
+   がエラーとなります。(次がエラーメッセージ)
+
+  -----------------------------------------------------------------------
+  DBD::mysql::st fetchrow_array failed: fetch() without execute() 
+       at dummy.pl line 47.
+  または
+  DBD::mysql::st execute failed: Lost connection to MySQL server during query
+       at dummy.pl line 46.
+  または
+  DBD::mysql::st execute failed: MySQL server has gone away 
+       at dummy.pl line46.
+  -----------------------------------------------------------------------
+
+
+==【参考】=====(スクリプト始まり)======================================
+#! /usr/bin/perl -Lsjis
+#--------------------------------------------------------------------
+#   ＤＢサーバ負荷耐久テスト                              dummy  .pl 
+#     ダミー検索プログラム                    最終更新日  00/05/29   
+#--------------------------------------------------------------------
+    use DBI;
+    use FileHandle;
+    $dbname    = &quot;bics&quot;;                          # MySQL
+    $hostname  = &quot;fz002086&quot;;
+
+
+    $pid    = $0;                                 # PROGRAM-ID
+    $num    = '^[0-9]+$';                         # 文字列の全てが数字
+    $otfl1  = &quot;$$.lst&quot;;                           # 出力ファイル名
+
+    open (OT,&quot;&gt;$otfl1&quot;);
+    OT-&gt;autoflush(1);
+    for(;;) {
+      $dbh     = DBI-&gt;connect(&quot;DBI:mysql:$dbname:$hostname&quot;,&quot;root&quot;,&quot;&quot;);
+      $dbh || die &quot;connect err :$dbname:$hostname&quot;;
+      $fields  =  &quot;SYSYCD&quot;;
+      $cond    =  &quot;where SYSLVL = '2'&quot;;
+      $state   =  &quot;select $fields from SZK $cond&quot;;
+
+      $sth = $dbh-&gt;prepare($state) || die $dbh-&gt;errstr;
+      $sth-&gt;execute || die $sth-&gt;errstr;
+      while (@SYSYCD = $sth-&gt;fetchrow_array) {  #検索:約120レコード◆
+          &amp;GetYMY($SYSYCD[0]);
+#         sleep(5);
+      }
+      $sth-&gt;finish;
+      $dbh-&gt;disconnect;
+}
+    close(OT);
+
+
+sub GetYMY   {   #
+    my $SYSYCD  = shift(@_);
+    $SYSYCD     = substr($SYSYCD, 0, 6);
+    my $dbh     = DBI-&gt;connect(&quot;DBI:mysql:$dbname:$hostname&quot;, &quot;root&quot;, &quot;&quot;);
+    $dbh || die &quot;connect err :$dbname:$hostname&quot;;
+    my $fields  =  &quot;*&quot;;
+    my $cond    =  &quot;where SEKACD like '$SYSYCD%'&quot;;
+    my $state   =  &quot;select $fields from YMY $cond&quot;;
+    print (OT &quot;$state\n&quot;);
+    my $sth = $dbh-&gt;prepare($state) || die $dbh-&gt;errstr;
+    $sth-&gt;execute || die $sth-&gt;errstr;
+    while (@YMY = $sth-&gt;fetchrow_array) {   #検索:数100〜1000レコード◆
+      printf(&quot;(@YMY)\n&quot;);          #perl dummy3ny.pl&gt;/dev/null&amp;で起動◆
+    }
+    $sth-&gt;finish;
+    $dbh-&gt;disconnect;
+}
+=============(スクリプト終わり)=========================================
+
+
+
+-------------------------------------------------------------------------
+  吉田 伸次(N.Yoshida) E-mail:yosh_no@xxxxxxxxxx
+                       nifty :TCN00171@xxxxxxxxxx
+-------------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="2152">[前]</a><a href="2154">[次]</a><a href="../list/2101-2200">[番号順一覧]</a><a href="../thread/2101-2200">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="2153">   2153 2000-06-02 11:39 [&quot;N.Yoshida&quot; &lt;yosh_no] mysql デーモンの負荷テストで不可解な現象</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2154">   2154 2000-06-02 17:32 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2156">   2156 2000-06-02 20:12 　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2158">   2158 2000-06-02 22:43 　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2163">   2163 2000-06-05 14:58 　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2164">   2164 2000-06-05 16:14 　　　　┗[Seiji Tateyama &lt;tate]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2165">   2165 2000-06-05 19:41 　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2166">   2166 2000-06-05 21:44 　　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2188">   2188 2000-06-10 19:27 　　　　　　┃┗[&quot;N.Yoshida&quot; &lt;yosh_no]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2167">   2167 2000-06-06 01:42 　　　　　　┗[tateyan &lt;tateyan@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2168">   2168 2000-06-06 10:22 　　　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                         </a></span>
+</pre>
+</body>
+</html>

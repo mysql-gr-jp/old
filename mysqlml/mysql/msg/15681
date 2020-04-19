@@ -1,0 +1,146 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15681</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15680">[前]</a><a href="15682">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15681
+</p>
+<div class="header">
+<p>
+From: &lt;nwakamatsu@xxxxxxxxxx&gt;<br>
+Date: Thu, 23 Feb 2012 16:35:38 +0900<br>
+Subject: [mysql 15681] Re: MySQL 5.5にConnector/J 5.1経由で接続すると、エラーメッセージが文字化けする。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+若松です。
+
+
+以前、JavaアプリケーションからConnector/J経由でMySQL serverに接続し、
+クエリがエラーになった際にテーブル名・カラム名が文字化けするという事を書かせて頂きました。
+
+私はConnector/Jの問題だと思っていますが、いかかでしょうか。
+皆さんの意見を聞かせて頂きたいです。
+
+
+<span class="quote1">&gt; 初めて投稿させていただます。若松と申します。</span>
+<span class="quote1">&gt; よろしくお願い致します。</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; Java ApplicationからConnector/J経由でMySQL serverに対してクエリを発行し、</span>
+<span class="quote1">&gt; そのクエリが失敗した際に、エラーメッセージが文字化けします。</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 各ソフトウェアのバージョンは下記の通りです。</span>
+<span class="quote1">&gt; JDK 1.7.0_02-b13</span>
+<span class="quote1">&gt; MySQL server 5.5.20</span>
+<span class="quote1">&gt; Connector/J 5.1.18</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; JDK 1.6及び、MySQL server 5.5.17〜5.5.20及び、Connector/J 5.1.5〜5.1.18をテスト済みです。</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; また、MySQL serverの言語設定は下記の通りです。</span>
+<span class="quote1">&gt; mysql&gt; SHOW VARIABLES LIKE 'character%';</span>
+<span class="quote1">&gt; +--------------------------+----------------------------------+</span>
+<span class="quote2">&gt; | Variable_name            | Value                            |</span>
+<span class="quote1">&gt; +--------------------------+----------------------------------+</span>
+<span class="quote2">&gt; | character_set_client     | utf8                             |</span>
+<span class="quote2">&gt; | character_set_connection | utf8                             |</span>
+<span class="quote2">&gt; | character_set_database   | utf8                             |</span>
+<span class="quote2">&gt; | character_set_filesystem | binary                           |</span>
+<span class="quote2">&gt; | character_set_results    | utf8                             |</span>
+<span class="quote2">&gt; | character_set_server     | utf8                             |</span>
+<span class="quote2">&gt; | character_set_system     | utf8                             |</span>
+<span class="quote2">&gt; | character_sets_dir       | /opt/mysql/mysql/share/charsets/ |</span>
+<span class="quote1">&gt; +--------------------------+----------------------------------+</span>
+<span class="quote1">&gt; 8 rows in set (0.00 sec)</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; mysql&gt; SHOW VARIABLES LIKE 'lc_messages%';</span>
+<span class="quote1">&gt; +-----------------+-------------------------+</span>
+<span class="quote2">&gt; | Variable_name   | Value                   |</span>
+<span class="quote1">&gt; +-----------------+-------------------------+</span>
+<span class="quote2">&gt; | lc_messages     | en_US                   |</span>
+<span class="quote2">&gt; | lc_messages_dir | /opt/mysql/mysql/share/ |</span>
+<span class="quote1">&gt; +-----------------+-------------------------+</span>
+<span class="quote1">&gt; 2 rows in set (0.00 sec)</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; 例えば、Java Applicationから下記のクエリを発行します。</span>
+<span class="quote1">&gt; SELECT * FROM `test`.`ほげほげ`;</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; しかし、`ほげほげ`というテーブルは存在しない為、クエリは失敗し、エラーメッセージが返って来ます。</span>
+<span class="quote1">&gt; その際、テーブル名が文字化けして表示されてしまいます。</span>
+<span class="quote1">&gt; jp.co.afy_systems.framework.database.exception.DatabaseException: AFY_DATABASE:0021E:SQL実行時に例外が発生しました。（エラーコード：1146）</span>
+<span class="quote1">&gt;     at jp.co.afy_systems.framework.database.dao.AbstractDao.executeQuery(AbstractDao.java:172)</span>
+<span class="quote1">&gt;     at jp.co.afy_systems.framework.database.dao.direct.SelectDirectDao.execute(SelectDirectDao.java:56)</span>
+<span class="quote1">&gt;     at jp.co.afy_systems.sql_executor.service.impl.ExecuteSQLService.select(ExecuteSQLService.java:117)</span>
+<span class="quote1">&gt;     at jp.co.afy_systems.sql_executor.service.impl.ExecuteSQLService.execute(ExecuteSQLService.java:82)</span>
+<span class="quote1">&gt;     at jp.co.afy_systems.framework.service.manager.XmlServiceManager$1.run(XmlServiceManager.java:287)</span>
+<span class="quote1">&gt; Caused by: com.mysql.jdbc.exceptions.MySQLSyntaxErrorException: Table 'test.??≫??’??≫??’' doesn't exist</span>
+<span class="quote1">&gt;     at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1049)</span>
+<span class="quote1">&gt;     at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3609)</span>
+<span class="quote1">&gt;     at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3541)</span>
+<span class="quote1">&gt;     at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:2002)</span>
+<span class="quote1">&gt;     at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2163)</span>
+<span class="quote1">&gt;     at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2624)</span>
+<span class="quote1">&gt;     at com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.java:2127)</span>
+<span class="quote1">&gt;     at com.mysql.jdbc.PreparedStatement.executeQuery(PreparedStatement.java:2293)</span>
+<span class="quote1">&gt;     at jp.co.afy_systems.framework.database.wrapper.PreparedStatementWrapper.executeQuery(PreparedStatementWrapper.java:46)</span>
+<span class="quote1">&gt;     at jp.co.afy_systems.framework.database.dao.AbstractDao.executeQuery(AbstractDao.java:167)</span>
+<span class="quote1">&gt;     ... 4 more</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 同じクエリを、mysql commandから実行すると、テーブル名は正常に返ってきます。</span>
+<span class="quote1">&gt; mysql&gt; SELECT * FROM `test`.`ほげほげ`;</span>
+<span class="quote1">&gt; ERROR 1146 (42S02): Table 'test.ほげほげ' doesn't exist</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; この文字化けを起こす原因が、二つある事が分かっています。</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; 一つは、Connector/Jがエラーメッセージをエンコードする際に、SHOW VARIABLES LIKE 'language'にて言語を取得し、</span>
+<span class="quote1">&gt; 返ってきた言語から対応する文字コードを取得している為です。</span>
+<span class="quote1">&gt; （com.mysql.jdbc.ConnectionImpl 3843行目 と com.mysql.jdbc.CharsetMapping 1017行目）</span>
+<span class="quote1">&gt; 環境変数'language'はMySQL server 5.5では廃止され、lc_messagesとlc_messages_dirに置き換えられています。</span>
+<span class="quote1">&gt; Connector/Jは'language'が取得出来ない為、デフォルトのCp1252でエラーメッセージをエンコードします。</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; 二つ目は、Connector/Jがエラーメッセージを、エラーメッセージそのものと、テーブル名やカラム名を、</span>
+<span class="quote1">&gt; 全て同じ文字コードでエンコードしている為です。</span>
+<span class="quote1">&gt; テーブル名やカラム名の文字コードはMySQL serverの設定に依存しますが、</span>
+<span class="quote1">&gt; エラーメッセージの文字コードは、com.mysql.jdbc.CharsetMapping に直接書かれています。</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; その為、UTF-8で返ってきたテーブル名やカラム名が正常にエンコードされず、文字化けを起こします。</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 現在、日本語のテーブル名、カラム名にて開発を行っている為、</span>
+<span class="quote1">&gt; エラーが発生した際にエラー発生個所が分からず、開発に影響が出ています。</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; MySQL bugsの方にも報告致しましたが、改善される予定はなさそうです。</span>
+<span class="quote1">&gt; <a href="http://bugs.mysql.com/bug.php?id=64205">http://bugs.mysql.com/bug.php?id=64205</a></span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 日本ユーザ会の方から、この問題のバグ報告をして頂けないでしょうか。</span>
+<span class="quote1">&gt;  </span>
+<span class="quote1">&gt; 以上、よろしくお願いします。</span>
+
+</pre>
+</div>
+<p class="button"><a href="15680">[前]</a><a href="15682">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15665">@ 15665 2012-02-14 11:27 [&lt;nwakamatsu@xxxxxxxx] MySQL 5.5にConnector/J 5.1経由で接続すると、エラーメッセージが文字化けする。</a></span>
+<span class="current">-&gt;&nbsp;<a href="15681">  15681 2012-02-23 16:35 ┗[&lt;nwakamatsu@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15682">  15682 2012-02-23 16:55 　┗[HIRATSUKA Sadao &lt;hir]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15685">  15685 2012-02-24 13:47 　　┗[&lt;nwakamatsu@xxxxxxxx]                                   </a></span>
+</pre>
+</body>
+</html>

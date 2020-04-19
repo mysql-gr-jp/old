@@ -1,0 +1,672 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10637</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="10636">[前]</a><a href="10638">[次]</a><a href="../list/10601-10700">[番号順一覧]</a><a href="../thread/10601-10700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10637
+</p>
+<div class="header">
+<p>
+From: &quot;Zen Kishimoto&quot; &lt;&quot;Zen Kishimoto&quot; &lt;zen@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 8 Dec 2004 13:21:40 -0800<br>
+Subject: [mysql 10637] MySQL4.1新機能の記事の最終版<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<a href="http://dev.mysql.com/tech-resources/articles/4.1/grab-bag.html">http://dev.mysql.com/tech-resources/articles/4.1/grab-bag.html</a>
+
+Trudy Pelzer と Jim Winstead
+
+この記事は現在プロダクション・リリースとして提供されて
+いるMySQL4.1の新しい幾つかの機能について説明する
+シリーズの最後です。
+
+現在まで4.1での全ての大きな機能に関しては説明をしてきました。
+しかし、まだ色々な機能があります。
+
+新しいステートメント
+
+HELP
+
+新しいHELP ステートメントでサーバーから様々なトピックに関する
+ヘルプを得ることができます。HELP　contentsを使用すれば
+どのようなトピックが在るか分かります。
+
+mysql&gt; HELP contents;
+You asked for help about help category: &quot;Contents&quot;
+For more information, type 'help ', where item is one of the following
+categories :
+   Administration
+   Column Types
+   Data Definition
+   Data Manipulation
+   Functions
+   Geographic features
+   Transactions
+
+mysql&gt; HELP Functions;
+You asked for help about help category: &quot;Functions&quot;
+For more information, type 'help ', where item is one of the following
+topics :
+   CHAR BYTE
+   DUAL
+   FUNCTION
+   TRUE FALSE
+categories :
+   Bit Functions
+   Comparison operators
+   Control flow functions
+   Date and Time Functions
+   Encryption Functions
+   Functions and Modifiers for Use with GROUP BY Clauses
+   Information Functions
+   Logical operators
+   Miscellaneous Functions
+   Numeric Functions
+   String Functions
+
+mysql&gt; HELP DUAL;
+Name: 'DUAL'
+Description:
+SELECT ... FROM DUAL is an alias for SELECT ....
+(他のデータベースとコンパチにするため).
+
+MySQL 4.1に前の版からアップグレードした場合、HELP情報を
+格納するのに利用されていたテーブルにデータがロードされて
+いるかを確認してください。fill_help_tables.sql ファイルは
+バイナリー・ディストリビューションに含まれます。それで、
+簡単にMySQLのデータベースにロードすることができます。
+
+mysql -uroot mysql &lt; /path/to/fill_help_tables.sql
+
+SHOW WARNINGSとSHOW ERRORSコマンド
+
+MySQLメーリングリストで何回も質問される質問は LOAD DATA INFILE
+のようなコマンドを実行した後で要約の形式でどの様な警告が
+発せられるのかです。MySQL 4.1ではSHOW WARNINGSコマンドでは
+注意、警告とエラーの情報が得られます。
+(SHOW ERRORSステートメントはエラーのみを示します。)
+
+mysql&gt; DROP TABLE IF EXISTS no_such_table;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+mysql&gt; SHOW WARNINGS;
++-------+------+-------------------------------+
+<span class="quote1">| Level | Code | Message                       |</span>
++-------+------+-------------------------------+
+<span class="quote1">| Note  | 1051 | Unknown table 'no_such_table' |</span>
++-------+------+-------------------------------+
+1 row in set (0.01 sec)
+
+レファレンスマニュアルのSHOW WARNINGS Syntax の章には
+INSERTステートメントの実行中にデータが切り捨てられる
+ときにレポートされる警告の例が載っています。
+(これはMySQL 5.0ではエラーになりますが、これは5.0の時の
+話題です。)
+
+INSERT ... ON DUPLICATE KEY UPDATE ...コマンド
+
+INSERTステートメント用の新しいON DUPLICATE KEY UPDATE ... クローズ
+は挿入された行でUNIQUEインデクス(またはPRIMARY KEY)を使用して
+2重の値が生じた場合特別の処理が出来ます。例えば、以下の
+ステートメントのようなものを使用して投票システムで投票数を
+記録できます。
+
+mysql&gt; INSERT INTO poll (favorite, votes) VALUES ('Hamburger', 1)
+    -&gt; ON DUPLICATE KEY UPDATE votes = votes + 1;
+
+新しい VALUES()関数を使ってクエリのINSERTの部分から列の値が求められます。
+
+mysql&gt; INSERT INTO poll (favorite, votes, last_voter)
+                        VALUES ('Hamburger', 1, 'Wimpy')
+    -&gt; ON DUPLICATE KEY UPDATE votes = votes + 1,
+                                  last_voter = VALUES(last_voter);
+
+CREATE TABLE ... LIKE コマンド
+
+CREATE TABLE ... LIKE ステートメントは現存するテーブルの構造
+（フォーリンキーではなく、インデスクを含み）を早くクローンする方法です。
+これは新しいテーブルを生成して既存のMERGEテーブルに追加するのに
+特に有益です。
+
+mysql&gt; CREATE TABLE log_20041124 LIKE log_20041123;
+
+GROUP BY ... WITH ROLLUP　コマンド
+
+ROLLUP はOn-Line Analytical Processing（OLAP）として知られる
+機能の１つです。
+
+ROLLUP はGROUP BYレベルのそれぞれに要約行を提供します。
+実際 ROLLUPはサーバーがGROUP BYクローズにある全ての名前
+の付いた列に対する１つのグループを返還することを要求します。
+これはそれぞれのグループをたった１つだけ残るまでまとめること
+で達成します。要約行は大雑把な要約のオペレーションを
+表します。
+
+新しいシンタクスはこのようです。GROUP BYから始めて
+列とグループのエクスプレッション、そしてWITH ROLLUPを最後にします。
+
+[GROUP BY {column_name | expression | column_position}
+        [ASC | DESC], ... [WITH ROLLUP]]
+
+では簡単な例を見ましょう。以下のようなT_rollupテーブルがあるとします。
+
+mysql&gt; SELECT * FROM T_rollup;
++------+------+------+
+<span class="quote1">| col1 | col2 | col3 |</span>
++------+------+------+
+<span class="quote1">|    1 | a    | 0.55 |</span>
+<span class="quote1">|    1 | a    | 0.55 |</span>
+<span class="quote1">|    1 | b    | 1.00 |</span>
+<span class="quote1">|    1 | b    | 1.35 |</span>
+<span class="quote1">|    2 | a    | 6.00 |</span>
+<span class="quote1">|    2 | a    | 1.77 |</span>
++------+------+------+
+6 rows in set (0.04 sec)
+
+このテーブルに対する普通のSELECT ... GROUP BYは以下のような結果がでます。
+
+mysql&gt; SELECT col1, col2, SUM(col3) AS sumcol3
+    -&gt; FROM T_rollup GROUP BY col1,col2;
++------+------+---------+
+<span class="quote1">| col1 | col2 | sumcol3 |</span>
++------+------+---------+
+<span class="quote1">|    1 | a    |    1.10 |</span>
+<span class="quote1">|    1 | b    |    2.35 |</span>
+<span class="quote1">|    2 | a    |    7.77 |</span>
++------+------+---------+
+3 rows in set (0.03 sec)
+
+対照的に、同じクエリもWITH ROLLUPと使用とすると、以下になります。
+
+mysql&gt; SELECT col1, col2, SUM(col3) AS sumcol3
+    -&gt; FROM T_rollup GROUP BY col1,col2 WITH ROLLUP;
++------+------+---------+
+<span class="quote1">| col1 | col2 | sumcol3 |</span>
++------+------+---------+
+<span class="quote1">|    1 | a    |    1.10 |</span>
+<span class="quote1">|    1 | b    |    2.35 |</span>
+<span class="quote1">|    1 | NULL |    3.45 |</span>
+<span class="quote1">|    2 | a    |    7.77 |</span>
+<span class="quote1">|    2 | NULL |    7.77 |</span>
+<span class="quote1">| NULL | NULL |   11.22 |</span>
++------+------+---------+
+6 rows in set (0.04)
+
+結果が示すように、通常のGROUP BYクエリによって返還されるグループ
+の他にGROUP BY ... WITH ROLLUPはそれぞれのグループに要約行を
+返還します。
+
+それで、col1が１であるグループに対して、要約行を示すために
+col2がNULLの値をとり、col3がグループに対して和{col1=1}をとります。
+
+それから、col1が2であるグループに対して、要約行を示すために
+col2がNULLの値をとり、col3がグループに対して和{col1=2}をとります。
+
+全ての結果に対する要約行を示すために、最後の行はcol1とcol2に
+対してNULL でcol3は結果セットの全ての和となります。
+
+WITH ROLLUP はリミットがあります。:
+
+   1. WITH ROLLUPを含むクエリにはORDER BYクローズを追加できません。
+しかしながら、 GROUP BYクローズそのものでMySQLの
+ソートのオプションを使用することで回避できます。
+   2. LIMIT はROLLUPの後で適用できます。そのためLIMITを使用して
+クライアントに返還される行数を制限しようとするクエリは
+ ROLLUPで生成された要約行が切り落とされてしまいます。
+   3. それぞれの要約行のNULLは行がクライアントに送付された
+時に生成されます。これらのNULLの値はクエリの処理の最後の
+ステージにセットされるので、クエリの内部でNULLの値のテスト
+に含めることは出来ません。
+
+新しいオペレーター
+
+２つの新しいオペレータが追加されました。これは整数の割り算に
+関するものです。
+
+DIVオペレータ
+
+    最初にDIV。これは２つの数字を使います。
+
+    DIV は２つの数字に関して整数の割り算を行います。 DIVは被除数
+を除数で割ります。そして結果の整数の部分だけを返還します。
+
+/オペレータは割り算の結果の全てを返還することで対照的です。
+
+    DIVはBIGINTまでの数字に有効です。どちらかの、オペランドが
+NULLの場合はNULLを返還します。これからはDIVは
+MySQLではリザーブされたキーワードとなります。
+
+mysql&gt; SELECT 1025 DIV 13;
++-------------+
+<span class="quote1">| 1025 DIV 13 |</span>
++-------------+
+<span class="quote1">|          78 |</span>
++-------------+
+1 row in set (0.02 sec)
+
+mysql&gt; SELECT 1025/13;
++---------+
+<span class="quote1">| 1025/13 |</span>
++---------+
+<span class="quote1">|   78.85 |</span>
++---------+
+1 row in set (0.02 sec)
+
+MODオペレータ
+
+    MySQL 4.1.0 でMOD()関数と同じ機能のオペレータを追加
+しました。DIVと対照的に被除数を除数で割り結果のあまりだけ
+を返還します。
+
+    MOD はBIGINTまでの大きさの数字に関し正しく動作します。
+どちらかのオペランドがNULLであれば、NULLを返還します。
+
+mysql&gt; SELECT 1025 MOD 13;
++-------------+
+<span class="quote1">| 1025 MOD 13 |</span>
++-------------+
+<span class="quote1">|          11 |</span>
++-------------+
+1 row in set (0.02 sec)
+
+DIVとMOD は*, / と%のオペレータと同じ優先順位です。
+
+新たな関数
+
+新しい日付と時間の他に文字のエンコードと照合順序とspatial extension関数
+とその他いくつかの新しい関数が追加されました。
+
+データ圧縮
+
+COMPRESS(ストリングのエクスプレッション)
+
+    COMPRESS関数は名前からも分かるとうり、文字ストリング
+で与えられたストリングを圧縮します。これはMySQLがzlib
+圧縮ライブラリーとリンクされているときに限ります。そうでなければ、
+COMPRESSは単にNULLを返還します。また引数がNULL で
+あってもNULLを返還します。
+
+    圧縮されたストリングを元に戻すにはUNCOMPRESSを使用します。これも
+4.1.1から追加されました。これに付いては後で触れます。
+
+    圧縮されたストリングをソートする際は以下のルールに従います。
+
+        * ルール 1: 空のストリングは空のストリングとして格納
+        * ルール 2: 空でないストリングは４バイトの長さを示す
+プリフィックス（下のバイトが最初）と共に格納され、続いて圧縮された
+ストリングそのものを格納します。 長さのプリフィックスは圧縮された
+ストリングの長さをサーバーに示します。
+        * ルール 3: スペースで終わるストリングは最後に
+ '.' (ピリオッド文字) が追加されて、結果がCHAR か VARCHAR列に
+格納される時にスペースが取り除かれるのを防ぎます。
+
+    最後のルールにも関わらず、圧縮されたデータはCHARや VARCHAR
+の列に格納しない方が良いでしょう。圧縮されたストリングは
+BLOB列に格納するのが良いでしょう。
+
+mysql&gt; SELECT LENGTH(COMPRESS(REPEAT('a',1000)));
++------------------------------------+
+<span class="quote1">| LENGTH(COMPRESS(REPEAT('a',1000))) |</span>
++------------------------------------+
+<span class="quote1">|                                 21 |</span>
++------------------------------------+
+1 row in set (0.02 sec)
+
+UNCOMPRESS(圧縮されたストリング)
+
+    これはCOMPRESSの反対です。UNCOMPRESS 関数は
+COMPRESS関数で圧縮されたストリングを取って、もとの
+大きさに戻します。
+
+    COMPRESSと同様UNCOMPRESSはMySQL がzlib圧縮ライブラリーと
+リンクされているときのみ正しく作動します。そうでなければ、
+UNCOMPRESSは単にNULLを返還します。この関数は引数が
+圧縮されたストリングでないか、ストリングがNULLの時はNULL
+を返還します。
+
+mysql&gt; SELECT UNCOMPRESS(COMPRESS('aaaa'));
++------------------------------+
+<span class="quote1">| UNCOMPRESS(COMPRESS('aaaa')) |</span>
++------------------------------+
+<span class="quote1">| aaaa                         |</span>
++------------------------------+
+1 row in set (0.02 sec)
+
+UNCOMPRESSED_LENGTH(圧縮されたストリング)
+
+    最後の新しい関数で圧縮されたストリングを扱う関数はUNCOMPRESSED_LENGTH
+で圧縮されたストリングの元の長さを返還します。つまり、
+UNCOMPRESSED_LENGTHは圧縮されたストリングを取り、圧縮されたストリング
+の圧縮される前の長さを返還します。もし、引数がNULLだとNULLを返還します。
+
+mysql&gt; SELECT UNCOMPRESSED_LENGTH(COMPRESS(REPEAT('A',1000)));
++-------------------------------------------------+
+<span class="quote1">| UNCOMPRESSED_LENGTH(COMPRESS(REPEAT('a',1000))) |</span>
++-------------------------------------------------+
+<span class="quote1">|                                            1000 |</span>
++-------------------------------------------------+
+1 row in set (0.02 sec)
+
+アグリゲート
+
+BIT_XOR(エクスプレッション)
+
+    BIT_XOR 関数はビット演算のexclusive-OR (XOR)の結果を
+返還します。エクスプレッションのタイプは問いません。
+計算は64ビット(BIGINT) の精度で行われます。BIT_XOR は
+マッチする行がないか、引数がNULLの際はNULLを返還します。
+
+mysql&gt; SELECT val FROM t;
++------+
+<span class="quote1">| val  |</span>
++------+
+<span class="quote1">|    1 |</span>
+<span class="quote1">|    3 |</span>
+<span class="quote1">|    5 |</span>
+<span class="quote1">|    4 |</span>
++------+
+4 rows in set (0.00 sec)
+
+mysql&gt; SELECT BIT_XOR(val) FROM t;
++--------------+
+<span class="quote1">| BIT_XOR(val) |</span>
++--------------+
+<span class="quote1">|            3 |</span>
++--------------+
+1 row in set (0.00 sec)
+
+GROUP_CONCAT(&lt;シンタクス・オプション&gt;)
+
+    新しいGROUP_CONCAT関数の貢献は大きいです。まづ最初に
+単に１つか２つの引数を取るだけではなく、様々なシンタクスの
+オプションを提供します。
+
+    GROUP_CONCATは括弧を必要とします。括弧のコンマで区切られたリスト
+DISTINCTで始まるかまたはSELECTステートメントの中のORDER BY クローズと同じ
+シンタクスのORDER BYで終わります。終わりにはSEPARATORキーワード
+と１文字の文字ストリングを必要とします。
+
+GROUP_CONCAT([DISTINCT] expression [,expression ...]
+             [ORDER BY {unsigned_integer | column_name | expression}
+                 [ASC | DESC] [,column_name ...]]
+             [SEPARATOR string_value])
+
+    GROUP_CONCATは通常列の名前であるエクスプレッションの値の組み合わせ
+を取り出す機能を提供します。 CONCATがストリングに関して
+することをこれはエクスプレッションに関して行います。
+つまり、結果を結合し、結果を１つのグループとして返還します。
+例を示します。次のテーブルを持っているとします。
+
+mysql&gt; SELECT * FROM xx;
++------+------+------+
+<span class="quote1">| col1 | col2 | col3 |</span>
++------+------+------+
+<span class="quote1">| one  |   10 |   25 |</span>
+<span class="quote1">| two  |   10 |   50 |</span>
+<span class="quote1">| two  |   10 |   50 |</span>
+<span class="quote1">| one  |   20 |   25 |</span>
+<span class="quote1">| one  |   30 |   25 |</span>
++------+------+------+
+5 rows in set (0.06 sec)
+
+    ２番目と３番目の列にGROUP_CONCATを使うクエリは
+この結果を返還します。２番目の列はcol2と col3からのデータ
+を結合します。 col1の値によって示されるそれぞれの
+行用のグループ化された値をコンマで分けます。
+
+mysql&gt; SELECT col1,GROUP_CONCAT(col2,col3) FROM xx GROUP BY col1;
++-------+-------------------------+
+<span class="quote1">| col1  | GROUP_CONCAT(col2,col3) |</span>
++-------+-------------------------+
+<span class="quote1">| one   | 1025,2025,3025          |</span>
+<span class="quote1">| two   | 1050,1050               |</span>
++-------+-------------------------+
+2 rows in set (0.03 sec)
+
+    DISTINCTオプションで２重の値が起こるのを防ぎます。これは
+まさにSELECTの際と同じです。２番目の列は1050のグループだけを
+示します。
+
+mysql&gt; SELECT col1,GROUP_CONCAT(DISTINCT col2,col3)
+FROM xx GROUP BY col1;
++------+----------------------------------+
+<span class="quote1">| col1 | GROUP_CONCAT(DISTINCT col2,col3) |</span>
++------+----------------------------------+
+<span class="quote1">| one  | 1025,2025,3025                   |</span>
+<span class="quote1">| two  | 1050                             |</span>
++------+----------------------------------+
+2 rows in set (0.03 sec)
+
+    GROUP_CONCAT関数でORDER BYクローズを追加することで
+結合された結果をソートすることができます。
+
+mysql&gt; SELECT col1,GROUP_CONCAT(DISTINCT col2,col3 ORDER BY col2 DESC)
+    -&gt; FROM xx GROUP BY col1;
++------+-----------------------------------------------------+
+<span class="quote1">| col1 | GROUP_CONCAT(DISTINCT col2,col3 ORDER BY col2 DESC) |</span>
++------+-----------------------------------------------------+
+<span class="quote1">| one  | 3025,2025,1025                                      |</span>
+<span class="quote1">| two  | 1050                                                |</span>
++------+-----------------------------------------------------+
+2 rows in set (0.03 sec)
+
+    その場合ORDER BYはSELECTステートメントのORDER BYクローズ
+からの経験から予想できるように動作します。
+
+    MySQLがグループを分けるセパレータを変えることもできます。
+ディフォルトは例で見てきたようにコンマです。しかし、SEPARATOR
+オプションで変えることができます。SEPARATORの後にセパレータ
+を指示しなければなりません。この例はセパレータをコンマ(,)でなく
+パーセント(%)にします。
+
+mysql&gt; SELECT col1,GROUP_CONCAT(DISTINCT col2,col3 ORDER BY col2 DESC 
+SEPARATOR '%')
+    -&gt; FROM xx GROUP BY col1;
++------+-------------------------------------------------------------------+
+<span class="quote1">| col1 | GROUP_CONCAT(DISTINCT col2,col3 ORDER BY col2 DESC SEPARATOR '%') |</span>
++------+-------------------------------------------------------------------+
+<span class="quote1">| one  | 3025%2025%1025                                                    |</span>
+<span class="quote1">| two  | 1050                                                              |</span>
++------+-------------------------------------------------------------------+
+2 rows in set (0.03 sec)
+
+    もしセパレータを全然必要ない場合は２つのクオート（')（空のストリング）
+をSEPARATORのオプションの後に指定します。
+
+    GROUP_CONCATを使用すると大きな値になることがあります。これを
+避けるため、 GROUP_CONCATの結果に対して最長の長さを指定することが
+出来ます。これはgroup_concat_max_lenシステム変数を使用することで
+ランタイムに完了します。
+
+mysql&gt; SET group_concat_max_len=8;
+Query OK, 0 rows affected (0.01 sec)
+
+mysql&gt; SELECT col1,GROUP_CONCAT(DISTINCT col2,col3 ORDER BY col2 DESC 
+SEPARATOR '')
+    -&gt; FROM xx GROUP BY col1;
++------+------------------------------------------------------------------+
+<span class="quote1">| col1 | GROUP_CONCAT(DISTINCT col2,col3 ORDER BY col2 DESC SEPARATOR '') |</span>
++------+------------------------------------------------------------------+
+<span class="quote1">| one  | 30252025                                                         |</span>
+<span class="quote1">| two  | 1050                                                             |</span>
++------+------------------------------------------------------------------+
+2 rows in set, 1 warning (0.03 sec)
+
+    一旦最長が指定されると、GROUP_CONCAT の結果は最長に
+合うように切り捨てられます。そのため結果は最初の行のグループ化
+された列に対して８文字のみを含みます。
+
+VARIANCE(数字のエクスプレッション)
+
+    もう１つのアグリゲート関数はVARIANCEです。VARIANCE 関数は引数の
+standard population varianceを返還します。それは数字のエクスプレッション
+かMySQLが数字のデータタイプに変換できるデータタイプで
+なければなりません。
+
+    VARIANCEは行をサンプルではなく全てのpopulationとしてとらえます。
+これは計算の中で返還された行の数を分母として使用することです。
+これはOracleが分散を計算する方法とは違います。
+
+mysql&gt; SELECT col2 FROM xx;
++------+
+<span class="quote1">| col2 |</span>
++------+
+<span class="quote1">|   10 |</span>
+<span class="quote1">|   10 |</span>
+<span class="quote1">|   10 |</span>
+<span class="quote1">|   20 |</span>
+<span class="quote1">|   30 |</span>
++------+
+5 rows in set (0.03 sec)
+
+mysql&gt; SELECT VARIANCE(col2) FROM xx;
++----------------+
+<span class="quote1">| VARIANCE(col2) |</span>
++----------------+
+<span class="quote1">|        64.0000 |</span>
++----------------+
+1 row in set (0.02 sec)
+
+その他
+
+CRC32(ストリングエクスプレッション)
+
+    CRC32関数は32ビットのunsignedの値を返還します。
+この関数の目的は与えられたストリングのcyclic redundancy
+check の値を計算することです。１つの引数は列の名前かストリング
+エクスプレッションとなります。引数がNULLであるとNULLを返還します。
+
+mysql&gt; SELECT CRC32('trudy');
++----------------+
+<span class="quote1">| CRC32('trudy') |</span>
++----------------+
+<span class="quote1">|     1899238533 |</span>
++----------------+
+1 row in set (0.02 sec)
+
+    Cyclic redundancy checkはエラーを素早くテストするの
+に使えます。例えば、BLOBのバイトがあるオペレーションの
+ために変更されたか破壊されたかはオペレーションの前と
+後のCRC32()の値を比較することで知ることができます。
+または、BLOB を簡単に比較できます。２つのBLOBの
+CRC32の値を比較する方がそれぞれのバイトを比較するより
+速くできます。
+
+DEFAULT(列の名前)
+
+    MySQL 4.1.0で初めて紹介されDEFAULT関数は与えられた列に
+デフォルトとして設定された値を返還します。
+
+mysql&gt; CREATE TABLE xz (col1 VARCHAR(10) DEFAULT 'hello');
+Query OK, 0 rows affected (0.09 sec)
+
+mysql&gt; INSERT INTO xz VALUES ('bob');
+Query OK, 1 row affected (0.01 sec)
+
+mysql&gt; SELECT DEFAULT(col1) FROM xz;
++---------------+
+<span class="quote1">| DEFAULT(col1) |</span>
++---------------+
+<span class="quote1">| hello         |</span>
++---------------+
+1 row in set (0.02 sec)
+
+IS_USED_LOCK(ストリング・エクスプレッション)
+
+    IS_USED_LOCK 関数は与えられたロックが使用されて
+いるかどうかをチェックします。引数はロックを示す
+ストリングでなければなりません。ロックが使用中であれば、
+IS_USED_LOCKはロックを所有しているクライアントと接続の
+IDを返還します。そうでなければ、NULLを返還します。
+引数がNULLであってもNULLを返還します。
+
+mysql&gt; SELECT IS_USED_LOCK('lock1');
++-----------------------+
+<span class="quote1">| IS_USED_LOCK('lock1') |</span>
++-----------------------+
+<span class="quote1">|                  NULL |</span>
++-----------------------+
+1 row in set (0.19 sec)
+
+UNHEX(ストリング・エクスプレッション)
+
+    UNHEX 関数は3.22.4版からあったHEX関数の反対です。
+UNHEXは ストリングの引数の16進法の数字のペアーを数字と
+して受け取りその数字を文字列に変換して、バイナリ
+ストリングとして返還します。UNHEXは引数がNULLであれば、
+NULLを返還します。
+
+mysql&gt; SELECT UNHEX('4D7953514C');
++---------------------+
+<span class="quote1">| UNHEX('4D7953514C') |</span>
++---------------------+
+<span class="quote1">| MySQL               |</span>
++---------------------+
+1 row in set (0.02 sec)
+
+UUID()
+
+    UUID()関数。括弧が絶対必要なことに注意してください。
+これはUniversal Unique Identifier (UUID)を返還します。
+UUIDはThe Open Groupが発表している仕様によって生成されます。
+UUID は128ビットの番号でスペース的にも時間的にもユニーク
+な番号です。これは２つの別のUUID() への関数コールは
+状況に関わらず常に２つの異なった番号を返還するということです。
+
+mysql&gt; SELECT UUID();
++--------------------------------------+
+<span class="quote1">| UUID()                               |</span>
++--------------------------------------+
+<span class="quote1">| 9c87d546-5891-1027-b8d6-dce9fa28dace |</span>
++--------------------------------------+
+1 row in set (0.02 sec)
+
+    UUIDはここで示される形式で５つの16進法の番号表されます。
+８つの16進の数字、４つの16進の数字からなる3つの番号
+と12の数字です。
+
+        * 最初の３つの番号はタイムスタンプから生成されます。
+        * ４つ目の番号はタイムスタンプが増減がある場合に
+ユニークであることを保障するため（夏時間などのため）
+        * ５つ目の番号はIEEE 802 ノードの番号。これは
+コンピュータ空間のユニークさを保障するため。
+        * ノード番号がない場合(例えばホストコンピュータにEthernet
+のカードがない場合), MySQLは通常 ランダムに生成された48ビット
+の番号を代わりに使用します。
+
+    UUID() は現在リプリケーションとは一緒に動作しません。
+
+他の新しい機能
+
+MEMORY用のBTREE
+
+MySQL 4.1以前MEMORY (nee HEAP)ストレッジエンジンはHASH
+インデクスのみをサポートしていました。それはインデクスの値
+の範囲にアクセスするクエリにとってはあまり有益ではありません。
+鍵の複製が頻繁に起こるハッシュインデクスの性能はあまり良くありません。
+
+MEMORYストレッジエンジン(NDBまたはクラスターストレジエンジンでも)
+を使うテーブルを生成する際インデクスのタイプを宣言することができます。
+
+mysql&gt; CREATE TABLE lookup (id INT, INDEX USING
+ BTREE (id)) ENGINE = MEMORY;
+---------------------
+Zen Kishimoto                        zen@xxxxxxxxxx
+IP Devices, Inc.                       (408) 567-9391
+2175 De La Cruz Blvd., Suite 10  (801) 720-8847 (FAX)
+Santa Clara, CA 95050 
+
+
+
+</pre>
+</div>
+<p class="button"><a href="10636">[前]</a><a href="10638">[次]</a><a href="../list/10601-10700">[番号順一覧]</a><a href="../thread/10601-10700">[スレッド一覧]</a></p>
+</body>
+</html>

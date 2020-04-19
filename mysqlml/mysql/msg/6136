@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6136</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6135">[前]</a><a href="6137">[次]</a><a href="../list/6101-6200">[番号順一覧]</a><a href="../thread/6101-6200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6136
+</p>
+<div class="header">
+<p>
+From: &lt;ml_mysql@xxxxxxxxxx&gt;<br>
+Date: Fri, 13 Sep 2002 15:24:53 +0900<br>
+Subject: [mysql 06136] CGI::SpeedyCGI と Mysql 　との組み合わせ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは
+石川といいます。
+
+今まで使っていたスクリプト（Perl) をCGI::SpeedyCGI　を使用するように
+しました。
+
+具体的には
+#!/usr/bin/perl ---&gt;  #!/usr/bin/speedy -- -M100 -t600 -r500
+に変更し、
+スクリプトの最初に 
+use CGI::SpeedyCGI;
+my $sp = CGI::SpeedyCGI-&gt;new;
+undef ($hogehoge);
+     :
+     :
+     :
+
+のように変数をクリアーするようにしただけです。
+
+自分でテストをしたときには正常に動作していましたが、
+実際に稼動させた所、以下のエラーがApache のエラーログに記録されています。
+Issuing rollback() for database handle being DESTROY'd without explicit
+disconnect() at /var/www/hogehoge.pl line 758.
+
+頻度は　約10000回動いて20回ほどエラーが記録されています。
+デバッグの進め方を教えていただければ、
+
+CGI::SpeedyCGI　を使った場合のMysql　で一般的な注意点はあるのでしょうか？
+
+また、せっかくCGI::SpeedyCGIを使っていますので、
+データーベースのconnect を毎回しないでよい方法は？
+
+すみません、分からない事ばかりで、
+よろしくお願いします。
+
+●　以下がエラーが出る部分です。
+
+#########################  DB HANDRING ######################
+package db_out;
+my $dbh;
+my $out;
+my $flg_connect = 0;
+use strict;
+use CGI qw(:standard);
+use DBI;
+
+sub connect{
+	if ($flg_connect == 0){
+		$dbh = DBI-&gt;connect('DBI:mysql:present','root','hogehoge');
+		$flg_connect = 1;
+	}
+}
+
+sub id_read{
+	my($query) = @_;
+	my($err_flg);
+	&amp;connect;
+	$out = $dbh-&gt;prepare($query);
+	$out-&gt;execute;         ###  &lt;---- 758　行目
+	$out-&gt;bind_col(1,\$err_flg);
+	$out-&gt;fetch;
+	return $err_flg;
+}
+
+
+
+
+●　その他
+OS Red hat rinux  7.0
+Perl v5.6.0
+SpeedyCGI  2.11
+
+
+
+</pre>
+</div>
+<p class="button"><a href="6135">[前]</a><a href="6137">[次]</a><a href="../list/6101-6200">[番号順一覧]</a><a href="../thread/6101-6200">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="6136">   6136 2002-09-13 15:24 [&lt;ml_mysql@xxxxxxxxxx] CGI::SpeedyCGI と Mysql 　との組み合わせ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6137">   6137 2002-09-13 16:30 ┗[&quot;Takashi Yamashita&quot; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6138">   6138 2002-09-13 17:30 　┗[&lt;ml_mysql@xxxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6139">   6139 2002-09-13 18:00 　　┗[&quot;Takashi Yamashita&quot; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6143">   6143 2002-09-14 09:33 　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                 </a></span>
+</pre>
+</body>
+</html>

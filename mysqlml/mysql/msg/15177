@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15177</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15176">[前]</a><a href="15178">[次]</a><a href="../list/15101-15200">[番号順一覧]</a><a href="../thread/15101-15200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15177
+</p>
+<div class="header">
+<p>
+From: &lt;kaba@xxxxxxxxxx&gt;<br>
+Date: Mon, 1 Feb 2010 17:44:44 +0900 (JST)<br>
+Subject: [mysql 15177] Re: JOIN 文での件数絞り込みについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、Hiroshi Kabayamaと申します。
+
+時間があったので、SQLを考えてみました。
+MySQL5.0であれば副問合せが使えるはずですので、
+こんな感じにしてみてはいかがでしょうか？
+
+■SQL
+================================================
+SELECT
+　　ev.eventId,
+　　sa.name
+FROM
+　　t_event ev,
+　　t_sankasha sa
+WHERE
+　　ev.id = sa.evId
+AND ev.evDay =
+　　　　(
+　　　　　SELECT MIN(evDay) FROM t_event
+　　　　　WHERE evDay &gt;= {$today}
+　　　　)
+ORDER BY
+　　ev.evDay,
+　　ev.starttime;
+================================================
+
+まず、副問合せでイベントテーブルから今日以降で最も小さい
+日付を取得してきます。
+その日付を用いて、ダイレクトに等比較で絞り込めると思います。
+
+ただし、同日付のイベントが複数ある場合はどのような
+表示にするのか考える必要があるかと思います。
+１件のイベントだけ表示したいのであれば、他に何か絞り込みの
+条件が必要になるということです。
+全件表示するのであれば、上記のSQLでいけると思います。
+
+私が思い付いたのはこんな感じです。
+参考になれば幸いです。
+
+以上
+
+
+<span class="quote1">&gt; MYSQL初心者で勉強中の Tadashi Kunitomoといいます</span>
+<span class="quote1">&gt; 環境はCentOS5.3 Mysql5で作業しています</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 現在スケジューラを作っていて、初回アクセス時に次回のイベント</span>
+<span class="quote1">&gt; を表示させたいと思います。</span>
+<span class="quote1">&gt; 取得するデータは　eventテーブルから開催日やイベント</span>
+<span class="quote1">&gt; 名、sankashaテーブルから参加者名なので</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; SELECT ~~ FROM `t_event` LEFT JOIN `t_sankasha` ON `t_event`.id =</span>
+<span class="quote1">&gt; `t_sankasha`.evId</span>
+<span class="quote1">&gt; WHERE `t_event`.evDay &gt;= {$today} ORDER BY `t_event`.evDay,</span>
+<span class="quote1">&gt; `t_event`.starttime</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; という感じに書いたんですが、これだと当然今日の日付より新しい</span>
+<span class="quote1">&gt; イベントが全部取られてしまいます</span>
+<span class="quote1">&gt; 直近の一イベントの情報に限って取得するにはどうしたら良いで</span>
+<span class="quote1">&gt; しょうか？</span>
+<span class="quote1">&gt; LIMIT 1を上のクエリ文に追記で書いたところ、本当に１行しか返し</span>
+<span class="quote1">&gt; てくれないので</span>
+<span class="quote1">&gt; LEFT JOINで取得される複数行部分が取れず不完全になってしまいま</span>
+<span class="quote1">&gt; した。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; どなたか宜しくお願いします。</span>
+<span class="quote1">&gt; PHP側で整形することを考えましたが、クエリの負担を減らせるグッ</span>
+<span class="quote1">&gt; ドアイデアを教えてくれると嬉しいです。</span>
+<span class="quote1">&gt; 宜しくお願いいたします。</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="15176">[前]</a><a href="15178">[次]</a><a href="../list/15101-15200">[番号順一覧]</a><a href="../thread/15101-15200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15176">  15176 2010-02-01 17:14 [小林 正史 &lt;gustav.tk] JOIN文での件数絞り込みについて          </a></span>
+<span class="current">-&gt;&nbsp;<a href="15177">  15177 2010-02-01 17:44 ┗[&lt;kaba@xxxxxxxxxx&gt;   ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15178">  15178 2010-02-01 19:08 　┗[小林 正史 &lt;gustav.tk] Re: JOIN 文での件数絞り込みについて　解決</a></span>
+</pre>
+</body>
+</html>

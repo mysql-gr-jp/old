@@ -1,0 +1,133 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15915</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15914">[前]</a><a href="15916">[次]</a><a href="../list/15901-16000">[番号順一覧]</a><a href="../thread/15901-16000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15915
+</p>
+<div class="header">
+<p>
+From: yoshiyuki komiya &lt;yoshiyuki komiya &lt;yoshiyuki.komiya@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 11 Jan 2013 01:23:47 +0900<br>
+Subject: [mysql 15915] Re: MySQLのログ削除に関して<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+黄さん
+
+ご丁寧に返信ありがとうございます。
+すみません、全然ちがっていましたね（汗
+解決したようで、何よりです。
+
+小宮
+
+2013年1月10日 17:57 Hwang Se Won &lt;coolguy318@xxxxxxxxxx&gt;:
+
+<span class="quote1">&gt;  小宮さん、</span>
+<span class="quote1">&gt; こんにちは。黄と申します。</span>
+<span class="quote1">&gt; 私も、バイナリログかと思いましたが、my.cnfに設定されてないことを確認しました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MYSQL/LOG下にpsamというフォルダーがあって、以下のファイルがいっぱいありました。</span>
+<span class="quote1">&gt; AppInfo_20120507.info</span>
+<span class="quote1">&gt; RankingDaily_20110811.info</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 一応、開発側で、psam配下のファイルを削除して、現在、以下のように、/MYSQL/LOGの領域が大幅に減りました。</span>
+<span class="quote1">&gt; 親切な回答、ありがとう御座いました。勉強になりました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 以上、よろしくお願いいたします。</span>
+<span class="quote1">&gt; 黄世元</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [root@amsdb1 psam]# df -h</span>
+<span class="quote1">&gt; Filesystem            Size  Used Avail Use% Mounted on</span>
+<span class="quote1">&gt; /dev/xvda2            4.9G  1.4G  3.3G  29% /</span>
+<span class="quote1">&gt; /dev/xvda7            9.7G  3.9G  5.4G  42% /var</span>
+<span class="quote1">&gt; /dev/xvda6            9.7G  3.2G  6.0G  35% /usr</span>
+<span class="quote1">&gt; /dev/xvda5            9.7G  250M  9.0G   3% /mgmt</span>
+<span class="quote1">&gt; /dev/xvda1             99M   23M   72M  24% /boot</span>
+<span class="quote1">&gt; tmpfs                 8.0G     0  8.0G   0% /dev/shm</span>
+<span class="quote1">&gt; /dev/mapper/VG01-mysql</span>
+<span class="quote1">&gt;                       5.0G  2.8G  2.0G  59% /MYSQL</span>
+<span class="quote1">&gt; /dev/mapper/VG01-dblog</span>
+<span class="quote1">&gt;                       9.9G  1.6G  7.8G  17% /MYSQL/LOG</span>
+<span class="quote1">&gt; /dev/drbd0            341G  180G  144G  56% /MYSQL_DATA</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 2013-01-10  4:25, yoshiyuki komiya  :</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; こんにちは。小宮と申します。</span>
+<span class="quote1">&gt; MySQLのログはいくつか種類と方法がありますので</span>
+<span class="quote1">&gt; どのログが削除対象か、を明記していただくとよいかと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  とりわけ運用中に目立って増えるのはバイナリログ(mysql-bin.******)かと思いましたので</span>
+<span class="quote1">&gt; 確認・削除の方法を簡単に記載しましたのでご参考ください。</span>
+<span class="quote1">&gt;  (まったく別のログファイルの話でしたら見当違いでした。すみません…)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  ・バイナリログの一覧を表示</span>
+<span class="quote1">&gt;   mysql&gt; SHOW MASTER LOGS;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  ・バイナリログの削除</span>
+<span class="quote1">&gt;  指定したログファイルの番号より前のバイナリログが削除対象となります。</span>
+<span class="quote1">&gt;   PURGE MASTER LOGS TO '&lt;ログファイル名&gt;'</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  ※実行例</span>
+<span class="quote1">&gt;  mysql&gt; PURGE MASTER LOGS TO 'mysql-bin.000010';</span>
+<span class="quote1">&gt;  この場合は&quot;mysql-bin.000009&quot;以前のものが削除され、000010以降が残ります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  作業前の注意点としては</span>
+<span class="quote1">&gt; ・必ずmysqlモニター上から実施すること</span>
+<span class="quote1">&gt; ・削除前に、データファイルがどこまでバックアップ済みか、を確認すること</span>
+<span class="quote1">&gt; ・DRBD環境なので、ピアノード側でのログ削除も確認する</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  あたりでしょうか。</span>
+<span class="quote1">&gt; 以上、宜しくお願い致します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 2013年1月10日 14:33 Hwang Se Won &lt;coolguy318@xxxxxxxxxx&gt;:</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; お疲れ様です。</span>
+<span class="quote2">&gt;&gt; MySQLを担当している黄と申します。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; MySQLでログを削除することに関して質問があります。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  以下の構成になっているシステムで、MYSQL/LOGの領域が ９５%です。</span>
+<span class="quote2">&gt;&gt; ログを削除したいですが、MySQLに接続して、ログを削除する方法はありますか？</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  DRBD (Active)</span>
+<span class="quote2">&gt;&gt; Redhat Enterprise Linux 5.4 (64bit)</span>
+<span class="quote2">&gt;&gt; MySQL Community 5.5.25a</span>
+<span class="quote2">&gt;&gt; heartbeat-2.1.3</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 以上、よろしくお願いいたします。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="http://www.mysql.gr.jp/mysqlml/mysql/msg/15915/0/"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="15914">[前]</a><a href="15916">[次]</a><a href="../list/15901-16000">[番号順一覧]</a><a href="../thread/15901-16000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15912">  15912 2013-01-10 14:33 [Hwang Se Won &lt;coolgu] MySQLのログ削除に関して                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15913">@ 15913 2013-01-10 16:25 ┗[yoshiyuki komiya &lt;yo]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15914">@ 15914 2013-01-10 17:57 　┗[Hwang Se Won &lt;coolgu]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="15915">@ 15915 2013-01-11 01:23 　　┗[yoshiyuki komiya &lt;yo]                                   </a></span>
+</pre>
+</body>
+</html>

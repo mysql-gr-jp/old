@@ -1,0 +1,120 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2675</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2674">[前]</a><a href="2676">[次]</a><a href="../list/2601-2700">[番号順一覧]</a><a href="../thread/2601-2700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2675
+</p>
+<div class="header">
+<p>
+From: Ko Tanikawa &lt;Ko Tanikawa &lt;dev@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 04 Nov 2000 15:31:30 GMT<br>
+Subject: [mysql 02675] MyODBC 経由で JPEG ファイルを書き込むには？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは，谷川です。
+
+現在， Delphi で作成した Windows ソフトから，リモートの MySQL サー
+バの blob フィールドへ JPEG イメージを書き込もうとしているのです
+が，なかなかうまくいきません。
+
+カラム一覧
+ SID smallint not null,
+ ItemId integer not null,
+ FileId tinyint not null,
+ ImgBinary mediumblob,
+
+MySQL サーバーは Linux 上で動作していますが， Delphi からは，
+MyODBC-2.50.29 の SJIS 版経由で接続しています。（バイナリファイル
+をコード変換しないため） Delphi からは，大体下記のようにして書き
+込んでいます。
+
+----------------------------------------------
+fm := TMemoryStream.Create;
+jpg := TJPEGImage.Create;
+jpg.LoadFromFile(FileName);
+jpg.SaveToStream(fm);  
+  //JPEGのバイナリデータをメモリーストリームfmへセーブ
+
+with TQuery.Create(self) do begin
+  DatabaseName := Database1.DatabaseName;
+  SQL.Text := 'replace MItemImg (SID,ItemId,FileId,ImgBinary) '
+    + ' values (:SID,:ItemId,:FileId,:ImgBinary)';
+  ParamByName('SID').AsInteger := SID;
+  ParamByName('ItemId').AsInteger :=ItemId;
+  ParamByName('FileId').AsInteger := FileId;
+  ParamByName('ImgBinary').LoadFromStream(fm,ftBlob);
+    //fmからバイナリデータを読み込んでカラムへセット
+  try
+    ExecSQL;
+  finally
+    Free;
+    jpg.Free;
+    fm.Free;
+  end;
+end;
+----------------------------------------------
+
+一応書き込めるのですが，正しく書き込まれません。（画像によっては，
+まれに良いこともある）例えば，
+
+<a href="http://www.agapesystem.com/receive.php?SID=2&amp;FileId=1&amp;ItemId=8">http://www.agapesystem.com/receive.php?SID=2&amp;FileId=1&amp;ItemId=8</a>
+<a href="http://www.agapesystem.com/receive.php?SID=2&amp;FileId=1&amp;ItemId=38">http://www.agapesystem.com/receive.php?SID=2&amp;FileId=1&amp;ItemId=38</a>
+
+のようになってしまいます。 Delphi からは他にも色々な方法で試して
+みたのですが，何とか画像らしきものが現れるのは上記のコードでした。
+
+ちなみに，クライアントに Windows 版の PHP3 をインストールし，下記
+のコードを直接ダブルクリックして (php3.exe から？ ) 実行すると，
+ものの見事に書き込んでくれます。
+
+----------------------------------------------
+&lt;?
+$jpegfile=JPEG画像ファイル名;
+
+$conn=mysql_connect($HOST,$USERID,$PASSWD);
+mysql_select_db($DBNAME,$conn);
+
+$fp=fopen($jpegfile,&quot;r&quot;);
+$Binary=addslashes(fread($fp, filesize($jpegfile)));
+fclose ($fp);
+$sql = &quot;replace MItemImg (SID,ItemId,FileId,ImgBinary) values 
+(2,108,1,'$Binary')&quot;;
+$result = mysql_query($sql);
+?&gt;
+----------------------------------------------
+
+上記PHPで書き込んだ例
+<a href="http://www.agapesystem.com/receive.php?SID=2&amp;FileId=1&amp;ItemId=108">http://www.agapesystem.com/receive.php?SID=2&amp;FileId=1&amp;ItemId=108</a>
+<a href="http://www.agapesystem.com/receive.php?SID=2&amp;FileId=1&amp;ItemId=138">http://www.agapesystem.com/receive.php?SID=2&amp;FileId=1&amp;ItemId=138</a>
+
+何としても Delphi から直接書き込みたいんですが，何かヒントがござ
+いましたら，ぜひご教示頂ければ幸いです。 m(_ _)m
+
+サーバー側MySQL：Ver 3.22.32 (on RedHat Linux 6.1J)
+クライアント側：サーバー：Ver 3.23.27-beta クライアント：3.23.22-beta
+クライアントOS：Windows98
+MyODBC Ver 2.50.29
+
+-- 
+                             Thanks in advance,
+---------------------------------------------
+谷川剛一 dev@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="2674">[前]</a><a href="2676">[次]</a><a href="../list/2601-2700">[番号順一覧]</a><a href="../thread/2601-2700">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="2675">   2675 2000-11-05 00:31 [Ko Tanikawa &lt;dev@xxx] MyODBC 経由で JPEG ファイルを書き込むには？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2676">   2676 2000-11-05 01:45 ┗[&quot;MIYATSU Kazunari&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2681">   2681 2000-11-06 00:47 　┗[Ko Tanikawa &lt;dev@xxx]                                     </a></span>
+</pre>
+</body>
+</html>

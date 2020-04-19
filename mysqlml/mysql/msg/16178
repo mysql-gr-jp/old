@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16178</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16177">[前]</a><a href="16179">[次]</a><a href="../list/16101-16200">[番号順一覧]</a><a href="../thread/16101-16200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16178
+</p>
+<div class="header">
+<p>
+From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 3 Nov 2014 23:27:28 +0900<br>
+Subject: [mysql 16178] Re: [mysql 16177] Re: [mysql 16176] Re: [mysql 16175] LVS(DSR)を利用したMySQLの負荷分散について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんばんは。
+
+解決なさったようでよかったです！
+フィードバックありがとうございました :)
+
+yoku0825,
+
+2014年11月2日 18:16 香田昌俊 &lt;m.kouda@xxxxxxxxxx&gt;:
+
+<span class="quote1">&gt; yoku0825様</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ご回答頂きありがとうございます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ご教授頂いた内容を元に再度見直したところ、</span>
+<span class="quote1">&gt; LVS側のiptablesにmysqlの許可設定でNEWステートが入っている影響で、</span>
+<span class="quote1">&gt; MySQL側にFINが届いておらず、LVS側でドロップされておりました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; LVS側のiptablesを下記の様に変更し問題は解決しました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; -----</span>
+<span class="quote1">&gt; from</span>
+<span class="quote1">&gt; -A RH-Firewall-1-INPUT -s xxxx -p tcp -m state --state NEW -m tcp --dport</span>
+<span class="quote1">&gt; xxxx -j ACCEPT</span>
+<span class="quote1">&gt; to</span>
+<span class="quote1">&gt; -A RH-Firewall-1-INPUT -s xxxx -p tcp -m tcp --dport xxxx -j ACCEPT</span>
+<span class="quote1">&gt; -----</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ありがとうございました!!</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 2014年11月2日 17:21 yoku ts. &lt;yoku0825@xxxxxxxxxx&gt;:</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; こんにちは、yoku0825といいます。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; このあたり、参考にならないでしょうか。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; LVS が FIN を落とす | 3.1415.jp</span>
+<span class="quote2">&gt;&gt; <a href="http://3.1415.jp/node/226">http://3.1415.jp/node/226</a></span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; yoku0825,</span>
+<span class="quote2">&gt;&gt;  2014/11/01 23:26 &quot;香田昌俊&quot; &lt;m.kouda@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 香田と申します。初めて投稿させて頂きます。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; MySQLの負荷分散としてLVS(DSR)を利用し、Postfix(クライアント)からMySQLを</span>
+<span class="quote3">&gt;&gt;&gt; 参照させメール配信を行う検証を行っております。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; --------</span>
+<span class="quote3">&gt;&gt;&gt; 構成</span>
+<span class="quote3">&gt;&gt;&gt; - Postfix (クライアント) ---&gt; LVS(DSR) ---&gt; MySQL</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; バージョン</span>
+<span class="quote3">&gt;&gt;&gt; - Keepalived 1.2.7</span>
+<span class="quote3">&gt;&gt;&gt; - MySQL 5.5.36</span>
+<span class="quote3">&gt;&gt;&gt; - Postfix 2.6.6-6</span>
+<span class="quote3">&gt;&gt;&gt; --------</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; Postfix側でMySQLを参照させ、メール送信を行うと</span>
+<span class="quote3">&gt;&gt;&gt; 送信完了後も、MySQLにconnectionが残り続けるという事象が発生しました。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; メール配信をする度にconnectionが残り続け、</span>
+<span class="quote3">&gt;&gt;&gt; 最終的にMySQL でmax connectionに到達してしまうという状況です。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; netstatを見ると、MySQL側にESTABLISHEDが残り続け、</span>
+<span class="quote3">&gt;&gt;&gt; Postfix側にFIN_WAIT1が多発している状況です。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 何か考えられる要因等、アドバイスいただけると幸いです。</span>
+<span class="quote3">&gt;&gt;&gt; 宜しくお願いします。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="http://www.mysql.gr.jp/mysqlml/mysql/msg/16178/0/"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="16177">[前]</a><a href="16179">[次]</a><a href="../list/16101-16200">[番号順一覧]</a><a href="../thread/16101-16200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16175">@ 16175 2014-11-01 23:25 [香田昌俊 &lt;m.kouda@xx] LVS(DSR)を利用したMySQLの負荷分散について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16176">@ 16176 2014-11-02 17:21 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16175] LVS(DSR)を利用したMySQLの負荷分散について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16177">@ 16177 2014-11-02 18:16 　┗[香田昌俊 &lt;m.kouda@xx] Re: [mysql 16176] Re: [mysql 16175] LVS(DSR)を利用したMySQLの負荷分散について</a></span>
+<span class="current">-&gt;&nbsp;<a href="16178">@ 16178 2014-11-03 23:27 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16177] Re: [mysql 16176] Re: [mysql 16175] LVS(DSR)を利用したMySQLの負荷分散について</a></span>
+</pre>
+</body>
+</html>

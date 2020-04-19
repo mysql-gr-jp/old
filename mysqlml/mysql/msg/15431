@@ -1,0 +1,129 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15431</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15430">[前]</a><a href="15432">[次]</a><a href="../list/15401-15500">[番号順一覧]</a><a href="../thread/15401-15500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15431
+</p>
+<div class="header">
+<p>
+From: &quot;kenji@xxxxxxxxxx&quot; &lt;&quot;kenji@xxxxxxxxxx&quot; &lt;kenji@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 19 Nov 2010 11:59:27 +0900<br>
+Subject: [mysql 15431] EUC-JPの一部の文字がphpMyAdminで化ける<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんには、鈴木と申します。
+
+FreeBSD8.1 + mysql-server-5.5.4 + phpMyAdmin-3.3.4です
+MySQLをEUC-JPで使いたいので
+ports から WITH_CHARSET=ujis WITH_XCHARSET=all でインストール。
+
+# cat /var/db/mysql/my.cnf
+[mysqld]
+character-set-server=ujis
+skip-character-set-client-handshake
+
+mysql&gt; SHOW VARIABLES LIKE 'character_set%';
++--------------------------+----------------------------------+
+<span class="quote1">| Variable_name            | Value                            |</span>
++--------------------------+----------------------------------+
+<span class="quote1">| character_set_client     | ujis                             |</span>
+<span class="quote1">| character_set_connection | ujis                             |</span>
+<span class="quote1">| character_set_database   | ujis                             |</span>
+<span class="quote1">| character_set_filesystem | binary                           |</span>
+<span class="quote1">| character_set_results    | ujis                             |</span>
+<span class="quote1">| character_set_server     | ujis                             |</span>
+<span class="quote1">| character_set_system     | utf8                             |</span>
+<span class="quote1">| character_sets_dir       | /usr/local/share/mysql/charsets/ |</span>
++--------------------------+----------------------------------+
+8 rows in set (0.00 sec)
+
+上記の環境で
+
+# cat test-euc.sql
+CREATE DATABASE `test` ;
+USE `test`;
+CREATE TABLE `sample` ( `moji` text ) CHARSET=ujis;
+INSERT INTO `sample` VALUES ('普'),('通'),('の'),('文'),('字'),('〓'),('〓'),('〓');
+
+# mysql -p&quot;PASSWORD&quot; &lt; test-euc.sql
+
+としてtestデータベースにsampleテーブルにEUC-JPで
+普通の文字と機種依存の文字を入れました
+
+コマンドラインからは
+
+mysql&gt; SELECT `moji` FROM `sample`;
++------+
+<span class="quote1">| moji |</span>
++------+
+<span class="quote1">| 普   |</span>
+<span class="quote1">| 通   |</span>
+<span class="quote1">| の   |</span>
+<span class="quote1">| 文   |</span>
+<span class="quote1">| 字   |</span>
+<span class="quote1">| 〓   |</span>
+<span class="quote1">| 〓   |</span>
+<span class="quote1">| 〓   |</span>
++------+
+8 rows in set (0.00 sec)
+
+と期待通り表示されます。
+またEUC-JPで作成したPHPのWebサイトからも正常に扱えます。
+
+しかし、phpMyAdminでは機種依存文字の部分3つは文字化けします。
+
+SHOW VARIABLES LIKE 'character_set%'　を見てみると。
+Variable_name 	Value
+character_set_client 	utf8
+character_set_connection 	utf8
+character_set_database 	ujis
+character_set_filesystem 	binary
+character_set_results 	utf8
+character_set_server 	ujis
+character_set_system 	utf8
+character_sets_dir 	/usr/local/share/mysql/charsets/
+
+のようにグローバル値と違ったセッション値になっているし
+ブラウザに表示されるのも　charset=utf-8　なので
+phpMyAdmin で？ または MySQL が？
+EUC-JP を UTF-8 に変換して表示しているのだと思うのですが。
+
+EUC-JP の機種依存文字は変換するときに
+
+mb_convert_encoding(mb_convert_encoding($moji,&quot;sjis-win&quot;,&quot;EUC-JP&quot;),&quot;UTF-8&quot;,&quot;sjis-win&quot;)
+の様に
+EUC-JP → sjis-win → UTF-8 の手順で変換すると問題なく
+
+UTF-8で作ったWebサイトでも扱えます
+
+phpMyAdmin でこれらの文字を正しく扱えるようにする方法はありませんでしょ
+うか？
+
+または、どこかの設定が間違っているのでしょうか？
+
+よろしくお願いします。
+
+</pre>
+</div>
+<p class="button"><a href="15430">[前]</a><a href="15432">[次]</a><a href="../list/15401-15500">[番号順一覧]</a><a href="../thread/15401-15500">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15431">  15431 2010-11-19 11:59 [&quot;kenji@xxxxxxxxxx&quot; &lt;] EUC-JPの一部の文字がphpMyAdminで化ける  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15432">  15432 2010-11-19 12:09 ┗[Akio Imai &lt;suzuro204] Re: [mysql 15431] EUC-JPの一部の文字がphpMyAdminで化ける</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15433">  15433 2010-11-19 13:04 　┗[&quot;kenji@xxxxxxxxxx&quot; &lt;] Re: EUC-JPの一部の文字がphpMyAdminで化ける</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15434">  15434 2010-11-19 13:29 　　┣[Akio Imai &lt;suzuro204] Re: [mysql 15433] Re: EUC-JPの一部の文字がphpMyAdminで化ける</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15436">  15436 2010-11-19 13:44 　　┃┗[&quot;kenji@xxxxxxxxxx&quot; &lt;] Re: EUC-JPの一部の文字がphpMyAdminで化ける</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15435">  15435 2010-11-19 13:43 　　┗[SAKAI Kei &lt;sak2@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15437">  15437 2010-11-19 13:47 　　　┗[&quot;kenji@xxxxxxxxxx&quot; &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15438">  15438 2010-11-19 14:10 　　　　┗[SAKAI Kei &lt;sak2@xxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15439">  15439 2010-11-19 14:16 　　　　　┗[&quot;kenji@xxxxxxxxxx&quot; &lt;]                             </a></span>
+</pre>
+</body>
+</html>

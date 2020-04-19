@@ -1,0 +1,69 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3176</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="3175">[前]</a><a href="3177">[次]</a><a href="../list/3101-3200">[番号順一覧]</a><a href="../thread/3101-3200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3176
+</p>
+<div class="header">
+<p>
+From: Tomohiro Takahashi &lt;Tomohiro Takahashi &lt;t_takahashi@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 06 Feb 2001 22:55:46 +0900<br>
+Subject: [mysql 03176] Re: フィールドへ格納可能なサイズについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+  高橋(智)です。
+
+Mitsuru Maruno wrote:
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; MARUです。</span>
+<span class="quote1">&gt; 現在、LONGBLOB型のフィールドへデータを挿入するテストを行っているの</span>
+<span class="quote1">&gt; ですが、約16MB位以上のデータをINSERTする事が出来ません。何か制限が</span>
+<span class="quote1">&gt; あるのでしょうか？下記のようなSQLです。(LOAD_FILE関数を使っています)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; update t1 set dt=load_file(&quot;d:/temp/test.dat&quot;) where id=1</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; サーバの設定でmy.iniファイルの中で、</span>
+<span class="quote1">&gt; max_allowed_packet=30M    'パケットの最大サイズを30Mと設定</span>
+<span class="quote1">&gt; としています。</span>
+
+  JDBCドライバを拡張していて分かったのですが、MySQLが規定しているパケット
+の構造に原因があると思います。MySQLが受信するSQL文や、MySQLが送信する結果
+セットををパケットととして送信する場合、そのパケットの先頭にSQL文全体の長
+さをセットすることになるのですが、セットできるサイズが約16MBまでなのです。
+
+  具体的には、3バイトのフィールドでもってパケットのサイズを指定しまして、
+最大のパケットサイズ L は
+   L = x + (y * 256) + (z * 256 * 256) + 1 = 16843009 バイト
+     (ただし 0 &lt;= x,y,z =&lt; 256 )
+となり、約16MBになります。
+※ + 1 という余分なものは、それ1バイトでもってSQLコマンドの種別を示すため
+に使用されます。
+
+  で、このパケットの構造にもバージョンがあるようで、上位のバージョンの
+パケット構造を採用するようなドライバを作成すれば、壁を打ち破れるのかも
+しれません。しかし、詳しいことは分かりません。
+  どなたか詳しい方いらっしゃいませんか? &gt; みなさん
+
+
+-- 
+高橋智宏
+  Java読書会( <a href="http://www.t3-jpn.com/bof/">http://www.t3-jpn.com/bof/</a> )
+  T3-Japan( <a href="http://www.t3-jpn.com/">http://www.t3-jpn.com/</a> )
+
+</pre>
+</div>
+<p class="button"><a href="3175">[前]</a><a href="3177">[次]</a><a href="../list/3101-3200">[番号順一覧]</a><a href="../thread/3101-3200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3167">   3167 2001-02-06 14:17 [&quot;Mitsuru Maruno&quot; &lt;ma] フィールドへ格納可能なサイズについて    </a></span>
+<span class="current">-&gt;&nbsp;<a href="3176">   3176 2001-02-06 22:55 ┗[Tomohiro Takahashi &lt;]                                       </a></span>
+</pre>
+</body>
+</html>

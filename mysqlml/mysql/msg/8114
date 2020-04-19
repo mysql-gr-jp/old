@@ -1,0 +1,126 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8114</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8113">[前]</a><a href="8115">[次]</a><a href="../list/8101-8200">[番号順一覧]</a><a href="../thread/8101-8200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8114
+</p>
+<div class="header">
+<p>
+From: 伊藤 恵吾 &lt;伊藤 恵吾 &lt;k5_ito@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 7 Aug 2003 18:47:38 +0900 (JST)<br>
+Subject: [mysql 08114] Re: InnoDB への大量 INSERT ，高速化 <br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+アドバイスを頂いた皆様：
+
+皆さんのお陰で大幅に高速化することができました。
+ありがとうございました。
+
+キーポイントとなったのは、
+「innodb_buffer_pool_size」と、
+「set autocommit=0;」です。
+（どちらが効果をもたらしたのかは不明です。）
+
+以下、考察です。
+
+「7.6.9 Performance tuning tips」
+<a href="http://www.mysql.gr.jp/jpdoc/3.23.x/manual.ja_Table_types.html#InnoDB_Consistent_read_example">http://www.mysql.gr.jp/jpdoc/3.23.x/manual.ja_Table_types.html#InnoDB_Consistent_read_example</a>
+より以下、抜粋。
+
+1. もし Unix `top' や Windows `Task Manager' が CPU 使用
+率を 70% 未満に表示している場合、おそらく、disk アクセス
+に処理が取られています。とても多くのトランザクションのコ
+ミットを作成しているか、バッファプールが小さいのでしょう
+。バッファプールを大きくすれば良くなりますが、しかし、バ
+ッファプールは物理メモリの 80% より大きくしないように。
+
+  → /etc/my.cnf で
+     set-variable = innodb_buffer_pool_size=64M
+  を指定した。
+
+7. InnoDB にデータを流し込む場合には、 MySQL の設定が
+autocommit=1 
+になっていないようにします。それぞれの全ての insert が log
+
+をディスクにフラッシュすることを要求するからです。取り込
+む SQL の最初に 
+
+set autocommit=0;
+
+を追加し、最後に 
+
+commit;
+
+を書きます。 
+
+  → set autocommit=0;
+     commit;
+  を追加した。
+
+
+　　　　↓
+
+今まで10時間以上かかっていたものが、2時間50分ほどで完了
+するようになりました。
+
+　アドバイス、誠にありがとうございました。
+
+
+ --- Tatsuhiko Miyagawa &lt;miyagawa@xxxxxxxxxx&gt; からのメッ
+セージ：
+<span class="quote1">&gt; 宮川です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; At Thu, 7 Aug 2003 14:07:05 +0900 (JST),</span>
+<span class="quote1">&gt; 伊藤 恵吾 wrote:</span>
+<span class="quote3">&gt; &gt; &gt; 毎回commitしているのでは？</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote1">&gt; 1000回insertしたら１回commitなんて感じでやれば早くなり&gt;</span>
+<span class="quote1">&gt; ます．</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; 外してたらごめんちゃい</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 1000個のVALUE</span>
+<span class="quote1">&gt; を一度にINSERTしています。具体的にはこうで</span>
+<span class="quote2">&gt; &gt; す。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; LOCK TABLES foo WRITE;</span>
+<span class="quote2">&gt; &gt; INSERT INTO foo VALUES</span>
+<span class="quote2">&gt; &gt;   (f1, ...),</span>
+<span class="quote2">&gt; &gt;   (f2, ...),</span>
+<span class="quote2">&gt; &gt;   ....</span>
+<span class="quote2">&gt; &gt;   (f1000, ...);</span>
+<span class="quote2">&gt; &gt; UNLOCK TABLES;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; SET autocommit=0;</span>
+<span class="quote1">&gt; INSERT INTO ..:</span>
+<span class="quote1">&gt; COMMIT;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ではどうでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; Tatsuhiko Miyagawa &lt;miyagawa@xxxxxxxxxx&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="8113">[前]</a><a href="8115">[次]</a><a href="../list/8101-8200">[番号順一覧]</a><a href="../thread/8101-8200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8108">   8108 2003-08-07 11:29 [伊藤 恵吾 &lt;k5_ito@xx] InnoDB への大量 INSERT ，高速化         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8109">   8109 2003-08-07 12:00 ┣[hironaka &lt;hironaka@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8110">   8110 2003-08-07 13:57 ┃┣[ken &lt;t_takahashi@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8111">   8111 2003-08-07 14:07 ┃┗[伊藤 恵吾 &lt;k5_ito@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8113">   8113 2003-08-07 14:27 ┃　┗[Tatsuhiko Miyagawa &lt;]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="8114">   8114 2003-08-07 18:47 ┃　　┗[伊藤 恵吾 &lt;k5_ito@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8112">   8112 2003-08-07 14:25 ┗[SUGAWARA Hajime &lt;sug]                                       </a></span>
+</pre>
+</body>
+</html>

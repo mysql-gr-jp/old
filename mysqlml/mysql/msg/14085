@@ -1,0 +1,259 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14085</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14084">[前]</a><a href="14086">[次]</a><a href="../list/14001-14100">[番号順一覧]</a><a href="../thread/14001-14100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14085
+</p>
+<div class="header">
+<p>
+From: &quot;Katsuyuki Sakai&quot; &lt;&quot;Katsuyuki Sakai&quot; &lt;sakai@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 3 Jul 2007 16:46:17 +0900<br>
+Subject: [mysql 14085] Re: レプリケーションが一瞬だけ遅れる<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+酒井と申します。
+
+masterとslaveの時刻は同期していますでしょうか（MySQL
+5.0.41のソースを読む限り、masterとslaveの時刻差はSeconds_Behind_Master表示時に補正されているように見えますが）。
+また
+SELECT UNIX_TIMESTAMP();
+をmasterとslaveで同時に実行した際の値はどのようになるか、教えていただけますでしょうか。
+
+--
+酒井
+
+On 7/2/07, 橋本健太 &lt;kem@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; クックパッドの橋本と申します。</span>
+<span class="quote1">&gt; いつもお世話になっております。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; CentOS4.3上で、</span>
+<span class="quote1">&gt; マスターがMySQL 4.1.12、スレーブがMySQL 5.0.41のシステムで、</span>
+<span class="quote1">&gt; レプリケーションを行っているのですが、不可解な現象に悩まされております。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; スレーブでSHOW SLAVE STATUS したときに、Seconds_Behind_Masterが、</span>
+<span class="quote1">&gt; 一瞬だけ、150秒ほどになったりもどったりするという現象です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 1〜2秒の隙間を開けて、４回連続でSHOW SLAVE STATUSしたところ、</span>
+<span class="quote1">&gt; 以下のようになりました。</span>
+<span class="quote1">&gt; （パラメータは一部の抜粋です。省略なしのものを、メールの最後に載せます。）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; show slave status \G</span>
+<span class="quote1">&gt;         Read_Master_Log_Pos: 150756503</span>
+<span class="quote1">&gt;               Relay_Log_Pos: 151129280</span>
+<span class="quote1">&gt;         Exec_Master_Log_Pos: 150753080</span>
+<span class="quote1">&gt;             Relay_Log_Space: 151132727</span>
+<span class="quote1">&gt;       Seconds_Behind_Master: 167</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; show slave status \G</span>
+<span class="quote1">&gt;         Read_Master_Log_Pos: 150772717</span>
+<span class="quote1">&gt;               Relay_Log_Pos: 151149027</span>
+<span class="quote1">&gt;         Exec_Master_Log_Pos: 150772717</span>
+<span class="quote1">&gt;             Relay_Log_Space: 151149027</span>
+<span class="quote1">&gt;       Seconds_Behind_Master: 0</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; show slave status \G</span>
+<span class="quote1">&gt;         Read_Master_Log_Pos: 150808337</span>
+<span class="quote1">&gt;               Relay_Log_Pos: 151183739</span>
+<span class="quote1">&gt;         Exec_Master_Log_Pos: 150807249</span>
+<span class="quote1">&gt;             Relay_Log_Space: 151184835</span>
+<span class="quote1">&gt;       Seconds_Behind_Master: 167</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; show slave status \G</span>
+<span class="quote1">&gt;         Read_Master_Log_Pos: 150819730</span>
+<span class="quote1">&gt;               Relay_Log_Pos: 151196286</span>
+<span class="quote1">&gt;         Exec_Master_Log_Pos: 150819730</span>
+<span class="quote1">&gt;             Relay_Log_Space: 151196286</span>
+<span class="quote1">&gt;       Seconds_Behind_Master: 0</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この様に、数秒の間に、Seconds_Behind_Masterが、遅れたり、</span>
+<span class="quote1">&gt; 戻ったりを繰り返すのですが、同じような現象に会ったことがある方、</span>
+<span class="quote1">&gt; 原因の見当がつくかたなどいらっしゃいますでしょうか。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ネットワークの遅延などがあるのかとも思ったのですが、遅れて</span>
+<span class="quote1">&gt; 戻った直後に、また同じだけ遅れたりしているので、</span>
+<span class="quote1">&gt; 原因はまた、ほかの場所にあるのではないかと思っております。、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; お知恵をお貸しいただけると助かります。</span>
+<span class="quote1">&gt; よろしくお願いいたします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ---- show slave status を４回行った結果 ----</span>
+<span class="quote1">&gt; mysql&gt; show slave status \G</span>
+<span class="quote1">&gt; *************************** 1. row ***************************</span>
+<span class="quote1">&gt;              Slave_IO_State: Waiting for master to send event</span>
+<span class="quote1">&gt;                 Master_Host: 192.168.1.100</span>
+<span class="quote1">&gt;                 Master_User: repl</span>
+<span class="quote1">&gt;                 Master_Port: 3306</span>
+<span class="quote1">&gt;               Connect_Retry: 60</span>
+<span class="quote1">&gt;             Master_Log_File: masterdb-bin.001869</span>
+<span class="quote1">&gt;         Read_Master_Log_Pos: 150756503</span>
+<span class="quote1">&gt;              Relay_Log_File: slave5-relay-bin.001151</span>
+<span class="quote1">&gt;               Relay_Log_Pos: 151129280</span>
+<span class="quote1">&gt;       Relay_Master_Log_File: masterdb-bin.001869</span>
+<span class="quote1">&gt;            Slave_IO_Running: Yes</span>
+<span class="quote1">&gt;           Slave_SQL_Running: Yes</span>
+<span class="quote1">&gt;             Replicate_Do_DB:</span>
+<span class="quote1">&gt;         Replicate_Ignore_DB:</span>
+<span class="quote1">&gt;          Replicate_Do_Table:</span>
+<span class="quote1">&gt;      Replicate_Ignore_Table:</span>
+<span class="quote1">&gt;     Replicate_Wild_Do_Table: db1.%,db1.%</span>
+<span class="quote1">&gt; Replicate_Wild_Ignore_Table:</span>
+<span class="quote1">&gt;                  Last_Errno: 0</span>
+<span class="quote1">&gt;                  Last_Error:</span>
+<span class="quote1">&gt;                Skip_Counter: 0</span>
+<span class="quote1">&gt;         Exec_Master_Log_Pos: 150753080</span>
+<span class="quote1">&gt;             Relay_Log_Space: 151132727</span>
+<span class="quote1">&gt;             Until_Condition: None</span>
+<span class="quote1">&gt;              Until_Log_File:</span>
+<span class="quote1">&gt;               Until_Log_Pos: 0</span>
+<span class="quote1">&gt;          Master_SSL_Allowed: No</span>
+<span class="quote1">&gt;          Master_SSL_CA_File:</span>
+<span class="quote1">&gt;          Master_SSL_CA_Path:</span>
+<span class="quote1">&gt;             Master_SSL_Cert:</span>
+<span class="quote1">&gt;           Master_SSL_Cipher:</span>
+<span class="quote1">&gt;              Master_SSL_Key:</span>
+<span class="quote1">&gt;       Seconds_Behind_Master: 167</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; show slave status \G</span>
+<span class="quote1">&gt; *************************** 1. row ***************************</span>
+<span class="quote1">&gt;              Slave_IO_State: Waiting for master to send event</span>
+<span class="quote1">&gt;                 Master_Host: 192.168.1.100</span>
+<span class="quote1">&gt;                 Master_User: repl</span>
+<span class="quote1">&gt;                 Master_Port: 3306</span>
+<span class="quote1">&gt;               Connect_Retry: 60</span>
+<span class="quote1">&gt;             Master_Log_File: masterdb-bin.001869</span>
+<span class="quote1">&gt;         Read_Master_Log_Pos: 150772717</span>
+<span class="quote1">&gt;              Relay_Log_File: slave5-relay-bin.001151</span>
+<span class="quote1">&gt;               Relay_Log_Pos: 151149027</span>
+<span class="quote1">&gt;       Relay_Master_Log_File: masterdb-bin.001869</span>
+<span class="quote1">&gt;            Slave_IO_Running: Yes</span>
+<span class="quote1">&gt;           Slave_SQL_Running: Yes</span>
+<span class="quote1">&gt;             Replicate_Do_DB:</span>
+<span class="quote1">&gt;         Replicate_Ignore_DB:</span>
+<span class="quote1">&gt;          Replicate_Do_Table:</span>
+<span class="quote1">&gt;      Replicate_Ignore_Table:</span>
+<span class="quote1">&gt;     Replicate_Wild_Do_Table: db1.%,db1.%</span>
+<span class="quote1">&gt; Replicate_Wild_Ignore_Table:</span>
+<span class="quote1">&gt;                  Last_Errno: 0</span>
+<span class="quote1">&gt;                  Last_Error:</span>
+<span class="quote1">&gt;                Skip_Counter: 0</span>
+<span class="quote1">&gt;         Exec_Master_Log_Pos: 150772717</span>
+<span class="quote1">&gt;             Relay_Log_Space: 151149027</span>
+<span class="quote1">&gt;             Until_Condition: None</span>
+<span class="quote1">&gt;              Until_Log_File:</span>
+<span class="quote1">&gt;               Until_Log_Pos: 0</span>
+<span class="quote1">&gt;          Master_SSL_Allowed: No</span>
+<span class="quote1">&gt;          Master_SSL_CA_File:</span>
+<span class="quote1">&gt;          Master_SSL_CA_Path:</span>
+<span class="quote1">&gt;             Master_SSL_Cert:</span>
+<span class="quote1">&gt;           Master_SSL_Cipher:</span>
+<span class="quote1">&gt;              Master_SSL_Key:</span>
+<span class="quote1">&gt;       Seconds_Behind_Master: 0</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; show slave status \G</span>
+<span class="quote1">&gt; *************************** 1. row ***************************</span>
+<span class="quote1">&gt;              Slave_IO_State: Waiting for master to send event</span>
+<span class="quote1">&gt;                 Master_Host: 192.168.1.100</span>
+<span class="quote1">&gt;                 Master_User: repl</span>
+<span class="quote1">&gt;                 Master_Port: 3306</span>
+<span class="quote1">&gt;               Connect_Retry: 60</span>
+<span class="quote1">&gt;             Master_Log_File: masterdb-bin.001869</span>
+<span class="quote1">&gt;         Read_Master_Log_Pos: 150808337</span>
+<span class="quote1">&gt;              Relay_Log_File: slave5-relay-bin.001151</span>
+<span class="quote1">&gt;               Relay_Log_Pos: 151183739</span>
+<span class="quote1">&gt;       Relay_Master_Log_File: masterdb-bin.001869</span>
+<span class="quote1">&gt;            Slave_IO_Running: Yes</span>
+<span class="quote1">&gt;           Slave_SQL_Running: Yes</span>
+<span class="quote1">&gt;             Replicate_Do_DB:</span>
+<span class="quote1">&gt;         Replicate_Ignore_DB:</span>
+<span class="quote1">&gt;          Replicate_Do_Table:</span>
+<span class="quote1">&gt;      Replicate_Ignore_Table:</span>
+<span class="quote1">&gt;     Replicate_Wild_Do_Table: db1.%,db1.%</span>
+<span class="quote1">&gt; Replicate_Wild_Ignore_Table:</span>
+<span class="quote1">&gt;                  Last_Errno: 0</span>
+<span class="quote1">&gt;                  Last_Error:</span>
+<span class="quote1">&gt;                Skip_Counter: 0</span>
+<span class="quote1">&gt;         Exec_Master_Log_Pos: 150807249</span>
+<span class="quote1">&gt;             Relay_Log_Space: 151184835</span>
+<span class="quote1">&gt;             Until_Condition: None</span>
+<span class="quote1">&gt;              Until_Log_File:</span>
+<span class="quote1">&gt;               Until_Log_Pos: 0</span>
+<span class="quote1">&gt;          Master_SSL_Allowed: No</span>
+<span class="quote1">&gt;          Master_SSL_CA_File:</span>
+<span class="quote1">&gt;          Master_SSL_CA_Path:</span>
+<span class="quote1">&gt;             Master_SSL_Cert:</span>
+<span class="quote1">&gt;           Master_SSL_Cipher:</span>
+<span class="quote1">&gt;              Master_SSL_Key:</span>
+<span class="quote1">&gt;       Seconds_Behind_Master: 167</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; show slave status \G</span>
+<span class="quote1">&gt; *************************** 1. row ***************************</span>
+<span class="quote1">&gt;              Slave_IO_State: Waiting for master to send event</span>
+<span class="quote1">&gt;                 Master_Host: 192.168.1.100</span>
+<span class="quote1">&gt;                 Master_User: repl</span>
+<span class="quote1">&gt;                 Master_Port: 3306</span>
+<span class="quote1">&gt;               Connect_Retry: 60</span>
+<span class="quote1">&gt;             Master_Log_File: masterdb-bin.001869</span>
+<span class="quote1">&gt;         Read_Master_Log_Pos: 150819730</span>
+<span class="quote1">&gt;              Relay_Log_File: slave5-relay-bin.001151</span>
+<span class="quote1">&gt;               Relay_Log_Pos: 151196286</span>
+<span class="quote1">&gt;       Relay_Master_Log_File: masterdb-bin.001869</span>
+<span class="quote1">&gt;            Slave_IO_Running: Yes</span>
+<span class="quote1">&gt;           Slave_SQL_Running: Yes</span>
+<span class="quote1">&gt;             Replicate_Do_DB:</span>
+<span class="quote1">&gt;         Replicate_Ignore_DB:</span>
+<span class="quote1">&gt;          Replicate_Do_Table:</span>
+<span class="quote1">&gt;      Replicate_Ignore_Table:</span>
+<span class="quote1">&gt;     Replicate_Wild_Do_Table: db1.%,db1.%</span>
+<span class="quote1">&gt; Replicate_Wild_Ignore_Table:</span>
+<span class="quote1">&gt;                  Last_Errno: 0</span>
+<span class="quote1">&gt;                  Last_Error:</span>
+<span class="quote1">&gt;                Skip_Counter: 0</span>
+<span class="quote1">&gt;         Exec_Master_Log_Pos: 150819730</span>
+<span class="quote1">&gt;             Relay_Log_Space: 151196286</span>
+<span class="quote1">&gt;             Until_Condition: None</span>
+<span class="quote1">&gt;              Until_Log_File:</span>
+<span class="quote1">&gt;               Until_Log_Pos: 0</span>
+<span class="quote1">&gt;          Master_SSL_Allowed: No</span>
+<span class="quote1">&gt;          Master_SSL_CA_File:</span>
+<span class="quote1">&gt;          Master_SSL_CA_Path:</span>
+<span class="quote1">&gt;             Master_SSL_Cert:</span>
+<span class="quote1">&gt;           Master_SSL_Cipher:</span>
+<span class="quote1">&gt;              Master_SSL_Key:</span>
+<span class="quote1">&gt;       Seconds_Behind_Master: 0</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; 橋本健太</span>
+<span class="quote1">&gt; 世界最大の料理サイト！  「クックパッド」 - <a href="http://cookpad.com">http://cookpad.com</a></span>
+<span class="quote1">&gt; スタッフ大募集中！ - <a href="http://cookpad.com/jobs/">http://cookpad.com/jobs/</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="14084">[前]</a><a href="14086">[次]</a><a href="../list/14001-14100">[番号順一覧]</a><a href="../thread/14001-14100">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14084">  14084 2007-07-02 21:15 [&quot;橋本健太&quot; &lt;kem@xxxx] レプリケーションが一瞬だけ遅れる        </a></span>
+<span class="current">-&gt;&nbsp;<a href="14085">  14085 2007-07-03 16:46 ┗[&quot;Katsuyuki Sakai&quot; &lt;s]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14086">  14086 2007-07-03 21:08 　┗[&quot;橋本健太&quot; &lt;kem@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14087">  14087 2007-07-03 22:07 　　┗[&quot;Katsuyuki Sakai&quot; &lt;s]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14088">  14088 2007-07-03 22:45 　　　┣[&lt;kenrouse@xxxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14089">  14089 2007-07-04 00:45 　　　┗[&quot;Yoshinori Matsunobu]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14090">  14090 2007-07-04 01:51 　　　　┗[&quot;Katsuyuki Sakai&quot; &lt;s]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14096">  14096 2007-07-05 00:45 　　　　　┗[&quot;橋本健太&quot; &lt;kem@xxxx]                             </a></span>
+</pre>
+</body>
+</html>

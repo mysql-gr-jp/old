@@ -1,0 +1,217 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:669</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="668">[前]</a><a href="670">[次]</a><a href="../list/601-700">[番号順一覧]</a><a href="../thread/601-700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:669
+</p>
+<div class="header">
+<p>
+From: &quot;tateno&quot; &lt;&quot;tateno&quot; &lt;tatenon@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 1 Feb 1999 13:51:19 +0900<br>
+Subject: [mysql 00669] JDBC 接続について (2)<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+立野@KEOです.
+
+「JDBC入門(インターナショナル トムソン パブリッシング 豊福 剛監訳)」の
+sample applet(chap 4 のIQ.class)のurl,user,passwordのみを変更してmysql
+への接続(IE4.0)を試みたところconsoleに以下のエラーがでました.
+
+&quot;java.lang.NullPointerException
+ at IQ2.destroy
+ at com/ms/applet/AppletPanel.securedCall0
+ at com/ms/applet/AppletPanel.securedCall
+ at com/ms/applet/AppletPanel.processSentEvent
+ at com/ms/applet/AppletPanel.run
+ at java/lang/Thread.run&quot;
+
+<a href="http://www.listquest.com/lq/search.cgi?ln=mysqljava&amp;mid=&amp;sp=&amp;q=NullPointerEx">http://www.listquest.com/lq/search.cgi?ln=mysqljava&amp;mid=&amp;sp=&amp;q=NullPointerEx</a>
+ception&amp;b=1&amp;s=1&amp;o=0
+に(複数)あるもののように
+No suitable Driverのメッセージは一切出ません.
+SQLExceptionも表示されません.
+この症状はgweのdriverだけでなくorg.gjt.mm.mysql.Driverでも同じです.
+どなたか対処方法をご存知でしたらご教授下さいますようお願いします.
+
+
+使用したappletのcodeは以下の通り(上記上記書籍に同じ)
+&quot;import java.net.URL;
+import java.sql.*;
+import exgwe.sql.*;
+import java.awt.event.*;
+import java.awt.*;
+import java.applet.Applet;
+
+public class IQ2 extends java.applet.Applet implements MouseListener {
+  Button ConnectBtn = new Button(&quot;Connect to Database&quot;);
+  Button QueryBtn = new Button(&quot;Execute Query&quot;);
+
+  TextField QueryField = new TextField(40);
+  TextArea OutputField = new TextArea(10,75);
+  TextField NameField = new TextField(40);
+  TextField PassField = new TextField(40);
+  TextField DBurl = new TextField(40);
+  String url = &quot;jdbc:mysql://210.143.100.52:3306/mysql&quot;;
+  String Name = &quot;&quot;;
+  String Passwd = &quot;&quot;;
+  Connection con;
+
+
+public void init() {
+  QueryField.setEditable(true);
+  OutputField.setEditable(false);
+  NameField.setEditable(true);
+  DBurl.setEditable(true);
+
+ GridBagLayout gridbag = new GridBagLayout();
+ GridBagConstraints Con = new GridBagConstraints();
+ setLayout(gridbag);
+ setFont(new Font(&quot;Helvetica&quot;, Font.PLAIN, 12));
+ setBackground(Color.gray);
+ Con.weightx=1.0;
+ Con.weighty=0.0;
+ Con.anchor = GridBagConstraints.CENTER;
+ Con.fill = GridBagConstraints.NONE;
+ Con.gridwidth = GridBagConstraints.REMAINDER;
+
+
+  add(new Label(&quot;Name&quot;));
+  gridbag.setConstraints(NameField, Con);
+  add(NameField);
+  add(new Label(&quot;Password&quot;));
+  gridbag.setConstraints(PassField, Con);
+  add(PassField);
+
+  add(new Label(&quot;Database URL&quot;));
+  gridbag.setConstraints(DBurl, Con);
+  add(DBurl);
+
+  gridbag.setConstraints(ConnectBtn, Con);
+  add(ConnectBtn);
+  ConnectBtn.addMouseListener(this);
+
+  add(new Label(&quot;SQL Query&quot;));
+  gridbag.setConstraints(QueryField, Con);
+  add(QueryField);
+
+  gridbag.setConstraints(QueryBtn, Con);
+  add(QueryBtn);
+  QueryBtn.addMouseListener(this);
+
+  Label result_label = new Label(&quot;Result&quot;);
+  result_label.setFont(new Font(&quot;Helvetica&quot;, Font.PLAIN, 16));
+  result_label.setForeground(Color.blue);
+  gridbag.setConstraints(result_label, Con);
+  Con.weighty=1.0;
+  add(result_label);
+
+  gridbag.setConstraints(OutputField, Con);
+  OutputField.setForeground(Color.white);
+  OutputField.setBackground(Color.black);
+  add(OutputField);
+
+  setVisible(true);
+    } //init
+
+
+  public void mouseClicked( MouseEvent mEvt ) {
+
+    if (mEvt.getComponent() == QueryBtn) {
+      System.out.println(QueryField.getText());
+      OutputField.setText(Select(QueryField.getText()));
+
+    }
+
+    if (mEvt.getComponent() == ConnectBtn) {
+      Name=NameField.getText();
+      url=DBurl.getText();
+      Passwd = PassField.getText();
+
+      try
+
+ Class.forName(&quot;exgwe.sql.gweMysqlDriver&quot;).newInstance();
+ con = DriverManager.getConnection(url, Name, Passwd);
+ ConnectBtn.setLabel(&quot;Reconnect to Database&quot;);
+      }
+      catch( Exception e ) {
+ e.printStackTrace();
+ OutputField.setText(e.getMessage());
+      }
+    }
+  }
+
+
+public String Select(String QueryLine) {
+  String Output=&quot;&quot;;
+  int columns;
+  int pos;
+    try {
+
+      Statement stmt = con.createStatement();
+      ResultSet rs = stmt.executeQuery(QueryLine);
+      columns=(rs.getMetaData()).getColumnCount();
+
+      System.out.println((rs.getMetaData()).getColumnCount());
+
+
+      while(rs.next()) {
+
+ for( pos=1; pos&lt;=columns; pos++) {
+
+   Output+=rs.getString(pos)+&quot; &quot;;
+ }
+ Output+=&quot;\n&quot;;
+
+      }
+      stmt.close();
+      //      con.close();
+    }
+    catch( Exception e ) {
+      e.printStackTrace();
+      Output=e.getMessage();
+    }
+return Output;
+  }
+
+  // We must override that methods since we implemented this applet as a
+  // MouseListener. To avoid doing this, we could do an abstract
+  // implement of this applet.
+  public void mouseEntered (MouseEvent mEvt ) { }
+  public void mouseExited (MouseEvent mEvt ) { }
+  public void mousePressed (MouseEvent mEvt ) { }
+  public void mouseReleased (MouseEvent mEvt ) { }
+
+
+public void destroy() {
+
+  try {con.close();}
+  catch( Exception e ) {
+      e.printStackTrace();
+     System.out.println(e.getMessage());
+    }
+}
+
+}
+
+&quot;
+
+
+
+
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="668">[前]</a><a href="670">[次]</a><a href="../list/601-700">[番号順一覧]</a><a href="../thread/601-700">[スレッド一覧]</a></p>
+</body>
+</html>

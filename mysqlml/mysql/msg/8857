@@ -1,0 +1,100 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8857</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8856">[前]</a><a href="8858">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8857
+</p>
+<div class="header">
+<p>
+From: ML account &lt;ML account &lt;ml@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 23 Feb 2004 02:03:52 +0900<br>
+Subject: [mysql 08857] Re: <br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+　こんにちは。
+
+&quot;katayose&quot; &lt;katayose@xxxxxxxxxx&gt;さんの
+&lt;007101c3f913$245745e0$937ba8c0@katayose&gt;
+&quot;<a href="08855">[mysql 08855]</a> Re: &quot;
+
+
+<span class="quote1">&gt; 初めまして、今月メンバーに参加しました。片寄と申します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 問題を整理してみました。</span>
+<span class="quote1">&gt; この整理が近藤のものと合致しているかわかりませんが、こう仮定したらということ</span>
+<span class="quote1">&gt; で</span>
+<span class="quote1">&gt; 解決策を考えてみました。</span>
+&lt;snip&gt;
+
+　片寄さんの解決方針は、(3)で時間毎(24発)、送信と受信(２発)で合計48発の
+クエリを発行する事になります(正確には(2)のテーブル削除とテーブル作成のク
+エリ、結果を得るクエリの合計３発を含め51発ですが)。これはボクが[mysql
+08847]の「しかし、 24*2=48発のクエリを出して、は少々問題があるでしょう」
+と述べたやり方ですね。
+
+　もちろん、この方法で目的を果たす事は可能なのです。しかし「少々問題があ
+るでしょう」の通り、あまり良い方法とは言えません。mail_tb(とmaster_tb)が
+どれだけのレコードを持っているのか定かではありませんが、数が多い場合には
+DBMSに多大な負担を掛ける事になります。mail_tbが１万のレコードを持ってい
+るとすれば、合計 48万レコードを (インデックスが張ってあれば48万のインデッ
+クスを)舐める事になります。
+
+　と言う事で、「TRANSFORM文が使えないのであれば、この様な処理はDBMSを使
+っている処理系に任せてしまった方が好結果を生む」が<a href="08847">[mysql 08847]</a>の趣旨で
+すし、その後のもりきゅうさんの<a href="08849">[mysql 08849]</a>、<a href="08852">[mysql 08852]</a>での解法でしょ
+う。
+
+
+　また別の解法としては、集計結果そのままのテーブルをあらかじめ作成して置
+き、 mail_tbにレコードを追加する際に、その集計結果テーブルを更新する、が
+あります。この時点では、日付、時間、送信者と受信者（とその所属グループ)
+は確定している訳ですから、行追加クエリ(挿入失敗は無視)と送受信カウントの
+更新クエリの単純な２発を余計に出すだけです。
+
+　利点は処理が時間的に分散される、集計結果を得るのに集計結果テーブルへの
+軽いクエリ１発で済む、です。他方難点としては、何らかの原因で集計結果に誤
+りがあった場合には集計結果テーブルの再作成が必要で、その用意が工数的に不
+利となるだろう、があります。
+
+
+# <a href="08847">[mysql 08847]</a>での「<a href="8841">[mysql08841]</a>で沼田さんが示された方法位しか無いです
+# ね」は、少々勘違いでした。反省。
+
+
+
+
+　　　　松枝知直　　　　&lt;tomom@xxxxxxxxxx&gt;
+　　　　　　　　　　　　<a href="http://www.argus.ne.jp/~tomom/">http://www.argus.ne.jp/~tomom/</a>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8856">[前]</a><a href="8858">[次]</a><a href="../list/8801-8900">[番号順一覧]</a><a href="../thread/8801-8900">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8833">   8833 2004-02-20 17:48 [&lt;lavlav@xxxxxxxxxx&gt; ]                                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8834">   8834 2004-02-20 17:55 ┣[&lt;lavlav@xxxxxxxxxx&gt; ] Re: SQL 文について                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8836">   8836 2004-02-20 18:09 ┣[遠藤 俊裕 &lt;endo_t@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8839">   8839 2004-02-20 18:40 ┃┗[&lt;lavlav@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8841">   8841 2004-02-20 20:23 ┃　┣[&lt;numata@xxxxxxxxxx&gt; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8844">   8844 2004-02-21 04:51 ┃　┣[Kazuhiro Yoshida &lt;mo]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8846">   8846 2004-02-21 14:24 ┃　┃┗[&lt;konet218@xxxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8849">   8849 2004-02-21 17:59 ┃　┃　┣[Kazuhiro Yoshida &lt;mo]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8850">   8850 2004-02-21 18:38 ┃　┃　┃┗[&lt;konet218@xxxxxxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8852">   8852 2004-02-22 02:22 ┃　┃　┃　┗[Kazuhiro Yoshida &lt;mo]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8855">   8855 2004-02-22 16:11 ┃　┃　┗[&quot;katayose&quot; &lt;katayose]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="8857">   8857 2004-02-23 02:03 ┃　┃　　┗[ML account &lt;ml@xxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8847">   8847 2004-02-21 15:16 ┃　┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8848">   8848 2004-02-21 17:18 ┃　　┗[&lt;konet218@xxxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8838">   8838 2004-02-20 18:15 ┗[Shingo Yamagai &lt;yama] Re: SQL 文について                    </a></span>
+</pre>
+</body>
+</html>

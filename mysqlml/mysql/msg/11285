@@ -1,0 +1,113 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11285</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11284">[前]</a><a href="11286">[次]</a><a href="../list/11201-11300">[番号順一覧]</a><a href="../thread/11201-11300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11285
+</p>
+<div class="header">
+<p>
+From: Hirokazu Aoyama &lt;Hirokazu Aoyama &lt;aoyama@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 28 Mar 2005 11:13:08 +0900<br>
+Subject: [mysql 11285] Re: PCに負荷を掛けているのは何処ですか<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、青山です。
+
+<span class="quote1">&gt; 谷口です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 杉本誠 wrote:</span>
+<span class="quote2">&gt; &gt; パススルークエリを使えば、レコードセットをごっそり持って</span>
+<span class="quote2">&gt; &gt; くることもなく、比較的軽い処理にできるのではないのでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; それともフロントエンドをAccess、DBをMySQLなどのクライアント-サーバ型の</span>
+<span class="quote1">&gt; DBで、という意味でしょうか?</span>
+<span class="quote1">&gt; (福田さんの件で言うクライアントとサーバ側１間をダイレクトで)</span>
+
+クライアントPCに負荷がかかるのか、サーバ側に負荷がかかるのかは
+ケースバイケースですので、まず最初に、
+・1回のクエリーに対する結果セットの期待行数
+・クエリー発行の頻度
+・クライアントPCの台数
+・発行するクエリの複雑さ
+あたりについて何らかの想定がないと考えようがない話だと思います。
+
+闇雲に対策したのでは、クライアント側のプログラムをいじっても、
+負荷について改善効果はなかったという話になる可能性もあります。
+
+
+今回のケースと同じ構成ではないのですが、以前DBサーバと
+クライアントの負荷を測定したことがあります。
+RDBMSとしてはDB2(Linux &amp; Win)とかSQL Serverとかだったので、
+どこまで参考になるかは不明ですが。。
+
+テストの構成としては、DBサーバ1台と、クライアントPCが1台
+という構成です。
+クライアントPCはWindows/Linuxで、プログラムは自作です。
+また、１回のクエリーによる結果セットの行数は百万行としました。
+クエリーは単純な全件検索で、WHERE条件はなしです。
+
+結果としては、クライアント側の作りにもよる話ですが、
+クライアントを単純な結果セット取出しのループ処理とした場合は、
+サーバにはほとんどCPU負荷がかからず、クライアント側の
+負荷がボトルネックとなりました。
+# クライアント側の カーネル(TCP/IP処理) + プログラム(ループ処理)
+# を足して常時ほぼ100%。
+# ＆クライアントPCのCPU性能が高いほど処理時間が短くなる。
+
+このため、ネットワーク帯域が十分であり、クライアントPCの数が
+少ない場合は、クライアントPCの処理性能がボトルネックになる
+可能性があるということになります。
+
+このことから、結果セット行数が多い場合や、クライアントPCの
+台数が比較的少ない場合は、Access側の処理を最適化する
+(パススルークエリを使う等)のが効果的である可能性はある、
+と言えると思います。
+
+
+一方、サブクエリー等を含んだ複雑なSQL文を発行する場合は、
+結果セットの行数にかかわらず、サーバ側の実行計画の作成時に
+サーバマシンにかなりのCPU負荷がかかります。
+また、クライアントの数が多くなったり、クエリーを頻繁に大量に
+発行したりすることによっても、DBサーバ側に負荷が集中してくる
+ことになりますが、今回のご質問では大規模なシステムを想定して
+いるということですので、このパターンになる可能性も十分に
+考えられると思います。
+
+サーバ側の負荷が高い場合は、当然ながら、Accessの処理を多少
+いじったところであまり意味がありませんので、
+SQL文のチューニングや、DBのパラメータ調整や、場合によっては
+マシンを高性能のものに置き換えたり、テーブル構成の見直し等も
+必要になってくるかもしれません。
+
+
+-- 
+-----------------------------------
+Hirokazu Aoyama &lt;aoyama@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="11284">[前]</a><a href="11286">[次]</a><a href="../list/11201-11300">[番号順一覧]</a><a href="../thread/11201-11300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11250">  11250 2005-03-25 10:19 [福田　晃章 &lt;t.fukuta] PCに負荷を掛けているのは何処ですか      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11251">  11251 2005-03-25 10:23 ┗[Hiroshi Moriyama &lt;mt]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11252">  11252 2005-03-25 10:38 　┗[福田　晃章 &lt;t.fukuta]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11253">  11253 2005-03-25 11:06 　　┣[Kikuo Taniguchi &lt;ki-]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11255">  11255 2005-03-25 11:27 　　┗[Hiroshi Moriyama &lt;mt]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11258">  11258 2005-03-25 12:38 　　　┗[福田　晃章 &lt;t.fukuta]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11259">  11259 2005-03-25 13:24 　　　　┗[杉本誠 &lt;sugimoto@xxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11263">  11263 2005-03-25 22:03 　　　　　┗[Kikuo Taniguchi &lt;ki-]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11283">  11283 2005-03-28 08:57 　　　　　　┣[杉本誠 &lt;sugimoto@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11284">  11284 2005-03-28 09:31 　　　　　　┃┗[Kikuo Taniguchi &lt;ki-]                         </a></span>
+<span class="current">-&gt;&nbsp;<a href="11285">  11285 2005-03-28 11:13 　　　　　　┗[Hirokazu Aoyama &lt;aoy]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11286">  11286 2005-03-28 11:34 　　　　　　　┗[杉本誠 &lt;sugimoto@xxx]                         </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,4156 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.texi on 20 June 1998 -->
+
+  <TITLE>MySQL Reference Manual for version 3.21.31. - MySQL ¸À¸ì¥ê¥Õ¥¡¥ì¥ó¥¹</TITLE>
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Privilege_system.html">previous</A>, <A HREF="manual_Stabilty.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Syntax" HREF="manual_toc.html#Syntax"><STRONG>MySQL</STRONG> ¸À¸ì¥ê¥Õ¥¡¥ì¥ó¥¹</A></H1>
+
+<P>
+<A NAME="IDX26"></A>
+
+
+<H2><A NAME="Base Syntax" HREF="manual_toc.html#Base Syntax">¥ê¥Æ¥é¥ë¡£Ê¸»úÎó¤È¿ôÃÍ¤ò¤É¤Î¤è¤¦¤Ë½ñ¤¯¤«¡©</A></H2>
+
+
+
+<H3><A HREF="manual_toc.html#">Ê¸»úÎó</A></H3>
+
+<P>
+Ê¸»úÎó¤Ï ' ¤Þ¤¿¤Ï " ¤Ç³ç¤é¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+\ ¤Ï¥¨¥¹¥±¡¼¥×Ê¸»ú¤Ç¤¹¡£¼¡¤Î¥¨¥¹¥±¡¼¥×Ê¸»ú¤¬Ç§¼±¤µ¤ì¤Þ¤¹:
+<DL COMPACT>
+
+<DT><CODE>\0</CODE>
+<DD>
+ASCII 0 Ê¸»ú¡£
+<DT><CODE>\n</CODE>
+<DD>
+²þ¹ÔÊ¸»ú¡£
+<DT><CODE>\t</CODE>
+<DD>
+¥¿¥ÖÊ¸»ú¡£
+<DT><CODE>\r</CODE>
+<DD>
+¥ê¥¿¡¼¥óÊ¸»ú¡£
+<DT><CODE>\b</CODE>
+<DD>
+¥Ð¥Ã¥¯¥¹¥Ú¡¼¥¹Ê¸»ú¡£
+<DT><CODE>\'</CODE>
+<DD>
+<CODE>'</CODE> Ê¸»ú¡£
+<DT><CODE>\"</CODE>
+<DD>
+<CODE>"</CODE> Ê¸»ú¡£
+<DT><CODE>\\</CODE>
+<DD>
+<CODE>\</CODE> Ê¸»ú¡£
+<DT><CODE>\%</CODE>
+<DD>
+<CODE>%</CODE> Ê¸»ú¡£¤³¤ì¤Ï <CODE>%</CODE> ¤ò¸¡º÷¤¹¤ë¤¿¤á¤Ë¡¢¥ï¥¤¥ë¥É¥«¡¼¥ÉÊ¸»úÎóÃæ
+¤Ç»ÈÍÑ¤µ¤ì¤Þ¤¹¡£
+<DT><CODE>\_</CODE>
+<DD>
+<CODE>_</CODE> Ê¸»ú¡£¤³¤ì¤Ï <CODE>_</CODE> ¤ò¸¡º÷¤¹¤ë¤¿¤á¤Ë¡¢¥ï¥¤¥ë¥É¥«¡¼¥ÉÊ¸»úÎóÃæ
+¤Ç»ÈÍÑ¤µ¤ì¤Þ¤¹¡£
+</DL>
+
+
+<PRE>
+' ¤Ç»Ï¤Þ¤ëÊ¸»úÎóÃæ¤Î ' ¤Ï '' ¤È¤·¤Æ½ñ¤­¤Þ¤¹¡£
+" ¤Ç»Ï¤Þ¤ëÊ¸»úÎóÃæ¤Î " ¤Ï "" ¤È¤·¤Æ½ñ¤­¤Þ¤¹¡£
+</PRE>
+
+<P>
+¤É¤Î¤è¤¦¤Ë¤½¤ì¤¬Æ¯¤¯¤«¤ò¼¨¤¹¤¤¤¯¤Ä¤«¤Î select ¤ÎÎã¡£
+
+<PRE>
+MySQL&#62; select 'hello', "'hello'", '""hello""', '''h''e''l''l''o''', "hel""lo";
+1 rows in set (0.00 sec)
+
++-------+---------+-----------+-------------+--------+
+| hello | 'hello' | ""hello"" | 'h'e'l'l'o' | hel"lo |
++-------+---------+-----------+-------------+--------+
+| hello | 'hello' | ""hello"" | 'h'e'l'l'o' | hel"lo |
++-------+---------+-----------+-------------+--------+
+</PRE>
+
+
+<PRE>
+mysql&#62; select 'hello', "hello", '""hello""', "'ello", 'e''l''lo', '\'hello';
+1 rows in set (0.00 sec)
+
++-------+-------+-----------+-------+--------+--------+
+| hello | hello | ""hello"" | 'ello | e'l'lo | 'hello |
++-------+-------+-----------+-------+--------+--------+
+| hello | hello | ""hello"" | 'ello | e'l'lo | 'hello |
++-------+-------+-----------+-------+--------+--------+
+</PRE>
+
+
+<PRE>
+mysql&#62; select "This\nIs\nFour\nlines";
+1 rows in set (0.00 sec)
+
++--------------------+
+| This
+Is
+Four
+lines |
++--------------------+
+| This
+Is
+Four
+lines |
++--------------------+
+</PRE>
+
+<P>
+<A NAME="IDX27"></A>
+
+</P>
+<P>
+¥Ð¥¤¥Ê¥ê¥Ç¡¼¥¿¤ò BLOB ¤ËÁÞÆþ¤·¤¿¤¤¾ì¹ç¡¢¼¡¤ÎÊ¸»ú¤ò¥¨¥¹¥±¡¼¥×¥·¡¼¥±¥ó¥¹¤Ç
+É½¤¹É¬Í×¤¬¤¢¤ê¤Þ¤¹:
+<DL COMPACT>
+
+<DT><CODE>\0</CODE>
+<DD>
+ASCII 0¡£"\0"(¥Ð¥Ã¥¯¥¹¥é¥Ã¥·¥å¤È¿ô»ú 0)¤ËÃÖ¤­´¹¤¨¤Þ¤¹ ¡£
+<DT><CODE>\</CODE>
+<DD>
+ASCII 92, ¥Ð¥Ã¥¯¥¹¥é¥Ã¥·¥å
+<DT><CODE>'</CODE>
+<DD>
+ASCII 39, °úÍÑÉä
+<DT><CODE>"</CODE>
+<DD>
+ASCII 33, Æó½Å°úÍÑÉä
+</DL>
+
+<P>
+<CODE>'</CODE> Æâ¤Ç¤Î <CODE>"</CODE> ¤È <CODE>'</CODE> Æâ¤Ç¤Î <CODE>"</CODE> ¤Ï¥¨¥¹¥±¡¼¥×¤·¤Æ¤Ï
+¤¤¤±¤Þ¤»¤ó¡£
+
+</P>
+<P>
+C ¥³¡¼¥É¤ò½ñ¤¯¾ì¹ç¡¢<CODE>INSERT</CODE> Àá¤ÇÊ¸»ú¤ò¥¨¥¹¥±¡¼¥×¤¹¤ë¤¿¤á¤Ë¡¢C API 
+´Ø¿ô <CODE>mysql_escape_string(char *to,char *from,uint length)</CODE> ¤ò»ÈÍÑ
+¤Ç¤­¤Þ¤¹ ('to' ¤Ï¾¯¤Ê¤¯¤È¤â from ¤è¤ê2ÇÜÂç¤­¤¤¤³¤È¤ËÃí°Õ¤·¤Æ¤¯¤À¤µ¤¤)¡£ 
+perl ¤Ç¤Ï <CODE>quote</CODE> ´Ø¿ô¤ò»ÈÍÑ¤Ç¤­¤Þ¤¹¡£
+
+</P>
+<P>
+¾åµ­¤ÎÆÃ¼ìÊ¸»ú¤Î°ì¤Ä¤ò»ý¤Ä²ÄÇ½À­¤Î¤¢¤ëÁ´¤Æ¤ÎÊ¸»úÎó¤Ë¤Ä¤¤¤Æ¡¢¥¨¥¹¥±¡¼¥×´Ø
+¿ô¤ò¼Â¹Ô¤¹¤Ù¤­¤Ç¤¹¡ª
+
+</P>
+
+
+<H3><A HREF="manual_toc.html#">¿ôÃÍ</A></H3>
+
+<P>
+À°¿ô¤Ï¿ô»ú¤Î¹àÌÜ¤Ç¤¹¡£ÉâÆ°¾®¿ôÅÀ¤Ï <CODE>.</CODE> ¤Ç¾®¿ô¤òÊ¬³ä¤·¤Þ¤¹¡£
+
+</P>
+<P>
+ÀµÅö¤Ê¿ôÃÍ¤ÎÎã: <CODE>1221</CODE>, <CODE>294.42</CODE>, <CODE>-32032.6809e+10</CODE>¡£
+
+</P>
+
+
+<H3><A HREF="manual_toc.html#"><CODE>NULL</CODE></A></H3>
+
+<P>
+¥Æ¥­¥¹¥È¥Õ¥¡¥¤¥ë½ÐÎÏ·Á¼°¤ò»ÈÍÑ¤¹¤ë»þ¡¢<CODE>NULL</CODE> ¤Ï <CODE>\N</CODE> ¤È¤·¤ÆÉ½
+¤µ¤ì¤Þ¤¹¡£ ¡Ö<A HREF="manual_Syntax.html#Load">LOAD DATA INFILE ¹½Ê¸</A>¡×Àá»²¾È 
+
+</P>
+
+
+
+<H3><A NAME="Legal names" HREF="manual_toc.html#Legal names">¥Ç¡¼¥¿¥Ù¡¼¥¹, ¥Æ¡¼¥Ö¥ë, ¥¤¥ó¥Ç¥Ã¥¯¥¹¤½¤·¤Æ¹àÌÜ¤ÎÌ¾Á°</A></H3>
+
+<P>
+¥Ç¡¼¥¿¥Ù¡¼¥¹¡¢¥Æ¡¼¥Ö¥ë¡¢¥¤¥ó¥Ç¥Ã¥¯¥¹¤½¤·¤Æ¹àÌÜ¤ÎÌ¾Á°¤Ï¡¢<STRONG>MySQL</STRONG> 
+¤Ç¤ÏÁ´¤ÆÆ±¤¸µ¬Â§¤Ë´ð¤Å¤­¤Þ¤¹¡£
+
+</P>
+<P>
+Ì¾Á°¤Ï¡¢¥Ç¥Õ¥©¥ë¥ÈÊ¸»ú¥»¥Ã¥È¤Î¥¢¥ë¥Õ¥¡¥Ù¥Ã¥È¤È¿ô»ú¤ò»ÈÍÑ¤·¤Þ¤¹¡£¤³¤ì¤Ï¥Ç
+¥Õ¥©¥ë¥È¤Ç¤Ï ISO-8859-1 Latin1 ¤Ç¤¹¤¬¡¢<STRONG>MySQL</STRONG> ¥³¥ó¥Ñ¥¤¥ë»þ¤ËÊÑ¹¹
+¤Ç¤­¤Þ¤¹¡£
+
+</P>
+<P>
+<STRONG>MySQL</STRONG> ¤Ï¡¢²¿¤«¤¬Ì¾Á°¤«¿ôÃÍ¤«¤ò·èÄê¤Ç¤­¤ë¤³¤È¤¬É¬Í×¤Ê¤¿¤á¡¢¼¡¤Î
+ÆÃ¼ì¤Ê¾ì¹ç¤¬È¯À¸¤·¤Þ¤¹¡£
+
+</P>
+
+<UL>
+<LI>
+
+Ì¾Á°¤Ï¿ô»ú¤À¤±¤Ç¤Ï¤Ç¤­¤Þ¤»¤ó¡£
+<LI>
+
+Ì¾Á°¤Ï¿ô»ú¤Ç»Ï¤á¤ë¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£¤³¤ì¤ÏÂ¿¤¯¤ÎÂ¾¤Î¥·¥¹¥Æ¥à¤È¤Ï°Û¤Ê¤ê¤Þ¤¹¡ª
+<LI>
+
+<CODE>1e</CODE> ¤Î¤è¤¦¤ÊÌ¾Á°¤ò»ÈÍÑ¤¹¤ë¤³¤È¤Ï´«¤á¤é¤ì¤Þ¤»¤ó¡£¤³¤ì¤Ï <CODE>1e+1</CODE> 
+¤Î¤è¤¦¤ÊÉ½¸½¤Ï¡¢É½¸½ <CODE>1e + 1</CODE> ¤Þ¤¿¤Ï¿ôÃÍ <CODE>1e+1</CODE> ¤Î¤è¤¦¤Ë²ò¼á¤µ
+¤ì¤ë¤¿¤á¤Ç¤¹¡£
+</UL>
+
+<P>
+Ì¾Á°Ãæ¤Ë <CODE>.</CODE> ¤ä <CODE>@</CODE> ¤Î¤è¤¦¤Êµ­¹æÊ¸»ú¤Ïµö¤µ¤ì¤Þ¤»¤ó¡£¤³¤ì¤é¤Ï 
+<STRONG>MySQL</STRONG> ¤Î³ÈÄ¥¤Ç»ÈÍÑ¤µ¤ì¤ë¤¿¤á¤Ç¤¹¡£
+
+</P>
+<P>
+MySQL ¤Ç¤Ï¼¡¤Î¹½Ê¸¤Î¤É¤ì¤«¤Ç¹àÌÜ¤ò»²¾È¤Ç¤­¤Þ¤¹:
+
+</P>
+
+<UL>
+<LI>column
+
+<LI>table.column
+
+<LI>database.table.column
+
+<LI>table@database.column
+
+</UL>
+
+<P>
+'column' ¤Þ¤¿¤Ï 'table.column' ¤ò»ÈÍÑ¤¹¤ë¾ì¹ç¡¢»ÈÍÑ¤µ¤ì¤¿¥Æ¡¼¥Ö¥ë¤Î´Ö¤Ç
+Ì¾Á°¤¬¥æ¥Ë¡¼¥¯¤Ç¤Ê¤±¤ì¤Ð¥¨¥é¡¼¤Ë¤Ê¤ê¤Þ¤¹¡ª
+
+</P>
+
+
+<H2><A NAME="Column types" HREF="manual_toc.html#Column types">¹àÌÜ·¿</A></H2>
+
+<P>
+¼¡¤Î¹àÌÜ·¿¤¬¥µ¥Ý¡¼¥È¤µ¤ì¤Þ¤¹:
+
+</P>
+
+<UL>
+<LI>
+
+M ¤ÏºÇÂçÉ½¼¨¥µ¥¤¥º¤ò°ÕÌ£¤·¤Þ¤¹¡£
+<LI>
+
+L ¤Ï1¹Ô¤Î¼ÂºÝ¤ÎÄ¹¤µ¤ò°ÕÌ£¤·¤Þ¤¹¡£
+<LI>
+
+M ¤ÏºÇÂçÄ¹¤ò°ÕÌ£¤·¤Þ¤¹¡£
+<LI>
+
+D ¤Ï10¿Ê¿ô¤ò°ÕÌ£¤·¤Þ¤¹¡£
+</UL>
+
+<P>
+<A NAME="IDX28"></A>
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD>Name </TD><TD> Description </TD><TD> Size
+
+</TR NOSAVE>
+<TR><TD>TINYINT[(M)] [UNSIGNED] [ZEROFILL] </TD><TD>
+<A NAME="IDX29"></A>
+ 
+¤È¤Æ¤â¾®¤µ¤¤À°¿ô¡£Éä¹æ¤Ä¤­¤ÎÈÏ°Ï¤Ï -128¡Á127¡£Éä¹æ¤Ê¤·¤ÎÈÏ°Ï¤Ï 0¡Á255¡£ </TD><TD> 1
+
+</TR NOSAVE>
+<TR><TD>SMALLINT[(M)]. [UNSIGNED] [ZEROFILL] </TD><TD>
+<A NAME="IDX30"></A>
+ 
+¾®¤µ¤¤À°¿ô¡£Éä¹æ¤Ä¤­¤ÎÈÏ°Ï¤Ï -32768¡Á32767¡£Éä¹æ¤Ê¤·¤ÎÈÏ°Ï¤Ï 0¡Á65535¡£ </TD><TD> 2
+
+</TR NOSAVE>
+<TR><TD>MEDIUMINT[(M)] [UNSIGNED] [ZEROFILL] </TD><TD>
+<A NAME="IDX31"></A>
+ 
+Ãæ´Ö¤ÎÀ°¿ô¡£Éä¹æ¤¢¤ê¤ÎÈÏ°Ï¤Ï -8388608¡Á8388607¡£Éä¹æ¤Ê¤·¤ÎÈÏ°Ï¤Ï 0¡Á
+16777215¡£ </TD><TD> 3
+
+</TR NOSAVE>
+<TR><TD>INT[(M)] [UNSIGNED] [ZEROFILL] </TD><TD>
+<A NAME="IDX32"></A>
+ 
+ÄÌ¾ï¤ÎÀ°¿ô¡£Éä¹æ¤¢¤ê¤ÎÈÏ°Ï¤Ï -2147483648¡Á2147483647¡£Éä¹æ¤Ê¤·¤ÎÈÏ°Ï¤Ï 0¡Á
+4294967295¡£ </TD><TD> 4
+
+</TR NOSAVE>
+<TR><TD>BIGINT[(M)] [UNSIGNED] [ZEROFILL] </TD><TD>
+<A NAME="IDX33"></A>
+ 
+Âç¤­¤¤À°¿ô¡£Éä¹æ¤¢¤ê¤ÎÈÏ°Ï¤Ï -9223372036854775808¡Á9223372036854775807¡£
+Éä¹æ¤Ê¤·¤ÎÈÏ°Ï¤Ï 0¡Á18446744073709551615¡£Á´¤Æ¤Î±é»»¤ÏÉä¹çÉÕ¤­ BIGINT ¤Þ
+¤¿¤Ï DOUBLE ¤Ç¹Ô¤ï¤ì¤ë¤¿¤á¡¢Éä¹çÌµ¤·¤Î 9223372036854775807 (63 bits) ¤è
+¤ê¤âÂç¤­¤ÊÀ°¿ô¤ò¥Ó¥Ã¥È´Ø¿ô°Ê³°¤Ç»ÈÍÑ¤¹¤Ù¤­¤Ç¤Ï¤¢¤ê¤Þ¤»¤ó¡ª </TD><TD> 8
+
+</TR NOSAVE>
+<TR><TD>FLOAT(Precision) </TD><TD>
+<A NAME="IDX34"></A>
+ <A NAME="IDX35"></A>
+ 
+¾®¤µ¤¤ÉâÆ°¾®¿ôÅÀ¿ô¡£Precision ¤Ï 4 ¤Þ¤¿¤Ï 8 ¤Ë¤Ç¤­¤Þ¤¹¡£FLOAT(4) ¤ÏÃ±Àº
+ÅÙ¿ô¤Ç¡¢FLOAT(8) ¤ÏÇÜÀºÅÙ¿ô¤Ç¤¹ (DOUBLE ¥¨¥ó¥È¥ê¤ò»²¾È¤·¤Æ¤¯¤À¤µ¤¤)¡£¤³
+¤Î¹½Ê¸¤Ï ODBC ¸ß´¹¤Ç¤¹¡£ÈÏ°Ï¤Ï -3.402823466E+38F¡Á-1.175494351E-38, 0, 
+-1.175494351E-38¡Á3.402823466E+38F ¤Ç¤¹¡£ </TD><TD> 4
+
+</TR NOSAVE>
+<TR><TD>FLOAT[(M,D)] </TD><TD>
+<A NAME="IDX36"></A>
+ <A NAME="IDX37"></A>
+ 
+¾®¤µ¤¤ÉâÆ°¾®¿ôÅÀ¿ô¡£Éä¹æ¤Ê¤·¤Ë¤Ï¤Ç¤­¤Þ¤»¤ó¡£ÈÏ°Ï¤Ï -3.402823466E+38F¡Á
+-1.175494351E-38, 0, -1.175494351E-38¡Á3.402823466E+38F ¤Ç¤¹¡£ </TD><TD> 4
+
+</TR NOSAVE>
+<TR><TD>DOUBLE PRECISION[(M,D)] </TD><TD>
+<A NAME="IDX38"></A>
+ 
+ÄÌ¾ï¤ÎÉâÆ°¾®¿ôÅÀ¿ô¡£Éä¹æ¤Ê¤·¤Ë¤Ï¤Ç¤­¤Þ¤»¤ó¡£ÈÏ°Ï¤Ï
+-1.7976931348623157E+308¡Á-2.2250738585072014E-308, 0,
+2.2250738585072014E-308¡Á1.7976931348623157E+308 ¤Ç¤¹¡£ </TD><TD> 8
+
+</TR NOSAVE>
+<TR><TD>REAL[(M,D)] </TD><TD> DOUBLE ¤ÈÆ±¤¸ </TD><TD> 8
+<A NAME="IDX39"></A>
+ 
+
+</TR NOSAVE>
+<TR><TD>DECIMAL [(M,D)] </TD><TD>
+<A NAME="IDX40"></A>
+ 
+Èó¥Ñ¥Ã¥¯ÉâÆ°¾®¿ôÅÀ¿ô¡£Éä¹æ¤Ê¤·¤Ë¤Ï¤Ç¤­¤Þ¤»¤ó¡£¸½ºß¤Ï double ¤ÎºÇÂçÈÏ°Ï¤Î
+ÈÏ°Ï¤Ç¤¹¡£CHAR ¹àÌÜ¤Î¤è¤¦¤Ë¿¶Éñ¤¤¤Þ¤¹¡£ </TD><TD> M+D
+
+</TR NOSAVE>
+<TR><TD>NUMERIC [(M,D)] </TD><TD>
+<A NAME="IDX41"></A>
+ 
+DECIMAL ¤ÈÆ±¤¸ </TD><TD> M+D
+
+</TR NOSAVE>
+<TR><TD>TIMESTAMP [(M)] </TD><TD>
+<A NAME="IDX42"></A>
+ 
+¼«Æ°Åª¤Ê¥¿¥¤¥à¥¹¥¿¥ó¥×¡£Â¿¤¯¤Î TIMESTAMP ¹àÌÜ¤ò»ý¤Ä¾ì¹ç¡¢ºÇ½é¤Î°ì¤Ä¤À¤±
+¤¬¼«Æ°Åª¤Ë¤Ê¤ê¤Þ¤¹¡£ </TD><TD> 4
+
+</TR NOSAVE>
+<TR><TD>DATE </TD><TD>
+<A NAME="IDX43"></A>
+ 
+ÆüÉÕ¾ðÊó¤ò³ÊÇ¼¤¹¤ë¤¿¤á¤Î·¿¡£"YYYY-MM-DD" ¹½Ê¸¤ò»ÈÍÑ¤·¤Þ¤¹¤¬¡¢¿ôÃÍ¤Þ¤¿¤Ï
+Ê¸»úÎó¤Ç¹¹¿·¤Ç¤­¤Þ¤¹¡£¾¯¤Ê¤¯¤È¤â¼¡¤Î¹½Ê¸¤òÍý²ò¤·¤Þ¤¹:
+ 'YY-MM-DD', 'YYYY-MM-DD', 'YYMMDD' ¤½¤·¤Æ´°Á´¤Ê¥¿¥¤¥à¥¹¥¿¥ó¥×
+(YYYYMMDDHHMMDD)¡£ÈÏ°Ï¤Ï 0000-00-00 ¤«¤é 9999-12-31 ¤Ç¤¹¡£ </TD><TD> 3
+
+</TR NOSAVE>
+<TR><TD>TIME </TD><TD>
+<A NAME="IDX44"></A>
+ 
+»þ¹ï¾ðÊó¤ò³ÊÇ¼¤¹¤ë¤¿¤á¤Î·¿¡£"HH:MM:SS" ¹½Ê¸¤ò»ÈÍÑ¤·¤Þ¤¹¤¬¡¢¿ôÃÍ¤Þ¤¿¤ÏÊ¸
+»úÎó¤Ç¹¹¿·¤Ç¤­¤Þ¤¹¡£¾¯¤Ê¤¯¤È¤â¼¡¤Î·Á¼°¤¬Íý²ò¤Ç¤­¤Þ¤¹: 'HH:MM:SS', 'HHMMSS',
+'HHMM', 'HH'¡£ </TD><TD> 3
+
+</TR NOSAVE>
+<TR><TD>DATETIME </TD><TD>
+<A NAME="IDX45"></A>
+ 
+ÆüÉÕ¤È»þ¹ï¾ðÊó¤ò³ÊÇ¼¤¹¤ë¤¿¤á¤Î·¿¡£·Á¼° "YYYY-MM-DD HH:MM:SS"¡£8¥Ð¥¤¥È»È
+ÍÑ¤·¤Þ¤¹¡£ÈÏ°Ï¤Ï '0000-01-01 00:00:00'¡Á'9999-12-31 23:59:59' ¤Ç¤¹¡£ </TD><TD> 8
+
+</TR NOSAVE>
+<TR><TD>YEAR </TD><TD>
+<A NAME="IDX46"></A>
+ 
+Ç¯¤ò³ÊÇ¼¤¹¤ë¤¿¤á¤Î·¿¡£·Á¼° "YYYY" ¤Þ¤¿¤Ï "YY"¡£1¥Ð¥¤¥È»ÈÍÑ¤·¤Þ¤¹¡£ÈÏ°Ï¤Ï 
+0, 1901-2155 ¤Ç¤¹¡£ÈÏ°Ï 00-69 ¤Î2·å¤ÎÇ¯¤Ï 2000-2069 ¤È¤ß¤Ê¤µ¤ì¡¢Àµ¤·¤¯¥½¡¼
+¥È¤µ¤ì¤Þ¤¹¡£(MySQL 3.22 ¤Î·¿) </TD><TD> 1
+
+</TR NOSAVE>
+<TR><TD>CHAR(M) [binary] </TD><TD>
+<A NAME="IDX47"></A>
+ 
+¸ÇÄêÄ¹Ê¸»úÎó¡£¾ï¤Ë¸ÇÍ­¤ÎÄ¹¤µ¤Þ¤Ç¶õÇò¤¬Ëä¤á¤é¤ì¤Þ¤¹¡£ÈÏ°Ï¤Ï 1¡Á255 Ê¸»ú¤Ç
+¤¹¡£½ª¤ê¤Î¶õÇò¤ÏÆÉ¤ß½Ð¤·»þ¤Ëºï½ü¤µ¤ì¤Þ¤¹¡£binary ¥­¡¼¥ï¡¼¥É¤¬Í¿¤¨¤é¤ì¤Ê
+¤¤¾ì¹ç¡¢¥½¡¼¥È¤ÈÈæ³Ó¤Ï¥±¡¼¥¹¤Ë°ÍÂ¸¤·¤Þ¤»¤ó¡£ </TD><TD> M
+
+</TR NOSAVE>
+<TR><TD>VARCHAR(M) [binary] </TD><TD>
+<A NAME="IDX48"></A>
+ 
+²ÄÊÑÄ¹Ê¸»úÎó¡£¤½¤ÎÄ¹¤µ¤Ç³ÊÇ¼¤µ¤ì¤Þ¤¹¡£Á´¤Æ¤Î½ª¤ï¤ê¤Î¶õÇò¤Ï³ÊÇ¼»þ¤Ëºï½ü¤µ
+¤ì¤Þ¤¹¡£ºÇÂçÈÏ°Ï¤Ï 1¡Á255 Ê¸»ú¤Ç¤¹¡£binary ¥­¡¼¥ï¡¼¥É¤¬Í¿¤¨¤é¤ì¤Ê¤¤¾ì¹ç¡¢
+¥½¡¼¥È¤ÈÈæ³Ó¤Ï¥±¡¼¥¹¤Ë°ÍÂ¸¤·¤Þ¤»¤ó¡£ </TD><TD> L+1
+
+</TR NOSAVE>
+<TR><TD>TINYTEXT and TINYBLOB </TD><TD>
+<A NAME="IDX49"></A>
+ <A NAME="IDX50"></A>
+ 
+ºÇÂçÄ¹ 255 Ê¸»ú¤Î <CODE>TEXT</CODE>/<CODE>BLOB</CODE>¡£ </TD><TD> L+1
+
+</TR NOSAVE>
+<TR><TD>TEXT and BLOB </TD><TD>
+<A NAME="IDX51"></A>
+ <A NAME="IDX52"></A>
+ 
+ºÇÂçÄ¹ 65535 Ê¸»ú¤Î <CODE>TEXT</CODE>/<CODE>BLOB</CODE>¡£ </TD><TD> L+2
+
+</TR NOSAVE>
+<TR><TD>MEDIUMTEXT and MEDIUMBLOB </TD><TD>
+<A NAME="IDX53"></A>
+ <A NAME="IDX54"></A>
+ 
+ºÇÂçÄ¹ 16777216 Ê¸»ú¤Î <CODE>TEXT</CODE>/<CODE>BLOB</CODE>¡£ </TD><TD> L+3
+
+</TR NOSAVE>
+<TR><TD>LONGTEXT and LONGBLOB </TD><TD>
+<A NAME="IDX55"></A>
+ <A NAME="IDX56"></A>
+ 
+ºÇÂçÄ¹ 4294967295 Ê¸»ú¤Î <CODE>TEXT</CODE>/<CODE>BLOB</CODE>¡£ </TD><TD> L+4
+
+</TR NOSAVE>
+<TR><TD>ENUM('value','value2',...) </TD><TD>
+<A NAME="IDX57"></A>
+ 
+Ê¸»úÎó¥ª¥Ö¥¸¥§¥¯¥È¡£µö²Ä¤µ¤ì¤¿ÃÍ¥»¥Ã¥È¤Î°ì¤Ä¡Ê¤Þ¤¿¤Ï NULL¡Ë¤Î¤ß»ý¤Ä¤³¤È
+¤¬¤Ç¤­¤Þ¤¹¡£ ¡Ö<A HREF="manual_Syntax.html#Type details">¥Ç¡¼¥¿·¿¤Ë¤Ä¤¤¤Æ¤µ¤é¤Ë¾ÜºÙ</A>¡×Àá»²¾È ¡£ </TD><TD> 1 ¤Þ¤¿¤Ï 2
+
+</TR NOSAVE>
+<TR><TD>SET('value','value2',...) </TD><TD>
+<A NAME="IDX58"></A>
+ 
+Ê¸»úÎó¥ª¥Ö¥¸¥§¥¯¥È¡£µö²Ä¤µ¤ì¤¿ÃÍ¥»¥Ã¥È¤Î°ì¤Ä¤Þ¤¿¤ÏÊ£¿ô¤ÎÃÍ¤ò»ý¤Ä¤³¤È¤¬¤Ç
+¤­¤Þ¤¹¡£ ¡Ö<A HREF="manual_Syntax.html#Type details">¥Ç¡¼¥¿·¿¤Ë¤Ä¤¤¤Æ¤µ¤é¤Ë¾ÜºÙ</A>¡×Àá»²¾È ¡£ </TD><TD> 1-8
+
+</TR>
+</TABLE>
+
+
+
+<H3><A NAME="Type details" HREF="manual_toc.html#Type details">¥Ç¡¼¥¿·¿¤Ë¤Ä¤¤¤Æ¤µ¤é¤Ë¾ÜºÙ</A></H3>
+
+
+
+<H4><A HREF="manual_toc.html#">¥Ç¡¼¥¿¥Ù¡¼¥¹¥µ¥¤¥º¾ðÊó</A></H4>
+<P>
+¾å¤Î¥Æ¡¼¥Ö¥ë¤Ç L ¤Ï¥¤¥ó¥¹¥¿¥ó¥¹¤Î¼ÂºÝ¤ÎÄ¹¤µ¤ò¡¢M ¤ÏºÇÂçÄ¹¤ò°ÕÌ£¤·¤Þ¤¹¡£¤½¤·¤Æ¡¢
+"abcd" ¤Î L+1 ¤Ï¥Ç¡¼¥¿¥Ù¡¼¥¹Æâ¤Î 5 ¥Ð¥¤¥È¤ò°ÕÌ£¤·¤Þ¤¹¡£
+
+</P>
+<P>
+Ä¹¤µ¥Õ¥£¡¼¥ë¥É¤¬ L ¤Î¥Ç¡¼¥¿·¿¤ò»ÈÍÑ¤·¤¿¾ì¹ç¡¢²ÄÊÑÄ¹¥ì¥³¡¼¥É·Á¼°¤òÆÀ¤Þ¤¹¡£
+
+</P>
+
+
+<H4><A HREF="manual_toc.html#">¿ôÃÍ·¿</A></H4>
+<P>
+Á´¤Æ¤ÎÀ°¿ô·¿¤Ï¥ª¥×¥·¥ç¥ó¤Î°ú¿ô <CODE>unsigned</CODE> ¤ò»ý¤Ä¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£¹àÌÜ
+¤ÇÀµ¤Î¿ôÃÍ¤À¤±¤òµö²Ä¤·¤¿¤¤»þ¤ä¡¢¹àÌÜ¤Ë¾¯¤·Âç¤­¤Ê¿ôÃÍÈÏ°Ï¤òÉ¬Í×¤Ê»þ¤Ë¡¢¤³¤ì
+¤ò»ÈÍÑ¤Ç¤­¤Þ¤¹¡£
+
+</P>
+<P>
+¤Þ¤¿¡¢Á´¤Æ¤ÎÀ°¿ô¹àÌÜ¤Ë¤Ä¤¤¤Æ¤Î¥ª¥×¥·¥ç¥ó¤Î°ú¿ô <CODE>ZEROFILL</CODE> ¤Ï¡¢¹àÌÜ¤ÏºÇ
+ÂçÄ¹¤Þ¤Ç 0 ¤ÇËä¤á¤é¤ì¤ë¤³¤È¤ò°ÕÌ£¤·¤Þ¤¹¡£
+
+</P>
+<P>
+ºÇÂçÉ½¼¨¥µ¥¤¥º¤È¾®¿ô¤Ï¡¢À°·Á¤ÈºÇÂç¹àÌÜÉý¤Î·×»»¤Ë¤è¤ê¤Þ¤¹¡£
+
+</P>
+<P>
+ÈÏ°Ï³°¤ÎÀ°¿ôÃÍ¤ò³ÊÇ¼¤·¤¿»þ¡¢<STRONG>MySQL</STRONG> ¤ÏºÇÂç(¤Þ¤¿¤ÏºÇ¾®)¤Î²ÄÇ½¤ÊÃÍ
+¤ò³ÊÇ¼¤·¤Þ¤¹¡£<CODE>ALTER TABLE</CODE> ¤Þ¤¿¤Ï <CODE>LOAD DATA INFILE</CODE> »þ¡¢¤³¤ì
+¤é¤ÎÊÑ´¹¤Ï '·Ù¹ð' ¤È¤·¤ÆÆÀ¤é¤ì¤Þ¤¹¡£INSERT ¤È UPDATE ¤â·Ù¹ð¤òÊÖ¤»¤ë¤è¤¦
+¤Ë¤¹¤ë¤³¤È¤Ï TODO ¾å¤Ë¤¢¤ê¤Þ¤¹¡£¤·¤«¤·¡¢¤³¤ì¤Ï¼¡¤Î¥×¥í¥È¥³¥ëÊÑ¹¹¤Ë¥¹¥±¥¸¥å¡¼
+¥ë¤µ¤ì¤Æ¤¤¤Þ¤¹¡£
+
+</P>
+<P>
+Îã¤¨¤Ð¡¢<CODE>-999999999999999</CODE> ¤ò int ¹àÌÜ¤Ë³ÊÇ¼¤¹¤ë»þ¡¢ÃÍ¤Ï 
+<CODE>-2147483648</CODE> ¤È¤Ê¤ê¤Þ¤¹¡£¤½¤·¤Æ <CODE>9999999999999999</CODE> ¤Ï 
+<CODE>2147483647</CODE> ¤È¤Ê¤ê¤Þ¤¹¡£
+
+</P>
+<P>
+¤½¤·¤Æ¡¢<CODE>int</CODE> ¤¬Éä¹æÌµ¤·¤Î¾ì¹ç¡¢¾å¤Î³ÊÇ¼¤µ¤ì¤ëÃÍ¤Ï <CODE>0</CODE> ¤È
+<CODE>4294967296</CODE> ¤Ë¤Ê¤ê¤Þ¤¹¡£
+
+</P>
+<P>
+Æ±¤¸µ¬Â§¤¬Á´¤Æ¤ÎÂ¾¤ÎÀ°¿ô·¿¤Ë¤âÅ¬ÍÑ¤µ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+³ä¤êÅö¤Æ¤é¤ì¤¿ÎÎ°è¤òÄ¶¤¨¤ë int(4) ¹àÌÜ¤Î¥Ç¡¼¥¿¤òÊÖ¤¹»þ¡¢<STRONG>MySQL</STRONG> 
+¤Ï 9.99 ¤òÊÖ¤·¤Þ¤¹¡£¥ª¥Ú¥ì¡¼¥·¥ç¥ó¤¬ <CODE>UPDATE</CODE> ¤Î¾ì¹ç¤Ï¡¢·Ù¹ð¤¬½Ð¤µ
+¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>decimal(4,2)</CODE> ¤Î¤è¤¦¤Ê·¿¤Ï¡¢2·å¤Î¾®¿ôÃÍ¤ò»ý¤Ã¤¿ºÇÂç4Ê¸»ú¤ò°ÕÌ£¤¹¤ë
+¤³¤È¤ËÃí°Õ¤·¤Æ²¼¤µ¤¤¡£¤³¤ì¤Ï <CODE>-.99</CODE> -&#62; <CODE>9.99</CODE> ¤ÎÈÏ°Ï¤òÍ¿¤¨¤Þ¤¹¡£
+
+</P>
+<P>
+¤¤¤¯¤Ä¤«¤Î´Ý¤á¤ÎÌäÂê¤ò²óÈò¤¹¤ë¤¿¤á¤Ë¡¢<STRONG>MySQL</STRONG> ¤ÏÉâÆ°¾®¿ôÅÀ¤Î¹àÌÜ¤Ë
+³ÊÇ¼¤¹¤ëÁ´¤Æ¤ò¾ï¤Ë¡¢¾®¿ô¤Î¿ô¤Ë°ìÃ×¤¹¤ë¤è¤¦¤Ë´Ý¤á¤Þ¤¹¡£¤³¤ì¤Ï¡¢
+<CODE>float(8,2)</CODE> Æâ¤Ë³ÊÇ¼¤µ¤ì¤ë <CODE>2.333</CODE> ¤Ï <CODE>2.33</CODE> ¤È¤·¤Æ³ÊÇ¼
+¤µ¤ì¤ë¤³¤È¤ò°ÕÌ£¤·¤Þ¤¹¡£
+
+</P>
+<P>
+<A NAME="IDX59"></A>
+
+
+<H4><A HREF="manual_toc.html#"><CODE>TIMESTAMP</CODE> ·¿</A></H4>
+<P>
+1970Ç¯12·î1Æü 00:00 ¤«¤é 2106Ç¯¤Î¤¤¤Ä¤«¤Þ¤Ç¤ÎÈÏ°Ï¤ò»ý¤Á¡¢1ÉÃ¤ÎÀºÅÙ¤Ç¤¹¡£
+TIMESTAMP ¹àÌÜ¤Ï¡¢<CODE>NULL</CODE> ¤¬ÀßÄê¤µ¤ì¤ë¤«¡¢¥¹¥Æ¡¼¥È¥á¥ó¥ÈÃæ¤Ç¹àÌÜ¤¬¹¹
+¿·¤µ¤ì¤Ê¤±¤ì¤Ð <CODE>INSERT</CODE> ¤È <CODE>UPDATE</CODE> ¥¹¥Æ¡¼¥È¥á¥ó¥È¤Ç¼«Æ°Åª¤Ë¹¹
+¿·¤µ¤ì¤Þ¤¹¡£¥¤¥ó¥Ç¥Ã¥¯¥¹(¤Î°ìÉô)¤Ë¤Ç¤­¤Þ¤¹¡£Ãí°Õ: Â¿¤¯¤Î timestamp ¹àÌÜ
+¤¬¹Ô¤Ë¤¢¤ë¾ì¹ç¤Ï¡¢ºÇ½é¤Î timestamp ¹àÌÜ¤À¤±¤¬¼«Æ°Åª¤Ë¹¹¿·¤µ¤ì¤Þ¤¹¡£Ç¤°Õ
+¤Î timestamp ¹àÌÜ¤Ï <CODE>NULL</CODE> ¤òÀßÄê¤¹¤ì¤Ð¡¢¸½ºß¤Î»þ¹ï¤ËÀßÄê¤µ¤ì¤Þ¤¹¡£
+É½¼¨¥µ¥¤¥º¤Ë°ÍÂ¸¤·¤Æ¡¢¼¡¤Î·Á¼°¤Î°ì¤Ä¤¬ÆÀ¤é¤ì¤Þ¤¹: "YYYY-MM-DD HH:MM:SS",
+"YY-MM-DD HH:MM:SS", "YYYY-MM-DD" or "YY-MM-DD"¡£
+
+</P>
+<P>
+<A NAME="IDX60"></A>
+<A NAME="IDX61"></A>
+
+
+<H4><A HREF="manual_toc.html#"><CODE>TEXT</CODE> ¤È <CODE>BLOB</CODE> ·¿</A></H4>
+<P>
+¤³¤ì¤é¤Ï¾å¸ÂÌµ¤·¤Î²ÄÊÑÄ¹¤ò»ý¤Ä¤³¤È¤¬¤Ç¤­¤ë¥ª¥Ö¥¸¥§¥¯¥È¤Ç¤¹¡£Á´¤Æ¤Î TEXT 
+¤È BLOB ¥ª¥Ö¥¸¥§¥¯¥È¤Ï¤½¤ÎÄ¹¤µ(¥ª¥Ö¥¸¥§¥¯¥È¤Î·¿¤Ë°ÍÂ¸¤·¤Æ 1 ¤«¤é 4 ¥Ð¥¤
+¥È)¤È¶¦¤Ë³ÊÇ¼¤µ¤ì¤Þ¤¹¡£»ÈÍÑ²ÄÇ½¤Ê <CODE>TEXT</CODE> ¤È <CODE>BLOB</CODE> ¤ÎºÇÂçÄ¹¤Ï¡¢
+Í­¸ú¤Ê¥á¥â¥ê¤È¥¯¥é¥¤¥¢¥ó¥È¥Ð¥Ã¥Õ¥¡¤Ë°ÍÂ¸¤·¤Þ¤¹¡£<CODE>TEXT</CODE> ¤È 
+<CODE>BLOB</CODE> ¤Î°ã¤¤¤Ï¡¢<CODE>TEXT</CODE> ¤Ï¥±¡¼¥¹¤Ë°ÍÂ¸¤·¤Ê¤¤¤Ç¥½¡¼¥È¤ÈÈæ³Ó¤µ¤ì¡¢
+<CODE>BLOB</CODE> ¤Ï¥±¡¼¥¹¤Ë°ÍÂ¸¤·¤Æ(Ê¸»ú¥³¡¼¥É¤Ç)Èæ³Ó¤µ¤ì¤ë¤³¤È¤À¤±¤Ç¤¹¡£
+<CODE>TEXT </CODE>¤È <CODE>BLOB</CODE> ¥ª¥Ö¥¸¥§¥¯¥È¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¤Ë¤Ï¤Ç¤­¤Þ¤»¤ó¡£
+
+</P>
+<P>
+BLOB ¤Ï¥Ð¥¤¥Ê¥êµðÂç¥ª¥Ö¥¸¥§¥¯¥È(binary large object)¤Ç¡¢Âç¤­¤Ê¥Ç¡¼¥¿¤òÊÝ
+»ý¤Ç¤­¤Þ¤¹¡£4¼ïÎà¤Î BLOB ¤¬¤¢¤ê¤Þ¤¹  ¡Ö<A HREF="manual_Syntax.html#Column types">¹àÌÜ·¿</A>¡×Àá»²¾È ¡£ÄÌ¾ï¡¢BLOB ¤ÏÀ©
+¸ÂÌµ¤·¤Î VARCHAR ¤È¸«¤Ê¤¹¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>TEXT</CODE> ¤Ï¡¢¥½¡¼¥È¤ÈÈæ³Ó¤¬¥±¡¼¥¹¤Ë°ÍÂ¸¤·¤Ê¤¤ <CODE>BLOB</CODE> ¤Ç¤¹¡£
+
+</P>
+<P>
+<CODE>BLOB</CODE>/<CODE>TEXT</CODE> ¹àÌÜ¤Ï¥á¥Ã¥»¡¼¥¸¥Ð¥Ã¥Õ¥¡¤è¤êÂç¤­¤¯¤Ç¤­¤Þ¤»¤ó¡£¥µ¡¼
+¥Ð¤È¥¯¥é¥¤¥¢¥ó¥È¤Î¥á¥Ã¥»¡¼¥¸¥Ð¥Ã¥Õ¥¡¤òÊÑ¹¹¤¹¤ëÉ¬Í×¤¬¤¢¤ë¤³¤È¤ËÃí°Õ¤·¤Æ¤¯
+¤À¤µ¤¤¡£ ¡Ö<A HREF="manual_Performance.html#MySQL parameters"><STRONG>MySQL</STRONG> ¤Î¥Ð¥Ã¥Õ¥¡¥µ¥¤¥º¤ÎÊÑ¹¹ÊýË¡</A>¡×Àá»²¾È ¡£
+
+</P>
+<P>
+<CODE>MyODBC</CODE> ¤Ï <CODE>BLOB</CODE> ¤ò <CODE>LONGVARBINARY</CODE> ¤È¤·¤Æ¡¢¤½¤·¤Æ 
+<CODE>TEXT</CODE> ¤ò <CODE>LONGVARCHAR</CODE> ¤È¤·¤ÆÄêµÁ¤·¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>BLOB</CODE> ¤È <CODE>TEXT</CODE> ¹àÌÜ¤ÎÀ©¸Â:
+
+</P>
+
+<OL>
+<LI>
+
+<CODE>BLOB</CODE> ¤Þ¤¿¤Ï <CODE>TEXT</CODE> ¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¤Þ¤¿¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¤Î°ìÉô¤Ë
+¤Ï¤Ç¤­¤Þ¤»¤ó¡£
+<LI>
+
+<CODE>BLOB</CODE> ¤Þ¤¿¤Ï <CODE>TEXT</CODE> ¤Î¥½¡¼¥È¤Þ¤¿¤Ï¥°¥ë¡¼¥×»þ¤Ë¤Ï¡¢BLOB ¤ÎºÇ½é
+¤Î <CODE>max_sort_length</CODE> (¥Ç¥Õ¥©¥ë¥È 1024) ¤À¤±¤¬»ÈÍÑ¤µ¤ì¤Þ¤¹¡£¤³¤ÎÃÍ¤Ï¡¢
+mysqld ¥Ç¡¼¥â¥óµ¯Æ°»þ¤Ë <CODE>-O</CODE> ¥ª¥×¥·¥ç¥ó¤ÇÊÑ¹¹¤Ç¤­¤Þ¤¹¡£
+<CODE>BLOB</CODE>/<CODE>TEXT</CODE> ¤ò´Þ¤ó¤ÀÉ½¸½¤Ç¥°¥ë¡¼¥×¤Ç¤­¤Þ¤¹: <CODE>SELECT
+id,SUBSTR(blob,1,100) GROUP BY 2</CODE>
+<LI>
+
+<CODE>BLOB</CODE> ¤È <CODE>TEXT</CODE> ¤Ç¤Ï¡¢½ª¤ê¤Î¶õÇò¤Ï <CODE>CHAR</CODE> ¤ä 
+<CODE>VARCHAR</CODE> ¤Î¤è¤¦¤Ë¤Ï¥«¥Ã¥È¤µ¤ì¤Þ¤»¤ó¡£
+</OL>
+
+<P>
+<A NAME="IDX62"></A>
+
+
+<H4><A HREF="manual_toc.html#"><CODE>ENUM</CODE> ·¿</A></H4>
+<P>
+Ê¸»úÎó¥ª¥Ö¥¸¥§¥¯¥È¡£µö²Ä¤µ¤ì¤¿ÃÍ¥»¥Ã¥È¤Î°ì¤Ä¤À¤±¤ò»ý¤Ä¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£³Ê
+Ç¼¤µ¤ì¤ëÃÍ¤Ï¥±¡¼¥¹Èó°ÍÂ¸¤Ç¤¹¡£Â¸ºß¤·¤Ê¤¤ÃÍ¤ò³ÊÇ¼¤·¤è¤¦¤È¤¹¤ë¤È¡¢"" ¤¬³Ê
+Ç¼¤µ¤ì¤Þ¤¹¡£¿ôÃÍÊ¸Ì®¤Ç»ÈÍÑ¤µ¤ì¤¿¾ì¹ç¤Ï¡¢¤³¤Î¥ª¥Ö¥¸¥§¥¯¥È¤ÏÃÍ¥¤¥ó¥Ç¥Ã¥¯¥¹
+¤òÊÖ/³ÊÇ¼¤·¤Þ¤¹¡£Í­¸ú¤ÊÃÍ¤¬ 255 ¸Ä¤è¤ê¾¯¤Ê¤¤¾ì¹ç¤Ï¡¢¤³¤Î¥ª¥Ö¥¸¥§¥¯¥È¤Ï 1 
+¥Ð¥¤¥È¡¢¤½¤¦¤Ç¤Ê¤±¤ì¤Ð 2¥Ð¥¤¥ÈÀêÍ­¤·¤Þ¤¹ (ºÇÂç¤Ç 65535 ¸Ä¤Î°Û¤Ê¤ëÃÍ)¡£À°
+¿ô¤¬ <CODE>ENUM</CODE> ¤ËÃÖ¤«¤ì¤¿¾ì¹ç¡¢ºÇ½é¤¬ÈÖ¹æ 1 ¤È¤·¤Æ¿ô¤¨¤é¤ì¤ë¡¢ÂÐ±þ¤¹¤ë
+Ê¸»úÎó¤òÆÀ¤ë¤³¤È¤ËÃí°Õ¤·¤Æ²¼¤µ¤¤ (0 ¤Ï´Ö°ã¤Ã¤¿ enum ÃÍ¤Î¤¿¤á¤ËÍ½Ìó¤µ¤ì¤Æ
+¤¤¤Þ¤¹)¡£<CODE>ENUM</CODE> ·¿¤Ç¤Î¥½¡¼¥È¤Ï¡¢enum Æâ¤ÎÊ¸»úÎó¤Î½ç¤Ë¤è¤Ã¤Æ¹Ô¤Ê¤ï¤ì
+¤Þ¤¹¡£<CODE>NOT NULL</CODE> ¤ÈÀë¸À¤µ¤ì¤¿¾ì¹ç¡¢¥Ç¥Õ¥©¥ë¥ÈÃÍ¤ÏºÇ½é¤ÎÃÍ¤Ç¤¹¡£¤½¤¦
+¤Ç¤Ê¤±¤ì¤Ð¥Ç¥Õ¥©¥ë¥ÈÃÍ¤Ï <CODE>NULL</CODE> ¤Ç¤¹¡£
+
+</P>
+<P>
+Îã¤¨¤Ð¡¢¹àÌÜ <CODE>test ENUM("one","two", "three")</CODE> ¤Ï¼¡¤ÎÃÍ¤ÎÇ¤°Õ¤ò»ý¤Ä
+¤³¤È¤¬¤Ç¤­¤Þ¤¹:
+
+</P>
+
+<PRE>
+NULL
+"one"
+"two"
+"three"
+</PRE>
+
+<P>
+<A NAME="IDX63"></A>
+
+
+<H4><A HREF="manual_toc.html#"><CODE>SET</CODE> ·¿</A></H4>
+<P>
+Ê¸»úÎó¥ª¥Ö¥¸¥§¥¯¥È¡£µö²Ä¤µ¤ì¤¿ÃÍ¥»¥Ã¥È¤Î°ì¤Ä¤Þ¤¿¤ÏÊ£¿ô¤ò»ý¤Ä¤³¤È¤¬¤Ç¤­¤Þ
+¤¹¡£³ÆÃÍ¤Ï ',' ¤Ç¶èÀÚ¤é¤ì¤Þ¤¹¡£¿ôÃÍÊ¸Ì®¤Ç»È¤ï¤ì¤ë¤È¡¢¤³¤Î¥ª¥Ö¥¸¥§¥¯¥È¤Ï
+»ÈÍÑ¤µ¤ì¤¿ÃÍ¤Î¥Ó¥Ã¥È°ÌÃÖ¤òÊÖ¤·/³ÊÇ¼¤·¤Þ¤¹¡£¤³¤Î¥ª¥Ö¥¸¥§¥¯¥È¤Ï (°Û¤Ê¤ëÃÍ
+¤Î¿ô-1)/8+1 ¤ò 1,2,3,4 ¤Þ¤¿¤Ï 8 ¤Ë´Ý¤á¤¿¥Ð¥¤¥È¤òÀêÍ­¤·¤Þ¤¹¡£64 ¸Ä°Ê¾å¤Î
+°Û¤Ê¤ëÃÍ¤Ï»ý¤Æ¤Þ¤»¤ó¡£À°¿ô¤¬ <CODE>SET</CODE> Æâ¤ËÃÖ¤«¤ì¤¿¾ì¹ç¡¢ºÇ½é¤Î¥Ó¥Ã¥È¤¬
+ºÇ½é¤ÎÊ¸»úÎó¤ËÂÐ±þ¤¹¤ë¤è¤¦¤Ë¡¢ÂÐ±þ¤¹¤ëÊ¸»úÎó¤¬ÆÀ¤é¤ì¤ë¤³¤È¤ËÃí°Õ¤·¤Æ¤¯¤À
+¤µ¤¤¡£<CODE>SET</CODE> ·¿¤Ç¤Î¥½¡¼¥È¤Ï¿ôÃÍ¤È¤·¤Æ¹Ô¤Ê¤ï¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+Îã¤¨¤Ð¡¢¹àÌÜ <CODE>test SET("one","two") NOT NULL</CODE> ¤Ï¼¡¤ÎÃÍ¤ò»ý¤Ä¤³¤È¤¬
+¤Ç¤­¤Þ¤¹:
+
+</P>
+
+<PRE>
+""
+"one"
+"two"
+"one,two"
+</PRE>
+
+<P>
+ÄÌ¾ï¡¢LIKE ¤Þ¤¿¤Ï FINS_IN_SET() ¤Ç¤Î¡¢SET ¹àÌÜ¤Î SELECT:
+
+</P>
+
+<PRE>
+SELECT * from banner where banner_group LIKE '%value%';
+SELECT * from banner where FIND_IN_SET('value',banner_group)&#62;0;
+</PRE>
+
+<P>
+¤·¤«¤·¼¡¤âÆ¯¤­¤Þ¤¹:
+
+</P>
+
+<PRE>
+SELECT * from banner where banner_group = 'v1,v2';  ;Exact match
+SELECT * from banner where banner_group &#38; 1;        ;Is in first group
+</PRE>
+
+<P>
+<A NAME="IDX64"></A>
+<A NAME="IDX65"></A>
+
+
+<H3><A NAME="Choosing types" HREF="manual_toc.html#Choosing types">Àµ¤·¤¤¹àÌÜ·¿¤ÎÁªÂò</A></H3>
+
+<P>
+ºÇ¤âÀºÅÙ¤Î¹â¤¤·¿¤òÁ´¤Æ¤Î¾ì¹ç¤Ë»ÈÍÑ¤·¤Æ¤ß¤Æ²¼¤µ¤¤¡£Îã¤¨¤Ð¡¢1-99999 ¤ÎÀ°¿ô
+¤Ë¤Ï¡¢<CODE>unsigned mediumint</CODE> ¤¬ºÇÎÉ¤Î·¿¤Ç¤¹¡£
+
+</P>
+<P>
+ÎÉ¤¯¤¢¤ëÌäÂê¤Ï¡¢²ßÊ¾¤ÎÃÍ¤ÎÀµ³Î¤ÊÉ½¸½¤Ç¤¹¡£<STRONG>MySQL</STRONG> ¤Ç¤Ï 
+<CODE>DECIMAL</CODE> ·¿¤ò»ÈÍÑ¤¹¤Ù¤­¤Ç¤¹¡£¤³¤ì¤ÏÊ¸»úÎó¤È¤·¤Æ³ÊÇ¼¤·¡¢Àµ³Î¤µ¤Î¥í
+¥¹¤ÏÈ¯À¸¤·¤Þ¤»¤ó¡£Àµ³Î¤µ¤¬½ÅÍ×¤Ç¤Ê¤¤¾ì¹ç¤Ï <CODE>DOUBLE</CODE> ·¿¤Ç¤â½½Ê¬ÎÉ¤¤
+¤Ç¤¹¡£
+
+</P>
+<P>
+¹âÀºÅÙ¤Î¤¿¤á¡¢¾ï¤Ë <CODE>BITINT</CODE> ¤Ë³ÊÇ¼¤µ¤ì¤ë¸ÇÄê¾®¿ôÅÀ·¿¤ËÊÑ´¹¤Ç¤­¤Þ¤¹¡£
+¤³¤ì¤Ï¡¢Á´¤Æ¤Î·×»»¤òÀ°¿ô¤Ç¹Ô¤Ê¤¦¤è¤¦¤Ë¤·¡¢·ë²Ì¤À¤±¤òÉâÆ°¾®¿ôÅÀ¤ËÊÑ´¹¤·¤Æ
+Ìá¤·¤Þ¤¹¡£
+
+</P>
+<P>
+ ¡Ö<A HREF="manual_Performance.html#Row format">¹Ô·Á¼°¤Î¼ïÎà¤Ï¡© ¤Þ¤¿ VARCHAR/CHAR ¤Î»ÈÍÑ»þ¤Ï¡©</A>¡×Àá»²¾È .
+
+</P>
+<P>
+<A NAME="IDX66"></A>
+<A NAME="IDX67"></A>
+
+
+<H3><A NAME="Indexes" HREF="manual_toc.html#Indexes">¹àÌÜ¥¤¥ó¥Ç¥Ã¥¯¥¹</A></H3>
+
+<P>
+<CODE>BLOB</CODE> ¤È <CODE>TEXT</CODE> ·¿¤ò½ü¤¯ <STRONG>MySQL</STRONG> ¤ÎÁ´¤Æ¤Î¹àÌÜ¤Ï¥¤¥ó¥Ç¥Ã
+¥¯¥¹¤ò»ý¤Ä¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£Å¬ÀÚ¤Ê¹àÌÜ¤Ç¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹¤Î»ÈÍÑ¤Ï¡¢select ¤Î
+À­Ç½¤ò¸þ¾å¤¹¤ëºÇÎÉ¤ÎÊýË¡¤Ç¤¹¡£
+
+</P>
+<P>
+<CODE>CHAR</CODE> ¤È <CODE>VARCHAR</CODE> ¹àÌÜ¤Ë¤ÏÀÜÆ¬Éô¤Ë¥¤¥ó¥Ç¥Ã¥¯¥¹¤ò»ý¤Ä¤³¤È¤¬¤Ç¤­
+¤Þ¤¹¡£¼¡¤ÎÎã¤Ï¡¢¹àÌÜ¤ÎºÇ½é¤Î 10 Ê¸»ú¤Ë¥¤¥ó¥Ç¥Ã¥¯¥¹¤òºîÀ®¤¹¤ëÊýË¡¤ò¼¨¤·¤Þ¤¹¡£
+¤³¤ì¤Ï¹àÌÜÁ´ÂÎ¤Ë¥¤¥ó¥Ç¥Ã¥¯¥¹¤ò»ý¤Ä¤Î¤ËÈæ¤Ù¡¢¤È¤Æ¤âÂ®¤¯¡¢¤½¤·¤Æ¤è¤ê¾¯¤Ê¤¤¥Ç¥£
+¥¹¥¯ÎÎ°è¤¬É¬Í×¤Ç¤¹¡£
+
+</P>
+
+<PRE>
+CREATE TABLE test (
+name CHAR(200) NOT NULL,
+KEY index_name (name(10));
+</PRE>
+
+
+
+<H3><A HREF="manual_toc.html#">Ê£¿ô¹àÌÜ¥¤¥ó¥Ç¥Ã¥¯¥¹</A></H3>
+
+<P>
+<STRONG>MySQL</STRONG> ¤Ï°Û¤Ê¤ë¹àÌÜ¤Î¥»¥Ã¥È¤Ë°ì¤Ä¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹¤ò»ý¤Ä¤³¤È¤¬¤Ç¤­¤Þ
+¤¹¡£
+
+</P>
+<P>
+Ê£¿ô¹àÌÜ¥¤¥ó¥Ç¥Ã¥¯¥¹¤Ï¡¢¹àÌÜ¤¬Ï¢·ë¤µ¤ì¡¢¥½¡¼¥È¤µ¤ì¤¿ÇÛÎó¤È¸«¤Ê¤¹¤³¤È¤¬¤Ç
+¤­¤Þ¤¹¡£¤³¤ì¤Ï¡¢¥¤¥ó¥Ç¥Ã¥¯¥¹Æâ¤ÎºÇ½é¤Î¹àÌÜ¤¬ÃÎ¤é¤ì¤¿ÎÌ¤Ç¡¢Â¾¤Î¹àÌÜ¤¬¤½¤¦¤Ç
+¤Ê¤¤¾ì¹ç¤Ë¡¢¥¯¥¨¥ê¤¬Â®¤¯¤Ê¤ê¤Þ¤¹¡£
+
+</P>
+<P>
+¼¡¤Î¥Æ¡¼¥Ö¥ë¤ò»ý¤Ã¤Æ¤¤¤ë¤È²¾Äê¤·¤Þ¤¹:
+
+</P>
+
+<PRE>
+CREATE TABLE test (
+id INT NOT NULL,
+last_name CHAR(30) NOT NULL,
+first_name CHAR(30) NOT NULL,
+PRIMARY KEY (id),
+INDEX name (last_name,first_name));
+</PRE>
+
+<P>
+¥¤¥ó¥Ç¥Ã¥¯¥¹ <CODE>name</CODE> ¤Ï last_name ¤È first_name ¤Ë¤Þ¤¿¤¬¤Ã¤¿¥¤¥ó¥Ç¥Ã
+¥¯¥¹¤Ç¤¹¡£
+
+</P>
+<P>
+<CODE>name</CODE> ¥¤¥ó¥Ç¥Ã¥¯¥¹¤Ï¼¡¤Î¥¯¥¨¥ê¤Ç»ÈÍÑ¤µ¤ì¤Þ¤¹:
+
+</P>
+
+<PRE>
+SELECT * FROM test WHERE last_name="Widenius";
+
+SELECT * FROM test WHERE last_name="Widenius" AND first_name="Michael";
+
+SELECT * FROM test WHERE last_name="Widenius" AND
+                         (first_name="Michael" OR first_name="Monty");
+
+SELECT * FROM test WHERE last_name="Widenius" and
+                         first_name &#62;="M" and first_name &#60; "N";
+</PRE>
+
+<P>
+<CODE>name</CODE> ¥¤¥ó¥Ç¥Ã¥¯¥¹¤Ï¼¡¤Î¥¯¥¨¥ê¤Ç¤Ï»ÈÍÑ¤µ¤ì¤Þ¤»¤ó:
+
+</P>
+
+<PRE>
+SELECT * FROM test WHERE first_name="Michael";
+
+SELECT * FROM test WHERE last_name="Widenius" or first_name="Michael";
+</PRE>
+
+<P>
+<A NAME="IDX68"></A>
+
+
+<H3><A HREF="manual_toc.html#">°Û¤Ê¤ë¥Ç¡¼¥¿¥Ù¡¼¥¹¥¨¥ó¥¸¥ó¤È¤Î´Ö¤Ç¥Æ¡¼¥Ö¥ëÄêµÁ¤ò´ÊÃ±¤Ë°Ü¿¢¤¹¤ë¤¿¤á¤Î·¿ÂÐ±þ</A></H3>
+<P>
+                                                                     
+Â¾¤Î SQL ¥Ù¥ó¥À¤«¤é¤Î¥³¡¼¥É¤Î»ÈÍÑ¤ò¤è¤ê´ÊÃ±¤Ë¥µ¥Ý¡¼¥È¤¹¤ë¤¿¤á¡¢
+<STRONG>MySQL</STRONG> ¤Ï¼¡¤ÎÂÐ±þ¤ò¥µ¥Ý¡¼¥È¤·¤Þ¤¹:
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD>binary(num) </TD><TD> char(num) binary
+</TR NOSAVE>
+<TR><TD>char varying </TD><TD> varchar
+</TR NOSAVE>
+<TR><TD>float4 </TD><TD> float
+</TR NOSAVE>
+<TR><TD>float8 </TD><TD> double
+</TR NOSAVE>
+<TR><TD>int1 </TD><TD> tinyint
+</TR NOSAVE>
+<TR><TD>int2 </TD><TD> smallint
+</TR NOSAVE>
+<TR><TD>int3 </TD><TD> mediumint
+</TR NOSAVE>
+<TR><TD>int4 </TD><TD> int
+</TR NOSAVE>
+<TR><TD>int8 </TD><TD> bigint
+</TR NOSAVE>
+<TR><TD>long varbinary </TD><TD> blob
+</TR NOSAVE>
+<TR><TD>long varchar </TD><TD> text
+</TR NOSAVE>
+<TR><TD>middleint </TD><TD> mediumint
+</TR NOSAVE>
+<TR><TD>varbinary(num) </TD><TD> varchar(num) binary
+</TR>
+</TABLE>
+
+
+
+<H2><A NAME="Functions" HREF="manual_toc.html#Functions"><CODE>SELECT</CODE> ¤È <CODE>WHERE</CODE> Àá¤Ç»ÈÍÑ¤¹¤ë´Ø¿ô</A></H2>
+
+<P>
+<CODE>select_expression</CODE> ¤Þ¤¿¤Ï <CODE>where_definition</CODE> ¤Ï¼¡¤Î´Ø¿ô¤ò»ÈÍÑ
+¤·¤¿Ç¤°Õ¤ÎÉ½¸½¤«¤é¤Ê¤ê¤Þ¤¹:
+
+</P>
+<P>
+¼¡¤ÎÎã¤Ç¤Ï¡¢<CODE>mysql</CODE> ¥×¥í¥°¥é¥à¤Î½ÐÎÏ¤ÏÃ»¤¯¤Ê¤Ã¤Æ¤¤¤Þ¤¹¡£¤Ä¤Þ¤ê:
+
+</P>
+
+<PRE>
+mysql&#62; select mod(29,9);
+1 rows in set (0.00 sec)
+
++-----------+
+| mod(29,9) |
++-----------+
+|         2 |
++-----------+
+</PRE>
+
+<P>
+¤³¤ì¤Ï¼¡¤ËÊÑ´¹¤µ¤ì¤Æ¤¤¤Þ¤¹:
+
+</P>
+
+<PRE>
+mysql&#62; select mod(29,9);                -&#62;      2
+</PRE>
+
+<P>
+<A NAME="IDX70"></A>
+
+
+<H3><A NAME="Grouping functions" HREF="manual_toc.html#Grouping functions">¥°¥ë¡¼¥×²½´Ø¿ô</A></H3>
+<DL COMPACT>
+
+<DT><CODE>(</CODE>
+<DD>
+<A NAME="IDX69"></A>
+ <A NAME="IDX71"></A>
+ 
+<A NAME="IDX72"></A>
+<DT><CODE>)</CODE>
+<DD>
+<A NAME="IDX73"></A>
+³ç¸Ì¡£É½¸½¤ÎÉ¾²Á¤Î½ç¤ò¶¯À©¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select 1+2*3;                     -&#62;      7
+mysql&#62; select (1+2)*3;                   -&#62;      9
+</PRE>
+
+</DL>
+
+
+
+<H3><A NAME="Arithmetic functions" HREF="manual_toc.html#Arithmetic functions">ÄÌ¾ï¤Î»»½Ñ±é»»</A></H3>
+<P>
+<A NAME="IDX74"></A>
+<DL COMPACT>
+
+<DT><CODE>+</CODE>
+<DD>
+<A NAME="IDX75"></A>
+ 
+²Ã»»
+<A NAME="IDX76"></A>
+<DT><CODE>-</CODE>
+<DD>
+¸º»»¡£
+<A NAME="IDX77"></A>
+<DT><CODE>*</CODE>
+<DD>
+¾è»»
+<A NAME="IDX78"></A>
+<DT><CODE>/</CODE>
+<DD>
+½ü»»¡£0 ³ä¤ê¤Ï <CODE>NULL</CODE> ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select 102/(1-1);                 -&#62;      NULL
+</PRE>
+
+</DL>
+
+<P>
+<A NAME="IDX79"></A>
+<A NAME="IDX80"></A>
+
+
+<H3><A NAME="Bit functions" HREF="manual_toc.html#Bit functions">¥Ó¥Ã¥È´Ø¿ô</A></H3>
+<P>
+¤³¤ì¤é¤ÏºÇÂç 64 ¥Ó¥Ã¥È¤ÎÈÏ°Ï¤ò»ý¤Á¤Þ¤¹¡£<STRONG>MySQL</STRONG> ¤Ï bigint (64
+bit) ±é»»¤ò»ÈÍÑ¤¹¤ë¤¿¤á¤Ç¤¹¡£
+<DL COMPACT>
+
+<DT><CODE>|</CODE>
+<DD>
+<A NAME="IDX81"></A>
+ 
+¥Ó¥Ã¥È±é»» OR¡£
+
+<PRE>
+mysql&#62; select 29 | 15;                   -&#62;     31
+</PRE>
+
+<A NAME="IDX82"></A>
+<DT><CODE>&#38;</CODE>
+<DD>
+¥Ó¥Ã¥È±é»» AND¡£
+
+<PRE>
+mysql&#62; select 29 &#38; 15;                   -&#62;      13
+</PRE>
+
+<A NAME="IDX83"></A>
+<DT><CODE>BIT_COUNT()</CODE>
+<DD>
+°ú¿ô¤Î¥»¥Ã¥È¤µ¤ì¤Æ¤¤¤ë¥Ó¥Ã¥È¤Î¿ô¡£
+
+<PRE>
+mysql&#62; select bit_count(29);             -&#62;      4
+</PRE>
+
+</DL>
+
+<P>
+<A NAME="IDX84"></A>
+
+
+<H3><A NAME="Logical functions" HREF="manual_toc.html#Logical functions">ÏÀÍý±é»»</A></H3>
+<P>
+Á´¤Æ¤ÎÏÀÍý´Ø¿ô¤Ï 1 (TRUE) ¤Þ¤¿¤Ï 0 (FALSE) ¤òÊÖ¤·¤Þ¤¹¡£
+<DL COMPACT>
+
+<DT><CODE>NOT</CODE>
+<DD>
+<A NAME="IDX85"></A>
+ 
+<A NAME="IDX86"></A>
+<DT><CODE>!</CODE>
+<DD>
+ÏÀÍýÈÝÄê¡£°ú¿ô¤¬ 0 ¤Ê¤é 1 ¤òÊÖ¤·¡¢¤½¤¦¤Ç¤Ê¤±¤ì¤Ð 0 ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select NOT 1;                    -&#62;      0
+mysql&#62; select NOT NULL;                 -&#62;      NULL
+mysql&#62; select ! (1+1);                  -&#62;      0
+mysql&#62; select ! 1+1;                    -&#62;      1
+</PRE>
+
+<A NAME="IDX87"></A>
+<DT><CODE>OR</CODE>
+<DD>
+<A NAME="IDX88"></A>
+<DT><CODE>||</CODE>
+<DD>
+ÏÀÍýÏÂ¡£°ú¿ô¤Î¤É¤ì¤«¤¬ 0 ¤Þ¤¿¤Ï NULL ¤Ç¤Ê¤±¤ì¤Ð 1 ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select 1 || 0;                   -&#62;      1
+mysql&#62; select 0 || 0;                   -&#62;      0
+mysql&#62; select 1 || NULL;                -&#62;      1
+
+</PRE>
+
+<A NAME="IDX89"></A>
+<DT><CODE>AND</CODE>
+<DD>
+<A NAME="IDX90"></A>
+<DT><CODE>&#38;&#38;</CODE>
+<DD>
+ÏÀÍýÀÑ¡£Á´¤Æ¤Î°ú¿ô¤¬ 0 ¤Þ¤¿¤Ï NULL ¤Ç¤Ê¤±¤ì¤Ð 1 ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select 1 &#38;& NULL;                -&#62;      0
+mysql&#62; select 1 &#38;& 0;                   -&#62;      0
+</PRE>
+
+</DL>
+
+<P>
+<A NAME="IDX91"></A>
+<A NAME="IDX92"></A>
+<A NAME="IDX93"></A>
+
+
+<H3><A NAME="Comparison functions" HREF="manual_toc.html#Comparison functions">Èæ³Ó±é»»»Ò</A></H3>
+<P>
+1 (TRUE), 0 (FALSE) ¤Þ¤¿¤Ï <CODE>NULL</CODE> ¤òÊÖ¤·¤Þ¤¹¡£¤³¤ì¤é¤Î´Ø¿ô¤Ï¿ôÃÍ¤È
+Ê¸»úÎó¤ÎÎ¾Êý¤ÇÆ¯¤­¤Þ¤¹¡£<STRONG>MySQL</STRONG> ¤ÏÈæ³Ó¤¬¤É¤Î¤è¤¦¤Ë¹Ô¤Ê¤ï¤ì¤ë¤«¤ò
+·èÄê¤¹¤ë¤¿¤á¤Ë¡¢¼¡¤Îµ¬Â§¤ò»ÈÍÑ¤·¤Þ¤¹:
+
+<UL>
+<LI>
+
+Èæ³ÓÁàºî¤ÎÎ¾Êý¤Î°ú¿ô¤¬Ê¸»úÎó¤Î¾ì¹ç¡¢Ê¸»úÎó¤È¤·¤ÆÈæ³Ó¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+Î¾Êý¤Î°ú¿ô¤¬À°¿ô¤Î¾ì¹ç¡¢À°¿ô¤È¤·¤ÆÈæ³Ó¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+°ú¿ô¤Î°ìÊý¤¬ <CODE>TIMESTAMP</CODE> ¤Þ¤¿¤Ï <CODE>DATETIME</CODE> ¹àÌÜ¤Ç¡¢Â¾¤Î°ú¿ô¤¬
+Äê¿ô¤Î¾ì¹ç¤Ï¡¢Äê¿ô¤ÏÈæ³ÓÁ°¤Ë timestamp ¤ËÊÑ´¹¤µ¤ì¤Þ¤¹¡£¤³¤ì¤Ï¤è¤ê ODBC 
+¥Õ¥ì¥ó¥É¥ê¤Ë¤¹¤ë¤¿¤á¤Ç¤¹¡£
+<LI>
+
+Â¾¤Î¾ì¹ç¤ÏÁ´¤ÆÉâÆ°¾®¿ôÅÀ(real)¤È¤·¤ÆÈæ³Ó¤µ¤ì¤Þ¤¹¡£
+</UL>
+
+<P>
+¤É¤Á¤é¤«¤Þ¤¿¤ÏÎ¾Êý¤Î°ú¿ô¤¬ <CODE>NULL</CODE> ¤Î¾ì¹ç¤Ï¡¢Èæ³Ó·ë²Ì¤Ï <CODE>NULL</CODE> 
+¤Ç¤¹¡£
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>=</CODE>
+<DD>
+<A NAME="IDX94"></A>
+ 
+Åù¤·¤¤¡£
+
+<PRE>
+mysql&#62; select 1 = 0;                    -&#62;      0
+mysql&#62; select '0' = 0;                  -&#62;      1
+mysql&#62; select '0.0' = 0;                -&#62;      1
+mysql&#62; select '0.01' = 0;               -&#62;      0
+mysql&#62; select '.01' = 0.01;             -&#62;      1
+</PRE>
+
+<A NAME="IDX95"></A>
+<DT><CODE>&#60;&#62;</CODE>
+<DD>
+<A NAME="IDX96"></A>
+<DT><CODE>!=</CODE>
+<DD>
+Åù¤·¤¯¤Ê¤¤¡£
+
+<PRE>
+mysql&#62; select '.01' &#60;&#62; '0.01';          -&#62;      1
+mysql&#62; select .01 &#60;&#62; '0.01';            -&#62;      0
+mysql&#62; select 'zapp' &#60;&#62; 'zappp';        -&#62;      1
+</PRE>
+
+<A NAME="IDX97"></A>
+<DT><CODE>&#60;=</CODE>
+<DD>
+¤è¤ê¾®¤µ¤¤¤Þ¤¿¤ÏÅù¤·¤¤¡£
+
+<PRE>
+mysql&#62; select 0.1 &#60;= 2;                 -&#62;      1
+</PRE>
+
+<A NAME="IDX98"></A>
+<DT><CODE>&#60;</CODE>
+<DD>
+¤è¤ê¾®¤µ¤¤¡£
+
+<PRE>
+mysql&#62; select 2 &#60;= 2;                   -&#62;      1
+</PRE>
+
+<A NAME="IDX99"></A>
+<DT><CODE>&#62;=</CODE>
+<DD>
+¤è¤êÂç¤­¤¤¤Þ¤¿¤ÏÅù¤·¤¤¡£
+
+<PRE>
+mysql&#62; select 2 &#62;= 2;                   -&#62;      1
+</PRE>
+
+<A NAME="IDX100"></A>
+<DT><CODE>&#62;</CODE>
+<DD>
+¤è¤êÂç¤­¤¤¡£
+
+<PRE>
+mysql&#62; select 2 &#62; 2;                    -&#62;      0
+</PRE>
+
+<A NAME="IDX101"></A>
+<DT><CODE>ISNULL(A)</CODE>
+<DD>
+<CODE>A</CODE> ¤¬ <CODE>NULL</CODE> ¤Ê¤é 1 ¤ò¡¢¤½¤¦¤Ç¤Ê¤±¤ì¤Ð 0 ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select isnull(1+1);              -&#62;      0
+mysql&#62; select isnull(1/0);              -&#62;      1
+</PRE>
+
+<A NAME="IDX102"></A>
+<DT><CODE>A BETWEEN B AND C</CODE>
+<DD>
+<CODE>A</CODE> ¤¬ <CODE>B</CODE> °Ê¾å¤«¤Ä <CODE>A</CODE> ¤¬ <CODE>C</CODE> °Ê²¼¡£Á´¤Æ¤Î°ú¿ô¤¬Æ±
+¤¸·¿¤Î¾ì¹ç¡¢<CODE>(A &#62;= B AND A &#60;= C)</CODE> ¤ÈÆ±¤¸¤Ç¤¹¡£Èæ³Ó¤¬¤É¤Î¤è¤¦¤Ë¹Ô¤Ê
+¤ï¤ì¤ë¤«¤ò·èÄê¤¹¤ë¤Î¤ÏºÇ½é¤Î°ú¿ô (<CODE>A</CODE>) ¤Ç¤¹¡ª <CODE>A</CODE> ¤¬Ê¸»úÎóÉ½¸½
+¤Î¾ì¹ç¡¢¥±¡¼¥¹Èó°ÍÂ¸Ê¸»úÎó¤È¤·¤ÆÈæ³Ó¤µ¤ì¤Þ¤¹¡£<CODE>A</CODE> ¤¬¥Ð¥¤¥Ê¥êÊ¸»úÎó
+¤Î¾ì¹ç¡¢¥Ð¥¤¥Ê¥êÊ¸»úÎó¤È¤·¤ÆÈæ³Ó¤µ¤ì¤Þ¤¹¡£<CODE>A</CODE> ¤¬Àµ¿ôÉ½¸½¤Î¾ì¹ç¡¢Àµ
+¿ô¤È¤·¤Æ¸¡º÷¤µ¤ì¤Þ¤¹¡£¤½¤¦¤Ç¤Ê¤±¤ì¤Ð¼Â¿ô¤È¤·¤ÆÈæ³Ó¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select 1 between 2 and 3;        -&#62;      0
+mysql&#62; select 'b' between 'a' and 'c';  -&#62;      1
+mysql&#62; select 2 between 2 and '3';      -&#62;      1
+mysql&#62; select 2 between 2 and 'x-3';    -&#62;      0
+</PRE>
+
+</DL>
+
+<P>
+<A NAME="IDX103"></A>
+
+
+<H3><A NAME="String comparison functions" HREF="manual_toc.html#String comparison functions">Ê¸»úÎóÈæ³Ó´Ø¿ô</A></H3>
+<DL COMPACT>
+
+<DT><CODE>expr IN (value,...)</CODE>
+<DD>
+<A NAME="IDX104"></A>
+ 
+expr ¤¬ <CODE>IN</CODE> ¥ê¥¹¥ÈÃæ¤ÎÃÍ¤Î¤É¤ì¤«¤Ê¤é 1 ¤òÊÖ¤·¡¢¤½¤¦¤Ç¤Ê¤±¤ì¤Ð 0 ¤ò
+ÊÖ¤·¤Þ¤¹¡£Á´¤Æ¤ÎÃÍ¤¬Äê¿ô¤Î¾ì¹ç¤Ï¡¢Á´¤Æ¤ÎÃÍ¤Ï expr ¤Î·¿¤Ë½¾¤Ã¤ÆÉ¾²Á¡¢¥½¡¼
+¥È¤µ¤ì¤Þ¤¹¡£¹àÌÜ¤Î¸¡º÷¤Ï¥Ð¥¤¥Ê¥ê¸¡º÷¤Î»ÈÍÑ¤Ë¤è¤Ã¤Æ¹Ô¤Ê¤ï¤ì¤Þ¤¹¡£¤³¤ì¤Ï¡¢
+<CODE>IN</CODE> ÉôÆâ¤ËÄê¿ô¤¬»ÈÍÑ¤µ¤ì¤¿¾ì¹ç¤Ë <CODE>IN</CODE> ¤Ï¤È¤Æ¤âÂ®¤¤¤³¤È¤ò°ÕÌ£
+¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select 2 in (0,3,5,'wefwf');               -&#62;      0
+mysql&#62; select 'wefwf' in (0,3,5,'wefwf');         -&#62;      1
+</PRE>
+
+<A NAME="IDX105"></A>
+<DT><CODE>expr NOT IN (value,...)</CODE>
+<DD>
+<CODE>NOT (expr IN (value,...))</CODE> ¤ÈÆ±¤¸
+
+<A NAME="IDX106"></A>
+<A NAME="IDX107"></A>
+<DT><CODE>expr LIKE expr</CODE>
+<DD>
+SQL ¤Î´ÊÃ±¤ÊÀµµ¬É½¸½Èæ³Ó¤Ç¤¹¡£1 (TRUE) ¤Þ¤¿¤Ï 0 (FALSE) ¤òÊÖ¤·¤Þ¤¹¡£
+<CODE>LIKE</CODE> ¤Ë¤Ï2¤Ä¤Î¥ï¥¤¥ë¥É¥«¡¼¥É¤¬¤¢¤ê¤Þ¤¹¡£
+
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><CODE>%</CODE> </TD><TD> Ç¤°Õ¤Î¿ô¤ÎÊ¸»ú(0Ê¸»ú¤â´Þ¤à)¤ËÅ¬¹ç¤·¤Þ¤¹¡£
+</TR NOSAVE>
+<TR><TD><CODE>_</CODE> </TD><TD> ¸·Ì©¤Ë1¤Ä¤ÎÊ¸»ú¤ËÅ¬¹ç¤·¤Þ¤¹¡£
+</TR NOSAVE>
+<TR><TD><CODE>\%</CODE> </TD><TD> 1¤Ä¤Î <CODE>%</CODE> ¤ËÅ¬¹ç¤·¤Þ¤¹¡£
+</TR NOSAVE>
+<TR><TD><CODE>\_</CODE> </TD><TD> 1¤Ä¤Î <CODE>_</CODE> ¤ËÅ¬¹ç¤·¤Þ¤¹¡£
+</TR>
+</TABLE>
+
+<PRE>
+mysql&#62; select 'David!' like 'David_';             -&#62;      1
+mysql&#62; select 'David!' like 'David\_';            -&#62;      0
+mysql&#62; select 'David_' like 'David\_';            -&#62;      1
+mysql&#62; select 'David!' like '%D%v%';              -&#62;      1
+mysql&#62; select 10 like '1%';                       -&#62;      1
+</PRE>
+
+<CODE>LIKE</CODE> ¤Ï¿ôÃÍÉ½¸½¤Ç¤âµö¤µ¤ì¤Þ¤¹¡ª¡Ê³ÈÄ¥¡Ë
+<LI>expr NOT LIKE expr
+
+<A NAME="IDX108"></A>
+ 
+<CODE>NOT (expr LIKE expr)</CODE> ¤ÈÆ±¤¸¤Ç¤¹¡£
+<A NAME="IDX109"></A>
+<LI>expr REGEXP expr
+
+<A NAME="IDX110"></A>
+<LI>expr RLIKE expr
+
+³ÈÄ¥Àµµ¬É½¸½¤Ë´ð¤Å¤¤¤ÆÊ¸»úÎó¤ò¥Á¥§¥Ã¥¯¤·¤Þ¤¹¡£
+ ¡Ö<A HREF="manual_Regexp.html#Regexp"><STRONG>MySQL</STRONG> Àµµ¬É½¸½¹½Ê¸¤Î²òÀâ</A>¡×Àá»²¾È . <CODE>RLIKE</CODE>¤Ï <CODE>mSQL</CODE> ¸ß´¹¤Î¤¿¤á¤Ç¤¹¡£Ãí°Õ:
+<STRONG>MySQL</STRONG> ¤ÏÊ¸»úÎóÃæ¤Ç C ¥¨¥¹¥±¡¼¥×¹½Ê¸ (<CODE>\n</CODE>) ¤ò»ÈÍÑ¤¹¤ë¤¿¤á¡¢
+REGEXP Ê¸»úÎóÆâ¤Ç»ÈÍÑ¤¹¤ë <CODE>'\'</CODE> ¤ÏÆó½Å¤Ë¤¹¤ëÉ¬Í×¤¬¤¢¤ê¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select 'Monty!' regexp 'm%y%%';            -&#62;      0
+mysql&#62; select 'Monty!' regexp '.*';               -&#62;      1
+mysql&#62; select 'new*\n*line' regexp 'new\\*.\\*line'
+</PRE>
+
+<A NAME="IDX111"></A>
+<LI>expr NOT REGEXP expr
+
+<CODE>NOT (expr REGEXP expr)</CODE> ¤ÈÆ±¤¸¡£
+<A NAME="IDX112"></A>
+<LI>STRCMP()
+
+Ê¸»úÎó¤¬Æ±¤¸¤Ê¤é 0 ¤òÊÖ¤·¤Þ¤¹¡£¤½¤¦¤Ç¤Ê¤±¤ì¤Ð¡¢ºÇ½é¤Î°ú¿ô¤¬¥½¡¼¥È½ç¤Ç¾®
+¤µ¤±¤ì¤Ð -1 ¤òÊÖ¤·¤Þ¤¹¡£¤½¤¦¤Ç¤Ê¤±¤ì¤Ð 1 ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select strcmp('text', 'text2');            -&#62; -1
+mysql&#62; select strcmp('text2', 'text');            -&#62; 1
+mysql&#62; select strcmp('text', 'text');             -&#62; 0
+</PRE>
+
+</DL>
+
+
+
+<H3><A NAME="Control flow functions" HREF="manual_toc.html#Control flow functions">¥Õ¥í¡¼À©¸æ´Ø¿ô</A></H3>
+<DL COMPACT>
+
+<DT><CODE>IFNULL(A,B)</CODE>
+<DD>
+<A NAME="IDX113"></A>
+ <A NAME="IDX114"></A>
+ 
+<CODE>A</CODE> ¤¬ <CODE>NULL</CODE> ¤Ç¤Ê¤¤¾ì¹ç¤Ï <CODE>A</CODE> ¤ò¡¢¤½¤¦¤Ç¤Ê¤±¤ì¤Ð 
+<CODE>B</CODE> ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select ifnull(1,0);        -&#62; 1
+mysql&#62; select ifnull(0,10);       -&#62; 0
+mysql&#62; select ifnull(1/0,10);     -&#62; 10
+</PRE>
+
+<A NAME="IDX115"></A>
+<DT><CODE>IF(A,B,C)</CODE>
+<DD>
+<CODE>A</CODE> ¤¬¿¿ (<CODE>A &#60;&#62; 0</CODE> ¤«¤Ä <CODE>A &#60;&#62; NULL</CODE>) ¤Î¾ì¹ç <CODE>B</CODE> ¤òÊÖ
+¤·¡¢¤½¤¦¤Ç¤Ê¤±¤ì¤Ð <CODE>C</CODE> ¤òÊÖ¤·¤Þ¤¹¡£A ¤Ï INTEGER ¤È¤·¤ÆÉ¾²Á¤µ¤ì¤Þ¤¹¡£
+¤³¤ì¤ÏÉâÆ°¾®¿ôÅÀ¤ò»ÈÍÑ¤¹¤ë¾ì¹ç¡¢Èæ³Ó±é»»¤â»ÈÍÑ¤¹¤Ù¤­¤Ç¤¢¤ë¤³¤È¤ò°ÕÌ£¤·¤Þ
+¤¹¡£
+
+<PRE>
+mysql&#62; select if(1&#62;2,2,3);        -&#62; 3
+</PRE>
+
+</DL>
+
+<P>
+<A NAME="IDX116"></A>
+
+
+<H3><A NAME="Mathematical functions" HREF="manual_toc.html#Mathematical functions">¿ô³Ø´Ø¿ô</A></H3>
+<P>
+¤¹¤Ù¤Æ¤Î¿ô³Ø´Ø¿ô¤Ï¥¨¥é¡¼¤Î¾ì¹ç <CODE>NULL</CODE> ¤òÊÖ¤·¤Þ¤¹¡£
+<DL COMPACT>
+
+<DT><CODE>-</CODE>
+<DD>
+<A NAME="IDX117"></A>
+ 
+Éä¹æ¡£°ú¿ô¤ÎÉä¹æ¤òÊÑ¹¹¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select - 2;                -&#62; -2
+</PRE>
+
+<A NAME="IDX118"></A>
+<DT><CODE>ABS()</CODE>
+<DD>
+ÀäÂÐÃÍ¡£
+
+<PRE>
+mysql&#62; select abs(2);             -&#62; 2
+mysql&#62; select abs(-32);           -&#62; 32
+</PRE>
+
+<A NAME="IDX119"></A>
+<DT><CODE>SIGN()</CODE>
+<DD>
+°ú¿ô¤ÎÉä¹æ¡£-1, 0 ¤Þ¤¿¤Ï 1 ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select sign(-32);          -&#62; -1
+mysql&#62; select sign(0);            -&#62; 0
+mysql&#62; select sign(234);          -&#62; 1
+</PRE>
+
+<A NAME="IDX120"></A>
+<DT><CODE>MOD()</CODE>
+<DD>
+<A NAME="IDX121"></A>
+<DT><CODE>%</CODE>
+<DD>
+¾êÍ¾ (C ¤Î % ¤ÈÆ±ÍÍ)¡£
+
+<PRE>
+mysql&#62; select mod(234, 10);       -&#62; 4
+mysql&#62; select 253 % 7;            -&#62; 1
+mysql&#62; select mod(29,9);                -&#62; 2
+</PRE>
+
+<A NAME="IDX122"></A>
+<DT><CODE>FLOOR()</CODE>
+<DD>
+x ¤è¤ê¾®¤µ¤¤ºÇÂç¤ÎÀ°¿ôÃÍ¡£
+
+<PRE>
+mysql&#62; select floor(1.23);              -&#62; 1
+mysql&#62; select floor(-1.23);             -&#62; -2
+</PRE>
+
+<A NAME="IDX123"></A>
+<DT><CODE>CEILING()</CODE>
+<DD>
+x ¤è¤êÂç¤­¤¤ºÇ¾®¤ÎÀ°¿ôÃÍ¡£
+
+<PRE>
+mysql&#62; select ceiling(1.23);            -&#62; 2
+mysql&#62; select ceiling(-1.23);           -&#62; -1
+</PRE>
+
+<A NAME="IDX124"></A>
+<DT><CODE>ROUND(N)</CODE>
+<DD>
+°ú¿ô <CODE>N</CODE> ¤òÀ°¿ô¤Ë´Ý¤á¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select round(-1.23);             -&#62; -1
+mysql&#62; select round(-1.58);             -&#62; -2
+mysql&#62; select round(1.58);              -&#62; 2
+</PRE>
+
+<A NAME="IDX125"></A>
+<DT><CODE>ROUND(Number,Decimals)</CODE>
+<DD>
+°ú¿ô <CODE>Number</CODE> ¤ò <CODE>Decimals</CODE> ·å¤Î¾¯¿ô¤Ë´Ý¤á¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select ROUND(1.298, 1);          -&#62; 1.3
+</PRE>
+
+<A NAME="IDX126"></A>
+<DT><CODE>EXP(N)</CODE>
+<DD>
+<CODE>e</CODE> (¼«Á³ÂÐ¿ô¤Î´ð¿ô) ¤Î <CODE>N</CODE> ¾è¤ÎÃÍ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select exp(2);                   -&#62; 7.389056
+mysql&#62; select exp(-2);                  -&#62; 0.135335
+</PRE>
+
+<A NAME="IDX127"></A>
+<DT><CODE>LOG(X)</CODE>
+<DD>
+<CODE>X</CODE> ¤Î¼«Á³ÂÐ¿ô¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select log(2);             -&#62; 0.693147
+mysql&#62; select log(-2);            -&#62; NULL
+</PRE>
+
+<A NAME="IDX128"></A>
+<DT><CODE>LOG10(X)</CODE>
+<DD>
+<CODE>X</CODE> ¤Î 10´ð¿ô¤ÎÂÐ¿ô¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select log10(2);           -&#62; 0.301030
+mysql&#62; select log10(100);                 -&#62; 2.000000
+mysql&#62; select log10(-100);                -&#62; NULL
+</PRE>
+
+<A NAME="IDX129"></A>
+<DT><CODE>POW(X,Y)</CODE>
+<DD>
+<A NAME="IDX130"></A>
+<DT><CODE>POWER(X,Y)</CODE>
+<DD>
+<CODE>X</CODE> ¤Î <CODE>Y</CODE> ¾è¤ÎÃÍ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select pow(2,2);           -&#62; 4.000000
+mysql&#62; select pow(2,-2);                  -&#62; 0.250000
+</PRE>
+
+<A NAME="IDX131"></A>
+<DT><CODE>sqrt(X)</CODE>
+<DD>
+<CODE>X</CODE> ¤ÎÈóÉé¤ÎÊ¿Êýº¬¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select sqrt(4);            -&#62; 2.000000
+mysql&#62; select sqrt(20);           -&#62; 4.472136
+</PRE>
+
+<A NAME="IDX132"></A>
+<DT><CODE>PI()</CODE>
+<DD>
+PI ¤ÎÃÍ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select PI();               -&#62; 3.141593
+</PRE>
+
+<A NAME="IDX133"></A>
+<DT><CODE>COS(X)</CODE>
+<DD>
+<CODE>X</CODE> ¤Î¥³¥µ¥¤¥ó¤òÊÖ¤·¤Þ¤¹¡£<CODE>X</CODE> ¤Ï¥é¥¸¥¢¥ó¤ÇÍ¿¤¨¤é¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select cos(PI());                  -&#62; -1.000000
+</PRE>
+
+<A NAME="IDX134"></A>
+<DT><CODE>SIN(X)</CODE>
+<DD>
+<CODE>X</CODE> ¤Î¥µ¥¤¥ó¤òÊÖ¤·¤Þ¤¹¡£<CODE>X</CODE> ¤Ï¥é¥¸¥¢¥ó¤ÇÍ¿¤¨¤é¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select sin(PI());                  -&#62; 0.000000
+</PRE>
+
+<A NAME="IDX135"></A>
+<DT><CODE>TAN(X)</CODE>
+<DD>
+<CODE>X</CODE> ¤Î¥¿¥ó¥¸¥§¥ó¥È¤òÊÖ¤·¤Þ¤¹¡£<CODE>X</CODE> ¤Ï¥é¥¸¥¢¥ó¤ÇÍ¿¤¨¤é¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select tan(PI()+1);                -&#62; 1.557408
+</PRE>
+
+<A NAME="IDX136"></A>
+<DT><CODE>ACOS(X)</CODE>
+<DD>
+Return the arc cosine of <CODE>X</CODE>; that is the value whose cosine is
+<CODE>X</CODE>. If <CODE>X</CODE> is not in the range -1 to 1 <CODE>NULL</CODE> is
+returned.
+
+<PRE>
+mysql&#62; select ACOS(1);                  -&#62; 0.000000
+mysql&#62; select ACOS(1.0001);             -&#62; NULL
+mysql&#62; select ACOS(0);          -&#62; 1.570796
+</PRE>
+
+<A NAME="IDX137"></A>
+<DT><CODE>ASIN(X)</CODE>
+<DD>
+<CODE>X</CODE> ¤Î¥¢¡¼¥¯¥µ¥¤¥ó¤òÊÖ¤·¤Þ¤¹¡£¤¹¤Ê¤ï¤Á¥µ¥¤¥ó¤¬ <CODE>X</CODE> ¤Ë¤Ê¤ëÃÍ¤Ç
+¤¹¡£<CODE>X</CODE> ¤¬ -1 ¤«¤é 1 ¤ÎÈÏ°Ï¤Ë¤Ê¤¤¾ì¹ç <CODE>NULL</CODE> ¤¬ÊÖ¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select ASIN(0.2);                -&#62; 0.201358
+mysql&#62; select ASIN('foo');              -&#62; 0.000000
+</PRE>
+
+<A NAME="IDX138"></A>
+<DT><CODE>ATAN(X)</CODE>
+<DD>
+<CODE>X</CODE> ¤Î¥¢¡¼¥¯¥¿¥ó¥¸¥§¥ó¥È¤òÊÖ¤·¤Þ¤¹¡£¤¹¤Ê¤ï¤Á¥¿¥ó¥¸¥§¥ó¥È¤¬ <CODE>X</CODE> 
+¤Ë¤Ê¤ëÃÍ¤Ç¤¹¡£
+
+<PRE>
+mysql&#62; select ATAN(2);          -&#62; 1.107149
+mysql&#62; select ATAN(-2);         -&#62; -1.107149
+</PRE>
+
+<A NAME="IDX139"></A>
+<DT><CODE>ATAN2(X,Y)</CODE>
+<DD>
+2¤Ä¤ÎÃÍ <CODE>X</CODE> ¤È <CODE>Y</CODE> ¤Î¥¢¡¼¥¯¥¿¥ó¥¸¥§¥ó¥È¤òÊÖ¤·¤Þ¤¹¡£<CODE>Y /
+X</CODE> ¤Î¥¢¡¼¥¯¥¿¥ó¥¸¥§¥ó¥È¤Î·×»»¤ÈÆ±ÍÍ¤Ç¤¹¤¬¡¢Î¾Êý¤Î°ú¿ô¤ÎÉä¹æ¤¬·ë²Ì¤Î 
+quadrant ¤ò·èÄê¤¹¤ë¤¿¤á¤Ë»ÈÍÑ¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select ATAN(-2,2);               -&#62; -0.785398
+mysql&#62; select ATAN(PI(),0);             -&#62; 1.570796
+</PRE>
+
+<A NAME="IDX140"></A>
+<DT><CODE>COT(N)</CODE>
+<DD>
+<CODE>N</CODE> ¤Î¥³¥¿¥ó¥¸¥§¥ó¥È¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select COT(12);          -&#62; -1.57267341
+mysql&#62; select COT(0);           -&#62; NULL
+</PRE>
+
+<A NAME="IDX141"></A>
+<DT><CODE>RAND([X])</CODE>
+<DD>
+ÉâÆ°¾®¿ôÅÀ¤ÎÍð¿ô <CODE>0 &#60;= x &#60;= 1.0</CODE> ¤òÊÖ¤·¤Þ¤¹¡£Àµ¿ôÉ½¸½ <CODE>X</CODE> ¤Ï¥ª
+¥×¥·¥ç¥ó¤Ç¥·¡¼¥ÉÃÍ¤È¤·¤Æ»ÈÍÑ¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; SELECT RAND();           -&#62; 0.5925
+mysql&#62; SELECT RAND(20);         -&#62; 0.1811
+mysql&#62; SELECT RAND(20);         -&#62; 0.1811
+mysql&#62; SELECT RAND();           -&#62; 0.2079
+mysql&#62; SELECT RAND();           -&#62; 0.7888
+</PRE>
+
+RAND() ÃÍ¤ò»ý¤Ä¹àÌÜ¤Ï ORDER BY ¤Ç¤­¤Þ¤»¤ó¡£ORDER BY ¤Ï¹àÌÜ¤òÊ£¿ô²óÉ¾²Á¤¹
+¤ë¤¿¤á¤Ç¤¹¡£
+<A NAME="IDX142"></A>
+<DT><CODE>MIN(X,Y...)</CODE>
+<DD>
+°ú¿ô¤ÎºÇ¾®ÃÍ¡£2¸Ä°Ê¾å¤Î°ú¿ô¤¬É¬Í×¤Ç¤¹¡£¤Ç¤Ê¤±¤ì¤Ð¡¢¤³¤ì¤Ï <CODE>GROUP
+BY</CODE> ´Ø¿ô¤Ç¤¹¡£°ú¿ô¤Ï¿ôÃÍ¤È¤·¤ÆÈæ³Ó¤µ¤ì¤Þ¤¹¡£¥ì¥³¡¼¥É¤¬¸«¤Ä¤«¤é¤Ê¤¤¾ì¹ç¤Ï 
+<CODE>NULL</CODE> ¤¬ÊÖ¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; SELECT MIN(2,0);                         -&#62; 0
+mysql&#62; SELECT MIN(34,3,5,767);                  -&#62; 3
+mysql&#62; SELECT MIN(a) from table where 1=0;      -&#62; NULL
+</PRE>
+
+<A NAME="IDX143"></A>
+<DT><CODE>MAX(X,Y...)</CODE>
+<DD>
+°ú¿ô¤ÎºÇÂçÃÍ¡£2¸Ä°Ê¾å¤Î°ú¿ô¤¬É¬Í×¤Ç¤¹¡£¤Ç¤Ê¤±¤ì¤Ð¡¢¤³¤ì¤Ï <CODE>GROUP
+BY</CODE> ´Ø¿ô¤Ç¤¹¡£°ú¿ô¤Ï¿ôÃÍ¤È¤·¤ÆÈæ³Ó¤µ¤ì¤Þ¤¹¡£¥ì¥³¡¼¥É¤¬¸«¤Ä¤«¤é¤Ê¤¤¾ì¹ç¤Ï
+<CODE>NULL</CODE> ¤¬ÊÖ¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; SELECT MAX(34,3,5,767);                  -&#62; 767
+mysql&#62; SELECT MAX(2,0,4,5,34);                  -&#62; 34
+mysql&#62; SELECT MAX(a) from table where 1=0;      -&#62; NULL
+</PRE>
+
+<A NAME="IDX144"></A>
+<DT><CODE>DEGREES(N)</CODE>
+<DD>
+¥é¥¸¥¢¥ó¤«¤éÅÙ¤ËÊÑ´¹¤µ¤ì¤¿ <CODE>N</CODE> ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select DEGREES(PI());                    -&#62; 180.000000
+</PRE>
+
+<A NAME="IDX145"></A>
+<DT><CODE>RADIANS(N)</CODE>
+<DD>
+ÅÙ¤«¤é¥é¥¸¥¢¥ó¤ËÊÑ´¹¤µ¤ì¤¿ <CODE>N</CODE> ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select RADIANS(90);                      -&#62; 1.570796
+</PRE>
+
+<A NAME="IDX146"></A>
+<DT><CODE>TRUNCATE(Number, Decimals)</CODE>
+<DD>
+<CODE>Number</CODE> ¤ò <CODE>Decimals</CODE> ·å¤Î¾¯¿ô¤ËÀÚ¤ê¼Î¤Æ¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select TRUNCATE(1.223,1);                -&#62; 1.2
+mysql&#62; select TRUNCATE(1.999,1);                -&#62; 1.9
+mysql&#62; select TRUNCATE(1.999,0);                -&#62; 1
+</PRE>
+
+</DL>
+
+<P>
+<A NAME="IDX147"></A>
+
+
+<H3><A NAME="String functions" HREF="manual_toc.html#String functions">Ê¸»úÎó´Ø¿ô</A></H3>
+<DL COMPACT>
+
+<DT><CODE>ASCII(S)</CODE>
+<DD>
+<A NAME="IDX148"></A>
+ 
+<CODE>S</CODE> ¤Îº¸Ã¼¤ÎÊ¸»ú¤Î ASCII ¥³¡¼¥ÉÃÍ¤òÊÖ¤·¤Þ¤¹¡£<CODE>S</CODE> ¤¬ 
+<CODE>NULL</CODE> ¤Î¾ì¹ç¤Ï <CODE>NULL</CODE> ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; SELECT ascii(2);                         -&#62; 50
+mysql&#62; SELECT ascii('dx');                      -&#62; 100
+</PRE>
+
+<A NAME="IDX149"></A>
+<DT><CODE>CHAR(X,...)</CODE>
+<DD>
+°ú¿ô¤Î ASCII ¥³¡¼¥ÉÃÍ¤Ë¤è¤Ã¤ÆÍ¿¤¨¤é¤ì¤¿Ê¸»ú¤«¤é¤Ê¤ëÊ¸»úÎó¤òÊÖ¤·¤Þ¤¹¡£
+<CODE>NULL</CODE> ¤ÏÈô¤Ð¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; SELECT char(77,121,83,81,'76');          -&#62; 'MySQL'
+</PRE>
+
+<A NAME="IDX150"></A>
+<DT><CODE>CONCAT(X,Y...)</CODE>
+<DD>
+Ê¸»úÎó¤ò·ë¹ç¤·¤Þ¤¹¡£2¸Ä°Ê¾å¤Î°ú¿ô¤òÉ¬Í×¤È¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; SELECT CONCAT('My', 'S', 'QL');          -&#62; 'MySQL'
+</PRE>
+
+<A NAME="IDX151"></A>
+<DT><CODE>LENGTH(S)</CODE>
+<DD>
+<A NAME="IDX152"></A>
+<DT><CODE>OCTET_LENGTH(S)</CODE>
+<DD>
+<A NAME="IDX153"></A>
+<DT><CODE>CHAR_LENGTH(S)</CODE>
+<DD>
+<A NAME="IDX154"></A>
+<DT><CODE>CHARACTER_LENGTH(S)</CODE>
+<DD>
+Ê¸»úÎó¤ÎÄ¹¤µ¡£
+
+<PRE>
+mysql&#62; SELECT length('text');                   -&#62; 4
+mysql&#62; SELECT octet_length('text');             -&#62; 4
+</PRE>
+
+<A NAME="IDX155"></A>
+<DT><CODE>LOCATE(A,B)</CODE>
+<DD>
+<A NAME="IDX156"></A>
+<DT><CODE>POSITION(B IN A)</CODE>
+<DD>
+<CODE>B</CODE> Æâ¤Ë¤¢¤ë <CODE>A</CODE> Ê¸»úÎó¤Î°ÌÃÖ¤òÊÖ¤·¤Þ¤¹¡£ºÇ½é¤Î°ÌÃÖ¤Ï 1 ¤Ç¤¹¡£
+<CODE>B</CODE> Æâ¤Ë <CODE>A</CODE> ¤¬¤Ê¤¤»þ¤Ï 0 ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select locate('bar', 'foobarbar');         -&#62; 4
+mysql&#62; select locate('xbar', 'foobar');           -&#62; 0
+</PRE>
+
+<A NAME="IDX157"></A>
+<DT><CODE>INSTR(A,B)</CODE>
+<DD>
+Ê¸»úÎó <CODE>A</CODE> Æâ¤ÎºÇ½é¤ÎÊ¸»úÎó <CODE>B</CODE> ¤Î°ÌÃÖ¤òÊÖ¤·¤Þ¤¹¡£¤³¤ì¤Ï°ú¿ô¤ò
+¸ò´¹¤·¤¿ <CODE>LOCATE</CODE> ¤ÈÆ±¤¸¤Ç¤¹¡£
+
+<PRE>
+mysql&#62; select instr('foobarbar', 'bar');         -&#62; 4
+mysql&#62; select instr('xbar', 'foobar');           -&#62; 0
+</PRE>
+
+<A NAME="IDX158"></A>
+<DT><CODE>LOCATE(A,B,C)</CODE>
+<DD>
+Ê¸»úÎó <CODE>B</CODE> ¤Î <CODE>C</CODE> °ÌÃÖ¤«¤é¡¢Ê¸»úÎó <CODE>A</CODE> ¤Î°ÌÃÖ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select locate('bar', 'foobarbar',5);        -&#62; 7
+</PRE>
+
+<A NAME="IDX159"></A>
+<DT><CODE>LEFT(str,length)</CODE>
+<DD>
+Ê¸»úÎó¤ÎºÇ½é¤«¤é length ¸Ä¤ÎÊ¸»ú¤òÆÀ¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select left('foobarbar', 5);             -&#62; 'fooba'
+</PRE>
+
+<A NAME="IDX160"></A>
+<DT><CODE>RIGHT(A,B)</CODE>
+<DD>
+<A NAME="IDX161"></A>
+<DT><CODE>SUBSTRING(A FROM B)</CODE>
+<DD>
+Ê¸»úÎó <CODE>A</CODE> ¤ÎºÇ¸å¤«¤é <CODE>B</CODE> ¸Ä¤ÎÊ¸»ú¤òÆÀ¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select right('foobarbar', 5);            -&#62; 'arbar'
+mysql&#62; select substring('foobarbar' from 5);    -&#62; 'arbar'
+</PRE>
+
+<A NAME="IDX162"></A>
+<DT><CODE>LTRIM(str)</CODE>
+<DD>
+Ê¸»úÎó¤ÎºÇ½é¤«¤é¶õÇòÊ¸»ú¤òºï½ü¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select ltrim('  barbar');                -&#62; 'barbar'
+</PRE>
+
+<A NAME="IDX163"></A>
+<DT><CODE>RTRIM(str)</CODE>
+<DD>
+Ê¸»úÎó¤ÎºÇ¸å¤«¤é¶õÇòÊ¸»ú¤òºï½ü¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select rtrim('barbar   ');             -&#62; 'barbar'
+</PRE>
+
+<A NAME="IDX164"></A>
+<DT><CODE>TRIM([[ BOTH | LEADING | TRAILING] [ A ] FROM ] B)</CODE>
+<DD>
+Á´¤Æ¤Î <CODE>A</CODE> ¥×¥ì¥Õ¥£¥Ã¥¯¥¹¤Þ¤¿¤Ï¥µ¥Õ¥£¥Ã¥¯¥¹¤ò <CODE>B</CODE> ¤«¤éºï½ü¤·¤¿
+Ê¸»úÎó¤òÊÖ¤·¤Þ¤¹¡£<CODE>BOTH</CODE>, <CODE>LEADING</CODE> ¤½¤·¤Æ <CODE>TRAILING</CODE> ¤¬
+»ÈÍÑ¤µ¤ì¤Ê¤¤¾ì¹ç¡¢<CODE>BOTH</CODE> ¤¬Å¬ÍÑ¤µ¤ì¤Þ¤¹¡£<CODE>A</CODE> ¤¬Í¿¤¨¤é¤ì¤Ê¤¤¤È¡¢
+¶õÇò¤¬ºï½ü¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select trim('  bar   ');                      -&#62; 'bar'
+mysql&#62; select trim(leading 'x' from 'xxxbarxxx');    -&#62; 'barxxx'
+mysql&#62; select trim(both 'x' from 'xxxbarxxx');       -&#62; 'bar'
+mysql&#62; select trim(trailing 'xyz' from 'barxxyz');   -&#62; 'barx'
+</PRE>
+
+<A NAME="IDX165"></A>
+<DT><CODE>SOUNDEX(S)</CODE>
+<DD>
+Gets a soundex string from <CODE>S</CODE>. Two strings that sound 'about the
+same' should have identical soundex strings. A 'standard' soundex string
+is 4 characters long, but this function returns an arbitrary long
+string. One can use <CODE>SUBSTRING</CODE> on the result to get a 'standard'
+soundex string.  All non alpha characters are ignored in the given
+string. All characters outside the A-Z range are treated as vocals.
+
+<PRE>
+mysql&#62; select soundex('Hello');                 -&#62; 'H400'
+mysql&#62; select soundex('B-Aättre');                -&#62; 'B360'$)B
+mysql&#62; select soundex('Quadratically');         -&#62; 'Q36324'
+</PRE>
+
+<A NAME="IDX166"></A>
+<DT><CODE>SUBSTRING(A, B, C)</CODE>
+<DD>
+<A NAME="IDX167"></A>
+<DT><CODE>SUBSTRING(A FROM B FOR C)</CODE>
+<DD>
+<A NAME="IDX168"></A>
+<DT><CODE>MID(A, B, C)</CODE>
+<DD>
+<CODE>A</CODE> ¤Î <CODE>B</CODE> °ÌÃÖ¤«¤é <CODE>C</CODE> Ê¸»ú¤ÎÊ¸»úÎó¤òÊÖ¤·¤Þ¤¹¡£
+<CODE>FROM</CODE> ¤Î°ã¤¤¤Ï ANSI SQL 92 ¹½Ê¸¤Ç¤¹¡£
+
+<PRE>
+mysql&#62; select substring('Quadratically',5,6);          -&#62; ratica
+</PRE>
+
+<A NAME="IDX169"></A>
+<DT><CODE>SUBSTRING_INDEX(String, Delimiter, Count)</CODE>
+<DD>
+<CODE>String</CODE> ¤«¤é¡¢<CODE>Delimiter</CODE> ¤Ç <CODE>Count</CODE> ¸Ä¤Ë¶èÀÚ¤é¤ì¤¿Ê¸»ú
+Îó¤òÊÖ¤·¤Þ¤¹¡£<CODE>Count</CODE> ¤¬Àµ¤Î¾ì¹ç¤ÏÊ¸»úÎó¤Ïº¸¤«¤é¸¡º÷¤µ¤ì¡¢
+<CODE>Count</CODE> ¤¬Éé¤Î¾ì¹ç¤ÏÊ¸»úÎó¤Ï±¦¤«¤é¸¡º÷¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select substring_index('www.tcx.se', '.', 2);   -&#62; 'www.tcx'
+mysql&#62; select substring_index('www.tcx.se', '.', -2);  -&#62; 'tcx.se'
+</PRE>
+
+<A NAME="IDX170"></A>
+<DT><CODE>SPACE(N)</CODE>
+<DD>
+<CODE>N</CODE> ¸Ä¤Î¶õÇòÊ¸»ú¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select SPACE(6);         -&#62; '      '
+</PRE>
+
+<A NAME="IDX171"></A>
+<DT><CODE>REPLACE(A, B, C)</CODE>
+<DD>
+Ê¸»úÎó <CODE>A</CODE> Æâ¤ÎÁ´¤Æ¤ÎÊ¸»úÎó <CODE>B</CODE> ¤ò <CODE>C</CODE> ¤ËÃÖ¤­´¹¤¨¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select replace('www.tcx.se', 'w', 'Ww');  -&#62; 'WwWwWw.tcx.se'
+</PRE>
+
+<A NAME="IDX172"></A>
+<DT><CODE>REPEAT(String, Count)</CODE>
+<DD>
+<CODE>String</CODE> ¤ò <CODE>Count</CODE> ²ó·«¤êÊÖ¤·¤Þ¤¹¡£<CODE>Count &#60;= 0</CODE> ¤Î¾ì¹ç¤Ï
+¶õ¤ÎÊ¸»úÎó¤òÊÖ¤·¤Þ¤¹¡£<CODE>String</CODE> ¤Þ¤¿¤Ï <CODE>Count</CODE> ¤¬ <CODE>NULL</CODE> 
+¤Þ¤¿¤Ï¡¢<CODE>LENGTH(string)*count &#62; max_allowed_size</CODE> ¤Î¾ì¹ç¤Ï 
+<CODE>NULL</CODE> ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select repeat('MySQL', 3);                -&#62; 'MySQLMySQLMySQL'
+</PRE>
+
+<A NAME="IDX173"></A>
+<DT><CODE>REVERSE(String)</CODE>
+<DD>
+Ê¸»úÎóÃæ¤ÎÁ´¤Æ¤ÎÊ¸»ú¤òÈ¿Å¾¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select reverse('abc');  -&#62; 'cba'
+</PRE>
+
+<A NAME="IDX174"></A>
+<DT><CODE>INSERT(Org, Start, Length, New)</CODE>
+<DD>
+<CODE>Org</CODE> Ãæ¤Î <CODE>Start</CODE> °ÌÃÖ¤«¤é <CODE>Length</CODE> Ä¹¤ÎÊ¸»úÎó¤ò 
+<CODE>New</CODE> ¤ÇÃÖ¤­´¹¤¨¤Þ¤¹¡£<CODE>Org</CODE> Æâ¤ÎºÇ½é¤Î°ÌÃÖ¤Ï1¤Ç¤¹¡£
+
+<PRE>
+mysql&#62; select insert('Quadratic', 3, 4, 'What');   -&#62; 'QuWhattic'
+</PRE>
+
+<A NAME="IDX175"></A>
+<DT><CODE>INTERVAL(N, N1, N2, N3...)</CODE>
+<DD>
+¤³¤Î´Ø¿ô¤¬µ¡Ç½¤¹¤ë¤¿¤á¤Ë¤Ï <CODE>Nn</CODE> &#62; <CODE>N3</CODE> &#62; <CODE>N2</CODE> &#62; <CODE>N1</CODE>
+¤¬Í×µá¤µ¤ì¤Þ¤¹¡£¤³¤ì¤Ï(¤È¤Æ¤âÂ®¤¤)¥Ð¥¤¥Ê¥ê¥µ¡¼¥Á¤¬»ÈÍÑ¤µ¤ì¤ë¤«¤é¤Ç¤¹¡£
+<CODE>N</CODE> &#60; <CODE>N1</CODE> ¤Î¾ì¹ç¤Ï 0 ¤ò¡¢<CODE>N</CODE> &#60; <CODE>N2</CODE> ¤Î¾ì¹ç¤Ï 1 ¤ò
+(°Ê¸åÆ±ÍÍ¡Ä)ÊÖ¤·¤Þ¤¹¡£Á´¤Æ¤Î°ú¿ô¤Ï¿ôÃÍ¤È¤·¤Æ¥Æ¥¹¥È¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select INTERVAL(23, 1, 15, 17, 30, 44, 200);     -&#62; 3
+mysql&#62; select INTERVAL(10, 1, 10, 100, 1000);           -&#62; 2
+mysql&#62; select INTERVAL(22, 23, 30, 44, 200);            -&#62; 0
+</PRE>
+
+<A NAME="IDX176"></A>
+<DT><CODE>ELT(N, A1, A2, A3...)</CODE>
+<DD>
+<CODE>N</CODE> = 1 ¤Ê¤é <CODE>A1</CODE> ¤ò¡¢<CODE>N</CODE> = 2 ¤Ê¤é <CODE>A2</CODE> ¤òÊÖ¤·¤Þ¤¹¡£
+<CODE>N</CODE> ¤¬ 1 ¤è¤ê¾®¤µ¤¤¾ì¹ç¡¢¤Þ¤¿¤Ï°ú¿ô¤Î¿ô¤è¤êÂç¤­¤¤¾ì¹ç¤Ï <CODE>NULL</CODE> 
+¤¬ÊÖ¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select elt(1, 'ej', 'Heja', 'hej', 'foo');  -&#62; 'ej'
+mysql&#62; select elt(4, 'ej', 'Heja', 'hej', 'foo');  -&#62; 'foo'
+</PRE>
+
+<A NAME="IDX177"></A>
+<DT><CODE>FIELD(S, S1, S2, S3...)</CODE>
+<DD>
+<CODE>S1</CODE>, <CODE>S2</CODE>, <CODE>S3</CODE>... ¥ê¥¹¥ÈÆâ¤Î <CODE>S</CODE> ¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹¤ò
+ÊÖ¤·¤Þ¤¹¡£<CODE>ELT()</CODE> ¤ÎµÕ¤Ç¤¹¡£S ¤¬¸«¤Ä¤«¤é¤Ê¤±¤ì¤Ð 0 ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select FIELD('ej', 'Hej', 'ej', 'Heja', 'hej', 'foo');       -&#62; 2
+mysql&#62; select FIELD('fo', 'Hej', 'ej', 'Heja', 'hej', 'foo');       -&#62; 0
+</PRE>
+
+<A NAME="IDX178"></A>
+<DT><CODE>FIND_IN_SET(string,string of strings)</CODE>
+<DD>
+'string' ¤¬ 'string of strings' Ãæ¤Ë¤¢¤ì¤Ð¡¢ÃÍ 1 ¤«¤é N ¤òÊÖ¤·¤Þ¤¹¡£'string
+of strings' ¤Ï¡¢¤½¤ì¤¾¤ì¤Î°Û¤Ê¤ëÃÍ¤¬ ',' ¤ÇÊ¬³ä¤µ¤ì¤¿Ê¸»úÎó¤Ç¤¹¡£ºÇ½é¤Î
+°ú¿ô¤¬Äê¿ôÊ¸»úÎó¤Ç£²ÈÖÌÜ¤¬ SET ·¿¤Î¹àÌÜ¤Î¾ì¹ç¡¢FIND_IN_SET ¤Ï¥Ó¥Ã¥È±é»»
+¤ò»ÈÍÑ¤·¤ÆºÇÅ¬²½¤µ¤ì¤Þ¤¹¡ª
+
+<PRE>
+mysql&#62; SELECT FIND_IN_SET('b','a,b,c,d')		-&#62; 2
+</PRE>
+
+ºÇ½é¤Î°ú¿ô¤¬ ',' ¤ò´Þ¤à¾ì¹ç¤Ï¡¢¤³¤Î´Ø¿ô¤ÏÅöÁ³Æ¯¤­¤Þ¤»¤ó¡£
+<A NAME="IDX179"></A>
+<DT><CODE>LCASE(A)</CODE>
+<DD>
+<A NAME="IDX180"></A>
+<DT><CODE>LOWER(A)</CODE>
+<DD>
+<CODE>A</CODE> ¤ò¸½ºß¤ÎÊ¸»ú¥»¥Ã¥È,dmappings (¥Ç¥Õ¥©¥ë¥È Latin1) ¤Ë¤·¤¿¤¬¤Ã¤Æ¾®
+Ê¸»ú¤ËÊÑ´¹¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select lcase('QUADRATICALLY');           -&#62; 'quadratically'
+</PRE>
+
+<A NAME="IDX181"></A>
+<DT><CODE>UCASE(A)</CODE>
+<DD>
+<A NAME="IDX182"></A>
+<DT><CODE>UPPER(A)</CODE>
+<DD>
+<CODE>A</CODE> ¤òÂçÊ¸»ú¤ËÊÑ´¹¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select ucase('Hej');             -&#62; 'HEJ'
+</PRE>
+
+</DL>
+
+<P>
+<A NAME="IDX183"></A>
+
+
+<H3><A NAME="Date and time functions" HREF="manual_toc.html#Date and time functions">ÆüÉÕ¤È»þ¹ï´Ø¿ô</A></H3>
+
+<P>
+1¤Ä°Ê¾å¤ÎÆüÉÕ´Ø¿ô¤ò»ÈÍÑ¤¹¤ëÎã:
+
+</P>
+<P>
+date_field ¤¬ºÇ¿·¤Î30Æü¤Ç¤¢¤ëÁ´¤Æ¤Î¥ì¥³¡¼¥É¤òÁªÂò¤·¤Þ¤¹¡£
+
+<PRE>
+SELECT something FROM table WHERE TO_DAYS(NOW()) - TO_DAYS(date_field) &#60;= 30;
+</PRE>
+
+<P>
+<CODE>Date</CODE> É½¸½¤Ï date Ê¸»úÎó¡¢datetime Ê¸»úÎó¡¢timestamp([6 | 8 | 14]) 
+¤Þ¤¿¤Ï¡¢<CODE>YYMMDD</CODE> ¤ä <CODE>YYYYMMDD</CODE> ¤Î·Á¼°¤Î¿ôÃÍ¤Ç¤¹¡£
+
+</P>
+<P>
+date É½¸½¤Ç¤Ï¡¢Ç¯¤Ï 2 ¤Þ¤¿¤Ï 4 ·å¤Î¿ôÃÍ¤Ç¤¹¡£2 ·å¤Ï 1970-2069 ¤ÎÈÏ°Ï¤È¸«
+¤Ê¤µ¤ì¤Þ¤¹¡£Date 100-199 ¤ÏÇ¯¤Î±é»»¤ò¤è¤ê´ÊÃ±¤Ë¤¹¤ë¤¿¤á¡¢2000-2999 ¤ËÊÑ
+´¹¤µ¤ì¤Þ¤¹¡ª ÆÃ¼ì¤ÊÆüÉÕ '0000-00-00' ¤Ï 0000-00-00 ¤È¤·¤Æ³ÊÇ¼¤µ¤ì¡¢¼è¤ê
+½Ð¤µ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+¿ôÃÍ¤ËÆüÉÕ´Ø¿ô¤ò»ÈÍÑ¤¹¤ë¾ì¹ç¡¢¿ôÃÍ¤ÎÄ¹¤µ¤¬ 4, 8 ¤Þ¤¿¤Ï &#62;= 14 ¤Ê¤éÇ¯¤¬4·å
+¤È¸«¤Ê¤µ¤ì¤Þ¤¹¡£Â¾¤ÎÁ´¤Æ¤Î¥±¡¼¥¹¤Ç¤ÏÇ¯¤ÏÍ¿¤¨¤é¤ì¤¿¿ôÃÍ¤ÎºÇ½é¤Î2·å¤È¸«¤Ê
+¤µ¤ì¤Þ¤¹¡£°ÂÁ´Â¦¤Ë¤ª¤¯¤¿¤á¡¢ÆüÉÕ¤ò¿ôÃÍ(Ê¸»úÎó¤Ç¤Ê¤¯)¤Ç»ÈÍÑ¤¹¤ë»þ¤Ï¡¢¾ï¤Ë
+4·å¤ÎÆüÉÕ¤ò»ÈÍÑ¤¹¤Ù¤­¤Ç¤¹¡ª ¤½¤¦¤Ç¤Ê¤±¤ì¤Ð¡¢2000Ç¯¤ÇÌäÂê¤¬È¯À¸¤·¤Þ¤¹¡£¿ô
+ÃÍ 002001 ¤¬ÆüÉÕ´Ø¿ô¤ËÁ÷¤é¤ì¤¿»þ¡¢ÆüÉÕ '20002001' ¤ÎÂå¤ï¤ê¤Ë '2001' ¤Ë¤Ê
+¤ê¤Þ¤¹¡£'002001' ¤Ï¤â¤Á¤í¤óÀµ¤·¤¯Æ¯¤­¤Þ¤¹¡ª
+
+</P>
+<P>
+<CODE>Time</CODE> É½¸½¤Ï date Ê¸»úÎó¡¢datetime Ê¸»úÎó¡¢timestamp([6 | 8 | 14]) 
+¤Þ¤¿¤Ï¡¢<CODE>HHMMSS</CODE> ¤ä <CODE>YYYYMMDDHHMMSS</CODE> ·Á¼°¤Î¿ôÃÍ¤Ç¤¹¡£
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>DAYOFWEEK(date expr)</CODE>
+<DD>
+<A NAME="IDX184"></A>
+ 
+<CODE>Date</CODE> ¤ÎÍËÆü¤òÆÀ¤Þ¤¹ (0 = ÆüÍËÆü, 1 = ·îÍËÆü, 2 = ²ÐÍËÆü ..) 
+¤³¤ì¤Ï ODBC É¸½à¤Ë½¾¤¤¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select dayofweek('1998-02-03');		-&#62; 3
+</PRE>
+
+<A NAME="IDX185"></A>
+<DT><CODE>WEEKDAY(date expr)</CODE>
+<DD>
+<CODE>Date</CODE> ¤ÎÍËÆü¤òÆÀ¤Þ¤¹ (0 = ·îÍËÆü, 1 = ²ÐÍËÆü ..)
+
+<PRE>
+mysql&#62; select WEEKDAY('1997-10-04 22:23:00');	-&#62; 5
+mysql&#62; select WEEKDAY('1997-11-05');            -&#62; 2
+</PRE>
+
+<A NAME="IDX186"></A>
+<DT><CODE>DAYOFMONTH(date expr)</CODE>
+<DD>
+·î¤ÎÆü¤òÊÖ¤·¤Þ¤¹ (1-31)
+
+<PRE>
+mysql&#62; select DAYOFMONTH('1998-02-03');		-&#62; 3
+</PRE>
+
+<A NAME="IDX187"></A>
+<DT><CODE>DAYOFYEAR(date expr)</CODE>
+<DD>
+Ç¯¤ÎÆü¤òÊÖ¤·¤Þ¤¹ (1-366)
+
+<PRE>
+mysql&#62; select DAYOFYEAR('1998-02-03');		-&#62; 34
+</PRE>
+
+<A NAME="IDX188"></A>
+<DT><CODE>MONTH(date expr)</CODE>
+<DD>
+·î¤òÊÖ¤·¤Þ¤¹ (1-12)
+
+<PRE>
+mysql&#62; select MONTH('1998-02-03');		-&#62; 02
+</PRE>
+
+<A NAME="IDX189"></A>
+<DT><CODE>DAYNAME(date expr)</CODE>
+<DD>
+ÍËÆü¤ÎÌ¾Á°¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select dayname("1998-02-05");            -&#62; Thursday
+</PRE>
+
+<A NAME="IDX190"></A>
+<DT><CODE>MONTHNAME(date expr)</CODE>
+<DD>
+·î¤ÎÌ¾Á°¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select monthname("1998-02-05");          -&#62; February
+</PRE>
+
+<A NAME="IDX191"></A>
+<DT><CODE>QUARTER(date expr)</CODE>
+<DD>
+Returns quarter (1-4).
+
+<PRE>
+mysql&#62; select QUARTER('98-04-01');		-&#62; 2
+</PRE>
+
+<A NAME="IDX192"></A>
+<DT><CODE>WEEK(date expr)</CODE>
+<DD>
+ÆüÍËÆü¤¬Ç¯¤ÎºÇ½é¤ÎÆü¤Ç¤¢¤ë°ÌÃÖ¾å¤Î½µ¤òÊÖ¤·¤Þ¤¹ (1-53)¡£
+
+<PRE>
+mysql&#62; select WEEK('98-02-20');			-&#62; 7
+</PRE>
+
+<A NAME="IDX193"></A>
+<DT><CODE>YEAR(date expr)</CODE>
+<DD>
+Ç¯¤òÊÖ¤·¤Þ¤¹ (1000-9999)¡£
+
+<PRE>
+mysql&#62; select YEAR('98-02-03');			-&#62; 1998
+</PRE>
+
+<A NAME="IDX194"></A>
+<DT><CODE>HOUR(time expr)</CODE>
+<DD>
+»þ¤òÊÖ¤·¤Þ¤¹ (0-23)
+
+<PRE>
+mysql&#62; select HOUR('10:05:03');			-&#62; 10
+</PRE>
+
+<A NAME="IDX195"></A>
+<DT><CODE>MINUTE(time expr)</CODE>
+<DD>
+Ê¬¤òÊÖ¤·¤Þ¤¹ (0-59)¡£
+
+<PRE>
+mysql&#62; select MINUTE('98-02-03 10:05:03');	-&#62; 5
+</PRE>
+
+<A NAME="IDX196"></A>
+<DT><CODE>SECOND(time expr)</CODE>
+<DD>
+ÉÃ¤òÊÖ¤·¤Þ¤¹ (1000-9999)¡£
+
+<PRE>
+mysql&#62; select SECOND('10:05:03');		-&#62; 3
+</PRE>
+
+<A NAME="IDX197"></A>
+<DT><CODE>PERIOD_ADD(P, N)</CODE>
+<DD>
+<CODE>N</CODE> ·î¤ò´ü´Ö <CODE>P</CODE> (·¿ <CODE>YYMM</CODE> ¤Þ¤¿¤Ï <CODE>YYYYMM</CODE>) ¤ËÄÉ²Ã
+¤·¤Þ¤¹¡£<CODE>YYYYMM</CODE> ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select PERIOD_ADD(9801,2);               -&#62; 199803
+</PRE>
+
+<A NAME="IDX198"></A>
+<DT><CODE>PERIOD_DIFF(A, B)</CODE>
+<DD>
+´ü´Ö <CODE>A</CODE> ¤È <CODE>B</CODE> ¤Îº¹¤Î·î¤òÊÖ¤·¤Þ¤¹¡£<CODE>A</CODE> ¤È <CODE>B</CODE> ¤Ï·Á
+¼° <CODE>YYMM</CODE> ¤Þ¤¿¤Ï <CODE>YYYYMM</CODE> ¤Ç¤¹¡£
+
+<PRE>
+mysql&#62; select PERIOD_DIFF(9802,199703);         -&#62; 11
+</PRE>
+
+<A NAME="IDX199"></A>
+<DT><CODE>TO_DAYS(Date)</CODE>
+<DD>
+<CODE>Date</CODE> ¤ò daynumber (0Ç¯¤«¤é¤ÎÆü¿ô) ¤ËÊÑ´¹¤·¤Þ¤¹¡£<CODE>Date</CODE> ¤Ï 
+<CODE>DATE</CODE> Ê¸»úÎó¡¢<CODE>DATETIME</CODE> Ê¸»úÎó¡¢<CODE>TIMESTAMP([6 | 8 |
+14])</CODE>¡¢<CODE>YYMMDD</CODE> ¤Þ¤¿¤Ï <CODE>YYYYMMDD</CODE> ·Á¼°¤Î¿ôÃÍ¤Ç¤¹¡£
+
+<PRE>
+mysql&#62; select TO_DAYS(9505);                    -&#62; 733364
+mysql&#62; select TO_DAYS('1997-10-07);             -&#62; 729669
+</PRE>
+
+<A NAME="IDX200"></A>
+<DT><CODE>FROM_DAYS()</CODE>
+<DD>
+daynumber ¤ò DATE ¤ËÊÑ´¹¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select from_days(729669);                -&#62; 1997-10-07       
+</PRE>
+
+<A NAME="IDX201"></A>
+<DT><CODE>DATE_FORMAT(Date, Format)</CODE>
+<DD>
+<CODE>Format</CODE> Ê¸»úÎó¤Ë¤·¤¿¤¬¤Ã¤Æ <CODE>Date</CODE> (date ¤Þ¤¿¤Ï timestamp) ¤ò
+À°·Á¤·¤Þ¤¹¡£¼¡¤ÎÀ°·Á¥³¥Þ¥ó¥É¤¬ÃÎ¤é¤ì¤Æ¤¤¤Þ¤¹:
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD>M </TD><TD> ·îÌ¾
+</TR NOSAVE>
+<TR><TD>W </TD><TD> ÍËÆü
+</TR NOSAVE>
+<TR><TD>D </TD><TD> ±Ñ¸ì¥µ¥Õ¥£¥Ã¥¯¥¹ÉÕ¤­·î¤ÎÆü
+</TR NOSAVE>
+<TR><TD>Y </TD><TD> 4·å¤ÎÇ¯
+</TR NOSAVE>
+<TR><TD>y </TD><TD> 2·å¤ÎÇ¯
+</TR NOSAVE>
+<TR><TD>a </TD><TD> ¾ÊÎ¬¤µ¤ì¤¿ÍËÆüÌ¾ (Sun..Sat)
+</TR NOSAVE>
+<TR><TD>d </TD><TD> ·î¤ÎÆü, ¿ôÃÍ
+</TR NOSAVE>
+<TR><TD>m </TD><TD> ·î, ¿ôÃÍ
+</TR NOSAVE>
+<TR><TD>b </TD><TD> ¾ÊÎ¬¤µ¤ì¤¿·îÌ¾ (Jan.Dec)
+</TR NOSAVE>
+<TR><TD>j </TD><TD> Ç¯¤ÎÆü (001..366)
+</TR NOSAVE>
+<TR><TD>H </TD><TD> »þ (00..23)
+</TR NOSAVE>
+<TR><TD>k </TD><TD> »þ ( 0..23)
+</TR NOSAVE>
+<TR><TD>h </TD><TD> »þ (01..12)
+</TR NOSAVE>
+<TR><TD>I </TD><TD> »þ (01..12)
+</TR NOSAVE>
+<TR><TD>l </TD><TD> »þ ( 1..12)
+</TR NOSAVE>
+<TR><TD>i </TD><TD> Ê¬, ¿ôÃÍ
+</TR NOSAVE>
+<TR><TD>r </TD><TD> »þ¹ï, 12»þ´Ö (hh:mm:ss [AP]M)
+</TR NOSAVE>
+<TR><TD>T </TD><TD> »þ¹ï, 24»þ´Ö (hh:mm:ss)
+</TR NOSAVE>
+<TR><TD>S </TD><TD> ÉÃ (00..59)
+</TR NOSAVE>
+<TR><TD>s </TD><TD> ÉÃ (00..59)
+</TR NOSAVE>
+<TR><TD>p </TD><TD> AM ¤Þ¤¿¤Ï PM
+</TR NOSAVE>
+<TR><TD>w </TD><TD> ½µ¤ÎÆü (0=ÆüÍËÆü..)
+</TR NOSAVE>
+<TR><TD>% </TD><TD> °ì¤Ä¤Î % ¤ÏÌµ»ë¤µ¤ì¤Þ¤¹¡£% ¤Î¤¿¤á¤Ë¤Ï %% ¤ò»ÈÍÑ¤·¤Æ¤¯¤À¤µ¤¤ (¾­Íè¤Î³ÈÄ¥¤Î¤¿¤á)¡£
+</TR>
+</TABLE>
+Â¾¤ÎÁ´¤Æ¤ÎÊ¸»ú¤Ï·ë²Ì¤Ë¥³¥Ô¡¼¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select date_format('1997-10-04 22:23:00', '%W %M %Y %h:%i:%s');
+        -&#62; 'Saturday October 1997 22:23:00'
+mysql&#62; select date_format('1997-10-04 22:23:00', '%D %y %a %d %m %b %j %H %k %I %r %T %S %w');
+        -&#62; '4th 97 Sat 04 10 Oct 277 22 22 10 10:23:00 PM 22:23:00 00 6'
+</PRE>
+
+¤·¤Ð¤é¤¯¤Ï <CODE>%</CODE> ¤Ï¥ª¥×¥·¥ç¥ó¤Ç¤¹¡£<STRONG>MySQL</STRONG> ¤Î¾­Íè¤Î¥Ð¡¼¥¸¥ç¥ó
+¤Ç¤Ï¡¢<CODE>%</CODE> ¤ÏÉ¬Í×¤È¤Ê¤ê¤Þ¤¹¡£
+<LI>TIME_FORMAT(time expr, format)
+
+<A NAME="IDX202"></A>
+ 
+¤³¤ì¤Ï¾åµ­¤Î DATE_FORMAT ¤Î¤è¤¦¤Ë»ÈÍÑ¤µ¤ì¤Þ¤¹¤¬¡¢format ¥ª¥×¥·¥ç¥ó¤Ç¤Ï¡¢
+»þ,Ê¬,ÉÃ¤À¤±¤òÁàºî¤Ç¤­¤Þ¤¹¡£Â¾¤Î¥ª¥×¥·¥ç¥ó¤Ï NULL ÃÍ¤Þ¤¿¤Ï 0 ¤òÍ¿¤¨¤Þ¤¹¡£
+<A NAME="IDX203"></A>
+<LI>WEEKDAY(Date)
+
+<CODE>DATE</CODE> ¤ÎÍËÆü¤òÆÀ¤Þ¤¹ (0 = ·îÍËÆü, 1 = ²ÐÍËÆü)¡£<CODE>Date</CODE> ¤Ï date 
+Ê¸»úÎó¡¢datetime Ê¸»úÎó¡¢timestamp([6 | 8 | 14])¡¢<CODE>YYMMDD</CODE> ¤Þ¤¿¤Ï 
+<CODE>YYYYMMDD</CODE> ·Á¼°¤Î¿ôÃÍ¤Ç¤¹¡£
+
+<PRE>
+mysql&#62; select WEEKDAY('1997-10-04 22:23:00');           -&#62; 5
+mysql&#62; select WEEKDAY('1997-11-05');                    -&#62; 2
+</PRE>
+
+<A NAME="IDX204"></A>
+<LI>CURDATE()
+
+<A NAME="IDX205"></A>
+<LI>CURRENT_DATE
+
+º£Æü¤ÎÆüÉÕ¤òÊÖ¤·¤Þ¤¹¡£·Á¼°¤Ï¡¢<CODE>CURDATE()</CODE> ¤¬¿ôÃÍ¤Þ¤¿¤ÏÊ¸»úÎó¤Î¤É¤Á
+¤é¤ÎÊ¸Ì®¤Ç»ÈÍÑ¤µ¤ì¤¿¤«¤Ë°ÍÂ¸¤·¤Æ <CODE>YYYYMMDD</CODE> ¤Þ¤¿¤Ï 
+<CODE>'YYYY-MM-DD'</CODE> ¤Ç¤¹¡£
+
+<PRE>
+mysql&#62; select CURDATE();                -&#62; '1997-12-15'
+mysql&#62; select CURDATE()+0;              -&#62; 19971215
+</PRE>
+
+<A NAME="IDX206"></A>
+<LI>CURTIME()
+
+<A NAME="IDX207"></A>
+<LI>CURRENT_TIME
+
+¸½ºß¤Î»þ¹ï¤ò <CODE>HHMMSS</CODE> ¤Þ¤¿¤Ï <CODE>'HH:MM:SS'</CODE> ¤Î·Á¼°¤ÇÊÖ¤·¤Þ¤¹¡£¤³
+¤ì¤Ï <CODE>CURTIME()</CODE> ¤¬¿ôÃÍ¤Þ¤¿¤ÏÊ¸»úÎó¤Î¤É¤Á¤é¤ÎÊ¸Ì®¤Ç»ÈÍÑ¤µ¤ì¤¿¤«¤Ë°Í
+Â¸¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select CURTIME();                -&#62; '23:50:20'
+mysql&#62; select CURTIME()+0;              -&#62; 235026
+</PRE>
+
+<A NAME="IDX208"></A>
+<LI>NOW()
+
+<A NAME="IDX209"></A>
+<LI>SYSDATE()
+
+<A NAME="IDX210"></A>
+<LI>CURRENT_TIMESTAMP
+
+¸½ºß¤Î»þ¹ï¤òÊÖ¤·¤Þ¤¹¡£·Á¼°¤Ï¡¢<CODE>NOW()</CODE> ¤¬¿ôÃÍ¤Þ¤¿¤ÏÊ¸»úÎó¤Î¤É¤Á¤é¤Î
+Ê¸Ì®¤Ç»ÈÍÑ¤µ¤ì¤¿¤«¤Ë°ÍÂ¸¤·¤Æ <CODE>YYYYMMDDHHMMSS</CODE> ¤Þ¤¿¤Ï 
+<CODE>'YYYY-MM-DD HH:MM:SS'</CODE> ¤Ç¤¹¡£
+
+<PRE>
+mysql&#62; select NOW();            -&#62; '1997-12-15 23:51:26'
+mysql&#62; select NOW()+0;          -&#62; 19971215235131
+</PRE>
+
+<A NAME="IDX211"></A>
+<LI>UNIX_TIMESTAMP([date expression])
+
+°ú¿ô¤Ê¤·¤Ç¸Æ¤Ó½Ð¤µ¤ì¤¿¾ì¹ç¤Ï¡¢UNIX timestamp (GMT 1970.01.01 00:00:00 ¤«
+¤é¤ÎÉÃ¿ô) ¤Ç¤¹¡£ÄÌ¾ï¤Ï¡¢<CODE>TIMESTAMP</CODE> ¹àÌÜ¤ò°ú¿ô¤È¤·¤Æ¸Æ¤Ó½Ð¤·¡¢¹àÌÜ
+ÃÍ¤òÉÃ¿ô¤ÇÊÖ¤·¤Þ¤¹¡£<CODE>Date</CODE> ¤Ï¥í¡¼¥«¥ë»þ¹ï¤Ç¤Î date Ê¸»úÎó¡¢datetime 
+Ê¸»úÎó¡¢¤Þ¤¿¤Ï YYMMDD ¤Þ¤¿¤Ï YYYYMMDD ·Á¼°¤Î¿ôÃÍ¤Ç¤¹¡£
+
+<PRE>
+mysql&#62; select UNIX_TIMESTAMP();                         -&#62; 882226357
+mysql&#62; select UNIX_TIMESTAMP('1997-10-04 22:23:00');    -&#62; 875996580
+</PRE>
+
+<A NAME="IDX212"></A>
+<LI>FROM_UNIXTIME(Unix_timestamp)
+
+Ê¸Ì®(¿ôÃÍ/Ê¸»úÎó)¤Ë°ÍÂ¸¤·¤Æ¡¢<CODE>YYYY-MM-DD HH:MM:SS</CODE> ¤Þ¤¿¤Ï 
+<CODE>YYYYMMDDHHMMSS</CODE> ·Á¼°¤Î timestamp Ê¸»úÎó¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select FROM_UNIXTIME(875996580);   -&#62; '1997-10-04 22:23:00'
+</PRE>
+
+<A NAME="IDX213"></A>
+<LI>FROM_UNIXTIME(Unix_timestamp, Format_string)
+
+Format_string ¤Ë½¾¤Ã¤ÆÀ°·Á¤µ¤ì¤¿ timestamp Ê¸»úÎó¤òÊÖ¤·¤Þ¤¹¡£À°·ÁÊ¸»úÎó
+¤Ï¼¡¤ò´Þ¤ß¤Þ¤¹:
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><CODE>M</CODE> </TD><TD> ·î, Ê¸»úÎó
+</TR NOSAVE>
+<TR><TD><CODE>W</CODE> </TD><TD> Æü (½µ¤Î), Ê¸»úÎó
+</TR NOSAVE>
+<TR><TD><CODE>D</CODE> </TD><TD> Æü (·î¤Î), ¿ôÃÍ+±Ñ¸ì¥µ¥Õ¥£¥Ã¥¯¥¹
+</TR NOSAVE>
+<TR><TD><CODE>Y</CODE> </TD><TD> Ç¯, ¿ôÃÍ, 4 ·å
+</TR NOSAVE>
+<TR><TD><CODE>y</CODE> </TD><TD> Ç¯, ¿ôÃÍ, 2 ·å
+</TR NOSAVE>
+<TR><TD><CODE>m</CODE> </TD><TD> ·î, ¿ôÃÍ
+</TR NOSAVE>
+<TR><TD><CODE>d</CODE> </TD><TD> Æü (·î¤Î), ¿ôÃÍ
+</TR NOSAVE>
+<TR><TD><CODE>h</CODE> </TD><TD> »þ, ¿ôÃÍ
+</TR NOSAVE>
+<TR><TD><CODE>i</CODE> </TD><TD> Ê¬, ¿ôÃÍ
+</TR NOSAVE>
+<TR><TD><CODE>s</CODE> </TD><TD> ÉÃ, ¿ôÃÍ
+</TR NOSAVE>
+<TR><TD><CODE>w</CODE> </TD><TD> Æü (½µ¤Î), ¿ôÃÍ
+</TR NOSAVE>
+<TR><TD>¤½¤ÎÂ¾ </TD><TD> Â¾¤ÎÊ¸»ú¤Ï¤½¤Î¤Þ¤Þ¥³¥Ô¡¼¤µ¤ì¤Þ¤¹¡£
+</TR>
+</TABLE>
+
+<PRE>
+mysql&#62; select FROM_UNIXTIME(UNIX_TIMESTAMP(), 'Y D M h:m:s x');
+        -&#62; '1997 23rd December 03:12:30 x'
+</PRE>
+
+<LI>SEC_TO_TIME(Seconds)
+
+<A NAME="IDX214"></A>
+ 
+Ê¸Ì®¤Ë°ÍÂ¸¤·¤Æ <CODE>H:MM:SS</CODE> ¤Þ¤¿¤Ï <CODE>HMMSS</CODE> ·Á¼°¤Ç¡¢°ú¿ô¤Î»þ, Ê¬, 
+ÉÃ¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select SEC_TO_TIME(2378);                -&#62; '00:39:38'
+mysql&#62; select SEC_TO_TIME(2378)+0;              -&#62; 3938
+</PRE>
+
+<A NAME="IDX215"></A>
+<LI>TIME_TO_SEC(Time)
+
+<CODE>Time</CODE> ¤òÉÃ¤ËÊÑ´¹¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select TIME_TO_SEC('22:23:00');  -&#62; 80580
+mysql&#62; select TIME_TO_SEC('00:39:38');  -&#62; 2378
+</PRE>
+
+</DL>
+
+
+
+<H3><A NAME="Miscellaneous functions" HREF="manual_toc.html#Miscellaneous functions">¤½¤ÎÂ¾¤Î´Ø¿ô</A></H3>
+
+<DL COMPACT>
+
+<DT><CODE>DATABASE()</CODE>
+<DD>
+<A NAME="IDX216"></A>
+ <A NAME="IDX217"></A>
+ 
+¸½ºß¤Î¥Ç¡¼¥¿¥Ù¡¼¥¹Ì¾¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select DATABASE();               -&#62; 'test'
+</PRE>
+
+<A NAME="IDX218"></A>
+<DT><CODE>USER()</CODE>
+<DD>
+<A NAME="IDX219"></A>
+<DT><CODE>SYSTEM_USER()</CODE>
+<DD>
+<A NAME="IDX220"></A>
+<DT><CODE>SESSION_USER()</CODE>
+<DD>
+¸½ºß¤Î¥æ¡¼¥¶Ì¾¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select USER();                   -&#62; 'davida'
+</PRE>
+
+<A NAME="IDX221"></A>
+<DT><CODE>PASSWORD(String)</CODE>
+<DD>
+¥×¥ì¡¼¥ó¥Æ¥­¥¹¥È¤Î¥Ñ¥¹¥ï¡¼¥É <CODE>String</CODE> ¤«¤é¥Ñ¥¹¥ï¡¼¥ÉÊ¸»úÎó¤ò·×»»¤·
+¤Þ¤¹¡£¥Ñ¥¹¥ï¡¼¥É¤ò 'user' ¾µÇ§¥Æ¡¼¥Ö¥ëÆâ¤Ë³ÊÇ¼¤¹¤ë¤¿¤á¤Ë»ÈÍÑ¤¹¤ëÉ¬Í×¤¬¤¢
+¤ê¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select PASSWORD('badpwd');       -&#62; '7f84554057dd964b'
+</PRE>
+
+<A NAME="IDX222"></A>
+<DT><CODE>ENCRYPT(String[, Salt])</CODE>
+<DD>
+UNIX ¤Î <CODE>crypt()</CODE> ¥³¥Þ¥ó¥É¤Ç <CODE>String</CODE> ¤ò°Å¹æ²½¤·¤Þ¤¹¡£
+<CODE>Salt</CODE> ¤Ï2Ê¸»ú¤ÎÊ¸»úÎó¤Ç¤¹¡£<CODE>crypt()</CODE> ¤¬¸«»È¤ï¤Ê¤¤¾ì¹ç¤Ï¾ï¤Ë 
+<CODE>NULL</CODE> ¤¬ÊÖ¤µ¤ì¤Þ¤¹¡£
+
+<PRE>
+</PRE>
+
+<A NAME="IDX223"></A>
+<DT><CODE>LAST_INSERT_ID()</CODE>
+<DD>
+ºÇ¸å¤Ë auto_increment ¹àÌÜ¤ËÀßÄê¤µ¤ì¤¿¼«Æ°Åª¤ËÀ¸À®¤µ¤ì¤¿ÃÍ¤òÊÖ¤·¤Þ¤¹¡£
+ ¡Ö<A HREF="manual_Clients.html#mysql_insert_id">ºÇ¸å¤ËÁÞÆþ¤µ¤ì¤¿¹Ô¤Î¥æ¥Ë¡¼¥¯ ID ¤ò¤É¤Î¤è¤¦¤ËÆÀ¤é¤ì¤ë¤«¡©</A>¡×Àá»²¾È ¡£
+
+<PRE>
+mysql&#62; select LAST_INSERT_ID();         -&#62; 1
+</PRE>
+
+<A NAME="IDX224"></A>
+<DT><CODE>FORMAT(Nr, Num)</CODE>
+<DD>
+'#,###,###.##' ¤Î¤è¤¦¤Ê·Á¼°(¾®¿ôÉô <CODE>Num</CODE> ·å)¤Ç¿ôÃÍ <CODE>Nr</CODE> ¤òÀ°·Á
+¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select FORMAT(12332.33, 2);      -&#62; '12,332.33'
+</PRE>
+
+<A NAME="IDX225"></A>
+<DT><CODE>VERSION</CODE>
+<DD>
+<STRONG>MySQL</STRONG> ¥µ¡¼¥Ð¤Î¥Ð¡¼¥¸¥ç¥ó¤òÊÖ¤·¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select version();                -&#62; '3.21.16-beta-log'
+</PRE>
+
+<A NAME="IDX226"></A>
+<DT><CODE>GET_LOCK(String,timeout)</CODE>
+<DD>
+'timeout' ÉÃ¤Î¥¿¥¤¥à¥¢¥¦¥È¤Ç¡¢'String' ¤ÈÌ¾ÉÕ¤±¤é¤ì¤¿¥í¥Ã¥¯¤Î³ÍÆÀ¤ò»î¤ß
+¤Þ¤¹¡£¥í¥Ã¥¯¤ò³ÍÆÀ¤·¤¿¾ì¹ç¤Ï 1, ¥¿¥¤¥à¥¢¥¦¥È¤Î¾ì¹ç¤Ï 0, ¥¨¥é¡¼¤Î¾ì¹ç(¥á
+¥â¥êÉÔÂ­¤ä¥¹¥ì¥Ã¥É¤¬ <CODE>mysqladmin kill</CODE> ¤Ç»¦¤µ¤ì¤¿¾ì¹ç¤Ê¤É)¤Ï NULL 
+¤¬ÊÖ¤ê¤Þ¤¹¡£<CODE>RELEASE_LOCK</CODE> ¤Î¼Â¹Ô¡¢¿·¤·¤¤ <CODE>GET_LOCK</CODE> ¤Î¼Â¹Ô¡¢
+¥¹¥ì¥Ã¥É¤Î½ªÎ»¤Î¾ì¹ç¤Ë¡¢¥í¥Ã¥¯¤Ï²òÊü¤µ¤ì¤Þ¤¹¡£¤³¤Î´Ø¿ô¤Ï¥¢¥×¥ê¥±¡¼¥·¥ç¥ó
+¥í¥Ã¥¯¤ä¥ì¥³¡¼¥É¥í¥Ã¥¯¤Î¥·¥ß¥å¥ì¡¼¥È¤Î¤¿¤á¤Ë»ÈÍÑ¤Ç¤­¤Þ¤¹¡£
+
+<PRE>
+mysql&#62; select get_lock("automaticly released",10);     -&#62; 1
+mysql&#62; select get_lock("test",10);		       -&#62; 1
+mysql&#62; select release_lock("test");                    -&#62; 1
+mysql&#62; select release_lock("automaticly released")     -&#62; NULL
+</PRE>
+
+<A NAME="IDX227"></A>
+<DT><CODE>RELEASE_LOCK(String)</CODE>
+<DD>
+¤³¤Î¥¹¥ì¥Ã¥É¤¬ <CODE>GET_LOCK</CODE> ¤Ç³ÍÆÀ¤·¤¿¥í¥Ã¥¯¤ò²òÊü¤·¤Þ¤¹¡£¥í¥Ã¥¯¤¬²ò
+Êü¤µ¤ì¤¿¾ì¹ç¤Ï 1, ¤³¤Î¥¹¥ì¥Ã¥É¤Ë¤è¤Ã¤Æ¥í¥Ã¥¯¤µ¤ì¤Æ¤¤¤Ê¤¤¾ì¹ç¤Ï 0, 'String' 
+¤¬Â¸ºß¤·¤Ê¤¤¾ì¹ç¤Ï NULL ¤¬ÊÖ¤ê¤Þ¤¹¡£
+</DL>
+
+<P>
+<A NAME="IDX228"></A>
+
+
+<H3><A NAME="Group by functions" HREF="manual_toc.html#Group by functions"><CODE>GROUP BY</CODE> Àá¤Î´Ø¿ô</A></H3>
+
+<DL COMPACT>
+
+<DT><CODE>COUNT(Expr)</CODE>
+<DD>
+<A NAME="IDX229"></A>
+ 
+Èó <CODE>NULL</CODE> ¤Î¹Ô¤Î¿ô¤ò¿ô¤¨¤Þ¤¹¡£<CODE>count(*)</CODE> ¤Ï¡¢<CODE>SELECT</CODE> Ãæ
+¤ËÂ¾¤Î¹àÌÜ¤¬»ÈÍÑ¤µ¤ì¤Ê¤±¤ì¤Ð¡¢Èó¾ï¤ËÂ®¤¯ÊÖ¤ë¤è¤¦¤ËºÇÅ¬²½¤µ¤ì¤Æ¤¤¤Þ¤¹¡£
+
+<PRE>
+select count(*) from student;
+select count(if(length(name)&#62;3,1,NULL)) from student;
+</PRE>
+
+<A NAME="IDX230"></A>
+<DT><CODE>AVG(expr)</CODE>
+<DD>
+expr ¤ÎÊ¿¶ÑÃÍ¡£
+<A NAME="IDX231"></A>
+<DT><CODE>MIN(expr)</CODE>
+<DD>
+<A NAME="IDX232"></A>
+<DT><CODE>MAX(expr)</CODE>
+<DD>
+expr ¤ÎºÇ¾®/ºÇÂçÃÍ¡£<CODE>min()</CODE> ¤È <CODE>max()</CODE> ¤¬Ê¸»úÎó°ú¿ô¤ò¼è¤ë¤È¡¢
+ºÇ¾®/ºÇÂç¤ÎÊ¸»úÎóÃÍ¤òÊÖ¤·¤Þ¤¹¡£
+<A NAME="IDX233"></A>
+<DT><CODE>SUM(expr)</CODE>
+<DD>
+expr ¤Î¹ç·×¡£
+<A NAME="IDX234"></A>
+<DT><CODE>STD(expr)</CODE>
+<DD>
+<A NAME="IDX235"></A>
+<DT><CODE>STDDEV(expr)  (Oracle format)</CODE>
+<DD>
+É½¸½¤ÎÉ¸½àÍ¶Æ³(standard derivative)¡£¤³¤ì¤Ï <CODE>ANSI SQL</CODE> ¤ËÂÐ¤¹¤ë³ÈÄ¥
+¤Ç¤¹¡£
+<A NAME="IDX236"></A>
+<DT><CODE>BIT_OR(expr)</CODE>
+<DD>
+expr Æâ¤ÎÁ´¤Æ¤Î¥Ó¥Ã¥È¤ÎÏÀÍý <CODE>OR</CODE>¡£64 ¥Ó¥Ã¥È¤ÎÀºÅÙ¤Ç·×»»¤µ¤ì¤Þ¤¹¡£
+<A NAME="IDX237"></A>
+<DT><CODE>BIT_AND(expr)</CODE>
+<DD>
+expr Æâ¤ÎÁ´¤Æ¤Î¥Ó¥Ã¥È¤ÎÏÀÍý <CODE>AND</CODE>¡£64 ¥Ó¥Ã¥È¤ÎÀºÅÙ¤Ç·×»»¤µ¤ì¤Þ¤¹¡£
+</DL>
+
+<P>
+MySQL ¤Ï <CODE>GROUP BY</CODE> »ÈÍÑ¤ò³ÈÄ¥¤·¤Þ¤¹¡£<CODE>SELECT</CODE> É½¸½Æâ¤Ç
+<CODE>GROUP BY</CODE> Éô¤Ë¸½¤ì¤Ê¤¤¹àÌÜ¤Þ¤¿¤Ï·×»»¤ò»ÈÍÑ¤Ç¤­¤Þ¤¹¡£¤³¤ì¤Ï '¤³¤Î¥°¥ë¡¼
+¥×¤Î¤¿¤á¤ÎÁ´¤Æ¤Î²ÄÇ½¤ÊÃÍ' ¤òÉ½¤·¤Æ¤¤¤Þ¤¹¡£¤³¤Î»ÈÍÑ¤Ë¤è¤ê¡¢É¬Í×¤Ê¤¤¹àÌÜ¤Ç
+¤Î¥½¡¼¥È¤È¥°¥ë¡¼¥×¤¬Èò¤±¤é¤ì¤ë¤Î¤Ç¡¢¹â¤¤À­Ç½¤¬ÆÀ¤é¤ì¤Þ¤¹¡£Îã¤¨¤Ð¡¢¼¡¤Î¥¯
+¥¨¥ê¤Ç¤Ï b.name ¤Ç¥°¥ë¡¼¥×¤¹¤ëÉ¬Í×¤Ï¤¢¤ê¤Þ¤»¤ó:
+
+</P>
+
+<PRE>
+SELECT a.id,b.name,COUNT(*) from a,b WHERE a.id=b.id GROUP BY a.id
+</PRE>
+
+<P>
+ANSI SQL ¤Ç¤Ï¡¢¼¡¤Î¥¯¥¨¥ê¤Ç¤Ï <CODE>GROUP BY</CODE> Æâ¤Ë customer.name ¤òÄÉ²Ã
+¤¹¤ëÉ¬Í×¤¬¤¢¤ê¤Þ¤¹¡£<STRONG>MySQL</STRONG> ¤Ç¤Ï name ¤Ï¾éÄ¹¤Ç¤¹¡£
+
+</P>
+
+<PRE>
+SELECT order.custid,customer.name,max(payments) from order,customer
+WHERE order.custid = customer.custid GROUP BY order.custid;
+</PRE>
+
+<P>
+<CODE>GROUP BY</CODE> ¤Þ¤¿¤Ï <CODE>ORDER BY</CODE> Àá¤ÇÉ½¸½¤ò»ÈÍÑ¤Ç¤­¤Ê¤¤¤³¤È¤ËÃí°Õ
+¤·¤Æ¤¯¤À¤µ¤¤¡£Â¾¤ÎÊýË¡¤È¤·¤ÆÉ½¸½¤ÎÊÌÌ¾¤ò»ÈÍÑ¤Ç¤­¡¢ÌäÂê¤Î²ò·è¤È¤·¤Æ¤³¤ì¤ò
+»ÈÍÑ¤Ç¤­¤Þ¤¹:
+
+</P>
+
+<PRE>
+SELECT id,FLOOR(value/100) AS val FROM table_name GROUP BY id,val ORDER BY val
+</PRE>
+
+<P>
+<A NAME="IDX238"></A>
+
+
+<H2><A NAME="Create database" HREF="manual_toc.html#Create database">Create database ¹½Ê¸</A></H2>
+
+
+<PRE>
+CREATE DATABASE database_name
+</PRE>
+
+<P>
+¥Ç¡¼¥¿¥Ù¡¼¥¹¤òÍ¿¤¨¤é¤ì¤¿Ì¾Á°¤ÇºîÀ®¤·¤Þ¤¹¡£Ì¾Á°¤ÏÊ¸»ú¡¢¿ô»ú¤Þ¤¿¤Ï 
+<CODE>'_'</CODE> Ê¸»ú¤À¤±¤ò´Þ¤à¤³¤È¤¬¤Ç¤­¡¢Ê¸»ú¤Þ¤¿¤Ï <CODE>_</CODE> ¤Ç»Ï¤Þ¤é¤Ê¤¤¤È
+¤¤¤±¤Þ¤»¤ó¡£¥Ç¡¼¥¿¥Ù¡¼¥¹Ì¾¤ÎºÇÂçÄ¹¤Ï 64 Ê¸»ú¤Ç¤¹¡£<STRONG>MySQL</STRONG> Æâ¤ÎÁ´
+¤Æ¤Î¥Ç¡¼¥¿¥Ù¡¼¥¹¤Ï¥Ç¥£¥ì¥¯¥È¥ê¤Ç¤¹¡£¤½¤Î¤¿¤á¡¢CREATE DATABASE ¤Ï¡¢
+<STRONG>MySQL</STRONG> ¥Ç¡¼¥¿¥Ù¡¼¥¹¥Ç¥£¥ì¥¯¥È¥êÆâ¤Ë¥Ç¥£¥ì¥¯¥È¥ê¤òºîÀ®¤¹¤ë¤À¤±¤Ç
+¤¹¡£<CODE>mysqladmin</CODE> ¤Ç¤â¥Ç¡¼¥¿¥Ù¡¼¥¹¤òºîÀ®¤¹¤ë¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£
+ ¡Ö<A HREF="manual_Tools.html#Programs">ÍÍ¡¹¤Ê <STRONG>MySQL</STRONG> ¥×¥í¥°¥é¥à¤Î³µÍ×</A>¡×Àá»²¾È 
+
+</P>
+<P>
+<A NAME="IDX239"></A>
+
+
+<H2><A NAME="Drop database" HREF="manual_toc.html#Drop database">Drop database ¹½Ê¸</A></H2>
+
+
+<PRE>
+DROP DATABASE database_name
+</PRE>
+
+<P>
+¥Ç¡¼¥¿¥Ù¡¼¥¹Æâ¤ÎÁ´¤Æ¤Î¥Æ¡¼¥Ö¥ë¤òÇË´þ¤·¡¢¥Ç¡¼¥¿¥Ù¡¼¥¹¤òºï½ü¤·¤Þ¤¹¡£<STRONG>¤³¤Î
+¥³¥Þ¥ó¥É¤Ï¤È¤Æ¤âÃí°Õ¤·¤Æ¹Ô¤Ê¤Ã¤Æ¤¯¤À¤µ¤¤¡ª</STRONG> <CODE>DROP DATABASE</CODE> ¤Ï¥Ç¥£
+¥ì¥¯¥È¥ê¤«¤é¤¤¤¯¤Ä¤Î¥Õ¥¡¥¤¥ë¤¬ºï½ü¤µ¤ì¤¿¤«¤òÊÖ¤·¤Þ¤¹¡£ÄÌ¾ï¤³¤ì¤Ï¥Æ¡¼¥Ö¥ë¿ô * 3 
+¤Ç¤¹¡£<CODE>mysqladmin</CODE> ¤Ç¤â¥Ç¡¼¥¿¥Ù¡¼¥¹¤òÇË´þ¤¹¤ë¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£
+ ¡Ö<A HREF="manual_Tools.html#Programs">ÍÍ¡¹¤Ê <STRONG>MySQL</STRONG> ¥×¥í¥°¥é¥à¤Î³µÍ×</A>¡×Àá»²¾È 
+
+</P>
+<P>
+<A NAME="IDX240"></A>
+
+
+<H2><A NAME="Create table" HREF="manual_toc.html#Create table">CREATE TABLE ¹½Ê¸</A></H2>
+
+
+<PRE>
+CREATE TABLE table_name ( create_definition,... )
+
+create_definition:
+  column_name type [NOT NULL | NULL] [DEFAULT default_value] [AUTO_INCREMENT]
+                   [ PRIMARY KEY ] [reference_definition]
+  or	PRIMARY KEY ( index_column_name,... )
+  or	KEY [index_name] KEY( index_column_name,...)
+  or	INDEX [index_name] ( index_column_name,...)
+  or	UNIQUE [index_name] ( index_column_name,...)
+  or    FOREIGN KEY index_name ( index_column_name,...) [reference_definition]
+  or	CHECK (expr)
+
+type:
+        TINYINT[(length)] [UNSIGNED] [ZEROFILL]
+  or    SMALLINT[(length)] [UNSIGNED] [ZEROFILL]
+  or    MEDIUMINT[(length)] [UNSIGNED] [ZEROFILL]
+  or    INT[(length)] [UNSIGNED] [ZEROFILL]
+  or    INTEGER[(length)] [UNSIGNED] [ZEROFILL]
+  or    BIGINT[(length)] [UNSIGNED] [ZEROFILL]
+  or    REAL[(length,decimals)] [UNSIGNED] [ZEROFILL]
+  or    DOUBLE[(length,decimals)] [UNSIGNED] [ZEROFILL]
+  or	FLOAT[(length,decimals)] [UNSIGNED] [ZEROFILL]
+  or	DECIMAL[(length,decimals)] [UNSIGNED] [ZEROFILL]
+  or	NUMERIC[(length,decimals)] [UNSIGNED] [ZEROFILL]
+  or    CHAR(length) [BINARY],
+  or    VARCHAR(length) [BINARY],
+  or    DATE
+  or    TIME
+  or    TIMESTAMP
+  or    DATETIME
+  or    TINYBLOB
+  or    BLOB
+  or    MEDIUMBLOB
+  or    LONGBLOB
+  or    TINYTEXT
+  or    TEXT
+  or    MEDIUMTEXT
+  or    ENUM(value1,value2,value3...)
+  or    SET(value1,value2,value3...)
+
+index_column_name:
+        column_name [ (length) ]
+
+reference_definition:
+        REFERENCES table_name [( index_column_name,...)]
+                   [ MATCH FULL | MATCH PARTIAL]
+                   [ ON DELETE reference_option]
+                   [ ON UPDATE reference_option]
+
+reference_option:
+        RESTRICT | CASCADE | SET NULL | NO ACTION | SET DEFAULT
+</PRE>
+
+<P>
+ ¡Ö<A HREF="manual_Syntax.html#Column types">¹àÌÜ·¿</A>¡×Àá»²¾È 
+
+</P>
+<P>
+FOREIGN KEY, CHECK ¤½¤·¤Æ REFERENCE ¹½Ê¸¤Ï¸ß´¹¤Î¤¿¤á¤À¤±¤Ë¤¢¤ê¤Þ¤¹¡£¡ÊÂ¾
+¤Î SQL ¥µ¡¼¥Ð¤«¤é¤Î¥³¡¼¥É¤è¤ê´ÊÃ±¤Ë°Ü¹Ô¤·¡¢¥ê¥Õ¥¡¥ì¥ó¥¹ÉÕ¤­¤Î¥Æ¡¼¥Ö¥ë¤ò
+À¸À®¤¹¤ë¤è¤¦¤Ê¥¢¥×¥ê¥±¡¼¥·¥ç¥ó¤ò¼Â¹Ô¤¹¤ë¤¿¤á¡Ë¡£¤³¤ì¤é¤Ï¼ÂºÝ¤Ë¤Ï²¿¤â¤·¤Þ
+¤»¤ó¡£ ¡Ö<A HREF="manual_Compatibility.html#Missing functions"><STRONG>MySQL</STRONG> ¤ËÌµ¤¤µ¡Ç½</A>¡×Àá»²¾È 
+
+</P>
+<P>
+¹àÌÜ¤¬ DEFAULT ¤ÎÃÍ¤ò»ý¤¿¤º¡¢NOT NULL ¤È¤·¤ÆÀë¸À¤µ¤ì¤Æ¤¤¤Ê¤¤¾ì¹ç¤Ï¡¢¥Ç¥Õ¥©
+¥ë¥ÈÃÍ¤Ï NULL ¤Ç¤¹¡£
+
+</P>
+<P>
+¹àÌÜ¤¬ DEFAULT ¤ÎÃÍ¤ò»ý¤¿¤º¡¢NOT NULL ¤È¤·¤ÆÀë¸À¤µ¤ì¤Æ¤¤¤ë¾ì¹ç¤Ï¡¢MySQL 
+¤Ï¼«Æ°Åª¤Ë¤½¤Î¹àÌÜ¤Ë¥Ç¥Õ¥©¥ë¥ÈÃÍ¤ò³ä¤êÅö¤Æ¤Þ¤¹¡£
+
+</P>
+
+<UL>
+<LI>
+
+ZEROFILL ¤Ï¡¢¿ôÃÍ¤¬ºÇÂçÄ¹¤Þ¤Ç 0 ¤¬ÀèÆ¬¤Ë¤Ä¤¯¤³¤È¤ò°ÕÌ£¤·¤Þ¤¹¡£
+<CODE>INT(5) ZEROFILL</CODE> ¤Ï¡¢ÃÍ 5 ¤Ï <CODE>00005</CODE> ¤È¤·¤Æ¼è¤ê½Ð¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+<CODE>BINARY</CODE> ¤Ï¡¢¤½¤Î¹àÌÜ¤¬¥±¡¼¥¹°ÍÂ¸¤ÇÈæ³Ó¤µ¤ì¤ë¤³¤È¤ò°ÕÌ£¤·¤Þ¤¹¡£¥Ç¥Õ¥©
+¥ë¥È¤ÏÁ´¤Æ¤ÎÊ¸»úÎó¤Ï ISO-8859-1 Latin1 ¤Ë½¾¤Ã¤Æ¥±¡¼¥¹Èó°ÍÂ¸¤ÇÈæ³Ó¤µ¤ì¤Þ
+¤¹¡£<CODE>BINARY</CODE> ¤Ï 'sticky' ¤Ç¤¹¡£¤Ä¤Þ¤ê¡¢<CODE>BINARY</CODE> ¤È¥Þ¡¼¥¯¤µ¤ì¤¿
+¹àÌÜ¤¬É½¸½Ãæ¤Ç»È¤ï¤ì¤ë¤È¡¢É½¸½Á´ÂÎ¤¬ <CODE>BINARY</CODE> Èæ³Ó¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+KEY ¤Ï INDEX ¤ÎÆ±µÁ¸ì¤Ç¤¹¡£
+<LI>
+
+UNIQUE ¤Ï <STRONG>MySQL</STRONG> ¤Ç¤Ï distinct ÃÍ¤À¤±¤ò»ý¤Ä¤³¤È¤¬¤Ç¤­¤ë¥­¡¼¤Ç¤¹¡£
+¸Å¤¤¹Ô¤ËÅ¬¹ç¤¹¤ë¥­¡¼¤ò»ý¤Ä¿·¤·¤¤¹Ô¤òÄÉ²Ã¤·¤è¤¦¤È¤¹¤ë¤È¥¨¥é¡¼¤Ë¤Ê¤ê¤Þ¤¹¡£
+<LI>
+
+PRIMARY KEY ¤Ï¥æ¥Ë¡¼¥¯¥­¡¼¤Ç¤¹¡£¥Æ¡¼¥Ö¥ë¤Ë¤Ï°ì¤Ä¤À¤±¤Î PRIMARY KEY ¤ò»ý
+¤Ä¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£
+<LI>
+
+¥¤¥ó¥Ç¥Ã¥¯¥¹¤ËÌ¾Á°¤ò¤Ä¤±¤Ê¤±¤ì¤Ð¡¢¥¤¥ó¥Ç¥Ã¥¯¥¹¤ÏºÇ½é¤Î key_column ¤ÈÆ±¤¸
+Ì¾Á°¤òÆÀ¤Þ¤¹¡£¤¿¤À¤·¥æ¥Ë¡¼¥¯¤Ë¤¹¤ë¤¿¤á¤Ë¥ª¥×¥·¥ç¥ó¤Ç _# ¤¬¤Ä¤±¤é¤ì¤Þ¤¹¡£
+<LI>
+
+¥¤¥ó¥Ç¥Ã¥¯¥¹¹àÌÜ timestamp ¹àÌÜ NULL ¤Ë¤Ê¤ê¤Þ¤»¤ó¡£¤³¤ì¤é¤Î¹àÌÜ¤Ø¤Î NULL 
+Â°À­¤ÏÌÛ¤Ã¤Æºï½ü¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+<CODE>column_name(length)</CODE> ¹½Ê¸¤Ç¤Ï¡¢<CODE>string</CODE> ¹àÌÜ¤Î°ìÉô¤Ë¤À¤±¥¤¥ó
+¥Ç¥Ã¥¯¥¹¤ò»ØÄê¤Ç¤­¤Þ¤¹¡£¤³¤ì¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¥Õ¥¡¥¤¥ë¤ò¤È¤Æ¤â¾®¤µ¤¯¤Ç¤­¤Þ¤¹¡£
+<LI>
+
+¿ôÃÍ¹àÌÜ¤ÏÄÉ²ÃÂ°À­ AUTO_INCREMENT ¤ò»ý¤Æ¤Þ¤¹¡£¤³¤ì¤Ï¡¢¹àÌÜÃÍ¤¬ NULL ¤Þ¤¿
+¤Ï 0 ¤È¤·¤ÆÁÞÆþ¤¹¤ëÅÙ¤Ë¼«Æ°Åª¤ËºÇÂçÃÍ+1 ¤ò³ÍÆÀ¤·¤Þ¤¹¡£
+ ¡Ö<A HREF="manual_Clients.html#mysql_insert_id">ºÇ¸å¤ËÁÞÆþ¤µ¤ì¤¿¹Ô¤Î¥æ¥Ë¡¼¥¯ ID ¤ò¤É¤Î¤è¤¦¤ËÆÀ¤é¤ì¤ë¤«¡©</A>¡×Àá»²¾È 
+<LI>
+
+timestamp ¤È auto_increment ¹àÌÜ¤Ë NULL ¤òÁÞÆþ¤Ç¤­¤Þ¤¹¡£¤³¤Î·ë²Ì¤Ï¸½ºß¤Î
+»þ¹ï/¼¡¤ÎÃÍ¤Ç¤¹¡£
+<LI>
+
+BLOB ¹àÌÜ¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¤Ë¤Ï¤Ç¤­¤Þ¤»¤ó¡£
+<LI>
+
+BLOB ¾å¤Ç¥°¥ë¡¼¥×²½¤¹¤ë¤È¡¢ºÇ½é¤Î 'max_sort_length' ¥Ð¥¤¥È¤À¤±¤¬»È¤ï¤ì¤Þ
+¤¹¡£ ¡Ö<A HREF="manual_Compatibility.html#BLOB Limitations"><CODE>BLOB</CODE> ¤È <CODE>TEXT</CODE> ·¿¤ÎÀ©¸Â</A>¡×Àá»²¾È ¡£
+<LI>
+
+ºï½ü¤µ¤ì¤¿¥ì¥³¡¼¥É¤Ï¥ê¥ó¥¯¥ê¥¹¥ÈÆâ¤Ë¤¢¤ê¡¢¤½¤Î¸å¤ÎÁÞÆþ¤Ï¸Å¤¤°ÌÃÖ¤òºÆ»ÈÍÑ
+¤·¤Þ¤¹¡£¥Õ¥¡¥¤¥ë¤ò¤è¤ê¾®¤µ¤¯¤¹¤ë¤Ë¤Ï¡¢<CODE>isamchk</CODE> ¥æ¡¼¥Æ¥£¥ê¥Æ¥£¤ò¥Æ¡¼
+¥Ö¥ë¤ÎºÆÊÔÀ®¤ò¤¹¤ë¤¿¤á¤Ë»ÈÍÑ¤Ç¤­¤Þ¤¹¡£
+<LI>
+
+³Æ null ¹àÌÜ¤Ï 1 bit Í¾·×¤Ë»ÈÍÑ¤µ¤ì¡¢°ìÈÖ¶á¤¤¥Ð¥¤¥È¤Ë´Ý¤á¤é¤ì¤Þ¤¹¡£
+<LI>
+
+ºÇÂç¥ì¥³¡¼¥ÉÄ¹¤Ï¼¡¤Î¤è¤¦¤Ë·×»»¤Ç¤­¤Þ¤¹: 1 + ¹àÌÜÄ¹¤Î¹ç·× + null¹àÌÜ¿ô/8
++ ²ÄÊÑÄ¹¹àÌÜ¿ô¡£
+<LI>
+
+À¸À®¸å¤ËÂ°À­¤¬ÌÛ¤Ã¤ÆÊÑ¹¹¤µ¤ì¤ë¾ì¹ç¤¬¤¢¤ê¤Þ¤¹: Ä¹¤µ 1 ¤Þ¤¿¤Ï 2 ¤Î
+<CODE>VARCHAR</CODE> ¹àÌÜ¤Ï <CODE>CHAR</CODE> ¤ËÊÑ¹¹¤µ¤ì¤Þ¤¹¡£<CODE>VARCHAR</CODE> ¹àÌÜ¤¬
+°ì¤Ä»ÈÍÑ¤µ¤ì¤ë¤È¡¢2 ¤è¤êÄ¹¤¤Á´¤Æ¤Î <CODE>CHAR</CODE> ¹àÌÜ¤Ï <CODE>VARCHAR</CODE> ¤Ë
+ÊÑ¹¹¤µ¤ì¤Þ¤¹¡£¤³¤ì¤Ï¤É¤ó¤ÊÊýË¡¤Ç¹àÌÜ¤ò»ÈÍÑ¤¹¤ë¤«¤Ë±Æ¶Á¤·¤Þ¤»¤ó;
+<STRONG>MySQL</STRONG> ¤Ç¤Ï¡¢<CODE>VARCHAR</CODE> ¤ÏÊ¸»ú¤ò³ÊÇ¼¤¹¤ëÊýË¡¤¬°ã¤¦¤À¤±¤Ç¤¹¡£
+ÎÎ°è¤òÀáÌó¤·¡¢¥Æ¡¼¥Ö¥ë¤ò¤è¤êÂ®¤¯¤¹¤ë¤¿¤á¤Ë¡¢<CODE>MySQL</CODE> ¤Ï¤³¤ÎÊÑ´¹¤ò¹Ô
+¤¤¤Þ¤¹¡£ ¡Ö<A HREF="manual_Performance.html#Row format">¹Ô·Á¼°¤Î¼ïÎà¤Ï¡© ¤Þ¤¿ VARCHAR/CHAR ¤Î»ÈÍÑ»þ¤Ï¡©</A>¡×Àá»²¾È 
+<LI>
+
+<CODE>INSERT</CODE>/<CODE>UPDATE</CODE> ¤Ç¤Ï¡¢Á´¤Æ¤ÎÊ¸»úÎó(<CODE>CHAR</CODE> ¤È 
+<CODE>VARCHAR</CODE>)¤Ï CREATE ¤ÇÍ¿¤¨¤é¤ì¤¿ºÇÂçÄ¹¤ÇÀÚÃÇ¤Þ¤¿¤ÏºÇÂçÄ¹¤Þ¤ÇËä¤á¤é
+¤ì¤Þ¤¹¡£½ª¤ê¤ÎÁ´¤Æ¤Î¶õÇò¤â¼«Æ°Åª¤Ëºï½ü¤µ¤ì¤Þ¤¹¡£Îã¤¨¤Ð 
+<CODE>VARCHAR(10)</CODE> ¤Ï¡¢¹àÌÜ¤ÏºÇÂç 10 Ê¸»ú¤ÎÄ¹¤µ¤ÎÊ¸»úÎó¤ò´Þ¤à¤³¤È¤¬¤Ç¤­¤Þ
+¤¹¡£
+<LI>
+
+²¿¤«/0 ¤Ï <CODE>NULL</CODE> ÃÍ¤Ë¤Ê¤ê¤Þ¤¹¡£
+<LI>
+
+Àµµ¬É½¸½´Ø¿ô (<CODE>REGEXP</CODE> ¤È <CODE>RLIKE</CODE>) ¤ÏISO8859-1 (Latin1) ¤òÊ¸»ú
+¤Î·¿¤Î·èÄê¤Ë»ÈÍÑ¤·¤Þ¤¹¡£
+</UL>
+
+<P>
+<A NAME="IDX241"></A>
+
+
+<H2><A NAME="Alter table" HREF="manual_toc.html#Alter table">ALTER TABLE ¹½Ê¸</A></H2>
+
+
+<PRE>
+ALTER [IGNORE] TABLE table_name alter_spec [, alter_spec ...]
+
+alter_specification:
+	ADD [COLUMN] create_definition [AFTER column_namn | FIRST]
+or	CHANGE [COLUMN] old_column_name create_definition
+or	ALTER [COLUMN] column_name { SET DEFAULT literal | DROP DEFAULT }
+or	ADD INDEX [index_name] ( index_column_name,...)
+or	ADD UNIQUE [index_name] ( index_column_name,...)
+or	DROP [COLUMN] column_name
+or	DROP PRIMARY KEY
+or	DROP INDEX key_name
+or	RENAME [AS] new_table_name
+</PRE>
+
+
+<UL>
+<LI>
+
+<CODE>ALTER TABLE</CODE> ¤Ï¼¡¤Î¤è¤¦¤ËÆ¯¤­¤Þ¤¹¡£°ì»þÅª¤Ê¥Æ¡¼¥Ö¥ë¤òºîÀ®¤·¡¢Á´¤Æ
+¤Î¾ðÊó¤ò¤½¤³¤Ë¥³¥Ô¡¼¤·¡¢¤½¤ì¤«¤é¸Å¤¤¥Æ¡¼¥Ö¥ë¤¬ºï½ü¤µ¤ì¡¢¿·¤·¤¤¥Æ¡¼¥Ö¥ë¤¬
+¥ê¥Í¡¼¥à¤µ¤ì¤Þ¤¹¡£Á´¤Æ¤Î¹¹¿·¤Ï¼«Æ°Åª¤Ë¿·¤·¤¤¥Æ¡¼¥Ö¥ë¤Ë¥ê¥À¥¤¥ì¥¯¥È¤µ¤ì¤ë
+¤Î¤Ç¡¢¹¹¿·¤¬¼ºÇÔ¤¹¤ë¤³¤È¤Ê¤¯¹Ô¤ï¤ì¤Þ¤¹¡£<CODE>ALTER TABLE</CODE> ¤¬Æ°ºîÃæ¤Ï¡¢
+¸Å¤¤¥Æ¡¼¥Ö¥ë¤ÏÂ¾¤Î¥¯¥é¥¤¥¢¥ó¥È¤ËÆÉ¤ß¹þ¤ß²ÄÇ½¤Ç¤¹¡£¥Æ¡¼¥Ö¥ë¤Î¹¹¿·/¥Æ¡¼¥Ö
+¥ë¤Ø¤Î½ñ¤­¹þ¤ß¤Ï»ß¤á¤é¤ì¡¢¿·¤·¤¤¥Æ¡¼¥Ö¥ë¤Î½àÈ÷¤¬¤Ç¤­¤¿¸å¤Ë¤À¤±¼Â¹Ô¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+<CODE>IGNORE</CODE> ¤¬»ØÄê¤µ¤ì¤Ê¤¤¾ì¹ç¡¢¿·¤·¤¤¥Æ¡¼¥Ö¥ëÆâ¤ËÊ£¿ô¤Î¥æ¥Ë¡¼¥¯¥­¡¼¤¬
+Â¸ºß¤¹¤ë¤È¡¢¥³¥Ô¡¼¤Ï¼ºÇÔ¤·´¬¤­Ìá¤µ¤ì(roll back)¤Þ¤¹¡£½ÅÊ£¤¹¤ë¾ì¹ç¡¢ºÇ½é
+¤Ë¸«¤Ä¤«¤Ã¤¿¹Ô¤¬»ÈÍÑ¤µ¤ì¤Þ¤¹¡£¤³¤ì¤Ï <STRONG>MySQL</STRONG> ³ÈÄ¥¤Ç¤¹¡£
+<LI>
+
+<CODE>CHANGE column_name</CODE>, <CODE>DROP column_name</CODE> ¤½¤·¤Æ <CODE>DROP
+INDEX</CODE> ¤Ï ANSI SQL92 ¤Ø¤Î <STRONG>MySQL</STRONG> ³ÈÄ¥¤Ç¤¹¡£
+<LI>
+
+¥ª¥×¥·¥ç¥ó¤ÎÃ±¸ì <CODE>COLUMN</CODE> ¤Ï½ã¿è¤Ë¥´¥ß¤ÎÃ±¸ì¤Ç¡¢¾ÊÎ¬¤Ç¤­¤Þ¤¹¡£
+<LI>
+
+<CODE>ADD</CODE> ¤È <CODE>CHANGE</CODE> ¤Ï <CODE>CREATE TABLE</CODE> ¤ÈÆ±¤¸ 
+create_definition ¤ò»È¤¤¤Þ¤¹¡£ ¡Ö<A HREF="manual_Syntax.html#Create table">CREATE TABLE ¹½Ê¸</A>¡×Àá»²¾È ¡£
+<LI>
+
+<STRONG>MySQL</STRONG> 3.22 ¤Ç¤Ï <CODE>ADD</CODE> ... <CODE>AFTER</CODE> column_name ¤Þ¤¿¤Ï
+<CODE>FIRST</CODE> ¤ò»ÈÍÑ¤·¤Æ¡¢¥Æ¡¼¥Ö¥ëÆâ¤Î°ÌÃÖ¤ò»ØÄê¤·¤Æ¹àÌÜ¤òÄÉ²Ã¤Ç¤­¤Þ¤¹¡£
+¥Ç¥Õ¥©¥ë¥È¤Ï¹àÌÜ¤ÎºÇ¸å¤Ç¤¹¡£
+<LI>
+
+<CODE>ALTER COLUMN</CODE> ¤Ï¹àÌÜ¤Ë¿·¤·¤¤¥Ç¥Õ¥©¥ë¥ÈÃÍ¤òÀßÄê¤Þ¤¿¤Ï¸Å¤¤¥Ç¥Õ¥©¥ë¥ÈÃÍ
+¤òºï½ü¤·¤Þ¤¹¡£
+<LI>
+
+<CODE>DROP INDEX</CODE> ¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¤òºï½ü¤·¤Þ¤¹¡£¤³¤ì¤Ï <STRONG>MySQL</STRONG> ¤Î³È
+Ä¥¤Ç¤¹¡£
+<LI>
+
+<STRONG>MySQL</STRONG> ¤Î <CODE>FOREIGN KEY</CODE> ¹½Ê¸¤Ï¸ß´¹¤Î¤¿¤á¤À¤±¤ËÂ¸ºß¤·¤Þ¤¹¡£
+ ¡Ö<A HREF="manual_Compatibility.html#Missing functions"><STRONG>MySQL</STRONG> ¤ËÌµ¤¤µ¡Ç½</A>¡×Àá»²¾È 
+<LI>
+
+¤¤¤¯¤Ä¤«¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹¤Î°ìÉô¤Ç¤¢¤ë column_name ¤òÇË´þ¤¹¤ë¤È¡¢¤³¤Î¥¤¥ó¥Ç¥Ã
+¥¯¥¹Éô¤Ïºï½ü¤µ¤ì¤Þ¤¹¡£Á´¤Æ¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹Éô¤¬ºï½ü¤µ¤ì¤ë¤È¡¢¥¤¥ó¥Ç¥Ã¥¯¥¹¤¬
+ºï½ü¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+<CODE>DROP PRIMARY KEY</CODE> ¤Ï <CODE>PRIMARY</CODE> ¤ÈÌ¾ÉÕ¤±¤é¤ì¤¿¥¤¥ó¥Ç¥Ã¥¯¥¹¤òÇË
+´þ¤·¤Þ¤¹¡£¤Þ¤¿¤Ï¡¢¤½¤Î¤è¤¦¤Ê¥¤¥ó¥Ç¥Ã¥¯¥¹¤¬Â¸ºß¤·¤Ê¤±¤ì¤Ð¡¢¥Æ¡¼¥Ö¥ë¤ÎºÇ½é
+¤Î <CODE>UNIQUE</CODE> ¥¤¥ó¥Ç¥Ã¥¯¥¹¤òÇË´þ¤·¤Þ¤¹¡£
+<LI>
+
+<CODE>CHANGE</CODE> ¤Ï¥Ç¡¼¥¿¤ò¤Ç¤­¤ë¤À¤±ÎÉ¤¤¿·¤·¤¤·Á¼°¤ËÊÑ´¹¤ò»î¤ß¤Þ¤¹¡£
+<LI>
+
+<CODE>mysql_info(MYSQL*)</CODE> ¤Ç¡¢¤¤¤¯¤Ä¤Î¥ì¥³¡¼¥É¤¬¥³¥Ô¡¼¤µ¤ì¡¢¤¤¤¯¤Ä¤Î¥ì¥³¡¼
+¥É¤¬Ê£¿ô¥¤¥ó¥Ç¥Ã¥¯¥¹¤Î¤¿¤á¤Ëºï½ü¤µ¤ì¤¿¤«¤ò¼è¤ê½Ð¤»¤Þ¤¹¡£
+<LI>
+
+<CODE>ALTER TABLE</CODE> ¤ò»ÈÍÑ¤¹¤ë¤¿¤á¤Ë¤Ï¡¢select, insert, delete, update,
+create, drop ÆÃ¸¢¤¬¥Æ¡¼¥Ö¥ë¤ËÉ¬Í×¤Ç¤¹¡£
+<LI>
+
+<CODE>ALTER TABLE table_name RENAME AS new_name</CODE> ¤òÂ¾¤Î¥ª¥×¥·¥ç¥óÌµ¤·¤Ë
+»ÈÍÑ¤¹¤ë¾ì¹ç¤Ï¡¢<STRONG>MySQL</STRONG> ¤Ï¥Æ¡¼¥Ö¥ë¤Î¥ê¥Í¡¼¥à¤òÂ®¤¯¹Ô¤Ê¤¦¤À¤±¤Ç¤¹¡£
+</UL>
+
+<P>
+ALTER TABLE ¤Î¤¤¤¯¤Ä¤«¤Î»ÈÍÑÎã:
+
+</P>
+
+<PRE>
+CREATE TABLE t1 (a INTEGER,b CHAR(10));
+INSERT INTO t1 VALUES(1,"testing");
+ALTER TABLE t1 RENAME t2;
+ALTER TABLE t2 CHANGE a a TINYINT NOT NULL, CHANGE b c CHAR(20);
+ALTER TABLE t2 ADD d TIMESTAMP;
+ALTER TABLE t2 ADD INDEX (d), ADD PRIMARY KEY (a);
+ALTER TABLE t2 DROP COLUMN c;
+ALTER TABLE t2 ADD c INT UNSIGNED NOT NULL AUTO_INCREMENT, ADD INDEX (c);
+DROP TABLE t2;
+</PRE>
+
+<P>
+<A NAME="IDX242"></A>
+
+
+<H2><A NAME="Delete table" HREF="manual_toc.html#Delete table">DROP TABLE ¹½Ê¸</A></H2>
+
+<P>
+<CODE>DROP TABLE table_name [, table_name...]</CODE>
+
+</P>
+<P>
+°ì¤Ä¤Þ¤¿¤Ï¤½¤ì°Ê¾å¤Î¥Æ¡¼¥Ö¥ë¤òºï½ü¤·¤Þ¤¹¡£Á´¤Æ¤Î¥Ç¡¼¥¿¤ÈÄêµÁ¤Ï<EM>ºï½ü</EM>¤µ¤ì
+¤Þ¤¹¡£¤³¤Î¥³¥Þ¥ó¥É¤Ï¤½¤ì¤ò´ÊÃ±¤Ë¹Ô¤Ê¤¤¤Þ¤¹¡ª
+
+</P>
+<P>
+<A NAME="IDX243"></A>
+
+
+<H2><A NAME="Delete" HREF="manual_toc.html#Delete">DELETE ¹½Ê¸</A></H2>
+
+<P>
+<CODE>DELETE FROM table_name WHERE where_definition</CODE>
+
+</P>
+<P>
+±Æ¶Á¤µ¤ì¤¿¥ì¥³¡¼¥É¿ô¤òÊÖ¤·¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>WHERE</CODE> Àá¤Ê¤·¤Çºï½ü¤ò¹Ô¤Ã¤¿¾ì¹ç¡¢¥Æ¡¼¥Ö¥ë¤¬ºÆÀ¸À®¤µ¤ì¤Þ¤¹¡£¤³¤ì¤Ï
+³Æ¹Ô¤òºï½ü¤¹¤ë¤è¤ê¤â¤È¤Æ¤âÂ®¤¤¤Ç¤¹¡£¤³¤Î¾ì¹ç¡¢±Æ¶Á¤µ¤ì¤¿¥ì¥³¡¼¥É¤Ï 0 ¤È
+¤·¤Æ¥³¥Þ¥ó¥É¤¬ÊÖ¤ê¤Þ¤¹¡£<STRONG>MySQL</STRONG> ¤Ïºï½ü¤µ¤ì¤¿¹Ô¤Î¿ô¤òÊÖ¤·¤Þ¤»¤ó¡£
+¥Æ¡¼¥Ö¥ëÄêµÁ¥Õ¥¡¥¤¥ë <CODE>table_name.frm</CODE> ¤¬Àµ¤·¤¤¸Â¤ê¡¢¥Æ¡¼¥Ö¥ë¤òºÆÀ¸
+À®¤Ç¤­¤ë¤³¤È¤ò³Î¤«¤á¤ë¤¿¤á¤Ë¡¢¥Ç¡¼¥¿¥Õ¥¡¥¤¥ë¤ò¥ª¡¼¥×¥ó¤¹¤ë¤³¤È¤Ï¤Ê¤·¤Ë¡¢
+ºÆÀ¸À®¤¬¹Ô¤ï¤ì¤ë¤¿¤á¤Ç¤¹¡£
+
+</P>
+<P>
+<A NAME="IDX244"></A>
+
+
+<H2><A NAME="Select" HREF="manual_toc.html#Select">SELECT ¹½Ê¸</A></H2>
+
+<P>
+<CODE>SELECT [STRAIGHT_JOIN] [DISTINCT | ALL] select_expression,... [INTO OUTFILE 'file_name' ...] [ FROM table_references [WHERE where_definition ] [GROUP BY column,...] [HAVING where_definition] [ ORDER BY column [ASC | DESC] ,..] [LIMIT [offset,] rows] [PROCEDURE procedure_name]] </CODE>
+
+</P>
+<P>
+»ÈÍÑ¤µ¤ì¤ëÁ´¤Æ¤Î¥­¡¼¥ï¡¼¥É¤Ï¸·Ì©¤Ë¾åµ­¤Î½ç¤ÎÉ¬Í×¤¬¤¢¤ê¤Þ¤¹¡£Îã¤¨¤Ð
+<CODE>HAVING</CODE> Àá¤Ï <CODE>GROUP BY</CODE> ¤Î¸å¤Ç <CODE>ORDER BY</CODE> Àá¤ÎÁ°¤ËÍè¤Ê¤±
+¤ì¤Ð¤¤¤±¤Þ¤»¤ó¡£
+
+</P>
+<P>
+É¬Í×¤Ë±þ¤¸¤Æ(Perl ¤Î¤è¤¦¤Ë)¡¢¼«Æ°Åª¤ËÊ¸»úÎó¤Ï¿ôÃÍ¤Ë¡¢¿ôÃÍ¤ÏÊ¸»úÎó¤ËÊÑ´¹
+¤µ¤ì¤Þ¤¹¡£Èæ³ÓÁàºî (<CODE>(=, &#60;&#62;, &#60;=, &#60;, &#62;=, &#62;)</CODE>) ¤Ç¤Ï¡¢°ú¿ô¤¬¿ôÃÍ¤Î¾ì¹ç
+°ú¿ô¤Ï¿ôÃÍ¤È¤·¤ÆÈæ³Ó¤µ¤ì¤Þ¤¹¡£¤½¤¦¤Ç¤Ê¤¤¾ì¹ç¤Ï°ú¿ô¤ÏÊ¸»úÎó¤È¤·¤ÆÈæ³Ó¤µ¤ì
+¤Þ¤¹¡£Á´¤Æ¤ÎÊ¸»úÎóÈæ³Ó¤Ï¥Ç¥Õ¥©¥ë¥È¤Ç¤Ï ISO8859-1 (±Ñ¸ì¤Ç¤âÍ¥½¨¤ËÆ¯¤¯¥¹¥«
+¥ó¥¸¥Ê¥Ó¥¢Ê¸»ú¥»¥Ã¥È) ¤Ë¤è¤ë¥±¡¼¥¹Èó°ÍÂ¸¤Ç¤¹¡£
+
+</P>
+
+<PRE>
+select 1 &#62; '6x';        -&#62;      0
+
+select 7 &#62; '6x';        -&#62;      1
+
+select 0 &#62; 'x6';        -&#62;      0 
+
+select 0 = 'x6';        -&#62;      1
+</PRE>
+
+
+<UL>
+<LI>
+
+¹àÌÜÌ¾¤Ï¡¢¤½¤Î¹àÌÜÌ¾¤¬ unique ¤Ç¤¢¤ë¾ì¹ç¡¢table ¥×¥ì¥Õ¥£¥Ã¥¯¥¹¤ò»ý¤ÄÉ¬Í×
+¤Ï¤¢¤ê¤Þ¤»¤ó¡£
+<LI>
+
+select É½¸½¤ÏÊÌÌ¾¤òÍ¿¤¨¤é¤ì¤Þ¤¹¡£ÊÌÌ¾¤Ï¤½¤Î¹àÌÜÌ¾¤È¤Ê¤ê¡¢¤½¤·¤Æ¥½¡¼¥È¤È
+¥°¥ë¡¼¥×»þ¤Ë¡¢¤Þ¤¿¤Ï <CODE>HAVING</CODE> ÀáÆâ¤Ç»ÈÍÑ¤Ç¤­¤Þ¤¹¡£
+
+<PRE>
+select concat(last_name,' ',first_name) as name from table order by name
+</PRE>
+
+<LI>
+
+table_references ¤Ï·ë¹ç¤¹¤ë¥Æ¡¼¥Ö¥ë¤Î¥ê¥¹¥È¤Ç¤¹¡£¤³¤ì¤Ï <CODE>LEFT OUTER
+JOIN</CODE> »²¾È¤â´Þ¤ß¤Þ¤¹¡£ ¡Ö<A HREF="manual_Syntax.html#Join">Join ¹½Ê¸</A>¡×Àá»²¾È 
+<LI>
+
+<CODE>LIKE</CODE> É½¸½¤Ç¤Ï¡¢% ¤È _ ¤Ï '\' ¤òÁ°¤ËÃÖ¤¯¤³¤È¤Ç¡¢¥ï¥¤¥ë¥É¥«¡¼¥É¤Î°Õ
+Ì£¤ò¤Ê¤¯¤·¡¢¥ê¥Æ¥é¥ë¤Î % ¤È _ ¤Ë¤Ê¤ê¤Þ¤¹¡£
+<LI>
+
+DATE ¤ÏÊ¸»úÎó¤Ç¼¡¤Î¹½Ê¸¤Î°ì¤Ä¤Ç¤¹:
+
+<UL>
+<LI>
+
+YYMMDD        (Ç¯¤Ï YY &#60; 70 ¤Î¾ì¹ç 2000 Ç¯¤È¤ß¤Ê¤µ¤ì¤Þ¤¹¡£)
+<LI>
+
+YYYYMMDD
+<LI>
+
+YY.MM.DD	¤³¤³¤Ç '.' ¤ÏÇ¤°Õ¤ÎÈó¿ô»ú¤Î¥»¥Ñ¥ì¡¼¥¿¤Ë¤Ç¤­¤Þ¤¹¡£
+<LI>
+
+YYYY.MM.DD	¤³¤³¤Ç '.' ¤ÏÇ¤°Õ¤ÎÈó¿ô»ú¤Î¥»¥Ñ¥ì¡¼¥¿¤Ë¤Ç¤­¤Þ¤¹¡£
+</UL>
+
+<LI>
+
+<CODE>IFNULL()</CODE> ¤È <CODE>IF()</CODE> ¤Ï¡¢»ÈÍÑ¤Ë±þ¤¸¤Æ¿ôÃÍ¤Þ¤¿¤ÏÊ¸»úÎóÃÍ¤òÊÖ¤·
+¤Þ¤¹¡£
+<LI>
+
+<CODE>ORDER</CODE> ¤È <CODE>GROUP</CODE> ¤Î¹àÌÜ¤Ï¡¢¹àÌÜÌ¾, ¹àÌÜÊÌÌ¾ ¤Þ¤¿¤Ï <CODE>SELECT</CODE> 
+ÀáÆâ¤Î¹àÌÜÈÖ¹æ¤È¤·¤Æ¡¢Í¿¤¨¤é¤ì¤Þ¤¹¡£
+<LI>
+
+<CODE>HAVING</CODE> Àá¤Ï¡¢select_expressions Ãæ¤ÎÇ¤°Õ¤Î¹àÌÜ¤Þ¤¿¤ÏÊÌÌ¾¤ò»ý¤Ä¤³¤È
+¤¬¤Ç¤­¤Þ¤¹¡£ºÇ¸å¤ËÅ¬ÍÑ¤µ¤ì¡¢Ä¾Á°¤Î¹àÌÜ¤¬¥¯¥é¥¤¥¢¥ó¥È¤ËºÇÅ¬²½¤µ¤ì¤º¤ËÁ÷¤é
+¤ì¤Þ¤¹¡£WHERE ÀáÆâ¤ËÃÖ¤¯¤Ù¤­¹àÌÜ¤Ë¤Ï»È¤ï¤Ê¤¤¤Ç²¼¤µ¤¤¡£¼¡¤Ï(¤Þ¤À)¤Ç¤­¤Þ¤»
+¤ó:
+
+
+<PRE>
+<CODE>SELECT user,MAX(salary) FROM users GROUP BY user HAVING max(salary)&#62;10</CODE>
+</PRE>
+
+¼¡¤Î¤è¤¦¤ËÊÑ¹¹¤·¤Æ²¼¤µ¤¤:
+
+
+<PRE>
+<CODE>SELECT user,MAX(salary) AS sum FROM users GROUP BY user HAVING sum &#62; 10</CODE>
+</PRE>
+
+<LI>
+
+<CODE>STRAIGHT_JOIN</CODE> ¤Ï¡¢<CODE>FROM</CODE> Àá¤ÇÍ¿¤¨¤é¤ì¤¿½çÈÖÄÌ¤ê¤Ë¥Æ¡¼¥Ö¥ë¤ò·ë¹ç¤¹
+¤ë¤è¤¦¤Ë¡¢¥ª¥×¥Æ¥£¥Þ¥¤¥¶¤Ë¶¯À©¤·¤Þ¤¹¡£¥ª¥×¥Æ¥£¥Þ¥¤¥¶¤¬¥Æ¡¼¥Ö¥ë¤òºÇÅ¬¤Ç¤Ê¤¤½ç¤Ë
+·ë¹ç¤¹¤ë¾ì¹ç¡¢¤è¤êÂ®¤¯¹Ô¤Ê¤¦¥¯¥¨¥ê¤òÆÀ¤ë¤¿¤á¤Ë¤³¤ì¤ò»ÈÍÑ¤¹¤ë¤³¤È¤¬¤Ç¤­¤Þ
+¤¹¡£ ¡Ö<A HREF="manual_Syntax.html#Explain">EXPLAIN ¹½Ê¸¡£SELECT ¤Ë¤Ä¤¤¤Æ¤Î¾ðÊó¤òÆÀ¤ë</A>¡×Àá»²¾È 
+<LI>
+
+LIMIT ¤Ï1¤Ä¤Þ¤¿¤Ï2¤Ä¤Î¿ôÃÍ°ú¿ô¤ò¼è¤ê¤Þ¤¹¡£
+
+<UL>
+<LI>
+
+°ú¿ô¤¬1¤Ä¤Î¾ì¹ç¡¢°ú¿ô¤Ï·ë²Ì¤ÎºÇÂç¹Ô¿ô¤ò¼¨¤·¤Þ¤¹¡£
+<LI>
+
+°ú¿ô¤¬2¤Ä¤Î¾ì¹ç¡¢ºÇ½é¤Î°ú¿ô¤ÏÊÖ¤µ¤ì¤¿¹Ô¤Î»Ï¤á¤«¤é¤Î¥ª¥Õ¥»¥Ã¥È¤ò¼¨¤·¡¢2ÈÖ
+ÌÜ¤ÏºÇÂç¹Ô¿ô¤Ç¤¹¡£
+</UL>
+
+<LI>
+
+INTO OUTFILE 'filename' ¤Ï¥Õ¥¡¥¤¥ë¤ËÍ¿¤¨¤é¤ì¤¿¥»¥Ã¥È¤ò½ñ¤­½Ð¤·¤Þ¤¹¡£¥Õ¥¡
+¥¤¥ë¤Ï»öÁ°¤ËÂ¸ºß¤·¤Æ¤¤¤Æ¤Ï¤¤¤±¤Þ¤»¤ó¡£ ¡Ö<A HREF="manual_Syntax.html#Load">LOAD DATA INFILE ¹½Ê¸</A>¡×Àá»²¾È ¡£
+</UL>
+
+<P>
+<A NAME="IDX245"></A>
+<A NAME="IDX246"></A>
+
+
+<H2><A NAME="Join" HREF="manual_toc.html#Join">Join ¹½Ê¸</A></H2>
+
+<P>
+<STRONG>MySQL</STRONG> ¤Ï¼¡¤Î <CODE>JOIN</CODE> ¹½Ê¸¤ò¥µ¥Ý¡¼¥È¤·¤Þ¤¹:
+
+</P>
+
+<PRE>
+table_reference, table_reference
+table_reference [CROSS] JOIN table_reference
+table_reference LEFT [OUTER] JOIN table_reference ON conditional-expr
+table_reference LEFT [OUTER] JOIN table_reference USING (column-commalist)
+table_reference NATURAL LEFT [OUTER] JOIN table_reference
+{ oj table_reference LEFT OUTER JOIN table_reference ON conditional-expr }
+</PRE>
+
+<P>
+ºÇ¸å¤ÎÎã¤Ï ODBC ¹½Ê¸¤Ç¤¹¡£
+
+</P>
+
+<UL>
+<LI>
+
+table reference ¤Ï <CODE>table_reference AS alias</CODE> ¤Þ¤¿¤Ï 
+<CODE>table_reference alias</CODE> ¤ÇÊÌÌ¾¤ò¤Ä¤±¤é¤ì¤Þ¤¹¡£
+<LI>
+
+<CODE>,</CODE> ¤È <CODE>JOIN</CODE> ¤Ï°ÕÌ£Åª¤Ë¤ÏÆ±¤¸¤Ç¤¹¡£¤³¤ì¤Ï»ÈÍÑ¤µ¤ì¤¿¥Æ¡¼¥Ö¥ë´Ö
+¤Î´°Á´¤Ê·ë¹ç¤ò¹Ô¤¤¤Þ¤¹¡£ÄÌ¾ï¤Ï¡¢¥Æ¡¼¥Ö¥ë¤ò¤É¤Î¤è¤¦¤Ë¥ê¥ó¥¯¤¹¤ë¤«¤ò 
+<CODE>WHERE</CODE> ¾ò·ïÃæ¤Çµ­½Ò¤·¤Þ¤¹¡£
+<LI>
+
+<CODE>ON</CODE> conditional ¤ÏÇ¤°Õ¤Î <CODE>WHERE</CODE> ¾ò·ï¤Ç¤¹¡£<CODE>LEFT JOIN</CODE> 
+¤Î±¦¤Î¥Æ¡¼¥Ö¥ë¤ËÅ¬¹ç¤¹¤ë¥ì¥³¡¼¥É¤¬¤Ê¤¤¾ì¹ç¡¢Á´¤Æ¤Î¹àÌÜ¤¬ NULL ¤ËÀßÄê¤µ¤ì
+¤¿¹Ô¤¬±¦¤Î¥Æ¡¼¥Ö¥ë¤È¤·¤Æ»ÈÍÑ¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+<CODE>USING</CODE> column-list ¤ÏÎ¾Êý¤Î¥Æ¡¼¥Ö¥ë¤ËÂ¸ºß¤¹¤ë¹àÌÜ¤Î¥ê¥¹¥È¤Ç¤¹¡£
+<CODE>A LEFT JOIN B USING (C1,C2,C3...)</CODE> ¤Ï¡¢°ÕÌ£Åª¤Ë¤Ï <CODE>ON</CODE>
+expression <CODE> A.C1=B.C1 AND A.C2=B.C2 AND A.C3=B.C3...</CODE> ¤ÈÆ±¤¸¤ÈÄêµÁ
+¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+2¤Ä¤Î¥Æ¡¼¥Ö¥ë¤Î <CODE>NATURAL LEFT JOIN</CODE> ¤Ï°ÕÌ£Åª¤Ë¤Ï¡¢Î¾Êý¤Î¥Æ¡¼¥Ö¥ë¤Ë
+Â¸ºß¤¹¤ëÁ´¤Æ¤Î¹àÌÜÌ¾¤ò»ý¤Ä <CODE>USING</CODE> ¤ÈÆ±¤¸¤ÈÄêµÁ¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+ºÇ¸å¤Î <CODE>LEFT JOIN</CODE> ¹½Ê¸¤Ï ODBC ¤È¤Î¸ß´¹¤Î¤¿¤á¤À¤±¤ËÂ¸ºß¤·¤Þ¤¹¡£
+</UL>
+
+<P>
+<A NAME="IDX247"></A>
+
+
+<H2><A NAME="Insert" HREF="manual_toc.html#Insert">INSERT ¹½Ê¸</A></H2>
+
+
+<PRE>
+	INSERT INTO table [ (column_name,...) ] VALUES (expression,...)
+or	INSERT INTO table [ (column_name,...) ] SELECT ...
+</PRE>
+
+<P>
+expression ¤Ï column_name ¥ê¥¹¥È(¤Þ¤¿¤Ï column_name ¥ê¥¹¥È¤¬Í¿¤¨¤é¤ì¤Ê¤¤
+¾ì¹ç¤Ï¥Æ¡¼¥Ö¥ë)¤ÎÁ°¤Î¹àÌÜ¤ò»ÈÍÑ¤·¤Þ¤¹¡£
+
+</P>
+<P>
+¼¡¤Ï¡¢Ê£¿ô¹Ô¤Î <CODE>INSERT</CODE> ¥¹¥Æ¡¼¥È¥á¥ó¥È¤òÊÝ»ý¤·¤Þ¤¹:
+
+<UL>
+<LI>
+
+¥¯¥¨¥ê¤Ë¤Ï <CODE>ORDER BY</CODE> Àá¤ò´Þ¤á¤ë¤³¤È¤Ï¤Ç¤­¤Þ¤»¤ó¡£
+<LI>
+
+<CODE>INSERT</CODE> ¥¹¥Æ¡¼¥È¥á¥ó¥È¤Î¥¿¡¼¥²¥Ã¥È¥Æ¡¼¥Ö¥ë¤Ï¡¢¥¯¥¨¥ê¤Î FROM Àá¤Ë¸½¤ì¤ë¤³
+¤È¤¬¤Ç¤­¤Þ¤»¤ó¡£
+<LI>
+
+<CODE>INSERT INTO ... SELECT ...</CODE> ¤ò»ÈÍÑ¤¹¤ë¾ì¹ç¡¢C API ´Ø¿ô 
+<CODE>mysql_info()</CODE> ¤Ç¼¡¤Î¾ðÊóÊ¸»úÎó¤òÆÀ¤ë¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£
+
+<CODE>Records: 100 Duplicates: 0 Warnings: 0</CODE> Duplicates ¤Ï¤¤¤¯¤Ä¤«¤Î¥¤
+¥ó¥Ç¥Ã¥¯¥¹¤¬½ÅÊ£¤·¤¿¤¿¤á¤Ë½ñ¤­½Ð¤µ¤ì¤Ê¤«¤Ã¤¿¹Ô¿ô¤Ç¤¹¡£Warnings ¤Ï NOT
+NULL ¤ÈÀë¸À¤µ¤ì¤Æ¤¤¤ë¤Î¤Ë NULL ¤¬ÀßÄê¤µ¤ì¤¿¹àÌÜ¿ô¤Ç¤¹¡£¤³¤ì¤é¤Ï¤½¤Î¥Ç¥Õ¥©
+¥ë¥ÈÃÍ¤¬ÀßÄê¤µ¤ì¤Þ¤¹¡£
+
+¤³¤Î¾ì¹ç¡¢ÁÞÆþ¤·¤Æ¤¤¤ë¤Î¤ÈÆ±¤¸¥Æ¡¼¥Ö¥ë¤«¤é¤Î SELECT ¤Ï ANSI SQL ¤Ç¶Ø¤¸¤é
+¤ì¤Æ¤¤¤Þ¤¹¡£Æ±¤¸¼Â¹Ô¤ÇÁÞÆþ¤µ¤ì¤¿¹Ô¤ò SELECT ¤¬¸«¤Ä¤±¤ë¾ì¹ç¤Ë¡¢ÌäÂê¤È¤Ê¤ê
+¤Þ¤¹¡£sub select »ÈÍÑ»þ¤Ë¤Ï¡¢¾õ¶·¤Ï´ÊÃ±¤Ë¤È¤Æ¤âº®Íð¤·¤Þ¤¹¡ª
+<LI>
+
+TIMESTAMP ¤ÎÃÍ¤Ë NULL °Ê³°¤Î²¿¤«¤¬ÀßÄê¤µ¤ì¤¿¾ì¹ç¤Ï¡¢TIMESTAMP ¤ÎÃÍ¤Ï·ë²Ì
+¤Î¥Æ¡¼¥Ö¥ë¤Ë¥³¥Ô¡¼¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+AUTO_INCREMENT ¹àÌÜ¤ÏÉáÄÌ¤ËÆ¯¤­¤Þ¤¹¡£
+</UL>
+
+<P>
+<A NAME="IDX248"></A>
+
+
+<H2><A NAME="Replace" HREF="manual_toc.html#Replace">REPLACE ¹àÌÜ</A></H2>
+
+
+<PRE>
+	REPLACE INTO table [ (column_name,...) ] VALUES (expression,...)
+or	REPLACE INTO table [ (column_name,...) ] SELECT ...
+</PRE>
+
+<P>
+¤³¤ì¤ÏÀµ³Î¤Ë <CODE>INSERT</CODE> ¤È»÷¤¿Æ°¤­¤ò¤·¤Þ¤¹¡£¥Æ¡¼¥Ö¥ëÆâ¤ËÆ±¤¸¥æ¥Ë¡¼¥¯¥­¡¼¤ò
+»ý¤Ä¸Å¤¤¥ì¥³¡¼¥É¤¬¤¤¤¯¤Ä¤«¤¢¤ë¾ì¹ç¤Ë¡¢¸Å¤¤¥ì¥³¡¼¥É(°ì¤Ä¤Þ¤¿¤ÏÊ£¿ô)¤¬¤³¤Î
+¥ì¥³¡¼¥É¤¬ÁÞÆþ¤µ¤ì¤ëÁ°¤Ëºï½ü¤µ¤ì¤ë¤³¤È¤¬°Û¤Ê¤ê¤Þ¤¹¡£
+ ¡Ö<A HREF="manual_Syntax.html#Insert">INSERT ¹½Ê¸</A>¡×Àá»²¾È .
+
+</P>
+<P>
+<A NAME="IDX249"></A>
+
+
+<H2><A NAME="Load" HREF="manual_toc.html#Load">LOAD DATA INFILE ¹½Ê¸</A></H2>
+
+<P>
+<CODE>LOAD DATA INFILE</CODE> 'text_file_name.text' [<CODE>REPLACE</CODE> |
+<CODE>IGNORE</CODE>] <CODE>INTO</CODE> <CODE>TABLE</CODE> table_name [<CODE>FIELDS</CODE>
+[<CODE>TERMINATED BY</CODE> ',' [<CODE>OPTIONALLY</CODE>] <CODE>ENCLOSED BY</CODE> '"'
+<CODE>ESCAPED BY</CODE> '\\' ]] [<CODE>LINES TERMINATED BY</CODE> '\n'] [(Field1,
+Field2...)]
+
+</P>
+<P>
+¤³¤ì¤Ï¥µ¡¼¥Ð¤ËÃÖ¤«¤ì¤¿¥Æ¥­¥¹¥È¥Õ¥¡¥¤¥ë¤«¤é¹Ô¤òÆÉ¤ß¹þ¤à¤¿¤á¤Ë»ÈÍÑ¤µ¤ì¡¢¤È
+¤Æ¤â¹âÂ®¤Ç¤¹¡£¥µ¡¼¥Ð - ¥¯¥é¥¤¥¢¥ó¥È¥×¥í¥È¥³¥ë¤Ï¤Þ¤ÀÀÜÂ³¾å¤Î¥Õ¥¡¥¤¥ë¤ò¥µ
+¥Ý¡¼¥È¤·¤Æ¤¤¤Þ¤»¤ó¡£¥¯¥é¥¤¥¢¥ó¥È¾å¤Ë¤À¤±¥Õ¥¡¥¤¥ë¤¬¤¢¤ë¾ì¹ç¤Ï¡¢<CODE>LOAD
+DATA INFILE</CODE> ¤ò»ÈÍÑ¤¹¤ëÁ°¤Ë¡¢²ÄÇ½¤Ê¤é¤Ð°µ½Ì¤·¤Æ <STRONG>rcp</STRONG> ¤ä 
+<STRONG>ftp</STRONG> ¤Ç¥µ¡¼¥Ð¤Ë¥³¥Ô¡¼¤·¤Æ¤¯¤À¤µ¤¤¡£¥Æ¥­¥¹¥È¥Õ¥¡¥¤¥ë¤Ø¤ÎÁ´¤Æ¤Î¥Ñ
+¥¹¤Ï¥Ç¡¼¥¿¥Ù¡¼¥¹¥Ç¥£¥ì¥¯¥È¥ê¤Ø¤ÎÁêÂÐ¤Ç¤¹¡£
+
+</P>
+<P>
+¥Æ¥­¥¹¥È¥Õ¥¡¥¤¥ë¤Ë¥Ç¡¼¥¿¤ò½ñ¤­¹þ¤à¤Ë¤Ï¡¢
+<CODE>SELECT ...  INTO OUTFILE 'interval.txt' fields terminated by ','
+enclosed by '"' escaped by '\\' lines terminated by '\n' FROM ....</CODE>
+¹½Ê¸¤ò»ÈÍÑ¤·¤Þ¤¹¡£
+
+</P>
+<P>
+ÄÌ¾ï¡¢¥Æ¥­¥¹¥È¥Õ¥¡¥¤¥ë·¿¥ª¥×¥·¥ç¥ó¤Ë¤Ï²¿¤âµ­½Ò¤¹¤ë¤Ù¤­¤Ç¤Ï¤¢¤ê¤Þ¤»¤ó¡£¥Ç
+¥Õ¥©¥ë¥È¤Ï <CODE>tab</CODE> Ê¸»ú¤Ç¶èÀÚ¤é¤ì¤¿¹àÌÜ¤Î¥³¥ó¥Ñ¥¯¥È¥Æ¥­¥¹¥È¥Õ¥¡¥¤¥ë¤Ç¡¢
+Á´¤Æ¤Î¹Ô¤Ï²þ¹Ô¤Ç½ª¤ê¤Þ¤¹¡£¹àÌÜÆâ¤Î¥¿¥Ö, ²þ¹Ô¤È <CODE>\</CODE> ¤Ï <CODE>\</CODE> ¤¬Á°
+¤ËÃÖ¤«¤ì¤Þ¤¹¡£NULL ¤Ï \N ¤È¤·¤ÆÆÉ¤Þ¤ì¡¢½ñ¤«¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>FIELDS TERMINATED BY</CODE> ¤Î¥Ç¥Õ¥©¥ë¥ÈÃÍ¤Ï <CODE>\t</CODE> ¤Ç¤¹¡£
+
+</P>
+<P>
+<CODE>FIELDS [OPTIONALLY] ENCLOSED BY</CODE> ¤Î¥Ç¥Õ¥©¥ë¥ÈÃÍ¤Ï <CODE>''</CODE> ¤Ç¤¹¡£
+
+</P>
+<P>
+<CODE>FIELDS ESCAPED BY</CODE> ¤Î¥Ç¥Õ¥©¥ë¥ÈÃÍ¤Ï <CODE>'\\'</CODE> ¤Ç¤¹¡£
+
+</P>
+<P>
+<CODE>LINES TERMINATED BY</CODE> ¤Î¥Ç¥Õ¥©¥ë¥ÈÃÍ¤Ï <CODE>'\n'</CODE> ¤Ç¤¹¡£
+
+</P>
+<P>
+<CODE>FIELDS TERMINATED BY</CODE> ¤È <CODE>LINES TERMINATED BY</CODE> ¤Ï1Ê¸»ú°Ê¾å¤Ë
+¤Ç¤­¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>LINES TERMINATED BY</CODE> ¤¬¶õÊ¸»úÎó¤Ç <CODE>FIELDS TERMINATED BY</CODE> ¤¬¶õ
+¤Ç¤Ê¤±¤ì¤Ð¡¢¹Ô¤â <CODE>FIELDS TERMINATED BY</CODE> ¤Ç½ªÃ¼¤µ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>FIELDS TERMINATED BY</CODE> ¤È <CODE>FIELDS ENCLOSED BY</CODE> ¤ÎÎ¾Êý¤¬¶õÊ¸»ú
+Îó (<CODE>''</CODE>) ¤Ê¤é¡¢¸ÇÄê¹Ô·Á¼°("¶­³¦¤Ê¤·" ÆÉ¤ß¹þ¤ß·Á¼°)¤òÍ¿¤¨¤Þ¤¹¡£¸ÇÄê
+¹Ô¥µ¥¤¥º¤Ç¤Ï¡¢NULL ÃÍ¤Ï¶õÇòÊ¸»úÎó¤È¤·¤Æ½ÐÎÏ¤µ¤ì¤Þ¤¹¡£
+        
+<CODE>ENCLOSED BY</CODE> Æâ¤Ç <CODE>OPTIONALLY</CODE> ¤òµ­½Ò¤¹¤ë¤È¡¢<CODE>SELECT ... 
+INTO</CODE> µ­½Ò¤Ç¡¢Ê¸»úÎó¤Ï <CODE>ENCLOSED BY</CODE> ¤Ç°Ï¤Þ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+Æó½Å¤Î <CODE>ENCLOSED BY</CODE> Ê¸»ú¤Ï¡¢<CODE>ENCLOSED BY</CODE> ¤Ç»Ï¤Þ¤ëÊ¸»úÎó¤«¤é
+ºï½ü¤µ¤ì¤Þ¤¹¡£Îã¤¨¤Ð <CODE>ENCLOSED BY '"'</CODE> ¤Ç¤Ï:
+
+<PRE>
+"The ""BIG"" boss"  -&#62; The "BIG" boss
+The "BIG" boss	    -&#62; The "BIG" boss
+</PRE>
+
+<P>
+<CODE>ESCAPED BY</CODE> ¤¬¶õ¤Ç¤Ê¤±¤ì¤Ð¡¢¼¡¤ÎÊ¸»ú¤Ï¥¨¥¹¥±¡¼¥×Ê¸»ú¤¬Á°¤ËÃÖ¤«¤ì¤Þ
+¤¹: <CODE>ESCAPED BY</CODE>, <CODE>ASCII 0</CODE>, ¤½¤·¤Æ <CODE>FIELDS TERMINATED
+BY</CODE>, <CODE>FIELDS ENCLOSED BY</CODE> ¤È <CODE>LINES TERMINATED BY</CODE> Æâ¤ÎºÇ½é¤Î
+Ê¸»ú¡£
+
+</P>
+<P>
+<CODE>FIELDS ENCLOSED BY</CODE> ¤¬¶õ¤Ç¤Ê¤±¤ì¤Ð¡¢<CODE>NULL</CODE> ¤Ï <CODE>NULL</CODE> ÃÍ
+¤È¤·¤ÆÆÉ¤Þ¤ì¤Þ¤¹¡£<CODE>FIELDS ESCAPED BY</CODE> ¤¬¶õ¤Ç¤Ê¤±¤ì¤Ð <CODE>\N</CODE> ¤â 
+<CODE>NULL</CODE> ÃÍ¤È¤·¤ÆÆÉ¤Þ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>REPLACE</CODE> ¤¬»ÈÍÑ¤µ¤ì¤ë¤È¡¢¿·¤·¤¤¹Ô¤ÏÆ±¤¸¥æ¥Ë¡¼¥¯¥¤¥ó¥Ç¥Ã¥¯¥¹¤ò»ý¤Ä
+Á´¤Æ¤Î¹Ô¤òÃÖ¤­´¹¤¨¤Þ¤¹¡£<CODE>IGNORE</CODE> ¤¬»ÈÍÑ¤µ¤ì¤ë¤È¡¢Æ±¤¸¥æ¥Ë¡¼¥¯¥­¡¼¤ò
+»ý¤Ä¥ì¥³¡¼¥É¤¬´û¤ËÂ¸ºß¤·¤Æ¤¤¤¿¾ì¹ç¡¢¹Ô¤Ï¥¹¥­¥Ã¥×¤µ¤ì¤Þ¤¹¡£¾åµ­¥ª¥×¥·¥ç¥ó
+¤¬¤Ê¤±¤ì¤Ð¥¨¥é¡¼¤Ë¤Ê¤ê¤Þ¤¹¡£½ÅÊ£¥¤¥ó¥Ç¥Ã¥¯¥¹¤Î¥¨¥é¡¼¤Ë¤Ê¤Ã¤¿¾ì¹ç¡¢¥Æ¥­¥¹
+¥È¥Õ¥¡¥¤¥ë¤Î»Ä¤ê¤ÏÌµ»ë¤µ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>LOAD DATA</CODE> ¤¬¥µ¥Ý¡¼¥È¤µ¤ì¤Ê¤¤¤¤¤¯¤Ä¤«¤Î¥±¡¼¥¹:
+
+<UL>
+<LI>
+
+¸ÇÄê¥µ¥¤¥º¹Ô (<CODE>FIELDS TERMINATED BY</CODE> ¤È <CODE>FIELDS ENCLOSED BY</CODE> 
+¤ÎÎ¾Êý¤¬¶õ) ¤È BLOB ¹àÌÜ¡£
+<LI>
+
+¶èÀÚ¤êµ­¹æ¤Î¤¤¤¯¤Ä¤«¤¬Â¾¤Î¥×¥ì¥Õ¥£¥Ã¥¯¥¹¤Ç¤¢¤ë¾ì¹ç¡£
+<LI>
+
+<CODE>FIELDS ESCAPED BY</CODE> ¤¬¶õ¤Ç¡¢¥Ç¡¼¥¿¤¬ <CODE>LINES TERMINATED BY</CODE> ¤Þ
+¤¿¤Ï <CODE>FIELDS TERMINATED BY</CODE> ¤¬Â³¤¯ <CODE>FIELDS ENCLOSED BY</CODE> ¤ò´Þ¤ó
+¤Ç¤¤¤ë¡£
+</UL>
+
+<P>
+Á´¤Æ¤Î¹Ô¤Ï¥Æ¡¼¥Ö¥ë¤ËÆÉ¤ß¹þ¤Þ¤ì¤Þ¤¹¡£¹Ô¤Î¹àÌÜ¤¬¾¯¤Ê¤¤¾ì¹ç¤Ï¡¢»Ä¤ê¤Î¹àÌÜ¤Ë
+¤Ï¥Ç¥Õ¥©¥ë¥ÈÃÍ¤¬ÀßÄê¤µ¤ì¤Þ¤¹¡£<CODE>TIMESTAMP</CODE> ¹àÌÜ¤Ï¡¢NULL ÃÍ¤¬¤½¤ÎÎó¤Ë
+Í¿¤¨¤é¤ì¤¿¾ì¹ç¡¢¤Þ¤¿¤Ï¹àÌÜ¥ê¥¹¥È¤¬»ÈÍÑ¤µ¤ì¤¿»þ¤Ë <CODE>TIMESTAMP</CODE> ¹àÌÜ¤¬¡¢
+¤½¤Î¹àÌÜ¥ê¥¹¥È¤Ë¤Ê¤¤¾ì¹ç¤Ë¡¢¸½ºß¤Î»þ¹ï¤òÀßÄê¤·¤Þ¤¹ (ºÇ¸å¤Î¥±¡¼¥¹¤Ç¤Ï¡¢ºÇ
+½é¤Î <CODE>TIMESTAMP</CODE> ¹àÌÜ¤À¤±¤òÊÝ»ý¤·¤Þ¤¹)¡£
+
+</P>
+<P>
+¥»¥­¥å¥ê¥Æ¥£¾å¤ÎÍýÍ³¤Ë¤è¤ê¡¢¥Æ¥­¥¹¥È¥Õ¥¡¥¤¥ë¤Ï¥Ç¡¼¥¿¥Ù¡¼¥¹¥Ç¥£¥ì¥¯¥È¥êÆâ
+¤Ë¤¢¤ë¤«Á´°÷¤ËÆÉ¤ß¹þ¤ß²ÄÇ½¤Ç¤Ê¤±¤ì¤Ð¤¤¤±¤Þ¤»¤ó¡£<CODE>LOAD DATA INFLIE</CODE> 
+¤ò»ÈÍÑ¤·¤¿¤¤³Æ¥æ¡¼¥¶¤Ï¡¢user ÆÃ¸¢¥Æ¡¼¥Ö¥ë¤Î 'File_priv' ¹àÌÜ¤â 'Y' ¤Ç¤Ê
+¤±¤ì¤Ð¤Ê¤ê¤Þ¤»¤ó¡ª  ¡Ö<A HREF="manual_Privilege_system.html#Privileges">ÆÃ¸¢¥·¥¹¥Æ¥à¤¬¤É¤Î¤è¤¦¤ËÆ¯¤¯¤«¡©</A>¡×Àá»²¾È 
+
+</P>
+<P>
+<CODE>LOAD DATA INFILE</CODE> ¤ÏÁ´¤Æ¤ÎÆþÎÏ¤òÊ¸»úÎó¤È¤·¤Æ¤ß¤ë¤¿¤á¡¢<CODE>enum</CODE> 
+¤Þ¤¿¤Ï <CODE>set</CODE> ¹àÌÜ¤Ë¤Ï¡¢<CODE>INSERT</CODE> ¥¹¥Æ¡¼¥È¥á¥ó¥È¤Ç»ÈÍÑ¤Ç¤­¤ë¤è¤¦
+¤Ë¤Ï¡¢¿ôÃÍ¤Ï»ÈÍÑ¤Ç¤­¤Þ¤»¤ó¡£Á´¤Æ¤Î <CODE>enum</CODE> ¤È <CODE>set</CODE> ¤ÏÊ¸»úÎó¤Ç
+Í¿¤¨¤é¤ì¤ëÉ¬Í×¤¬¤¢¤ê¤Þ¤¹¡ª
+
+</P>
+<P>
+¥¨¥¹¥±¡¼¥×¹½Ê¸¤Ë¤Ä¤¤¤Æ¤Î¤³¤ì°Ê¾å¤Î¾ðÊó¤Ï  ¡Ö<A HREF="manual_Syntax.html#Base Syntax">¥ê¥Æ¥é¥ë¡£Ê¸»úÎó¤È¿ôÃÍ¤ò¤É¤Î¤è¤¦¤Ë½ñ¤¯¤«¡©</A>¡×Àá»²¾È ¡£
+
+</P>
+<P>
+<CODE>LOAD DATA</CODE> Ìä¤¤¹ç¤ï¤»¤¬¹Ô¤Ê¤ï¤ì¤¿»þ¡¢¼¡¤Î¾ðÊóÊ¸»úÎó¤¬ C API ´Ø¿ô 
+<CODE>mysql_info()</CODE> ¤ÇÆÀ¤é¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>Records: 1  Deleted: 0  Skipped: 0  Warnings: 0</CODE>
+
+</P>
+<P>
+Warnings ¤Ï¡¢ÀºÅÙ¤ÎÂ»¼º¤Ê¤·¤ÇÃÖ¤«¤ì¤Ê¤«¤Ã¤¿¹àÌÜ¡¢ÆÉ¤ß¹þ¤ó¤À¥Æ¥­¥¹¥È¹Ô¤«
+¤éÃÍ¤òÆÀ¤Ê¤«¤Ã¤¿¹àÌÜ(¹Ô¤¬Ã»¤«¤¹¤®¤ë¤ÈÈ¯À¸)¡¢Í¿¤¨¤é¤ì¤¿¹àÌÜ¤ËÅ¬¹ç¤Ç¤­¤ë¤µ
+¤é¤Ê¤ë¥Ç¡¼¥¿¤ò»ý¤Ä¹Ô¤ÇÁý²Ã¤·¤Þ¤¹¡£warning ¤Ï¤Þ¤¿ time, date, timestamp 
+¤Þ¤¿¤Ï datetime ¹àÌÜ¤¬ 0 ¤ËÀßÄê¤µ¤ì¤¿»þ¤Ë¤âÍ¿¤¨¤é¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+Á´¤Æ¤Î¹àÌÜ¤ò¥í¡¼¥É¤¹¤ëÎã:
+
+</P>
+
+<PRE>
+LOAD DATA INFILE 'persondata.text' INTO TABLE persondata;
+</PRE>
+
+<P>
+ ¡Ö<A HREF="manual_Performance.html#Table efficiency">»ä¤Î¥Æ¡¼¥Ö¥ë¤ò¤Ç¤­¤ë¤À¤±Â®¤¯/¾®¤µ¤¯°·¤¦ÊýË¡¤Ï¡©</A>¡×Àá»²¾È 
+
+</P>
+<P>
+<A NAME="IDX250"></A>
+
+
+<H2><A NAME="Update" HREF="manual_toc.html#Update">UPDATE ¹½Ê¸</A></H2>
+
+
+<PRE>
+UPDATE table SET column=expression,... WHERE where_definition
+</PRE>
+
+<P>
+Á´¤Æ¤Î¹¹¿·¤Ïº¸¤«¤é±¦¤Ë¹Ô¤Ê¤ï¤ì¤Þ¤¹¡£expression Æâ¤Ç¹àÌÜ¤ò¥¢¥¯¥»¥¹¤¹¤ë¤È¡¢
+¹¹¿·¤Ï¹àÌÜ¤Î¸½ºß¤ÎÃÍ(Í¿¤¨¤é¤ì¤¿ÃÍ¤Þ¤¿¤Ï¥Ç¥Õ¥©¥ë¥ÈÃÍ)¤ò»ÈÍÑ¤·¤Þ¤¹¡£
+
+</P>
+
+<PRE>
+UPDATE persondata SET count=count+1
+</PRE>
+
+<P>
+<CODE>UPDATE</CODE> ¥¹¥Æ¡¼¥È¥á¥ó¥È¤Ï¤¤¤¯¤Ä¤Î¹Ô¤¬¼ÂºÝ¤ËÊÑ¹¹¤µ¤ì¤¿¤«¤òÊÖ¤·¤Þ¤¹¡£
+<STRONG>MySQL</STRONG> 3.22 ¤Ç¤Ï <CODE>mysql_info()</CODE> ¤ÏÅ¬¹ç¤·¤¿¹Ô¿ô¤È¹¹¿·¤µ¤ì¤¿
+¹Ô¿ô¤È¡¢¹¹¿·Ãæ¤Ë¤¤¤¯¤Ä¤Î·Ù¹ð¤òÆÀ¤¿¤«¤òÊÖ¤·¤Þ¤¹¡£
+
+</P>
+<P>
+<A NAME="IDX251"></A>
+<A NAME="IDX252"></A>
+<A NAME="IDX253"></A>
+<A NAME="IDX254"></A>
+<A NAME="IDX255"></A>
+<A NAME="IDX256"></A>
+<A NAME="IDX257"></A>
+<A NAME="IDX258"></A>
+
+
+<H2><A NAME="Show" HREF="manual_toc.html#Show">SHOW ¹½Ê¸¡£¥Æ¡¼¥Ö¥ë¤ä¹àÌÜ¤Ê¤É¤Ë¤Ä¤¤¤Æ¤Î¾ðÊó¤òÆÀ¤ë</A></H2>
+
+
+<PRE>
+	SHOW DATABASES [LIKE wild]
+or 	SHOW TABLES [FROM database] [LIKE wild]
+or	SHOW COLUMNS FROM table [FROM database] [LIKE wild]
+or	SHOW INDEX FROM table [FROM database]
+or	SHOW STATUS
+or	SHOW VARIABLES [LIKE wild]
+</PRE>
+
+<P>
+¥Ç¡¼¥¿¥Ù¡¼¥¹¡¢¥Æ¡¼¥Ö¥ë¡¢¹àÌÜ¤Ë¤Ä¤¤¤Æ¤Î¾ðÊó¤òÍ¿¤¨¤Þ¤¹¡£<CODE>LIKE wild</CODE> 
+Éô¤¬»ÈÍÑ¤µ¤ì¤¿¾ì¹ç¡¢<CODE>wild</CODE> Ê¸»úÎó¤ÏÄÌ¾ï¤Î SQL ¥ï¥¤¥ë¥É¥«¡¼¥É (% ¤È _) 
+¤Ç¤¹¡£<CODE>FIELDS</CODE> ¤Ï <CODE>COLUMNS</CODE> ¤ÎÊÌÌ¾¤È¤·¤Æ»ÈÍÑ¤µ¤ì¡¢<CODE>KEYS</CODE> 
+¤Ï <CODE>INDEXES</CODE> ¤ÎÊÌÌ¾¤È¤·¤Æ»ÈÍÑ¤µ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>STATUS</CODE> ¤Ï¡¢<CODE>mysqladmin status</CODE> ¤ÈÆ±ÍÍ¤Ë¡¢¥µ¡¼¥Ð¤«¤é¤Î¥¹¥Æ¡¼
+¥¿¥¹¾ðÊó¤òÍ¿¤¨¤Þ¤¹¡£½ÐÎÏ¤Ï¼¡¤È¤Ï°Û¤Ê¤ë¤«¤â¤·¤ì¤Þ¤»¤ó:
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><CODE>Uptime</CODE> </TD><TD> <CODE>Running_threads</CODE> </TD><TD> <CODE>Questions</CODE> </TD><TD> <CODE>Reloads</CODE> </TD><TD> <CODE>Open_tables</CODE>
+</TR NOSAVE>
+<TR><TD>119 </TD><TD> 1 </TD><TD> 4 </TD><TD> 1 </TD><TD> 3
+</TR>
+</TABLE>
+
+<CODE>VARIABLES</CODE> ¤Ï <STRONG>MySQL</STRONG> ¥·¥¹¥Æ¥àÊÑ¿ô¤Î¤¤¤¯¤Ä¤«¤ÎÃÍ¤ò¼¨¤·¤Þ¤¹¡£
+¤³¤ì¤é¤ÎÊÑ¿ô¤ÎÂ¿¤¯¤Ï¡¢<CODE>mysqld</CODE> ¤Ø¤ÎÍÍ¡¹¤Ê¥ª¥×¥·¥ç¥ó¤ÇÊÑ¹¹¤Ç¤­¤Þ¤¹¡ª
+
+
+
+<H2><A NAME="Explain" HREF="manual_toc.html#Explain">EXPLAIN ¹½Ê¸¡£SELECT ¤Ë¤Ä¤¤¤Æ¤Î¾ðÊó¤òÆÀ¤ë</A></H2>
+
+
+<PRE>
+	EXPLAIN SELECT select_options
+</PRE>
+
+<P>
+¥Æ¡¼¥Ö¥ë¤ò¤É¤Î¤è¤¦¤Ë¤É¤Î½ç¤Ç·ë¹ç¤¹¤ë¤Î¤«¤Î¾ðÊó¤òÍ¿¤¨¤Þ¤¹¡£<CODE>EXPLAIN</CODE> ¤Î½õ
+¤±¤Ç¡¢¥ì¥³¡¼¥É¤ò¸«¤Ä¤±¤ë¤¿¤á¤Ë¥­¡¼¤ò»ÈÍÑ¤¹¤ë¤è¤êÂ®¤¤ select ¤òÆÀ¤ë¤¿¤á¤Ë¡¢
+¤µ¤é¤Ê¤ë¥¤¥ó¥Ç¥Ã¥¯¥¹¤ò¥Æ¡¼¥Ö¥ë¤ËÄÉ²Ã¤¹¤Ù¤­»þ¤ò¸«¤ë¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£¤Þ¤¿¡¢¥ª¥×¥Æ¥£
+¥Þ¥¤¥¶¤¬ºÇÅ¬¤Ê½ç¤Ç¥Æ¡¼¥Ö¥ë¤ò·ë¹ç¤¹¤ë¤«¤É¤¦¤«¤ò¸«¤ë¤³¤È¤â¤Ç¤­¤Þ¤¹¡£select ¤Ø¤Î 
+<CODE>STRAIGHT_JOIN</CODE> ¥ª¥×¥·¥ç¥ó¤Ç¡¢ÆÃÄê¤Î·ë¹ç½ç½ø¤Î»ÈÍÑ¤ò¥ª¥×¥Æ¥£¥Þ¥¤¥¶
+¤Ë¶¯À©¤¹¤ë¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£
+
+</P>
+<P>
+ÍÍ¡¹¤Ê·ë¹ç¥¿¥¤¥×:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>system</CODE>
+<DD>
+<A NAME="IDX259"></A>
+ 
+¥Æ¡¼¥Ö¥ë¤Ï1¥ì¥³¡¼¥É¤À¤±¤ò»ý¤Á¤Þ¤¹ (= ¥·¥¹¥Æ¥à¥Æ¡¼¥Ö¥ë) 
+<DT><CODE>const</CODE>
+<DD>
+¥Æ¡¼¥Ö¥ë¤Ï¡¢Â¿¤¯¤Æ¤â1¤Ä¤ÎÅ¬¹ç¤¹¤ë¥ì¥³¡¼¥É(Ìä¤¤¹ç¤ï¤»¤Î³«»Ï»þ¤ËÆÉ¤Þ¤ì¤ë)¤ò»ý¤Á
+¤Þ¤¹¡£¤³¤Î¥Æ¡¼¥Ö¥ëÆâ¤ÎÁ´¤Æ¤Î¹àÌÜ¤Ï¡¢¥ª¥×¥Æ¥£¥Þ¥¤¥¶¤ÎµÙ»ß¤Ë¤è¤Ã¤ÆÄê¿ô¤È¸«¤Ê¤µ¤ì¤Þ
+¤¹¡£
+<DT><CODE>eq_ref</CODE>
+<DD>
+Á°¤Î¥Æ¡¼¥Ö¥ë¤Î³ÆÁÈ¹ç¤»¤Ë¤Ä¤¤¤Æ¡¢°ì¤Ä¤Î¹Ô¤¬¤³¤Î¥Æ¡¼¥Ö¥ë¤«¤éÆÉ¤Þ¤ì¤Þ¤¹¡£
+<DT><CODE>ref</CODE>
+<DD>
+Á°¤Î¥Æ¡¼¥Ö¥ë¤Î³ÆÁÈ¹ç¤»¤Ë¤Ä¤¤¤Æ¡¢Å¬¹ç¤¹¤ë¥¤¥ó¥Ç¥Ã¥¯¥¹¤ÎÁ´¤Æ¤Î¹Ô¤¬¤³¤Î¥Æ¡¼
+¥Ö¥ë¤«¤éÆÉ¤Þ¤ì¤Þ¤¹¡£
+<DT><CODE>range</CODE>
+<DD>
+Í¿¤¨¤é¤ì¤¿¥¤¥ó¥Ç¥Ã¥¯¥¹ÈÏ°ÏÆâ¤Î¹Ô¤À¤±¤¬¥¤¥ó¥Ç¥Ã¥¯¥¹¤òÄÌ¤¸¤Æ¼è¤ê½Ð¤µ¤ì¤Þ¤¹¡£
+³ÈÄ¥¹àÌÜ¤Ï¤É¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹¤¬»ÈÍÑ¤µ¤ì¤¿¤«¤òÃÎ¤é¤»¤Þ¤¹¡£
+<DT><CODE>all</CODE>
+<DD>
+Á°¤Î¥Æ¡¼¥Ö¥ë¤Î³ÆÁÈ¹ç¤»¤Ë¤Ä¤¤¤Æ¡¢´°Á´¤Ê¥Æ¡¼¥Ö¥ë scan ¤¬¹Ô¤Ê¤ï¤ì¤Þ¤¹¡£
+</DL>
+
+<P>
+¤³¤ì¤Ï <CODE>EXPLAIN</CODE> ¤Î½õ¤±¤ÇºÇÅ¬²½¤µ¤ì¤¿ join ¤ÎÎã¤Ç¤¹¡£
+
+</P>
+
+<PRE>
+EXPLAIN SELECT tt.TicketNumber, tt.TimeIn,
+        tt.ProjectReference, tt.EstimatedShipDate,
+        tt.ActualShipDate, tt.ClientID,
+        tt.ServiceCodes, tt.RepetitiveID,
+        tt.CurrentProcess, tt.CurrentDPPerson,
+        tt.RecordVolume, tt.DPPrinted, et.COUNTRY,
+        et_1.COUNTRY, do.CUSTNAME
+        FROM tt, et, et AS et_1,
+        do
+        WHERE tt.SubmitTime Is Null and tt.ActualPC =
+        et.EMPLOYID and tt.AssignedPC =
+        et_1.EMPLOYID and tt.ClientID =
+        do.CUSTNMBR;
+</PRE>
+
+<P>
+<CODE>EXPLAIN</CODE> ¤Ï¼¡¤òÊÖ¤·¤Þ¤¹:
+
+</P>
+
+<PRE>
+table   type    possible_keys   key     key_len ref     rows    Extra
+et      ALL     PRIMARY NULL    NULL    NULL    74
+do      ALL     PRIMARY NULL    NULL    NULL    2135
+et_1    ALL     PRIMARY NULL    NULL    NULL    74
+tt      ALL     AssignedPC,ClientID,ActualPC    NULL    NULL    NULL   3872
+        range checked for each record (key map: 35)
+</PRE>
+
+<P>
+¤³¤Î¾ì¹ç <STRONG>MySQL</STRONG> ¤ÏÁ´¤Æ¤Î¥Æ¡¼¥Ö¥ë¤Ë´°Á´¤Ê·ë¹ç¤ò¹Ô¤Ã¤Æ¤¤¤Þ¤¹¡ª ³Æ
+¥Æ¡¼¥Ö¥ëÆâ¤Î¹Ô¤Î¿ô¤ÎÀ½ÉÊ¤¬¸¡Æ¤¤µ¤ì¤ë¤Î¤Ç¡¢¤³¤ì¤Ï¤«¤Ê¤êÄ¹¤¤»þ´Ö¤«¤«¤ê¤Þ¤¹¡ª 
+Á´¤Æ¤Î¥Æ¡¼¥Ö¥ë¤¬ 1000 ¥ì¥³¡¼¥É»ý¤Ã¤Æ¤¤¤¿¾ì¹ç¡¢<STRONG>MySQL</STRONG> ¤Ï 1000^4 =
+1000000000000 ¹Ô¤òÄ´¤Ù¤Ê¤¤¤È¤¤¤±¤Þ¤»¤ó¡£¥Æ¡¼¥Ö¥ë¤¬¤â¤Ã¤ÈÂç¤­¤¤¤È¡¢¤É¤ì¤¯
+¤é¤¤¤Î»þ´Ö¤«¤«¤ë¤«ÁÛÁü¤Ç¤­¤Þ¤¹...¡£
+
+</P>
+<P>
+¤³¤Î¾ì¹ç¡¢ºÇ½é¤Î´Ö°ã¤¤¤Ï <STRONG>MySQL</STRONG> ¤Ï¤Þ¤À¡¢°Û¤Ê¤Ã¤¿Àë¸À¤¬¤µ¤ì¤¿¹àÌÜ
+¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹¤òÇ½Î¨Åª¤Ë»ÈÍÑ¤·¤Ê¤¤¤³¤È¤Ç¤¹: (varchar() ¤È char() ¤Ï¤³¤Î
+Ê¸Ì®¤Ç¤Ï°Û¤Ê¤ê¤Þ¤»¤ó)
+
+</P>
+<P>
+¤³¤Î¾ì¹ç¡¢<CODE>tt.ActualPC</CODE> ¤Ï <CODE>char(10)</CODE> ¤Ç <CODE>et.EMPLOYID</CODE> ¤Ï 
+<CODE>char(15)</CODE> ¤Ç¤¹¡£
+
+</P>
+<P>
+½¤Àµ:
+
+</P>
+
+<PRE>
+mysql&#62; alter table tt change ActualPC ActualPC varchar(15);
+</PRE>
+
+<P>
+¤½¤·¤Æ¾å¤Î EXPLAIN ¤Ï¼¡¤ò¼¨¤·¤Þ¤¹:
+
+</P>
+
+<PRE>
+table   type    possible_keys   key     key_len ref     rows    Extra
+tt      ALL     AssignedPC,ClientID,ActualPC    NULL    NULL    NULL   3872
+        where used
+do      ALL     PRIMARY NULL    NULL    NULL    2135
+        range checked for each record (key map: 1)
+et_1    ALL     PRIMARY NULL    NULL    NULL    74
+        range checked for each record (key map: 1)
+et     eq_ref  PRIMARY PRIMARY 15      tt.ActualPC    1
+</PRE>
+
+<P>
+¤³¤ì¤Ï´°Á´¤Ç¤Ï¤¢¤ê¤Þ¤»¤ó¤¬¡¢¤«¤Ê¤ê¤Þ¤·¤Ç¤¹¡£¤³¤Î¥Ð¡¼¥¸¥ç¥ó¤Ï¿ôÉÃ¤Ç¼Â¹Ô¤µ
+¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+¤µ¤é¤Ë¡¢
+
+</P>
+
+<PRE>
+mysql&#62; alter table tt change AssignedPC AssignedPC varchar(15),
+                      change ClientID Clientid     varchar(15);
+</PRE>
+
+<P>
+<CODE>EXPLAIN</CODE> ¤«¤é¼¡¤¬ÆÀ¤é¤ì¤Þ¤¹:
+
+</P>
+
+<PRE>
+table   type    possible_keys   key     key_len ref     rows    Extra
+et      ALL     PRIMARY NULL    NULL    NULL    74
+tt      ref     AssignedPC,ClientID,ActualPC    ActualPC        15
+        et.EMPLOYID   52      where used
+et_1    eq_ref  PRIMARY PRIMARY 15      tt.AssignedPC  1
+do      eq_ref  PRIMARY PRIMARY 15      tt.Clientid    1
+</PRE>
+
+<P>
+Which is 'almost' as good as it can get.  The problem is that
+<STRONG>MySQL</STRONG> assumes that <CODE>tt.AcutalPC</CODE> is evenly distributed which
+isn't the case in the tt.
+
+</P>
+<P>
+Fortunately it is easy to tell <STRONG>MySQL</STRONG> about this:
+
+</P>
+
+<PRE>
+shell&#62; isamchk --analyze PATH_TO_MYSQL_DATABASE/tt
+shell&#62; mysqladmin refresh
+</PRE>
+
+<P>
+And now the join is 'perfect':
+
+</P>
+
+<PRE>
+table   type    possible_keys   key     key_len ref     rows    Extra
+tt      ALL     AssignedPC,ClientID,ActualPC    NULL    NULL    NULL
+        3872     where used
+et      eq_ref  PRIMARY PRIMARY 15      tt.ActualPC    1
+et_1    eq_ref  PRIMARY PRIMARY 15      tt.AssignedPC  1
+do      eq_ref  PRIMARY PRIMARY 15      tt.Clientid    1
+</PRE>
+
+<P>
+<A NAME="IDX260"></A>
+<A NAME="IDX261"></A>
+
+
+<H2><A NAME="Describe" HREF="manual_toc.html#Describe">DESCRIBE ¹½Ê¸¡£¹àÌÜ¤Ë¤Ä¤¤¤Æ¤Î¾ðÊó¤òÆÀ¤ë</A></H2>
+
+<P>
+<CODE>(DESCRIBE | DESC) table [column]</CODE>
+
+</P>
+<P>
+¹àÌÜ¤Ë¤Ä¤¤¤Æ¤Î¾ðÊó¤òÍ¿¤¨¤Þ¤¹¡£¤³¤Î¥³¥Þ¥ó¥É¤Ï Oracle ¤Î¸ß´¹¤Î¤¿¤á¤Ë¤¢¤ê¤Þ
+¤¹¡£ ¡Ö<A HREF="manual_Syntax.html#Show">SHOW ¹½Ê¸¡£¥Æ¡¼¥Ö¥ë¤ä¹àÌÜ¤Ê¤É¤Ë¤Ä¤¤¤Æ¤Î¾ðÊó¤òÆÀ¤ë</A>¡×Àá»²¾È ¡£¹àÌÜ¤Ï¹àÌÜÌ¾¤Þ¤¿¤ÏÊ¸»úÎó¤Ç¤¹¡£Ê¸»úÎó¤Ï¥ï¥¤¥ë¥É¥«¡¼¥É¤ò
+´Þ¤á¤Þ¤¹¡£
+
+</P>
+<P>
+<A NAME="IDX262"></A>
+<A NAME="IDX263"></A>
+
+
+<H2><A NAME="Lock tables" HREF="manual_toc.html#Lock tables"><CODE>LOCK TABLES</CODE> ¹½Ê¸</A></H2>
+
+
+<PRE>
+LOCK TABLES table_name [AS alias] READ|WRITE [, table_name READ|WRITE]
+...
+UNLOCK TABLES
+</PRE>
+
+<P>
+¤³¤Î¥¹¥ì¥Ã¥É¤Î¤¿¤á¤Ë¥Æ¡¼¥Ö¥ë¤ò¥í¥Ã¥¯¤·¤Þ¤¹¡£¥¹¥ì¥Ã¥É¤¬¥Æ¡¼¥Ö¥ë¤Ë READ ¥í¥Ã
+¥¯¤ò»ý¤Ä¾ì¹ç¡¢¤½¤Î¥¹¥ì¥Ã¥É(¤ÈÂ¾¤ÎÁ´¤Æ¤Î¥¹¥ì¥Ã¥É)¤Ï¥Æ¡¼¥Ö¥ë¤«¤é¤ÎÆÉ¤ß¹þ¤ß
+¤À¤±¤¬¤Ç¤­¤Þ¤¹¡£¥¹¥ì¥Ã¥É¤¬¥Æ¡¼¥Ö¥ë¤Ë WRITE ¥í¥Ã¥¯¤ò»ý¤Ä¾ì¹ç¡¢¤³¤Î¥¹¥ì¥Ã
+¥É¤À¤±¤¬¥Æ¡¼¥Ö¥ë¤Î READ ¤È WRITE ¤¬¤Ç¤­¤Þ¤¹¡£Á´¤Æ¤Î¥¹¥ì¥Ã¥É¤Ï¤½¤ì¤é¤¬Á´
+¤Æ¤Î¥í¥Ã¥¯¤òÆÀ¤ë¤Þ¤ÇÂÔ¤Á¤Þ¤¹(¥¿¥¤¥à¥¢¥¦¥ÈÌµ¤·)¡£
+
+</P>
+<P>
+<CODE>LOCK TABLES</CODE> ¤ò»ÈÍÑ¤¹¤ë¤È¤­¡¢»ÈÍÑ¤·¤è¤¦¤È¤¹¤ëÁ´¤Æ¤Î¥Æ¡¼¥Ö¥ë¤ò¥í¥Ã
+¥¯¤¹¤Ù¤­¤Ç¤¹¡ª ¤³¤Î¥Ý¥ê¥·¡¼¤Ï¥Æ¡¼¥Ö¥ë¥í¥Ã¥¯¤ò¥Ç¥Ã¥É¥í¥Ã¥¯¥Õ¥ê¡¼¤Ë¤¹¤ë¤³
+¤È¤ò³Î¤«¤Ë¤·¤Þ¤¹¡£
+
+</P>
+
+<PRE>
+LOCK TABLES trans READ, customer AS c WRITE
+SELECT SUM(value) FROM trans WHERE customer_id= #some_id#;
+UPDATE customer SET total_value=#value_from_last_statement# WHERE
+customer_id=#some_id#
+UNLOCK TABLES
+</PRE>
+
+<P>
+Á´¤Æ¤Î¥Æ¡¼¥Ö¥ë¤Ï¡¢Â¾¤Î <CODE>LOCK TABLES</CODE> ¤òÈ¯¹Ô¤·¤¿»þ¡¢¤Þ¤¿¤Ï¥µ¡¼¥Ð¤Ø¤Î
+ÀÜÂ³¤¬¥¯¥í¡¼¥º¤µ¤ì¤¿¾ì¹ç¡¢¼«Æ°Åª¤Ë¥¢¥ó¥í¥Ã¥¯¤µ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+ÄÌ¾ï¤Ï¥Æ¡¼¥Ö¥ë¤ò¥í¥Ã¥¯¤¹¤ëÉ¬Í×¤Ï¤¢¤ê¤Þ¤»¤ó¡£¤È¤Ë¤«¤¯¥Æ¡¼¥Ö¥ë¤ò¥í¥Ã¥¯¤·¤¿
+¤¤»þ¤Ë¤Ï¤¤¤¯¤Ä¤«¤Î¾ì¹ç¤¬¤¢¤ê¤Þ¤¹:
+
+</P>
+
+<UL>
+<LI>
+
+¥Æ¡¼¥Ö¥ë¤ÎÂ«¤ÇÂ¿¤¯¤ÎÁàºî¤ò¼Â¹Ô¤·¤è¤¦¤È¤¹¤ë¾ì¹ç¡¢»ÈÍÑ¤·¤è¤¦¤È¤·¤Æ¤¤¤ë¥Æ¡¼
+¥Ö¥ë¤ò¥í¥Ã¥¯¤¹¤ë¤È¤È¤Æ¤âÂ®¤¯¤Ê¤ê¤Þ¤¹¡£¤â¤Á¤í¤ó¡¢Â¾¤Î¥¹¥ì¥Ã¥É¤Ï READ ¥í¥Ã
+¥¯¤µ¤ì¤¿¥Æ¡¼¥Ö¥ë¤Î¹¹¿·¤Ï¤Ç¤­¤Þ¤»¤ó¤·¡¢Â¾¤Î¥¹¥ì¥Ã¥É¤Ï WRITE ¥í¥Ã¥¯¤µ¤ì¤¿
+¥Æ¡¼¥Ö¥ë¤òÆÉ¤à¤³¤È¤Ï¤Ç¤­¤Þ¤»¤ó¡£
+<LI>
+
+<CODE>MySQL</CODE> ¤Ï¥È¥é¥ó¥¶¥¯¥·¥ç¥ó´Ä¶­¤ò¥µ¥Ý¡¼¥È¤·¤Ê¤¤¤¿¤á¡¢Â¾¤Î¥¹¥ì¥Ã¥É¤¬
+ÆÉ¤ß¹þ¤ßÅÔ¹¹¿·¤Î´Ö¤ËÍè¤Ê¤¤¤³¤È¤òÊÝ¾Ú¤·¤¿¤¤¾ì¹ç¤Ï¡¢lock tables ¤ò»ÈÍÑ¤¹¤ë
+É¬Í×¤¬¤¢¤ê¤Þ¤¹¡£Îã¤¨¤ÐÁ°¤ÎÎã¤Ï°ÂÁ´¤Î¤¿¤á¤Ë¤Ï <CODE>LOCK TABLES</CODE> ¤òÉ¬Í×¤È
+¤·¤Þ¤¹¡ª <CODE>LOCK TABLES</CODE> ¤ò»ÈÍÑ¤·¤Ê¤¤¾ì¹ç¡¢SELECT ¤È UPDATE ¥¹¥Æ¡¼¥È
+¥á¥ó¥È¤Î´Ö¤Ë¡¢Ã¯¤«¤¬¿·¤·¤¤ 'trans' ¹Ô¤òÁÞÆþ¤¹¤ëÊÑ¹¹¤¬¤Ç¤­¤Þ¤¹¡£
+<LI>
+
+Áý²Ã¹¹¿· (<CODE>UPDATE customer set value=value+new_value</CODE>) ¤Þ¤¿¤Ï 
+LAST_INSERT_ID() ´Ø¿ô¤Î»ÈÍÑ¤Ë¤è¤ê¡¢Â¿¤¯¤Î¾ì¹ç <CODE>LOCK TABLES</CODE> ¤ò²óÈò
+¤Ç¤­¤Þ¤¹¡£
+</UL>
+
+<P>
+¤¤¤¯¤Ä¤«¤Î¾ì¹ç¡¢¥æ¡¼¥¶¥ì¥Ù¥ë¥í¥Ã¥¯: GET_LOCK() ¤È RELEASE_LOCK() ¤Î»ÈÍÑ
+¤Ë¤è¤Ã¤Æ¤â²ò·è¤Ç¤­¤Þ¤¹¡£¤³¤ì¤é¤Î¥í¥Ã¥¯¤Ï¥µ¡¼¥ÐÆâ¤Î¥Ï¥Ã¥·¥å¥Æ¡¼¥Ö¥ëÆâ¤ËÊÝ
+»ý¤µ¤ì¡¢¹âÂ®¤Î¤¿¤á pthread_mutex ¤Ç¼ÂÁõ¤µ¤ì¤Þ¤·¤¿¡£
+ ¡Ö<A HREF="manual_Syntax.html#Miscellaneous functions">¤½¤ÎÂ¾¤Î´Ø¿ô</A>¡×Àá»²¾È 
+
+</P>
+<P>
+<A NAME="IDX264"></A>
+
+
+<H2><A NAME="Set option" HREF="manual_toc.html#Set option">SET OPTION ¹½Ê¸</A></H2>
+
+
+<PRE>
+SET [OPTION] SQL_VALUE_OPTION=value, ...
+</PRE>
+
+<P>
+»ÈÍÑ¤µ¤ì¤¿¥ª¥×¥·¥ç¥ó¤Ï¼ÂºÝ¤Ë¤Ï¸½ºß¤Î¥»¥Ã¥·¥ç¥óÁ´ÂÎ¤ËÂÐ¤·¤Æ»Ä¤ê¤Þ¤¹¡£
+
+</P>
+<P>
+ÍÍ¡¹¤Ê¥ª¥×¥·¥ç¥ó:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>SQL_SELECT_LIMIT=value</CODE>
+<DD>
+Á´¤Æ¤Î select ¤ÇÊÖ¤µ¤ì¤ë¥ì¥³¡¼¥É¤ÎºÇÂç¿ô¡£select ¤¬ limit Àá¤ò»ý¤Ã¤Æ¤¤¤¿
+¾ì¹ç¡¢¤½¤ì¤Ï¤³¤Î¥¹¥Æ¡¼¥È¥á¥ó¥È¤ò¾å½ñ¤­¤·¤Þ¤¹¡£¿·¤·¤¤ÀÜÂ³¤Î¥Ç¥Õ¥©¥ë¥ÈÃÍ¤Ï 
+'ÌµÀ©¸Â' ¤Ç¤¹¡£
+<DT><CODE>SQL_BIG_TABLES= 0 | 1</CODE>
+<DD>
+1 ¤ËÀßÄê¤·¤¿¾ì¹ç¡¢Á´¤Æ¤Î°ì»þ¥Æ¡¼¥Ö¥ë¤Ï¥á¥â¥ê¤ÎÂå¤ï¤ê¤Ë¥Ç¥£¥¹¥¯¾å¤Ë³ÊÇ¼¤µ
+¤ì¤Þ¤¹¡£¤³¤ì¤Ï¾¯¤·ÃÙ¤¯¤Ê¤ê¤Þ¤¹¤¬¡¢Âç¤­¤Ê°ì»þ¥Æ¡¼¥Ö¥ë¤òÍ×µá¤¹¤ëÂç¤­¤Ê 
+select ¤Ç¡¢¥¨¥é¡¼ <CODE>The table ### is full</CODE> ¤Ë¤Ê¤ë¤³¤È¤Ï¤¢¤ê¤Þ¤»¤ó¡£
+¿·¤·¤¤ÀÜÂ³¤Î¥Ç¥Õ¥©¥ë¥ÈÃÍ¤Ï 0 ¤Ç¤¹(¥á¥â¥ê°ì»þ¥Æ¡¼¥Ö¥ë¤ò»ÈÍÑ¤·¤Þ¤¹)¡£
+<DT><CODE>SQL_BIG_SELECTS= 0 | 1</CODE>
+<DD>
+1 ¤ËÀßÄê¤·¤¿¾ì¹ç¡¢¤È¤Æ¤âÄ¹¤¤»þ´Ö¤¬³Ý¤«¤ë¤Ç¤¢¤í¤¦ select ¤ò¹Ô¤Ê¤ª¤¦¤È¤¹¤ë
+¤È¡¢<STRONG>MySQL</STRONG> ¤Ï abort ¤·¤Þ¤¹¡£¤³¤ì¤Ï¡¢´Ö°ã¤Ã¤¿ <CODE>WHERE</CODE> ¥¹¥Æ¡¼
+¥È¥á¥ó¥È¤¬È¯¹Ô¤µ¤ì¤¿»þ¤ËÍ­ÍÑ¤Ç¤¹¡£<CODE>max_join_size</CODE> ¹Ô°Ê¾å¤ò¸¡Æ¤¤¹¤ë
+¤è¤¦¤Ê <CODE>SELECT</CODE> ¤¬Âç¤­¤Ê¥¯¥¨¥ê¤ÈÄêµÁ¤µ¤ì¤Þ¤¹¡£¿·¤·¤¤ÀÜÂ³¤Î¥Ç¥Õ¥©¥ë
+¥ÈÃÍ¤Ï 0 ¤Ç¤¹(¤³¤ì¤ÏÁ´¤Æ¤Î SELECT ¤òµö¤·¤Þ¤¹)¡£
+<DT><CODE>CHARACTER SET character_set_name | DEFAULT</CODE>
+<DD>
+¤³¤ì¤Ï¥¯¥é¥¤¥¢¥ó¥È¤«¤é¤Î¤½¤·¤Æ¥¯¥é¥¤¥¢¥ó¥È¤Ø¤ÎÁ´¤Æ¤ÎÊ¸»úÎó¤òÍ¿¤¨¤é¤ì¤¿¥Þ¥Ã
+¥Ô¥ó¥°¤Ë¥Þ¥Ã¥×¤·¤Þ¤¹¡£¸½ºß character_set_name ¤Î¥ª¥×¥·¥ç¥ó¤Ï 
+<CODE>cp1251_koi8</CODE> ¤À¤±¤Ç¤¹¤¬¡¢¥Õ¥¡¥¤¥ë 
+<CODE>mysql_source_directory/sql/convert.cc</CODE> ¤òÊÔ½¸¤¹¤ë¤³¤È¤Ë¤è¤ê¡¢¿·¤·
+¤¤¥Þ¥Ã¥Ô¥ó¥°¤ò´ÊÃ±¤ËÄÉ²Ã¤Ç¤­¤Þ¤¹¡£¥Ç¥Õ¥©¥ë¥È¥Þ¥Ã¥Ô¥ó¥°¤òÌá¤¹¤Ë¤Ï
+character_set_name ¤È¤·¤Æ <CODE>DEFAULT</CODE> ¤ò»ÈÍÑ¤·¤Þ¤¹¡£
+<DT><CODE>SQL_LOG_OFF= 0 | 1</CODE>
+<DD>
+1 ¤ËÀßÄê¤·¤¿¾ì¹ç¡¢¥¯¥é¥¤¥¢¥ó¥È¤¬¥×¥í¥»¥¹¥ê¥¹¥ÈÆÃ¸¢¤ò»ý¤Ã¤Æ¤¤¤ë¤È¡¢¤³¤Î¥¯
+¥é¥¤¥¢¥ó¥È¤Î¤¿¤á¤ÎÉ¸½à¥í¥°¤Ø¤Î¥í¥®¥ó¥°¤Ï¹Ô¤ï¤ì¤Þ¤»¤ó¡£¤³¤ì¤Ï¹¹¿·¥í¥°¤Ë¤Ï
+±Æ¶Á¤·¤Þ¤»¤ó¡ª
+<DT><CODE>TIMESTAMP= timestamp_value | DEFAULT</CODE>
+<DD>
+¤³¤Î¥¯¥é¥¤¥¢¥ó¥È¤Î»þ¹ï¤òÀßÄê¤·¤Þ¤¹¡£¤³¤ì¤Ï¡¢¹Ô¤ò¥ê¥¹¥È¥¢¤¹¤ë¤¿¤á¤Î¹¹¿·¥í
+¥°¤ò»ÈÍÑ¤¹¤ë¾ì¹ç¡¢¥ª¥ê¥¸¥Ê¥ë¥¿¥¤¥à¥¹¥¿¥ó¥×¤òÆÀ¤ë¤¿¤á¤Ë»ÈÍÑ¤µ¤ì¤Þ¤¹¡£
+<DT><CODE>LAST_INSERT_ID= #</CODE>
+<DD>
+LAST_INSERT_ID() ¤«¤éÊÖ¤µ¤ì¤ëÃÍ¤òÀßÄê¤·¤Þ¤¹¡£¤³¤ì¤Ï¡¢¥Æ¡¼¥Ö¥ë¤ò¹¹¿·¤¹¤ë
+¥³¥Þ¥ó¥ÉÆâ¤Ç LAST_INSERT_ID() ¤ò»ÈÍÑ¤·¤¿»þ¡¢¹¹¿·¥í¥°¤Ë³ÊÇ¼¤µ¤ì¤Þ¤¹¡£
+</DL>
+
+<P>
+<A NAME="IDX265"></A>
+
+
+<H2><A NAME="Grant" HREF="manual_toc.html#Grant">GRANT ¹½Ê¸(¸ß´¹´Ø¿ô)</A></H2>
+
+
+<PRE>
+GRANT (ALL PRIVILEGES | (SELECT, INSERT, UPDATE, DELETE,
+ REFERENCES (column list), USAGE))
+ ON table TO user,... [WITH GRANT OPTION]
+</PRE>
+
+<P>
+¤³¤Î¥³¥Þ¥ó¥É¤Ï²¿¤â¹Ô¤Ê¤¤¤Þ¤»¤ó¡£¤³¤ì¤¬ <STRONG>MySQL</STRONG> ¤Ë¤¢¤ë¤Î¤Ï¸ß´¹À­¤Î
+¤¿¤á¤À¤±¤Ç¤¹¡£¡ÊÂ¾¤Î SQL ¥µ¡¼¥Ð¤«¤é¤Î¥³¡¼¥É¤Î°Ü¹Ô¤ò¤è¤ê´ÊÃ±¤Ë¤¹¤ë¤¿¤á¡Ë¡£
+<STRONG>MySQL</STRONG> ¤ÎÆÃ¸¢¤Ï <STRONG>MySQL</STRONG> ¾µÇ§¥Æ¡¼¥Ö¥ë¤ÇÁàºî¤µ¤ì¤Þ¤¹¡£
+ ¡Ö<A HREF="manual_Privilege_system.html#Privileges">ÆÃ¸¢¥·¥¹¥Æ¥à¤¬¤É¤Î¤è¤¦¤ËÆ¯¤¯¤«¡©</A>¡×Àá»²¾È 
+
+</P>
+<P>
+<A NAME="IDX266"></A>
+<A NAME="IDX267"></A>
+<A NAME="IDX268"></A>
+
+
+<H2><A NAME="Create Index" HREF="manual_toc.html#Create Index">CREATE INDEX ¹½Ê¸(¸ß´¹´Ø¿ô)</A></H2>
+
+<P>
+<CODE>CREATE [UNIQUE] INDEX index_name ON table_name ( column_name[(length)],... )</CODE>
+
+</P>
+<P>
+¥Ð¡¼¥¸¥ç¥ó¤¬ 3.22 ¤è¤ê¤âÁ°¤Î MySQL ¤Ç¤Ï¡¢¤³¤Î´Ø¿ô¤Ï²¿¤â¹Ô¤Ê¤¤¤Þ¤»¤ó¡£¤³
+¤ì¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¤òÀ¸À®¤¹¤ë <CODE>ALTER TABLE</CODE> ¸Æ¤Ó½Ð¤·¤Ë¥Þ¥Ã¥×¤µ¤ì¤Æ¤¤¤Þ
+¤¹¡£ ¡Ö<A HREF="manual_Syntax.html#Alter table">ALTER TABLE ¹½Ê¸</A>¡×Àá»²¾È 
+
+</P>
+<P>
+ÄÌ¾ï¡¢Á´¤Æ¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹¤Ï <CODE>CREATE TABLE</CODE> ¤ÈÆ±»þ¤ËÀ¸À®¤Ç¤­¤Þ¤¹¡£
+ ¡Ö<A HREF="manual_Syntax.html#Create table">CREATE TABLE ¹½Ê¸</A>¡×Àá»²¾È 
+
+</P>
+<P>
+<CODE>(col1, col2)</CODE> ¤Ï2¤Ä¤Î¹àÌÜ¤«¤é¤Ê¤ëÊ£¹ç¥¤¥ó¥Ç¥Ã¥¯¥¹¤òºîÀ®¤·¤Þ¤¹¡£¥¤
+¥ó¥Ç¥Ã¥¯¥¹¤ÏÍ¿¤¨¤é¤ì¤¿¹àÌÜ¤Î·ë¹ç¤Î¤è¤¦¤Ë¸«¤¨¤Þ¤¹¡£<CODE>CREATE TABLE</CODE> Ãæ
+¤Ç <CODE>INDEX(col1,col2)</CODE> ¤ÎÂå¤ï¤ê¤Ë <CODE>INDEX(col1)</CODE>,
+<CODE>INDEX(col2)</CODE> ¤ò»È¤¨¤Ð¡¢°ì¤Ä¤ÎÊ£¹ç¥¤¥ó¥Ç¥Ã¥¯¥¹¤ÎÂå¤ï¤ê¤ËÆó¤Ä¤ÎÊÌ¡¹
+¤Î¥­¡¼¤¬Âå¤ï¤ê¤ËÆÀ¤é¤ì¤Þ¤¹¡£
+
+</P>
+
+<PRE>
+SELECT * FROM table WHERE col1=# AND col2=#
+</PRE>
+
+<P>
+<CODE>(col1,col2)</CODE> ¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹¤Î¾ì¹ç¤Ï¡¢Àµ¤·¤¤¹Ô¤¬Ä¾ÀÜ fetch ¤µ¤ì¤Þ¤¹¡£
+<CODE>(col1)</CODE>, <CODE>(col2)</CODE> ¤Î¾ì¹ç¤Ï¡¢¤É¤Á¤é¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹¤ÎÊý¤¬¤è¤ê¾¯
+¤Ê¤¤¹Ô¤ò¸«¤Ä¤«¤ë¤«¤ò¥ª¥×¥Æ¥£¥Þ¥¤¥¶¤¬·èÄê¤·¡¢¤³¤Î¥¤¥ó¥Ç¥Ã¥¯¥¹¤¬¹Ô¤ò fetch 
+¤¹¤ë¤¿¤á¤Ë»ÈÍÑ¤µ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+¥Æ¡¼¥Ö¥ë¤¬¥¤¥ó¥Ç¥Ã¥¯¥¹ <CODE>(col1,col2,col3...)</CODE> ¤ò»ý¤Ã¤Æ¤¤¤ë¾ì¹ç¤Ï¡¢¤³
+¤ÎÆ¬¤ÎÊý¤¬¥ª¥×¥Æ¥£¥Þ¥¤¥¶¤Ë¤è¤Ã¤Æ¹Ô¤ò¸«¤Ä¤±¤ë¤¿¤á¤Ë»ÈÍÑ¤µ¤ì¤Þ¤¹¡£¤³¤ì¤Ï¡¢
+¼¡¤Î¤è¤¦¤Ê¸¡º÷Ç½ÎÏ¤ò¤¢¤Ê¤¿¤ËÍ¿¤¨¤ë¤³¤È¤ò°ÕÌ£¤·¤Þ¤¹: <CODE>(col1)</CODE> ¤½¤·¤Æ 
+<CODE>(col1,col2)</CODE> ¤½¤·¤Æ <CODE>(col1,col2,col3)</CODE>...
+
+</P>
+<P>
+<STRONG>MySQL</STRONG> ¤Ï¡¢¥¤¥ó¥Ç¥Ã¥¯¥¹¤òÄÌ¤·¤Æ¹Ô¤òÇÛÃÖ¤¹¤ë¤¿¤á¤Ë¡¢¥¤¥ó¥Ç¥Ã¥¯¥¹
+¤Î°ìÉôÊ¬¤ò»ÈÍÑ¤¹¤ë¤³¤È¤Ï¤Ç¤­¤Þ¤»¤ó¡£
+
+</P>
+<P>
+<CODE>(col1,col2,col3)</CODE> ÄêµÁ¤Ç¤Ï:
+
+</P>
+
+<PRE>
+SELECT * FROM table WHERE col1=#
+SELECT * FROM table WHERE col2=#
+SELECT * FROM table WHERE col2=# and col3=#
+</PRE>
+
+<P>
+ºÇ½é¤Î¥¯¥¨¥ê¤À¤±¤¬¥¤¥ó¥Ç¥Ã¥¯¥¹¤ò»ÈÍÑ¤·¤Þ¤¹¡£
+
+</P>
+<P>
+<CODE>LIKE</CODE> °ú¿ô¤¬¥ï¥¤¥ë¥ÉÊ¸»ú¤Ç»Ï¤Þ¤é¤Ê¤¤Äê¿ôÊ¸»úÎó¤Î¾ì¹ç¡¢
+<STRONG>MySQL</STRONG> ¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¤â»ÈÍÑ¤·¤Þ¤¹:
+
+</P>
+<P>
+¼¡¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¤ò»ÈÍÑ¤·¤Þ¤¹:
+
+</P>
+
+<PRE>
+SELECT * from table WHERE key_column like "Patrick%";
+SELECT * from table WHERE key_column like "Pat%_ck%";
+</PRE>
+
+<P>
+¾å¤Î¥±¡¼¥¹¤Ç¤Ï¡¢<CODE>Patrick &#60;= key_column &#60; Patric1</CODE> ¤È <CODE>Pat &#60;=
+key_column &#60; Pau</CODE> ¤Î¹Ô¤À¤±¤¬¹ÍÎ¸¤µ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+¼¡¤Î select ¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¤ò»ÈÍÑ¤·¤Þ¤»¤ó:
+
+<PRE>
+SELECT * from table WHERE key_column like "%Patrick%";
+SELECT * from table WHERE key_column like other_column;
+</PRE>
+
+<P>
+<CODE>column_name(length)</CODE> ¹½Ê¸¤Ç <CODE>string</CODE> ¹àÌÜ¤Ç¤À¤±°ìÉô¤Î¥¤¥ó¥Ç¥Ã
+¥¯¥¹¤òµ­½Ò¤Ç¤­¤Þ¤¹¡£¤³¤ì¤Ï¥¤¥ó¥Ç¥Ã¥¯¥¹¥Õ¥¡¥¤¥ë¤ò¤è¤ê¾®¤µ¤¯¤·¤Þ¤¹¡£
+
+</P>
+
+<PRE>
+CREATE INDEX part_of_name ON customer (name(10))
+</PRE>
+
+<P>
+Â¿¤¯¤ÎÌ¾Á°¤ÏºÇ½é¤Î10Ê¸»ú¤¬°Û¤Ê¤ë¤³¤È¤ÏÁ´¤¯ÉáÄÌ¤Ê¤Î¤Ç¡¢¾å¤ÎÄêµÁ¤ÏÌ¾Á°¤Î¸¡
+º÷¤òÃÙ¤¯¤·¤Þ¤»¤ó¤¬¡¢Â¿¤¯¤Î¥Ç¥£¥¹¥¯¤òÀáÌó¤·¡¢ÁÞÆþ¤òÂ®¤¯¤·¤Þ¤¹¡ª
+
+</P>
+<P>
+<A NAME="IDX269"></A>
+
+
+<H2><A NAME="Drop Index" HREF="manual_toc.html#Drop Index">DROP INDEX ¹½Ê¸(¸ß´¹´Ø¿ô)</A></H2>
+
+<P>
+<CODE>DROP INDEX index_name</CODE>
+
+</P>
+<P>
+¤³¤Î´Ø¿ô¤Ï¥Ð¡¼¥¸¥ç¥ó 3.22 ¤è¤êÁ°¤Î <CODE>MySQL</CODE> ¤Ç¤Ï²¿¤â¹Ô¤¤¤Þ¤»¤ó¡£¤³¤ì
+¤Ï <CODE>INDEX</CODE> ¤Þ¤¿¤Ï <CODE>UNIQUE</CODE> ÄêµÁ¤òÇË´þ¤¹¤ë <CODE>ALTER TABLE</CODE> 
+¸Æ¤Ó½Ð¤·¤Ë¥Þ¥Ã¥×¤µ¤ì¤Æ¤¤¤Þ¤¹¡£ ¡Ö<A HREF="manual_Syntax.html#Alter table">ALTER TABLE ¹½Ê¸</A>¡×Àá»²¾È 
+
+</P>
+<P>
+<A NAME="IDX270"></A>
+
+
+<H2><A NAME="Comments" HREF="manual_toc.html#Comments">Comment ¹½Ê¸</A></H2>
+
+<P>
+<STRONG>MySQL</STRONG> ¤Ï <CODE># ¤«¤é¹ÔËö¤Þ¤Ç</CODE> ¤È <CODE>/* Ê£¿ô¹Ô */</CODE> ¥³¥á¥ó¥È
+·Á¼°¤ò¥µ¥Ý¡¼¥È¤·¤Þ¤¹¡£
+
+</P>
+
+<PRE>
+select 1+1;	# This comment is to the end of line
+select 1 /* in-line-comment */ + 1;
+select 1+
+/*
+This will be ignored
+*/
+1;
+</PRE>
+
+<P>
+<STRONG>MySQL</STRONG> ¤Ï <CODE>--</CODE> ANSI SQL ·Á¼°¥³¥á¥ó¥È¤ò¥µ¥Ý¡¼¥È¤·¤Þ¤»¤ó¡£
+ ¡Ö<A HREF="manual_Compatibility.html#Missing comments">¥³¥á¥ó¥È³«»Ï¤È¤·¤Æ¤Î --</A>¡×Àá»²¾È ¡£
+
+</P>
+
+<P>
+<A NAME="IDX271"></A>
+<A NAME="IDX272"></A>
+<A NAME="IDX273"></A>
+
+
+<H2><A NAME="UDF functions" HREF="manual_toc.html#UDF functions">CREATE FUNCTION ¹½Ê¸</A></H2>
+
+
+<PRE>
+CREATE FUNCTION &#60;function_name&#62; RETURNS [string|real|integer]
+       SONAME &#60;name_of_shared_library&#62;
+
+DROP FUNCTION &#60;function_name&#62;
+</PRE>
+
+<P>
+¥æ¡¼¥¶ÄêµÁ²ÄÇ½´Ø¿ô (UDF:User definable functions) ¤Ï¡¢<CODE>ABS()</CODE> ¤È 
+<CODE>concat()</CODE> ¤Î¤è¤¦¤Ê¥Í¥¤¥Æ¥£¥Ö <STRONG>MySQL</STRONG> ´Ø¿ô¤È¤·¤Æµ¡Ç½¤¹¤ë¿·¤·
+¤¤´Ø¿ô¤ò <STRONG>MySQL</STRONG> ¤Ë³ÈÄ¥¤¹¤ëÊýË¡¤Ç¤¹¡£UDF ¤Ï C ¤Þ¤¿¤Ï C++ ¤Ç½ñ¤«¤ì¡¢
+OS ¤ÇÆ°Åª¥í¡¼¥É¤¬µ¡Ç½¤¹¤ë¤³¤È¤òÍ×µá¤·¤Þ¤¹¡£¥½¡¼¥¹ÇÛÉÛ¤Ï¡¢£µ¤Ä¤Î¿·¤·¤¤´Ø
+¿ô¤òÄêµÁ¤¹¤ë¥Õ¥¡¥¤¥ë <TT>`udf_example.cc'</TT> ¤ò´Þ¤ó¤Ç¤¤¤Þ¤¹¡£
+
+</P>
+<P>
+´Ø¿ôÌ¾¡¢·¿¡¢¶¦Í­¥é¥¤¥Ö¥é¥ê¤Ï 'mysql' ¥Ç¡¼¥¿¥Ù¡¼¥¹Æâ¤Î¿·¤·¤¤¥·¥¹¥Æ¥à¥Æ¡¼
+¥Ö¥ë 'func' ¤ËÊÝÂ¸¤µ¤ì¤Þ¤¹¡£¿·¤·¤¤´Ø¿ô¤ÎºîÀ®¤ò²ÄÇ½¤Ë¤¹¤ë¤¿¤á¤Ë¤Ï¡¢¥Ç¡¼¥¿
+¥Ù¡¼¥¹ 'mysql' ¤Ë½ñ¤­¹þ¤ß¸¢¤¬É¬Í×¤Ç¤¹¡£<STRONG>MySQL</STRONG> ¤ò 
+--skip-grant-tables ¤Ç³«»Ï¤¹¤ë¾ì¹ç¤Ï¡¢UDF ½é´ü²½¤â¥¹¥­¥Ã¥×¤µ¤ì¤Þ¤¹¡£
+
+</P>
+<P>
+³ÆÄêµÁ´Ø¿ô¤Ï xxxx_init ´Ø¿ô¤È xxx_deinit ´Ø¿ô¤ò»ý¤Á¤Þ¤¹¡£init ´Ø¿ô¤Ï´Ø¿ô
+¤Î¤¿¤á¤Ë¥á¥â¥ê¤ò³ä¤êÅö¤Æ¡¢·ë²Ì¤ÎºÇÂçÄ¹(Ê¸»úÎó´Ø¿ô)¡¢¾®¿ôÅÀ¤Î·å¿ô(double 
+´Ø¿ô)¡¢·ë²Ì¤¬ null ÃÍ¤Ë¤Ê¤ë¤«¤É¤¦¤«¤Ë¤Ä¤¤¤Æ main ´Ø¿ô¤ËÃÎ¤é¤»¤Þ¤¹¡£
+
+</P>
+<P>
+´Ø¿ô¤¬ 'error' °ú¿ô¤ò 1 ¤ËÀßÄê¤¹¤ë¾ì¹ç¡¢¤½¤Î´Ø¿ô¤Ï¤½¤ì°Ê¾å¸Æ¤Ð¤ì¤º¡¢
+mysqld ¤Ï¤³¤Î´Ø¿ô¤Î¥¤¥ó¥¹¥¿¥ó¥¹¤ò¸Æ¤Ó½Ð¤¹Á´¤Æ¤Ë¤Ä¤¤¤Æ NULL ¤òÊÖ¤·¤Þ¤¹¡£
+
+</P>
+<P>
+´Ø¿ô¤Ø¤ÎÁ´¤Æ¤ÎÊ¸»úÎó°ú¿ô¤Ï¡¢¥Ð¥¤¥Ê¥ê¥Ç¡¼¥¿¤ÎÁàºî¤ò¤Ç¤­¤ë¤è¤¦¤Ë¡¢Ê¸»úÎó¤Î
+¥Ý¥¤¥ó¥¿ + Ä¹¤µ¤È¤·¤ÆÍ¿¤¨¤é¤ì¤Þ¤¹¡£Á´¤Æ¤Î´Ø¿ô¤Ï¥¹¥ì¥Ã¥É¥»¡¼¥Õ¤Ç¤Ê¤¤¤È¤¤
+¤±¤Ê¤¤¤³¤È¤òÃÎ¤Ã¤Æ¤¤¤Æ¤¯¤À¤µ¤¤¡£¤³¤ì¤ÏÊÑ¹¹¤µ¤ì¤ë¤è¤¦¤Ê¥°¥í¡¼¥Ð¥ëÊÑ¿ô¤Þ¤¿
+¤ÏÀÅÅªÊÑ¿ô¤Î³ä¤êÅö¤Æ¤Ïµö¤µ¤ì¤Ê¤¤¤³¤È¤ò°ÕÌ£¤·¤Þ¤¹¡ª ¥á¥â¥ê¤òÉ¬Í×¤È¤¹¤ë¾ì
+¹ç¤Ï¡¢init ´Ø¿ôÆâ¤Ç³ä¤êÅö¤Æ¡¢__deinit ´Ø¿ô¤Ç¤³¤ì¤ò²òÊü¤¹¤Ù¤­¤Ç¤¹¡£
+
+</P>
+<P>
+Æ°Åª¥í¡¼¥É¥Õ¥¡¥¤¥ë¤Ï¶¦Í­²ÄÇ½¤È¤·¤Æ¥³¥ó¥Ñ¥¤¥ë¤µ¤ì¤ë¤Ù¤­¤Ç¤¹ (¼¡¤Î¤è¤¦¤Ê¤â
+¤Î: <CODE>gcc -shared -o udf_example.so myfunc.cc</CODE>)¡£¼¡¤ò¹Ô¤¦¤³¤È¤ÇÀµ¤·
+¤¤Á´¤Æ¤Î¥¹¥¤¥Ã¥Á¤ò´ÊÃ±¤ËÆÀ¤ë¤³¤È¤¬¤Ç¤­¤Þ¤¹: <CODE>cd sql ; make
+udf_example.o</CODE> ½ñ¤­¹þ¤ß¤ò¹Ô¤¦¥³¥ó¥Ñ¥¤¥ë¹Ô¤ò¼è¤ê½Ð¤·¡¢¹ÔËö¶á¤¯¤Î '-c' ¤ò
+ºï½ü¤·¤Æ¡¢¥³¥ó¥Ñ¥¤¥ë¹Ô¤ÎºÇ¸å¤Ë -o udf_example.so ¤òÄÉ²Ã¤·¤Æ¤¯¤À¤µ¤¤¡£·ë
+²Ì¤Î¥é¥¤¥Ö¥é¥ê (udf_example.so) ¤Ï ld ¤Ë¤è¤Ã¤Æ¸¡º÷¤µ¤ì¤ë¤É¤³¤«¤Î¥Ç¥£¥ì¥¯
+¥È¥ê¡¢Îã¤¨¤Ð /usr/lib ¤Ë¥³¥Ô¡¼¤·¤Æ¤¯¤À¤µ¤¤¡£
+
+</P>
+<P>
+¥µ¥ó¥×¥ë´Ø¿ô¤Ë´Ø¤¹¤ë¤¤¤¯¤Ä¤«¤ÎÃí°Õ:
+
+</P>
+
+<UL>
+<LI>
+
+´Ø¿ô <CODE>metaphon</CODE> ¤ÏÊ¸»úÎó°ú¿ô¤Î metaphon Ê¸»úÎó¤òÊÖ¤·¤Þ¤¹¡£
+¤³¤ì¤Ï soundex Ê¸»úÎó¤Ë»÷¤¿¤â¤Î¤Ç¤¹¤¬¡¢¤µ¤é¤Ë±Ñ¸ì¤Ë tune ¤µ¤ì¤Þ¤¹¡£
+<LI>
+
+´Ø¿ô <CODE>myfunc_double</CODE> ¤Ï¡¢°ú¿ô¤ÎÁ´¤Æ¤ÎÊ¸»ú¥³¡¼¥É¤Î¹ç·×¤ò¡¢Á´¤Æ¤Î°ú¿ô
+¤ÎÄ¹¤µ¤Î¹ç·×¤Ç³ä¤Ã¤¿ÃÍ¤òÊÖ¤·¤Þ¤¹¡£
+<LI>
+
+´Ø¿ô <CODE>myfunc_int</CODE> ¤ÏÁ´¤Æ¤Î°ú¿ô¤ÎÄ¹¤µ¤Î¹ç·×¤òÊÖ¤·¤Þ¤¹¡£
+<LI>
+
+´Ø¿ô <CODE>lookup</CODE> ¤Ï¥Û¥¹¥ÈÌ¾¤Î IP ÈÖ¹æ¤òÊÖ¤·¤Þ¤¹¡£
+<LI>
+
+´Ø¿ô <CODE>reverse_lookup</CODE> ¤Ï IP ÈÖ¹æ¤Î¥Û¥¹¥ÈÌ¾¤òÊÖ¤·¤Þ¤¹¡£
+¤³¤Î´Ø¿ô¤ÏÊ¸»úÎó "xxx.xxx.xxx.xxx" ¤Þ¤¿¤Ï4·å¤Î¿ôÃÍ¤Ç¸Æ¤Ð¤ì¤Þ¤¹¡£
+</UL>
+
+<P>
+¥é¥¤¥Ö¥é¥ê¤¬¥¤¥ó¥¹¥È¡¼¥ë¤µ¤ì¤¿¸å¡¢<CODE>mysqld</CODE> ¤Ë¿·¤·¤¤´Ø¿ô¤ò¼¡¤Î¥³¥Þ¥ó
+¥É¤ÇÃÎ¤é¤»¤ëÉ¬Í×¤¬¤¢¤ê¤Þ¤¹:
+
+</P>
+
+<PRE>
+CREATE FUNCTION metaphon RETURNS STRING SONAME "udf_example.so";
+CREATE FUNCTION myfunc_double RETURNS REAL SONAME "udf_example.so";
+CREATE FUNCTION myfunc_int RETURNS INTEGER SONAME "udf_example.so";
+CREATE FUNCTION lookup RETURNS STRING SONAME "udf_example.so";
+CREATE FUNCTION reverse_lookup RETURNS STRING SONAME "udf_example.so";
+</PRE>
+
+<P>
+´Ø¿ô¤Ï°ìÅÙ¤À¤±ºîÀ®¤µ¤ì¤Þ¤¹¡£
+´Ø¿ô¤Ï¼¡¤Î¤è¤¦¤Ë¤·¤Æºï½ü¤Ç¤­¤Þ¤¹:
+
+</P>
+
+<PRE>
+DROP FUNCTION metaphon;
+DROP FUNCTION myfunc_double;
+DROP FUNCTION myfunc_int;
+DROP FUNCTION lookup;
+DROP FUNCTION reverse_lookup;
+</PRE>
+
+<P>
+<CODE>CREATE FUNCTION</CODE> ¤È <CODE>DROP FUNCTION</CODE> ¤Ï <CODE>func</CODE> ¥Æ¡¼¥Ö¥ë¤ò
+¹¹¿·¤·¤Þ¤¹¡£Á´¤Æ¤Î¥¢¥¯¥Æ¥£¥Ö¤Ê´Ø¿ô¤Ï¥µ¡¼¥Ð¤ÎºÆµ¯Æ°¤´¤È¤Ë¥ê¥í¡¼¥É¤µ¤ì¤Þ¤¹
+(--skip-grant-tables ¤¬Í¿¤¨¤é¤ì¤Ê¤¤¾ì¹ç)¡£
+
+</P>
+<P>
+<A NAME="IDX274"></A>
+
+
+<H2><A NAME="Reserved words" HREF="manual_toc.html#Reserved words"><STRONG>MySQL</STRONG> ¤ÏÍ½Ìó¸ì¤Ë¤Ä¤¤¤Æ¸·Ì©¤«¡©</A></H2>
+
+<P>
+¤è¤¯¤¢¤ëÌäÂê¤Ï¡¢<CODE>timestamp</CODE> ¤ä <CODE>group</CODE>¡¢<STRONG>MySQL</STRONG> ¤ËËä¤á
+¹þ¤Þ¤ì¤Æ¤¤¤ë¥Ç¡¼¥¿·¿¤ä´Ø¿ô¤ÎÌ¾Á°¤ò¹àÌÜÌ¾¤È¤·¤Æ»ý¤Ä¥Æ¡¼¥Ö¥ë¤ÎºîÀ®¤ò»î¤ß¤ë
+¤³¤È¤ò¤¯¤¤¤È¤á¤Þ¤¹¡£¤½¤ì¤ò¹Ô¤Ê¤¦¤³¤È¤Ïµö¤µ¤ì¤Æ¤¤¤Þ¤¹(Îã¤¨¤Ð¡¢<CODE>ABS</CODE> 
+¤Ï¹àÌÜÌ¾¤È¤·¤Æµö¤µ¤ì¤Þ¤¹)¤¬¡¢Ì¾Á°¤¬¹àÌÜÌ¾¤Ç¤â¤¢¤ë´Ø¿ô»ÈÍÑ»þ¤Ë¤Ï¡¢´Ø¿ôÌ¾
+¤È <CODE>'('</CODE> ¤Î´Ö¤Ë¶õÇò¤Ïµö¤µ¤ì¤Þ¤»¤ó¡£
+
+</P>
+<P>
+¼¡¤Ï <STRONG>MySQL</STRONG> ¤Ç¤ÎÌÀÇò¤ÊÍ½Ìó¸ì¤Ç¤¹¡£¤³¤ì¤é¤Î¤Û¤È¤ó¤É¤Ï (Îã¤¨¤Ð)
+<CODE>group</CODE> ¤Ï ANSI SQL92 ¤Ç¤Ï¹àÌÜÌ¾¤ä¥Æ¡¼¥Ö¥ëÌ¾¤È¤·¤Æ¤Ï¶Ø¤¸¤é¤ì¤Æ¤Þ¤¹¡£
+¤¤¤¯¤Ä¤«¤Ï <STRONG>MySQL</STRONG> ¤¬É¬Í×¤È¤¹¤ë¤¿¤á¤Ç¡¢(¸½ºß) Yacc ¥Ñ¡¼¥µ¤ò»ÈÍÑ¤·
+¤Æ¤¤¤Þ¤¹:
+
+</P>
+<TABLE BORDER WIDTH="100%" NOSAVE >
+<TR><TD><CODE>action</CODE> </TD><TD> <CODE>add</CODE> </TD><TD> <CODE>all</CODE> </TD><TD> <CODE>alter</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>and</CODE> </TD><TD> <CODE>as</CODE> </TD><TD> <CODE>asc</CODE> </TD><TD> <CODE>auto_increment</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>between</CODE> </TD><TD> <CODE>bigint</CODE> </TD><TD> <CODE>bit</CODE> </TD><TD> <CODE>binary</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>blob</CODE> </TD><TD> <CODE>both</CODE> </TD><TD> <CODE>by</CODE> </TD><TD> <CODE>cascade</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>char</CODE> </TD><TD> <CODE>character</CODE> </TD><TD> <CODE>change</CODE> </TD><TD> <CODE>check</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>column</CODE> </TD><TD> <CODE>columns</CODE> </TD><TD> <CODE>create</CODE> </TD><TD> <CODE>data</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>database</CODE> </TD><TD> <CODE>databases</CODE> </TD><TD> <CODE>date</CODE> </TD><TD> <CODE>datetime</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>day</CODE> </TD><TD> <CODE>day_hour</CODE> </TD><TD> <CODE>day_minute</CODE> </TD><TD> <CODE>day_second</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>dayofweek</CODE> </TD><TD> <CODE>dec</CODE> </TD><TD> <CODE>decimal</CODE> </TD><TD> <CODE>default</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>delete</CODE> </TD><TD> <CODE>desc</CODE> </TD><TD> <CODE>describe</CODE> </TD><TD> <CODE>distinct</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>double</CODE> </TD><TD> <CODE>drop</CODE> </TD><TD> <CODE>escaped</CODE> </TD><TD> <CODE>enclosed</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>enum</CODE> </TD><TD> <CODE>explain</CODE> </TD><TD> <CODE>fields</CODE> </TD><TD> <CODE>float</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>float4</CODE> </TD><TD> <CODE>float8</CODE> </TD><TD> <CODE>foreign</CODE> </TD><TD> <CODE>from</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>for</CODE> </TD><TD> <CODE>full</CODE> </TD><TD> <CODE>grant</CODE> </TD><TD> <CODE>group</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>having</CODE> </TD><TD> <CODE>hour</CODE> </TD><TD> <CODE>hour_minute</CODE> </TD><TD> <CODE>hour_second</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>ignore</CODE> </TD><TD> <CODE>in</CODE> </TD><TD> <CODE>index</CODE> </TD><TD> <CODE>infile</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>insert</CODE> </TD><TD> <CODE>int</CODE> </TD><TD> <CODE>integer</CODE> </TD><TD> <CODE>interval</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>int1</CODE> </TD><TD> <CODE>int2</CODE> </TD><TD> <CODE>int3</CODE> </TD><TD> <CODE>int4</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>int8</CODE> </TD><TD> <CODE>into</CODE> </TD><TD> <CODE>is</CODE> </TD><TD> <CODE>join</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>key</CODE> </TD><TD> <CODE>keys</CODE> </TD><TD> <CODE>leading</CODE> </TD><TD> <CODE>left</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>like</CODE> </TD><TD> <CODE>lines</CODE> </TD><TD> <CODE>limit</CODE> </TD><TD> <CODE>lock</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>load</CODE> </TD><TD> <CODE>long</CODE> </TD><TD> <CODE>longblob</CODE> </TD><TD> <CODE>longtext</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>match</CODE> </TD><TD> <CODE>mediumblob</CODE> </TD><TD> <CODE>mediumtext</CODE> </TD><TD> <CODE>mediumint</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>middleint</CODE> </TD><TD> <CODE>minute</CODE> </TD><TD> <CODE>minute_second</CODE> </TD><TD> <CODE>month</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>natural</CODE> </TD><TD> <CODE>numeric</CODE> </TD><TD> <CODE>no</CODE> </TD><TD> <CODE>not</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>null</CODE> </TD><TD> <CODE>on</CODE> </TD><TD> <CODE>option</CODE> </TD><TD> <CODE>optionally</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>or</CODE> </TD><TD> <CODE>order</CODE> </TD><TD> <CODE>outer</CODE> </TD><TD> <CODE>outfile</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>partial</CODE> </TD><TD> <CODE>precision</CODE> </TD><TD> <CODE>primary</CODE> </TD><TD> <CODE>procedure</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>privileges</CODE> </TD><TD> <CODE>read</CODE> </TD><TD> <CODE>real</CODE> </TD><TD> <CODE>references</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>rename</CODE> </TD><TD> <CODE>regexp</CODE> </TD><TD> <CODE>repeat</CODE> </TD><TD> <CODE>replace</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>restrict</CODE> </TD><TD> <CODE>rlike</CODE> </TD><TD> <CODE>select</CODE> </TD><TD> <CODE>set</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>show</CODE> </TD><TD> <CODE>smallint</CODE> </TD><TD> <CODE>sql_big_tables</CODE> </TD><TD> <CODE>sql_big_selects</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>sql_select_limit</CODE> </TD><TD> <CODE>sql_log_off</CODE> </TD><TD> <CODE>straight_join</CODE> </TD><TD> <CODE>starting</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>table</CODE> </TD><TD> <CODE>tables</CODE> </TD><TD> <CODE>terminated</CODE> </TD><TD> <CODE>text</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>time</CODE> </TD><TD> <CODE>timestamp</CODE> </TD><TD> <CODE>tinyblob</CODE> </TD><TD> <CODE>tinytext</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>tinyint</CODE> </TD><TD> <CODE>trailing</CODE> </TD><TD> <CODE>to</CODE> </TD><TD> <CODE>use</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>using</CODE> </TD><TD> <CODE>unique</CODE> </TD><TD> <CODE>unlock</CODE> </TD><TD> <CODE>unsigned</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>update</CODE> </TD><TD> <CODE>usage</CODE> </TD><TD> <CODE>values</CODE> </TD><TD> <CODE>varchar</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>varying</CODE> </TD><TD> <CODE>varbinary</CODE> </TD><TD> <CODE>with</CODE> </TD><TD> <CODE>write</CODE>
+</TR NOSAVE>
+<TR><TD><CODE>where</CODE> </TD><TD> <CODE>year</CODE> </TD><TD> <CODE>year_month</CODE> </TD><TD> <CODE>zerofill</CODE>
+</TR>
+</TABLE>
+
+¼¡¤Î¥·¥ó¥Ü¥ë(¾å¤ÎÉ½¤«¤é)¤Ï ANSI SQL ¤Ç¤Ïµö¤µ¤ì¤Þ¤»¤ó¤¬¡¢<STRONG>MySQL</STRONG> 
+¤Ç¤Ï¹àÌÜÌ¾/¥Æ¡¼¥Ö¥ëÌ¾¤È¤·¤Æµö¤µ¤ì¤Þ¤¹¡£¤³¤ì¤é¤ÎÌ¾Á°¤Î¤¤¤¯¤Ä¤«¤Ï¤È¤Æ¤â¼«
+Á³¤ÊÌ¾Á°¤Ç¡¢Â¿¤¯¤Î¿Í¤¬´û¤Ë»ÈÍÑ¤·¤Æ¤¤¤ë¤«¤é¤Ç¤¹¡£
+
+
+<UL>
+<LI>ACTION
+
+<LI>BIT
+
+<LI>DATE
+
+<LI>ENUM
+
+<LI>NO
+
+<LI>TEXT
+
+<LI>TIME
+
+<LI>TIMESTAMP
+
+</UL>
+
+<P><HR><P>
+Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Privilege_system.html">previous</A>, <A HREF="manual_Stabilty.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

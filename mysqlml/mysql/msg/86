@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:86</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="85">[前]</a><a href="87">[次]</a><a href="../list/1-100">[番号順一覧]</a><a href="../thread/1-100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:86
+</p>
+<div class="header">
+<p>
+From: &quot;民斗 &quot; &lt;&quot;民斗 &quot; &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 16 Mar 1998 01:55:27 +0900<br>
+Subject: [mysql 86] Re: UJIS &amp; SJIS<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+SJIS 対応のパッチをつくってみました。マルチバイト文字を汎用的に処理
+できる仕組みを作って、それを使用して SJIS 対応しています。
+
+ですので、名前は SJIS パッチではなくて MB(MultiByte)パッチです。
+この一つのパッチで UJIS にも SJIS にも対応します。
+
+<a href="http://www.valley.ne.jp/~tommy/mysql/patch/">http://www.valley.ne.jp/~tommy/mysql/patch/</a> にあります。
+configure 時に --with-charset= で ujis または sjis を指定して
+ください。
+
+前の UJIS パッチの部分に加えて、オリジナルソース中にある BIG5 コード
+対応部分を変更したものです。動きを良く理解せずに見よう見まねで変更した
+ので、信頼性はちょっと怪しいかもしれません (^^;
+
+…ということで、前の UJIS パッチもそのまま置いてあります。
+
+-=-=-=-=-
+
+[Subject: <a href="85">[mysql 85]</a> Re: UJIS &amp; SJIS]
+[Date: Sat, 14 Mar 1998 20:47:04 +0900  From:takeshi@xxxxxxxxxx]
+
+<span class="quote1">&gt; サーバーに変換機能があれば、クライアントは触らなくて良いと思ったのですが、</span>
+<span class="quote1">&gt; クライアントの漢字コードを自動で最初に判断するすべがありませんね。</span>
+
+そうなんですよね。ある程度文章が長ければかなりの確率で特定できるんですが…。
+
+<span class="quote1">&gt; 結局、引数か設定ファイルなどで、外部の漢字コードを指定するはめになるので、</span>
+<span class="quote1">&gt; サーバー固定と等価でした。</span>
+
+サーバ側で対応するのであれば、1つのサーバが、接続するクライアント毎に
+文字コードを判断するよりは、引数等でポート番号と文字コードを指定して、
+UJIS と SJIS の2つサーバを起動して『SJIS 使いたい人(クライアント)は
+こっちのポートにつないでね』とした方が良さそうですね。
+
+で、SJIS の方は内部で UJIS に変換して、UJIS と同じデータベースを見ること
+ができる。と。
+
+<span class="quote1">&gt; libmysqlclient.{a|so} を、漢字に対応させると後々いいと思います。</span>
+<span class="quote1">&gt; MyODBC は libmysqlclient を使用していたはずですし。</span>
+<span class="quote1">&gt; MS-Win 用に nkf.dll なるものもあるらしいです。(UNIX で libnkf ないかな？)</span>
+<span class="quote1">&gt; M$ で開発できる方っています？</span>
+
+libmysqlclient 中のどれが関係するのか調べてませんが、libmysql.c 中の
+mysql_escape_string() は上述の MB パッチで日本語対応するはずです。
+
+<span class="quote1">&gt; UNIX がわで、SJIS を MySQL が喋った場合の対応策が発生しますが。</span>
+<span class="quote1">&gt; lib を変えて、コンパイルし直しはこの際いた仕方ないことでしょうか。</span>
+
+これは、クライアント側が SJIS → UJIS しているのに、サーバが実は SJIS を
+喋っているという状況を考えているのでしょうか。
+
+そこまで考えなくてもいいのではないでしょうか (^^; 
+『運用する漢字コードには気をつけましょう』ということで…。
+
+<span class="quote1">&gt; 漢字コードと host の対応表みたいなのを、暫定的に見に行かせるようなのは</span>
+<span class="quote1">&gt; やぼったいですかね？</span>
+<span class="quote1">&gt; host,user,db とともにイニシャル時に読み込んで動作する、、。</span>
+
+サーバはそのテーブルの内容に応じて、動的に文字コードを変換するという
+ことですよね。ん〜、やぼったいかどうかはともかく、実装するのは結構
+大変かも…。
+
+-=-=-=-=-
+
+文字コードの変換の問題点を一つ思い出しました。文字でないバイナリデータの
+扱いです。イメージ形式などをデータとして保存する場合、BLOB を使用すると
+思いますが、そのデータ中にたまたま漢字コードに一致するものがあっても、
+それまで変換されちゃ困りますよね。でも BLOB 中に文字を入れたい場合もある
+でしょう。その場合は変換された方がいいですね。
+
+現状では、項目の値を変換していいものか、いけないものなのかが、プログラム
+では区別がつかないです。人間がそのデータをどう処理するのかに依存するので…。
+
+オリジナルの &quot;set optoin character set&quot; はそこまで考えずに、全部変換して
+いるようでしたが…。
+
+--
+民斗 &lt;tommy@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="85">[前]</a><a href="87">[次]</a><a href="../list/1-100">[番号順一覧]</a><a href="../thread/1-100">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="86">     86 1998-03-16 01:55 [&quot;民斗 &quot; &lt;tommy@xxxxx] Re: UJIS &amp;amp; SJIS                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="87">     87 1998-03-19 12:35 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+</pre>
+</body>
+</html>

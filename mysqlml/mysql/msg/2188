@@ -1,0 +1,208 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2188</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2187">[前]</a><a href="2189">[次]</a><a href="../list/2101-2200">[番号順一覧]</a><a href="../thread/2101-2200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2188
+</p>
+<div class="header">
+<p>
+From: &quot;N.Yoshida&quot; &lt;&quot;N.Yoshida&quot; &lt;yosh_no@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 10 Jun 2000 19:27:03 +0900<br>
+Subject: [mysql 02188] Re: mysql デーモンの負荷テストで不可解な現象<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+  吉田です。
+  解決しました。ありがとうございました。
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;libz (-lz) が mysql.so 作成時にリンクされていないのでは？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;ldd ....../mysql.so</span>
+<span class="quote1">&gt;nm --dynamic ......../mysql.so</span>
+<span class="quote1">&gt;nm --dynamic ...../lib/libz.so</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;ldd ......../mysqldump</span>
+<span class="quote1">&gt;ldd ......../libmysqlclient.so</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;-- </span>
+<span class="quote1">&gt; 村上 毅  takeshi@xxxxxxxxxx</span>
+<span class="quote1">&gt;</span>
+
+  なぜかは分かりませんが、libz.soがリンクされていないのが原因でした。
+  そこで、perl Makefile.PLが生成するMsql-Mysql-moduleのmysqlサブディ
+  レクトリのMakefileのリンクパラメタに -lz を書き加えてmake,make test
+  してやり、正常に動作する mysql.soが作成されました。
+
+==(ログ)=============================================================
+Shell &gt; perl %f --static --config
+Which drivers do you want to install?
+
+    1)  MySQL only
+    2)  mSQL only (either of mSQL 1 or mSQL 2)
+    3)  MySQL and mSQL (either of mSQL 1 or mSQL 2)
+
+    4)  mSQL 1 and mSQL 2
+    5)  MySQL, mSQL 1 and mSQL 2
+
+Enter the appropriate number:  [3] 1
+
+
+Do you want to install the MysqlPerl emulation? You might keep your old
+Mysql module (to be distinguished from DBD::mysql!) if you are concerned
+about compatibility to existing applications! [n]
+Where is your MySQL installed? Please tell me the directory that
+contains the subdir 'include'. [/usr/local/mysql]
+Which database should I use for testing the MySQL drivers? [test]
+On which host is database test running (hostname, ip address
+or host:port) [localhost]
+User name for connecting to database test? [root]
+Password for connecting to database test? [undef]
+Creating files for MySQL ....................
+Checking if your kit is complete...
+Looks good
+Using DBI 1.13 installed in /usr/lib/perl5/site_perl/5.005/i586-linux/auto/DBI
+Writing Makefile for DBD::mysql
+Writing Makefile for Msql-Mysql-modules
+-----------------------------------------------------------------
+(〜/Msql-Mysql-modules-1.22XX/mysql/Makefileの修正)
+.......
+LD = cc
+LDDLFLAGS = -shared -L/usr/local/lib -lz     ◆39行目あたりのLDDFLAGS変数に
+LDFLAGS =  -L/usr/local/lib                    -lzを追加(libz.soのリンク)
+.......
+-----------------------------------------------------------------
+Shell &gt; make
+mkdir blib
+mkdir blib/lib
+mkdir blib/arch
+mkdir blib/arch/auto
+mkdir blib/arch/auto/Msql-Mysql-modules
+mkdir blib/lib/auto
+mkdir blib/lib/auto/Msql-Mysql-modules
+mkdir blib/man1
+/usr/bin/pod2text mysql/lib/DBD/mysql.pm &gt;README
+make[1]: Entering directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+mkdir ../blib/lib/DBD
+mkdir ../blib/arch/auto/DBD
+mkdir ../blib/arch/auto/DBD/mysql
+mkdir ../blib/lib/auto/DBD
+mkdir ../blib/lib/auto/DBD/mysql
+mkdir ../blib/man3
+cp lib/DBD/mysql.pm ../blib/lib/DBD/mysql.pm
+cp lib/Bundle/DBD/mysql.pm ../blib/lib/Bundle/DBD/mysql.pm
+cp lib/Mysql/Statement.pm ../blib/lib/Mysql/Statement.pm
+cp lib/Mysql.pm ../blib/lib/Mysql.pm
+cc -c -I/usr/lib/perl5/site_perl/5.005/i586-linux/auto/DBI -I/usr/local/mysql/in
+clude/mysql -I../dbd -I/usr/lib/perl5/site_perl/5.005/i586-linux/auto/DBI -I/usr
+/lib/perl5/5.00503/i586-linux -Dbool=char -DHAS_BOOL -O2    -DVERSION=\&quot;2.0414\&quot;
+ -DXS_VERSION=\&quot;2.0414\&quot; -fpic -I/usr/lib/perl5/5.00503/i586-linux/CORE -DDBD_MY
+SQL dbdimp.c
+/usr/bin/perl -p -e &quot;s/~DRIVER~/mysql/g&quot; &lt; /usr/lib/perl5/site_perl/5.005/i586-l
+inux/auto/DBI/Driver.xst &gt; mysql.xsi
+/usr/bin/perl -I/usr/lib/perl5/5.00503/i586-linux -I/usr/lib/perl5/5.00503 /usr/
+lib/perl5/5.00503/ExtUtils/xsubpp -object_capi  -typemap /usr/lib/perl5/5.00503/
+ExtUtils/typemap mysql.xs &gt;xstmp.c &amp;&amp; mv xstmp.c mysql.c
+cc -c -I/usr/lib/perl5/site_perl/5.005/i586-linux/auto/DBI -I/usr/local/mysql/in
+clude/mysql -I../dbd -I/usr/lib/perl5/site_perl/5.005/i586-linux/auto/DBI -I/usr
+/lib/perl5/5.00503/i586-linux -Dbool=char -DHAS_BOOL -O2    -DVERSION=\&quot;2.0414\&quot;
+ -DXS_VERSION=\&quot;2.0414\&quot; -fpic -I/usr/lib/perl5/5.00503/i586-linux/CORE -DDBD_MY
+SQL mysql.c
+Running Mkbootstrap for DBD::mysql ()
+chmod 644 mysql.bs
+LD_RUN_PATH=&quot;/lib:/usr/lib/gcc-lib/i586-pc-linux/2.95.2&quot; cc -o ../blib/arch/auto
+/DBD/mysql/mysql.so  -shared -L/usr/local/lib -lz dbdimp.o mysql.o -L/usr/local/
+mysql/lib/mysql    /usr/local/mysql/lib/mysql/libmysqlclient.a -lm -L/usr/lib/gc
+c-lib/i586-pc-linux/2.95.2 -lgcc
+chmod 755 ../blib/arch/auto/DBD/mysql/mysql.so
+cp mysql.bs ../blib/arch/auto/DBD/mysql/mysql.bs
+chmod 644 ../blib/arch/auto/DBD/mysql/mysql.bs
+Manifying ../blib/man3/DBD::mysql.3
+Manifying ../blib/man3/Bundle::DBD::mysql.3
+Manifying ../blib/man3/Mysql.3
+make[1]: Leaving directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+mkdir blib/script
+cp dbimon blib/script/dbimon
+/usr/bin/perl -I/usr/lib/perl5/5.00503/i586-linux -I/usr/lib/perl5/5.00503 -MExt
+Utils::MakeMaker -e &quot;MY-&gt;fixin(shift)&quot; blib/script/dbimon
+Manifying blib/man1/dbimon.1
+
+-----------------------------------------------------------------
+Shell &gt; make test
+make[1]: Entering directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+make[1]: Leaving directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+make[1]: Entering directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+PERL_DL_NONLAZY=1 /usr/bin/perl -I../blib/arch -I../blib/lib -I/usr/lib/perl5/5.
+00503/i586-linux -I/usr/lib/perl5/5.00503 -e 'use Test::Harness qw(&amp;runtests $ve
+rbose); $verbose=0; runtests @ARGV;' t/*.t
+t/00base............ok
+t/10dsnlist.........ok
+t/20createdrop......ok
+t/30insertfetch.....ok
+t/40bindparam.......ok
+t/40blobs...........ok
+t/40listfields......ok
+t/40nulls...........ok
+t/40numrows.........ok
+t/50chopblanks......ok
+t/50commit..........ok
+t/60leaks...........skipping test on this platform
+t/ak-dbd............ok
+t/dbdadmin..........ok
+All tests successful, 1 test skipped.
+Files=14,  Tests=276, 34 wallclock secs (11.54 cusr +  1.11 csys = 12.65 CPU)
+make[1]: Leaving directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+
+Shell &gt; make install
+make[1]: Entering directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+make[1]: Leaving directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+Installing /usr/lib/perl5/site_perl/5.005/i586-linux/auto/DBD/mysql/mysql.so
+Installing /usr/lib/perl5/site_perl/5.005/i586-linux/auto/DBD/mysql/mysql.bs
+Files found in blib/arch --&gt; Installing files in blib/lib into architecture depe
+ndend library tree!
+Installing /usr/lib/perl5/site_perl/5.005/i586-linux/DBD/mysql.pm
+Installing /usr/lib/perl5/site_perl/5.005/i586-linux/Bundle/DBD/mysql.pm
+Installing /usr/lib/perl5/site_perl/5.005/i586-linux/Mysql/Statement.pm
+Installing /usr/lib/perl5/site_perl/5.005/i586-linux/Mysql.pm
+Installing /usr/man/man1/dbimon.1
+Installing /usr/lib/perl5/5.00503/man/man3/DBD::mysql.3
+Installing /usr/lib/perl5/5.00503/man/man3/Bundle::DBD::mysql.3
+Installing /usr/lib/perl5/5.00503/man/man3/Mysql.3
+Installing /usr/bin/dbimon
+Writing /usr/lib/perl5/site_perl/5.005/i586-linux/auto/Msql-Mysql-modules/.packl
+ist
+Appending installation info to /usr/lib/perl5/5.00503/i586-linux/perllocal.pod
+
+Shell &gt;
+-----------------------------------------------------------------
+
+-------------------------------------------------------------------------
+  吉田 伸次(N.Yoshida) E-mail:yosh_no@xxxxxxxxxx
+                       nifty :TCN00171@xxxxxxxxxx
+-------------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="2187">[前]</a><a href="2189">[次]</a><a href="../list/2101-2200">[番号順一覧]</a><a href="../thread/2101-2200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2153">   2153 2000-06-02 11:39 [&quot;N.Yoshida&quot; &lt;yosh_no] mysql デーモンの負荷テストで不可解な現象</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2154">   2154 2000-06-02 17:32 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2156">   2156 2000-06-02 20:12 　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2158">   2158 2000-06-02 22:43 　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2163">   2163 2000-06-05 14:58 　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2164">   2164 2000-06-05 16:14 　　　　┗[Seiji Tateyama &lt;tate]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2165">   2165 2000-06-05 19:41 　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2166">   2166 2000-06-05 21:44 　　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="2188">   2188 2000-06-10 19:27 　　　　　　┃┗[&quot;N.Yoshida&quot; &lt;yosh_no]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2167">   2167 2000-06-06 01:42 　　　　　　┗[tateyan &lt;tateyan@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2168">   2168 2000-06-06 10:22 　　　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                         </a></span>
+</pre>
+</body>
+</html>

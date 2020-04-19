@@ -1,0 +1,97 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2534</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2533">[前]</a><a href="2535">[次]</a><a href="../list/2501-2600">[番号順一覧]</a><a href="../thread/2501-2600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2534
+</p>
+<div class="header">
+<p>
+From: (遠藤　俊裕) &lt;&lt;endo@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 01 Oct 2000 00:56:25 +0900<br>
+Subject: [mysql 02534] FreeBSD 2.2.7 で make したい。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+遠藤です。
+
+今、久しぶりに make と格闘しています。
+相手は MySQL 3.23.25-beta + FreeBSD 2.2.7 です。
+
+で、これで ./configure --with-mit-threads で
+config し、make をかけると
+.....
+gcc -O -O6 -DDBUG_OFF   -Werror -I/usr/home/endo/mysql-3.23.25-beta/mit-pthreads
+ -I/usr/home/endo/mysql-3.23.25-beta/mit-pthreads/include -I/usr/home/endo/mysql
+-3.23.25-beta/mit-pthreads/include -DPTHREAD_KERNEL -c /usr/home/endo/mysql-3.23
+.25-beta/mit-pthreads/net/gethostname.c -o gethostname.o
+/usr/home/endo/mysql-3.23.25-beta/mit-pthreads/net/gethostname.c: In function `g
+ethostname':
+/usr/home/endo/mysql-3.23.25-beta/mit-pthreads/net/gethostname.c:19: request for
+ member `sysname' in something not a structure or union
+*** Error code 1
+
+と出て、make が止まってしまいます。
+いろいろ source をいじったりしていますが、そも
+そも make 出来ないのでしょうか？
+ここは以下のように変更して make を通しました。
+しかし、また別なところで止まります。
+
+# cat gethostname.c
+/* Copyright Abandoned 2000 TCX DataKonsult AB &amp; Monty Program KB &amp; Detron HB
+   This file is public domain and comes with NO WARRANTY of any kind */
+
+#include &quot;config.h&quot;
+#include &lt;pthread.h&gt;
+#include &lt;sys/utsname.h&gt;
+
+#ifdef HAVE_SYSCALL_UNAME
+int gethostname(char *name, int len)
+{
+  int ret;
+  struct utsname buf, buf2;
+
+  if ((ret = machdep_sys_chroot(&amp;buf)) &lt; OK)
+  {
+    SET_ERRNO(-ret);
+  }
+  else
+  {
+    uname(&amp;buf2);
+    strncpy(name,buf2.sysname, len);
+  }
+  return(ret);
+}
+#endif
+
+OS を上げるのは一苦労なので、とりあえず、make 
+を通したいのですが、何か根本的な事が分かってな
+いのではないかと思って投稿しました。
+
+ご指導お願いいたします。m(_ _)m
+
+</pre>
+</div>
+<p class="button"><a href="2533">[前]</a><a href="2535">[次]</a><a href="../list/2501-2600">[番号順一覧]</a><a href="../thread/2501-2600">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="2534">   2534 2000-10-01 00:56 [&lt;endo@xxxxxxxxxx&gt;   ] FreeBSD 2.2.7 で make したい。          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2537">   2537 2000-10-01 02:09 ┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2539">   2539 2000-10-01 02:29 　┣[&quot;Y. Tsutsui&quot; &lt;tutui@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2540">   2540 2000-10-01 02:32 　┗[&lt;endo@xxxxxxxxxx&gt;   ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2541">   2541 2000-10-01 02:39 　　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2542">   2542 2000-10-01 02:50 　　　┣[&lt;endo@xxxxxxxxxx&gt;   ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2543">   2543 2000-10-01 03:25 　　　┃┗[&lt;endo@xxxxxxxxxx&gt;   ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2544">   2544 2000-10-01 08:43 　　　┃　┗[&lt;endo@xxxxxxxxxx&gt;   ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2545">   2545 2000-10-01 10:12 　　　┃　　┗[&lt;endo@xxxxxxxxxx&gt;   ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2546">   2546 2000-10-01 11:00 　　　┃　　　┗[&lt;endo@xxxxxxxxxx&gt;   ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2547">   2547 2000-10-02 01:12 　　　┗[&lt;endo@xxxxxxxxxx&gt;   ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2548">   2548 2000-10-02 13:10 　　　　┗[&lt;endo@xxxxxxxxxx&gt;   ]                               </a></span>
+</pre>
+</body>
+</html>

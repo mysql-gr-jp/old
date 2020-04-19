@@ -1,0 +1,61 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1411</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="1410">[前]</a><a href="1412">[次]</a><a href="../list/1401-1500">[番号順一覧]</a><a href="../thread/1401-1500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1411
+</p>
+<div class="header">
+<p>
+From: Y. Tsutsui &lt;Y. Tsutsui &lt;tutui@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 17 Dec 1999 01:43:35 +0900<br>
+Subject: [mysql 01411] Re: またまた質問。賢い SQL の記述方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+堤井です。
+
+<span class="quote1">&gt; select CarType, CurrentDate From WorkSchedule Where SerialCode = '10';</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; とすると</span>
+<span class="quote1">&gt; （中略）</span>
+<span class="quote1">&gt; というようなデータが出てきます。</span>
+<span class="quote1">&gt; ここで、CurrentDate の最大値の時の CarType のデータを抜き出したい</span>
+<span class="quote1">&gt; のですが、どのようにすれば宜しいのでしょうか？</span>
+
+もしCurrentDateに対し、CarTypeのデータが１件しかないなら
+
+select CarType, CurrentDate From WorkSchedule Where SerialCode = '10'
+ order by CurrentDate desc limit 1;
+
+とやればできますが、複数あるとすると中間ファイルを使わざるを得ません。
+WorkSchedule　と同じ定義のファイルをwork_tempとして、
+
+select CarType, CurrentDate into outfile 'temp1' from WorkSchedule
+where SerialCode = '10' order by CurrentDate desc limit 1;
+delete from work_temp;
+load data infile 'temp1' into table work_temp;
+select a.CarType, a.CurrentDate From WorkSchedule as a, work_temp as b
+ Where a.SerialCode = '10'and a.CurrentDate=b.CurrentDate;
+
+という感じだと思います。
+
+プレック研究所システム開発室　堤井泰志
+tutui@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="1410">[前]</a><a href="1412">[次]</a><a href="../list/1401-1500">[番号順一覧]</a><a href="../thread/1401-1500">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1410">   1410 1999-12-17 00:59 [&lt;endot@xxxxxxxxxx&gt;  ] またまた質問。賢い SQL の記述方法       </a></span>
+<span class="current">-&gt;&nbsp;<a href="1411">   1411 1999-12-17 01:43 ┗[Y. Tsutsui &lt;tutui@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1412">   1412 1999-12-17 09:30 　┗[&lt;endo@xxxxxxxxxx&gt;   ]                                     </a></span>
+</pre>
+</body>
+</html>

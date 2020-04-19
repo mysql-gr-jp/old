@@ -1,0 +1,202 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16088</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16087">[前]</a><a href="16089">[次]</a><a href="../list/16001-16100">[番号順一覧]</a><a href="../thread/16001-16100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16088
+</p>
+<div class="header">
+<p>
+From: HAYASHI Kentaro &lt;HAYASHI Kentaro &lt;hayashi@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 29 Jan 2014 12:25:21 +0900<br>
+Subject: [mysql 16088] [ANN] Mroonga 3.12<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+林です。
+
+今日はGroonga Meetupの開催日(<a href="http://atnd.org/events/47093">http://atnd.org/events/47093</a>)ですね。
+
+Mroonga 3.12をリリースしました。
+  <a href="http://mroonga.org/ja/docs/news.html#release-3-12">http://mroonga.org/ja/docs/news.html#release-3-12</a>
+
+MroongaはMySQL 5.1/5.5/5.6、MariaDB 5.3/5.5/10.0で利用できる全文検索
+・位置情報検索可能なストレージエンジンです。MroongaはTritonnの後継プロジェクトです。
+
+ドキュメント:
+  <a href="http://mroonga.org/ja/">http://mroonga.org/ja/</a>
+インストールガイド:
+  <a href="http://mroonga.org/ja/docs/install.html">http://mroonga.org/ja/docs/install.html</a>
+
+MroongaでよくあるMySQLとのバージョン不一致でうまくインストールできなかったんだけど、、、
+というトラブルもリリース直後は遭遇しにくいので、この機会にMroongaを試してみるのは
+いかがでしょうか。
+
+みなさんからのフィードバックをお待ちしています!
+
+古いバージョンからアップグレードする場合には、アップグレード手順に
+注意が必要です。2.09以降であればデータベースの互換性があります。
+
+今回のリリースではWプラグマに関する非互換な変更が入っています。
+既存のクエリに影響がないか確認してください。
+
+古いバージョンからアップグレードするときの詳細情報については、
+次のドキュメントを参照してください。
+
+  <a href="http://mroonga.org/ja/docs/install.html#upgrade-guide">http://mroonga.org/ja/docs/install.html#upgrade-guide</a>
+
+今回のリリースの主なトピックは以下の通りです。
+
+  * ロックタイムアウトを動的に変更できるようになりました
+  * WプラグマのTritonnとの互換性を改善しました
+  * [参考] Groonga Advent Calendar 2013を実施しました
+  * [募集] mroongaからMroongaへ 表記の統一を一緒にやってみませんか?
+  * [参考] 隔週連載Groonga
+
+○ ロックタイムアウトを動的に変更できるようになりました
+
+今回のリリースでは、ロックタイムアウトを動的に変更できるようになりまし
+た。
+
+クラッシュせずにロックが競合してしまった場合、Mroongaからは処理中の
+扱いにしか見えず、Groonga内部でひたすらロックのタイムアウト待ちに
+なる場合がありえます。
+
+ただ、Groonga内部のタイムアウト設定はソースコード上決めうちになってい
+たので、これまでは直接Groongaのソースコードを書き換えてビルドする
+必要がありました。リリースされるたびにパッチをあてて対処しなくても
+すむようになっています。
+
+挙動を変更するには、mroonga_lock_timeoutを次のように実行します。
+1000ミリ秒でタイムアウトする場合はこんな感じです。
+
+  SET GLOBAL mroonga_lock_timeout = 1000;
+
+この機能はyokuさんからの提案で実現しました。
+経緯については、yokuさんが詳しくエントリを書いてくれています。
+
+  日々の覚書 Mroongaのロックが突き刺さるとどうなるか 
+  <a href="http://yoku0825.blogspot.jp/2013/12/mroonga.html">http://yoku0825.blogspot.jp/2013/12/mroonga.html</a>
+
+○ WプラグマのTritonnとの互換性を改善しました
+
+今回のリリースでは、WプラグマのTritonnとの互換性を改善しました。
+
+Tritonn由来でWプラグマというマルチカラムインデックスで
+カラムごとに重みづけをする機能があるのですが、このときの
+セクションの指定が0オリジンだったのを1オリジンに変更しました。
+これはTritonnと異なる実装だったのを修正したものです。
+
+また、これにあわせてセクションを省略したときの重みが0だったのを
+1に変更しました。これもTritonnと同じになるように修正したものです。
+
+Wプラグマを使っている既存のクエリーで上記変更の影響を受けるものが
+あれば修正する必要があります。
+
+○ [参考] Groonga Advent Calendar 2013を実施しました
+
+Groongaを囲む夕べ4でも告知しましたが、ここ数年、年末の風物詩である
+技術系Advent CalendarをGroongaでもやってみました。
+
+  <a href="http://qiita.com/advent-calendar/2013/groonga/">http://qiita.com/advent-calendar/2013/groonga/</a>
+
+みんなでGroongaやMroongaやRroongaなど、Groonga関連のノウハウを
+共有してみようという趣旨ではじめたGroonga Advent Calendar 2013に
+参加してくださった方、ありがとうございます！
+
+毎週1つのトピックを週刊GroongaということでQiitaに投稿していますが、
+週刊Groongaでは扱っていないネタがたくさん集まりました。
+
+Mroonga関係だと、yokuさんがGroongaを囲む夕べの雑感、3.11で入った
+DATETIME型のORDER BY最適化のエントリを、naoaさんが、全文検索
+性能に関する7本のエントリを投稿してくれています。
+
+まだ未読の人はぜひ読んでみてください。
+
+○ mroongaからMroongaへ 表記の統一を一緒にやってみませんか?
+
+リリースアナウンスや、公式ドキュメントをみてもうすでに気づいた人がいるかもしれませんが、
+Groonga関連のソフトウェアの表記を先頭大文字へ統一する作業をすすめています。
+これは、世界中で広く使ってもらえることを視野に入れているからです。
+
+Mroongaもその流れを汲んでこれまでのmroonga表記をMroongaへと表記を変更していっていま
+す。Groongaに比べると分量はそれほどないのですが、気づいたところを
+報告してくれたり、ドキュメントに散らばっている「mroonga」表記の統一を
+お手伝いしてくれる人を募集します。
+コードを書かなくてもできる作業なので一緒にやってみませんか。
+Mroongaプロジェクトに名前を残せるチャンスですよ！
+
+具体的にどんなふうに作業をすすめたらいいかについては、エントリを書いたので、
+そちらを参照してください。
+
+  <a href="http://mroonga.org/ja/blog/2013/10/30/use-capitalized-notation.html">http://mroonga.org/ja/blog/2013/10/30/use-capitalized-notation.html</a>
+
+○ [参考] 隔週連載Groonga
+
+これまでも、MySQLで高速全文検索を実現するためのMroongaの利用事例 
+<a href="http://mroonga.org/ja/users/">http://mroonga.org/ja/users/</a> を公式サイトで紹介してきました。
+まだGroongaやMroongaを知らない人にもWebの連載記事を通じて
+知ってもらいたいというのが動機で <a href="http://gihyo.jp/">http://gihyo.jp/</a> にて
+隔週連載Groongaを2013年4月から半年間連載しました。
+
+隔週連載Groongaという名前ですが、Groongaに限らずMroongaについても
+扱っています。
+過去の記事(第1回から第10回,最終回)については隔週連載Groongaのページを参照してください。
+
+  <a href="http://gihyo.jp/dev/clip/01/groonga">http://gihyo.jp/dev/clip/01/groonga</a>
+
+似たような動機で、毎週木曜にQiitaでのGroonga関連の情報提供も続けています。
+Mroongaのトピックはmroongaタグをつけているので、こちらも参考にどうぞ。
+以下からMroonga関連のトピックの一覧を参照できます。
+
+  <a href="http://qiita.com/tags/mroonga">http://qiita.com/tags/mroonga</a>
+
+○ 変更点
+
+3.10からの変更点は以下の通りです。
+  <a href="http://mroonga.org/ja/docs/news.html#release-3-11">http://mroonga.org/ja/docs/news.html#release-3-11</a>
+
+改良
+^^^^
+
+  * システム変数 mroonga_lock_timeout を追加しました。
+    この変更で、Groongaのロックタイムアウトを動的に変更できるようになりました。
+  * Tritonnの&quot;W&quot;プラグマとの互換性を改善しました。以前のバージョンでは、
+    Mroongaは省略したセクションの重みを0としていました。この変更で、
+    省略時 のセクションの重みを1にしています。これはTritonnと同じ振舞いです。
+    [#2152] [丸山さんがパッチ提供]
+
+
+修正
+^^^^
+
+  * SELECT MATCH AGAINST ... クエリ実行中にFLUSH TABLESを実行すると
+    クラッシュする不具合を修正しました。 [#2137] [yokuさんが報告]
+  * &quot;W&quot;プラグマの実装の誤りを修正しました。1オリジンに修正しています。
+    以前のバージョンでは、0オリジンとして実装されていましたが、これは
+    Tritonnとは互換性がありませんでした。
+    これは非互換な変更なので、既存の&quot;W&quot;プラグマを使ったクエリを確認してください。 [#2151]
+  * 空のレコードを否定で検索すると重複した結果が返ってくる不具合を修正しました。 
+    [#2215] [groonga-dev,02052] [村上さんが報告]
+
+感謝
+^^^^
+  * 丸山さん
+  * yokuさん
+  * 村上さん
+
+-- 
+HAYASHI Kentaro &lt;hayashi@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="16087">[前]</a><a href="16089">[次]</a><a href="../list/16001-16100">[番号順一覧]</a><a href="../thread/16001-16100">[スレッド一覧]</a></p>
+</body>
+</html>

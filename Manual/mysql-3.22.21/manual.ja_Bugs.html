@@ -1,0 +1,122 @@
+  <HTML>
+  <HEAD>
+  <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
+     from manual.ja.texi on 1 December 1999 -->
+
+  <TITLE>MySQL Reference Manual for version 3.22.21. - E  MySQL での既知のエラーと欠けているデザイン</TITLE>
+  </HEAD>
+  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_News.html">previous</A>, <A HREF="manual.ja_TODO.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="Bugs" HREF="manual.ja_toc.html#Bugs">E  MySQL での既知のエラーと欠けているデザイン</A></H1>
+
+
+<UL>
+<LI>
+
+MIT-pthread を使用するとき、他のディレクトリでビルド出来ません。
+これは MIT-pthread の変更を要求するため、我々は、これを修正しそうにないです。
+<LI>
+
+<CODE>BLOB</CODE> values can't ``reliably'' be used in <CODE>GROUP BY</CODE> or
+<CODE>ORDER BY</CODE> or <CODE>DISTINCT</CODE>. 
+これらの場合、 <CODE>BLOB</CODE> の比較の際には最初の <CODE>max_sort_length</CODE> バイト
+（デフォルト1024）だけが使用されます。
+これは <CODE>mysqld</CODE> の <CODE>-O max_sort_length</CODE> オプションで変更可能です。
+A workaround for most cases is to use a substring:
+<CODE>SELECT DISTINCT LEFT(blob,2048) FROM tbl_name</CODE>.
+<LI>
+
+Calculation is done with <CODE>BIGINT</CODE> or <CODE>DOUBLE</CODE> (both are
+normally 64 bits long). It depends on the function which precision one
+gets. The general rule is that bit functions are done with <CODE>BIGINT</CODE>
+precision, <CODE>IF</CODE>, and <CODE>ELT()</CODE> with <CODE>BIGINT</CODE> or <CODE>DOUBLE</CODE>
+precision and the rest with <CODE>DOUBLE</CODE> precision.  One should try to
+avoid using bigger unsigned long long values than 63 bits
+(9223372036854775807) for anything else than bit fields!
+<LI>
+
+全ての文字型のフィールド、<CODE>BLOB</CODE> と <CODE>TEXT</CODE> はのぞいて、は、
+検索されるときに最後についているスペースを自動で取り除きます。
+ <CODE>CHAR</CODE> 型ではこれは OK で、この特徴は ANSI SQL92 に従っていると見なされるでしょう。
+<STRONG>MySQL</STRONG> のバグは、 <CODE>VARCHAR</CODE> でも同様に行ってしまうことです。
+<LI>
+
+一つのテーブルに <CODE>ENUM</CODE> と <CODE>SET</CODE> フィールドは 255 までしか持てません。
+<LI>
+
+<CODE>safe_mysqld</CODE> re-directs all messages from <CODE>mysqld</CODE> to the
+<CODE>mysqld</CODE> log.  One problem with this is that if you execute
+<CODE>mysqladmin refresh</CODE> to close and reopen the log,
+<CODE>stdout</CODE> and <CODE>stderr</CODE> are still redirected to the old log.
+If you use <CODE>--log</CODE> extensively, you should edit <CODE>safe_mysqld</CODE> to
+log to <TT>`'hostname'.err'</TT> instead of <TT>`'hostname'.log'</TT> so you can
+easily reclaim the space for the old log by deleting the old one and
+executing <CODE>mysqladmin refresh</CODE>.
+<LI>
+
+In the <CODE>UPDATE</CODE> statement, columns are updated from left to right.
+If you refer to a updated column, you will get the updated value instead of the
+original value. For example:
+
+<PRE>
+mysql&#62; UPDATE tbl_name SET KEY=KEY+1,KEY=KEY+1
+</PRE>
+
+will update <CODE>KEY</CODE> with <CODE>2</CODE> instead of with <CODE>1</CODE>.
+<LI>
+
+You can't use temporary tables more than once in the same query.
+
+
+<PRE>
+select * from temporary_table, temporary_table as t2;
+</PRE>
+
+</UL>
+
+<P>
+The following is known bugs in earlier versions of <STRONG>MySQL</STRONG>:
+
+</P>
+
+<UL>
+<LI>
+
+Before <STRONG>MySQL</STRONG> 3.23.2 an <CODE>UPDATE</CODE> that updated a key with
+a <CODE>WHERE</CODE> on the same key may have failed because the key was used to
+search for records and the same row may have been found multiple times:
+
+
+<PRE>
+UPDATE tbl_name SET KEY=KEY+1 WHERE KEY &#62; 100;
+</PRE>
+
+A workaround is to use:
+
+
+<PRE>
+mysql&#62; UPDATE tbl_name SET KEY=KEY+1 WHERE KEY+0 &#62; 100;
+</PRE>
+
+This will work because <STRONG>MySQL</STRONG> will not use index on expressions in
+the <CODE>WHERE</CODE> clause.
+<LI>
+
+<STRONG>MySQL</STRONG> 3.23 より前では、全ての数値型で、少数部分が削られてしまいます。
+これは、そのフィールドが何桁の小数部を持つか、定義しなければならなかった、と
+いうことです。 全ての結果は10進の数で正しく返ってきました。
+</UL>
+
+<P>
+For platform-specific bugs, see the sections about compiling and porting.
+
+</P>
+<P>
+<A NAME="IDX838"></A>
+<P><HR><P>
+Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_News.html">previous</A>, <A HREF="manual.ja_TODO.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
+ </BODY>
+ </HTML>

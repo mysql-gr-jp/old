@@ -1,0 +1,157 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5273</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="5272">[前]</a><a href="5274">[次]</a><a href="../list/5201-5300">[番号順一覧]</a><a href="../thread/5201-5300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5273
+</p>
+<div class="header">
+<p>
+From: kuroda &lt;kuroda &lt;kuroda@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 27 Mar 2002 15:03:52 +0900<br>
+Subject: [mysql 05273] Delphi で LAST_INSERT_ID<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、黒田 といいます。
+いつも勉強させていただき、ありがとうございます。
+
+現在、Delphi にて MySQL にアクセスするプログラムを
+書いているのですが、以下のような問題に遭遇し、解決
+できずにおります。
+
+[環境]
+サーバー側：
+  RedHat6.2J
+  MySQL3.23.46 (rpmでインストール)
+クライアント側：
+  WinXP Home
+  Delphi6 Update2
+
+Delphi の dbExpress コンポーネント
+・SQLConnection1  DBへの接続用
+・SQLQuery1       テーブルにINSERT（パラメータクエリ）
+・SQLQuery2       LAST_INSERT_ID() を発行・取得
+の３つのコンポーネントを使い、
+１．ローカルにあるデータをサーバ上の MySQL に INSERT
+２．その時の、AUTO_INCREMENT な項目の値を取得
+という処理をするプログラムを書いたのですが、
+LAST_INSERT_ID() が常に「0」を返してきてしまいます。
+
+[うまくいかないコード]
+with SQLConnection1 do begin
+  Open;
+end;
+with SQLQuery1 do begin
+  ParamByName('fld_name').AsString:= 'kuroda';
+  ExecSQL;
+end;
+with SQLQuery2 do begin
+  Open;
+  id := Fields[0].AsInteger;  // 常に「0」
+end;
+
+自分なりに調べたところ、
+SQLConnection1 には、MaxStmtsPerConn という読み取り専用のプロパティ
+があり、実行時に確認したところ「1」でした。
+この MaxStmtsPerConn というプロパティですが、Help によれば、
+「現在の接続を使って実行できる文の数に対する制限がデータベースサーバーに
+よって設定されているかどうかを判別できます。MaxStmtsPerConn プロパティが
+ 0 の場合，サーバーは制限を設定していません。1 つのデータベース接続を使
+って，複数のデータセットをフェッチし，アクティブなデータセットが存在する
+間，文を実行できます。MaxStmtsPerConn プロパティが 0 より大きい場合は，
+実行できる文の数に対する制限がデータベースサーバーによって設定されていま
+す。サーバーは MaxStmtsPerConn プロパティで指定されている数だけのデータ
+セットを 1 つの接続で開くことができます。その数のデータセットが開かれる
+と，（たとえば Execute メソッドを使って）文をそれ以上実行することはでき
+ません。
+デフォルトでは，MaxStmtsPerConn プロパティが 0 より大きい場合，サーバー
+で設定されている制限に達すると TSQLConnection はデータベース接続を複製し
+ます。たとえば，MaxStmtsPerConn プロパティが 1 の場合，同じ TSQLConnecti
+on コンポーネントを使って 2 つ目のデータセットを開こうとすると，TSQLConn
+ection は 2 つ目のデータセット用に 2 つ目のデータベース接続を確立します。」
+
+案の定、サーバーに記録されたログをみたところ、
+[うまくいかないときのログ]
+/usr/sbin/mysqld, Version: 3.23.46-log, started with:
+Tcp port: 3306  Unix socket: /var/lib/mysql/mysql.sock
+Time                 Id Command    Argument
+020327 13:39:08       1 Connect     kuroda@xxxxxxxxxx on db
+020327 13:39:09       2 Connect     kuroda@xxxxxxxxxx on db
+                      2 Query       INSERT INTO tbl
+( fld_name)
+VALUES
+('kuroda')
+
+                      3 Connect     kuroda@xxxxxxxxxx on db
+                      3 Query       SELECT LAST_INSERT_ID()
+
+020327 13:39:10       1 Quit
+                      3 Quit
+                      2 Quit
+
+INSERT INTO 〜 と
+SELECT LAST_INSERT_ID() では、
+別の接続(Id=2, 3)になってしまっています。
+
+そこで、SQLQuery1 のみを使った以下のようなコードに変更したところ、
+[うまくいくコード]
+with SQLConnection1 do begin
+  Open;
+end;
+with SQLQuery1 do begin
+  ParamByName('fld_name').AsString:= 'kuroda';
+  ExecSQL;
+  Close;
+
+  SQL.Text:='SELECT LAST_INSERT_ID()';  // SQL文を設定しなおす
+  Open;
+  id := Fields[0].AsInteger;  // ちゃんと値が取得できる
+end;
+
+[うまくいったときのログ]
+020327 13:44:30       4 Connect     kuroda@xxxxxxxxxx on db
+020327 13:44:31       5 Connect     kuroda@xxxxxxxxxx on db
+                      5 Query       INSERT INTO tbl
+( fld_name)
+VALUES
+('kuroda')
+
+                      5 Query       SELECT LAST_INSERT_ID()
+
+020327 13:44:32       4 Quit
+                      5 Quit
+
+INSERT INTO 〜 と
+SELECT LAST_INSERT_ID() は、
+同じ接続(Id=5)になっています。
+
+しかし、この方法では、パラメータクエリの意味がなくなってしまいます。
+# 以前、多量のデータを INSERT する処理を繰り返していたとき、原因不明
+# のエラーが発生し、それをパラメータクエリに置き換えたところ解決した
+# ということがあったので、パラメータクエリは使いたいのです。
+
+そこで、教えていただきたいのは、
+・Delphi の TSQLConnection.MaxStmtsPerConn に相当する、
+ 「１つの接続を使って実行できる文の数に対する制限」を変更する方法が、
+  MySQL に用意されていませんでしょうか？
+・もっといい別の方法があったら教えていただけないでしょうか？
+  例えば、INSERT したら LAST_INSERT_ID を返すようなことができれば、
+  速度面でも有利かと思うのですが・・・。
+
+よろしく、お願いします。
+
+■□ システムプロモート 黒田
+□■ kuroda@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="5272">[前]</a><a href="5274">[次]</a><a href="../list/5201-5300">[番号順一覧]</a><a href="../thread/5201-5300">[スレッド一覧]</a></p>
+</body>
+</html>

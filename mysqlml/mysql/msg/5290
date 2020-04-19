@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5290</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="5289">[前]</a><a href="5291">[次]</a><a href="../list/5201-5300">[番号順一覧]</a><a href="../thread/5201-5300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5290
+</p>
+<div class="header">
+<p>
+From: &quot;Yasuhide Nomura&quot; &lt;&quot;Yasuhide Nomura&quot; &lt;mag@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 1 Apr 2002 03:13:50 +0900<br>
+Subject: [mysql 05290] MySQL が MySQL クライアントと共にダウン<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+野村です。
+
+先日私の携わるシステムで次のような障害が発生しました。
+解決できずに困っております。エラー番号146がキーになると思いますが、原因がお
+分かりの方お願いします。解決のヒントでも結構ですので、情報をお願いします。
+
+---
+環境:
+同一サービスを提供する複数台マシンがスタンドアローンで構成されている。
+各ホストにはMySQLサーバおよびMySQLクライアント機能を有するプログラムが稼動し
+ている。
+各サーバにはMySQL(mysqld)が2インスタンス起動している。
+MySQLクライアント機能を有するプログラムのプロセスリーダは2インスタンス起動し
+ており、親ごとにローカルMySQLへの接続するインスタンスが決められる。また、親
+プロセスから起動した子プロセスは他のプロセスとは無関係にMySQLへUnix ソケット
+を使用し接続する。
+MySQLへは子プロセスの数だけコネクションが確立される。
+
+障害:
+クライアントプログラムがMySQL以外のコードで停滞状態となり、クライアントプロ
+セス数が増加した。
+クライアントプロセスからMySQLへの接続エラーとして次のメッセージが表示され
+た。
+    Can't connect to local MySQL server through socket '/tmp/mysql.sock'
+(146)
+このとき、mysqladmin processlistでは2コネクションしかなかった。
+上記エラーが続き、異常となったMySQLクライアントのプロセスグループの接続先イ
+ンスタンスのMySQLサーバも同時にダウンしてしまった。
+
+事後検証:
+障害以前から障害発生時までmysqladmin processlistで確認していたが、プロセスリ
+ストには20リスト程度しか表示されていなかった。(通常時では本システムは500程度
+でも稼動している)
+サーバのリソースには空きがある。(sarでのfreemem, freeswap)
+もう一方のインスタンスには影響がなかった。
+クライアントプロセスの停滞状態はMySQL APIコード外で発生していた。
+クライアントプロセスは次の状況で停滞していた。
+-
+mysql_real_connect
+mysql_escape_string
+mysql_query
+&lt;-- 処理にトラブルがあり、複数のプロセスが長時間停滞状態 --&gt; クライアントと
+共にMySQLダウン
+mysql_close
+-
+
+疑問点:
+MySQLサーバはMySQLコマンドのmysqladmin processlistで表示されている(た)以外の
+(接続中か接続していた)クライアントに対してリソースを与えているのか?
+wait_timeoutによって、アイドルコネクションは切断するようにしていたためリスト
+は通常に比べ1割程度のコネクションでなぜダウンを引き起こしたのか? しかも片方
+のインスタンスのみ。
+mysql_closeを行えなかったのが原因か?
+perror 146(146 = Lock timed out; Retry transaction)とはどういう状態に発生す
+るのか?
+---
+
+よろしくお願いします。
+
+野村 安英
+mag@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="5289">[前]</a><a href="5291">[次]</a><a href="../list/5201-5300">[番号順一覧]</a><a href="../thread/5201-5300">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="5290">   5290 2002-04-01 03:13 [&quot;Yasuhide Nomura&quot; &lt;m] MySQL が MySQL クライアントと共にダウン </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5291">   5291 2002-04-01 08:13 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5294">   5294 2002-04-01 11:38 　┗[&quot;Yasuhide Nomura&quot; &lt;m]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5299">   5299 2002-04-02 07:30 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5307">   5307 2002-04-03 21:34 　　　┗[&quot;Yasuhide Nomura&quot; &lt;m]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5309">   5309 2002-04-03 22:42 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5310">   5310 2002-04-03 23:27 　　　　　┗[Shuhei Tomita &lt;shuhe]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5311">   5311 2002-04-04 08:17 　　　　　　┗[とみたまさひろ &lt;tomm]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5330">   5330 2002-04-08 20:18 　　　　　　　┗[&quot;Yasuhide Nomura&quot; &lt;m]                         </a></span>
+</pre>
+</body>
+</html>

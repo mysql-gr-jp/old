@@ -1,0 +1,132 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14966</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14965">[前]</a><a href="14967">[次]</a><a href="../list/14901-15000">[番号順一覧]</a><a href="../thread/14901-15000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14966
+</p>
+<div class="header">
+<p>
+From: &quot;N.K.&quot; &lt;&quot;N.K.&quot; &lt;nakai.kanako@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 7 Jul 2009 12:41:25 +0900<br>
+Subject: [mysql 14966] Re: 複雑なdeleteの書き方<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+tysmkさん はじめまして。
+
+
+削除条件にヒットしたuser_idのレコードは
+削除条件に一致していないものがあっても全て削除したいということですね。
+
+次のサブクエリで削除することはできると思いますが
+個人的にはこういった複雑なdeleteを流すと更新時のロックの範囲が広くなるのでお勧めではないと思っています。
+単純にクエリを2回に分けてはじめにSELECTで削除条件にヒットするuser_id一覧を取得して、その後
+user_idを元に削除する方がロック範囲も限定されていいと思います。
+（MyISAMだとテーブルロックなので範囲云々は関係ないかもしれませんが、削除中のテーブルロック時間に影響があると思います）
+
+※ユニークキーカラムが３つでしたので参考までにid:5は追加しました。
+※後、条件の符号は逆ですよね？
+
+mysql&gt; select * from test;
++----+---------+-----------+---------+------------+
+<span class="quote1">| id | user_id | member_id | page_id | created    |</span>
++----+---------+-----------+---------+------------+
+<span class="quote1">|  1 |       1 |         1 |       1 | 2009-06-05 |</span>
+<span class="quote1">|  2 |       2 |         2 |       3 | 2009-07-05 |</span>
+<span class="quote1">|  3 |       2 |         2 |       1 | 2009-07-05 |</span>
+<span class="quote1">|  4 |       1 |         1 |       2 | 2009-07-05 |</span>
+<span class="quote1">|  5 |       1 |         2 |       1 | 2009-07-05 |</span>
++----+---------+-----------+---------+------------+
+5 rows in set
+
+mysql&gt; select test.*
+from test
+inner join (Select distinct test2.id from test as test2
+inner join (select user_id from test WHERE page_id =1 AND
+date_add(created, INTERVAL 7 DAY ) &lt; &quot;2009/07/06&quot;) as tmp on
+tmp.user_id=test2.user_id) as work on test.id=work.id;
+
++----+---------+-----------+---------+------------+
+<span class="quote1">| id | user_id | member_id | page_id | created    |</span>
++----+---------+-----------+---------+------------+
+<span class="quote1">|  1 |       1 |         1 |       1 | 2009-06-05 |</span>
+<span class="quote1">|  4 |       1 |         1 |       2 | 2009-07-05 |</span>
+<span class="quote1">|  5 |       1 |         2 |       1 | 2009-07-05 |</span>
++----+---------+-----------+---------+------------+
+3 rows in set
+
+mysql&gt; delete test.*
+from test
+inner join (Select distinct test2.id from test as test2
+inner join (select user_id from test WHERE page_id =1 AND
+date_add(created, INTERVAL 7 DAY ) &lt; &quot;2009/07/06&quot;) as tmp on
+tmp.user_id=test2.user_id) as work on test.id=work.id;
+
+mysql&gt; select * from test;
++----+---------+-----------+---------+------------+
+<span class="quote1">| id | user_id | member_id | page_id | created    |</span>
++----+---------+-----------+---------+------------+
+<span class="quote1">|  2 |       2 |         2 |       3 | 2009-07-05 |</span>
+<span class="quote1">|  3 |       2 |         2 |       1 | 2009-07-05 |</span>
++----+---------+-----------+---------+------------+
+2 rows in set
+
+
+
+2009/07/06 16:45 に tysmk&lt;shu@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; お世話になっております。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 以下のようなテーブルがあったと仮定します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; id        int auto_increment,</span>
+<span class="quote1">&gt; user_id   int,</span>
+<span class="quote1">&gt; page_id   int,</span>
+<span class="quote1">&gt; created   date,</span>
+<span class="quote1">&gt; primary key(id),</span>
+<span class="quote1">&gt; unique key(user_id,member_id,page_id)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; このテーブルから</span>
+<span class="quote1">&gt; page_id=1 and created+ intarval 7 day &gt; now()</span>
+<span class="quote1">&gt; がtrueの場合、該当するuser_idのすべてを削除したいのですがどのように書け</span>
+<span class="quote1">&gt; ばいいでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; わかりやすく書くと舌のようにデータが入っていた場合、消えるのは</span>
+<span class="quote1">&gt; id = 1 and id = 4</span>
+<span class="quote1">&gt; になります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; id  user_id  page_id  created</span>
+<span class="quote1">&gt;  1        1        1  2009-06-15</span>
+<span class="quote1">&gt;  2        2        3  2009-07-05</span>
+<span class="quote1">&gt;  3        2        1  2009-07-05</span>
+<span class="quote1">&gt;  4        1        2  2009-07-05</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ご教示お願いいたします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="14965">[前]</a><a href="14967">[次]</a><a href="../list/14901-15000">[番号順一覧]</a><a href="../thread/14901-15000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14954">  14954 2009-07-06 16:45 [tysmk &lt;shu@xxxxxxxxx] 複雑なdeleteの書き方                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14955">  14955 2009-07-06 16:57 ┣[&lt;y-iida@xxxxxxxxxx&gt; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14958">  14958 2009-07-06 17:15 ┃┗[tysmk &lt;shu@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14957">  14957 2009-07-06 17:12 ┣[Yoshiaki Yanagimoto ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14963">  14963 2009-07-06 18:14 ┃┗[tysmk &lt;shu@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14964">  14964 2009-07-06 23:50 ┃　┗[chuuken kenkou &lt;ken_]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14965">  14965 2009-07-07 11:37 ┃　　┗[&quot;Kaname Kuji\(Y7\)&quot; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14959">  14959 2009-07-06 17:42 ┣[Katsutoshi Nakatomi ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14961">  14961 2009-07-06 17:57 ┃┗[tysmk &lt;shu@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14962">  14962 2009-07-06 18:09 ┃　┗[Katsutoshi Nakatomi ]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="14966">  14966 2009-07-07 12:41 ┗[&quot;N.K.&quot; &lt;nakai.kanako]                                       </a></span>
+</pre>
+</body>
+</html>

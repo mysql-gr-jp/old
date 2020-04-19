@@ -1,0 +1,334 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6114</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="6113">[前]</a><a href="6115">[次]</a><a href="../list/6101-6200">[番号順一覧]</a><a href="../thread/6101-6200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6114
+</p>
+<div class="header">
+<p>
+From: &quot;城&quot; &lt;&quot;城&quot; &lt;sora_iro@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 11 Sep 2002 13:32:15 +0900<br>
+Subject: [mysql 06114] Re: 検索が正常に出来ない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<span class="quote1">&gt; MLにぶつけるよりかは、お金を出してたくさん本を買って勉強した</span>
+<span class="quote1">&gt; 方がいい時もあります。</span>
+本に載っているサンプルとかで良いんでしょうか？
+
+
+<span class="quote1">&gt; 本を買ったら後は、修行僧のように基礎から地道にこつこつとやれば</span>
+<span class="quote1">&gt; いろいろと分かってくると思います。</span>
+<span class="quote1">&gt; そこでどうしても分からないことがあればMLに投稿する、</span>
+<span class="quote1">&gt; という形が理想だと思います。</span>
+僕の場合ですと
+本で探す→webで探す→めちゃくちゃに作ってみる→動く	よっしゃ！！(ス
+パゲッティコード満載)
+本で探す→webで探す→めちゃくちゃに作ってみる→動かない	がーーん！！→ML
+の皆様お願いします。
+の2パターンです
+
+<span class="quote1">&gt; 新宿：紀伊国屋書店</span>
+はい。↑は良く利用させていただいてます。
+
+
+そこで検索の時に使ったプログラムのコードを参考までに載せさせていただきま
+す。
+これはギリギリ動いています。
+
+サッカー選手のDB←この辺も作る意味がわからないけど気にしないでください＾
+＾；
+
+table senshu
+
+name		: VARCHAR
+area		: VARCHAR //国名です。2バイト文字を入れています
+age		: VARCHAR //この値ですが、年代という意味合いなのでintで
+はなくcharを使いました（汗
+comment	: VARCHAR //コメントです。ポジションとかです。オーウェンは足が速
+いとか。
+
+このテーブルから読み込みさせました。
+
+フォームから国と年齢をセレクトBOXでサーブレットでレスポンス処理でDBから
+検索して表示させるという仕組みにしたのです。
+
+当初は検索が全くできませんでした。原因を調べたところ
+&quot;書き込んだときに8859-1で書き込んだのに検索の時にシフトJISで読み込もうと
+していた&quot;
+ためでした。
+書き込みもフォーム→サーブレットで処理しています。
+
+
+次に検索結果が半分しか出てきませんでした。イングランドで検索してもスタメ
+ンが6人しかいない感じです。
+これはResultSetのnext();の使い方に間違いがあったためです。
+
+
+
+import javax.servlet.* ;
+import javax.servlet.http.* ;
+import java.io.* ;
+import java.sql.*;
+
+public class ShowServlet extends HttpServlet {
+
+	long No;
+	String serchArea	= &quot;&quot;;
+	String serchAge		= &quot;&quot;;
+	String stringViewNum	= &quot;&quot;;
+	int ViewNum;
+
+
+	public void init( ServletConfig config) throws ServletException
+{
+
+		super.init(config);
+	}
+
+    public void doGet(HttpServletRequest request, HttpServletResponse
+response)
+                          throws ServletException, IOException {
+
+			serchArea	= request.getParameter(&quot;area&quot;);
+			serchAge	= request.getParameter(&quot;age&quot;);
+			stringViewNum	=
+request.getParameter(&quot;viewnum&quot;);
+
+			boolean flagZero = stringViewNum.equals(&quot;&quot;);
+			if( flagZero == true){
+				stringViewNum = &quot;0&quot;;
+			}
+
+			Integer tmpViewNum =
+Integer.valueOf(stringViewNum);//intに変換処理♪
+			ViewNum = tmpViewNum.intValue();
+
+			String data =
+this.ConDB(serchArea,serchAge,ViewNum);
+
+	
+response.setContentType(&quot;text/html;charset=\&quot;Shift_JIS\&quot;&quot;);
+			PrintWriter out = response.getWriter();
+
+			out.println(&quot;&lt;html&gt;&quot;);
+			out.println(&quot;&lt;head&gt;&quot;);
+			out.println(&quot;&lt;title&gt;&lt;/title&gt;&quot;);
+			out.println(&quot;&lt;/head&gt;&quot;);
+			out.println(&quot;&quot;);
+			out.println(&quot;&lt;body&gt;&quot;);
+			out.println(data);
+
+			if(ViewNum &gt;= 10){
+
+				out.println(&quot;&lt;form name =\&quot;back\&quot;
+method=\&quot;get\&quot; action=\&quot;ShowServlet\&quot;&gt;&quot;);
+				out.println(&quot;&lt;input type=\&quot;hidden\&quot;
+name=\&quot;area\&quot;value=\&quot;&quot;+ serchArea +&quot;\&quot;&gt;&quot;);
+				out.println(&quot;&lt;input type=\&quot;hidden\&quot;
+name=\&quot;age\&quot;value=\&quot;&quot;+ serchAge +&quot;\&quot;&gt;&quot;);
+				out.println(&quot;&lt;input type=\&quot;hidden\&quot;
+name=\&quot;viewnum\&quot;value=\&quot;&quot;+ (ViewNum - 10)  + &quot;\&quot;&gt;&quot;);
+				out.println(&quot;&lt;input type=\&quot;submit\&quot;
+value=\&quot;前\&quot;&gt;&quot;);
+
+			}
+
+			out.println(&quot;&lt;form name =\&quot;go\&quot; method=\&quot;get\&quot;
+action=\&quot;ShowServlet\&quot;&gt;&quot;);
+			out.println(&quot;&lt;input type=\&quot;hidden\&quot;
+name=\&quot;area\&quot;value=\&quot;&quot;+ serchArea +&quot;\&quot;&gt;&quot;);
+			out.println(&quot;&lt;input type=\&quot;hidden\&quot;
+name=\&quot;age\&quot;value=\&quot;&quot;+ serchAge +&quot;\&quot;&gt;&quot;);
+			out.println(&quot;&lt;input type=\&quot;hidden\&quot;
+name=\&quot;viewnum\&quot;value=\&quot;&quot;+ (ViewNum + 10)  + &quot;\&quot;&gt;&quot;);
+			out.println(&quot;&lt;input type=\&quot;submit\&quot; value=\&quot;次
+\&quot;&gt;&quot;);
+			out.println(&quot;&lt;br&gt;&quot;);
+			out.println(&quot;&lt;br&gt;&quot;);
+			out.println(&quot;&lt;a href
+=\&quot;<a href="http://www.gogo-jo.no-ip.com/koihiroi/">http://www.gogo-jo.no-ip.com/koihiroi/</a>\&quot;&gt;top&lt;/a&gt;&quot;);
+			out.println(&quot;&lt;/body&gt;&quot;);
+			out.println(&quot;&lt;/html&gt;&quot;);
+			out.close();
+
+			System.out.println(&quot;表示正常終了&quot;);
+
+    }
+
+    public void doPost(HttpServletRequest request, HttpServletResponse
+response)
+                          throws ServletException, IOException {
+	}
+
+	private String Disp(String name,String age,String area,String
+comment){
+
+		StringBuffer dsb = new StringBuffer(&quot;&lt;br&gt;\n&quot;);
+
+
+		String Name = name;
+		String Age = age;
+		String Area = area;
+		String Comment = comment;
+
+		dsb.append(&quot;『&quot; + Name + &quot;』&lt;br&gt;\n&quot;);
+		dsb.append(&quot;&lt;br&gt;&quot;);
+		dsb.append(Area + &quot;┃&quot;+ Age + &quot;&lt;br&gt;\n&quot;);
+		dsb.append(&quot;&lt;br&gt;\n&quot;);
+		dsb.append( &quot;&lt;pre&gt;&quot;+ Comment + &quot;&lt;/pre&gt;&lt;br&gt;\n&quot;);
+		dsb.append(&quot;&lt;br&gt;\n&quot;);
+		dsb.append(&quot;&lt;hr&gt;\n&quot;);
+
+		String Kiji = dsb.toString();
+
+		return Kiji;
+
+	}
+
+	private String ConDB(String area,String age,int viewnum){
+
+		StringBuffer conDBsb = new StringBuffer();
+		String DBpara;
+
+		String	queryArea;
+		String	queryAge;
+		String	querySerch;
+		int		ShowNum = viewnum;
+
+		boolean flagArea	= area.equals(&quot;0&quot;);//
+		boolean flagAge	= age.equals(&quot;0&quot;);
+
+		if( flagArea == false &amp;&amp; flagAge == false){
+			queryArea	= (&quot;where area = \'&quot;+ area + &quot;\'
+and &quot;);
+			queryAge	= (&quot;age = \'&quot;+ age +&quot;\'&quot;);
+		}
+		else if( flagArea == true &amp; flagAge == false){
+
+			queryArea	= &quot;&quot;;
+			queryAge	= (&quot;where age = \'&quot; + age
++&quot;\'&quot;);
+		}
+		else if(flagArea == false &amp; flagAge == true){
+
+			queryArea	= (&quot;where area = \'&quot; + area
++&quot;\'&quot;);
+			queryAge	= &quot;&quot;;
+		}
+		else{
+			queryArea	= &quot;&quot;;
+			queryAge	= &quot;&quot;;
+		}
+
+		querySerch = queryArea + queryAge;
+
+		try {
+			Class.forName(&quot;org.gjt.mm.mysql.Driver&quot;); //コネ
+クタの呼び出し
+
+			// データベースへ接続
+
+
+			Connection con =
+DriverManager.getConnection(&quot;jdbc:mysql://localhost/SimpleDeai&quot;);
+			Statement stmt = con.createStatement();
+
+			//検索クエリ送信
+
+			String query = &quot;select * from senshu &quot;+
+querySerch +&quot; order by No desc limit &quot;+ ShowNum + &quot;,&quot; + (ShowNum + 10);
+
+			ResultSet rs;
+
+			rs = stmt.executeQuery(query);
+			rs.beforeFirst();
+
+			while(rs.next()){
+				//rs.next();      これが2個目のエラーの
+原因でした。上の判定の部分ですでに実行されるようです
+
+				String resName		= null;
+				String resAge		= null;
+				String resArea		= null;
+				String resComment	= null;
+
+	
+resName		=	rs.getString(&quot;name&quot;);
+	
+resAge			=	rs.getString(&quot;age&quot;);
+	
+resArea			=	rs.getString(&quot;area&quot;);
+	
+resComment		=	rs.getString(&quot;comment&quot;);
+
+				conDBsb.append(this.Disp(resName,resAge,
+resArea,resComment));
+			}
+
+				// データベースから切断
+				stmt.close();
+				con.close();
+
+				} catch (Exception e) {
+			      	e.printStackTrace();
+				}
+
+			DBpara = conDBsb.toString();
+
+			return DBpara;
+	}
+}
+
+こんな感じです。アルゴリズムの指摘お願いします♪
+
+
+</pre>
+</div>
+<p class="button"><a href="6113">[前]</a><a href="6115">[次]</a><a href="../list/6101-6200">[番号順一覧]</a><a href="../thread/6101-6200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="6091">   6091 2002-09-10 14:37 [&quot;Tatsuya Kondo&quot; &lt;kon] 検索が正常に出来ない                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6092">   6092 2002-09-10 15:04 ┣[&quot;altana&quot; &lt;altana@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6094">   6094 2002-09-10 15:13 ┣[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6097">   6097 2002-09-10 16:58 ┃┗[fukuixyz &lt;fukuixyz@x] 「 addslashes をつける」意味        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6098">   6098 2002-09-10 18:34 ┃　┣[&quot;KAWAI,Takanori&quot; &lt;GC]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6100">   6100 2002-09-10 19:20 ┃　┗[&quot;Takashi Yamashita&quot; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6106">   6106 2002-09-11 10:04 ┃　　┗[fukuixyz &lt;fukuixyz@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6108">   6108 2002-09-11 11:29 ┃　　　┣[mohri &lt;mohri@xxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6118">   6118 2002-09-11 14:30 ┃　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6120">   6120 2002-09-11 14:57 ┃　　　　┣[Tomohiro 'Tomo-p' KA]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6122">   6122 2002-09-11 15:24 ┃　　　　┃┣[&quot;Takashi Yamashita&quot; ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6151">   6151 2002-09-11 18:46 ┃　　　　┃┗[&lt;moeru@xxxxxxxxxx&gt;  ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6121">   6121 2002-09-11 15:24 ┃　　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6095">   6095 2002-09-10 15:25 ┣[HAMAI Kyoichi &lt;k-ham]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6096">   6096 2002-09-10 15:27 ┣[遠藤 俊裕 &lt;endo_t@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6099">   6099 2002-09-10 18:39 ┣[&quot;城&quot; &lt;sora_iro@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6101">   6101 2002-09-10 19:42 ┣[&quot;Takashi Yamashita&quot; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6102">   6102 2002-09-10 20:24 ┣[楠吉彦 &lt;moredebu@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6103">   6103 2002-09-11 01:54 ┃┗[&quot;Tatsuya Kondo&quot; &lt;kon]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6104">   6104 2002-09-11 08:26 ┃　┗[遠藤 俊裕 &lt;endo_t@xx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6105">   6105 2002-09-11 09:46 ┃　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6107">   6107 2002-09-11 10:04 ┃　　　┗[遠藤 俊裕 &lt;endo_t@xx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6109">   6109 2002-09-11 11:57 ┃　　　　┗[&quot;城&quot; &lt;sora_iro@xxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6111">   6111 2002-09-11 12:13 ┃　　　　　┣[遠藤 俊裕 &lt;endo_t@xx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6112">   6112 2002-09-11 12:25 ┃　　　　　┗[&quot;Takashi Yamashita&quot; ]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="6114">   6114 2002-09-11 13:32 ┃　　　　　　┗[&quot;城&quot; &lt;sora_iro@xxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6115">   6115 2002-09-11 14:11 ┃　　　　　　　┣[&quot;Tatsuya Kondo&quot; &lt;kon]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6116">   6116 2002-09-11 14:08 ┃　　　　　　　┗[&quot;Takashi Yamashita&quot; ]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6117">   6117 2002-09-11 14:29 ┃　　　　　　　　┗[&quot;城&quot; &lt;sora_iro@xxxxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6119">   6119 2002-09-11 14:47 ┃　　　　　　　　　┗[mohri &lt;mohri@xxxxxxx]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6123">   6123 2002-09-11 15:32 ┃　　　　　　　　　　┗[&quot;Takashi Yamashita&quot; ]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6128">   6128 2002-09-11 17:47 ┃　　　　　　　　　　　┗[mohri &lt;mohri@xxxxxxx]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6129">   6129 2002-09-11 17:58 ┃　　　　　　　　　　　　┗[&quot;城&quot; &lt;sora_iro@xxxxx]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6131">   6131 2002-09-11 18:20 ┃　　　　　　　　　　　　　┗[&quot;Takashi Yamashita&quot; ]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6110">   6110 2002-09-11 12:09 ┗[&quot;足田博信&quot; &lt;h_ashida]                                       </a></span>
+</pre>
+</body>
+</html>

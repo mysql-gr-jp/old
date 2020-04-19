@@ -1,0 +1,150 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7772</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="7771">[前]</a><a href="7773">[次]</a><a href="../list/7701-7800">[番号順一覧]</a><a href="../thread/7701-7800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7772
+</p>
+<div class="header">
+<p>
+From: A.K.I. &lt;A.K.I. &lt;aki@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 22 May 2003 21:34:10 +0900<br>
+Subject: [mysql 07772] Re: MyODBC でのエラー<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+A.I.I.です。
+まず、mysql-maxはそういう名前です。バイナリ版ではフル機能のmysql-max
+とシンプルなmysqlに分かれます。（確か。Winではmax使わなかっ
+たしFreeBSDのportsはmaxの名前ついていないけどInnoDB有効にな
+っているので正確なところは試してません）
+
+ODBCでの接続だと問題の切り分けがややこしくなるので、
+１．ローカルのコンソールで接続
+２．ネットワーク越しにコンソールで接続
+３．MyODBCで接続
+
+と順を追って操作してみてはいかがでしょうか。
+（私は２．の部分をいつもWinから「かねやんMySQLAdmin」で行っ
+ていますが）
+
+#あと、mysqldセクションのset-variablesの値が全体に控えめな気
+がするんですが・・・
+ml@xxxxxxxxxx wrote:
+<span class="quote1">&gt;AKI様</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;あれから、my.cnfにskip-innodbを追加しまして、</span>
+<span class="quote1">&gt;使う意図もありませんでしたし。</span>
+<span class="quote1">&gt;再起動をかけたのですが、外部からODBC接続をした途端、</span>
+<span class="quote1">&gt;コンソールに</span>
+<span class="quote1">&gt;-------------</span>
+<span class="quote1">&gt;/usr/bin/safe_mysqld: line 278: 29427 セグメンテーション違反です</span>
+<span class="quote1">&gt; $NOHUP_NICENESS $ledir/$MYSQLD</span>
+<span class="quote1">&gt;$defaults --basedir=$MY_BASEDIR_VERSION --datadi</span>
+<span class="quote1">&gt;r=$DATADIR $USER_OPTION --pid-file=$pid_file --skip-locking &gt;&gt;$err_log 2&gt;&amp;1</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;Number of processes running now: 1</span>
+<span class="quote1">&gt;mysqld-max process hanging, pid 29430 - killed</span>
+<span class="quote1">&gt;-------------</span>
+<span class="quote1">&gt;のエラーメッセージが出てプロセスが落ちます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;起動には、mysql.shというのを使用しています。</span>
+<span class="quote1">&gt;これは標準で使う・・・わないですよね？(^^;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;mysqld-maxについてもinnodbを使う意図はないので、設定ファイルを調べておりま</span>
+<span class="quote1">&gt;す。</span>
+<span class="quote1">&gt;-maxというのはsafe_mysqldで起動する時に指定するオプションでしょうか？</span>
+<span class="quote1">&gt;これは必要ないです。無しで起動する方法も調べてみようと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;一応、my.cnfの設定は以下の通りです。</span>
+<span class="quote1">&gt;# The following options will be passed to all MySQL clients</span>
+<span class="quote1">&gt;[client]</span>
+<span class="quote1">&gt;#password       = your_password</span>
+<span class="quote1">&gt;port            = 3306</span>
+<span class="quote1">&gt;socket          = /var/lib/mysql/mysql.sock</span>
+<span class="quote1">&gt;# Here follows entries for some specific programs</span>
+<span class="quote1">&gt;# The MySQL server</span>
+<span class="quote1">&gt;[mysqld]</span>
+<span class="quote1">&gt;port            = 3306</span>
+<span class="quote1">&gt;socket          = /var/lib/mysql/mysql.sock</span>
+<span class="quote1">&gt;skip-locking</span>
+<span class="quote1">&gt;set-variable    = key_buffer=16K</span>
+<span class="quote1">&gt;set-variable    = max_allowed_packet=1M</span>
+<span class="quote1">&gt;set-variable    = thread_stack=64K</span>
+<span class="quote1">&gt;set-variable    = table_cache=4</span>
+<span class="quote1">&gt;set-variable    = sort_buffer=64K</span>
+<span class="quote1">&gt;set-variable    = net_buffer_length=2K</span>
+<span class="quote1">&gt;server-id       = 1</span>
+<span class="quote1">&gt;# Uncomment the following if you want to log updates</span>
+<span class="quote1">&gt;#log-bin</span>
+<span class="quote1">&gt;# Uncomment the following if you are NOT using BDB tables</span>
+<span class="quote1">&gt;#skip-bdb</span>
+<span class="quote1">&gt;skip-innodb</span>
+<span class="quote1">&gt;# Uncomment the following if you are using Innobase tables</span>
+<span class="quote1">&gt;#innodb_data_home_dir = /var/lib/mysql/</span>
+<span class="quote1">&gt;#innodb_log_group_home_dir = /var/lib/mysql/</span>
+<span class="quote1">&gt;#innodb_log_arch_dir = /var/lib/mysql/</span>
+<span class="quote1">&gt;#innodb_data_file_path = ibdata1:25M;ibdata2:37M;ibdata3:100M;ibdata4:300M</span>
+<span class="quote1">&gt;#set-variable = innodb_mirrored_log_groups=1</span>
+<span class="quote1">&gt;#set-variable = innodb_log_files_in_group=3</span>
+<span class="quote1">&gt;#set-variable = innodb_log_file_size=5M</span>
+<span class="quote1">&gt;#set-variable = innodb_log_buffer_size=8M</span>
+<span class="quote1">&gt;#innodb_flush_log_at_trx_commit=1</span>
+<span class="quote1">&gt;#innodb_log_archive=0</span>
+<span class="quote1">&gt;#set-variable = innodb_buffer_pool_size=16M</span>
+<span class="quote1">&gt;#set-variable = innodb_additional_mem_pool_size=2M</span>
+<span class="quote1">&gt;#set-variable = innodb_file_io_threads=4</span>
+<span class="quote1">&gt;#set-variable = innodb_lock_wait_timeout=50</span>
+<span class="quote1">&gt;[mysqldump]</span>
+<span class="quote1">&gt;quick</span>
+<span class="quote1">&gt;set-variable    = max_allowed_packet=16M</span>
+<span class="quote1">&gt;[mysql]</span>
+<span class="quote1">&gt;no-auto-rehash</span>
+<span class="quote1">&gt;# Remove the next comment character if you are not familiar with SQL</span>
+<span class="quote1">&gt;#safe-updates</span>
+<span class="quote1">&gt;[isamchk]</span>
+<span class="quote1">&gt;set-variable    = key_buffer=8M</span>
+<span class="quote1">&gt;set-variable    = sort_buffer=8M</span>
+<span class="quote1">&gt;[myisamchk]</span>
+<span class="quote1">&gt;set-variable    = key_buffer=8M</span>
+<span class="quote1">&gt;set-variable    = sort_buffer=8M</span>
+<span class="quote1">&gt;[mysqlhotcopy]</span>
+<span class="quote1">&gt;interactive-timeout</span>
+<span class="quote1">&gt;----------------------------------------</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;和泉</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;---</span>
+<span class="quote1">&gt;Outgoing mail is certified Virus Free.</span>
+<span class="quote1">&gt;Checked by AVG anti-virus system (<a href="http://www.grisoft.com">http://www.grisoft.com</a>).</span>
+<span class="quote1">&gt;Version: 6.0.481 / Virus Database: 277 - Release Date: 2003/05/13</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="7771">[前]</a><a href="7773">[次]</a><a href="../list/7701-7800">[番号順一覧]</a><a href="../thread/7701-7800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7733">   7733 2003-05-17 11:10 [A.K.I. &lt;aki@xxxxxxxx] Re: MyODBC でのエラー                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7737">   7737 2003-05-18 10:03 ┣[&quot;Shinichi.Izumi&quot; &lt;iz]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7766">   7766 2003-05-20 14:35 ┗[&quot;Shinichi.Izumi&quot; &lt;iz]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="7772">   7772 2003-05-22 21:34 　┗[A.K.I. &lt;aki@xxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7774">   7774 2003-05-21 00:12 　　┗[&quot;Shinichi.Izumi&quot; &lt;iz]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7775">   7775 2003-05-23 01:05 　　　┗[A.K.I. &lt;aki@xxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7780">   7780 2003-05-21 11:36 　　　　┣[&quot;Shinichi.Izumi&quot; &lt;iz]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7781">   7781 2003-05-21 12:29 　　　　┃┗[A.K.I. &lt;aki@xxxxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7783">   7783 2003-05-21 12:36 　　　　┃　┗[&quot;Shinichi.Izumi&quot; &lt;iz]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7782">   7782 2003-05-21 12:32 　　　　┗[&quot;Shinichi.Izumi&quot; &lt;iz]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7784">   7784 2003-05-21 12:35 　　　　　┗[A.K.I. &lt;aki@xxxxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7810">   7810 2003-05-23 08:33 　　　　　　┗[&quot;Shinichi.Izumi&quot; &lt;iz] Re: MyODBC でのエラー：解決</a></span>
+</pre>
+</body>
+</html>

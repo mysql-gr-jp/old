@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:637</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="636">[前]</a><a href="638">[次]</a><a href="../list/601-700">[番号順一覧]</a><a href="../thread/601-700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:637
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Sat, 23 Jan 1999 13:05:54 +0900<br>
+Subject: [mysql 00637] Re: MB problem<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+From: Hironori Sato &lt;hiro@xxxxxxxxxx&gt;
+Subject: <a href="00636">[mysql 00636]</a> MB problem
+Date: Fri, 22 Jan 1999 15:59:26 -0800
+Message-ID: &lt;199901222354.PAA20832@xxxxxxxxxx&gt;
+
+hiro&gt; 佐藤＠ＪＰＮＮＥＴです。
+
+hiro&gt; しかし、突然like文がおかしくなってしまったのです。
+hiro&gt; 正確には「世界のご近所さん」にキーワードサーチがあったのですが、
+hiro&gt; 自己紹介のデータに対して「like '%テニス%'」とかをやると
+hiro&gt; データが抽出できないんです。一文字で「テ」をサーチすると問題なく
+hiro&gt; 引っかかるのですが...テーブルのデータがアップグレードで支障がでたのか
+
+
+条件が分かりませんでしたので、以下のように仮定して試してみました。
+# char binary にしないでやってみてます
+
+mysql&gt; show fields from a;
++-------+----------+------+-----+---------+-------+
+<span class="quote1">| Field | Type     | Null | Key | Default | Extra |</span>
++-------+----------+------+-----+---------+-------+
+<span class="quote1">| a     | char(20) | YES  |     | NULL    |       |</span>
++-------+----------+------+-----+---------+-------+
+1 row in set (0.00 sec)
+
+mysql&gt; select * from a where a like '%テニス%';
++------------+
+<span class="quote1">| a          |</span>
++------------+
+<span class="quote1">| テニス     |</span>
+<span class="quote1">| あテニスだ |</span>
+<span class="quote1">| あテニス   |</span>
+<span class="quote1">| テニスだあ |</span>
++------------+
+4 rows in set (0.07 sec)
+
+mysql&gt; select * from a where a like 'テニス%';
++------------+
+<span class="quote1">| a          |</span>
++------------+
+<span class="quote1">| テニス     |</span>
+<span class="quote1">| テニスだあ |</span>
++------------+
+2 rows in set (0.00 sec)
+
+mysql&gt; select * from a where a like '%テニス';
++----------+
+<span class="quote1">| a        |</span>
++----------+
+<span class="quote1">| テニス   |</span>
+<span class="quote1">| あテニス |</span>
++----------+
+2 rows in set (0.00 sec)
+
+3.22.14-gamma charset=ujis です。
+
+'テニス' を EUC, SJIS の 16進で書くと
+EUC: a5c6a5cba5b9    SJIS: 8366836a8358
+
+実際に入っているデータを示していただくと確認がとりやすいのですが...
+例えば
+  'なんとかかんとかテニスあれやこれや'
+という値が引っかからないよ、とか。
+
+ 村上 毅  takeshi@xxxxxxxxxx
+ PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
+ [ <a href="http://www.softagency.co.jp/mysql/">http://www.softagency.co.jp/mysql/</a> ]
+ [ MySQL ML: mysql-help@xxxxxxxxxx ]
+
+</pre>
+</div>
+<p class="button"><a href="636">[前]</a><a href="638">[次]</a><a href="../list/601-700">[番号順一覧]</a><a href="../thread/601-700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="636">    636 1999-01-23 08:59 [Hironori Sato &lt;hiro@] MB problem                              </a></span>
+<span class="current">-&gt;&nbsp;<a href="637">    637 1999-01-23 13:05 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="639">    639 1999-01-24 23:08 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="648">    648 1999-01-26 11:33 　┗[Hironori Sato &lt;hiro@]                                     </a></span>
+</pre>
+</body>
+</html>

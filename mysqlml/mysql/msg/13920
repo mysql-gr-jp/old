@@ -1,0 +1,154 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13920</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13919">[前]</a><a href="13921">[次]</a><a href="../list/13901-14000">[番号順一覧]</a><a href="../thread/13901-14000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13920
+</p>
+<div class="header">
+<p>
+From: &quot;fujita&quot; &lt;&quot;fujita&quot; &lt;t-fujita@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 26 Apr 2007 08:45:57 +0900<br>
+Subject: [mysql 13920] Re: Access2002+MyODBCでエラー<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。
+
+すみません。説明不足でしたら申し訳ないです。
+
+確かにADOやDAO等で接続する場合は御指摘の方法でOKですが、今問題になっているのは 
+
+
+<a href="http://dev.mysql.com/doc/refman/5.1/ja/myodbc-examples-tools-with-access.html">http://dev.mysql.com/doc/refman/5.1/ja/myodbc-examples-tools-with-access.html</a>
+
+の「9.1.4.4.3. Microsoft Access を MySQL のフロントエンドとして使用する」のところで、
+
+「プロセスが完了すれば、Access データベースでするように、リンクされたテーブルに
+インターフェイスやクエリを作成することができます。」
+
+となっていますが、実際にはこのリンクされたテーブルを開いて「十」という文字を入力
+するとエラーになるということです。
+
+
+尚、DSNの設定でRead Options From my.cnfにチェックをしても
+同じエラーがでてきました。
+
+
+
+
+----- Original Message ----- 
+From: &quot;goungoun&quot; &lt;gounx2@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Thursday, April 26, 2007 12:34 AM
+Subject: <a href="13919">[mysql 13919]</a> Re: Access2002+MyODBCでエラー
+
+
+<span class="quote1">&gt; こんにちは。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; On Wed, 25 Apr 2007 11:32:19 +0900 (JST)</span>
+<span class="quote1">&gt; t-fujita@xxxxxxxxxx wrote:</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt; &gt; つまり、Access が生成する SQL のキャラクタセットってどこかで設定可能なのでしょうか？</span>
+<span class="quote2">&gt;&gt; ODBCやDSNの画面にはみあたりませんでした。</span>
+<span class="quote2">&gt;&gt; ですので設定するのはできないのではないかと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; グーグル先生に、以下キーワードで聞くと</span>
+<span class="quote1">&gt; ・myodbc 3.51 cp932</span>
+<span class="quote1">&gt; ・&quot;read options from my.cnf&quot;</span>
+<span class="quote1">&gt; わりと有名な問題のようですね。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 環境依存性もあるような感じですが・・・</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ずばり、こんなのが出てきました。</span>
+<span class="quote1">&gt; <a href="http://okumurya.homeip.net/pukiwiki/pukiwiki.php?MySQL%204.1.20%20%2B%20MyODBC%203.51.12%20%2B%20MS%20Jet%204.0.9025%20%2B%20Microsoft%20Access">http://okumurya.homeip.net/pukiwiki/pukiwiki.php?MySQL%204.1.20%20%2B%20MyODBC%203.51.12%20%2B%20MS%20Jet%204.0.9025%20%2B%20Microsoft%20Access</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; で、私もやってみました。</span>
+<span class="quote1">&gt; ・クライアント(ODBC)は、mysql-connector-odbc-3.51.14-win32.msi</span>
+<span class="quote1">&gt; ・サーバは、</span>
+<span class="quote1">&gt;  $ sudo mysqld --version</span>
+<span class="quote1">&gt;  mysqld  Ver 5.0.32-Debian_7etch1-log for pc-linux-gnu on i486 (Debian </span>
+<span class="quote1">&gt; etch</span>
+<span class="quote1">&gt; distribution)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; まず、ODBCのユーザDSNを「mysql」という名前で作りました。</span>
+<span class="quote1">&gt; ODBC設定のオプション類はすべてチェックオフ（デフォルト）です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; で、以下を実行すると。</span>
+<span class="quote1">&gt; odbc_test.js</span>
+<span class="quote1">&gt; ----------------------------------------------------</span>
+<span class="quote1">&gt; var conn = new ActiveXObject(&quot;ADODB.Connection&quot;);</span>
+<span class="quote1">&gt; var rs = new ActiveXObject(&quot;ADODB.Recordset&quot;);</span>
+<span class="quote1">&gt; conn.Open(&quot;Provider=MSDASQL; Data Source=mysql&quot;);</span>
+<span class="quote1">&gt; var sql = &quot;SELECT '&lt;十&gt;' AS item1;&quot;;</span>
+<span class="quote1">&gt; rs.Open(sql, conn);</span>
+<span class="quote1">&gt; WScript.Echo(rs.Fields(&quot;item1&quot;).Value);</span>
+<span class="quote1">&gt; rs.Close();</span>
+<span class="quote1">&gt; conn.Close();</span>
+<span class="quote1">&gt; ----------------------------------------------------</span>
+<span class="quote1">&gt; 文字化けしました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 次に、conn.Open()の後に</span>
+<span class="quote1">&gt; ----------------------------------------------------</span>
+<span class="quote1">&gt; conn.Execute(&quot;set names cp932;&quot;);</span>
+<span class="quote1">&gt; ----------------------------------------------------</span>
+<span class="quote1">&gt; を追加して、実行すると</span>
+<span class="quote1">&gt; 文字化けせずに表示されました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 次に、ODBCの設定から「&quot;read options from my.cnf&quot;」をチェックして</span>
+<span class="quote1">&gt; c:\winnt\my.cnf</span>
+<span class="quote1">&gt; ----------------------------------------------------</span>
+<span class="quote1">&gt; [client]</span>
+<span class="quote1">&gt; default-character-set=cp932</span>
+<span class="quote1">&gt; ----------------------------------------------------</span>
+<span class="quote1">&gt; としてから、最初のスクリプト（set names無し版）を実行しても、</span>
+<span class="quote1">&gt; 文字化けせずに表示されました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; あと、公式の以下に「様々な構成で推奨する option 値の例のリスト」</span>
+<span class="quote1">&gt; というのがあるので、それらはチェックしておいたほうがよさげですね。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQL AB :: MySQL 5.1 リファレンスマニュアル :: 9.1.3.5 Connector/ODBC </span>
+<span class="quote1">&gt; Connection Parameters:</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/refman/5.1/ja/myodbc-configuration-connection-parameters.html">http://dev.mysql.com/doc/refman/5.1/ja/myodbc-configuration-connection-parameters.html</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ps.</span>
+<span class="quote1">&gt; 私の環境でODBCのInitialStatementに</span>
+<span class="quote1">&gt; 「set names cp932」とすると、エラーが出て</span>
+<span class="quote1">&gt; DSN定義が壊れてしまいました。ところが、</span>
+<span class="quote1">&gt; 少し時間をおいて、何気にもう一度設定すると</span>
+<span class="quote1">&gt; 何の問題も無く設定できました。</span>
+<span class="quote1">&gt; この設定で、最初のスクリプト（set names無し版）を実行しても、</span>
+<span class="quote1">&gt; 文字化けせずに表示されました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; goungoun &lt;gounx2@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; <a href="http://goungoun.dip.jp/app/">http://goungoun.dip.jp/app/</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; </span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="13919">[前]</a><a href="13921">[次]</a><a href="../list/13901-14000">[番号順一覧]</a><a href="../thread/13901-14000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13906">  13906 2007-04-25 11:32 [&lt;t-fujita@xxxxxxxxxx] Re: Access2002+MyODBCでエラー           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13919">  13919 2007-04-26 00:34 ┗[goungoun &lt;gounx2@xxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="13920">  13920 2007-04-26 08:45 　┣[&quot;fujita&quot; &lt;t-fujita@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13923">  13923 2007-04-26 12:18 　┃┣[&quot;T.Hirotsu&quot; &lt;hirotsu]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13925">  13925 2007-04-26 18:20 　┃┃┗[goungoun &lt;gounx2@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13924">  13924 2007-04-26 17:04 　┃┗[goungoun &lt;gounx2@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13926">  13926 2007-04-27 09:58 　┃　┣[&quot;fujita&quot; &lt;t-fujita@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13927">  13927 2007-04-27 17:20 　┃　┗[ezaki &lt;kjc_post@xxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13921">  13921 2007-04-26 11:25 　┗[ezaki &lt;kjc_post@xxxx]                                     </a></span>
+</pre>
+</body>
+</html>

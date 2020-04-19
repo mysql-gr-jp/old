@@ -1,0 +1,80 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8913</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8912">[前]</a><a href="8914">[次]</a><a href="../list/8901-9000">[番号順一覧]</a><a href="../thread/8901-9000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8913
+</p>
+<div class="header">
+<p>
+From: UNO Shintaro &lt;UNO Shintaro &lt;uno@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 07 Mar 2004 04:48:34 +0900<br>
+Subject: [mysql 08913] Re: DISTINCT オプションの動作について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<span class="quote1">&gt; NO |  MESSAGE   |   DATE</span>
+<span class="quote1">&gt;----+------------+-----------</span>
+<span class="quote1">&gt;  1 | あいうえお | 2004-02-01</span>
+<span class="quote1">&gt;  1 | かきくけこ | 2004-02-05</span>
+<span class="quote1">&gt;  2 | さしすせそ | 2004-02-08</span>
+<span class="quote1">&gt;  3 | たちつてと | 2004-02-13</span>
+<span class="quote1">&gt;  2 | なにぬねの | 2004-02-19</span>
+<span class="quote1">&gt;  4 | はひふへほ | 2004-02-19</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;と言うデータがあった場合、「NO」が重複するレコードは１つだけ取得し、</span>
+<span class="quote1">&gt;「DATE」を条件にSELECTしたいのですが、その時「NO」が重複する</span>
+<span class="quote1">&gt;レコードを１つだけ取得する際に「DATE」が最新の方を取得したいのです。</span>
+
+DATEっていうカラム名って許されるんでしたっけ…？
+
+NOとDATEを出したいだけなら、
+
+・集合関数を使う
+  SELECT NO,MAX(DATE) AS DATE FROM tbl GROUP BY NO;
+
+
+さらにMESSAGEも出したいのなら、
+
+・自己ジョインを使う
+  SELECT a.* FROM tbl AS a LEFT JOIN tbl AS b
+   ON a.NO=b.NO AND a.DATE &lt; b.DATE WHERE b.NO IS NULL;
+
+・集合関数とテンポラリテーブルを使う
+  DROP TABLE IF EXISTS tt;
+  CREATE TEMPORARY TABLE tt SELECT 
+     NO,MAX(DATE) AS DATE FROM tbl GROUP BY NO;
+  SELECT tbl.* FROM tt INNER JOIN tbl USING (NO,DATE);
+
+
+という感じでしょうか。
+
+-- 
+UNO Shintaro, 宇野 信太郎
+mailto:uno@xxxxxxxxxx
+<a href="http://www.venus.dti.ne.jp/~uno/">http://www.venus.dti.ne.jp/~uno/</a>
+
+</pre>
+</div>
+<p class="button"><a href="8912">[前]</a><a href="8914">[次]</a><a href="../list/8901-9000">[番号順一覧]</a><a href="../thread/8901-9000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8911">   8911 2004-03-07 02:49 [&lt;konet218@xxxxxxxxxx] DISTINCT オプションの動作について       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8912">   8912 2004-03-07 03:52 ┣[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8918">   8918 2004-03-07 16:51 ┃┗[KAWAJI Shinya &lt;kawaj]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8920">   8920 2004-03-07 22:06 ┃　┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="8913">   8913 2004-03-07 04:48 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8914">   8914 2004-03-07 06:20 　┣[Sumito_Oda &lt;oda@xxxx] 予約語 (Re: DISTINCT オプションの動作について)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8915">   8915 2004-03-07 06:23 　┗[&lt;konet218@xxxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8916">   8916 2004-03-07 13:36 　　┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8919">   8919 2004-03-07 18:56 　　　┗[UNO Shintaro &lt;uno@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8921">   8921 2004-03-07 22:06 　　　　┗[ML account &lt;ml@xxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8923">   8923 2004-03-07 22:29 　　　　　┗[UNO Shintaro &lt;uno@xx]                             </a></span>
+</pre>
+</body>
+</html>

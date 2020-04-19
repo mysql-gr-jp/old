@@ -1,0 +1,76 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13040</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13039">[前]</a><a href="13041">[次]</a><a href="../list/13001-13100">[番号順一覧]</a><a href="../thread/13001-13100">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13040
+</p>
+<div class="header">
+<p>
+From: &quot;F.Y&quot; &lt;&quot;F.Y&quot; &lt;fumi_sby@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 1 Jun 2006 21:45:51 +0900 (JST)<br>
+Subject: [mysql 13040] Re: UNION クエリで躓いています<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+desc つける場所間違えた。
+and このまんまで走るかどうかは知らない。
+そういやUNIONでくっつけるんだから4P,9P,13Pもってくるのにgroup byがつら
+いか。
+ま、view使うか一時表使うか副問い合わせにしちゃうか、もうちょいでできる
+でしょ。
+
+じゃなくって、すまん、根本的に読んでなかった。
+13Pの通過時間の早いほうから順位をつけた選手リストを出したいってことのよ
+うな気がしてきた。
+それならUNION使うことない。と思う。
+こんな感じでできるんじゃないかな。
+
+set @r1 = 0;
+select scode, namae, max(if(kcode = 4, ktime, null)) as 4P,
+max(if(kcode = 9, ktime, null)) as 9P,
+max(if(kcode = 13, ktime, null)) as 13P,
+@r1:=(@r1 + 1) as rank
+from kiroku,sensyu,kukan
+where kiroku.scode = sensyu.scode
+and kukan.kcode = kiroku.kcode
+group by scode, namae
+order by 13P desc;
+
+
+--- &quot;F.Y&quot; &lt;fumi_sby@xxxxxxxxxx&gt; からのメッセージ：
+<span class="quote1">&gt; UNIONの問題なんてないように見えるけどね。</span>
+<span class="quote1">&gt; 要は、namaeで絞りたい、順番つけたいってことじゃないの?</span>
+<span class="quote1">&gt; なら単純化するとこんな感じ。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; set @r1=0;</span>
+<span class="quote1">&gt; select scode, namae, min(p4), min(p9), min(p13), @r1:=(@r1+1) as</span>
+<span class="quote1">&gt; rank</span>
+<span class="quote1">&gt; from table</span>
+<span class="quote1">&gt; group by scode, namae</span>
+<span class="quote1">&gt; order by scode, namae desc;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 4P, 9P, 13Pの選択基準がわからんけど。</span>
+
+
+--------------------------------------
+Let's start Yahoo! Auction  -  Free Campaign Now!
+<a href="http://pr.mail.yahoo.co.jp/auction/">http://pr.mail.yahoo.co.jp/auction/</a>
+
+</pre>
+</div>
+<p class="button"><a href="13039">[前]</a><a href="13041">[次]</a><a href="../list/13001-13100">[番号順一覧]</a><a href="../thread/13001-13100">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13038">  13038 2006-06-01 20:26 [&quot;rishiri.info&quot; &lt;mail] UNIONクエリで躓いています               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13039">  13039 2006-06-01 21:20 ┗[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="13040">  13040 2006-06-01 21:45 　┗[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13041">  13041 2006-06-01 22:45 　　┗[&quot;rishiri.info&quot; &lt;mail]                                   </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2114</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="2113">[前]</a><a href="2115">[次]</a><a href="../list/2101-2200">[番号順一覧]</a><a href="../thread/2101-2200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2114
+</p>
+<div class="header">
+<p>
+From: Tomohiro Takahashi &lt;Tomohiro Takahashi &lt;t_takahashi@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 24 May 2000 23:52:14 +0900<br>
+Subject: [mysql 02114] Re: about MySQL JDBC Driver<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+Tomohiro Takahashi wrote:
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;  &lt;略&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   マニュアルには、</span>
+<span class="quote1">&gt;   「例えば、 BLOB 型の許容範囲いっぱいのデータをテーブルに入れる場合、</span>
+<span class="quote1">&gt;     --set-variable=max_allowed_packet=24M オプションを指定してサーバー</span>
+<span class="quote1">&gt;     を起動する必要があります。」</span>
+<span class="quote1">&gt; とありますが、クライアントから送りだすパケットのサイズは、ヘッダの構造上、</span>
+<span class="quote1">&gt; 16Mを越えることが出来ないと思うのですが、どうなのでしょうか...。</span>
+ 
+  高橋(智)です。
+
+  結局、--set-variable=max_allowed_packet=16M として mysqld を起動する
+ことで、数メガ程度のバイナリデータを格納することができました。
+  ここでやはり気になったのは、「MM Mysql JDBC DRIVER」は送信するSQL文を
+一度完成させてから一気にパケットを送り出しているため、パケット用のバッファ
+を確保できずに、内部で例外を発生させることがありますね。JavaVMの起動オプ
+ションでメモリを多めに確保しておけば問題ないですが。
+  その点、修正を加えた gwe JDBC Driver では、64K 程度のバッファを使いま
+わすようにしてます。そのかわり、UPDATE ... SET BINDATA=0x00010203....
+というように 16進表記 のSQL文を使用しているので、送り出すパケットは 2倍
+に脹れ上がります。(最終的なパケット長を早期に計算するためです)
+
+--
+高橋智宏
+
+</pre>
+</div>
+<p class="button"><a href="2113">[前]</a><a href="2115">[次]</a><a href="../list/2101-2200">[番号順一覧]</a><a href="../thread/2101-2200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2096">   2096 2000-05-23 22:00 [Tomohiro Takahashi &lt;] about MySQL JDBC Driver                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2105">   2105 2000-05-24 15:58 ┗[Shin-ichi Tsurunaga ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2108">   2108 2000-05-24 18:16 　┣[Tomohiro KATO &lt;tomop]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2112">   2112 2000-05-24 21:10 　┃┗[Shin-ichi Tsurunaga ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2110">   2110 2000-05-24 19:49 　┗[Tomohiro Takahashi &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2111">   2111 2000-05-24 20:32 　　┗[Shin-ichi Tsurunaga ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2113">   2113 2000-05-24 22:29 　　　┗[Tomohiro Takahashi &lt;]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="2114">   2114 2000-05-24 23:52 　　　　┗[Tomohiro Takahashi &lt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2116">   2116 2000-05-25 12:15 　　　　　┗[Shin-ichi Tsurunaga ]                             </a></span>
+</pre>
+</body>
+</html>

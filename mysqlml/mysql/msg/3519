@@ -1,0 +1,148 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3519</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="3518">[前]</a><a href="3520">[次]</a><a href="../list/3501-3600">[番号順一覧]</a><a href="../thread/3501-3600">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3519
+</p>
+<div class="header">
+<p>
+From: Kengo Jinno &lt;Kengo Jinno &lt;kengo@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 09 Apr 2001 11:53:47 +0900<br>
+Subject: [mysql 03519] Re: Borland での挙動について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+神野です。
+
+Sun, 08 Apr 2001 20:33:44 +0900 ごろに
+&lt;28C0C015C403BF.hirofujita8523@xxxxxxxxxx&gt; の
+&quot;<a href="03515">[mysql 03515]</a> Borland での挙動について&quot; のメールで
+hirofujita8523 &lt;hirofujita8523@xxxxxxxxxx&gt; さんは書きました。
+
+<span class="quote1">&gt; 今回、Borland での挙動で困っています。</span>
+<span class="quote1">&gt; 以下のソースを実行すると、main() 終了時にクラッシュしてしまいます。</span>
+
+問題の
+
+<span class="quote1">&gt;         mysql_data_seek(res, 0);        // この行を抜けば正常に動作する</span>
+
+ですが、
+
+winclients-3.23.09a-sjis の mysql.h
+void        STDCALL mysql_data_seek(MYSQL_RES *result,
+                    my_ulonglong offset);
+
+winclients-3_22_28_sjis の mysql.h
+void        STDCALL mysql_data_seek(MYSQL_RES *result,unsigned int offset);
+
+と宣言されています。
+第２引数の型が違うことに注意してください。
+
+my_ulonglong は、
+
+#if defined(NO_CLIENT_LONG_LONG)
+typedef unsigned long my_ulonglong;
+#elif defined (WIN32)
+typedef unsigned __int64 my_ulonglong;
+#else
+typedef unsigned long long my_ulonglong;
+#endif
+
+と定義されています。(どちらも同じ)
+
+藤田さんのソースでは、
+
+<span class="quote1">&gt; #define NO_CLIENT_LONG_LONG</span>
+<span class="quote1">&gt; #include &quot;mysql.h&quot;</span>
+
+なっているので、my_ulonglong は unsigned long 、
+つまり、32bit符号なし整数です。
+
+■winclients-3.23.09a-sjis でクラッシュする理由
+
+winclients-3.23.09a-sjis の mysql_data_seek() の第２引数は、
+64bit整数だとして作成されているものと思われます。
+
+STDCALL(Pascal呼び出し)ですから、スタックに積まれた引数は、
+呼び出された側(mysql_data_seek())で解放します。
+
+呼び出した側は第２引数として32bit(4byte)しか積んでないのに、
+呼び出された側で64bit(8byte)解放すれば、マズいです。
+
+■winclients-3_22_28_sjis でクラッシュしない理由
+
+winclients-3_22_28_sjis の mysql_data_seek() の第２引数は、
+32bit符号なし整数です。(これは間違いない)
+
+32bit(4byte)積んで32bit(4byte)解放しているのですから、
+問題ありません。
+
+■winclients-3_22_28_sjis の mysql_num_fields()
+
+<span class="quote1">&gt; (2).MySQL-3.22-Win32評価版（3.22.16-gamma）で、winclients-3_22_28_sjis</span>
+<span class="quote1">&gt; このうち、Borland では、(2) だけが動作します。</span>
+<span class="quote1">&gt; しかし、mysql_num_fields() では、常に 0 しか返ってきません。</span>
+
+<a href="03497">[mysql 03497]</a>では、
+
+<span class="quote1">&gt; たぶん、サーバーがこれよりも新しく、</span>
+<span class="quote1">&gt; ・フィールド数は他の方法で返す。</span>
+<span class="quote1">&gt; ・MYSQL_RES::field_countにゼロが入っている。</span>
+<span class="quote1">&gt; という実装になっているのではないかと思います。</span>
+
+という風に書きましたが、違うかもしれません。
+
+MYSQL_RES型の定義でも、my_ulonglong型が使われています。
+
+winclients-3_22_28_sjis の mysql.h
+
+typedef struct st_mysql_res {
+  my_ulonglong row_count;
+  unsigned int  field_count, current_field;
+  ...
+} MYSQL_RES;
+
+となっています。
+
+libmysql側がmy_ulonglongを64bitとした構造体を返しているとして、
+藤田さんのソース側でmy_ulonglongを32bitと想定して構造体に
+アクセスしたら、field_countの参照位置がズレる可能性があります。
+
+row_countの上位32bitに相当する位置を参照していれば、常にゼロでも
+おかしくありません。
+
+＃ヘルプによると、bcc55のアライメントはデフォルトで4byte、
+＃VC5のアライメントはデフォルトで8byteです。
+
+
+
+というわけで、
+
+<span class="quote1">&gt; どなたかこの症状の解消する術を教えていただけないでしょうか？</span>
+
+my_ulonglong を64bit整数として定義してやればいいのでは
+ないでしょうか？
+
+bcc55のヘッダーファイルを見る限り、__int64 がサポートされて
+いるように思えるのですが・・・
+
+-- 
+神野健吾 &lt;kengo@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="3518">[前]</a><a href="3520">[次]</a><a href="../list/3501-3600">[番号順一覧]</a><a href="../thread/3501-3600">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3515">   3515 2001-04-08 20:33 [hirofujita8523 &lt;hiro] Borland での挙動について                </a></span>
+<span class="current">-&gt;&nbsp;<a href="3519">   3519 2001-04-09 11:53 ┗[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3537">   3537 2001-04-11 12:06 　┗[hirofujita8523 &lt;hiro]                                     </a></span>
+</pre>
+</body>
+</html>

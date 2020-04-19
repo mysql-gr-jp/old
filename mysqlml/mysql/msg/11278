@@ -1,0 +1,131 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11278</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="11277">[前]</a><a href="11279">[次]</a><a href="../list/11201-11300">[番号順一覧]</a><a href="../thread/11201-11300">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11278
+</p>
+<div class="header">
+<p>
+From: Hirokazu Aoyama &lt;Hirokazu Aoyama &lt;aoyama@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 26 Mar 2005 19:35:52 +0900<br>
+Subject: [mysql 11278] Re: selectで<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、青山です。
+
+<span class="quote1">&gt; ＫＫ＠ＩＢです</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; それで、物理ソートですが、その順序で</span>
+<span class="quote1">&gt; レコードをスムーズに読み出したいときに</span>
+<span class="quote1">&gt; 物理ソートをしておいて、順（シーケンシャル）アクセス</span>
+<span class="quote1">&gt; したほうがトータルコストがかからない場合が</span>
+<span class="quote1">&gt; あります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; そういう時に使います。</span>
+<span class="quote1">&gt; そうでないときは、使わないでしょうね。</span>
+
+ここについてですが、もしかすると、物理ソートをする、というのは、
+・SELECT等のクエリー発行から終了までの間でDBがそういうことを行う
+という話では全然なくて、
+例えば
+・新しく別のPRIMARY KEYを定義したテーブルを作り、データを登録する
+ということにより「ソートする」という意味になるでしょうか？
+
+それであれば話はわかります。
+
+大量データの解析を行いたいような場合は、そういうことをする方が
+効率が良いでしょうし。
+
+# トランザクション系のシステムでそういうことを行うことはまず
+# ないとは思いますけど。
+
+
+<span class="quote2">&gt; &gt; また、全件検索する場合でも、Bツリーのリーフを順に読めばそのまま</span>
+<span class="quote2">&gt; &gt; PRIMARY KEYの順になっているので、シーケンシャルアクセスをすれば</span>
+<span class="quote2">&gt; &gt; PRIMARY KEYでソート済みデータが得られることになります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; PRIMARY KEYでデータを特定する場合は、ですね。</span>
+
+確かに条件の補足が足りなかったのですが、WHERE句はあってもなくてもよくて、
+ORDER BYとかGROUP BYがない場合は、ということになると思います。
+
+
+<span class="quote1">&gt; WHERE句が使われていて、データが複数選択された時、</span>
+<span class="quote1">&gt; ORDER BY がかかっている状態では、</span>
+<span class="quote1">&gt; その場での順序づけが必要でしょう。</span>
+
+結果セットの最初の一行をDBが返す前に、ORDER BYの順に従って
+内部的にマーキングする必要があるとは思いますが、
+「必要でしょう」の言い方がよくわかりませんでした。
+
+だから、何がどうなる、または、何をどうする、ということについて
+もう少し具体的に説明していただけないでしょうか？
+
+
+<span class="quote1">&gt; 「そのレコードを指すインデックス」とは、レコードのＩＤ（となっているもの）のことです。</span>
+<span class="quote1">&gt; 「インデックスソート」の「インデックス」です。</span>
+<span class="quote1">&gt; 青山さんのおっしゃっている「インデックス」は、そういうID的なものが、</span>
+<span class="quote1">&gt; 並べられ終わった記録、ファイルのことですね。これもインデックスと呼ばれるので</span>
+
+レコードのIDはデータベース用語としては「キー」でしょう。
+
+特に、「レコードのID」という言い方をする場合は、それはPRIMARY KEYを
+指すか、もしくはROWIDのことを指すことになると思います。
+
+データベースで「インデックス」と言えば、ファイルに格納された
+インデックスのことを指すと思うのですが。
+
+もしそれ以外の意味で使いたい場合は、予めそう宣言していただかないと
+他の人には意味が通じないと思います。
+
+
+<span class="quote2">&gt; &gt; MySQLの現在の機能では、物理的に並べ替えたい場合は、一旦データを</span>
+<span class="quote2">&gt; &gt; ダンプしてからテーブルを削除し、再度テーブルを作り直す必要が</span>
+<span class="quote2">&gt; &gt; あるようです。</span>
+<span class="quote2">&gt; &gt; # Oracleとかだと運用しながらテーブル再構築する機能があったりします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ＭｙＳＱＬがどうかは別とすると、（すみません、考えていなかったのです。）</span>
+<span class="quote1">&gt; ＤＢの機能としては、物理ソート機能があるのが普通ではないでしょうか？</span>
+<span class="quote1">&gt; そうでもないのでしょうかねぇ。</span>
+
+ちょっと調べて見たのですが、Oracle 10gでも、結局のところ
+PRIMARY KEYを変更して物理的に並びを変えることはできないみたいですね。
+擬似PRIMARY KEYを定義して、新しい表のように見せかけることができる
+だけの話でした。
+# うーん。ちゃんと調べないと・・。
+
+もちろん、フラグメント化を解消する、という意味で物理的に並べかえる機能は
+MySQLもOracleも持っています。
+
+MySQLの場合は
+ALTER TABLE tablename TYPE=InnoDB
+とかでテーブル再構築できます。
+
+
+-- 
+Hirokazu Aoyama &lt;aoyama@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="11277">[前]</a><a href="11279">[次]</a><a href="../list/11201-11300">[番号順一覧]</a><a href="../thread/11201-11300">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11272">  11272 2005-03-26 01:58 [&lt;hiromitsu.narimasu_] Re: selectで                            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11274">  11274 2005-03-26 10:49 ┗[Hirokazu Aoyama &lt;aoy]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11275">  11275 2005-03-26 12:56 　┣[Hirokazu Aoyama &lt;aoy]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11276">  11276 2005-03-26 16:12 　┃┗[深海水草 &lt;VYG01106@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11277">  11277 2005-03-26 17:21 　┗[&quot;KKuji_Y2&quot; &lt;kkuji@xx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="11278">  11278 2005-03-26 19:35 　　┣[Hirokazu Aoyama &lt;aoy]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11281">  11281 2005-03-27 05:04 　　┃┗[&quot;KKuji_Y2&quot; &lt;kkuji@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11280">  11280 2005-03-27 03:15 　　┗[Hirokazu Aoyama &lt;aoy]                                   </a></span>
+</pre>
+</body>
+</html>

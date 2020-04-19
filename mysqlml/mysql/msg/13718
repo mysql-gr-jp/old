@@ -1,0 +1,300 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13718</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="13717">[前]</a><a href="13719">[次]</a><a href="../list/13701-13800">[番号順一覧]</a><a href="../thread/13701-13800">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13718
+</p>
+<div class="header">
+<p>
+From: &lt;ska_king2005@xxxxxxxxxx&gt;<br>
+Date: Thu, 8 Feb 2007 10:07:46 +0900 (JST)<br>
+Subject: [mysql 13718] Re: オンラインバックアップデータのリカバリ時のエラーについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+skakingです。
+
+リカバリ手順の「1.バックアップデータを戻す」時は、スナッ
+プショットで取得した
+「InnnoDBデータファイル」と「InnoDBログファイル」と「デ
+ータベースファイル（.frm）」を戻していますか？
+クラッシュリカバリ時には「InnnoDBデータファイル」と「InnoDB
+ログファイル」を使用しますので、
+あまり内容が食い違っているとリカバリに失敗したような気が
+します。
+
+リカバリ時のログを見ると「ibd」ファイルを使用していると
+いうことは、
+「innodb-file-per-table 」オプションを使用しているのでし
+ょうか？
+その場合は、「データベースファイル（.frm,
+.ibd）」と「InnoDB
+ログファイル」になると思われます。
+
+基本的にMySQL5しかさわったことがないので過去バージョンは
+詳しくわかりませんが、
+「innodb_safe_binlog」は、トランザクションとバイナリログ
+の同期性に関するオプション設定なので、
+クラッシュリカバリの動きには特に影響ないと思われます。
+
+また、「innodb_safe_binlog」はMySQL5.0.3くらいに廃止され
+、
+代わりとして「sync_binlog」になっていますので注意して下
+さい。
+
+以上です。
+
+
+--- hiraken &lt;hiraken@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; skakingさん</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; たかひらです。</span>
+<span class="quote1">&gt; アドバイスありがとうございます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 確かに、バックアップ時のflush</span>
+<span class="quote1">&gt; logs;は、意味がありませんね。(^.^)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ただ、バックアップ手順「1→3→4→5→6」でも試してみま</span>
+したが、
+<span class="quote1">&gt; 同様のエラーがでてしまいます。(;_;)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 今回、my.cnfにて、innodb_safe_binlogを指定していますの</span>
+で、
+<span class="quote1">&gt; バックアップデータを戻し、MySQLを起動すれば、</span>
+<span class="quote1">&gt; InnoDB表に関してはクラッシュリカバリが成功し、エラーは</span>
+出ないと考えていたのですが....
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 特に似たような事象はないようですので、バージョンの問題</span>
+でしょうか？
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; / Takahira Ken</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ----- Original Message ----- </span>
+<span class="quote1">&gt; From: &lt;ska_king2005@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; To: &lt;ml@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; Sent: Wednesday, February 07, 2007 10:26 AM</span>
+<span class="quote1">&gt; Subject: <a href="13713">[mysql 13713]</a> Re:</span>
+<span class="quote1">&gt; オンラインバックアップデータのリカバリ時のエラーについ</span>
+て
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; skakingです。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; エラーを無視してよいかの回答ではありませんが。。。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; reset</span>
+<span class="quote1">&gt; masterコマンド実行時に、バイナリログもローテートさ</span>
+<span class="quote2">&gt; &gt; れると思ったのですが、</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt; あえて、2を実行しているのは何か意図があるのでしょうか</span>
+？
+<span class="quote2">&gt; &gt; flush</span>
+<span class="quote1">&gt; logsコマンドはバイナリログを安全にローテートするく</span>
+<span class="quote2">&gt; &gt; らいと認識しているのですが。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt; なので、バックアップ手順は「1→3→4→5→6」でよいと思</span>
+い
+<span class="quote2">&gt; &gt; ます。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt; 特に問題なければこの手順ではエラーが発生しないと思われ</span>
+ま
+<span class="quote2">&gt; &gt; す。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt; もしくは、expire_logs_daysオプション付で「1→3→2→5→6</span>
+<span class="quote2">&gt; &gt; 」でも問題ないのかなと。。。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt; ちょっとMySQLを試せる環境が無い状態なので、間違った内</span>
+容
+<span class="quote2">&gt; &gt; を書いていた場合はすいません。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 以上です。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; --- hiraken &lt;hiraken@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt;&gt; こんばんは。はじめまして</span>
+<span class="quote3">&gt; &gt;&gt; たかひらと申します。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; 最近、OracleDBユーザから、MySQLユーザへ切り替わってき</span>
+<span class="quote2">&gt; &gt; たものです。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; このMLは、過去ログも含め、非常に参考になる情報ばかりで</span>
+<span class="quote2">&gt; &gt; 重宝しております。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; さて現在、バージョン4.1.12 をRed Hat Linux</span>
+<span class="quote3">&gt; &gt;&gt; ES4上で稼動させた、</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; OLTP系のシステムの、バックアップ・リカバリ設計をしてお</span>
+<span class="quote2">&gt; &gt; りまして、</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; 以下の方法で、オンラインバックアップを行おうと考えてい</span>
+<span class="quote2">&gt; &gt; ます。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 【バックアップ手順】</span>
+<span class="quote3">&gt; &gt;&gt; 　1. flush tables with read lock;</span>
+<span class="quote3">&gt; &gt;&gt; 　2. flush logs;</span>
+<span class="quote3">&gt; &gt;&gt; 　3. ストレージのスナップショット</span>
+<span class="quote3">&gt; &gt;&gt; 　4. reset master;</span>
+<span class="quote3">&gt; &gt;&gt; 　5. unlock tables;</span>
+<span class="quote3">&gt; &gt;&gt; 　6.</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; 3で取得したスナップショットをテープ等へバックアップ</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; しかし、検証環境でリカバリ動作を確認したところ、データ</span>
+<span class="quote2">&gt; &gt; は戻し、MySQLを起動することができたものの、</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; 下記リカバリ手順の2.のタイミングで、/var/log/mysqld.log</span>
+<span class="quote2">&gt; &gt; にエラーが出力されているのに気づきました。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 【リカバリ手順】</span>
+<span class="quote3">&gt; &gt;&gt; 　1.バックアップデータを戻す</span>
+<span class="quote3">&gt; &gt;&gt; 　2.ネットワーク接続なしでMySQLを起動</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; 　3.バイナリログからロールフォワードリカバリ-&gt;MySQLを</span>
+<span class="quote2">&gt; &gt; 停止</span>
+<span class="quote3">&gt; &gt;&gt; 　4.MySQLを通常起動</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt;</span>
+=[リカバリ時のログ]===============================================================
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 070206 15:10:45  mysqld started</span>
+<span class="quote3">&gt; &gt;&gt; 070206 15:10:45 [Warning] --innodb-safe-binlog is</span>
+<span class="quote3">&gt; &gt;&gt; meaningful only if the</span>
+<span class="quote3">&gt; &gt;&gt; global sync_binlog variable</span>
+<span class="quote3">&gt; &gt;&gt; is 1; now setting it to 1.</span>
+<span class="quote3">&gt; &gt;&gt; 070206 15:10:45  InnoDB: Database was not shut</span>
+<span class="quote1">&gt; down</span>
+<span class="quote3">&gt; &gt;&gt; normally!</span>
+<span class="quote3">&gt; &gt;&gt; InnoDB: Starting crash recovery.</span>
+<span class="quote3">&gt; &gt;&gt; InnoDB: Reading tablespace information from the</span>
+<span class="quote1">&gt; .ibd</span>
+<span class="quote3">&gt; &gt;&gt; files...</span>
+<span class="quote3">&gt; &gt;&gt; InnoDB: Restoring possible half-written data</span>
+<span class="quote1">&gt; pages</span>
+<span class="quote3">&gt; &gt;&gt; from the doublewrite</span>
+<span class="quote3">&gt; &gt;&gt; InnoDB: buffer...</span>
+<span class="quote3">&gt; &gt;&gt; 070206 15:10:45  InnoDB: Starting log scan based</span>
+<span class="quote1">&gt; on</span>
+<span class="quote3">&gt; &gt;&gt; checkpoint at</span>
+<span class="quote3">&gt; &gt;&gt; InnoDB: log sequence number 0 44818.</span>
+<span class="quote3">&gt; &gt;&gt; InnoDB: Doing recovery: scanned up to log</span>
+<span class="quote1">&gt; sequence</span>
+<span class="quote3">&gt; &gt;&gt; number 0 44904</span>
+<span class="quote3">&gt; &gt;&gt; InnoDB: Last MySQL binlog file position 0 4, file</span>
+<span class="quote3">&gt; &gt;&gt; name</span>
+<span class="quote3">&gt; &gt;&gt; /var/lib/mysql/binlog.000002</span>
+<span class="quote3">&gt; &gt;&gt; 070206 15:10:45  InnoDB: Flushing modified pages</span>
+<span class="quote3">&gt; &gt;&gt; from the buffer pool...</span>
+<span class="quote3">&gt; &gt;&gt; 070206 15:10:45  InnoDB: Started; log sequence</span>
+<span class="quote3">&gt; &gt;&gt; number 0 44904</span>
+<span class="quote3">&gt; &gt;&gt; 070206 15:10:45 [ERROR] After InnoDB crash</span>
+<span class="quote1">&gt; recovery,</span>
+<span class="quote3">&gt; &gt;&gt; checking if the binary</span>
+<span class="quote3">&gt; &gt;&gt; log</span>
+<span class="quote3">&gt; &gt;&gt; '/var/lib/mysql/binlog.000002' contains rolled</span>
+<span class="quote1">&gt; back</span>
+<span class="quote3">&gt; &gt;&gt; transactions which must</span>
+<span class="quote3">&gt; &gt;&gt; be removed from it...</span>
+<span class="quote3">&gt; &gt;&gt; /usr/libexec/mysqld: ready for connections.</span>
+<span class="quote3">&gt; &gt;&gt; Version: '4.1.12-log'  socket:</span>
+<span class="quote3">&gt; &gt;&gt; '/var/lib/mysql/mysql.sock'  port: 0  Source</span>
+<span class="quote3">&gt; &gt;&gt; distribution</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt;</span>
+=[リカバリ時のログ]===============================================================
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; [ERROR] After InnoDB crash recovery, checking if</span>
+<span class="quote1">&gt; the</span>
+<span class="quote3">&gt; &gt;&gt; binary log</span>
+<span class="quote3">&gt; &gt;&gt; '/var/lib/mysql/binlog.000002' contains rolled</span>
+<span class="quote1">&gt; back</span>
+<span class="quote3">&gt; &gt;&gt; transactions which must</span>
+<span class="quote3">&gt; &gt;&gt; be removed from it...</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; は、</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; 『InnoDBのクラッシュリカバリ後、binlog.000002がロール</span>
+<span class="quote2">&gt; &gt; バックトランザクションを含むバイナリログならば、</span>
+<span class="quote3">&gt; &gt;&gt; チェックしなさい。』</span>
+<span class="quote3">&gt; &gt;&gt; という直訳で理解しましたが、binlog.000002自体が、</span>
+<span class="quote3">&gt; &gt;&gt; バックアップ手順の2.で、flush</span>
+<span class="quote3">&gt; &gt;&gt; logsを実行した時にできた、</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; 最新バイナリログですので、中身に処理は記載されておりま</span>
+<span class="quote2">&gt; &gt; せん。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; 従いましてこの場合、このメッセージを無視していいものか</span>
+<span class="quote2">&gt; &gt; どうか、迷っております。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote1">&gt; どなたか、同様のご経験をされた方がいらっしゃいましたら</span>
+<span class="quote2">&gt; &gt; 、何卒ご教授願いませんでしょうか。</span>
+<span class="quote3">&gt; &gt;&gt; 以上、よろしくお願い申し上げます。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; / Takahira Ken</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; --</span>
+<span class="quote1">&gt; </span>
+=== 以下のメッセージは省略されました ===
+
+
+--
+skaking &lt;ska_king2005@xxxxxxxxxx&gt;
+DB:MySQL5.0.19, OS:WinXPProSP2
+
+--------------------------------------
+Start Yahoo! Auction now! Check out the cool campaign
+<a href="http://pr.mail.yahoo.co.jp/auction/">http://pr.mail.yahoo.co.jp/auction/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="13717">[前]</a><a href="13719">[次]</a><a href="../list/13701-13800">[番号順一覧]</a><a href="../thread/13701-13800">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13712">  13712 2007-02-07 03:18 [&quot;hiraken&quot; &lt;hiraken@x] オンラインバックアップデータのリカバリ時のエラーについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13713">  13713 2007-02-07 10:26 ┣[&lt;ska_king2005@xxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13714">  13714 2007-02-07 17:38 ┃┣[&lt;kaidnu2@xxxxxxxxxx&gt;] MySQL GUI-tool （ Linux 版）インストール方法</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13715">  13715 2007-02-07 22:02 ┃┃┗[舘山 聖司 &lt;tateyan@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13716">  13716 2007-02-07 22:30 ┃┃　┗[&lt;kaidnu2@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13717">  13717 2007-02-08 01:54 ┃┗[&quot;hiraken&quot; &lt;hiraken@x]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="13718">  13718 2007-02-08 10:07 ┃　┗[&lt;ska_king2005@xxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13719">  13719 2007-02-08 11:24 ┗[Yasufumi Kinoshita &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13720">  13720 2007-02-08 16:10 　┗[&lt;ska_king2005@xxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13721">  13721 2007-02-08 17:21 　　┗[Yasufumi Kinoshita &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13722">  13722 2007-02-09 01:33 　　　┗[&quot;hiraken&quot; &lt;hiraken@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13724">  13724 2007-02-14 02:05 　　　　┗[&quot;hiraken&quot; &lt;hiraken@x]                               </a></span>
+</pre>
+</body>
+</html>

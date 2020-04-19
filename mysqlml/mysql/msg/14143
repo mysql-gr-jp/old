@@ -1,0 +1,139 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14143</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14142">[前]</a><a href="14144">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14143
+</p>
+<div class="header">
+<p>
+From: &quot;Kensuke Kaneko&quot; &lt;&quot;Kensuke Kaneko&quot; &lt;kyanny@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 31 Jul 2007 18:18:32 +0900<br>
+Subject: [mysql 14143] Re: アプリケーションレベルでの書き込みの分散について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。株式会社ライブドアの金子と申します。
+
+「アプリケーションレベルでの」ということなので、実際に SQL を発行している部分でがんばる方法を検討してみてはどうでしょうか。
+
+user_write1 にまず書き込んでみて、成功ならば user
+にも書き込み、両方ともコミット。失敗ならば、ロールバックしてどちらも書き込みせず。というふうにすれば、一貫性を保てると思います。
+
+以下は Perl の DBI モジュールを利用した場合のサンプルコードです。ただし、実際に動かして検証したものではないので、あくまで参考程度ということで、お願いします。(つまり間違っている可能性があります)
+
+my $dbh = DBI-&gt;connect(@connect_info_for_user);
+$dbh-&gt;{AutoCommit} = 0;
+
+if ($user_id &lt; 100000) {
+    my $dbh_for_user_write1 = DBI-&gt;connect(@connect_info_for_user_write1);
+    $dbh_for_user_write1-&gt;{AutoCommit} = 0;
+    my $sth = $dbh_for_user_write1-&gt;prepare(&quot;INSERT INTO user_write1 ...&quot;);
+    my $rv = $sth-&gt;execute(@bind_params);
+    if ($rv) {
+        my $sth = $dbh-&gt;prepare(&quot;UPDATE user SET ... WHERE ...&quot;);
+        $sth-&gt;execute;
+        $dbh-&gt;commit;
+        $dbh_for_user_write1-&gt;commit;
+    }
+    else {
+        $dbh_for_user_write1-&gt;rollback;
+    }
+}
+else {
+    my $dbh_for_user_write2 = DBI-&gt;connect(@connect_info_for_user_write2);
+    $dbh_for_user_write1-&gt;{AutoCommit} = 0;
+    # ...
+}
+
+ところどころはしょってあるので、環境にあわせて具体的な値で補って読んでください。
+
+やっていることは、接続する DB を user_id の値によって変える、 AutoCommit をオフにする、だけなので、 Perl
+ならば Class::DBI や DBIx::Class のような O/R
+マッパを使った場合でも可能でしょうし(むしろ使ったほうが良いです) PHP や Ruby などでも、同じことができると思います。(有名な
+O/R マッピングライブラリにはそういう機能があるはずです)
+
+以下、参考になりそうな URL です(DBI モジュールのドキュメント)
+<a href="http://search.cpan.org/~timb/DBI-1.58/DBI.pm#connect">http://search.cpan.org/~timb/DBI-1.58/DBI.pm#connect</a>
+<a href="http://search.cpan.org/~timb/DBI-1.58/DBI.pm#AutoCommit_">http://search.cpan.org/~timb/DBI-1.58/DBI.pm#AutoCommit_</a>(boolean)
+<a href="http://search.cpan.org/~timb/DBI-1.58/DBI.pm#commit">http://search.cpan.org/~timb/DBI-1.58/DBI.pm#commit</a>
+
+
+07/07/30 に Hiroyuki Yamada&lt;yamahiroyu.y@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; MySQLにおける書き込みの分散について質問させてください。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 現在、書き込みが多いサーバーを運用しており、</span>
+<span class="quote1">&gt; その書き込みをアプリケーションレベルで複数マシンに分散させたいとおもっております。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 考えている手段としては、ユーザごとに書き込み先を分散させる方法で、</span>
+<span class="quote1">&gt; 例えば、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; user_id 1-100000 =&gt; マシン1へ書き込み</span>
+<span class="quote1">&gt; user_id 100001-200000 =&gt; マシン2へ書き込み</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; のようなことです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 例えば、２つのテーブルがあるとして、</span>
+<span class="quote1">&gt; (現状は、もうちょっと複雑ですが、説明をわかりやすくするために、２つのテーブルで説明します。)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; user - ユーザのプロファイル等(書き込み少ない)</span>
+<span class="quote1">&gt; user_write - ユーザの書き込み履歴(書き込み多い)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; user への書き込みはあまりなく、user_writeへの書き込みがとても多い状況なので、</span>
+<span class="quote1">&gt; user_writeのみを分散したいと考えています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;                    --------</span>
+<span class="quote1">&gt;                     user</span>
+<span class="quote1">&gt;                    --------</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;      ---------------     ---------------</span>
+<span class="quote1">&gt;      user_write1  user_write2</span>
+<span class="quote1">&gt;      ---------------     ---------------</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この際、user_write1 と user を一貫性を保ったまま更新したい場合は</span>
+<span class="quote1">&gt; どのようにするのが一般的でしょうか？</span>
+<span class="quote1">&gt; (両方とも成功する必要があり、片方の失敗は許されない)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQL5からのtwo phase commit はこのような複数マシンをまたがったような</span>
+<span class="quote1">&gt; トランザクションにも対応できるのでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よく出てくるmixiの例などは参考にしていますが、</span>
+<span class="quote1">&gt; (<a href="http://blog.livedoor.jp/nipotan/archives/50538571.html">http://blog.livedoor.jp/nipotan/archives/50538571.html</a>)</span>
+<span class="quote1">&gt; 複数マシンへの書き込みに関しては具体的な方法がないので、</span>
+<span class="quote1">&gt; ちょっと困っております。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; みなさんなら、こういう状況でどうされますでしょうか？</span>
+<span class="quote1">&gt; ご教授ください</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Hiroyuki Yamada</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+-- 
+Kensuke Kaneko &lt;kyanny@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="14142">[前]</a><a href="14144">[次]</a><a href="../list/14101-14200">[番号順一覧]</a><a href="../thread/14101-14200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14138">  14138 2007-07-30 12:21 [&quot;Hiroyuki Yamada&quot; &lt;y] アプリケーションレベルでの書き込みの分散について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14142">  14142 2007-07-31 15:00 ┣[&quot;T.Hirotsu&quot; &lt;hirotsu]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14143">  14143 2007-07-31 18:18 ┣[&quot;Kensuke Kaneko&quot; &lt;ky]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14144">  14144 2007-07-31 21:26 ┃┗[&quot;T.Hirotsu&quot; &lt;hirotsu]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14145">  14145 2007-07-31 23:53 ┃　┗[&quot;Hiroyuki Yamada&quot; &lt;y]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14151">  14151 2007-08-01 12:04 ┗[&lt;ikari-ml@xxxxxxxxxx] [meiwaku#]Re:  アプリケーションレベルでの書き込みの分散について</a></span>
+</pre>
+</body>
+</html>

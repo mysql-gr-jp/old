@@ -1,0 +1,166 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7494</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="7493">[前]</a><a href="7495">[次]</a><a href="../list/7401-7500">[番号順一覧]</a><a href="../thread/7401-7500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7494
+</p>
+<div class="header">
+<p>
+From: くろ たろう &lt;くろ たろう &lt;kuro_taro_aki@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 15 Apr 2003 17:43:17 +0900 (JST)<br>
+Subject: [mysql 07494] JAVA プログラムで insert が正常に行われません <br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。くろたろうです。いろいろ試してみたんですが、
+どうしても直らないので、よろしくお願いします。
+※さきほど、間違えたメールを一通送ってしまいました。申し
+訳ありません。
+
+（環境）
+・ＪＤＫ：J2SDK1.4.1
+・ＭＹＳＱＬ：mysql-4.0.1.2
+・JDBCドライバ：gweMysqlJDBC_extra4
+
+(やろうとしていること）
+java.sql.ResultSetの更新系メソッドを用いてデータのinsert
+を行いたい
+
+（問題点）
+データのinsertが、決まった行でしか行われません。二度、三
+度とinsertを行う度、java.sql.ResultSet.moveToInsertRow()
+メソッドを使用して挿入行を指定しているのですが、プログラ
+ムを立ち上げる前に存在するテーブルの、最終行を常に更新し
+てしまいます。
+※executeQuery()を使用して、直接insert文を投げても同じ結
+果になってしまいました。
+※setFetchDirection(ResultSet.FETCH_FORWARD)も使用してみ
+ましたが、結果は同じでした。
+
+以下に、実行結果とソースを掲載します。
+
+（ソース）
+
+//InsertData.java
+import java.sql.*;
+import java.util.*;
+
+public class InsertData{
+　//Field
+　Vector rows;
+　//Constructor
+　public InsertData(Vector rows){
+　　this.rows = rows;
+　　try{
+　　　//DBへの接続
+　　　DBAccessor dbAccessor = new DBAccessor();
+　　　//ResultSetの取得
+　　　ResultSet rs = dbAccessor.getResultSet();
+　　　//既存の行数を取得（データ番号を割り振るため）
+　　　rs.last();
+　　　int lastRow = rs.getRow();
+　　　//データの挿入
+　　　for(int i = rows.size();i &gt; 0;i--){
+	doInsert(データを与えています);
+　　　}
+　　　//DB接続の終了
+　　　dbAccessor.closeResultSet(); 
+      dbAccessor.closeStatement();
+      dbAccessor.closeConnection();
+      dbAccessor2 = null;
+    }catch(SQLException sqlEx){
+      sqlEx.printStackTrace();
+    }
+  }
+  private void
+doInsert(ResultSetrs,intlastRow,java.sql.Date date,
+int raceSeq,int firstPrise,float odds) throws
+SQLException{
+  //カーソルをinsert行に移動
+  rs.moveToInsertRow();
+  //カラム値の更新
+  rs.updateInt(1,lastRow);
+  rs.updateDate(2,date);
+  rs.updateInt(3,raceSeq);
+  rs.updateInt(4,firstPrise);
+  rs.updateFloat(5,odds);
+  //insertの実行
+  rs.insertRow();
+  }
+}
+
+（実行結果）
+（１）insert実行前のデータです。SEQ列の番号は整列してい
+ます。（このデータは手動で作成しました。）
+mysql&gt; select * from master;
++-----+------------+---------+------------+------+
+<span class="quote1">| SEQ | DAY        | RaceSEQ | FirstPrise | ODDS |</span>
++-----+------------+---------+------------+------+
+<span class="quote1">|   1 | 2002-09-08 |       1 |          2 |  2.7 |</span>
+<span class="quote1">|   2 | 2002-09-08 |       3 |          3 |  5.6 |</span>
+<span class="quote1">|   3 | 2002-09-08 |       6 |          3 |  6.6 |</span>
+<span class="quote1">|   4 | 2002-09-08 |       7 |          4 |    8 |</span>
+<span class="quote1">|   5 | 2002-09-09 |       1 |          1 |  5.7 |</span>
+<span class="quote1">|   6 | 2002-09-09 |       2 |          3 |  3.3 |</span>
++-----+------------+---------+------------+------+
+6 rows in set (0.00 sec)
+（２）一度目のinsert実行後です。SEQ列の「７」というデー
+タをひとつだけ挿入しました。正常です。
+
+mysql&gt; select * from master;
++-----+------------+---------+------------+------+
+<span class="quote1">| SEQ | DAY        | RaceSEQ | FirstPrise | ODDS |</span>
++-----+------------+---------+------------+------+
+<span class="quote1">|   1 | 2002-09-08 |       1 |          2 |  2.7 |</span>
+<span class="quote1">|   2 | 2002-09-08 |       3 |          3 |  5.6 |</span>
+<span class="quote1">|   3 | 2002-09-08 |       6 |          3 |  6.6 |</span>
+<span class="quote1">|   4 | 2002-09-08 |       7 |          4 |    8 |</span>
+<span class="quote1">|   5 | 2002-09-09 |       1 |          1 |  5.7 |</span>
+<span class="quote1">|   6 | 2002-09-09 |       2 |          3 |  3.3 |</span>
+<span class="quote1">|   7 | 1970-01-01 |       5 |          5 |   58 |</span>
++-----+------------+---------+------------+------+
+7 rows in set (0.00 sec)
+
+（３）二度目のinsertです。SEQ列の「８」とういうデータをinsert
+しましたが、順序が入れ替わっています。この後、何度データ
+を入れても、プログラムを一番初めに起動したときのデータ挿
+入位置に、新しいデータが挿入されてしまいます。
+
+mysql&gt; select * from master;
++-----+------------+---------+------------+------+
+<span class="quote1">| SEQ | DAY        | RaceSEQ | FirstPrise | ODDS |</span>
++-----+------------+---------+------------+------+
+<span class="quote1">|   1 | 2002-09-08 |       1 |          2 |  2.7 |</span>
+<span class="quote1">|   2 | 2002-09-08 |       3 |          3 |  5.6 |</span>
+<span class="quote1">|   3 | 2002-09-08 |       6 |          3 |  6.6 |</span>
+<span class="quote1">|   4 | 2002-09-08 |       7 |          4 |    8 |</span>
+<span class="quote1">|   5 | 2002-09-09 |       1 |          1 |  5.7 |</span>
+<span class="quote1">|   6 | 2002-09-09 |       2 |          3 |  3.3 |</span>
+<span class="quote1">|   8 | 1970-01-01 |       5 |          5 |   58 |</span>
+<span class="quote1">|   7 | 1970-01-01 |       5 |          5 |   58 |</span>
++-----+------------+---------+------------+------+
+8 rows in set (0.00 sec)
+
+__________________________________________________
+Do You Yahoo!?
+Yahoo! BB is Broadband by Yahoo!
+<a href="http://bb.yahoo.co.jp/">http://bb.yahoo.co.jp/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="7493">[前]</a><a href="7495">[次]</a><a href="../list/7401-7500">[番号順一覧]</a><a href="../thread/7401-7500">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="7494">   7494 2003-04-15 17:43 [くろ たろう &lt;kuro_ta] JAVA プログラムで insert が正常に行われません</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7495">   7495 2003-04-15 18:06 ┣[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7496">   7496 2003-04-15 18:08 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
+</pre>
+</body>
+</html>

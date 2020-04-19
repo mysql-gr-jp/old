@@ -1,0 +1,84 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12371</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="12370">[前]</a><a href="12372">[次]</a><a href="../list/12301-12400">[番号順一覧]</a><a href="../thread/12301-12400">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12371
+</p>
+<div class="header">
+<p>
+From: Yasufumi Kinoshita &lt;Yasufumi Kinoshita &lt;kinoshita.yasufumi@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 07 Nov 2005 14:48:02 +0900<br>
+Subject: [mysql 12371] Re: MySQLの eucjpms   と IE   の EUC-JP<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+木下です。
+
+MySQL日本語要望オフお疲れさまでした。
+お蔭様で帰りの電車がなくなるくらい有意義な時間を過ごさせていただきました＾＾；
+
+cp51932についての私見を述べさせてください。
+
+ご指摘の記事の中に出てくる
+<a href="http://www.rikai.com/library/kanjitables/kanji_codes.euc.shtml">http://www.rikai.com/library/kanjitables/kanji_codes.euc.shtml</a>
+をざっと見たところ、eucJP-openとの違いは、SJISでの「NEC選定IBM拡張文字」(ED40〜EDFC)を
+そのままの句点コードに対応するEUCでの領域 (F9A1〜FCFE) に割り当てているみたいです。
+この領域は eucJP-open ではSJISでの 外字領域を保持する部分の一部です。
+cp51932への対応は少なくともEUCで外字領域を保持することと二者択一になりそうですね。
+ただ、SJISで直接格納できないPostgreSQLと違い、MySQLのcp932では外字領域が考慮されているので、
+MySQLではEUCで外字を格納するケースのほうが稀かも知れません。
+
+またもうひとつ分かれ道がありまして、「NEC特殊文字」は「JIS X 0208(EUCでは２バイト文字)」と、
+「NEC選定IBM拡張文字、IBM拡張文字」は「JIS X 0212(EUCでは３バイト文字)」と
+それぞれ重複する文字があり、MySQLでの cp932→eucjpms の変換では JISの文字がある場合は
+JISの文字として変換されます。
+（※PostgreSQLではNEC特殊文字だけはそのままの句点コードで変換されるようですが。)
+このポリシーのまま対応すればどちらにせよ、ご指摘の問題の発端となっている文字は
+JIS X 0212(補助漢字)に変換され、EUCでは&quot;8F&quot;で始まる３バイト文字に変換されます。
+
+しかし個人的にはJISの文字に揃える変換の方が、検索などの実用上望ましいと思います。
+
+ご指摘の問題の原因は、マッピングの差異も確かにあるのですが
+寧ろ、「JIS X 0212」までで規定されているEUCエンコーディングでの３バイト文字を
+表示できないIEの不具合なのではないでしょうか？
+FireFox(WinXP版)では&quot;FAE3&quot;も&quot;8fc7cb&quot;も両方表示できるので(cp51932が考慮されていますね・・)、
+ページ上から入力を行おうとしない限りは文字化けは起こらないと思います。
+
+ちなみに、私がベンダ固有文字の変換について調査した範囲では
+簡単に書くと、
+PostgreSQL:	eucJP-open
+MySQL:		eucJP-open(eucjpms) or 対応なし(ujis)
+Oracle:		JIS X 0212までのJISに含まれる文字のみ変換
+となっております。
+これらのRDBMSでは、cp51932は意識されていません。
+
+以上、長文で失礼しました。
+分かりづらくてすみません。
+
+-- 
+木下  靖文
+e-mail: kinoshita.yasufumi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="12370">[前]</a><a href="12372">[次]</a><a href="../list/12301-12400">[番号順一覧]</a><a href="../thread/12301-12400">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12362">  12362 2005-11-07 00:52 [MORIYAMA Masayuki &lt;m] MySQLの eucjpms  と IE  の EUC-JP       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12370">  12370 2005-11-07 14:06 ┣[&quot;Shuichi Tamagawa&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12375">  12375 2005-11-07 23:15 ┃┗[MORIYAMA Masayuki &lt;m]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12379">  12379 2005-11-08 09:10 ┃　┗[doumae &lt;doumae@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12407">  12407 2005-11-08 22:31 ┃　　┗[MORIYAMA Masayuki &lt;m]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="12371">  12371 2005-11-07 14:48 ┗[Yasufumi Kinoshita &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12376">  12376 2005-11-07 23:15 　┗[MORIYAMA Masayuki &lt;m]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12389">  12389 2005-11-08 15:34 　　┗[Yasufumi Kinoshita &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12408">  12408 2005-11-08 23:51 　　　┗[MORIYAMA Masayuki &lt;m]                                 </a></span>
+</pre>
+</body>
+</html>

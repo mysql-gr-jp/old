@@ -1,0 +1,225 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:811</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="810">[前]</a><a href="812">[次]</a><a href="../list/801-900">[番号順一覧]</a><a href="../thread/801-900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:811
+</p>
+<div class="header">
+<p>
+From: Tatsuya Ina &lt;Tatsuya Ina &lt;ina@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 15 Apr 1999 11:50:28 GMT<br>
+Subject: [mysql 00811] distinct と index と JOIN<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。
+
+以前 500万件の検索スピードの件でお世話になった 伊奈 です。
+
+その後、あのとき作ろうとしていたシステムは、MySQLベースで
+基本部分は出来てきました。
+
+現在はスピードアップのために、SQLを色々修正しているのですが、
+INDEXの設定よってdistinct指定しているにも関わらず、検索結果が
+重複する場合があったり、INDEXを使用する方が検索速度が遅い場合
+があったりして、困っています。
+皆様のアドバイスをお願いします。
+
+問題は
+
+1,INDEXの設定によりdistinctが効かず、重複したレコードが返る場合
+がある。
+
+2,JOINを使用して複数のテーブルを検索した場合、explainで見る限り
+INDEXを使っているように見えるのに、その検索時に使われるINDEXが
+設定されていない方が検索速度が速い場合がある。
+
+です。
+
+実例を以下に説明させて頂きますが、状況が複雑なため、長文なのを
+御容赦下さい。
+
+具体的にはD_id,D_et,D_prという3つのテーブルをJOINして検索する
+以下のようなSQLの場合に
+
+mysql&gt; select distinct D_id.product,D_id.lot,D_id.wfr,\
+D_et.parameter,D_et.vals,D_pr.stop_day,D_pr.mc,D_pr.param,\
+D_pr.value from D_pr,D_id,D_et where (D_id.name_id = D_et.name_id \
+and D_id.commid=D_pr.commonid) and D_pr.ope like 'ALB%SP' and \
+(D_pr.param='SP' or D_pr.param like 'T.%') and \
+D_id.Product = 'D1565' AND D_id.Lot LIKE 'LD28%' and \
+D_et.parameter like 'N%u0';
+
+D_prのINDEXが以下のようにcommonid,parentid,lotno,param,ope,
+stop_day,pc_type,mcに設定されている場合には「同じ行が2行」づつ
+返ってきます。
+
+create table D_pr
+(
+     commonid   varchar(11) binary NOT NULL, 
+     parentid   varchar(11) binary NOT NULL, 
+     lotno      varchar(19) binary NOT NULL, 
+     param      varchar(16) binary NOT NULL,
+     ope        varchar(16) binary NOT NULL,
+     start_day  date NOT NULL,
+     start_time time NOT NULL,
+     stop_day   date NOT NULL,
+     stop_time  time NOT NULL,
+     pc_type    varchar(16) binary NOT NULL,
+     pc_no      smallint NOT NULL,
+     good_wf    tinyint NOT NULL,
+     ng_wf      tinyint NOT NULL,
+     wfno       tinyint NOT NULL,
+     value      text NOT NULL,
+     mean       float(10,2) NOT NULL,
+     shigma     float(10,2) NOT NULL,
+     min        float(10,2) NOT NULL,
+     max        float(10,2) NOT NULL,
+     range      float(10,2) NOT NULL,
+     mc         mediumint NOT NULL,
+     index commonid_index (commonid),
+     index parentid_index (parentid),
+     index lotno_index (lotno),
+     index param_index (param),
+     index ope_index (ope),
+     index stop_day_index (stop_day),
+     index pc_type_index (pc_type),
+     index mc_index (mc),
+     primary key (lotno,param,ope,stop_day,stop_time,mc));
+
+この時のSQL文のexplainの結果をみると
+mysql&gt; explain select distinct D_id.product,D_id.lot,D_id.wfr,\
+D_et.parameter,D_et.vals,D_pr.stop_day,D_pr.mc,D_pr.param,\
+D_pr.value from D_pr,D_id,D_et where (D_id.name_id = D_et.name_id \
+and D_id.commid=D_pr.commonid) and D_pr.ope like 'ALB%SP' and \
+(D_pr.param='SP' or D_pr.param like 'T.%') and \
+D_id.Product = 'D1565' AND D_id.Lot LIKE 'LD28%' and \
+D_et.parameter like 'N%u0';
+
++-------+-------+--------------------------------------+-----------+---------+--------------+-------+-------+
+<span class="quote1">| table | type  | possible_keys                        | key       | key_len | ref          | rows  | Extra |</span>
++-------+-------+--------------------------------------+-----------+---------+--------------+-------+-------+
+<span class="quote1">| D_id  | range | PRIMARY,data_idx,comm_id             | data_idx  |    NULL | NULL         |    84 |       |</span>
+<span class="quote1">| D_et  | ref   | id_idx                               | id_idx    |       8 | D_id.Name_Id |   140 |       |</span>
+<span class="quote1">| D_pr | range | commonid_index,param_index,ope_index | ope_index |    NULL | NULL         | 70602 |       |</span>
++-------+-------+--------------------------------------+-----------+---------+--------------+-------+-------+
+
+となっており、D_prの検索時にはope_indexが使われることを示してい
+ます。
+
+
+次にD_prのINDEXを以下のようにparam,opeに関してDROPして、commonid,
+parentid,lotno,stop_day,pc_type,mcにするとレコードは「重複表示
+されません」。またこの時の検索スピードはparam,opeにINDEXが作成
+されているときの1/20以下です。
+
+create table D_pr
+(
+     〜カラム定義は前述と同様のため省略〜
+     index commonid_index (commonid),
+     index parentid_index (parentid),
+     index lotno_index (lotno),
+     index stop_day_index (stop_day),
+     index pc_type_index (pc_type),
+     index mc_index (mc));
+
+この時のSQL文のexplainの結果をみると
+mysql&gt; explain select distinct D_id.product,D_id.lot,D_id.wfr,\
+D_et.parameter,D_et.vals,D_pr.stop_day,D_pr.mc,D_pr.param,\
+D_pr.value from D_pr,D_id,D_et where (D_id.name_id = D_et.name_id \
+and D_id.commid=D_pr.commonid) and D_pr.ope like 'ALB%SP' and \
+(D_pr.param='SP' or D_pr.param like 'T.%') and \
+D_id.Product = 'D1565' AND D_id.Lot LIKE 'LD28%' and \
+D_et.parameter like 'N%u0';
+
++-------+-------+--------------------------+----------+---------+--------------+--------+----------------------------------------------+
+<span class="quote1">| table | type  | possible_keys            | key      | key_len | ref          | rows   | Extra                                        |</span>
++-------+-------+--------------------------+----------+---------+--------------+--------+----------------------------------------------+
+<span class="quote1">| D_id  | range | PRIMARY,data_idx,comm_id | data_idx |    NULL | NULL         |     84 |                                              |</span>
+<span class="quote1">| D_et  | ref   | id_idx,param_idx         | id_idx   |       8 | D_id.Name_Id |    140 | where used                                   |</span>
+<span class="quote1">| D_pr  | ALL   | commonid_index           | NULL     |    NULL | NULL         | 978192 | range checked for each record (index map: 1) |</span>
++-------+-------+--------------------------+----------+---------+--------------+--------+----------------------------------------------+
+3 rows in set (0.00 sec)
+
+
+です。D_prの検索にはINDEXが使われていないにもかかわらず、検索結果
+が速いのにも納得がいきません。
+
+
+
+こちらの環境は以下のとうりです。
+
+Linux-2.0.36(libc.so.5.4.46) + linuxthread0.6 + mysql-3.22.21 です。
+
+mysql&gt; show variables;
++----------------------------+---------------------------------+
+<span class="quote1">| Variable_name              | Value                           |</span>
++----------------------------+---------------------------------+
+<span class="quote1">| back_log                   | 5                               |</span>
+<span class="quote1">| connect_timeout            | 5                               |</span>
+<span class="quote1">| basedir                    | /usr/local/                     |</span>
+<span class="quote1">| datadir                    | /usr/local/var/                 |</span>
+<span class="quote1">| delayed_insert_limit       | 100                             |</span>
+<span class="quote1">| delayed_insert_timeout     | 300                             |</span>
+<span class="quote1">| delayed_queue_size         | 1000                            |</span>
+<span class="quote1">| join_buffer                | 8192                            |</span>
+<span class="quote1">| flush_time                 | 0                               |</span>
+<span class="quote1">| key_buffer                 | 33550336                        |</span>
+<span class="quote1">| language                   | /usr/local/share/mysql/english/ |</span>
+<span class="quote1">| log                        | OFF                             |</span>
+<span class="quote1">| log_update                 | OFF                             |</span>
+<span class="quote1">| long_query_time            | 10                              |</span>
+<span class="quote1">| low_priority_updates       | OFF                             |</span>
+<span class="quote1">| max_allowed_packet         | 1048576                         |</span>
+<span class="quote1">| max_connections            | 100                             |</span>
+<span class="quote1">| max_connect_errors         | 10                              |</span>
+<span class="quote1">| max_delayed_insert_threads | 20                              |</span>
+<span class="quote1">| max_join_size              | 4294967295                      |</span>
+<span class="quote1">| max_sort_length            | 1024                            |</span>
+<span class="quote1">| net_buffer_length          | 16384                           |</span>
+<span class="quote1">| port                       | 3306                            |</span>
+<span class="quote1">| protocol-version           | 10                              |</span>
+<span class="quote1">| record_buffer              | 33550336                        |</span>
+<span class="quote1">| skip_locking               | ON                              |</span>
+<span class="quote1">| socket                     | /tmp/mysql.sock                 |</span>
+<span class="quote1">| sort_buffer                | 33554424                        |</span>
+<span class="quote1">| table_cache                | 64                              |</span>
+<span class="quote1">| thread_stack               | 65536                           |</span>
+<span class="quote1">| tmp_table_size             | 33554424                        |</span>
+<span class="quote1">| tmpdir                     | /tmp/                           |</span>
+<span class="quote1">| version                    | 3.22.21                         |</span>
+<span class="quote1">| wait_timeout               | 28800                           |</span>
++----------------------------+---------------------------------+
+34 rows in set (0.00 sec)
+
+
+以上、よろしくお願いします。
+
+
+## 以前、ここで話題にあがっていたmySQLをの本を昨日本屋でみかけました。
+
+PC-UNIXによる高機能Webサイト構築入門
+高見 禎成　著 技術評論社
+B5変形判／264ページ／本体価格2780円+税
+ISBN4-7741-0758-1
+
+## これでmySQLユーザも大幅に増えるのではないでしょうか？
+
+伊奈 竜也 ina@xxxxxxxxxx
+セイコーエプソン 半導体事業部
+富士見工場 IC製品技術部 F製品技術G
+TEL 0266-61-1212
+FAX 0266-61-1271
+
+</pre>
+</div>
+<p class="button"><a href="810">[前]</a><a href="812">[次]</a><a href="../list/801-900">[番号順一覧]</a><a href="../thread/801-900">[スレッド一覧]</a></p>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15893</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15892">[前]</a><a href="15894">[次]</a><a href="../list/15801-15900">[番号順一覧]</a><a href="../thread/15801-15900">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15893
+</p>
+<div class="header">
+<p>
+From: HAYASHI Kentaro &lt;HAYASHI Kentaro &lt;hayashi@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 29 Nov 2012 11:10:22 +0900<br>
+Subject: [mysql 15893] [ANN] mroonga 2.09<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+林です。
+
+今日は全文検索エンジンgroongaを囲む夕べ 3の開催日ですね。(年に一度の11/29「いい肉の日」でもあります)
+  <a href="http://atnd.org/events/33070">http://atnd.org/events/33070</a>
+
+[groongaを囲む夕べ 3に関するお願い]
+ キャンセル待ちの方もおられますので、参加者で都合が悪くなってしまった方は
+ お早めにATNDよりキャンセル手続きをしていただけると助かります。
+
+
+mroonga 2.09をリリースしました。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-09">http://mroonga.github.com/ja/docs/news.html#release-2-09</a>
+
+mroongaはMySQL 5.1/5.5/5.6、MariaDB 5.3/5.5で利用できる全文検
+索・位置情報検索可能なストレージエンジンです。mroongaは
+Tritonnの後継プロジェクトです。
+
+ドキュメント:
+  <a href="http://mroonga.github.com/ja/">http://mroonga.github.com/ja/</a>
+インストールガイド:
+  <a href="http://mroonga.github.com/ja/docs/install.html">http://mroonga.github.com/ja/docs/install.html</a>
+
+注意: 今回のリリースには後方互換性のない変更が TIMESTAMP 型の値と
+主キーにchar(N)を使った場合にあります。
+
+このリリースには TIMESTAMP 型の値に関して後方互換性のない変更があります。
+TIMESTAMP 型ではUTCタイムゾーンを保持するように変更しました。
+もし TIMESTAMP 型のカラムを(UTCタイムゾーンでなく)使っているテーブルがあれば、
+データベースを再作成 (データベースのダンプおよびリストアを行ってください。
+
+char(N)を主キーとして使用しているテーブルがあるなら、インデックスを再作成してください。
+
+mroongaを使っているデータベースをダンプします:
+
+  % mysqldump MY_MROONGA_DATABASE &gt; database-mroonga.dump
+
+修正したダンプファイルを使ってデータベースを復旧します:
+
+  % mysql -u root MY_MROONGA_DATABASE &lt; database-mroonga.dump
+
+主キーにchar(N)を使ている場合にはインデックスをを作り直します:
+
+  mysql&gt; ALTER TABLE table_name DROP PRIMARY KEY;
+  mysql&gt; ALTER TABLE table_name ADD PRIMARY KEY(column_name);
+
+1.20より前のバージョンからアップグレードする場合は以下にある
+手順を使ってください。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-1-20">http://mroonga.github.com/ja/docs/news.html#release-1-20</a>
+
+1.20からアップグレードする場合は以下にある手順を使ってくださ
+い。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-00">http://mroonga.github.com/ja/docs/news.html#release-2-00</a>
+
+2.00か2.01からアップグレードする場合は、以下の手順でパッケージ
+署名用の新しい鍵をインポートしてください。
+
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-02">http://mroonga.github.com/ja/docs/news.html#release-2-02</a>
+
+2.00以降でストレージモードにてマルチカラムインデックスを
+使っている場合は以下の手順でインデックスを作り直して
+ください。
+
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-03">http://mroonga.github.com/ja/docs/news.html#release-2-03</a>
+
+2.04以降でストレージモードにてSETカラムもしくは要素数が256より
+少ないENUMを使用している場合は、以下の手順でデータベースを
+再作成してください。
+
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-05">http://mroonga.github.com/ja/docs/news.html#release-2-05</a>
+
+今回のリリースの主なトピックは以下の通りです。
+
+  * ラッパーモードでのlast_insert_id()関数のサポート
+  * 依存するMySQLバージョンを明示的に指定
+
+○ ラッパーモードでのlast_insert_id()関数のサポート
+
+今回のリリースでは、last_insert_id()関数をラッパーモードでも
+サポートしました。
+
+これまで、last_insert_id()関数自体はラッパーモードでも使うことは
+できましたが、ストレージモードとは異なり、値として0を返す挙動を示すなど
+正しい値を取得することができないという問題がありました。
+
+last_insert_id()をラッパーモードでも機能するように修正したことで、
+mroongaを使ったアプリケーションを開発するうえで不便な点を解消していま
+す。
+
+○ 依存するMySQLバージョンを明示的に指定
+
+mroongaにはパッケージのビルドに使用したMySQLとバージョンを
+揃える必要があり、毎月定期的にリリースしているものの、
+最新リリース以降にMySQLのパッケージが更新されるとバージョンの不一致に
+よりmroongaが動作しなくなるという既知の問題がありました。
+
+その場合、MySQLのバージョンをそのままにして使うか、もしくは
+mroongaをソースコードからご利用の環境でビルドする必要がありました。
+
+今回のリリースからmroongaで使用するMySQLのバージョンを
+パッケージのリリース時点のMySQLの最新バージョンに限定するようにしました。
+
+mroongaをパッケージで利用している場合、MySQLが更新されるタイミングによっ
+ては常に最新のMySQLと一緒に使うことはできませんが、その場合であっても
+次のリリースのタイミングでMySQLの対応バージョンを更新します。
+
+○ 変更点
+
+2.08からの変更点は以下の通りです。
+  <a href="http://mroonga.github.com/ja/docs/news.html#release-2-09">http://mroonga.github.com/ja/docs/news.html#release-2-09</a>
+
+改良
+^^^^
+
+    * [rpm][centos] CentOS 5にてMySQL 5.5.28に対応。
+    * [rpm][centos] CentOS 6にてMySQL 5.1.61に対応。
+    * [ラッパーモード] last_insert_id()関数をサポートした。[#1540] [@soundkitchenさんが報告]
+
+修正
+^^^^
+
+    * <a href="1">[mysql51]</a> utf8mb4の存在チェックでクラッシュする不具合を修正。
+      MySQL 5.1にはutf8mb4がないのが原因でした。 [groonga-dev,01069] [Reported by wakisuke]
+    * [ストレージモード] 検索でマッチしているのに該当データを削除できない問題を修正した。 [#1533] [@HANZUBONさんが報告]
+    * 主キーのインデックスがchar(N)のとき検索できないことがあるのを修正。
+      この不具合はchar(N)に設定した値がNよりも短いか末尾に空白がある場合に発現します。
+      この修正によりインデックスの再構築が必要になります。
+    * char(N)に設定した文字列でNULL文字を含んでいた場合、それ以降が無視されてしまう不具合を修正。
+    * TIMESTAMP 型の値をUTCで保持するようにしました。これは後方互換性のない変更です。
+
+感謝
+^^^^
+
+    @soundkitchenさん
+    wakisukeさん
+    @HANZUBONさん
+
+-- 
+HAYASHI Kentaro &lt;hayashi@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="15892">[前]</a><a href="15894">[次]</a><a href="../list/15801-15900">[番号順一覧]</a><a href="../thread/15801-15900">[スレッド一覧]</a></p>
+</body>
+</html>

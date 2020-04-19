@@ -1,0 +1,120 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15636</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15635">[前]</a><a href="15637">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15636
+</p>
+<div class="header">
+<p>
+From: 亀田義裕 &lt;亀田義裕 &lt;kameda.sbng@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 4 Oct 2011 17:43:06 +0900<br>
+Subject: [mysql 15636] collationについて質問<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+亀田と申します。
+
+collationについて、想定と違う動作に遭遇しました。どなたか動作の理由を
+ご存知であれば、教えていただけないでしょうか?
+
+■ 概要
+レコードに濁点付きの半角カタカナの文字列が格納されている。
+charset=utf8, collate=utf8_unicode_ci
+
+collateがutf8_unicode_ciであれば、全角ひらがな、全角カタカナ、
+半角カタカナ を同一の値として扱うと想定していたが、格納されている
+文字列を全角カタカナ、全角ひらがなに変換した値でlike検索を
+かけてもマッチしない。
+* ただし、値に濁点が含まれていないケースだとマッチする
+* like検索ではなく、 = を用いて検索すると、マッチする
+
+
+以下シェルの履歴です。全角カタカナでlike検索をかけたときのみ
+マッチしていません。
+
+
+=================================
+
+mysql&gt; status;
+--------------
+mysql  Ver 14.14 Distrib 5.1.53, for unknown-linux-gnu (x86_64) using
+readline 5.1
+...
+
+
+mysql&gt; create table test (id integer auto_increment primary key, kana
+varchar(255));
+Query OK, 0 rows affected (0.01 sec)
+
+mysql&gt; show create table test;
+<span class="quote1">| Table | Create Table</span>
+
+
+ |
+<span class="quote1">| test  | CREATE TABLE `test` (</span>
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `kana` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci |
+1 row in set (0.00 sec)
+
+mysql&gt; insert test set kana = 'ベネフィス';
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; select count(*) from test where kana = 'ベネフィス';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|        1 |</span>
++----------+
+1 row in set (0.00 sec)
+
+mysql&gt; select count(*) from test where kana like 'ベネフィス';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|        0 |</span>
++----------+
+1 row in set (0.00 sec)
+
+mysql&gt; select count(*) from test where kana = 'ベネフィス';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|        1 |</span>
++----------+
+1 row in set (0.00 sec)
+
+mysql&gt; select count(*) from test where kana like 'ベネフィス';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|        1 |</span>
++----------+
+1 row in set (0.00 sec)
+
+=================================
+
+同じ事をmysql5.5で行なっても同じ結果だったので、バージョンによる
+問題ではないと考えています。
+mysqlのドキュメントも読んでみたのですが、この挙動のヒントになるような
+情報は見つけられていません。どなたかこの挙動の根拠をご存知でしたら
+教えていただければ幸いです。
+
+</pre>
+</div>
+<p class="button"><a href="15635">[前]</a><a href="15637">[次]</a><a href="../list/15601-15700">[番号順一覧]</a><a href="../thread/15601-15700">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15636">  15636 2011-10-04 17:43 [亀田義裕 &lt;kameda.sbn] collationについて質問                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15637">  15637 2011-10-04 21:01 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15638">  15638 2011-10-06 14:51 　┗[亀田義裕 &lt;kameda.sbn]                                     </a></span>
+</pre>
+</body>
+</html>

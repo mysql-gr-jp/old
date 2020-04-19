@@ -1,0 +1,182 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14697</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="14696">[前]</a><a href="14698">[次]</a><a href="../list/14601-14700">[番号順一覧]</a><a href="../thread/14601-14700">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14697
+</p>
+<div class="header">
+<p>
+From: Akio Imai &lt;Akio Imai &lt;tegona@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 20 Nov 2008 16:26:07 +0900<br>
+Subject: [mysql 14697] Re: UTF-8環境の文字化けに関して<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+tuchida さん
+
+どうも今井です。
+
+<span class="quote1">&gt; 「Server characterset」は</span>
+<span class="quote1">&gt; 「mysqld」デビジョンで</span>
+<span class="quote1">&gt; character-set-server = utf8</span>
+<span class="quote1">&gt; と指定すればよいのでしょうか？</span>
+
+はい、[mysql] に default-character-set=utf8 を追記してください。
+再起動後、再度 status コマンドで確認していただければ
+Server characterset および Db characterset が utf8 に
+なっているかと思われます。
+
+問題なく修正されているようでしたら
+今までの流れ上、Insert していた日本語データは再度
+入れなおしを行った方が良いかと思われます。
+
+latin1 に utf8 のデータが入っていたのを
+latin1 から utf8 に変更したため
+文字化けが更に文字化けしたような状態になっているかもしれませんので。
+
+全て utf8 になっている状態で、データを入れなおし
+それでもダメな場合、更に [mysqld] に以下の項目を
+追加してみると改善するかもしれません。
+init-connect='SET CHARACTER SET utf8;'
+skip-character-set-client-handshake
+
+<span class="quote1">&gt; skip-character-set-client-handshake</span>
+に関して、既に記述されている場合は
+逆に消してみたりして動作を確認してみてください。
+
+
+
+Tuchida さんは書きました:
+<span class="quote1">&gt; tuchidaです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; お世話になっております。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 今井さんの御指摘のStatusですが</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql  Ver 14.7 Distrib 4.1.13, for suse-linux (i686) using readline 5.0</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Connection id:          171</span>
+<span class="quote1">&gt; Current database:       v55Ancate</span>
+<span class="quote1">&gt; Current user:           root@localhost</span>
+<span class="quote1">&gt; SSL:                    Not in use</span>
+<span class="quote1">&gt; Current pager:          less</span>
+<span class="quote1">&gt; Using outfile:          ''</span>
+<span class="quote1">&gt; Using delimiter:        ;</span>
+<span class="quote1">&gt; Server version:         4.1.13</span>
+<span class="quote1">&gt; Protocol version:       10</span>
+<span class="quote1">&gt; Connection:             Localhost via UNIX socket</span>
+<span class="quote1">&gt; Server characterset:    latin1</span>
+<span class="quote1">&gt; Db     characterset:    latin1</span>
+<span class="quote1">&gt; Client characterset:    utf8</span>
+<span class="quote1">&gt; Conn.  characterset:    utf8</span>
+<span class="quote1">&gt; UNIX socket:            /var/lib/mysql/mysql.sock</span>
+<span class="quote1">&gt; Uptime:                 27 days 1 hour 35 min 48 sec</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; となっています。</span>
+<span class="quote1">&gt; 特に</span>
+<span class="quote1">&gt; 「Server characterset」と「Db Characterset」が私も気になるのですが</span>
+<span class="quote1">&gt; my.cnfの指定がわかりません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 「Server characterset」は</span>
+<span class="quote1">&gt; 「mysqld」デビジョンで</span>
+<span class="quote1">&gt; character-set-server = utf8</span>
+<span class="quote1">&gt; と指定すればよいのでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt; はじめまして今井です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 根本的に、MySQL が UTF-8 の設定を正常に認識しているのかが気になります。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; status コマンドで出力される結果に</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; Server characterset:    utf8</span>
+<span class="quote2">&gt;&gt; Db     characterset:    utf8</span>
+<span class="quote2">&gt;&gt; Client characterset:    utf8</span>
+<span class="quote2">&gt;&gt; Conn.  characterset:    utf8</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; と出力されていますか？</span>
+<span class="quote2">&gt;&gt; PHP のサーバーと MySQL のサーバーが１台で構成されている</span>
+<span class="quote2">&gt;&gt; オールインワン構成であればそのまま、複数台構成であれば</span>
+<span class="quote2">&gt;&gt; DB(MySQL) サーバーおよび WEB(PHP) サーバーから</span>
+<span class="quote2">&gt;&gt; DB に接続して status コマンドを実行してみてください。</span>
+<span class="quote2">&gt;&gt; DB サーバーでは問題ないが、クライアントサーバーから接続したら</span>
+<span class="quote2">&gt;&gt; 文字コードが latin1 になってしまう等の現象もありますので。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; また、my.cnf の mysqld 項に</span>
+<span class="quote2">&gt;&gt; skip-character-set-client-handshake</span>
+<span class="quote2">&gt;&gt; も記述してみてください。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; Tuchida さんは書きました:</span>
+<span class="quote3">&gt;&gt;&gt; tuchidaです。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 先ほどのINSERT文が成功したのですが、これはコマンドラインで</span>
+<span class="quote3">&gt;&gt;&gt; 行ったときも同じですが漢字の文字化けが発生しています。</span>
+<span class="quote3">&gt;&gt;&gt; 条件としては以下の通りです。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; １．Mysqlのバージョンは4.1.13で、ｐｈｐは４．４．０です。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; ２．OSは SUSELinux１０．０　内部コードはUTF-8です</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; ３．ｍｙ．ｃｎｆで</span>
+<span class="quote3">&gt;&gt;&gt; [safe_mysqld]、[mysql_dump]、[mysql]セクションで</span>
+<span class="quote3">&gt;&gt;&gt; default-character-set = utf8</span>
+<span class="quote3">&gt;&gt;&gt; と指定しています。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; ４．元になっているデータはWebからの漢字データです。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; __________  ESET Smart Security からの情報, ウイルス定義データベースのバー</span>
+<span class="quote1">&gt; ジョン 3626 (20081119) __________</span>
+<span class="quote2">&gt;&gt; このメッセージは ESET Smart Security によって検査済みです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; <a href="http://canon-its.jp">http://canon-its.jp</a></span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="14696">[前]</a><a href="14698">[次]</a><a href="../list/14601-14700">[番号順一覧]</a><a href="../thread/14601-14700">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14671">  14671 2008-11-17 19:44 [&quot;Tuchida&quot; &lt;tuchida_t] UTF-8環境の文字化けに関して             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14677">  14677 2008-11-18 13:50 ┣[&lt;shin-1@xxxxxxxxxx&gt; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14679">  14679 2008-11-18 14:03 ┃┗[岡本　基 &lt;okamoto@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14685">  14685 2008-11-19 23:05 ┃　┗[&quot;Tuchida&quot; &lt;tuchida_t]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14686">  14686 2008-11-19 23:52 ┃　　┗[kazu &lt;ml@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14687">  14687 2008-11-20 07:01 ┃　　　┗[&quot;Tuchida&quot; &lt;tuchida_t]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14688">  14688 2008-11-20 08:14 ┃　　　　┗[kazu &lt;ml@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14689">  14689 2008-11-20 08:46 ┃　　　　　┗[&quot;Tuchida&quot; &lt;tuchida_t]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14690">  14690 2008-11-20 09:00 ┃　　　　　　┗[kazu &lt;ml@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14691">  14691 2008-11-20 09:08 ┃　　　　　　　┗[&quot;Tuchida&quot; &lt;tuchida_t]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14682">  14682 2008-11-18 21:23 ┣[&quot;Tuchida&quot; &lt;tuchida_t]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14683">  14683 2008-11-19 09:06 ┃┗[Alex &lt;alex.backspin@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14692">  14692 2008-11-20 10:36 ┣[&quot;Yoichi Kogure&quot; &lt;PXI]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14694">  14694 2008-11-20 14:22 ┃┗[&quot;Takayuki Kamiyama&quot; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14695">  14695 2008-11-20 14:26 ┃　┗[&quot;Takayuki Kamiyama&quot; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14693">  14693 2008-11-20 12:04 ┗[Akio Imai &lt;tegona@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14696">  14696 2008-11-20 16:11 　┗[&quot;Tuchida&quot; &lt;tuchida_t]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="14697">  14697 2008-11-20 16:26 　　┗[Akio Imai &lt;tegona@xx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14698">  14698 2008-11-20 17:02 　　　┗[&quot;Tuchida&quot; &lt;tuchida_t]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14699">  14699 2008-11-20 17:11 　　　　┣[HIRATSUKA Sadao &lt;hir]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14700">  14700 2008-11-20 17:13 　　　　┗[Akio Imai &lt;tegona@xx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14701">  14701 2008-11-20 17:15 　　　　　┗[&quot;Tuchida&quot; &lt;tuchida_t]                             </a></span>
+</pre>
+</body>
+</html>

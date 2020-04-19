@@ -1,0 +1,119 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15419</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="15418">[前]</a><a href="15420">[次]</a><a href="../list/15401-15500">[番号順一覧]</a><a href="../thread/15401-15500">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15419
+</p>
+<div class="header">
+<p>
+From: Yuya Takeyama &lt;Yuya Takeyama &lt;sign.of.the.wolf.pentagram@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 08 Nov 2010 11:11:14 +0900<br>
+Subject: [mysql 15419] FULLTEXT インデックス使用時のクエリキャッシュについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。竹山と申します。
+
+FULLTEXT インデックス使用時に、 SQL_NO_CACHE を使用しても、
+クエリキャッシュが効いてしまっている ? という事象に悩まされています。
+
+以下のページを参考に、 12 万件ほどのテーブルを作ってみました。
+MySQL FULLTEXT + Ngram : LIKE検索より数十倍高速な、お手軽 日本語全文検索
+について
+<a href="http://www.tatamilab.jp/rnd/archives/000390.html">http://www.tatamilab.jp/rnd/archives/000390.html</a>
+
+日本郵便から郵便番号・住所のデータをダウンロードして、
+以下のような定義で作っています。
+
+CREATE TABLE `addresses` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`zip` int(7) unsigned zerofill NOT NULL,
+`name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+`name_bigram` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+PRIMARY KEY (`id`),
+FULLTEXT KEY `name_bigram` (`name_bigram`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+
+郵便番号、住所、そして住所を 2-gram に分かち書きしたデータを入れています。
+
+「福岡市」という単語で検索するときは、以下のような SQL を使います。
+
+SELECT SQL_NO_CACHE SQL_CALC_FOUND_ROWS *
+FROM addresses
+WHERE MATCH (name_bigram) AGAINST ('+福岡 +岡市' IN BOOLEAN MODE)
+LIMIT 3
+
+このような形で、「福岡市」という単語での検索を 3 回行うと、
+実行時間は以下のような結果になりました。
+
+36msec
+14msec
+6msec
+
+「鹿児島市」ではこうです。
+
+61msec
+10msec
+4msec
+
+さらに、「戸田市」。
+
+25msec
+3msec
+3msec
+
+いずれも、 2 回目以降が不自然に速くなっています。
+
+SQL には SQL_NO_CACHE オプションが付いているので、
+通常であれば、クエリキャッシュは使用されない物だとおもいます。
+
+念のため name LIKE '%福岡市%' といった形での測定もしましたが、
+こちらはちゃんとクエリキャッシュが効いているようでした。
+
+「福岡市」
+
+112msec
+93msec
+144msec
+
+「鹿児島市」
+
+127msec
+122msec
+89msec
+
+「戸田市」
+
+108msec
+119msec
+124msec
+
+
+上記をまとめると、「FULLTEXT インデックス使用時は SQL_NO_CACHE が効かない」
+といったことがあるのでは、と考えられるのですが、どうでしょうか。
+
+詳しくご存知の方がいらしたら、ご教示いただければ幸いです。
+
+以上、長文失礼致しました。
+よろしくお願いします。
+
+-----
+Yuya Takeyama
+
+</pre>
+</div>
+<p class="button"><a href="15418">[前]</a><a href="15420">[次]</a><a href="../list/15401-15500">[番号順一覧]</a><a href="../thread/15401-15500">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15419">  15419 2010-11-08 11:11 [Yuya Takeyama &lt;sign.] FULLTEXT インデックス使用時のクエリキャッシュについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15420">  15420 2010-11-08 17:21 ┗[Mikiya Okuno &lt;mikiya]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15422">  15422 2010-11-11 22:00 　┗[Yuya Takeyama &lt;sign.]                                     </a></span>
+</pre>
+</body>
+</html>

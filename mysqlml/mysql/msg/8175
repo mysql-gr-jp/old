@@ -1,0 +1,142 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8175</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8174">[前]</a><a href="8176">[次]</a><a href="../list/8101-8200">[番号順一覧]</a><a href="../thread/8101-8200">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8175
+</p>
+<div class="header">
+<p>
+From: &quot;KAWAI,Takanori&quot; &lt;&quot;KAWAI,Takanori&quot; &lt;GCD00051@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 30 Aug 2003 06:17:50 +0900<br>
+Subject: [mysql 08175] Re: ＭＹＳＱＬ　ＵＰＤＡＴＥで「？」を書込と「 NULL 」に化ける<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+川合孝典です。
+
+----- Original Message ----- 
+From: &quot;SUGAWARA Hajime&quot; &lt;sugawara@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Friday, August 29, 2003 10:27 AM
+Subject: <a href="08169">[mysql 08169]</a> Re: ＭＹＳＱＬ　ＵＰＤＡＴＥで「？」を書込と「 NULL」
+に化ける
+
+
+<span class="quote1">&gt; 　菅原です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; &quot;山内&quot; &lt;GEG03466@xxxxxxxxxx&gt;さんは書きました：</span>
+<span class="quote2">&gt; &gt; ■環境　mysql v1.4 for win2000,win/xp、PERL 5.0</span>
+<span class="quote2">&gt; &gt; ■現象</span>
+<span class="quote2">&gt; &gt; 　　(1)PERLアプリからｄｂ項目 commentを下記ｓｑｌでアップデート</span>
+<span class="quote2">&gt; &gt; 　　　　　 update bbs_db_tbl set comment = &quot;?&quot; where cnt=35;</span>
+<span class="quote2">&gt; &gt;            (半角の？です）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 　どういうコードでUPDATEしているのか書いていただかないと原因が分かりませ</span>
+<span class="quote1">&gt; ん。</span>
+というのとDBI、DBD::mysqlのバージョンもわからないと。
+#Perlのバージョンもね
+perl -v
+perl -MDBI -e&quot;print $DBI::VERSION&quot;
+perl -MDBD::mysql -e&quot;print $DBD::mysql::VERSION&quot;
+とすればわかるはず。
+
+
+<span class="quote1">&gt; 　Perl+DBIを使っていて、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  my $sth = $dbh-&gt;prepare( q{</span>
+<span class="quote1">&gt;      UPDATE bbs_db_tbl SET comment=&quot;?&quot; WHERE cnt=35</span>
+<span class="quote1">&gt;  });</span>
+<span class="quote1">&gt;  $sth-&gt;execute();</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; のように書いているのであれば、「?」はプレースホルダとして扱われます。</span>
+そんなことはありません。&quot;（ダブルクォート)で囲まれていますから、
+文字列と判定するべきでしょう。DBD::mysqlならそうでないと困ります。
+もちろん
+　UPDATE bbs_db_tbl SET comment=? WHERE cnt=35
+のようにクォートされていなければ、プレースホルダになります。
+
+ちなみに私の環境
+-WinXP HomeEdition
+-ActivePerl Build633 + DBI : 1.28 + DBD::mysql : 2.1024
+-MySQL 3.23.52-max-nt
+では、何も問題ありませんでした。
+実際のコードはどうなっているのでしょうか？
+
+[確認したスクリプト]
+use strict;
+use DBI;
+my $hDb = DBI-&gt;connect('dbi:mysql:test', '', '',
+  {RaiseError=&gt;1, AutoCommit=&gt;1});
+
+#1. DROP TABLE
+eval {$hDb-&gt;do('DROP TABLE bbs_db_tbl');};
+#2. CREATE TABLE
+# 2.1 CREATE TABLE
+$hDb-&gt;do(q{
+     CREATE TABLE bbs_db_tbl (
+        cnt integer,
+        comment varchar(80)
+     )
+    }
+);
+my $hSt = $hDb-&gt;prepare(
+  'INSERT INTO bbs_db_tbl VALUES(?, ?)');
+$hSt-&gt;execute(34, 'ABC1');
+$hSt-&gt;execute(35, 'ABC2');
+$hSt-&gt;execute(36, 'ABC3');
+$hSt-&gt;execute(37, 'ABC3');
+$hDb-&gt;do(
+    'update bbs_db_tbl set comment = &quot;?&quot; where cnt=35');
+my $hStU = $hDb-&gt;prepare(
+    'update bbs_db_tbl set comment = &quot;?&quot; where cnt=36');
+$hStU-&gt;execute();
+# NULLになる
+$hStU = $hDb-&gt;prepare(
+    'update bbs_db_tbl set comment = ? where cnt=37');
+$hStU-&gt;execute();
+
+[mysqlによる表示]
+mysql&gt; select * from bbs_db_tbl;
++------+---------+
+<span class="quote1">| cnt  | comment |</span>
++------+---------+
+<span class="quote1">|   34 | ABC1    |</span>
+<span class="quote1">|   35 | ?       |</span>
+<span class="quote1">|   36 | ?       |</span>
+<span class="quote1">|   37 | NULL    |</span>
++------+---------+
+4 rows in set (0.00 sec)
+
+===================================================
+川合 孝典 (Hippo2000)
+   DBI日本語メーリングリスト管理人、Kansai.pm所属
+   kwitknr@xxxxxxxxxx GCD00051@xxxxxxxxxx
+   <a href="http://member.nifty.ne.jp/hippo2000">http://member.nifty.ne.jp/hippo2000</a>、<a href="http://www.hippo2000.info/">http://www.hippo2000.info/</a>
+perldocの日本語情報ならperldocjp：翻訳してみませんか？
+  <a href="http://perldocjp.sourceforge.jp/">http://perldocjp.sourceforge.jp/</a>
+===================================================
+
+
+</pre>
+</div>
+<p class="button"><a href="8174">[前]</a><a href="8176">[次]</a><a href="../list/8101-8200">[番号順一覧]</a><a href="../thread/8101-8200">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8165">   8165 2003-08-28 23:46 [&quot;山内&quot; &lt;GEG03466@xxx] ＭＹＳＱＬ　ＵＰＤＡＴＥで「？」を書込と「 NULL 」に化ける</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8167">   8167 2003-08-29 09:10 ┣[きたぢま &lt;kitajima@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8168">   8168 2003-08-29 09:32 ┣[Shinichi Maruyama &lt;m]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8169">   8169 2003-08-29 10:27 ┣[SUGAWARA Hajime &lt;sug]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="8175">   8175 2003-08-30 06:17 ┃┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8176">   8176 2003-08-30 11:16 ┃　┣[&quot;山内&quot; &lt;GEG03466@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8177">   8177 2003-08-30 21:58 ┃　┃┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8181">   8181 2003-09-01 12:19 ┃　┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8174">   8174 2003-08-30 00:59 ┗[&quot;山内&quot; &lt;GEG03466@xxx]                                       </a></span>
+</pre>
+</body>
+</html>

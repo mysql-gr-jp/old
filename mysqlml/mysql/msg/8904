@@ -1,0 +1,80 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8904</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="8903">[前]</a><a href="8905">[次]</a><a href="../list/8901-9000">[番号順一覧]</a><a href="../thread/8901-9000">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8904
+</p>
+<div class="header">
+<p>
+From: ML account &lt;ML account &lt;ml@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 04 Mar 2004 13:23:58 +0900<br>
+Subject: [mysql 08904] Re: テーブルロックの確認方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+　こんにちは。
+
+&quot;Keisuke Hamanaka&quot; &lt;hamanaka015@xxxxxxxxxx&gt;さんの
+&lt;001f01c4017e$a2a29e90$3f3214ac@xxxxxxxxxx&gt;
+&quot;<a href="08903">[mysql 08903]</a> テーブルロックの確認方法&quot;
+
+
+　3.23.x添付のマニュアルを見る限り、テーブルにロックが掛かっているかどう
+かを調べる正統的な一般的な方法は無いようです。
+
+　ロック状態確認に代用出来そうなのは“show open tables”で得られる
+in_useの値 (3.23.xでは Commentフィールド中の“in_use=”直後の値、4.0.xで
+は In_useフィールドの値)で、ロックが掛かるとこの値が０以外になります。但
+し、ロック以外のどの様な条件で in_useの値が変化するのかは不明ですし、バー
+ジョン依存の問題が発生しかねないのであまりお勧めでは無いでしょう。
+
+　InnoDBであればシステム変数“ innodb_lock_wait_timeout”で指定された秒
+数の後に、後から掛けたロックは失敗します。これにより「ロック失敗--&gt;ロッ
+ク中」の判定は可能だと考えます。この方法の問題点は、
+・“ innodb_lock_wait_timeout”の値を適宜設定する事が出来ない(mysqldの起
+  動時パラメータであるため)
+・ロック失敗時にクライアント&lt;-&gt;サーバ間の接続が切れる様に見受けられ、事
+  後に再接続が必要と思われる
+です。
+
+　以前、write-lockが掛かったテーブルに対する検索処理をスキップするコード
+を書いた時は、ロック状態を示すテーブルを作成し、これに
+・どのプロセスが
+・何時
+・どのテーブルに対して
+・どの様なロックを
+掛けているかを保持していました。この「ロック状態テーブル」を見て、検索の
+クエリを発行して良いものかどうかを判断する方法です。プロセスが落ちてしま
+った場合にロック状態とこのテーブルの不整合が発生しますが、この不整合を解
+消するためのプロセスバックグラウンドで走らせておく、の様な、あまりスマー
+トでは無いやり方をしていました。同様の手は、ファイル、セマフォ、
+sun-rpc(サービスを作る必要はありますが)でも可能と思います。
+
+
+　ところで“InnoDB Hot BackUp”なるものがありますが、これの利用は考慮さ
+れましたか？
+
+
+
+　　　　松枝知直　　　　&lt;tomom@xxxxxxxxxx&gt;
+　　　　　　　　　　　　<a href="http://www.argus.ne.jp/~tomom/">http://www.argus.ne.jp/~tomom/</a>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8903">[前]</a><a href="8905">[次]</a><a href="../list/8901-9000">[番号順一覧]</a><a href="../thread/8901-9000">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8903">   8903 2004-03-04 09:21 [&quot;Keisuke Hamanaka&quot; &lt;] テーブルロックの確認方法                </a></span>
+<span class="current">-&gt;&nbsp;<a href="8904">   8904 2004-03-04 13:23 ┗[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8905">   8905 2004-03-04 13:43 　┗[&quot;Keisuke Hamanaka&quot; &lt;]                                     </a></span>
+</pre>
+</body>
+</html>
