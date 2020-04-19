@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="3635.html">[��]</a><a href="3637.html">[��]</a><a href="../list/3601-3700.html">[�ֹ�����]</a><a href="../thread/3601-3700.html">[����åɰ���]</a></p>
+<p class="button"><a href="3635.html">[前]</a><a href="3637.html">[次]</a><a href="../list/3601-3700.html">[番号順一覧]</a><a href="../thread/3601-3700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:3636
 </p>
@@ -13,61 +13,61 @@ mysql:3636
 <p>
 From: &quot;MINOHATA Norio&quot; &lt;&quot;MINOHATA Norio&quot; &lt;minohata@xxxxxxxxxx&gt;&gt;<br>
 Date: Thu, 17 May 2001 11:05:29 +0900<br>
-Subject: [mysql 03636] ��ư�������ǥ����ʿ��ͤ˲����ƽ��Ϥ����Х�<br>
+Subject: [mysql 03636] 浮動小数がデタラメな数値に化けて出力されるバグ<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-��ư�����˴ؤ���Х���ȯ�����ޤ�����
+浮動小数に関するバグを発見しました。
 
-(�Ķ�)
+(環境)
 FreeBSD4.2
 MySQL3.23.37, 3.23.38
 configure --prefix=/usr/local/mysql --with-charset=ujis
 
-(�ɾ�)
+(症状)
   select * from tableA into outfile 'sample1.txt';
   select * from tableA into outfile 'sample2.txt';
-�Τ褦������Ʊ���ơ��֥��2��ե�����˽��Ϥ���
+のように全く同じテーブルを2回ファイルに出力して
   diff sample1.txt sample2.txt
-�Ǻ�ʬ��Ȥ����ư�����ι��ܤ����פ��ʤ��Ȥ������ݤ�ȯ�����ޤ�����
-10���쥳���ɤΥե�������԰��פ�1���2�����٤Ǥ���
+で差分をとると浮動小数の項目が一致しないという現象が発生しました。
+10万レコードのファイルで不一致が1件～2件程度です。
 
-(�԰��פ���)
-   12355.25 �� 63355.25 �ˤʤ롣&lt;---��̷夬�ǥ����ˤʤ�
-   12355.25 �� 12355.   �ˤʤ롣&lt;---�������ʲ����ä���
+(不一致の例)
+   12355.25 が 63355.25 になる。&lt;---上位桁がデタラメになる
+   12355.25 が 12355.   になる。&lt;---小数点以下が消える
 
-���ξɾ����Ǥ��Ķ��Ǥϡ�Ʊ����³����10�����٤�
-1ʬ������100��200���٤Υ����꡼���¹Ԥ���Ƥ��ޤ���
-�̤Υƥ����ѴĶ��˥ơ��֥�򥳥ԡ�����Ʊ�������Ƥ��ꡢ
-select ... into outfile ... ��¹���ˡ��̥���åɤ�¾�Υ����꡼��
-�¹Ԥ��줿���ˤ��ξɾ���ȯ������餷���Ȥ������Ȥ��狼��ޤ�����
-�ޤ����ǽ�ϥǡ������� float(10,2) ��ȤäƤ����ΤǤ�����
-����� double �� real ���ѹ����Ƥ�Ʊ���ɾ���ȯ�����ޤ�����
+この症状がでた環境では、同時接続数が10個程度で
+1分あたり100～200程度のクエリーが実行されています。
+別のテスト用環境にテーブルをコピーして同じ操作を試してた所、
+select ... into outfile ... を実行中に、別スレッドで他のクエリーが
+実行された場合にこの症状が発生するらしいということがわかりました。
+また、最初はデータ型に float(10,2) を使っていたのですが、
+これを double や real に変更しても同じ症状が発生しました。
 
-�԰��פΥѥ�����⤢�碌�ƹͤ��Ƥߤޤ��ȡ���ư�����򥢥�����ʸ�����
-�Ѵ�����롼���󤬥���åɥ����դˤʤäƤ��ʤ��褦�ʵ������ޤ���
-# ����ѿ��򥹥�åɴ֤Ƕ�ͭ���Ƥ��ޤäƤ��롩
+不一致のパターンもあわせて考えてみますと、浮動小数をアスキー文字列に
+変換するルーチンがスレッドセーフになっていないような気がします。
+# 一時変数をスレッド間で共有してしまっている？
 
 
-�Ȥꤢ����������Ϥǳ�ǧ�Ǥ����ΤϤ����ޤǤǤ���
-(�����������ɤ����פ���ǽ�Ϥ�����ޤ���Τ�)
+とりあえず、私の力で確認できたのはここまでです。
+(ソースコードを追跡する能力がありませんので)
 
 --
-̧Ȫŵ��
+箕畑典男
 minohata@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="3635.html">[��]</a><a href="3637.html">[��]</a><a href="../list/3601-3700.html">[�ֹ�����]</a><a href="../thread/3601-3700.html">[����åɰ���]</a></p>
+<p class="button"><a href="3635.html">[前]</a><a href="3637.html">[次]</a><a href="../list/3601-3700.html">[番号順一覧]</a><a href="../thread/3601-3700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span class="current">-&gt;&nbsp;<a href="3636.html">   3636 2001-05-17 11:05 [&quot;MINOHATA Norio&quot; &lt;mi] ��ư�������ǥ����ʿ��ͤ˲����ƽ��Ϥ����Х�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3646.html">   3646 2001-05-21 20:45 ��[&quot;MINOHATA Norio&quot; &lt;mi]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3650.html">   3650 2001-05-22 15:21 ����[Akihiko Shinohara &lt;s]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3652.html">   3652 2001-05-22 17:55 ������[&quot;MINOHATA Norio&quot; &lt;mi]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3654.html">   3654 2001-05-23 03:11 ����[tateyan &lt;tateyan@xxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3658.html">   3658 2001-05-23 11:10 ������[Yasuhide OMORI / ��]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="3636.html">   3636 2001-05-17 11:05 [&quot;MINOHATA Norio&quot; &lt;mi] 浮動小数がデタラメな数値に化けて出力されるバグ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3646.html">   3646 2001-05-21 20:45 ┗[&quot;MINOHATA Norio&quot; &lt;mi]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3650.html">   3650 2001-05-22 15:21 　┣[Akihiko Shinohara &lt;s]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3652.html">   3652 2001-05-22 17:55 　┃┗[&quot;MINOHATA Norio&quot; &lt;mi]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3654.html">   3654 2001-05-23 03:11 　┗[tateyan &lt;tateyan@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3658.html">   3658 2001-05-23 11:10 　　┗[Yasuhide OMORI / 大�]                                   </a></span>
 </pre>
 </body>
 </html>

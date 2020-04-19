@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="3651.html">[��]</a><a href="3653.html">[��]</a><a href="../list/3601-3700.html">[�ֹ�����]</a><a href="../thread/3601-3700.html">[����åɰ���]</a></p>
+<p class="button"><a href="3651.html">[前]</a><a href="3653.html">[次]</a><a href="../list/3601-3700.html">[番号順一覧]</a><a href="../thread/3601-3700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:3652
 </p>
@@ -13,75 +13,75 @@ mysql:3652
 <p>
 From: &quot;MINOHATA Norio&quot; &lt;&quot;MINOHATA Norio&quot; &lt;minohata@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 22 May 2001 17:55:17 +0900<br>
-Subject: [mysql 03652] Re: ��ư�������ǥ����ʿ��ͤ˲����ƽ��Ϥ����Х�<br>
+Subject: [mysql 03652] Re: 浮動小数がデタラメな数値に化けて出力されるバグ<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-<span class="quote1">&gt; ����Ū�ʺƸ����ϡ��󼨤Ǥ��ޤ�����</span>
-<span class="quote1">&gt; �� ɽ�������ǡ���������������ˡ</span>
+<span class="quote1">&gt; 具体的な再現手順は、提示できますか？</span>
+<span class="quote1">&gt; ＃ 表形式、データ、アクセス方法</span>
 
-���ä�����äƤߤޤ�����
+さっそく作ってみました。
 <a href="http://www.ipc.co.jp/tmp/freebsd_mysql_float_bug/test/">http://www.ipc.co.jp/tmp/freebsd_mysql_float_bug/test/</a>
-�˺Ƹ��ѤΥ�����ץȤ�3���֤��Ƥ��ޤ���
-perl5�Υ�����ץȤǡ�DBI�⥸�塼���mysql�˥����������ޤ���
+に再現用のスクリプトを3つ置いています。
+perl5のスクリプトで、DBIモジュールでmysqlにアクセスします。
 <a href="http://www.ipc.co.jp/tmp/freebsd_mysql_float_bug/test.tgz">http://www.ipc.co.jp/tmp/freebsd_mysql_float_bug/test.tgz</a>
-����ޤȤ�ƥ���������ɤ��Ƥ���������
+からまとめてダウンロードしてください。
 
-[�Ƹ����]
-������ץȤ�̵�ݾڤǤ���
-�Ȥ��������ʤ��Ȥ���FreeBSD�Ķ��Ǥ�ͭ���Ǥ���
-�¹Ԥ�����̤���Ǥ���餤�ޤ���(ǰ�ΰ�)
-�ƥ�����ץȤ��ѿ���Ķ��˹�碌��Ŭ���ѹ����Ƥ���¹Ԥ��Ƥ���������
+[再現手順]
+スクリプトは無保証です。
+というか少なくとも私のFreeBSD環境では有害です。
+実行した結果の責任は負いません。(念の為)
+各スクリプトの変数を環境に合わせて適宜変更してから実行してください。
 
-(1)����
-make_table.pl��¹Ԥ��ޤ���
-# test�ǡ����١�����dummy�Ȥ����ơ��֥���äơ�
-# ������˥��ߡ��쥳���ɤ�10����������ޤ���
+(1)準備
+make_table.plを実行します。
+# testデータベースにdummyというテーブルを作って、
+# その中にダミーレコードを10万件作成します。
 
-(2)MySQL������뤳�Ȥγ�ǧ
-check_table.pl����ץ�����Ʊ���¹Ԥ��Ƥ���������
+(2)MySQLが落ちることの確認
+check_table.plを数プロセス同時実行してください。
 <span class="quote1">&gt; ./check_table.pl &amp;</span>
 <span class="quote1">&gt; ./check_table.pl &amp;</span>
 ...
-��δĶ��Ǥϡ�(2)��2,3�ץ��������餻��Ȥ�����MySQL��
-����Ƥ��ޤ��ޤ��Τǡ����Ͳ����Υƥ����ѤΥ�����ץȤ�
-�����Ѱդ��ޤ�����(3)��
+私の環境では、(2)で2,3プロセス走らせるとすぐにMySQLが
+落ちてしまいますので、数値化けのテスト用のスクリプトを
+別途用意しました。(3)へ
 
-(3)���ͤ������뤳�Ȥγ�ǧ
-check_table_slow.pl��2�ץ������ۤɥХå������ɤ�
-�¹Ԥ����Ƥ�����֤ǡ�
+(3)数値が化けることの確認
+check_table_slow.plを2プロセスほどバックグランドで
+実行させている状態で、
    select * from test.dummy into outfile '/tmp/test1.txt';
    select * from test.dummy into outfile '/tmp/test2.txt';
-���Ƥ��顢
+してから、
    diff test1.txt test2.txt
-�Ǻ�ʬ����Ȱ��פ��ʤ��Ԥ������Ĥ��ФƤ��ޤ���
-# check_table_slow.pl ��1�ä��Ȥ�SELECT��¹Ԥ��ޤ��Τǡ�
-# select ... into outfile ��1�ð���ǽ����褦�ʴĶ�����
-# �ְ��פ��ʤ��װ۾��ȯ�����ʤ����⤷��ޤ���
+で差分を取ると一致しない行がいくつか出てきます。
+# check_table_slow.pl は1秒ごとにSELECTを実行しますので、
+# select ... into outfile が1秒以内で終わるような環境だと
+# 「一致しない」異常は発生しないかもしれません。
 
-�ʾ�Τ褦�ʴ����ǡ��Ȥꤢ���������Ρ�
-��FreeBSD4.1 or 4.2
-��MySQL3.23.37 or 38
-�� configure --prefix=/usr/local/mysql --with-charset=ujis
-�ʴĶ��Ǥϰ۾郎ȯ�����ޤ���
+以上のような感じで、とりあえずウチの、
+・FreeBSD4.1 or 4.2
+・MySQL3.23.37 or 38
+・ configure --prefix=/usr/local/mysql --with-charset=ujis
+な環境では異常が発生します。
 
 
 --
-̧Ȫŵ��
+箕畑典男
 minohata@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="3651.html">[��]</a><a href="3653.html">[��]</a><a href="../list/3601-3700.html">[�ֹ�����]</a><a href="../thread/3601-3700.html">[����åɰ���]</a></p>
+<p class="button"><a href="3651.html">[前]</a><a href="3653.html">[次]</a><a href="../list/3601-3700.html">[番号順一覧]</a><a href="../thread/3601-3700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="3636.html">   3636 2001-05-17 11:05 [&quot;MINOHATA Norio&quot; &lt;mi] ��ư�������ǥ����ʿ��ͤ˲����ƽ��Ϥ����Х�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3646.html">   3646 2001-05-21 20:45 ��[&quot;MINOHATA Norio&quot; &lt;mi]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3650.html">   3650 2001-05-22 15:21 ����[Akihiko Shinohara &lt;s]                                     </a></span>
-<span class="current">-&gt;&nbsp;<a href="3652.html">   3652 2001-05-22 17:55 ������[&quot;MINOHATA Norio&quot; &lt;mi]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3654.html">   3654 2001-05-23 03:11 ����[tateyan &lt;tateyan@xxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3658.html">   3658 2001-05-23 11:10 ������[Yasuhide OMORI / ��]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3636.html">   3636 2001-05-17 11:05 [&quot;MINOHATA Norio&quot; &lt;mi] 浮動小数がデタラメな数値に化けて出力されるバグ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3646.html">   3646 2001-05-21 20:45 ┗[&quot;MINOHATA Norio&quot; &lt;mi]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3650.html">   3650 2001-05-22 15:21 　┣[Akihiko Shinohara &lt;s]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="3652.html">   3652 2001-05-22 17:55 　┃┗[&quot;MINOHATA Norio&quot; &lt;mi]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3654.html">   3654 2001-05-23 03:11 　┗[tateyan &lt;tateyan@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3658.html">   3658 2001-05-23 11:10 　　┗[Yasuhide OMORI / 大�]                                   </a></span>
 </pre>
 </body>
 </html>

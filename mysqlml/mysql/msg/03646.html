@@ -5,7 +5,7 @@
 <link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="3645.html">[��]</a><a href="3647.html">[��]</a><a href="../list/3601-3700.html">[�ֹ�����]</a><a href="../thread/3601-3700.html">[����åɰ���]</a></p>
+<p class="button"><a href="3645.html">[前]</a><a href="3647.html">[次]</a><a href="../list/3601-3700.html">[番号順一覧]</a><a href="../thread/3601-3700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:3646
 </p>
@@ -13,63 +13,63 @@ mysql:3646
 <p>
 From: &quot;MINOHATA Norio&quot; &lt;&quot;MINOHATA Norio&quot; &lt;minohata@xxxxxxxxxx&gt;&gt;<br>
 Date: Mon, 21 May 2001 20:45:33 +0900<br>
-Subject: [mysql 03646] Re: ��ư�������ǥ����ʿ��ͤ˲����ƽ��Ϥ����Х�<br>
+Subject: [mysql 03646] Re: 浮動小数がデタラメな数値に化けて出力されるバグ<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
-<a href="03636.html">[mysql 03636]</a>�˴ؤ��ƤǤ�����
-Debian GNU/Linux(potato)��mysql-3.23.38�򥤥󥹥ȡ��뤷��
-Ʊ�ͤΥƥ��Ȥ�»ܤ��Ƥߤ��ꡢɽ��Τ褦�ʰ۾��ȯ�����ޤ���Ǥ�����
-# ����FreeBSD�λ���Ʊ����
+<a href="03636.html">[mysql 03636]</a>に関してですが、
+Debian GNU/Linux(potato)にmysql-3.23.38をインストールして
+同様のテストを実施してみた所、表題のような異常は発生しませんでした。
+# 前回FreeBSDの時と同じく
 # configure --prefix=/usr/local/mysql --with-charset=ujis
-# ��mysql�򥽡������饳��ѥ��뤷�Ƥ��ޤ���
+# でmysqlをソースからコンパイルしています。
 
-�Ȥꤢ�����������ޤǤˤ狼�ä����Ȥ�ޤȤ�Ƥߤޤ�����
+とりあえず現時点までにわかったことをまとめてみました。
 
-(�۾��ȯ������Ķ�)
-��FreeBSD4.1 or 4.2
-��MySQL3.23.37 or 38
-����ư�����ι��ܤ���Ϥ���SQL��ʣ������åɤ�Ʊ���˼¹Ԥ������
+(異常の発生する環境)
+・FreeBSD4.1 or 4.2
+・MySQL3.23.37 or 38
+・浮動小数の項目を出力するSQLを複数スレッドで同時に実行した場合
 
-(�ɾ�)
-����ư�����ν��Ϥ������뤳�Ȥ�����
-��mysqld�� signal 11 (segmentation fault���ä�����?)�������
+(症状)
+・浮動小数の出力が化けることがある
+・mysqldが signal 11 (segmentation faultだったかな?)で落ちる
 
-�ɾ���2���ܤ�������ϡ�����ϵ��Ť��ʤ��ä��ΤǤ�����
-�����䤨�֤ʤ�SELECT��¹Ԥ�³��������μ¸��ѥ�����ץȤ��ä�
-ʣ��Ʊ�������餻���ꡢ2����åɤ�3����å�Ʊ���¹Ԥ�������Ǥ�����
-����뤳�Ȥ���ǧ�Ǥ��ޤ�����1����åɤ����¹Ԥ������ϡ�
-̵����ư��뤳�Ȥ��ǧ���Ƥ��ޤ���
+症状の2つ目の落ちる件は、前回は気づかなかったのですが、
+今回、絶え間なくSELECTを実行し続けるだけの実験用スクリプトを作って
+複数同時に走らせた所、2スレッドか3スレッド同時実行するだけですぐに
+落ちることが確認できました。1スレッドだけ実行した場合は、
+無事に動作することを確認しています。
 
-����¾�ˤ⡢�̤�FreeBSD�ޥ����ư����Ƥ���MySQL�������˰���
-���٤�����Ƥ����ꤷ�ޤ��Τ�(���������ư�����������ȤäƤ��餺
-�����������Ϥޤ��������Ĥ��ʤ�����)������FreeBSD�Υ���åɤޤ���
-���꤬����Τ��⤷��ޤ���
-# ¿����ǽ������Ƥ⤤������ --with-mit-thread �ǤǤ�ư���С�
-# �Ȼפä��ΤǤ�����FreeBSD2.*�ʲ������б����Ƥ��ʤ��褦��
-# ����ѥ���˼��Ԥ��ޤ���
-# �Ȥꤢ����Linux�ؤΰܹԤ�ײ���Ǥ���
+この他にも、別のFreeBSDマシンで動作させているMySQLが数日に一回の
+頻度で落ちていたりしますので(こちらは浮動小数を全く使っておらず
+何が原因かはまだ見当がつかない状況)、何かFreeBSDのスレッドまわりに
+問題があるのかもしれません。
+# 多少性能が落ちてもいいから --with-mit-thread ででも動けば、
+# と思ったのですが、FreeBSD2.*以下しか対応していないようで
+# コンパイルに失敗します。
+# とりあえずLinuxへの移行を計画中です。
 
-�Ȥ����櫓�ǡ��Х�����ɤ��ˤɤ��Ф��Ф褤��
-���ηä��ҼڤǤ���й����Ǥ����伱�Ԥ�����
-# ���ʤߤ����������ä����Ȥ˱Ѹ�Ͻ񤱤ޤ���(�ɤ�Τ���ä�)
+というわけで、バグ報告をどこにどう出せばよいか
+お知恵を拝借できれば幸いです。＞識者の方々
+# ちなみに当方、困ったことに英語は書けません。(読むのがやっと)
 
 --
-̧Ȫŵ��
+箕畑典男
 minohata@xxxxxxxxxx
 
 </pre>
 </div>
-<p class="button"><a href="3645.html">[��]</a><a href="3647.html">[��]</a><a href="../list/3601-3700.html">[�ֹ�����]</a><a href="../thread/3601-3700.html">[����åɰ���]</a></p>
+<p class="button"><a href="3645.html">[前]</a><a href="3647.html">[次]</a><a href="../list/3601-3700.html">[番号順一覧]</a><a href="../thread/3601-3700.html">[スレッド一覧]</a></p>
 <pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="3636.html">   3636 2001-05-17 11:05 [&quot;MINOHATA Norio&quot; &lt;mi] ��ư�������ǥ����ʿ��ͤ˲����ƽ��Ϥ����Х�</a></span>
-<span class="current">-&gt;&nbsp;<a href="3646.html">   3646 2001-05-21 20:45 ��[&quot;MINOHATA Norio&quot; &lt;mi]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3650.html">   3650 2001-05-22 15:21 ����[Akihiko Shinohara &lt;s]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3652.html">   3652 2001-05-22 17:55 ������[&quot;MINOHATA Norio&quot; &lt;mi]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3654.html">   3654 2001-05-23 03:11 ����[tateyan &lt;tateyan@xxx]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="3658.html">   3658 2001-05-23 11:10 ������[Yasuhide OMORI / ��]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3636.html">   3636 2001-05-17 11:05 [&quot;MINOHATA Norio&quot; &lt;mi] 浮動小数がデタラメな数値に化けて出力されるバグ</a></span>
+<span class="current">-&gt;&nbsp;<a href="3646.html">   3646 2001-05-21 20:45 ┗[&quot;MINOHATA Norio&quot; &lt;mi]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3650.html">   3650 2001-05-22 15:21 　┣[Akihiko Shinohara &lt;s]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3652.html">   3652 2001-05-22 17:55 　┃┗[&quot;MINOHATA Norio&quot; &lt;mi]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3654.html">   3654 2001-05-23 03:11 　┗[tateyan &lt;tateyan@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3658.html">   3658 2001-05-23 11:10 　　┗[Yasuhide OMORI / 大�]                                   </a></span>
 </pre>
 </body>
 </html>
