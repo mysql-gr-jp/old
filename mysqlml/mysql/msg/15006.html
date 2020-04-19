@@ -1,0 +1,98 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15006</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15005.html">[前]</a><a href="15007.html">[次]</a><a href="../list/15001-15100.html">[番号順一覧]</a><a href="../thread/15001-15100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15006
+</p>
+<div class="header">
+<p>
+From: HIRATSUKA Sadao &lt;HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 01 Sep 2009 10:01:11 +0900<br>
+Subject: [mysql 15006] Re: １行も削除されないDELETE文によるロック<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、ひらつかといいます。
+
+<span class="quote1">&gt; これも削除される行があればデッドロックはしなかったので、</span>
+<span class="quote1">&gt; DELETE文で削除される行がある場合は、その行のみロックされ、</span>
+<span class="quote1">&gt; 削除される行が無い場合はそのテーブル全体へのINSERTがブロックされる</span>
+<span class="quote1">&gt; ような気がするのですが、そういうものなのでしょうか？</span>
+
+削除される行がない場合は、次に存在するレコードまでの値がブロックされる
+という挙動になっていると思います。
+
+■接続1
+mysql&gt; select * from test;
++----+------+
+<span class="quote1">| id | data |</span>
++----+------+
+<span class="quote1">|  2 | a    |</span>
+<span class="quote1">|  5 | a    |</span>
++----+------+
+2 rows in set (0.00 sec)
+
+mysql&gt; begin;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; delete from test where id = 3;
+Query OK, 0 rows affected (0.00 sec)
+
+■接続2
+mysql&gt; begin;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; insert into test values (6, 'b');
+Query OK, 1 row affected (0.00 sec) ★成功
+
+mysql&gt; insert into test values (1, 'b');
+Query OK, 1 row affected (0.00 sec) ★成功
+
+mysql&gt; insert into test values (4, 'b');
+ERROR 1205 (HY000): Lock wait timeout exceeded;
+try restarting transaction ★失敗
+
+
+これはInnoDBのネクストキーロックとギャップロックという仕組みです。
+
+要するに
+「id = 3がピンポイントでロックされたという情報を保持する場所が
+InnoDBのデータ構造上どこにもないので、【id = 2 と id = 5の間が
+ロックされた】と翻訳して、それらのレコードに情報を持たせておこう」
+という。
+
+かなり分かりづらいですが、マニュアルにも記載があります。
+<a href="http://dev.mysql.com/doc/refman/5.1/ja/innodb-next-key-locking.html">http://dev.mysql.com/doc/refman/5.1/ja/innodb-next-key-locking.html</a>
+
+また、
+
+・idにindexがあるかどうか
+・idがunique keyかnon-unique keyか
+・read-committed &amp; binlog_format = rowかどうか
+
+というところで挙動が変わるので、気をつけてください。
+
+間違っていたらすいません。
+よろしくお願いします。
+
+-- 
+平塚貞夫 hiratsuka.sadao@xxxxxxxxxx
+
+
+</pre>
+</div>
+<p class="button"><a href="15005.html">[前]</a><a href="15007.html">[次]</a><a href="../list/15001-15100.html">[番号順一覧]</a><a href="../thread/15001-15100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15005.html">  15005 2009-09-01 00:53 [goto &lt;gotou1213@xxxx] １行も削除されないDELETE文によるロック  </a></span>
+<span class="current">-&gt;&nbsp;<a href="15006.html">  15006 2009-09-01 10:01 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15007.html">  15007 2009-09-01 22:42 　┗[&lt;gotou1213@xxxxxxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

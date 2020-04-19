@@ -1,0 +1,81 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7556</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7555.html">[前]</a><a href="7557.html">[次]</a><a href="../list/7501-7600.html">[番号順一覧]</a><a href="../thread/7501-7600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7556
+</p>
+<div class="header">
+<p>
+From: Shinya Kawaji &lt;Shinya Kawaji &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 19 Apr 2003 01:30:09 +0900<br>
+Subject: [mysql 07556] Re: 最新の xx 件を小さい順 sort して出力するには？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+かわじ、です。
+
+
+<span class="quote2">&gt; &gt; id_no というint型データをKEYに持つテーブルで、現在データが</span>
+<span class="quote2">&gt; &gt;  id_no=1〜100 の100件存在するとします。</span>
+<span class="quote2">&gt; &gt; (データ総数は随時更新されますので100件と決まっているわけではありませ</span>
+<span class="quote2">&gt; &gt; ん)</span>
+<span class="quote2">&gt; &gt; そのデータの 最後5件表示するのに以下のSQL文を使っています</span>
+<span class="quote2">&gt; &gt; SELECT id_no FROM table_a ORDER BY id_no DESC LIMIT 5;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; そのSQLを吐いた後、</span>
+<span class="quote1">&gt; さらにSELECTして、ORDER BY で昇順表示って</span>
+<span class="quote1">&gt; 方法はどうでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ※試してないので出来なかったらごめんなさい</span>
+
+
+上記のことを TEMPORARY TABLE を使って書くと、
+
+CREATE TEMPORARY TABLE tmp_a
+  SELECT * FROM table_a ORDER BY id_no DESC LIMIT 5;
+SELECT * FROM tmp_a ORDER BY id_no ASC;
+
+といったところでしょうか（これは試しました）。
+
+
+TEMPORARY TABLE を作りたくなければ、ユーザー変数を使って、
+以下のようにも出来ます。
+
+SELECT (@c:=id_no) FROM table_a ORDER BY id_no DESC LIMIT 5,1;
+SELECT * FROM starter WHERE id_no &gt; @c ORDER BY id_no ASC;
+
+まず最初の SELECT 文で、最新から数えて 6番目の id_no を @c に代入します。
+次の SELECT 文で、その @c よりも後ろの id_no の行（ 5件）を表示します。
+
+ただし、この二つの SELECT 文の間に、他のクライアントから INSERT や
+DELETE を挟まれると正確な結果が出なくなるので、そのような事が懸念される
+場合には、上記二つの SELECT 文を LOCK TABLES で囲む必要があります。
+
+LOCK TABLES table_a READ;
+SELECT (@c:=id_no) FROM table_a ORDER BY id_no DESC LIMIT 5,1;
+SELECT * FROM starter WHERE id_no &gt; @c ORDER BY id_no ASC;
+UNLOCK TABLES;
+ 
+
+
+</pre>
+</div>
+<p class="button"><a href="7555.html">[前]</a><a href="7557.html">[次]</a><a href="../list/7501-7600.html">[番号順一覧]</a><a href="../thread/7501-7600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7542.html">   7542 2003-04-18 14:05 [aimitsu katoh &lt;akimi] 最新の xx 件を小さい順 sort して出力するには？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7544.html">   7544 2003-04-18 14:22 ┣[Taoka Fumiyoshi &lt;fmy]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7545.html">   7545 2003-04-18 14:23 ┗[小川星児 &lt;sogawa@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7546.html">   7546 2003-04-18 14:51 　┗[aimitsu katoh &lt;akimi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7548.html">   7548 2003-04-18 15:23 　　┣[小川星児 &lt;sogawa@xxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="7556.html">   7556 2003-04-19 01:30 　　┃┗[Shinya Kawaji &lt;kawaj]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7574.html">   7574 2003-04-20 17:55 　　┗[aimitsu katoh &lt;akimi]                                   </a></span>
+</pre>
+</body>
+</html>

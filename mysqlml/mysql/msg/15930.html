@@ -1,0 +1,146 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15930</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15929.html">[前]</a><a href="15931.html">[次]</a><a href="../list/15901-16000.html">[番号順一覧]</a><a href="../thread/15901-16000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15930
+</p>
+<div class="header">
+<p>
+From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 15 Feb 2013 15:02:20 +0900<br>
+Subject: [mysql 15930] Re: レプリケーション構築について（長文です）（質問）<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、yokuといいます。
+
+master-*のオプションは5.5で廃止されました。
+my.iniやmy.cnfに書き込むとunknown variablesでエラーになります。
+起動できているとしても、理由は判りませんが。
+
+<a href="http://dev.mysql.com/doc/refman/5.5/en/replication-options-slave.html#option_mysqld_master-host">http://dev.mysql.com/doc/refman/5.5/en/replication-options-slave.html#option_mysqld_master-host</a>
+
+
+<span class="quote1">&gt; mysql&gt; tee ‘ファイル名’</span>
+<span class="quote1">&gt; C:Program Files\MySQL\MySQL Server 5.5\bin\mysql.exe: Can’t Create/write to file ‘ファイル名’ (Errcode: 13)</span>
+エラーコード13はPermission Deniedですが、mysqlクライアントを立ち上げているユーザーはdatadirに書き込み権限ありますか？
+
+リレーログも一度ACLを確認してみるか、RESET SLAVEで再度初めからやり直した方が早いかも知れません。。
+
+
+yoku ts.
+
+2013年2月15日 14:54 Watanabe Tomoyuki &lt;WATANABE.TOMOYUKI.2@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; こんにちは。渡辺です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 「MySQLデータベース構築バイブル」は素晴らしい書籍で私も（自宅に）持っています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 今自宅にいないので確認できませんが、時期的にはおそらくMySQL5.0を前提に書かれているのではないかと推測します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; （先取りしていたとしてもMySQL5.1まで）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; CHANGE MASTER TOがエラーになるので、古い解説本（MySQLデータベース構築バイブル，2008年7月21日初版）</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt;に「スレーブとして動作させるためには、最低限、次のオプションをmy.cnfに記述する必要があります」とあったので、敢えて入れてみました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt;my.iniファイルから削除しておいたほうがいいでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 私の手元にある環境(MySQL5.5.29 Windows x64)では、master-host=をmy.iniに書いて起動させようとすると、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; エラーで起動できませんでした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; unknown variable 'master-host=(略</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; そちらで起動できている理由はわかりませんが、削除しておく方が良いと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt;Failed to open the relay log</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; このキーワードで思い出したのですが、スレーブ側のmy.iniに relay-logの指定があるかを確認してください。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 指定がないとCHANGE MASTER TOしたときに</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; “ERROR 1201 (HY000): Could not initialize master info structure; more error</span>
+<span class="quote1">&gt; messages can be found in the MySQL error log”</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; と出るのは確認できました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; もしmy.iniに記述なければ、以下のように追記してください。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; relay-log = relay-log</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; または</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; relay-log = &quot;C:\ProgramData\MySQL\MySQL Server 5.5\data\relay-log&quot;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; tee コマンドで操作ログをファイルに書き出そうとしました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ごめんなさい、こちらは再現できなかったのでわかりませんでした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Sent: Friday, February 15, 2013 10:50 AM</span>
+<span class="quote1">&gt; To: ml@xxxxxxxxxx</span>
+<span class="quote1">&gt; Subject: <a href="15928.html">[mysql 15928]</a> Re: レプリケーション構築について（長文です）（質問）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # 後略</span>
+
+</pre>
+</div>
+<p class="button"><a href="15929.html">[前]</a><a href="15931.html">[次]</a><a href="../list/15901-16000.html">[番号順一覧]</a><a href="../thread/15901-16000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15925.html">@ 15925 2013-02-13 16:39 [&quot;ochiai&quot; &lt;s.ochiai@x] レプリケーション構築について（長文です）（質問）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15926.html">@ 15926 2013-02-14 09:14 ┗[Watanabe Tomoyuki &lt;W]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15928.html">@ 15928 2013-02-15 10:50 　┗[&quot;ochiai&quot; &lt;s.ochiai@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15929.html">@ 15929 2013-02-15 14:54 　　┗[Watanabe Tomoyuki &lt;W]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="15930.html">  15930 2013-02-15 15:02 　　　┣[&quot;yoku ts.&quot; &lt;yoku0825]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15932.html">@ 15932 2013-02-15 16:48 　　　┃┗[&quot;ochiai&quot; &lt;s.ochiai@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15933.html">  15933 2013-02-15 18:47 　　　┃　┗[&quot;yoku ts.&quot; &lt;yoku0825]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15936.html">@ 15936 2013-02-20 11:31 　　　┃　　┗[&quot;ochiai&quot; &lt;s.ochiai@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15937.html">  15937 2013-02-20 15:24 　　　┃　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15941.html">  15941 2013-02-27 12:28 　　　┃　　　　┗[Watanabe Tomoyuki &lt;W]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15942.html">  15942 2013-02-27 13:03 　　　┃　　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15952.html">  15952 2013-03-13 15:17 　　　┃　　　　　　┗[ochiai &lt;s.ochiai@xxx] Re: レプリケーション構築について（長文です）（質問）_解決まとめ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15953.html">  15953 2013-03-13 15:38 　　　┃　　　　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15954.html">  15954 2013-03-13 16:49 　　　┃　　　　　　　　┗[ochiai &lt;s.ochiai@xxx]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15931.html">@ 15931 2013-02-15 16:35 　　　┗[&quot;ochiai&quot; &lt;s.ochiai@x] RE:[mysql 15929] Re: レプリケーション構築について（長文です）（質問）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15934.html">@ 15934 2013-02-15 19:06 　　　　┗[Watanabe Tomoyuki &lt;W] RE: [mysql 15931] RE:[mysql 15929] Re: レプリケーション構築について（長文です）（質問）</a></span>
+</pre>
+</body>
+</html>

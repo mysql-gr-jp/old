@@ -1,0 +1,133 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15604</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15603.html">[前]</a><a href="15605.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15604
+</p>
+<div class="header">
+<p>
+From: Kouhei Sutou &lt;Kouhei Sutou &lt;kou@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 29 Jul 2011 09:50:37 +0900 (JST)<br>
+Subject: [mysql 15604] [ANN] groongaストレージエンジン0.8<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+須藤です。
+
+今日は肉の日なので、MySQL 5.1/5.5で利用可能な、全文検索可能
+なストレージエンジン、groongaストレージエンジンのversion 0.8
+をリリースしました。
+
+ドキュメント:
+  <a href="http://mroonga.github.com/">http://mroonga.github.com/</a>
+インストールガイド:
+  <a href="http://mroonga.github.com/">http://mroonga.github.com/</a>
+
+groongaストレージエンジンとは、全文検索エンジンであるgroonga
+をベースとしたMySQLのストレージエンジンです。Tritonnの後継プ
+ロジェクトとなります。
+
+最近のトピックス
+================
+
+ラッパーモードの全文検索が高速に
+------------------------------
+
+0.7で新しく追加された既存のストレージエンジンに全文検索機能
+を追加するラッパーモード(*)ですが、0.7では大量レコード時に速
+度がでない問題がありました。
+
+(*) <a href="http://mroonga.github.com/userguide/wrapper.html">http://mroonga.github.com/userguide/wrapper.html</a>
+
+0.8では、この問題を解消し大量レコードがあるときでもある程度
+の速度で検索できるようになりました。が！まだまだ改善の余地と
+改善案があるので、0.9ではさらに高速になる予定です。
+
+ラッパーモードでマルチカラムインデックスサポート
+----------------------------------------------
+
+ラッパーモードでマルチカラムインデックスをサポートしました。
+ということで、こんなことができるようになりました。
+
+  &gt; create table diaries (
+  &gt;   id int primary key,
+  &gt;   title varchar(255),
+  &gt;   content text,
+  &gt;   fulltext index (title, content),
+  &gt;   fulltext index (title),
+  &gt;   fulltext index (content)
+  &gt; ) default charset utf8 COMMENT = 'engine &quot;innodb&quot;';
+  &gt; select * from diaries;
+  id	title	content
+  1	Hello	はじめました。
+  2	天気	明日の富士山の天気について
+  3	富士山	今日もきれい。
+  &gt; select * from diaries where match(title, content) against(&quot;富士山&quot;);
+  id	title	content
+  2	天気	明日の富士山の天気について
+  3	富士山	今日もきれい。
+  &gt; select * from diaries where match(title) against(&quot;富士山&quot;);
+  id	title	content
+  3	富士山	今日もきれい。
+  &gt; select * from diaries where match(content) against(&quot;富士山&quot;);
+  id	title	content
+  2	天気	明日の富士山の天気について
+
+InnoDBに全文検索機能が追加
+-------------------------
+
+ラッパーモード開発の動機は「安心のInnoDBと一緒に全文検索機能
+を使いたいという要望に応える」というものでした。InnoDBには全
+文検索機能がなかったのですが、先日リリースされたMySQL
+5.6.3-labsから全文検索機能が追加されています。
+
+このInnoDBの全文検索エンジンInnoDB FTSについて調べてみた感触
+をまとめてみました。（まとめたのはgroonga開発者の森さんです。）
+  <a href="http://groonga.org/ja/blog/2011/07/28/innodb-fts.html">http://groonga.org/ja/blog/2011/07/28/innodb-fts.html</a>
+
+InnoDBが全文検索エンジンに力を入れてくれば、InnoDBやMySQL本
+体の全文検索関連のサポートがより手厚くなることが期待できます。
+そうすれば、ラッパーモードでもより性能を出しやすくなるかもし
+れません。
+
+興味深いですね！
+
+
+変更点
+======
+
+0.7からの変更点は以下の通りです。
+
+<a href="http://mroonga.github.com/news.html#release-0-8">http://mroonga.github.com/news.html#release-0-8</a>
+
+0.8 リリース - 2011/07/29
+-------------------------
+
+改良
+++++
+
+* [deb] プラグインインストール時のエラーを無視するようにした。
+* [ラッパーモード] マルチカラムインデックスのサポート。 #1031
+* [ラッパーモード] 大量レコードの全文検索に対応。 #1032
+* [ラッパーモード] MyISAM対応。 #1033
+
+-- 
+須藤 功平 &lt;kou@xxxxxxxxxx&gt;
+株式会社クリアコード &lt;<a href="http://www.clear-code.com/">http://www.clear-code.com/</a>&gt; (03-6231-7270)
+
+プログラミングが好きなソフトウェア開発者を募集中:
+  <a href="http://www.clear-code.com/recruitment/">http://www.clear-code.com/recruitment/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="15603.html">[前]</a><a href="15605.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+</body>
+</html>

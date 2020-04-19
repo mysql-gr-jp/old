@@ -1,0 +1,100 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12836</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12835.html">[前]</a><a href="12837.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12836
+</p>
+<div class="header">
+<p>
+From: Hirofumi Fujiwara &lt;Hirofumi Fujiwara &lt;fuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 03 Mar 2006 13:32:54 +0900 (JST)<br>
+Subject: [mysql 12836] CONCAT()のキャラクタセット<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+藤原です
+
+マニュアルでは、CONCAT()で文字列をつなぐとき、binaryが１つでも含まれている
+と、結果の文字列はbinaryとのことですが、どうもそうはならない場合があるようです。
+
+12.3. String Functions
+<a href="http://dev.mysql.com/doc/refman/5.0/en/string-functions.html">http://dev.mysql.com/doc/refman/5.0/en/string-functions.html</a>
+
+以下のようになって、訳がわからない。
+
+mysql&gt; SELECT CHARSET(CONCAT(_binary'Bianry',CONVERT('abc' USING latin1)));
++--------------------------------------------------------------+
+<span class="quote1">| CHARSET(CONCAT(_binary'Bianry',CONVERT('abc' USING latin1))) |</span>
++--------------------------------------------------------------+
+<span class="quote1">| latin1                                                       |</span>
++--------------------------------------------------------------+
+1 row in set (0.00 sec)
+ 
+mysql&gt; SELECT CHARSET('漢字');
++-----------------+
+<span class="quote1">| CHARSET('漢字') |</span>
++-----------------+
+<span class="quote1">| eucjpms         |</span>
++-----------------+
+1 row in set (0.00 sec)
+ 
+mysql&gt; SELECT CHARSET(CONCAT(_binary'Bianry','漢字'));
++-----------------------------------------+
+<span class="quote1">| CHARSET(CONCAT(_binary'Bianry','漢字')) |</span>
++-----------------------------------------+
+<span class="quote1">| binary                                  |</span>
++-----------------------------------------+
+1 row in set (0.00 sec)
+ 
+mysql&gt; SELECT CHARSET(CONCAT(_binary'Bianry',CONVERT('漢字'USING eucjpms)));
++---------------------------------------------------------------+
+<span class="quote1">| CHARSET(CONCAT(_binary'Bianry',CONVERT('漢字'USING eucjpms))) |</span>
++---------------------------------------------------------------+
+<span class="quote1">| eucjpms                                                       |</span>
++---------------------------------------------------------------+
+1 row in set (0.00 sec)
+ 
+mysql&gt; SELECT CHARSET(CONCAT(_binary'Bianry',CONVERT('漢字'USING cp932)));
++-------------------------------------------------------------+
+<span class="quote1">| CHARSET(CONCAT(_binary'Bianry',CONVERT('漢字'USING cp932))) |</span>
++-------------------------------------------------------------+
+<span class="quote1">| cp932                                                       |</span>
++-------------------------------------------------------------+
+1 row in set (0.00 sec)
+ 
+mysql&gt; SELECT CHARSET(CONCAT(CONVERT('Bianry'USING binary),CONVERT('漢字'USING eucjpms)));
++-----------------------------------------------------------------------------+
+<span class="quote1">| CHARSET(CONCAT(CONVERT('Bianry'USING binary),CONVERT('漢字'USING eucjpms))) |</span>
++-----------------------------------------------------------------------------+
+<span class="quote1">| binary                                                                      |</span>
++-----------------------------------------------------------------------------+
+1 row in set (0.00 sec)
+ 
+mysql&gt;
+
+
+はて、どうなっているんだろう???
+
+_binary'Bianry' と CONVERT('Bianry'USING binary) は違うのでしょうか？
+
+------------------------------------------------------------------
+株式会社 タイムインターメディア       藤原 博文 fuji@xxxxxxxxxx
+本社 160-0002 東京都新宿区坂町26-27 ＩＰＢビル    TEL 03-5362-9009
+URL  <a href="http://www.timedia.co.jp/">http://www.timedia.co.jp/</a>                    FAX 03-5362-9008
+地図 <a href="http://www.timedia.co.jp/company/map/">http://www.timedia.co.jp/company/map/</a>     新宿線曙橋駅徒歩5分
+------------------------------------------------------------------
+オープンソースWEB   <a href="http://oss.timedia.co.jp/">http://oss.timedia.co.jp/</a>   「MySQL日本語の旅」
+------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="12835.html">[前]</a><a href="12837.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
+</body>
+</html>

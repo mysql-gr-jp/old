@@ -1,0 +1,118 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16579</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16578.html">[前]</a><a href="16580.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16579
+</p>
+<div class="header">
+<p>
+From: yoku0825 &lt;yoku0825 &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 17 Apr 2020 16:48:31 +0900<br>
+Subject: [mysql 16579] Re: [mysql 16577] WorkbenchのServer Statusの表示がおかしい？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、yoku0825といいます。
+
+<span class="quote1">&gt; 単にWorkbenchのConfiguration File表示が間違っているということでしょうか？</span>
+
+少なくともConfiguration Fileに関しては、MySQL Workbenchが認識しているファイルとMySQL
+Serverで実際に使っているファイルは「関係がありません」
+MySQL Workbenchに「MySQL
+Serverが実際に使っているものと同じものを指定してあげると、Workbench上でmy.iniが修正できるようになるよ」というものです。
+
+デフォルトが5.5になっているのは解せなくもありますが、ここで参照されている何かがおかしくなっているんだと思います。
+（MySQL Installerでインストールしたか、MySQL Workbench単体でインストールしたかにも寄りそう）
+
+./res/mysql.profiles/Windows_(MySQL_5.5_Installer_Package).xml:
+&lt;value type=&quot;string&quot; key=&quot;sys.config.path&quot;&gt;%ProgramData%\MySQL\MySQL
+Server 5.5\my.ini&lt;/value&gt;
+./res/mysql.profiles/Windows_(MySQL_5.7_Installer_Package).xml:
+&lt;value type=&quot;string&quot; key=&quot;sys.config.path&quot;&gt;%ProgramData%\MySQL\MySQL
+Server 5.7\my.ini&lt;/value&gt;
+./res/mysql.profiles/Windows_(MySQL_5.6_Installer_Package).xml:
+&lt;value type=&quot;string&quot; key=&quot;sys.config.path&quot;&gt;%ProgramData%\MySQL\MySQL
+Server 5.6\my.ini&lt;/value&gt;
+./res/mysql.profiles/Windows_(MySQL_8.0_Installer_Package).xml:
+&lt;value type=&quot;string&quot; key=&quot;sys.config.path&quot;&gt;%ProgramData%\MySQL\MySQL
+Server 8.0\my.ini&lt;/value&gt;
+
+なおこの値、C:\Users\hogehoge\AppData\Roaming\MySQL\Workbench\server_instances.xml
+に記録され、
+MySQL Workbenchをアンインストールしてもこのディレクトリは残り続けるので、
+一度誤認識されると再インストールしても変わらないとかWorkbenchにはそんなクセがあったりなかったりします…。
+
+なお、MySQL Serverには「自分がどのmy.ini(my.cnf)を使って起動したか」は記録されません。
+かろうじて（？）「どのパラメーターがどのmy.ini(my.cnf)から読み込まれたか」はperformance_schemaに記録されるので、↓を参考に探してみてください。
+
+<a href="https://gihyo.jp/dev/serial/01/mysql-road-construction-news/0031#sec1_h5">https://gihyo.jp/dev/serial/01/mysql-road-construction-news/0031#sec1_h5</a>
+
+
+<span class="quote1">&gt; Directriesに表示されているBase DirectryやData DirectryはC:\ProgramData\MySQL\MySQL</span>
+<span class="quote1">&gt; Server 8.0を指していますが</span>
+
+こちらの値はMySQL Serverの `SHOW VARIABLES LIKE 'basedir'` から取ってきているので正しいのだと思います。
+
+yoku0825,
+
+
+<span class="quote1">&gt; 2020年4月6日(月) 16:59 落合 司郎 &lt;s.ochiai@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; いつもお世話になります。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; MySQL8.0.19(Windows用)をインストールし、MySQL Workbenchで利用しています。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 1.my.ini</span>
+<span class="quote2">&gt; &gt; MySQL WorkbenchのAdministrationタブのServer StatusでConfiguration</span>
+<span class="quote2">&gt; &gt; Fileの内容が、C:\ProgramData\MySQL\MySQL Server</span>
+<span class="quote2">&gt; &gt; 8.0\my.iniではなく、C:\ProgramData\MySQL\MySQL Server</span>
+<span class="quote2">&gt; &gt; 5.5\my.iniを指していました。</span>
+<span class="quote2">&gt; &gt; MySQL WorkbenchのAdministrationタブのOptions File画面最下部に表示されるConfiguration</span>
+<span class="quote2">&gt; &gt; Fileの内容も同様です。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 2.Base Directory</span>
+<span class="quote2">&gt; &gt; MySQL WorkbenchのAdministrationタブのServer Status/Server</span>
+<span class="quote2">&gt; &gt; Directriesに表示されているBase DirectryやData DirectryはC:\ProgramData\MySQL\MySQL</span>
+<span class="quote2">&gt; &gt; Server 8.0を指していますが、Option FileのGeneral/Directriesの表示はMySQL Server</span>
+<span class="quote2">&gt; &gt; 5.6を指しています。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; MySQL Server 5.5\my.iniの内容は下記の3行のみでした。</span>
+<span class="quote2">&gt; &gt; [mysqld]</span>
+<span class="quote2">&gt; &gt; basedir = &quot;C:/Program Files/MySQL/MySQL Server 5.6&quot;</span>
+<span class="quote2">&gt; &gt; datadir = &quot;C:/ProgramData/MySQL/MySQL Server 5.6/data&quot;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; C:\ProgramData\MySQL\MySQL Server</span>
+<span class="quote2">&gt; &gt; 8.0\my.iniは、[client][mysql][mysqld]の各セクションが記述されており、以下のようになっています。</span>
+<span class="quote2">&gt; &gt; # Path to installation directory. All paths are usually resolved</span>
+<span class="quote2">&gt; &gt; relative to this.</span>
+<span class="quote2">&gt; &gt; # basedir=&quot;C:/Program Files/MySQL/MySQL Server 8.0/&quot;</span>
+<span class="quote2">&gt; &gt; # Path to the database root</span>
+<span class="quote2">&gt; &gt; datadir=C:/ProgramData/MySQL/MySQL Server 8.0/Data</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 単にWorkbenchのConfiguration File表示が間違っているということでしょうか？</span>
+<span class="quote2">&gt; &gt; どのiniファイルが適用されているのでしょうか？</span>
+<span class="quote2">&gt; &gt; 教えてください。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ちなみに、以下の環境で行っています。</span>
+<span class="quote2">&gt; &gt; インストールしたファイル：mysql-installer-community-8.0.19.0.msi</span>
+<span class="quote2">&gt; &gt; OS:Windows10</span>
+<span class="quote2">&gt; &gt; MySQL：8.0.19(Win64用GPL)</span>
+<span class="quote2">&gt; &gt; MySQL Workbench:8.0.17</span>
+<span class="quote2">&gt; &gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="16578.html">[前]</a><a href="16580.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="16579.html">  16579 2020-04-17 16:48 [yoku0825 &lt;yoku0825@x] Re: [mysql 16577] WorkbenchのServer Statusの表示がおかしい？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16580.html">  16580 2020-04-17 18:56 ┗[落合 司郎 &lt;s.ochiai@] Re=3a =5bmysql 16579=5d Re=3a =5bmysql 16577=5d WorkbenchのServer Statusの表示がおかしい？</a></span>
+</pre>
+</body>
+</html>

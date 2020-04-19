@@ -1,0 +1,140 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11281</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11280.html">[前]</a><a href="11282.html">[次]</a><a href="../list/11201-11300.html">[番号順一覧]</a><a href="../thread/11201-11300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11281
+</p>
+<div class="header">
+<p>
+From: &quot;KKuji_Y2&quot; &lt;&quot;KKuji_Y2&quot; &lt;kkuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 27 Mar 2005 05:04:37 +0900<br>
+Subject: [mysql 11281] Re: selectで<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+ＫＫ＠ＩＢです
+
+多少説明する責任があるようなので．．．
+
+<span class="quote2">&gt;&gt; WHERE句が使われていて、データが複数選択された時、</span>
+<span class="quote2">&gt;&gt; ORDER BY がかかっている状態では、</span>
+<span class="quote2">&gt;&gt; その場での順序づけが必要でしょう。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 結果セットの最初の一行をDBが返す前に、ORDER BYの順に従って</span>
+<span class="quote1">&gt; 内部的にマーキングする必要があるとは思いますが、</span>
+<span class="quote1">&gt; 「必要でしょう」の言い方がよくわかりませんでした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; だから、何がどうなる、または、何をどうする、ということについて</span>
+<span class="quote1">&gt; もう少し具体的に説明していただけないでしょうか？</span>
+
+結果セットのメンバーとなるレコードが複数ある時に
+それを、ORDER BYで指定されたものの順序に並べるわけですが、
+そこでぴったり使えるような、前もって張られたキーがあるのか、
+また、そのまま使えるかどうか、
+それは、決まっている話ではないのではないかと思います。
+
+ですから、ＤＢＭＳ内部の処理としては、
+中で指定されたフィールドの組み合わせなどで、そこであらためてソート
+めいたことをしているのではないでしょうか？
+
+何らか、順序づけの情報（インデックスの存在など）があれば、当然
+それを活用するでしょうが。
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; 「そのレコードを指すインデックス」とは、レコードのＩＤ（となっているもの）のことです。</span>
+<span class="quote2">&gt;&gt; 「インデックスソート」の「インデックス」です。</span>
+<span class="quote2">&gt;&gt; 青山さんのおっしゃっている「インデックス」は、そういうID的なものが、</span>
+<span class="quote2">&gt;&gt; 並べられ終わった記録、ファイルのことですね。これもインデックスと呼ばれるので</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; レコードのIDはデータベース用語としては「キー」でしょう。</span>
+
+キーには重複するものもあるので、その場合は、
+レコードをIdentifyできる「ID」にはならないかと思います。
+（たとえば、郵便番号をキーに指定した場合など。）
+何か（ここではレコード）をUniqueに指定できるものがIDと呼ばれるわけですから。
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 特に、「レコードのID」という言い方をする場合は、それはPRIMARY KEYを</span>
+<span class="quote1">&gt; 指すか、もしくはROWIDのことを指すことになると思います。</span>
+
+Oracleで言うRawIDをこれを書いたときは意識していました。
+いずれにせよ、DBMSにとってはレコードを同定できる何らかの識別子が必要ですが、
+それは必ずしもユーザーが明示的にはったキーのどれかとは限りません。
+
+ただ、ＤＢの用語としては、
+
+<span class="quote1">&gt; 特に、「レコードのID」という言い方をする場合は、それはPRIMARY KEYを</span>
+<span class="quote1">&gt; 指すか、もしくはROWIDのことを指すことになると思います。</span>
+
+そうですね。おっしゃるとおりです。
+
+そして、ここはＭｙＳＱＬのＭＬなので、青山さんのおっしゃるとおりです。
+つい、そういうことを忘れて、いろいろ書いてしまった私が迂闊でした。
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; データベースで「インデックス」と言えば、ファイルに格納された</span>
+<span class="quote1">&gt; インデックスのことを指すと思うのですが。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; もしそれ以外の意味で使いたい場合は、予めそう宣言していただかないと</span>
+<span class="quote1">&gt; 他の人には意味が通じないと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote3">&gt;&gt; &gt; MySQLの現在の機能では、物理的に並べ替えたい場合は、一旦データを</span>
+<span class="quote3">&gt;&gt; &gt; ダンプしてからテーブルを削除し、再度テーブルを作り直す必要が</span>
+<span class="quote3">&gt;&gt; &gt; あるようです。</span>
+<span class="quote3">&gt;&gt; &gt; # Oracleとかだと運用しながらテーブル再構築する機能があったりします。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ＭｙＳＱＬがどうかは別とすると、（すみません、考えていなかったのです。）</span>
+<span class="quote2">&gt;&gt; ＤＢの機能としては、物理ソート機能があるのが普通ではないでしょうか？</span>
+<span class="quote2">&gt;&gt; そうでもないのでしょうかねぇ。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ちょっと調べて見たのですが、Oracle 10gでも、結局のところ</span>
+<span class="quote1">&gt; PRIMARY KEYを変更して物理的に並びを変えることはできないみたいですね。</span>
+<span class="quote1">&gt; 擬似PRIMARY KEYを定義して、新しい表のように見せかけることができる</span>
+<span class="quote1">&gt; だけの話でした。</span>
+<span class="quote1">&gt; # うーん。ちゃんと調べないと・・。</span>
+
+そうですね。
+最近は、ＤＢＭＳとしては、物理的な姿をあまり意識させない様になっているようですね。
+といっても、インデックスタイプを選択させている部分は、そうでもないかな。
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; もちろん、フラグメント化を解消する、という意味で物理的に並べかえる機能は</span>
+<span class="quote1">&gt; MySQLもOracleも持っています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQLの場合は</span>
+<span class="quote1">&gt; ALTER TABLE tablename TYPE=InnoDB</span>
+<span class="quote1">&gt; とかでテーブル再構築できます。</span>
+
+こんなところでよろしいでしょうか？
+
+蛇足ですが、
+例のカーディナリティの問題は、昔、インデックスのシステムを
+いろいろ考えたときに、結構、どうすべきかな、と悩みました。
+普段あまり考えていないことではないかと思いますが、
+意識すべき問題ですね。
+
+
+</pre>
+</div>
+<p class="button"><a href="11280.html">[前]</a><a href="11282.html">[次]</a><a href="../list/11201-11300.html">[番号順一覧]</a><a href="../thread/11201-11300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11272.html">  11272 2005-03-26 01:58 [&lt;hiromitsu.narimasu_] Re: selectで                            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11274.html">  11274 2005-03-26 10:49 ┗[Hirokazu Aoyama &lt;aoy]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11275.html">  11275 2005-03-26 12:56 　┣[Hirokazu Aoyama &lt;aoy]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11276.html">  11276 2005-03-26 16:12 　┃┗[深海水草 &lt;VYG01106@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11277.html">  11277 2005-03-26 17:21 　┗[&quot;KKuji_Y2&quot; &lt;kkuji@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11278.html">  11278 2005-03-26 19:35 　　┣[Hirokazu Aoyama &lt;aoy]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="11281.html">  11281 2005-03-27 05:04 　　┃┗[&quot;KKuji_Y2&quot; &lt;kkuji@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11280.html">  11280 2005-03-27 03:15 　　┗[Hirokazu Aoyama &lt;aoy]                                   </a></span>
+</pre>
+</body>
+</html>

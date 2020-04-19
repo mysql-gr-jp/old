@@ -1,0 +1,159 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8644</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8643.html">[前]</a><a href="8645.html">[次]</a><a href="../list/8601-8700.html">[番号順一覧]</a><a href="../thread/8601-8700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8644
+</p>
+<div class="header">
+<p>
+From: Take &lt;Take &lt;office@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 22 Jan 2004 10:53:31 +0900<br>
+Subject: [mysql 08644] mysqld_multi を利用した複数のサーバーの起動について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、たけです。
+
+環境
+Redhat8.0
+MySQL4.0.17バイナリ
+
+１つのサーバーにMySQLサーバーを７つ稼動させたいのですが、
+その方法としてmysqld_multiを利用したいと思っています。
+
+■MySQLは/usr/local/mysqlにインストールされていて
+-rw-r--r--    1 root     mysql       19106 12月 15 06:52 COPYING
+-rw-r--r--    1 root     mysql        7399 12月 15 06:52 INSTALL-BINARY
+-rw-r--r--    1 root     mysql        1937 12月 15 06:23 README
+drwxr-xr-x    2 root     mysql        4096  1月 21 20:11 bin
+-rwxr-xr-x    1 root     mysql         773 12月 15 07:01 configure
+drwxr-x---    4 mysql    mysql        4096  1月 22 10:16 data
+drwxr-x---    4 mysql    mysql        4096  1月 21 20:40 data1
+drwxr-x---    4 mysql    mysql        4096  1月 21 19:01 data2
+drwxr-x---    4 mysql    mysql        4096  1月 21 19:01 data3
+drwxr-x---    4 mysql    mysql        4096  1月 21 19:01 data4
+drwxr-x---    4 mysql    mysql        4096  1月 21 19:01 data5
+drwxr-x---    4 mysql    mysql        4096  1月 21 19:01 data6
+drwxr-x---    4 mysql    mysql        4096  1月 21 19:01 data7
+drwxr-xr-x    2 root     mysql        4096 12月 15 07:01 docs
+drwxr-xr-x    2 root     mysql        4096 12月 15 07:01 include
+drwxr-xr-x    2 root     mysql        4096 12月 15 07:01 lib
+drwxr-xr-x    3 root     mysql        4096 12月 15 07:01 man
+drwxr-xr-x    6 root     mysql        4096 12月 15 07:01 mysql-test
+drwxr-xr-x    2 root     mysql        4096 12月 15 07:01 scripts
+drwxr-xr-x    3 root     mysql        4096 12月 15 07:01 share
+drwxr-xr-x    5 root     mysql        4096 12月 15 07:01 sql-bench
+drwxr-xr-x    2 root     mysql        4096 12月 15 07:01 support-files
+drwxr-xr-x    2 root     mysql        4096 12月 15 07:01 tests
+といった感じで、dataディレクトリをdata1〜data7を追加しています。
+
+■/etc/my.cnfは下記のように追加しています。
+
+# The following options will be passed to all MySQL clients
+[client]
+#password	= your_password
+port		= 3306
+socket		= /tmp/mysql.sock
+
+# Here follows entries for some specific programs
+# The MySQL server
+
+[mysqld_multi]
+mysqld     = /usr/local/mysql/bin/mysqld_safe
+mysqladmin = /usr/local/mysql/bin/mysqladmin
+
+<a href="1.html">[mysqld1]</a>
+socket     = /tmp/mysql.sock1
+port       = 3311
+pid-file   = /usr/local/mysql1/data/hostname.pid
+datadir    = /usr/local/mysql1/data
+
+
+<a href="2.html">[mysqld2]</a>
+socket     = /tmp/mysql.sock2
+port       = 3312
+pid-file   = /usr/local/mysql/data2/hostname.pid
+datadir    = /usr/local/mysql/data2
+
+
+<a href="3.html">[mysqld3]</a>
+socket     = /tmp/mysql.sock3
+port       = 3313
+pid-file   = /usr/local/mysql/data3/hostname.pid
+datadir    = /usr/local/mysql/data3
+
+<a href="4.html">[mysqld4]</a>
+socket     = /tmp/mysql.sock4
+port       = 3314
+pid-file   = /usr/local/mysql/data4/hostname.pid
+datadir    = /usr/local/mysql/data4
+
+<a href="5.html">[mysqld5]</a>
+socket     = /tmp/mysql.sock5
+port       = 3315
+pid-file   = /usr/local/mysql/data5/hostname.pid
+datadir    = /usr/local/mysql/data5
+
+<a href="6.html">[mysqld6]</a>
+socket     = /tmp/mysql.sock6
+port       = 3316
+pid-file   = /usr/local/mysql/data6/hostname.pid
+datadir    = /usr/local/mysql/data6
+
+<a href="7.html">[mysqld7]</a>
+socket     = /tmp/mysql.sock7
+port       = 3317
+pid-file   = /usr/local/mysql/data7/hostname.pid
+datadir    = /usr/local/mysql/data7
+
+
+[mysqld]
+port		= 3306
+socket		= /tmp/mysql.sock
+skip-locking
+key_buffer = 256M
+max_allowed_packet = 1M
+table_cache = 256
+sort_buffer_size = 1M
+read_buffer_size = 1M
+myisam_sort_buffer_size = 64M
+thread_cache = 8
+query_cache_size= 16M
+# Try number of CPU's*2 for thread_concurrency
+thread_concurrency = 8
+
+この環境で
+/usr/local/mysql/bin/mysqld_multi start 1-7
+としてMySQLを起動させても
+/usr/local/mysql/bin/mysqld_multi report
+Reporting MySQL servers
+MySQL server from group: mysqld1 is not running
+MySQL server from group: mysqld2 is not running
+MySQL server from group: mysqld3 is not running
+MySQL server from group: mysqld4 is not running
+MySQL server from group: mysqld5 is not running
+MySQL server from group: mysqld6 is not running
+MySQL server from group: mysqld7 is not running
+といった感じで起動できません。
+
+mysqld_multiで運用されてるなどお解かりでしたら
+ご教授頂けないでしょうか？
+
+</pre>
+</div>
+<p class="button"><a href="8643.html">[前]</a><a href="8645.html">[次]</a><a href="../list/8601-8700.html">[番号順一覧]</a><a href="../thread/8601-8700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="8644.html">   8644 2004-01-22 10:53 [Take &lt;office@xxxxxxx] mysqld_multi を利用した複数のサーバーの起動について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8645.html">   8645 2004-01-22 11:24 ┗[Yasumitsu Ito &lt;y-ito]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8648.html">   8648 2004-01-22 13:23 　┗[Take &lt;office@xxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8649.html">   8649 2004-01-22 15:22 　　┗[Yasumitsu Ito &lt;y-ito]                                   </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15383</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15382.html">[前]</a><a href="15384.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15383
+</p>
+<div class="header">
+<p>
+From: こんにちは伊藤です &lt;こんにちは伊藤です &lt;ito.takahiro.cp@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 24 Aug 2010 15:37:06 +0900<br>
+Subject: [mysql 15383] Re: カーソルのネストについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+伊藤です
+
+とりあえず、別方法でいきます。
+ネストを使わず、出来そうな感じもしてます。
+
+TO：ひらつかさん
+<span class="quote1">&gt; ・DECLAREは最初に全部書くこと</span>
+[お返事]
+これがわかっていませんでした。
+ありがとうございました。&lt;(_ _)&gt;
+
+
+
+On Tue, 24 Aug 2010 15:20:21 +0900
+HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt; 様から以下のようなメールをいただきました。。:
+
+<span class="quote1">&gt; ひらつかです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; On Mon, 23 Aug 2010 21:13:26 +0900</span>
+<span class="quote1">&gt; こんにちは伊藤です &lt;ito.takahiro.cp@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; 初歩的な質問かも知れませんが、MySQLのストアドの中で</span>
+<span class="quote2">&gt; &gt; カーソルを利用する場合、カーソルのネストは出来ないものでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; カーソルのネストは一応できます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ポイントは</span>
+<span class="quote1">&gt; ・DECLAREは最初に全部書くこと</span>
+<span class="quote1">&gt; ・HANDLERは一つしかないので自前でフラグ管理をすること</span>
+<span class="quote1">&gt; です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; DECLARE CURS_B CURSOR FOR SELECT * FROM TBL_B WHERE この条件が動的</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; この「動的」具合が問題で、</span>
+<span class="quote1">&gt; パラメータのバインド値を変更することはできますが、</span>
+<span class="quote1">&gt; 文字列処理をしてWHERE句を組み立てて使う方法は見つかりませんでした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; DELIMITER //</span>
+<span class="quote1">&gt; CREATE PROCEDURE test1()</span>
+<span class="quote1">&gt; BEGIN</span>
+<span class="quote1">&gt;   DECLARE not_found INT DEFAULT 0;</span>
+<span class="quote1">&gt;   DECLARE v_deptno INT;</span>
+<span class="quote1">&gt;   DECLARE v_dname VARCHAR(14);</span>
+<span class="quote1">&gt;   DECLARE cur1 CURSOR FOR SELECT deptno FROM emp ORDER BY empno;</span>
+<span class="quote1">&gt;   DECLARE cur2 CURSOR FOR SELECT dname FROM dept WHERE deptno = v_deptno;</span>
+<span class="quote1">&gt;   DECLARE CONTINUE HANDLER FOR NOT FOUND SET not_found = 1;</span>
+<span class="quote1">&gt;   </span>
+<span class="quote1">&gt;   OPEN cur1;</span>
+<span class="quote1">&gt;   loop1: LOOP</span>
+<span class="quote1">&gt;     FETCH cur1 INTO v_deptno;</span>
+<span class="quote1">&gt;     IF not_found THEN</span>
+<span class="quote1">&gt;       CLOSE cur1;</span>
+<span class="quote1">&gt;       LEAVE loop1;</span>
+<span class="quote1">&gt;     END IF;</span>
+<span class="quote1">&gt;     </span>
+<span class="quote1">&gt;     OPEN cur2;</span>
+<span class="quote1">&gt;     loop2: LOOP</span>
+<span class="quote1">&gt;       FETCH cur2 INTO v_dname;</span>
+<span class="quote1">&gt;       IF not_found THEN</span>
+<span class="quote1">&gt;         SET not_found = 0; ← フラグを戻す</span>
+<span class="quote1">&gt;         CLOSE cur2;</span>
+<span class="quote1">&gt;         LEAVE loop2;</span>
+<span class="quote1">&gt;       END IF;</span>
+<span class="quote1">&gt;       INSERT INTO work (dname) VALUES (v_dname);</span>
+<span class="quote1">&gt;     END LOOP;</span>
+<span class="quote1">&gt;   END LOOP;</span>
+<span class="quote1">&gt; END</span>
+<span class="quote1">&gt; //</span>
+<span class="quote1">&gt; DELIMITER ;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; よろしくお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; 平塚貞夫 hiratsuka.sadao@xxxxxxxxxx</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+
+
+-------------------------------------------------
+伊藤崇洋
+ito.takahiro.cp@xxxxxxxxxx
+-------------------------------------------------
+
+
+</pre>
+</div>
+<p class="button"><a href="15382.html">[前]</a><a href="15384.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15380.html">  15380 2010-08-23 21:13 [こんにちは伊藤です &lt;] カーソルのネストについて                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15382.html">  15382 2010-08-24 15:20 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="15383.html">  15383 2010-08-24 15:37 　┗[こんにちは伊藤です &lt;]                                     </a></span>
+</pre>
+</body>
+</html>

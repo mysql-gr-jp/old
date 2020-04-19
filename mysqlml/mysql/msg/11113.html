@@ -1,0 +1,198 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11113</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11112.html">[前]</a><a href="11114.html">[次]</a><a href="../list/11101-11200.html">[番号順一覧]</a><a href="../thread/11101-11200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11113
+</p>
+<div class="header">
+<p>
+From: qawsed 77 &lt;qawsed 77 &lt;qawsed77@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 2 Mar 2005 14:12:40 +0900 (JST)<br>
+Subject: [mysql 11113] 全角(2byte)のフィールド名およびデータが phpMyAdmin で見ると文字化け表示される<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+始めまして、PHPとMySQLを勉強中のyabukiと申します。
+長文で失礼いたします。
+MySQLで以下のような現象が出て、試行錯誤しておりますが、
+解決に至らず悩んでおります。
+どなたかご教授いただけると助かります。
+よろしくお願い致します。
+
+＜動作環境＞
+OS:WindowsXP Pro
+PHP,MySQL,Apache:XAMPPにてインストール
+PHP Version 4.3.10
+Apache Version Apache/2.0.53 (Win32) mod_ssl/2.0.53
+OpenSSL/0.9.7e PHP/4.3.10
+MySQL Client API Version 4.1.8  
+phpMyAdmin Version　2.6.1-pl2
+
+＜現象＞
+MySQLのテーブルに書込だデータ(２バイト全角)がphpMyAdmin
+で表示すると
+文字化けになって表示されてしまいます。
+正常に表示させるには、どのようにしたら良いでしょうか？  
+phpMyAdminの「文字セットと照会順序」を見ると、
+sjis (Shift-JIS Japanese) のところは、
+照会順序「sjis_bin」
+説明「日本語, バイナリ」
+照会順序「sjis_japanese_ci」
+説明「日本語, 英字の大小を区別しない」
+になっています。
+Languageは「Japanese(ja-utf-8)」
+MySQLの文字セットは「UTF-8 Unicode(utf8)」
+MySQL接続照会順序は「ujis_japanese_ci」
+となっていますが、何か設定が間違っておりますでしょうか？
+フィールド名にも２バイト（全角）を使うと、同様に文字化け
+しています。
+それ以外の画面内のメニューなどは正常に日本語で表示されて
+います。
+ちなみに、ブラウザはIE 6.x SP2で、
+表示エンコードは“Unicode(UTF-8)”を選択しています。
+
+＜編集した箇所＞
+C:\apachefriends\xampp\apache\conf\httpd.conf内を以下に
+編集しました。
+#AddDefaultCharset ISO-8859-1
+AddDefaultCharset UTF-8
+
+C:\apachefriends\xampp\mysql\bin\my.cnf内を以下に編集し
+ました。
+（エクスプローラでは何故かmyのショートカットに見えますが
+…）
+[mysqld]
+default-character-set=UTF-8
+[mysqldump]
+default-character-set=UTF-8
+skip-opt
+[mysql]
+default-character-set=UTF-8
+
+
+=============＜参考：現在のmy.conf中身＞================
+# The MySQL client 
+[client] 
+# password       = your_password 
+port            = 3306 
+socket          = mysql 
+
+# Here follows entries for some specific programs 
+
+# The MySQL server 
+
+##### 2005/3/2追加 #####
+[mysqld-4.1]
+default-character-set=ja-utf-8 
+##### 2005/3/2追加 #####
+
+[mysqld] 
+old-passwords 
+port            = 3306 
+socket          = mysql 
+skip-locking 
+##### 2005/3/2追加 #####
+default-character-set=utf-8 
+##### 2005/3/2追加 #####
+character-set-server = latin1
+collation-server = latin1_general_ci
+key_buffer = 16M 
+max_allowed_packet = 1M 
+table_cache = 256 
+sort_buffer_size = 1M 
+read_buffer_size = 1M 
+read_rnd_buffer_size = 4M 
+net_buffer_length = 8K 
+myisam_sort_buffer_size = 64M 
+# log-bin 
+server-id       = 1 
+thread_cache = 8 
+
+basedir=c:/apachefriends/xampp/mysql 
+tmpdir=c:/apachefriends/xampp/tmp 
+datadir=c:/apachefriends/xampp/mysql/data 
+
+#bind-address=192.168.1.1 
+#log-update     = /path-to-dedicated-directory/hostname 
+
+# Uncomment the following if you are using BDB tables 
+#set-variable   = bdb_cache_size=4M 
+#set-variable   = bdb_max_lock=10000 
+
+skip-innodb 
+# Uncomment the following if you are using InnoDB tables 
+#innodb_data_home_dir = c:/apachefriends/xampp/mysql/ 
+#innodb_data_file_path = ibdata1:10M:autoextend 
+#innodb_log_group_home_dir = c:/apachefriends/xampp/mysql/
+
+#innodb_log_arch_dir = c:/apachefriends/xampp/mysql/ 
+# You can set .._buffer_pool_size up to 50 - 80 % 
+# of RAM but beware of setting memory usage too high 
+#set-variable = innodb_buffer_pool_size=16M 
+#set-variable = innodb_additional_mem_pool_size=2M 
+# Set .._log_file_size to 25 % of buffer pool size 
+#set-variable = innodb_log_file_size=5M 
+#set-variable = innodb_log_buffer_size=8M 
+#innodb_flush_log_at_trx_commit=1 
+#set-variable = innodb_lock_wait_timeout=50 
+
+[mysqldump] 
+quick 
+max_allowed_packet=16M 
+##### 2005/3/2追加 #####
+default-character-set=utf-8
+#skip-opt
+##### 2005/3/2追加 #####
+
+[mysql] 
+no-auto-rehash 
+# Remove the next comment character if you are not
+familiar with SQL 
+#safe-updates 
+##### 2005/3/2追加 #####
+default-character-set=utf-8
+##### 2005/3/2追加 #####
+
+[isamchk] 
+set-variable    = key_buffer=20M 
+set-variable    = sort_buffer=20M 
+set-variable    = read_buffer=2M 
+set-variable    = write_buffer=2M 
+
+[myisamchk] 
+set-variable    = key_buffer=20M 
+set-variable    = sort_buffer=20M 
+set-variable    = read_buffer=2M 
+set-variable    = write_buffer=2M 
+
+[mysqlhotcopy] 
+interactive-timeout 
+
+[WinMySQLadmin] 
+Server=c:/apachefriends/xampp/mysql/bin/winmysqladmin.exe
+=============＜参考：現在のmy.conf中身＞================
+
+
+__________________________________
+Let's Celebrate Together!
+Yahoo! JAPAN
+<a href="http://pr.mail.yahoo.co.jp/so2005/">http://pr.mail.yahoo.co.jp/so2005/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="11112.html">[前]</a><a href="11114.html">[次]</a><a href="../list/11101-11200.html">[番号順一覧]</a><a href="../thread/11101-11200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="11113.html">  11113 2005-03-02 14:12 [qawsed 77 &lt;qawsed77@] 全角(2byte)のフィールド名およびデータが phpMyAdmin で見ると文字化け表示される</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11123.html">  11123 2005-03-03 15:46 ┣[&quot;kondo kondo&quot; &lt;umius]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11126.html">  11126 2005-03-04 17:44 ┗[Ryuji Matsushita &lt;ma]                                       </a></span>
+</pre>
+</body>
+</html>

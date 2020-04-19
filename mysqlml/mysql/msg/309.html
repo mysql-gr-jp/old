@@ -1,0 +1,92 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:309</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="308.html">[前]</a><a href="310.html">[次]</a><a href="../list/301-400.html">[番号順一覧]</a><a href="../thread/301-400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:309
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Fri, 23 Oct 1998 13:53:19 +0900<br>
+Subject: [mysql 309] mysql-3.22.9-beta LIKE op bug<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+From: 民斗 &lt;tommy@xxxxxxxxxx&gt;
+To: mysql@xxxxxxxxxx
+Subject: mysql-3.22.9-beta LIKE op bug
+Date: Fri, 23 Oct 1998 11:32:02 +0900
+
+MySQL 3.22.9 がちゃんと MB 対応しているかどうかを確認してたら、
+バグを見つけてしまいました。MB 対応したためのバグではありません。
+多分、3.22.6 あたりから同じ問題があったんではないかと思います。
+
+	mysql&gt; create table test (id char(10));
+	Query OK, 0 rows affected (0.02 sec)
+	
+	mysql&gt; insert into test values (&quot;aaa&quot;);
+	Query OK, 1 row affected (0.00 sec)
+	
+	mysql&gt; insert into test values (&quot;abc&quot;);
+	Query OK, 1 row affected (0.01 sec)
+	
+	mysql&gt; insert into test values (&quot;abcabc&quot;);
+	Query OK, 1 row affected (0.03 sec)
+	
+	mysql&gt; select * from test;                    
+	+--------+
+	| id     |
+	+--------+
+	| aaa    |
+	| abc    |
+	| abcabc |
+	+--------+
+	3 rows in set (0.00 sec)
+	
+	mysql&gt; select * from test where id like &quot;%a&quot;;
+	Empty set (0.00 sec)
+！&quot;aaa&quot; が見つからない
+	
+	mysql&gt; select * from test where id like &quot;%c&quot;;
+	+------+
+	| id   |
+	+------+
+	| abc  |
+	+------+
+	1 row in set (0.00 sec)
+！&quot;abcabc&quot; が見つからない
+
+パッチを作って、本家 ML に流したので、問題がなければ次のバージョンに
+組み込まれると思います。
+--
+民斗 &lt;tommy@xxxxxxxxxx&gt;
+
+
+--- sql/sql_string.cc.orig	Mon Oct 19 02:33:57 1998
++++ sql/sql_string.cc	Fri Oct 23 10:27:13 1998
+@@ -416,6 +416,8 @@
+ static int wild_case_compare(const char *str,const char *strend,
+ 			     const char *wildstr,const char *wildend,char escape)
+ {
++  if (wildstr == wildend)
++    return (str != strend);
+   int result= -1;				// Not found, using wildcards
+   while (wildstr != wildend)
+   {
+
+---&lt;cut&gt;------&lt;cut&gt;------&lt;cut&gt;------&lt;cut&gt;------&lt;cut&gt;------&lt;cut&gt;------&lt;cut&gt;---
+
+
+
+</pre>
+</div>
+<p class="button"><a href="308.html">[前]</a><a href="310.html">[次]</a><a href="../list/301-400.html">[番号順一覧]</a><a href="../thread/301-400.html">[スレッド一覧]</a></p>
+</body>
+</html>

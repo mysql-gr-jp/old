@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5569</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="5568.html">[前]</a><a href="5570.html">[次]</a><a href="../list/5501-5600.html">[番号順一覧]</a><a href="../thread/5501-5600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5569
+</p>
+<div class="header">
+<p>
+From: &quot;yosinaka tosimizu&quot; &lt;&quot;yosinaka tosimizu&quot; &lt;tosibe@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 28 May 2002 14:35:25 +0900<br>
+Subject: [mysql 05569] Re: left outer join 　について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+よしなかです。
+
+質問してから時間がたってしまいましたが、解決したので
+報告させていただきます。
+
+<span class="quote1">&gt; とみたです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # 関係ない話題に返信で新しい話題を出すのはやめましょうね。</span>
+
+申し訳ないです。以後気をつけますのでお許しください。
+
+<span class="quote2">&gt; &gt; 望む動作としては請求種別にある種別項目はすべて出力し</span>
+<span class="quote2">&gt; &gt; 日付とマッチしない請求種別項目も出力させたいのです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 「where NYUKIN_KANRI.seikyu_date = '20020521'」という条件を指定してい</span>
+<span class="quote1">&gt; るので、ムリのような…。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この条件を「where NYUKIN_KANRI.seikyu_date = '20020521' or</span>
+<span class="quote1">&gt; NYUKIN_KANRI.seikyu_date is null」とかにしてみてはどうでしょう？</span>
+
+とみたさんのご指摘のようにwhere条件に日付を指定していたのが
+間違いのもとでした。
+
+でもなかなか解決策が思い浮かばなくて、ここ三日ほどずっと考え続けていました。
+結論として、where条件に日付を入れるのではなくて、テーブル結合条件に入れてみ
+たら
+望む結果が取得できました。
+
+&lt;元のＳＱＬ文&gt;
+
+select
+    SEIKYU_SYUBETU.seikyu_syubetu_name as seikyu_syubetu_id,
+    sum(NYUKIN_KANRI.seikyu_kingaku) as seikyu_kingaku
+from
+    SEIKYU_SYUBETU
+left outer join
+    NYUKIN_KANRI
+on
+    SEIKYU_SYUBETU.seikyu_syubetu_id = NYUKIN_KANRI.seikyu_syubetu_id
+where
+    NYUKIN_KANRI.seikyu_date = '20020521'
+group by
+    SEIKYU_SYUBETU.seikyu_syubetu_id
+
+&lt;変更したＳＱＬ文&gt;
+
+select
+    SEIKYU_SYUBETU.seikyu_syubetu_name as seikyu_syubetu_name,
+    sum(NYUKIN_KANRI.seikyu_kingaku) as seikyu_kingaku
+from
+    SEIKYU_SYUBETU
+left join
+    NYUKIN_KANRI
+on
+    SEIKYU_SYUBETU.seikyu_syubetu_id = NYUKIN_KANRI.seikyu_syubetu_id
+and
+    NYUKIN_KANRI.seikyu_date = '20020525'
+group by
+    SEIKYU_SYUBETU.seikyu_syubetu_id
+
+とみたさん、ヒントを与えてくださってありがとうございました。
+今回初めて質問させてもらったんですが、わからないまま仕方ないから
+納品してしまおうかなどと考えても見ましたが、大変助かりました。
+ありがとうございます。
+
+LOOSE-FITS-SMART
+
+
+</pre>
+</div>
+<p class="button"><a href="5568.html">[前]</a><a href="5570.html">[次]</a><a href="../list/5501-5600.html">[番号順一覧]</a><a href="../thread/5501-5600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="5541.html">   5541 2002-05-23 22:57 [西出 学 &lt;Nishide@xxx] トランザクション開始でエラー発生        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5545.html">   5545 2002-05-24 18:45 ┗[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5549.html">   5549 2002-05-25 00:16 　┗[&quot;yosinaka tosimizu&quot; ] left outer join 　について          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5551.html">   5551 2002-05-25 09:52 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="5569.html">   5569 2002-05-28 14:35 　　　┗[&quot;yosinaka tosimizu&quot; ]                                 </a></span>
+</pre>
+</body>
+</html>

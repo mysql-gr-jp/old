@@ -1,0 +1,137 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3497</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="3496.html">[前]</a><a href="3498.html">[次]</a><a href="../list/3401-3500.html">[番号順一覧]</a><a href="../thread/3401-3500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3497
+</p>
+<div class="header">
+<p>
+From: Kengo Jinno &lt;Kengo Jinno &lt;kengo@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 06 Apr 2001 13:13:04 +0900<br>
+Subject: [mysql 03497] Re: 日本語版での開発について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+神野です。
+
+Fri, 6 Apr 2001 11:04:55 +0900 ごろに
+&lt;001101c0be3d$f9806e40$2501a8c0@jshome&gt; の
+&quot;<a href="03496.html">[mysql 03496]</a> 日本語版での開発について&quot; のメールで
+&quot;hirofujita8523&quot; &lt;hirofujita8523@xxxxxxxxxx&gt; さんは書きました。
+
+Borland C++ 5.5.1でコンパイルだけしてみました。
+
+<span class="quote1">&gt;   A.winclients-3.23.09a-sjis.zip（SJIS）</span>
+<span class="quote1">&gt;   A.コンパイルできない。</span>
+<span class="quote1">&gt;     Error: Unresolved external '_mysql_num_fields' referenced from module</span>
+<span class="quote1">&gt; test.cpp</span>
+
+「リンクに失敗する」ですよね。
+
+mysql.hを見ると、mysql_num_fields()はSTDCALL宣言されていないので、
+C呼び出し(__cdecl)です。
+test.cppで使っている他の関数は、Pascal呼び出し(__stdcall)です。
+
+コンパイラは、外部関数の名前を、
+C呼び出し       下線を付ける
+Pascal呼び出し  下線を付けない
+と修飾するようです。
+
+ライブラリは
+
+<span class="quote1">&gt; implib -c libmySQL.lib libmySQL.dll</span>
+
+で作成されている(-aが無い)ので、下線なしの名前になっています。
+そのため、C呼び出しのmysql_num_fieldsだけ、リンクに失敗します。
+
+bcc32 -ps test.cpp libmysql.lib
+で、全部Pascal呼び出しにしてやれば、コンパイル・リンクは通ります。
+しかし、mysql_num_fields()がC呼び出しで実装されている(少なくとも
+mysql.hはそう言っている)とすれば、正常に動作しないでしょう。
+
+
+implib -c -a libmySQL.lib libmySQL.dll
+で(下線付きで)ライブラリを作成し、
+
+#include &lt;windows.h&gt;
+#include &lt;stdio.h&gt;
+#define NO_CLIENT_LONG_LONG
+#include &quot;mysql.h&quot;
+
+#ifdef  __cplusplus
+extern &quot;C&quot; {
+#endif
+MYSQL *     STDCALL _mysql_init(MYSQL *mysql);
+MYSQL *     STDCALL _mysql_real_connect(MYSQL *mysql, const char *host,
+                       const char *user,
+                       const char *passwd,
+                       const char *db,
+                       unsigned int port,
+                       const char *unix_socket,
+                       unsigned int clientflag);
+int     STDCALL _mysql_select_db(MYSQL *mysql, const char *db);
+int     STDCALL _mysql_query(MYSQL *mysql, const char *q);
+MYSQL_RES * STDCALL _mysql_store_result(MYSQL *mysql);
+void        STDCALL _mysql_free_result(MYSQL_RES *result);
+void        STDCALL _mysql_close(MYSQL *sock);
+#ifdef  __cplusplus
+}
+#endif
+
+int main() {
+  MYSQL *p = _mysql_init(NULL);
+  p = _mysql_real_connect(p, NULL, NULL, NULL, NULL, 0, NULL, 0);
+  ...
+  MYSQL_RES *res = _mysql_store_result(p);
+  printf(&quot;%d&quot;, mysql_num_fields(res));
+  ...
+}
+
+のように、STDCALLの関数を下線付きで宣言しなおして使えば、
+コンパイル・リンクは通ります。
+＃mysql_num_fields()はSTDCALLではないのでそのまま。
+
+これなら(mysql.hが言う)呼び出し規約にも反しません。
+が、使うのは面倒かもしれませんね。
+
+#pragmaかなんかをうまく使ってやれば、「mysql.hで宣言している
+STDCALL関数は、下線なし」という風に指定できるかもしれません。
+それができれば一番簡単だと思います。
+
+
+<span class="quote1">&gt;   B.winclients-3_22_28_sjis.zip（SJIS）</span>
+<span class="quote1">&gt;   B.コンパイルはできるが、mysql_num_fields() で、0 が返ってくる。</span>
+
+このmysql.hでは、
+#define mysql_num_fields(res) (res)-&gt;field_count
+と定義されています。
+＃古いmysql_num_fields()の形式です。
+
+たぶん、サーバーがこれよりも新しく、
+・フィールド数は他の方法で返す。
+・MYSQL_RES::field_countにゼロが入っている。
+という実装になっているのではないかと思います。
+＃ソースと挙動から推測しただけです。
+
+-- 
+神野健吾 &lt;kengo@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="3496.html">[前]</a><a href="3498.html">[次]</a><a href="../list/3401-3500.html">[番号順一覧]</a><a href="../thread/3401-3500.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3496.html">   3496 2001-04-06 11:04 [&quot;hirofujita8523&quot; &lt;hi] 日本語版での開発について                </a></span>
+<span class="current">-&gt;&nbsp;<a href="3497.html">   3497 2001-04-06 13:13 ┗[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3506.html">   3506 2001-04-06 19:31 　┗[&quot;hirofujita8523&quot; &lt;hi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3507.html">   3507 2001-04-06 20:08 　　┗[Kengo Jinno &lt;kengo@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3509.html">   3509 2001-04-07 06:15 　　　┗[&quot;hirofujita8523&quot; &lt;hi]                                 </a></span>
+</pre>
+</body>
+</html>

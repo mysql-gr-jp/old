@@ -1,0 +1,132 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15296</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15295.html">[前]</a><a href="15297.html">[次]</a><a href="../list/15201-15300.html">[番号順一覧]</a><a href="../thread/15201-15300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15296
+</p>
+<div class="header">
+<p>
+From: &quot;TAKENAKA, Akikazu&quot; &lt;&quot;TAKENAKA, Akikazu&quot; &lt;akikazu@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 26 Apr 2010 18:16:39 +0900<br>
+Subject: [mysql 15296] 同じはずの環境で片方だけ文字化け<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+神奈川の竹中と申します。お世話になります。
+
+ML #15248 とも一部重なるかと思い恐縮なのですが、どうしても解決できず困っています。
+また、もしかしたらPHPユーザ会MLで聞いた方が適切かもしれないのですが、問題の切り分けができていません。
+
+同一のPHPコード、同一のMySQLテーブルを使用して、2つの環境でテストを行っているのですが、片方だけ文字化けするという現象に困っています。
+
+環境は下記の2ヶ所です。
+
+【A】レンタルサーバheteml。
+MySQLサーバ 5.0.82-community-log
+MySQLクライアント 4.0.25
+phpMyAdmin 2.11.2.2
+PHP 5.2.8
+
+【B】手元のMacBook（Mac OS X 10.5.8）。
+MySQLサーバ 5.1.45
+MySQLクライアント 5.0.82
+phpMyAdmin 3.3.2
+PHP 5.2.12
+
+上記のそれぞれの環境で、下記のテーブルをphpMyAdmin上で作成しました。
+下記のコードは、テーブル作成後に SHOW CREATE TABLE を発行した結果で、環境Aと環境Bでまったく同一でした。
+
+CREATE TABLE `test` (
+ `user_id` int(4) unsigned NOT NULL,
+ `user_name` varchar(20) collate utf8_unicode_ci DEFAULT NULL,
+ PRIMARY KEY  (`user_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+
+続いて、それぞれの環境で、phpMyAdmin上でデータを挿入しました。
+
+INSERT INTO test (`user_id`, `user_name`) VALUES (1, '竹中彰一');
+
+phpMyAdmin上、およびターミナル上でデータを確認したところ、どちらの環境でも正常に登録されていることがわかりました。
+
+次に、下記のPHPコードで接続テストを行いました。
+（シフトタブを全角スペースに置換しています）
+
+&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;
+&quot;<a href="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd</a>&quot;&gt;
+&lt;html xmlns=&quot;<a href="http://www.w3.org/1999/xhtml">http://www.w3.org/1999/xhtml</a>&quot; xml:lang=&quot;ja&quot; lang=&quot;ja&quot;&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;
+&lt;title&gt;テスト&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table&gt;
+&lt;tr&gt;&lt;th&gt;ユーザID&lt;/th&gt;&lt;th&gt;名前&lt;/th&gt;&lt;/tr&gt;
+&lt;?php
+$con = mysql_connect($hostname, $userid, $passwd);
+if (!$con) {
+　die('MySQLへ接続できませんでした' . mysql_error());
+}
+mysql_select_db($dbname);
+$ret = mysql_query(&quot;SELECT * FROM test&quot;);
+while ($val = mysql_fetch_array($ret)) {
+　$user_id = (string)$val['user_id'];
+　$user_name = $val['user_name'];
+　print '&lt;tr&gt;&lt;td&gt;' . $user_id . '&lt;/td&gt;&lt;td&gt;' . $user_name . '&lt;/td&gt;&lt;/tr&gt;';
+}
+mysql_close($con);
+?&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+このコードをFirefox 3.5.9で表示したところ、環境Aでは期待通り、下記の結果が返りました。
+（抜粋）
+
+&lt;table&gt;
+&lt;tr&gt;&lt;th&gt;ユーザID&lt;/th&gt;&lt;th&gt;名前&lt;/th&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;竹中彰一&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+
+しかし、環境Bでは文字化けしてしまいました。
+
+&lt;table&gt;
+&lt;tr&gt;&lt;th&gt;ユーザID&lt;/th&gt;&lt;th&gt;名前&lt;/th&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;????&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+
+問題がMySQL側とPHP側のどちらにあるのかわからず、糸口がつかめない状態で困っております。
+MacへのMySQLのインストールなどよくわからないままやったので、どこを調べればいいのかすらわからないのですが…
+
+解決へのヒントや疑うべきポイントなど、ご教授いただければ幸いです。
+よろしくお願いいたします。
+
+
+-- 
+equal1
+竹中 彰一 (TAKENAKA, Akikazu)
+akikazu@xxxxxxxxxx | www.equal1.net
+Skype: equal1.at | iPhone: +81-90-8477-3901
+
+</pre>
+</div>
+<p class="button"><a href="15295.html">[前]</a><a href="15297.html">[次]</a><a href="../list/15201-15300.html">[番号順一覧]</a><a href="../thread/15201-15300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15296.html">  15296 2010-04-26 18:16 [&quot;TAKENAKA, Akikazu&quot; ] 同じはずの環境で片方だけ文字化け        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15298.html">  15298 2010-04-26 21:31 ┣[Masaaki Matsuyama &lt;m]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15301.html">  15301 2010-04-27 10:27 ┃┗[&quot;TAKENAKA, Akikazu&quot; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15303.html">  15303 2010-04-27 10:37 ┃　┗[Masaaki Matsuyama &lt;m]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15304.html">  15304 2010-04-27 11:56 ┃　　┗[&quot;TAKENAKA, Akikazu&quot; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15299.html">  15299 2010-04-26 21:42 ┣[Yuya Takeyama &lt;sign.]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15302.html">  15302 2010-04-27 10:32 ┃┗[&quot;TAKENAKA, Akikazu&quot; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15305.html">  15305 2010-04-27 12:44 ┗[&quot;Michiyoshi Buniu\(D]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15306.html">  15306 2010-04-27 13:19 　┗[&quot;TAKENAKA, Akikazu&quot; ]                                     </a></span>
+</pre>
+</body>
+</html>

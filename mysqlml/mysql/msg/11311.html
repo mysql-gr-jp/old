@@ -1,0 +1,74 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11311</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11310.html">[前]</a><a href="11312.html">[次]</a><a href="../list/11301-11400.html">[番号順一覧]</a><a href="../thread/11301-11400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11311
+</p>
+<div class="header">
+<p>
+From: SATOH Fumiyasu &lt;SATOH Fumiyasu &lt;fumiya@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 06 Apr 2005 01:03:26 +0900<br>
+Subject: [mysql 11311] Re: innodbのバイナリバックアップ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+さとうふみやす です。
+
+At Tue, 05 Apr 2005 23:34:33 +0900,
+佐野 大輔 wrote:
+<span class="quote1">&gt; 1.mysqldをシャットダウンさせたくない</span>
+<span class="quote1">&gt; 2.バイナリバックアップ（データファイルのコピー）</span>
+<span class="quote1">&gt; によるバックアップを行いたい</span>
+<span class="quote1">&gt; 3.InnoDBホットバックアップは使えない</span>
+
+Linux で MySQL のデータディレクトリを LVM 上の XFS
+(ファイルシステム) 上に置いてあるなら:
+
+1. FLUSH TABLES WITH READ LOCK;
+2. XFS なファイルシステムへのアクセス凍結 (xfs_freeze -f)
+3. LVM でスナップショット作成
+4. XFS なファイルシステムへのアクセス再開 (xfs_freeze -u)
+5. UNLOCK TABLES;
+6. スナップショット上の MySQL のデータディレクトリをコピー (バックアップ)。
+7. スナップショットを削除。
+
+で少々のサービス遅延だけで完全なホットバックアップが
+可能なんじゃないかと思っているのですが、試したことはありません。
+どなたか、検証 and/or 突っ込みしてください。 (^_^;
+
+<span class="quote1">&gt; 1.新たなDBへのリクエストが発生しない状態を保証する</span>
+<span class="quote1">&gt; 2.進行中のトランザクションが全てコミットされるのを待つ</span>
+<span class="quote1">&gt; 3.MySQLの書き込みスレッドが動作しなくなるのを待つ</span>
+<span class="quote1">&gt; 4.datadir丸ごとコピーをとる</span>
+
+サービスの遅延が許されるなら、
+
+1. FLUSH TABLES WITH READ LOCK;
+2. MySQL データディレクトリをコピー (バックアップ)
+3. UNLOCK TABLES;
+
+でいいんじゃないでしょうか。データの量に依るでしょうが
+上の方法より遅延は長くなるかと思います。
+
+-- 
+-- Name: SATOH Fumiyasu  -- Home: <a href="http://www.sfo.jp">http://www.sfo.jp</a> (in Japanese only)
+-- Mail: fumiya at net-thrust.com, samba.gr.jp, namazu.org or ...
+
+</pre>
+</div>
+<p class="button"><a href="11310.html">[前]</a><a href="11312.html">[次]</a><a href="../list/11301-11400.html">[番号順一覧]</a><a href="../thread/11301-11400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11309.html">  11309 2005-04-05 23:34 [&quot;佐野 大輔&quot; &lt;d-sano@] innodbのバイナリバックアップ            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11310.html">  11310 2005-04-06 00:15 ┣[Suzuki Yuta &lt;yuta@xx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="11311.html">  11311 2005-04-06 01:03 ┗[SATOH Fumiyasu &lt;fumi]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11313.html">  11313 2005-04-06 10:49 　┗[&quot;佐野 大輔&quot; &lt;d-sano@]                                     </a></span>
+</pre>
+</body>
+</html>

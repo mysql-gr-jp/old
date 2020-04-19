@@ -1,0 +1,95 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15382</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15381.html">[前]</a><a href="15383.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15382
+</p>
+<div class="header">
+<p>
+From: HIRATSUKA Sadao &lt;HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 24 Aug 2010 15:20:21 +0900<br>
+Subject: [mysql 15382] Re: カーソルのネストについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+ひらつかです。
+
+On Mon, 23 Aug 2010 21:13:26 +0900
+こんにちは伊藤です &lt;ito.takahiro.cp@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; 初歩的な質問かも知れませんが、MySQLのストアドの中で</span>
+<span class="quote1">&gt; カーソルを利用する場合、カーソルのネストは出来ないものでしょうか？</span>
+
+カーソルのネストは一応できます。
+
+ポイントは
+・DECLAREは最初に全部書くこと
+・HANDLERは一つしかないので自前でフラグ管理をすること
+です。
+
+
+<span class="quote1">&gt; DECLARE CURS_B CURSOR FOR SELECT * FROM TBL_B WHERE この条件が動的</span>
+
+この「動的」具合が問題で、
+パラメータのバインド値を変更することはできますが、
+文字列処理をしてWHERE句を組み立てて使う方法は見つかりませんでした。
+
+
+DELIMITER //
+CREATE PROCEDURE test1()
+BEGIN
+  DECLARE not_found INT DEFAULT 0;
+  DECLARE v_deptno INT;
+  DECLARE v_dname VARCHAR(14);
+  DECLARE cur1 CURSOR FOR SELECT deptno FROM emp ORDER BY empno;
+  DECLARE cur2 CURSOR FOR SELECT dname FROM dept WHERE deptno = v_deptno;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET not_found = 1;
+  
+  OPEN cur1;
+  loop1: LOOP
+    FETCH cur1 INTO v_deptno;
+    IF not_found THEN
+      CLOSE cur1;
+      LEAVE loop1;
+    END IF;
+    
+    OPEN cur2;
+    loop2: LOOP
+      FETCH cur2 INTO v_dname;
+      IF not_found THEN
+        SET not_found = 0; ← フラグを戻す
+        CLOSE cur2;
+        LEAVE loop2;
+      END IF;
+      INSERT INTO work (dname) VALUES (v_dname);
+    END LOOP;
+  END LOOP;
+END
+//
+DELIMITER ;
+
+
+よろしくお願いします。
+
+-- 
+平塚貞夫 hiratsuka.sadao@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15381.html">[前]</a><a href="15383.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15380.html">  15380 2010-08-23 21:13 [こんにちは伊藤です &lt;] カーソルのネストについて                </a></span>
+<span class="current">-&gt;&nbsp;<a href="15382.html">  15382 2010-08-24 15:20 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15383.html">  15383 2010-08-24 15:37 　┗[こんにちは伊藤です &lt;]                                     </a></span>
+</pre>
+</body>
+</html>

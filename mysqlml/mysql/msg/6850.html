@@ -1,0 +1,93 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6850</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="6849.html">[前]</a><a href="6851.html">[次]</a><a href="../list/6801-6900.html">[番号順一覧]</a><a href="../thread/6801-6900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6850
+</p>
+<div class="header">
+<p>
+From: Shinya Kawaji &lt;Shinya Kawaji &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 13 Jan 2003 02:04:09 +0900<br>
+Subject: [mysql 06850] Re: MySQL での SQL 文について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+かわじ、です。
+
+
+<span class="quote1">&gt; OuttimeとIntimeの型がわからないのでDATETIME型と仮定して……</span>
+<span class="quote1">&gt; DATETIME型同士での単純な算術演算ってできましたっけ？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Date_Format(UNIX_TIMESTAMP(Outtime)-UNIX_TIMESTAMP(Intime),'%i:%s') AS TotalSec,</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; といった感じでどうでしょう？(試してません)</span>
+
+FROM_UNIXTIME も使った方が良さそうです。
+
+mysql&gt; SELECT DATE_FORMAT(
+    -&gt;   UNIX_TIMESTAMP('2003-01-01 00:01:20') -
+    -&gt;   UNIX_TIMESTAMP('2003-01-01 00:00:00'),
+    -&gt;   '%i:%s'
+    -&gt; ) AS TotalSec;
++----------+
+<span class="quote1">| TotalSec |</span>
++----------+
+<span class="quote1">| NULL     |</span>
++----------+
+1 row in set (0.00 sec)
+
+mysql&gt; SELECT DATE_FORMAT(
+    -&gt;   FROM_UNIXTIME(
+    -&gt;     UNIX_TIMESTAMP('2003-01-01 00:01:20') -
+    -&gt;     UNIX_TIMESTAMP('2003-01-01 00:00:00')
+    -&gt;   ),
+    -&gt;   '%i:%s'
+    -&gt; ) AS TotalSec;
++----------+
+<span class="quote1">| TotalSec |</span>
++----------+
+<span class="quote1">| 01:20    |</span>
++----------+
+1 row in set (0.00 sec)
+
+
+あるいは、TIME_FORMAT と SEC_TO_TIME, TIME_TO_SEC の
+組み合わせという方法も。
+
+mysql&gt; SELECT TIME_FORMAT(
+    -&gt;   SEC_TO_TIME(
+    -&gt;     TIME_TO_SEC('2003-01-01 00:01:20') -
+    -&gt;     TIME_TO_SEC('2003-01-01 00:00:00')
+    -&gt;    ),
+    -&gt;   '%i:%s'
+    -&gt; ) AS TotalSec;
++----------+
+<span class="quote1">| TotalSec |</span>
++----------+
+<span class="quote1">| 01:20    |</span>
++----------+
+1 row in set (0.00 sec)
+
+--
+Shinya Kawaji
+
+
+
+</pre>
+</div>
+<p class="button"><a href="6849.html">[前]</a><a href="6851.html">[次]</a><a href="../list/6801-6900.html">[番号順一覧]</a><a href="../thread/6801-6900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="6838.html">   6838 2003-01-10 17:45 [&quot;K-A&quot; &lt;k-anzai@xxxxx] Re: MySQL での SQL  文について          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6839.html">   6839 2003-01-10 21:20 ┗[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="6850.html">   6850 2003-01-13 02:04 　┣[Shinya Kawaji &lt;kawaj]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6897.html">   6897 2003-01-21 11:00 　┗[&quot;K-A&quot; &lt;k-anzai@xxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

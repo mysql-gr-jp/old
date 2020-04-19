@@ -1,0 +1,63 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12752</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12751.html">[前]</a><a href="12753.html">[次]</a><a href="../list/12701-12800.html">[番号順一覧]</a><a href="../thread/12701-12800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12752
+</p>
+<div class="header">
+<p>
+From: &quot;Matsunobu, Yoshinori&quot; &lt;&quot;Matsunobu, Yoshinori&quot; &lt;Yoshinori.Matsunobu@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 14 Feb 2006 21:22:21 +0900<br>
+Subject: [mysql 12752] Re: MySQL のバックアップ・復元について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+大林さん
+
+松信です。
+
+<span class="quote1">&gt;% mysqldump ---all-databases --flush-logs &gt; ***.sql</span>
+<span class="quote1">&gt;を行い、フルバックアップとバイナリログにて、</span>
+<span class="quote1">&gt;データの復元を行う形かと思います。</span>
+
+mysqldumpによってオンラインバックアップを行なう場合、
+以下のどちらかの方法を使うと良いと思います。
+
+１．MyISAMなどの非InnoDBテーブルに対して途中で更新が入る可能性がある場合
+バックアップデータの一貫性を保つために、バックアップの間中共有ロックをかける必要があります。
+以下のように実行します。
+% mysqldump ---all-databases  --lock-all-tables --flush-logs &gt; ***.sql
+
+２．権限テーブルを除くすべてのテーブルがInnoDBの場合
+この場合、「バックアップの開始時にほんの一瞬だけ共有ロックをかければ、
+バックアップデータの一貫性が保たれる」というバックアップ方法があります。以下のように実行します。
+% mysqldump ---all-databases  --master-data=2 --single-transaction --flush-logs &gt; ***.sql
+１との違いは、バックアップの最中に更新を行なうことができるということです。
+
+１，２のどちらの場合でも、データベースの数に関わらず、
+バイナリログは1個しか作成されませんので試してみてください。
+
+
+--master-data=2とか、--single-transactionとかいったパラメータの意味は、
+英語版のマニュアルに書いてあるので、こっちを見てみてください。
+<a href="http://dev.mysql.com/doc/refman/5.0/en/mysqldump.html">http://dev.mysql.com/doc/refman/5.0/en/mysqldump.html</a>
+もう1年以上前に出たパラメータなのですが、日本語版にはまだ反映されてない…。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="12751.html">[前]</a><a href="12753.html">[次]</a><a href="../list/12701-12800.html">[番号順一覧]</a><a href="../thread/12701-12800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="12752.html">  12752 2006-02-14 21:22 [&quot;Matsunobu, Yoshinor] Re: MySQL のバックアップ・復元について  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12761.html">  12761 2006-02-16 01:39 ┗[baya &lt;bayapbayap@xxx]                                       </a></span>
+</pre>
+</body>
+</html>

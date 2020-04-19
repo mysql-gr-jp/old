@@ -1,0 +1,122 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15375</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15374.html">[前]</a><a href="15376.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15375
+</p>
+<div class="header">
+<p>
+From: Mikiya Okuno &lt;Mikiya Okuno &lt;mikiya.okuno@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 19 Aug 2010 21:50:03 +0900<br>
+Subject: [mysql 15375] Re: int column への2147483648<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+奥野です。こんばんは。
+
+bind[0].is_unsigned = 1にしましょう。
+そうしないと符号付き32ビット整数の最大値=2147483647に
+引っかかってしまいます。
+
+ではでは。
+
+On 08/19/2010 08:46 PM, Etsuo SUMIYA wrote:
+<span class="quote1">&gt; sumiyaといいます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql-5.1.47-winを使用していて、mysql_stmt_prepare()を使い、データ</span>
+<span class="quote1">&gt; ベースへ書き込むアプリケーションを開発していますが、添付のプログラ</span>
+<span class="quote1">&gt; ムを実行すると、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt;  select * from t;</span>
+<span class="quote1">&gt; +------------+</span>
+<span class="quote2">&gt; | c1         |</span>
+<span class="quote1">&gt; +------------+</span>
+<span class="quote2">&gt; | 2147483647 |</span>
+<span class="quote2">&gt; |          0 |</span>
+<span class="quote1">&gt; +------------+</span>
+<span class="quote1">&gt; 2 rows in set (0.03 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; となり、2147483648が書き込まれずに、0になってしまいます。</span>
+<span class="quote1">&gt; mysqlコマンドでは書き込めるのですが、プログラムインタフェースから</span>
+<span class="quote1">&gt; は上の結果となります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 環境はWindows XP SP3</span>
+<span class="quote1">&gt; Visual studio 2003</span>
+<span class="quote1">&gt; を使用しております。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; どなたか、情報をお持ちの方はアドバイスをお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; --- テーブル ---</span>
+<span class="quote1">&gt; CREATE TABLE `t` (</span>
+<span class="quote1">&gt;    `c1` int(10) unsigned DEFAULT NULL</span>
+<span class="quote1">&gt; ) ENGINE=MyISAM DEFAULT CHARSET=sjis</span>
+<span class="quote1">&gt; --- ここまで ---</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; --- プログラム ---</span>
+<span class="quote1">&gt; #include &quot;stdafx.h&quot;</span>
+<span class="quote1">&gt; #include&lt;config-win.h&gt;</span>
+<span class="quote1">&gt; #include&lt;mysql.h&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; MYSQL *mysql;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; int mytest();</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; int _tmain(int argc, _TCHAR* argv[])</span>
+<span class="quote1">&gt; {</span>
+<span class="quote1">&gt; 	mytest();</span>
+<span class="quote1">&gt; 	return 0;</span>
+<span class="quote1">&gt; }</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; int mytest()</span>
+<span class="quote1">&gt; {</span>
+<span class="quote1">&gt; 	static MYSQL_BIND bind[1];</span>
+<span class="quote1">&gt; 	int result;</span>
+<span class="quote1">&gt; 	unsigned int stat;</span>
+<span class="quote1">&gt; 	my_bool statnull = 0;</span>
+<span class="quote1">&gt; 	char *insert = &quot;INSERT INTO t (c1) values (?)&quot;;</span>
+<span class="quote1">&gt; 	MYSQL_STMT *tstmt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 	MYSQL *mymysql;</span>
+<span class="quote1">&gt; 	mysql = mysql_init(NULL);</span>
+<span class="quote1">&gt; 	if(mysql) {</span>
+<span class="quote1">&gt; 		mymysql = mysql_real_connect(mysql, &quot;192.168.48.15&quot;, &quot;test&quot;, &quot;&quot;, &quot;test&quot;, 0, NULL, CLIENT_MULTI_STATEMENTS);</span>
+<span class="quote1">&gt; 	} else exit(-1);</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 	tstmt = mysql_stmt_init(mysql);</span>
+<span class="quote1">&gt; 	result = mysql_stmt_prepare(tstmt, insert, (unsigned long)strlen(insert));</span>
+<span class="quote1">&gt; 	memset(bind, 0, sizeof(bind));</span>
+<span class="quote1">&gt; 	bind[0].buffer_type = MYSQL_TYPE_LONG;</span>
+<span class="quote1">&gt; 	bind[0].buffer = (char *)&amp;stat;</span>
+<span class="quote1">&gt; 	bind[0].length = 0;</span>
+<span class="quote1">&gt; 	bind[0].is_null =&amp;statnull;</span>
+<span class="quote1">&gt; 	result = mysql_stmt_bind_param(tstmt, bind);</span>
+<span class="quote1">&gt; 	stat = 0x80000000-1;</span>
+<span class="quote1">&gt; 	result = mysql_stmt_execute(tstmt);</span>
+<span class="quote1">&gt; 	stat = 0x80000000;</span>
+<span class="quote1">&gt; 	result = mysql_stmt_execute(tstmt);</span>
+<span class="quote1">&gt; 	return(0);</span>
+<span class="quote1">&gt; }</span>
+<span class="quote1">&gt; --- ここまで ---</span>
+<span class="quote1">&gt; </span>
+
+</pre>
+</div>
+<p class="button"><a href="15374.html">[前]</a><a href="15376.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15374.html">  15374 2010-08-19 20:46 [Etsuo SUMIYA &lt;sumiya] int column への2147483648               </a></span>
+<span class="current">-&gt;&nbsp;<a href="15375.html">  15375 2010-08-19 21:50 ┗[Mikiya Okuno &lt;mikiya]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15376.html">  15376 2010-08-20 08:23 　┗[Etsuo SUMIYA &lt;sumiya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15377.html">  15377 2010-08-20 22:10 　　┗[SAKAI Kei &lt;sak2@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15378.html">  15378 2010-08-21 10:39 　　　┗[Etsuo SUMIYA &lt;sumiya]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15379.html">  15379 2010-08-21 18:31 　　　　┗[SAKAI Kei &lt;sak2@xxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15381.html">  15381 2010-08-24 08:56 　　　　　┗[&quot;Watanabe Tomoyuki&quot; ]                             </a></span>
+</pre>
+</body>
+</html>

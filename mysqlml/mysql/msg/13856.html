@@ -1,0 +1,86 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13856</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13855.html">[前]</a><a href="13857.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13856
+</p>
+<div class="header">
+<p>
+From: &quot;やまもとのぶゆき&quot; &lt;&quot;やまもとのぶゆき&quot; &lt;mr.number9@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 5 Apr 2007 20:19:15 +0900<br>
+Subject: [mysql 13856] 特定のクエリを、全部の行で個別に実行させる方法について。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、山本と申します。
+
+テーブル内に
+残り日数：「resttime」
+有効期限：「kigen」
+今日の日付：「kyou」
+というdate方で指定した3つのフィールドがあり、それぞれアップデートで特定の日にちを登録出来るようにクエリを作成しています。行いたい作業は、有効期限から今日の日付を引き、残った日数を残り日数として「resttime」に登録したいと思っています。
+
+「resttime」への登録を、全ての行で繰り返して個別に実行したいと思い
+
+
+$kyou = date(&quot;y-m-d&quot;);
+$sql = &quot;update testing set kyou = '$kyou'&quot;;
+mysql_query($sql);
+echo &quot;今日の日付を登録しました。&quot;;
+
+
+$test1 = &quot;select * from faq_table where kigen != 0000-00-00&quot;;
+$result = mysql_query($test1);
+$rows = mysql_num_rows($result);
+$row = mysql_fetch_array($result);
+
+if(rows != 0){
+echo &quot;取該当レコード無し&quot;;
+}
+
+else {
+while ($row = mysql_fetch_array($result))
+{
+$inday = date($row[&quot;kyou&quot;]);
+$outday = date($row[&quot;kigen&quot;] );
+$date1=explode(&quot;-&quot;,$inday);
+$date2=explode(&quot;-&quot;,$outday);
+$from	= mktime(0,0,0,$date1[1],$date1[2],$date1[0]);
+$to		=	mktime(0,0,0,$date2[1],$date2[2],$date2[0]);
+$remains=($to - $from) / 86400;
+$sql = &quot;update faq_table set resttime = $remains where kigen != 0000-00-00&quot;;
+mysql_query($sql);
+echo &quot;期限を登録&quot;;
+}
+}
+
+というクエリを書いてみたのですが、一つ目のフィールドの更新を、全ての行に適用してしまい、思ったような処理結果になりません。
+
+
+有効期限から今日の日付を引いて、残り日数を登録する。
+
+「kigen」 - 「kyou」 ＝「resttime」
+
+といったクエリを登録された全ての行で行うにはまったく別の処理を行わなければならないのでしょうか？
+
+教えていただければと思います。
+
+環境：windowsXP/apache2/PHP4.1/MYSQL4.12
+
+</pre>
+</div>
+<p class="button"><a href="13855.html">[前]</a><a href="13857.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="13856.html">  13856 2007-04-05 20:19 [&quot;やまもとのぶゆき&quot; &lt;] 特定のクエリを、全部の行で個別に実行させる方法について。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13857.html">  13857 2007-04-06 00:17 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13858.html">  13858 2007-04-06 14:15 　┗[&quot;やまもとのぶゆき&quot; &lt;] Re: [解決]特定のクエリを、全部の行で個別に実行させる方法について。</a></span>
+</pre>
+</body>
+</html>

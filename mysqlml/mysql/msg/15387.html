@@ -1,0 +1,76 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15387</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15386.html">[前]</a><a href="15388.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15387
+</p>
+<div class="header">
+<p>
+From: こんにちは伊藤です &lt;こんにちは伊藤です &lt;ito.takahiro.cp@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 31 Aug 2010 17:42:33 +0900<br>
+Subject: [mysql 15387] カラムの照合順序設定で質問です<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+いつも勉強させてもらってます。
+ストアドファンクションで質問があります。
+下記のget_test_valは、testtblのカラムcol2の照合順序がutf8_unicode_ciは問
+題なく実行されます。col2の照合順序がutf8_general_ciは例外に入ります。
+WHERE col2=i_param_key;のような箇所には、文字コードによって何か工夫が必
+要でしょうか？
+MySQLは5.0.27です。
+
+
+
+# create table testtbl (col1 int,col2 text,col3 text,primary key(col1));
+# insert into testtbl values(1,'test1-col2の値','test1-col3の値');
+# insert into testtbl values(2,'test2-col2の値','test2-col3の値');
+# insert into testtbl values(3,'test3-col2の値','test3-col3の値');
+
+#===================================================================
+#
+#===================================================================
+DROP FUNCTION IF EXISTS get_test_val;
+
+DELIMITER |
+CREATE FUNCTION get_test_val(
+	i_param_key VARCHAR(510)
+) RETURNS text
+BEGIN
+	
+# 宣言
+DECLARE ret_Text text;
+
+# 例外ハンドラ
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN #例外ハンドラ
+	#ROLLBACK;
+	RETURN '例外！';
+END; # 例外ハンドラ
+
+	# SQL
+	SELECT col3 INTO ret_Text FROM testtbl WHERE col2=i_param_key;
+	# RETURN
+	RETURN ret_Text;
+END;
+
+
+
+-------------------------------------------------
+伊藤崇洋
+ito.takahiro.cp@xxxxxxxxxx
+-------------------------------------------------
+
+
+</pre>
+</div>
+<p class="button"><a href="15386.html">[前]</a><a href="15388.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
+</body>
+</html>

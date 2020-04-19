@@ -1,0 +1,168 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7822</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7821.html">[前]</a><a href="7823.html">[次]</a><a href="../list/7801-7900.html">[番号順一覧]</a><a href="../thread/7801-7900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7822
+</p>
+<div class="header">
+<p>
+From: MURAKAMI Yukio &lt;MURAKAMI Yukio &lt;m_yukio@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 25 May 2003 17:17:28 +0900<br>
+Subject: [mysql 07822] Re: PC 起動と同時に MySQL  起動（ Macint<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、村上と申します。
+
+<span class="quote1">&gt; PC起動と同時にMySQLも起動したいと思っています。</span>
+:
+<span class="quote1">&gt; パッケージ版でなくバイナリ版を使っている理由ですが、</span>
+<span class="quote1">&gt; パッケージ版だとOSX以下の/usr/local/といった</span>
+<span class="quote1">&gt; Finderから見えない場所に保存されてしまうため、</span>
+<span class="quote1">&gt; 扱いやすくするため保存先を指定してバイナリ版を</span>
+<span class="quote1">&gt; インストールしました。</span>
+
+私は、自分が望む設定で、かつ、望むディレクトリにインストール
+したいという理由で、ソース版を使用しています。
+バイナリ版は使用した経験がございませんので、私の情報はお役に
+たてないかもしれませんが、少しは、参考になると考えまして、説
+明させていただきます。
+
+まず、MySQLのディレクトリやファイル構成は、バージョンによって
+ことなりますので、正確な情報は、MySQL付属のドキュメントで確認
+する事になります。
+ソース版は、解凍して得られたMySQLのディレクトリ直下にある
+INSTALL-SOURCEで説明されています。
+私が使用しています3.23.55は、mysql.serverというBourneシェル
+スクリプトで自動起動を行います。
+
+次に、Mac OX X固有の情報は、Appleのサイトを検索すれば得られ
+ます。URLは忘れてしまいました。
+
+そして、オライリーの「プログラミングMac OS X for Unix Geeks」
+で、サンプルソースとして、MySQLの自動機能が説明されていて、
+参考になります。
+
+追加情報ですが、最新のMac OS Xでは、StartupParameters.plist
+が、より厳密になったのか、古いバージョンで上手く行っていた
+内容で、起動に失敗しました。
+
+ちなみに、私の自動起動の為の設定ファイルは、以下の内容となっ
+ていますので、参考にして下さい。
+
+----------(/etc/hostconfig)----------
+（省略）
+	:
+MYSQLSERVER=-YES-
+	:
+（省略）
+----------(/etc/hostconfig)----------
+
+私は、MySQLをMYSQLSERVERという変数名にしました。
+
+----------(/Library/StartupItems/MySQL/MySQL)----------
+#!/bin/sh
+
+##
+# Start MySQL Server
+##
+
+. /etc/rc.common
+
+StartService()
+{
+         if [ &quot;${MYSQLSERVER:=-NO-}&quot; = &quot;-YES-&quot; ]; then
+                 ConsoleMessage &quot;Starting MySQL Server&quot;
+                 sh /usr/local/mysql/share/mysql/mysql.server start
+         fi
+}
+
+StopService()
+{
+         ConsoleMessage &quot;Stopping MySQL Server&quot;
+         sh /usr/local/mysql/share/mysql/mysql.server stop
+}
+
+RestartService()
+{
+         if [ &quot;${MYSQLSERVER:=-NO-}&quot; = &quot;-YES-&quot; ]; then
+                 ConsoleMessage &quot;Restarting MySQL Server&quot;
+                 StopService
+                 StartService
+         else
+                 StopService
+         fi
+}
+
+RunService &quot;$1&quot;
+----------(/Library/StartupItems/MySQL/MySQL)----------
+
+以前は、以下のswitch分で起動／停止をしていたのですが、最新の
+Mac OS Xの環境では、上記の記述が出来るようになったのですね。
+
+case &quot;$1&quot; in
+'start')
+        if [ &quot;${MYSQLSERVER:=-NO-}&quot; = &quot;-YES-&quot; ]; then
+                ConsoleMessage &quot;Starting MySQL Server&quot;
+                sh /usr/local/mysql/share/mysql/mysql.server start
+        fi
+        ;;
+'stop')
+        sh /usr/local/mysql/share/mysql/mysql.server stop
+        ;;
+*)
+        echo &quot;Usage: /Library/StartupItems/MySQL/MySQL { start | stop }&quot;
+        ;;
+esac
+
+＞雑談
+　初期のMac OS Xでは、バグっていた、システム終了時にOSから
+　停止要求がこないと、Appleのドキュメントで説明されていた
+　ような気がしますが、現在は、修正されたのでしょうか？
+
+----------(/Library/StartupItems/MySQL/ 
+StartupParameters.plist)----------
+{
+   Description     = &quot;MySQL Initialization&quot;;
+   Provides        = (&quot;MySQL&quot;);
+   Requires        = (&quot;Network&quot;);
+   OrderPreference = &quot;Late&quot;;
+   Messages =
+   {
+     start = &quot;Starting MySQL&quot;;
+     stop  = &quot;Stopping MySQL&quot;;
+   };
+}
+----------(/Library/StartupItems/MySQL/ 
+StartupParameters.plist)----------
+
+上記の内容は、先に説明した書籍のまったくの真似です。
+どう設定すべきかよく分かっていないため、適当な値としました。
+--
+ビッツ有限会社  代表取締役／SE  村上幸雄
+&lt;e-mail&gt; murakami@xxxxxxxxxx
+&lt;URL&gt;    <a href="http://www.bitz.co.jp/">http://www.bitz.co.jp/</a>
+※村上事務所から法人成りしました。
+
+
+</pre>
+</div>
+<p class="button"><a href="7821.html">[前]</a><a href="7823.html">[次]</a><a href="../list/7801-7900.html">[番号順一覧]</a><a href="../thread/7801-7900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7805.html">   7805 2003-05-22 18:49 [&quot;Kana Tobata&quot; &lt;ktoba] PC 起動と同時に MySQL 起動（ Macintosh ）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7806.html">   7806 2003-05-22 19:02 ┣[gustav &lt;beatle@xxxxx] Re: PC 起動と同時に MySQL  起動（ Macint</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7807.html">   7807 2003-05-22 19:59 ┣[Naoki Kawaharazuka &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7809.html">   7809 2003-05-23 00:51 ┣[Hiroto Tsubaki &lt;jak@] Re: PC 起動と同時に  MySQL  起動（ Macintosh</a></span>
+<span class="current">-&gt;&nbsp;<a href="7822.html">   7822 2003-05-25 17:17 ┗[MURAKAMI Yukio &lt;m_yu] Re: PC 起動と同時に MySQL  起動（ Macint</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7823.html">   7823 2003-05-26 10:45 　┗[&quot;Kana Tobata&quot; &lt;ktoba]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7824.html">   7824 2003-05-26 13:26 　　┗[&quot;Kana Tobata&quot; &lt;ktoba]                                   </a></span>
+</pre>
+</body>
+</html>

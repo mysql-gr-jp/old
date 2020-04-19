@@ -1,0 +1,459 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13569</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13568.html">[前]</a><a href="13570.html">[次]</a><a href="../list/13501-13600.html">[番号順一覧]</a><a href="../thread/13501-13600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13569
+</p>
+<div class="header">
+<p>
+From: &lt;atakahashi@xxxxxxxxxx&gt;<br>
+Date: Mon, 4 Dec 2006 09:48:53 +0900<br>
+Subject: [mysql 13569] Mysql の一意制約を判別する方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+OSのVER]:WINDOWS XP
+[VBのVER]:VISUAL BASIC6.0
+[MysqlのVER]Version4.025
+
+VB初心者の「じろう」ものです。
+
+現在、VB　ADO、データベースはMysql（Version4.025）で開発を行っております。
+
+例外処理で一意制約エラーの判定文を作成したいのですが、
+エラーコードが一意制約独自のものはありませんでした。
+
+どうやって例外処理の判定文を作ればいいかご教授お願いします。
+
+これはVBの掲示板で聞けばいいか分かりませんが、、、、
+
+ソースを下記に記載いたします。
+********************************
+
+Sub CSV取込処理_Click()
+Dim myrec As ADODB.Recordset
+Set myrec = New ADODB.Recordset
+Dim cn As ADODB.Connection
+Dim cnt As String
+Dim sql As String
+
+Dim i As Integer
+Dim myFileName
+
+Dim Fhiduke As Date
+Dim Thiduke As Date
+
+Dim suryou As Integer
+
+Dim intRet As Integer
+Dim strMsg As String
+
+
+On Error GoTo NormalErr
+
+Application.DisplayAlerts = False
+
+Fhiduke = Str(Cells(2, 2))
+Thiduke = Str(Cells(2, 4))
+
+cnt = &quot;Provider=MSDASQL.1;Data Source=minipos_system&quot;
+
+' ダイアログを表示
+myFileName = Application.GetOpenFilename( _
+fileFilter:=&quot;CSV ファイル(*.CSV), *.CSV&quot;, _
+Title:=&quot;ファイルを選択して下さい&quot;, MultiSelect:=False)
+
+
+If myFileName = False Then
+Exit Sub
+End If
+
+Workbooks.Open myFileName
+
+i = 1
+
+Set cn = CreateObject(&quot;ADODB.Connection&quot;)
+cn.Open cnt
+
+On Error GoTo SqlErr
+cn.BeginTrans
+
+Do Until Cells(i, 3) = &quot;MISC&quot;
+suryou = Cells(i, 4) / 100
+sql = &quot;insert into
+67ds.u_import(hiduke,jan_code,syohinmei,sum_suryo,sum_kingaku) values( '&quot; &amp;
+Str(Now()) &amp; Cells(i, 7) &amp; &quot;' , '&quot; &amp; Cells(i, 1) &amp; &quot;' , '&quot; &amp; Cells(i, 3) &amp;
+&quot;' , '&quot; &amp; suryou &amp; &quot;' , '&quot; &amp; Cells(i, 6) &amp; &quot;');&quot;
+cn.Execute (sql)
+i = i + 1
+Loop
+
+cn.CommitTrans
+cn.Close
+
+On Error GoTo NormalErr
+
+MsgBox &quot;CSVインポート処理は成功しました。&quot;
+
+ActiveWorkbook.Close
+Kill myFileName
+
+intRet = MsgBox(&quot;日計表を印刷しますか？&quot;, vbYesNo)
+If intRet = vbYes Then
+
+sql = &quot;Select
+m_syohin.code,m_syohin.syohinmei,m_syohin.kikakumei,u_import.sum_suryo,u_import.sum_kingaku
+ ,u_import.hiduke From 67ds.u_import LEFT JOIN 67ds.m_syohin on
+u_import.jan_code = m_syohin.jan_code &quot;
+sql = sql &amp; &quot; Where u_import.hiduke &lt;= '&quot; &amp; Str(Now()) &amp; &quot;'&quot;
+sql = sql &amp; &quot; Order by u_import.hiduke ,m_syohin.code2 , m_syohin.kikakumei
+&quot;
+
+Workbooks.Add
+
+Cells(1, 3) = &quot;指定日：&quot; &amp; Format$(CStr(Now()), &quot;YYYY年MM月DD日&quot;) &amp; &quot;〜&quot; &amp;
+Format$(CStr(Now()), &quot;YYYY年MM月DD日&quot;)
+Range(&quot;C1:F1&quot;).Select
+With Selection
+.HorizontalAlignment = xlGeneral
+.VerticalAlignment = xlCenter
+.WrapText = False
+.Orientation = 0
+.AddIndent = False
+.IndentLevel = 0
+.ShrinkToFit = False
+.ReadingOrder = xlContext
+.MergeCells = True
+End With
+
+Columns(&quot;C:C&quot;).EntireColumn.AutoFit
+Selection.Font.Bold = True
+Cells(1, 3).Select
+With Selection.Font
+.Name = &quot;ＭＳ Ｐゴシック&quot;
+.Size = 9
+.Strikethrough = False
+.Superscript = False
+.Subscript = False
+.OutlineFont = False
+.Shadow = False
+.Underline = xlUnderlineStyleSingle
+.ColorIndex = xlAutomatic
+End With
+With Selection
+.HorizontalAlignment = xlGeneral
+.VerticalAlignment = xlBottom
+.WrapText = False
+.Orientation = 0
+.AddIndent = False
+.IndentLevel = 0
+.ShrinkToFit = False
+.ReadingOrder = xlContext
+.MergeCells = True
+End With
+
+
+myrec.Open sql, cnt
+
+If myrec.EOF = True Then
+Beep
+MsgBox &quot;インポートされた売上情報にデータがありません。&quot;
+ActiveWorkbook.Close
+Exit Sub
+End If
+
+myrec.MoveFirst
+Cells(1, 2).Select
+With Selection.Font
+.Name = &quot;ＭＳ Ｐゴシック&quot;
+.Size = 14
+.Strikethrough = False
+.Superscript = False
+.Subscript = False
+.OutlineFont = False
+.Shadow = False
+.Underline = xlUnderlineStyleNone
+.ColorIndex = xlAutomatic
+End With
+Selection.Font.Underline = xlUnderlineStyleSingle
+Rows(&quot;1:1&quot;).RowHeight = 36
+Selection.Font.Bold = True
+
+
+Cells(2, 1).Value = &quot;コード&quot;
+Cells(2, 2).Value = &quot;商品名&quot;
+Cells(2, 3).Value = &quot;規格&quot;
+Cells(2, 4).Value = &quot;合計数量&quot;
+Cells(2, 5).Value = &quot;合計金額&quot;
+Cells(2, 6).Value = &quot;日付&quot;
+
+Range(&quot;A2:F2&quot;).Select
+Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+With Selection.Borders(xlEdgeTop)
+.LineStyle = xlContinuous
+.Weight = xlMedium
+.ColorIndex = xlAutomatic
+End With
+
+With Selection.Borders(xlEdgeLeft)
+.LineStyle = xlContinuous
+.Weight = xlThin
+.ColorIndex = xlAutomatic
+End With
+With Selection.Borders(xlEdgeBottom)
+.LineStyle = xlContinuous
+.Weight = xlMedium
+.ColorIndex = xlAutomatic
+End With
+With Selection.Borders(xlEdgeRight)
+.LineStyle = xlContinuous
+.Weight = xlThin
+.ColorIndex = xlAutomatic
+End With
+With Selection.Borders(xlInsideVertical)
+.LineStyle = xlContinuous
+.Weight = xlThin
+.ColorIndex = xlAutomatic
+End With
+With Selection
+.HorizontalAlignment = xlCenter
+.VerticalAlignment = xlCenter
+.WrapText = False
+.Orientation = 0
+.AddIndent = False
+.IndentLevel = 0
+.ShrinkToFit = False
+.ReadingOrder = xlContext
+.MergeCells = False
+End With
+
+i = 3
+
+Do Until myrec.EOF = True
+Cells(i, 1) = myrec.Fields(0).Value
+Cells(i, 2) = myrec.Fields(1).Value
+If IsNull(myrec.Fields(2).Value) = True Or myrec.Fields(2).Value = &quot;(null)&quot;
+Then
+Cells(i, 3) = &quot;&quot;
+Else
+Cells(i, 3) = myrec.Fields(2).Value
+End If
+Cells(i, 4) = myrec.Fields(3).Value
+Cells(i, 5) = myrec.Fields(4).Value
+Cells(i, 5).Select
+Selection.NumberFormatLocal = &quot;#,##0&quot;
+Cells(i, 6) = myrec.Fields(5).Value
+
+Cells(i, 2).Select
+Selection.Font.Bold = True
+
+Range(Cells(i, 1), Cells(i, 6)).Select
+
+Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+With Selection.Borders(xlEdgeLeft)
+.LineStyle = xlContinuous
+.Weight = xlThin
+.ColorIndex = xlAutomatic
+End With
+With Selection.Borders(xlEdgeBottom)
+.LineStyle = xlContinuous
+.Weight = xlThin
+.ColorIndex = xlAutomatic
+End With
+With Selection.Borders(xlEdgeRight)
+.LineStyle = xlContinuous
+.Weight = xlThin
+.ColorIndex = xlAutomatic
+End With
+With Selection.Borders(xlInsideVertical)
+.LineStyle = xlContinuous
+.Weight = xlThin
+.ColorIndex = xlAutomatic
+End With
+
+myrec.MoveNext
+i = i + 1
+Loop
+
+Range(Cells(i, 1), Cells(i, 6)).Select
+Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+With Selection.Borders(xlEdgeLeft)
+.LineStyle = xlContinuous
+.Weight = xlThin
+.ColorIndex = xlAutomatic
+End With
+With Selection.Borders(xlEdgeTop)
+.LineStyle = xlContinuous
+.Weight = xlMedium
+.ColorIndex = xlAutomatic
+End With
+With Selection.Borders(xlEdgeBottom)
+.LineStyle = xlContinuous
+.Weight = xlMedium
+.ColorIndex = xlAutomatic
+End With
+With Selection.Borders(xlEdgeRight)
+.LineStyle = xlContinuous
+.Weight = xlThin
+.ColorIndex = xlAutomatic
+End With
+With Selection.Borders(xlInsideVertical)
+.LineStyle = xlContinuous
+.Weight = xlThin
+.ColorIndex = xlAutomatic
+End With
+Cells(i, 4).Select
+Selection.Font.Bold = True
+ActiveCell.FormulaR1C1 = &quot;=SUM(R[-&quot; &amp; i - 3 &amp; &quot;]C:R[-1]C)&quot;
+Cells(i, 5).Select
+Selection.Font.Bold = True
+ActiveCell.FormulaR1C1 = &quot;=SUM(R[-&quot; &amp; i - 3 &amp; &quot;]C:R[-1]C)&quot;
+Selection.NumberFormatLocal = &quot;#,##0&quot;
+
+Range(Cells(i, 1), Cells(i, 3)).Select
+With Selection
+.HorizontalAlignment = xlGeneral
+.VerticalAlignment = xlCenter
+.WrapText = False
+.Orientation = 0
+.AddIndent = False
+.IndentLevel = 0
+.ShrinkToFit = False
+.ReadingOrder = xlContext
+.MergeCells = True
+End With
+
+ActiveCell.FormulaR1C1 = &quot;総合計&quot;
+ActiveCell.Characters(1, 1).PhoneticCharacters = &quot;ソウ&quot;
+ActiveCell.Characters(2, 2).PhoneticCharacters = &quot;ゴウケイ&quot;
+
+myrec.Close
+Set myrec = Nothing
+
+Columns(&quot;A:A&quot;).EntireColumn.AutoFit
+Columns(&quot;B:B&quot;).EntireColumn.AutoFit
+Columns(&quot;C:C&quot;).EntireColumn.AutoFit
+Columns(&quot;D:D&quot;).EntireColumn.AutoFit
+Columns(&quot;E:E&quot;).EntireColumn.AutoFit
+Columns(&quot;F:F&quot;).EntireColumn.AutoFit
+
+Range(&quot;B1&quot;).Select
+ActiveCell.FormulaR1C1 = &quot;日計表&quot;
+ActiveCell.Characters(1, 3).PhoneticCharacters = &quot;ニッケイヒョウ&quot;
+Range(&quot;B1&quot;).Select
+With Selection.Font
+.Name = &quot;ＭＳ Ｐゴシック&quot;
+.Size = 16
+.Strikethrough = False
+.Superscript = False
+.Subscript = False
+.OutlineFont = False
+.Shadow = False
+.Underline = xlUnderlineStyleNone
+.ColorIndex = xlAutomatic
+End With
+Selection.Font.Bold = True
+Range(&quot;B1&quot;).Select
+ActiveCell.FormulaR1C1 = &quot;日計表&quot;
+With ActiveCell.Characters(Start:=1, Length:=3).Font
+.Name = &quot;ＭＳ Ｐゴシック&quot;
+.FontStyle = &quot;太字&quot;
+.Size = 16
+.Strikethrough = False
+.Superscript = False
+.Subscript = False
+.OutlineFont = False
+.Shadow = False
+.Underline = xlUnderlineStyleSingle
+.ColorIndex = xlAutomatic
+End With
+ActiveCell.Characters(1, 3).PhoneticCharacters = &quot;ニッケイヒョウ&quot;
+Range(&quot;B1&quot;).Select
+
+With ActiveSheet.PageSetup
+.PrintTitleRows = &quot;$1:$2&quot;
+.PrintTitleColumns = &quot;&quot;
+End With
+ActiveSheet.PageSetup.PrintArea = &quot;&quot;
+With ActiveSheet.PageSetup
+.LeftHeader = &quot;&quot;
+.CenterHeader = &quot;&quot;
+.RightHeader = &quot;&quot;
+.LeftFooter = &quot;&amp;D&quot;
+.CenterFooter = &quot;&amp;P/&amp;N&quot;
+.RightFooter = &quot;&quot;
+.LeftMargin = Application.InchesToPoints(0.78740157480315)
+.RightMargin = Application.InchesToPoints(0.78740157480315)
+.TopMargin = Application.InchesToPoints(0.984251968503937)
+.BottomMargin = Application.InchesToPoints(0.984251968503937)
+.HeaderMargin = Application.InchesToPoints(0.511811023622047)
+.FooterMargin = Application.InchesToPoints(0.511811023622047)
+.PrintHeadings = False
+.PrintGridlines = False
+.PrintComments = xlPrintNoComments
+.PrintQuality = 600
+.CenterHorizontally = False
+.CenterVertically = False
+.Orientation = xlPortrait
+.Draft = False
+.PaperSize = xlPaperA4
+.FirstPageNumber = xlAutomatic
+.Order = xlDownThenOver
+.BlackAndWhite = False
+.Zoom = 100
+.PrintErrors = xlPrintErrorsDisplayed
+End With
+ActiveWindow.SelectedSheets.PrintOut Copies:=1, Collate:=True
+Range(&quot;A1&quot;).Select
+
+Else
+Exit Sub
+End If
+
+ActiveWorkbook.Close
+Exit Sub
+
+SqlErr:
+' 一意制約エラー
+If CStr(Err.Number) = &quot;-2147217900&quot; Then
+MsgBox &quot;登録されたデータは重複した可能性があります。日次処理を行い、既に
+データが登録されているか確認して下さい。&quot;
+MsgBox Err.Description, vbOKOnly, &quot;SQL番号&quot; &amp; CStr(Err.Number)
+cn.RollbackTrans
+cn.Close
+ActiveWorkbook.Close
+Kill myFileName
+Exit Sub
+Else
+MsgBox &quot;SQLエラー：インポートに失敗しました。&quot;
+cn.RollbackTrans
+cn.Close
+ActiveWorkbook.Close
+Exit Sub
+End If
+NormalErr:
+MsgBox &quot;エラーが発生しました。&quot;
+ActiveWorkbook.Close
+Exit Sub
+End Sub
+
+*******************************************
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="13568.html">[前]</a><a href="13570.html">[次]</a><a href="../list/13501-13600.html">[番号順一覧]</a><a href="../thread/13501-13600.html">[スレッド一覧]</a></p>
+</body>
+</html>

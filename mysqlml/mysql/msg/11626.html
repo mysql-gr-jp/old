@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11626</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11625.html">[前]</a><a href="11627.html">[次]</a><a href="../list/11601-11700.html">[番号順一覧]</a><a href="../thread/11601-11700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11626
+</p>
+<div class="header">
+<p>
+From: MAO &lt;MAO &lt;mao@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 25 Jun 2005 03:30:05 +0900<br>
+Subject: [mysql 11626] Re: 3つのテーブルのjoin<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+梅沢さん
+ご回答ありがとうございます。
+
+たしかに、打ちまちがえでした。
+
+ですが、修正したところ、まったく違う結果に。。。。??
+
+SELECT g.gid, g.gname, count( u.uid ) ,sum(i.inum)
+FROM (grp g
+LEFT join usr u ON g.gid = u.gid) left join item i on g.gid = i.gid
+GROUP  BY g.gid;
+
+でやってみたところ、
+
++-----+---------+----------------+-------------+
+<span class="quote1">| gid | gname   | count( u.uid ) | sum(i.inum) |</span>
++-----+---------+----------------+-------------+
+<span class="quote1">|   1 | チームA |              6 |          48 |</span>
+<span class="quote1">|   2 | チームB |              1 |           3 |</span>
++-----+---------+----------------+-------------+
+
+となってしまいました。
+
+
+等価結合と外部結合の組み合わせで、
+
+SELECT g.gid, g.gname, count( u.uid ) , sum( i.inum ) 
+FROM ( grp g LEFT  JOIN usr u ON g.gid = u.gid ),item i
+WHERE g.gid = i.gid
+GROUP  BY g.gid
+
+と、してみましたが、これも同様で上記の結果となり、
+
+SELECT g.gid,g.gname, count( u.uid ),sum(i.inum)
+FROM grp g
+LEFT join usr u ON g.gid = u.gid
+LEFT join item i on g.gid=i.gid
+GROUP  BY g.gid
+
+と、やっても、上記になります。
+
+
++-----+---------+----------------+-------------+
+<span class="quote1">| gid | gname   | count( u.uid ) | sum(i.inum) |</span>
++-----+---------+----------------+-------------+
+<span class="quote1">|   1 | チームA |              2 |          24 |</span>
+<span class="quote1">|   2 | チームB |              1 |           3 |</span>
++-----+---------+------------------------------+
+にまったくならず。。。。。。
+
+どこかでダブルカウントされてしまっているのでしょうか？
+
+以上、よろしくお願いいたします。
+
+
+</pre>
+</div>
+<p class="button"><a href="11625.html">[前]</a><a href="11627.html">[次]</a><a href="../list/11601-11700.html">[番号順一覧]</a><a href="../thread/11601-11700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11625.html">  11625 2005-06-25 03:01 [梅沢　功 &lt;umezawa@xx] Re: 3つのテーブルのjoin                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="11626.html">  11626 2005-06-25 03:30 ┗[MAO &lt;mao@xxxxxxxxxx&gt;]                                       </a></span>
+</pre>
+</body>
+</html>

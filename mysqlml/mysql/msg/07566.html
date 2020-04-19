@@ -1,0 +1,117 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7566</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7565.html">[前]</a><a href="7567.html">[次]</a><a href="../list/7501-7600.html">[番号順一覧]</a><a href="../thread/7501-7600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7566
+</p>
+<div class="header">
+<p>
+From: &quot;HIGUCHI Koichi&quot; &lt;&quot;HIGUCHI Koichi&quot; &lt;ko-ichi@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 20 Apr 2003 04:16:51 +0900<br>
+Subject: [mysql 07566] 文書検索のためのテーブル設計<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、樋口と申します。
+
+文書の検索などを行うためのフリーソフトウェアをPerl/Tk + MySQLで作製しようと
+しているのですが、テーブル設計で行き詰まってしまいました。皆様のお知恵をかし
+ていただけませんでしょうか。
+
+まず、次のようなテーブルが用意されています。
+
+#----------------#
+文書ID   -   単語
+1   -   今日
+1   -   は
+1   -   良い
+1   -   天気
+1   -   だ
+1   -   。
+2   -   明日
+2   -   は
+2   -   どう
+2   -   かな
+#----------------#
+
+実現したいことは、単語による文書の検索です。
+例えば、「今日 or 明日 &gt;= 2」という検索式を入力して、「今日」が含まれている
+か、「明日」が2つ以上含まれている文書を検索するといった具合です。
+
+この場合、どんな方法、ないしはSQL文を用いれば、MySQLの速さを活かした検索が行
+えそうでしょうか？
+皆様のアイデア、あるいは参考になりそうな書籍、ホームページなどなど、お教えい
+ただければ幸いです。
+
+
+ちなみに、私が考えたのは次のような検索手順です。
+
+まず、入力された検索式に含まれる単語1つ1つについて、各文書で何回出現している
+かを調べ上げ、一時テーブルにその結果を保存します。
+
+ CREATE TABLE 今日-TEMP (...中略...)
+ INSERT INTO 今日-TEMP (文書ID, 出現数)
+  SELECT   文書ID count(*)
+  FROM     冒頭のテーブル
+  WHERE    単語 = '今日'
+  GROUP BY 文書ID
+
+次に、「今日-TEMP」、「明日-TEMP」などの一時テーブルを全てJOINして、条件に合
+致するレコード（文書ID）を取り出すというものです。
+
+ SELECT 文書ID
+ FROM   文書IDリスト
+  LEFT JOIN 今日-TEMP ON 文書IDリスト.文書ID = 今日-TEMP.文書ID
+  LEFT JOIN 明日-TEMP
+ WHERE  ...
+
+しかしこの方法では、検索式に32種類以上の単語が含まれていた場合、「Too many
+tables. MySQL can only use 31 tables in a join」という制限にぶつかってしまい
+ます。
+
+かといって、次のようなテーブルをあらかじめ作っておくことには、ちょっと気後れ
+しています。
+#--------------------------------#
+文書ID   -   今日   -   明日 ...
+1   -   1   -   0   ...
+2   -   0   -   1   ...
+3   -   0   -   0   ...
+#--------------------------------#
+10万以上（単語の種類数）フィールがあって、中身はほとんど0というスパースな
+テーブルになってしまうけど、良いのかなぁ、、、と気後れしています。
+（大半の語は1回か2回しか出現しないためです）
+
+MySQLはおろかSQLにすら十分には慣れていないのですが、宜しく御願い致します。
+
+# なお現状としては、この程度のものがなんとか動いてるという状態です。
+# <a href="http://koichi.nihon.to/psnl/khcoder/linux_fig.html">http://koichi.nihon.to/psnl/khcoder/linux_fig.html</a>
+
+# Namazuはどうやっているのだろうと思って調べかけたのですが、、、
+# インデックス・ファイルの仕様を眺めただけでは、良く分からなかったです・・
+・。
+
+大阪大学 大学院 博士課程
+樋口耕一
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="7565.html">[前]</a><a href="7567.html">[次]</a><a href="../list/7501-7600.html">[番号順一覧]</a><a href="../thread/7501-7600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="7566.html">   7566 2003-04-20 04:16 [&quot;HIGUCHI Koichi&quot; &lt;ko] 文書検索のためのテーブル設計            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7567.html">   7567 2003-04-20 04:59 ┣[Shinya Kawaji &lt;kawaj]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7568.html">   7568 2003-04-20 05:07 ┣[Shogo &lt;shogo@xxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7569.html">   7569 2003-04-20 06:51 ┣[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7570.html">   7570 2003-04-20 09:40 ┗[&quot;HIGUCHI Koichi&quot; &lt;ko]                                       </a></span>
+</pre>
+</body>
+</html>

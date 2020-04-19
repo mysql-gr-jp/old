@@ -1,0 +1,157 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7823</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7822.html">[前]</a><a href="7824.html">[次]</a><a href="../list/7801-7900.html">[番号順一覧]</a><a href="../thread/7801-7900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7823
+</p>
+<div class="header">
+<p>
+From: &quot;Kana Tobata&quot; &lt;&quot;Kana Tobata&quot; &lt;ktobata@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 26 May 2003 10:45:49 +0900<br>
+Subject: [mysql 07823] Re: PC 起動と同時に MySQL   起動（ Macint<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+Tsubaki様、村上様　おはようございます。
+いろいろ情報をありがとうございます。
+
+
+ちょっと今までのところをまとめてみようと思います。
+
+Users/tobata内にmysqlというフォルダを作成後、
+インストールの際、
+./configure --prefix=/Users/tobata/mysql
+のように指定。
+
+<a href="http://www.entropy.ch/software/macosx/mysql/">http://www.entropy.ch/software/macosx/mysql/</a>
+にあるスタートアップ用のパッケージをインストール。
+
+/Library/StartupItems/MySQL/MySQL
+の内容は
+
+-------------------------------------------------------
+#!/bin/sh
+
+. /etc/rc.common
+
+##
+# Start up the MySQL database server on Mac OS X / Darwin
+#
+
+if [ &quot;${MYSQL:=-YES-}&quot; = &quot;-YES-&quot; ]; then
+
+    ConsoleMessage &quot;Starting MySQL database server&quot;
+
+ cd /usr/local/
+ REALDIR=`perl -e 'print readlink &quot;mysql&quot;'`
+ cd $REALDIR
+
+ # We have to find out if we're starting a 3.x or a 4.x
+ # MySQL database server
+ #
+ if [ -e ./bin/safe_mysqld ]
+ then
+
+  # This is version 3.x
+  #
+  ./bin/safe_mysqld --user=mysql &amp;
+
+ elif [ -e ./bin/mysqld_safe ]
+ then
+
+  # This is version 4.x
+  #
+  ./bin/mysqld_safe --user=mysql &amp;
+
+ else
+
+  # Don't know what version this is
+  #
+  ConsoleMessage &quot;Found neither safe_mysqld nor mysqld_safe&quot;
+
+ fi
+
+fi
+
+---------------------------------------------------------
+
+
+これをこのまま使用すると、
+
+Starting MySQL database server
+Found neither safe_mysqld nor mysqld_safe
+となるが、これはmysqlが/usr/local以下にインストールされて
+いないから当然こうなる。
+
+このファイルの中身をTsubaki様の案で、
+
+#!/bin/sh
+
+. /etc/rc.common
+
+sudo /Users/tobata/mysql/bin/safe_mysqld --user=mysql &amp;
+
+のみにすると
+
+Macintosh SystemStarter: Exec failed for item /Library/StartupItems/MySQL:
+No such file or directory
+Macintosh SystemStarter: MySQL database server (263) did not complete
+successfully.
+
+/Library/StartupItems/MySQL/MySQLの内容すら
+読み込まれてないのでは？と思います。
+
+ターミナルから
+/Users/tobata/mysql/bin/safe_mysqld --user=mysql &amp;
+と入力すれば、mysqlは起動します。
+
+
+/Library/StartupItems/MySQL/StartupParameters.plistの内容は
+-------------------------------------
+{
+   Description     = &quot;MySQL database server&quot;;
+   Provides        = (&quot;MySQL&quot;);
+   Requires        = (&quot;Resolver&quot;);
+   OrderPreference = &quot;Late&quot;;
+   Messages =
+   {
+     start = &quot;Starting MySQL&quot;;
+     stop  = &quot;Stopping MySQL&quot;;
+   };
+}
+------------------------------------
+
+これは全く扱っていません。
+
+
+これから、Appleのドキュメントをじっくり読んでみます。
+
+
+----------------------------
+φ（株）キューリン　
+   φシステム部　戸畑佳奈
+      φE-mail ktobata@xxxxxxxxxx
+----------------------------
+
+
+</pre>
+</div>
+<p class="button"><a href="7822.html">[前]</a><a href="7824.html">[次]</a><a href="../list/7801-7900.html">[番号順一覧]</a><a href="../thread/7801-7900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7805.html">   7805 2003-05-22 18:49 [&quot;Kana Tobata&quot; &lt;ktoba] PC 起動と同時に MySQL 起動（ Macintosh ）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7806.html">   7806 2003-05-22 19:02 ┣[gustav &lt;beatle@xxxxx] Re: PC 起動と同時に MySQL  起動（ Macint</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7807.html">   7807 2003-05-22 19:59 ┣[Naoki Kawaharazuka &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7809.html">   7809 2003-05-23 00:51 ┣[Hiroto Tsubaki &lt;jak@] Re: PC 起動と同時に  MySQL  起動（ Macintosh</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7822.html">   7822 2003-05-25 17:17 ┗[MURAKAMI Yukio &lt;m_yu] Re: PC 起動と同時に MySQL  起動（ Macint</a></span>
+<span class="current">-&gt;&nbsp;<a href="7823.html">   7823 2003-05-26 10:45 　┗[&quot;Kana Tobata&quot; &lt;ktoba]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7824.html">   7824 2003-05-26 13:26 　　┗[&quot;Kana Tobata&quot; &lt;ktoba]                                   </a></span>
+</pre>
+</body>
+</html>

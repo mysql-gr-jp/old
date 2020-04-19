@@ -1,0 +1,33 @@
+--- mysql-4.1.7/strings/ctype-ujis.c.orig	2004-10-23 16:28:47.000000000 +0900
++++ mysql-4.1.7/strings/ctype-ujis.c	2004-11-24 16:25:57.000000000 +0900
+@@ -8454,6 +8454,21 @@
+   return MY_CS_ILUNI;
+ }
+ 
++static uint my_well_formed_len_ujis(CHARSET_INFO *cs,
++				    const char *b, const char *e, uint pos)
++{
++  const char *b_start = b;
++  
++  while (pos && b < e)
++  {
++    int mblen;
++    if ((mblen = ismbchar_ujis(cs, b, e)) == 0)
++      mblen = 1;
++    b += mblen;
++    pos--;
++  }
++  return b - b_start;
++}
+ 
+ static MY_COLLATION_HANDLER my_collation_ci_handler =
+ {
+@@ -8475,7 +8490,7 @@
+     mbcharlen_ujis,
+     my_numchars_mb,
+     my_charpos_mb,
+-    my_well_formed_len_mb,
++    my_well_formed_len_ujis,
+     my_lengthsp_8bit,
+     my_numcells_eucjp,
+     my_mb_wc_euc_jp,	/* mb_wc       */

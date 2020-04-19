@@ -1,0 +1,127 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16206</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16205.html">[前]</a><a href="16207.html">[次]</a><a href="../list/16201-16300.html">[番号順一覧]</a><a href="../thread/16201-16300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16206
+</p>
+<div class="header">
+<p>
+From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 27 Jan 2015 18:55:06 +0900<br>
+Subject: [mysql 16206] Re: [mysql 16205] Re: LOAD DATA IN FILE についｔ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、yoku0825です。
+
+ウチでも前にCentOS 6.5でパフォーマンスが出なくて5.7か何かに戻したことがあったなぁとか思い出しました。
+黒田さんが教えてくださったフォーラムの書き込みを見ると、やっぱりext3にするのが良さそうに思えますね。
+
+<span class="quote1">&gt; MySQL is running 8,000% slower on CentOS 6x than CentOS 5x. Maybe ext4 related?</span>
+<span class="quote1">&gt; <a href="http://forums.mysql.com/read.php?11">http://forums.mysql.com/read.php?11</a>,589554,589554</span>
+&lt;quot&gt;
+So, I have found that MySQL running under CentOS 6.4 with ext3
+filesystem and barrier=0 is almost as fast as when running under
+CentOS 5X.
+&lt;/quot&gt;
+
+なおInnoDBはファイルシステムの保護に頼らずにACIDのDを実現するために
+(デフォルトで)InnoDBログをコミットのたびにfsyncしたり
+InnoDBテーブルスペースにマージする時に2回書き込んでfsyncしたりと色々しているので、
+InnoDBを使っている限りはバリアの有無はデータロストの有無はあまり関係ないかと思います。
+
+MyISAMだったらごめんなさい。
+
+
+yoku0825,
+
+2015年1月27日 14:12 笹山　敬祐 &lt;hyper_sql@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; 遅くなりましたが、テストが終わりました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; バリアを無効にした状態では1時間に短縮できました。</span>
+<span class="quote1">&gt; しかしながら、ext3の前の状態に比べ2倍かかっています。</span>
+<span class="quote1">&gt; やはり、バリアがなくてもext3＞ext4なのでしょうかね？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; On Mon, 26 Jan 2015 18:14:31 +0900</span>
+<span class="quote1">&gt; &quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; はじめまして、yoku0825といいます。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; Vine Linux 5.2から6.0の間でデフォルトのファイルシステムがext3からext4になったようですが</span>
+<span class="quote2">&gt;&gt; <a href="http://vinelinux.org/aboutvine6.html">http://vinelinux.org/aboutvine6.html</a></span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; バリアは有効な状態でしょうか？</span>
+<span class="quote2">&gt;&gt; <a href="http://d.hatena.ne.jp/iww/20110611/p1">http://d.hatena.ne.jp/iww/20110611/p1</a></span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 真面目に切り分けるとすると、旧サーバーに5.1.72を入れたらどうか、</span>
+<span class="quote2">&gt;&gt; 新サーバーに5.1.63を入れたらどうか、というあたりでMySQL側かサーバー側かを切り分けることになるだろうなーと思っています。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; yoku0825,</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 2015年1月26日 17:23 笹山 敬祐 &lt;hyper_sql@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt; &gt; はじめまして、笹山と申します。</span>
+<span class="quote3">&gt;&gt; &gt; 早速ですが標記の件、いままでメインで使用していた</span>
+<span class="quote3">&gt;&gt; &gt; Linuxサーバのコンデンサが膨らんできたので</span>
+<span class="quote3">&gt;&gt; &gt; 新しくサーバを組み、MysqlのデータをDumpから</span>
+<span class="quote3">&gt;&gt; &gt; 読み込ませたのですが、INSERT、UPDATEが遅く感じていました。</span>
+<span class="quote3">&gt;&gt; &gt;</span>
+<span class="quote3">&gt;&gt; &gt; この度、1500万件のTAB区切りデータをLOAD DATAで</span>
+<span class="quote3">&gt;&gt; &gt; Mysqlに読み込ませたところ、3時間以上かかり、</span>
+<span class="quote3">&gt;&gt; &gt; コンデンサの膨らんだ旧サーバで読み込ませると</span>
+<span class="quote3">&gt;&gt; &gt; 30分で読み込みが終わりました。</span>
+<span class="quote3">&gt;&gt; &gt;</span>
+<span class="quote3">&gt;&gt; &gt; my.cnfの内容も合わせたりしたのですが、</span>
+<span class="quote3">&gt;&gt; &gt; 改善せず、もし心当たりがありましたら</span>
+<span class="quote3">&gt;&gt; &gt; ご教示願いもうしあげます。</span>
+<span class="quote3">&gt;&gt; &gt;</span>
+<span class="quote3">&gt;&gt; &gt; （旧サーバ）</span>
+<span class="quote3">&gt;&gt; &gt; OS   ：Vine Linux 5.2 x86(32Bit)</span>
+<span class="quote3">&gt;&gt; &gt; Mysql:5.1.63(i686)</span>
+<span class="quote3">&gt;&gt; &gt; CPU  :Core2Duo E8500(3.16GHz)</span>
+<span class="quote3">&gt;&gt; &gt; メモリ:2G</span>
+<span class="quote3">&gt;&gt; &gt; (新サーバ)</span>
+<span class="quote3">&gt;&gt; &gt; OS   ：Vine Linux 6.0 x86_64(64Bit)</span>
+<span class="quote3">&gt;&gt; &gt; Mysql:5.1.72(i686)</span>
+<span class="quote3">&gt;&gt; &gt; CPU  :Pentium G2030(3.00GHz)</span>
+<span class="quote3">&gt;&gt; &gt; メモリ:8G</span>
+<span class="quote3">&gt;&gt; &gt;</span>
+<span class="quote3">&gt;&gt; &gt; なお、ハードディスクの書き込み性能は新サーバの方が2割くらい上です</span>
+<span class="quote3">&gt;&gt; &gt;</span>
+<span class="quote3">&gt;&gt; &gt; 笹山 敬祐</span>
+<span class="quote3">&gt;&gt; &gt;</span>
+<span class="quote3">&gt;&gt; &gt;</span>
+<span class="quote3">&gt;&gt; &gt;</span>
+<span class="quote3">&gt;&gt; &gt;</span>
+<span class="quote3">&gt;&gt; &gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="16205.html">[前]</a><a href="16207.html">[次]</a><a href="../list/16201-16300.html">[番号順一覧]</a><a href="../thread/16201-16300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16201.html">  16201 2015-01-26 17:23 [笹山　敬祐 &lt;hyper_sq] LOAD DATA IN FILE　についｔ             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16202.html">@ 16202 2015-01-26 18:14 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16201] LOAD DATA IN FILE についｔ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16203.html">  16203 2015-01-26 19:11 　┣[笹山　敬祐 &lt;hyper_sq] Re: LOAD DATA IN FILE  についｔ     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16204.html">  16204 2015-01-26 20:01 　┃┗[&lt;masaki.kuroda@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16205.html">  16205 2015-01-27 14:12 　┗[笹山　敬祐 &lt;hyper_sq] Re: LOAD DATA IN FILE  についｔ     </a></span>
+<span class="current">-&gt;&nbsp;<a href="16206.html">  16206 2015-01-27 18:55 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16205] Re: LOAD DATA IN FILE についｔ</a></span>
+</pre>
+</body>
+</html>

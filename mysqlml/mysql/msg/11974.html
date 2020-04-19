@@ -1,0 +1,220 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11974</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11973.html">[前]</a><a href="11975.html">[次]</a><a href="../list/11901-12000.html">[番号順一覧]</a><a href="../thread/11901-12000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11974
+</p>
+<div class="header">
+<p>
+From: Tetsuro IKEDA &lt;Tetsuro IKEDA &lt;tetsuro@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 16 Aug 2005 00:46:33 -0700<br>
+Subject: [mysql 11974] Re: JAVA で Mysql    にコネクトできません。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+池田です。
+
+あまり時間がないということなので・・・
+
+・WEB-INF/lib に mysql-connector-java-3.1.10-bin.jar をコピペする。
+・それ以外のことはしない（もちろんクラスパスへ通すことも不要）
+
+というのが必要十分条件です。
+（WEB-INF/libに置いたjarファイルに対してはアプリケーションサーバによって
+ロードされますのでクラスパス不要）
+
+当方の環境で mysql-connector-java-3.1.10-bin.jar を使って、
+下記のテストコードを走らせると、エラー無しに終了します。
+
+<span class="quote1">&gt; java.lang.NoClassDefFoundError:　org/aspectj/lang/Signature</span>
+
+このエラーが出るのは、mysql-connector-java-3.1.10-bin-g.jar に対して
+クラスパスがどこからか通っているからだ、とConnector/Jの開発者である
+Mark Matthews氏も言っています。
+
+以下の点を再度確認してみてください。
+
+・間違ってmysql-connector-java-3.1.10-bin-g.jarにクラスパスが通っていな
+いかどうか
+・mysql-connector-java-3.1.10-bin-g.jarをリネームしてmysql-connector-
+java-3.1.10-bin.jarにしていたりはしないか
+・mysql-connector-java-3.1.10-bin.jarは本当にmysql-connector-java-3.1.10
+-bin.jarなのか
+
+（jar -tf mysql-connector-java-3.1.10-bin.jar を実行した際に
+com/mysql/jdbc/trace/Tracer.classが含まれているか否か。）
+
+leader_cat wrote:
+<span class="quote1">&gt; 度々すいません。お世話になります。m(__)m</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ご指摘の&quot;mysql-connector-java-3.1.10-bin.jar&quot;は他で既にダウンロード済で</span>
+<span class="quote1">&gt; WEB-INF/libにコピペ済でしたが…</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; （スレ・トップより）</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt;[Tomcat 5.5]</span>
+<span class="quote3">&gt;&gt;  |</span>
+<span class="quote2">&gt;&gt;  + [webapps]</span>
+<span class="quote3">&gt;&gt;    |</span>
+<span class="quote2">&gt;&gt;    + [servlets_test]</span>
+<span class="quote3">&gt;&gt;      |</span>
+<span class="quote2">&gt;&gt;      + [mysql_test]</span>
+<span class="quote3">&gt;&gt;      |</span>
+<span class="quote2">&gt;&gt;      + [WEB-INF] - web.xml</span>
+<span class="quote3">&gt;&gt;        |</span>
+<span class="quote2">&gt;&gt;        + [classes] - mysql_access.java</span>
+<span class="quote4">&gt;&gt;        |               |</span>
+<span class="quote3">&gt;&gt;        |              + mysql_access.class</span>
+<span class="quote3">&gt;&gt;        |</span>
+<span class="quote2">&gt;&gt;        + [lib] - aspectjrt.jar</span>
+<span class="quote4">&gt;&gt;        |        |</span>
+<span class="quote3">&gt;&gt;        |       + mysql-connector-java-3.1.10-bin.jar（自分でここにコピー</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; した）　←※ココ</span>
+<span class="quote1">&gt; </span>
+<span class="quote3">&gt;&gt;        |</span>
+<span class="quote2">&gt;&gt;        + mysql_test_index.html（これから&quot;mysql_access&quot;にリンク）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; それとダウンロードし、解凍して出来た&quot;mysql-connector-java-3.1.10-bin.jar&quot;</span>
+<span class="quote1">&gt; は、</span>
+<span class="quote1">&gt; 以下のようなフォルダに入れてあります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; &quot;C:\mysql\mysql-connector-java-3.1.10&quot;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 解凍したままの為、&quot;mysql-connector-java-3.1.10-bin.jar&quot;も</span>
+<span class="quote1">&gt; &quot;mysql-connector-java-3.1.10-bin-g.jar&quot;もあります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; &quot;C:\mysql\mysql-connector-java-3.1.10\src\org\gjt\mm\mysql&quot;</span>
+<span class="quote1">&gt; には、&quot;Driver.java&quot;のみ存在します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; サーブレット上の、&quot;Class.forName(&quot;org.gjt.mm.mysql.Driver&quot;);&quot;って</span>
+<span class="quote1">&gt; 上記&quot;Driver.java&quot;を見に行ってるのではないんでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ちなみに上記は、以下のサイトを参考にしてました。</span>
+<span class="quote1">&gt; &quot;JavaでHello World　JDBC(MySQL)編&quot;</span>
+<span class="quote1">&gt; (<a href="http://www.hellohiro.com/jdbcmysql.htm">http://www.hellohiro.com/jdbcmysql.htm</a>)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; それと、ご指摘を受けてクラスパスは以下のように変えています。（&quot;C:\&quot;で折り返</span>
+<span class="quote1">&gt; して書いています）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; .;%JAVA_HOME%\lib\tools.jar;</span>
+<span class="quote1">&gt; C:\Program Files\Apache Software Foundation\Tomcat</span>
+<span class="quote1">&gt; 5.5\common\lib\servlet-api.jar;</span>
+<span class="quote1">&gt; C:\Program Files\Apache Software Foundation\Tomcat</span>
+<span class="quote1">&gt; 5.5\webapps\servlets_test\atmarkit\WEB-INF\classes;</span>
+<span class="quote1">&gt; C:\Program Files\Apache Software Foundation\Tomcat</span>
+<span class="quote1">&gt; 5.5\webapps\servlets_test\mysql_test\WEB-INF\classes;</span>
+<span class="quote1">&gt; C:\mysql\mysql-connector-java-3.1.10\mysql-connector-java-3.1.10-bin.jar;</span>
+<span class="quote1">&gt; C:\Program Files\Apache Software Foundation\Tomcat</span>
+<span class="quote1">&gt; 5.5\webapps\servlets_test\mysql_test\WEB-INF\lib</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; クラスパスからご指摘のあった、</span>
+<span class="quote1">&gt; C:\mysql\mysql-connector-java-3.1.10\src;</span>
+<span class="quote1">&gt; C:\Program Files\Java\aspectj1.5\lib\aspectjrt.jar</span>
+<span class="quote1">&gt; は削除しました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; C:\Program Files\Apache Software Foundation\Tomcat</span>
+<span class="quote1">&gt; 5.5\webapps\servlets_test\mysql_test\WEB-INF\lib</span>
+<span class="quote1">&gt; は、サーブレットの&quot;mysql-connector-java-3.1.10-bin.jar&quot;をコピペした</span>
+<span class="quote1">&gt; &quot;WEB-INF/lib&quot;にパスを通すのに</span>
+<span class="quote1">&gt; 必要だと思い追加しましたが…</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ご指摘のサンプルサイトを見て、データベースコネクトのサンプルを見つけ</span>
+<span class="quote1">&gt; 以下のjavaファイルを作り、&quot;C:\Connecting to MySQL&quot;というフォルダを作ってそこ</span>
+<span class="quote1">&gt; へ入れました。</span>
+<span class="quote1">&gt; （まあサンプルのまんまなんですが…）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 【LoadDriver.java】</span>
+<span class="quote1">&gt; import java.sql.Connection;</span>
+<span class="quote1">&gt; import java.sql.DriverManager;</span>
+<span class="quote1">&gt; import java.sql.SQLException;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; // Notice, do not import com.mysql.jdbc.*</span>
+<span class="quote1">&gt; // or you will have problems!</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; public class LoadDriver {</span>
+<span class="quote1">&gt;     public static void main(String[] args) {</span>
+<span class="quote1">&gt;         try {</span>
+<span class="quote1">&gt;             // The newInstance() call is a work around for some</span>
+<span class="quote1">&gt;             // broken Java implementations</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;             Class.forName(&quot;com.mysql.jdbc.Driver&quot;).newInstance();</span>
+<span class="quote1">&gt;         } catch (Exception ex) {</span>
+<span class="quote1">&gt;             // handle the error</span>
+<span class="quote1">&gt;         }</span>
+<span class="quote1">&gt;     }</span>
+<span class="quote1">&gt; }</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; コンパイル（C:\Connecting to MySQL&gt;javac LoadDriver.java）は通りました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 実行してみる（&quot;C:\Connecting to MySQL&gt;java LoadDriver&quot;）と以下のようにサーブ</span>
+<span class="quote1">&gt; レットの時と同様のエラーでした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; C:\Connecting to MySQL&gt;java LoadDriver</span>
+<span class="quote1">&gt; Exception in thread &quot;main&quot; java.lang.NoClassDefFoundError:</span>
+<span class="quote1">&gt; org/aspectj/lang/Signature</span>
+<span class="quote1">&gt;         at java.lang.Class.forName0(Native Method)</span>
+<span class="quote1">&gt;         at java.lang.Class.forName(Unknown Source)</span>
+<span class="quote1">&gt;         at LoadDriver.main(LoadDriver.java:15)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ここで&quot;Class.forName(&quot;com.mysql.jdbc.Driver&quot;).newInstance();&quot;の</span>
+<span class="quote1">&gt; &quot;com.mysql.jdbc.Driver&quot;が</span>
+<span class="quote1">&gt; 違うのでは？と思い、サーブレットと同様に、</span>
+<span class="quote1">&gt; &quot;Class.forName(&quot;org.gjt.mm.mysql.Driver&quot;).newInstance();&quot;に</span>
+<span class="quote1">&gt; してやってみましたが同じエラーでした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; もちろん、クラスパスを書き換える度に、サービスの&quot;Apache Tomcat&quot;と&quot;Apache&quot;は</span>
+<span class="quote1">&gt; 再起動（&quot;停止&quot;して&quot;開始&quot;）しています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 何か根本的なミスをしてるのでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; あまり時間的余裕がありません。m(__)m</span>
+<span class="quote1">&gt; 最終的にはwebアプリとしてJSPやサーブレットからMySqlにアクセスし、</span>
+<span class="quote1">&gt; データベースに新規登録・更新・削除等を行わなければいけません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; それもデータベースにコネクトが出来なければ話にならないので…</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以上、よろしくお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; __________________________________</span>
+<span class="quote1">&gt; Save the earth</span>
+<span class="quote1">&gt; <a href="http://pr.mail.yahoo.co.jp/ondanka/">http://pr.mail.yahoo.co.jp/ondanka/</a></span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+</pre>
+</div>
+<p class="button"><a href="11973.html">[前]</a><a href="11975.html">[次]</a><a href="../list/11901-12000.html">[番号順一覧]</a><a href="../thread/11901-12000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11944.html">  11944 2005-08-12 18:33 [leader cat &lt;leader_c] JAVA で Mysql にコネクトできません。    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11946.html">  11946 2005-08-13 02:50 ┣[Tetsuro IKEDA &lt;tetsu]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11969.html">  11969 2005-08-16 10:11 ┃┗[&quot;leader_cat&quot; &lt;leader]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11971.html">  11971 2005-08-16 13:22 ┃　┗[Tetsuro IKEDA &lt;tetsu]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11972.html">  11972 2005-08-16 16:06 ┃　　┗[&quot;leader_cat&quot; &lt;leader]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="11974.html">  11974 2005-08-16 16:46 ┃　　　┗[Tetsuro IKEDA &lt;tetsu]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11977.html">  11977 2005-08-16 17:40 ┃　　　　┗[&quot;leader_cat&quot; &lt;leader]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11973.html">  11973 2005-08-16 16:32 ┗[KIshii &lt;kn-ishi@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11975.html">  11975 2005-08-16 16:49 　┣[Tetsuro IKEDA &lt;tetsu]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11978.html">  11978 2005-08-16 17:47 　┃┗[&quot;leader_cat&quot; &lt;leader]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11979.html">  11979 2005-08-16 23:11 　┃　┗[Tetsuro IKEDA &lt;tetsu]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11981.html">  11981 2005-08-17 09:14 　┃　　┗[&quot;leader_cat&quot; &lt;leader]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11976.html">  11976 2005-08-16 17:39 　┗[&quot;leader_cat&quot; &lt;leader]                                     </a></span>
+</pre>
+</body>
+</html>

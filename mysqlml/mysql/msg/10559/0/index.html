@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html;charset=ISO-2022-JP">
+  <title></title>
+</head>
+<body text="#000000" bgcolor="#ffffff">
+村上様<br>
+<br>
+内藤です。<br>
+ありがとうございます。早速試してみました。<br>
+コンパイルにちょっと手間取りましたが、なんとか動作するものが<br>
+できました。<br>
+いちおう4.0で作成したsjisのテーブル名は読み込めるようになっ<br>
+たのですが、sjisのフィールド名が読み込めません。select *　で<br>
+見ると、半角英文字のテーブル名のみが見えます。<br>
+<br>
+他にも修正する部分があるのではないでしょうか？お心当たりが<br>
+ありましたら、お教えください。<br>
+よろしくお願いいたします。<br>
+<br>
+<a class="moz-txt-link-abbreviated" href="mailto:takeshi@mysql.gr.jp">takeshi@mysql.gr.jp</a> wrote:<br>
+<blockquote type="cite" cite="mid87oehi3hdx.wl@debian.mysql.gr.jp">
+  <pre wrap="">村上です
+
+At Tue, 09 Nov 2004 00:53:15 +0900,
+George Akimoto wrote:
+  </pre>
+  <blockquote type="cite">
+    <pre wrap="">秋元です。
+    </pre>
+  </blockquote>
+  <pre wrap=""><!---->
+  </pre>
+  <blockquote type="cite">
+    <pre wrap="">default-character-set=sjisとしても、
+character_set_systemがutf8になってます。
+
+これはテーブル名とかコラム名を格納する際に使われているみたいですが、
+utf8に固定でmy.iniなどでの上書きもできなさそうです。
+
+適当なテーブルを作ってみたところ、確かにファイル名はUTF8でした。
+    </pre>
+  </blockquote>
+  <pre wrap=""><!---->
+
+4.1では、テーブル名、フィールド名は、UTF に変換して保存します。
+4.0 までの、バイナリスルーにするには、ソースを変えるしかないです。
+しかし、それほど大変な変更じゃなく、これだけ。
+これで、テーブル名、フィールド名は、UTF に変換されません。
+# 他に害がでるかどうかは充分な検証が必要です。
+
+diff -u mysql-4.1.8pre/sql/mysqld.cc.orig mysql-4.1.8pre/sql/mysqld.cc
+--- mysql-4.1.8pre/sql/mysqld.cc.orig	2004-11-28 07:40:38.000000000 +0900
++++ mysql-4.1.8pre/sql/mysqld.cc	2004-11-28 07:15:33.000000000 +0900
+@@ -5498,6 +5498,9 @@
+   system_charset_info= &amp;my_charset_utf8_general_ci;
+   files_charset_info= &amp;my_charset_utf8_general_ci;
+   national_charset_info= &amp;my_charset_utf8_general_ci;
++  system_charset_info= &amp;my_charset_bin;
++  files_charset_info= &amp;my_charset_bin;
++  national_charset_info= &amp;my_charset_bin;
+   table_alias_charset= &amp;my_charset_bin;
+ 
+   opt_date_time_formats[0]= opt_date_time_formats[1]= opt_date_time_formats[2]= 0;
+diff -u mysql-4.1.8pre/sql/set_var.cc.orig mysql-4.1.8pre/sql/set_var.cc
+--- mysql-4.1.8pre/sql/set_var.cc.orig	2004-11-28 07:40:59.000000000 +0900
++++ mysql-4.1.8pre/sql/set_var.cc	2004-11-28 07:19:17.000000000 +0900
+@@ -136,7 +136,8 @@
+ 				    sys_check_charset,
+ 				    sys_update_charset,
+ 				    sys_set_default_charset,
+-                                    (char *)my_charset_utf8_general_ci.name);
++                                    (char *)my_charset_bin.name);
++//                                    (char *)my_charset_utf8_general_ci.name);
+ sys_var_character_set_database	sys_character_set_database("character_set_database");
+ sys_var_character_set_client  sys_character_set_client("character_set_client");
+ sys_var_character_set_connection  sys_character_set_connection("character_set_connection");
+
+
+
+
+  </pre>
+</blockquote>
+<br>
+<pre class="moz-signature" cols="72">-- 
+Yusuke Naito 内藤祐介
+Artificial Life Laboratory, Inc. （株）人工生命研究所
+<a class="moz-txt-link-abbreviated" href="mailto:E-mail:naito@alife-lab.co.jp">E-mail:naito@alife-lab.co.jp</a> URL:www.alife-lab.co.jp</pre>
+</body>
+</html>
+

@@ -1,0 +1,150 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4044</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="4043.html">[前]</a><a href="4045.html">[次]</a><a href="../list/4001-4100.html">[番号順一覧]</a><a href="../thread/4001-4100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4044
+</p>
+<div class="header">
+<p>
+From: Minoru Fukuda &lt;Minoru Fukuda &lt;fukuda@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 19 Jul 2001 11:58:59 +0900<br>
+Subject: [mysql 04044] Re: VIEW, UNION の代替方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+福田＠キノルです。
+
+とみたさん。ご指摘ありがとうございました。
+
+<span class="quote1">&gt; 普通に、join するという方法ではダメでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;         select sum(tableNyuuko.kazu) as nyuukoSuu,</span>
+<span class="quote1">&gt;         sum(tableShukko.kazu) as shukkoSuu,</span>
+<span class="quote1">&gt;         tableNyuuko.shouhinmei</span>
+<span class="quote1">&gt;         from tableNyuuko left join tableShukko using (shouhinmei)</span>
+<span class="quote1">&gt;         group by shouhinmei;</span>
+
+ん〜。これだと私が最初に出した例のように、入庫(tableNyuuko)の商品が
+出庫(tableShukko)の商品すべてを含んでいればの話（例１）ですよね。出庫の方が
+商品の種類が多い場合（例２）、入庫と出庫でそれぞれにしかない商品がある場合（例３）
+では使えないですよね。
+
+ここで、出庫している商品は必ず入庫しているはずだと言う前提なら例１）のような
+パターンしかないのですが、先月入庫した商品が今月売れて、今月の入出庫表を作ろうと
+すると例２、例３が出てくるのです。
+
+例１）入庫の商品が出庫の商品すべてを含む場合
+
+mysql&gt; select * from tableNyuuko;
++----------+------+------------+
+<span class="quote1">| nyuukoID | kazu | shouhinmei |</span>
++----------+------+------------+
+<span class="quote1">|        1 |   10 | A          |</span>
+<span class="quote1">|        2 |   20 | B          |</span>
+<span class="quote1">|        3 |   30 | C          |</span>
++----------+------+------------+
+3 rows in set (0.00 sec)
+
+mysql&gt; select * from tableShukko;
++----------+------+------------+
+<span class="quote1">| shukkoID | kazu | shouhinmei |</span>
++----------+------+------------+
+<span class="quote1">|        1 |    3 | A          |</span>
+<span class="quote1">|        2 |    4 | B          |</span>
++----------+------+------------+
+2 rows in set (0.01 sec)
+
+欲しい結果
++-----------+-----------+------------+
+<span class="quote1">| nyuukoSuu | shukkoSuu | shouhinmei |</span>
++-----------+-----------+------------+
+<span class="quote1">|        10 |         3 | A          |</span>
+<span class="quote1">|        20 |         4 | B          |</span>
+<span class="quote1">|        30 |         0 | C          |</span>
++-----------+-----------+------------+
+
+--------------------------------------------------------------------
+例２）出庫の商品が入庫の商品すべてを含む場合
+
+mysql&gt; select * from tableNyuuko;
++----------+------+------------+
+<span class="quote1">| nyuukoID | kazu | shouhinmei |</span>
++----------+------+------------+
+<span class="quote1">|        1 |    1 | A          |</span>
+<span class="quote1">|        2 |    2 | B          |</span>
++----------+------+------------+
+3 rows in set (0.00 sec)
+
+mysql&gt; select * from tableShukko;
++----------+------+------------+
+<span class="quote1">| shukkoID | kazu | shouhinmei |</span>
++----------+------+------------+
+<span class="quote1">|        1 |    3 | A          |</span>
+<span class="quote1">|        2 |    4 | B          |</span>
+<span class="quote1">|        3 |    5 | C          |</span>
++----------+------+------------+
+2 rows in set (0.01 sec)
+
+欲しい結果
++-----------+-----------+------------+
+<span class="quote1">| nyuukoSuu | shukkoSuu | shouhinmei |</span>
++-----------+-----------+------------+
+<span class="quote1">|         1 |         3 | A          |</span>
+<span class="quote1">|         2 |         4 | B          |</span>
+<span class="quote1">|         0 |         5 | C          |</span>
++-----------+-----------+------------+
+
+--------------------------------------------------------------------
+例３）入庫と出庫でそれぞれにしかない商品がある場合
+
+mysql&gt; select * from tableNyuuko;
++----------+------+------------+
+<span class="quote1">| nyuukoID | kazu | shouhinmei |</span>
++----------+------+------------+
+<span class="quote1">|        1 |    1 | A          |</span>
+<span class="quote1">|        2 |    2 | B          |</span>
++----------+------+------------+
+3 rows in set (0.00 sec)
+
+mysql&gt; select * from tableShukko;
++----------+------+------------+
+<span class="quote1">| shukkoID | kazu | shouhinmei |</span>
++----------+------+------------+
+<span class="quote1">|        1 |    3 | D          |</span>
+<span class="quote1">|        2 |    4 | E          |</span>
++----------+------+------------+
+2 rows in set (0.01 sec)
+
+欲しい結果
++-----------+-----------+------------+
+<span class="quote1">| nyuukoSuu | shukkoSuu | shouhinmei |</span>
++-----------+-----------+------------+
+<span class="quote1">|         1 |         0 | A          |</span>
+<span class="quote1">|         2 |         0 | B          |</span>
+<span class="quote1">|         0 |         3 | D          |</span>
+<span class="quote1">|         0 |         4 | E          |</span>
++-----------+-----------+------------+
+-- 
+福田稔 Minoru Fukuda
+fukuda@xxxxxxxxxx
+kinol interactive inc.
+<a href="http://www.kinol.co.jp">http://www.kinol.co.jp</a>
+
+</pre>
+</div>
+<p class="button"><a href="4043.html">[前]</a><a href="4045.html">[次]</a><a href="../list/4001-4100.html">[番号順一覧]</a><a href="../thread/4001-4100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="4039.html">   4039 2001-07-18 18:17 [Minoru Fukuda &lt;fukud] VIEW, UNION の代替方法                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4040.html">   4040 2001-07-19 04:11 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="4044.html">   4044 2001-07-19 11:58 　┗[Minoru Fukuda &lt;fukud]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4082.html">   4082 2001-07-29 15:16 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+</pre>
+</body>
+</html>

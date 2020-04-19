@@ -1,0 +1,111 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13577</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13576.html">[前]</a><a href="13578.html">[次]</a><a href="../list/13501-13600.html">[番号順一覧]</a><a href="../thread/13501-13600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13577
+</p>
+<div class="header">
+<p>
+From: YuGo &lt;YuGo &lt;yu.gotou@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 05 Dec 2006 17:29:30 +0900<br>
+Subject: [mysql 13577] Re: 複数テーブルのUPDATEがうまくいかない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。
+get_data.idが'001'のレコードのget_dataは1、user_idは86でuser_data.idが86
+のpointは0だから
+<span class="quote1">&gt;user_data.point + get_data.get_point</span>
+は1+0=1でいいんじゃないですか。
+どっちが正しいかはさておき、、sum関数などを使ってもっとわかりやすいSQLに
+した方がよいと思います。
+
+YuGo
+
+
+<span class="quote1">&gt; こんにちは、片岡と申します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 複数テーブルを使ったUPDATEクエリに関して質問させて下さい。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 下記「クエリ１」では全部で３レコードが結果として返ってきます。</span>
+<span class="quote1">&gt; ところが「クエリ２」では１レコードしか更新されません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 直感的には３レコード分更新されて、</span>
+<span class="quote1">&gt; user_data.id=86の行の`point`は 7になりそうな気がするのですが、</span>
+<span class="quote1">&gt; 実際にはuser_data.id=86の行の`point`は 1になります。</span>
+<span class="quote1">&gt; このようなものなのでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; MS-Access2000で同じクエリを走らせると、こちらは</span>
+<span class="quote1">&gt; user_data.id=86の行の`point`は 7になります。</span>
+<span class="quote1">&gt; 他のデータベースは環境が無いので試せていませんが、</span>
+<span class="quote1">&gt; 「クエリ２」のような書き方がおかしいのでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ■クエリ１</span>
+<span class="quote1">&gt; SELECT *</span>
+<span class="quote1">&gt; FROM</span>
+<span class="quote1">&gt;  get_data</span>
+<span class="quote1">&gt;  INNER JOIN user_data ON get_data.user_id = user_data.id</span>
+<span class="quote1">&gt; WHERE</span>
+<span class="quote1">&gt;  (get_data.id IN ('001','002','003','004'));</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ■クエリ２</span>
+<span class="quote1">&gt; UPDATE get_data</span>
+<span class="quote1">&gt;  INNER JOIN user_data ON get_data.user_id = user_data.id</span>
+<span class="quote1">&gt; SET</span>
+<span class="quote1">&gt;  user_data.point = user_data.point + get_data.get_point</span>
+<span class="quote1">&gt; WHERE</span>
+<span class="quote1">&gt;  (get_data.id IN ('001','002','003','004'));</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ■テーブル</span>
+<span class="quote1">&gt; CREATE TABLE `user_data` (</span>
+<span class="quote1">&gt;   `id` int(11) NOT NULL auto_increment,</span>
+<span class="quote1">&gt;   `point` int(11) NOT NULL default '0',</span>
+<span class="quote1">&gt;   PRIMARY KEY  (`id`)</span>
+<span class="quote1">&gt; ) TYPE=InnoDB ;</span>
+<span class="quote1">&gt; INSERT INTO user_data VALUES</span>
+<span class="quote1">&gt; (86, 0), (87, 0), (89, 0);</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; CREATE TABLE `get_data` (</span>
+<span class="quote1">&gt;   `id` varchar(32) NOT NULL default '',</span>
+<span class="quote1">&gt;   `get_point` int(11) NOT NULL default '0',</span>
+<span class="quote1">&gt;   `user_id` int(11) NOT NULL default '0',</span>
+<span class="quote1">&gt;   PRIMARY KEY  (`id`)</span>
+<span class="quote1">&gt; ) TYPE=InnoDB ;</span>
+<span class="quote1">&gt; INSERT INTO get_data VALUES</span>
+<span class="quote1">&gt; ('001', 1, 86), ('002', 2, 86), ('003', 4, 86),</span>
+<span class="quote1">&gt; ('004', 8, 0), ('005', 16, 0), ('006', 32, 0);</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ■MySQLバージョン</span>
+<span class="quote1">&gt;  5.0.22(Linux版)、4.0.26(Windows版)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -----</span>
+<span class="quote1">&gt; kataoka michio &lt;kataoka@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+</pre>
+</div>
+<p class="button"><a href="13576.html">[前]</a><a href="13578.html">[次]</a><a href="../list/13501-13600.html">[番号順一覧]</a><a href="../thread/13501-13600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13575.html">  13575 2006-12-05 12:28 [IKEBE Tomohiro &lt;ikeb] セミナー開催のお知らせ                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13576.html">  13576 2006-12-05 15:33 ┗[&quot;kataoka michio&quot; &lt;ka] 複数テーブルのUPDATEがうまくいかない  </a></span>
+<span class="current">-&gt;&nbsp;<a href="13577.html">  13577 2006-12-05 17:29 　┗[YuGo &lt;yu.gotou@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13578.html">  13578 2006-12-05 22:24 　　┗[&quot;kataoka michio&quot; &lt;ka]                                   </a></span>
+</pre>
+</body>
+</html>

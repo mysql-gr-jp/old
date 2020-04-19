@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7435</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7434.html">[前]</a><a href="7436.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7435
+</p>
+<div class="header">
+<p>
+From: tamura &lt;tamura &lt;zai91210@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 10 Apr 2003 02:23:31 +0900<br>
+Subject: [mysql 07435] JOIN を含む SQL 文（長文すみません）<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+田村です、毎度。
+
+環境は、
+OS　　　：Windows2000Pro
+MySQL　：　MySQL3.23.51
+PHP　　：　php-4.2.2-Win32
+です。
+
+
+（おそらく）JOIN節が理解できません。
+
+t_order_sales_main テーブル(売上伝票)の構成：
+order_sales_id        int(11)
+order_type            char(1)
+order_sales_class     char(1)
+order_date            timestamp(14)
+sales_date            timestamp(14)
+custom_id             int(11)
+custom_code           char(13)
+
+t_order_sales_detail テーブル(売上明細)の構成：
+detail_id             int(11)
+order_sales_id        int(11)
+item_id               int(11)
+order_sales_num       decimal(13,0)
+sales_price           decimal(13,0)
+prime_cost            decimal(13,0)
+
+m_custom テーブル(顧客)の構成：
+custom_id             int(11)
+custom_code           varchar(13)
+custom_name           varchar(32)
+
+m_item テーブル(商品)の構成：
+item_id               int(11)
+category_id           int(11)
+item_code             varchar(13)
+item_name             varchar(72)
+
+
+以上のような、４テーブルから、以下の順番で表示されるクエリーを作成したい
+のです。
+
+｜order_sales_id｜sales_date｜custom_name｜category_name｜item_name｜
+order_sales_num｜sales_price｜
+
+苦肉の策のACCESSで自動作成したものが以下のものですが、文法が異なるのかだ
+めでした。
+
+select t_order_sales_main.order_sales_id, t_order_sales_main.sales_date, m_custom.custom_name, m_category.category_name, m_item.item_name, t_order_sales_detail.order_sales_num, t_order_sales_detail.sales_price FROM m_category INNER JOIN (m_item INNER JOIN (m_custom INNER JOIN (t_order_sales_main INNER JOIN t_order_sales_detail ON t_order_sales_main.order_sales_id = t_order_sales_detail.order_sales_id) ON m_custom.custom_id = t_order_sales_main.custom_id) ON m_item.item_id = t_order_sales_detail.item_id) ON m_category.category_id = m_item.category_id;
+
+　そこで私の作成したものは、
+
+１．｜order_sales_id｜sales_date｜custom_name｜ならば、
+select order_sales_id, sales_date, custom_name from m_custom LEFT JOIN
+t_order_sales_main USING (custom_id);
+（これは、表示できました）
+
+２．｜order_sales_id｜order_sales_num｜sales_price｜item_name｜の時、
+select order_sales_id, order_sales_num, sales_price, item_name from 
+m_item LEFT JOIN t_order_sales_detail USING (item_id)
+（これは、だめでした？）
+
+
+｜order_sales_id｜sales_date｜custom_name｜category_name｜item_name｜
+order_sales_num｜sales_price｜の順番で表示できるSQL文を、ご教示ください。
+
+　よろしくお願いいたします（２．がダメな点も教えていただければ大変ありが
+たいです）。
+-- 
+tamura &lt;zai91210@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="7434.html">[前]</a><a href="7436.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="7435.html">   7435 2003-04-10 02:23 [tamura &lt;zai91210@xxx] JOIN を含む SQL 文（長文すみません）    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7436.html">   7436 2003-04-10 03:02 ┣[&quot;Kondo Tatsuya&quot; &lt;kon]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7440.html">   7440 2003-04-10 13:33 ┃┗[tamura &lt;zai91210@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7441.html">   7441 2003-04-10 13:42 ┃　┗[Koji KUSANAGI &lt;kusan] Off-topic (was: Re: JOIN を含む SQL 文)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7437.html">   7437 2003-04-10 05:27 ┣[Shinya Kawaji &lt;kawaj]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7444.html">   7444 2003-04-10 15:00 ┃┗[&quot;Kondo Tatsuya&quot; &lt;kon]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7445.html">   7445 2003-04-10 15:15 ┃　┣[Michiaki Negoro &lt;m-n]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7448.html">   7448 2003-04-10 15:30 ┃　┗[&lt;enim2@xxxxxxxxxx&gt;  ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7470.html">   7470 2003-04-11 03:27 ┃　　┗[&quot;Kondo Tatsuya&quot; &lt;kon]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7471.html">   7471 2003-04-11 03:49 ┃　　　┣[Tomohiro 'Tomo-p' KA]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7472.html">   7472 2003-04-11 04:10 ┃　　　┗[Shinya Kawaji &lt;kawaj]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7474.html">   7474 2003-04-11 14:45 ┃　　　　┗[&quot;Kondo Tatsuya&quot; &lt;kon]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7475.html">   7475 2003-04-11 18:27 ┃　　　　　┗[&lt;enim2@xxxxxxxxxx&gt;  ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7478.html">   7478 2003-04-12 02:36 ┃　　　　　　┗[&quot;Kondo Tatsuya&quot; &lt;kon]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7438.html">   7438 2003-04-10 11:14 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
+</pre>
+</body>
+</html>

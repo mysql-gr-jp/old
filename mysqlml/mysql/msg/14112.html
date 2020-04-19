@@ -1,0 +1,174 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14112</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14111.html">[前]</a><a href="14113.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14112
+</p>
+<div class="header">
+<p>
+From: &quot;Tetsuro IKEDA&quot; &lt;&quot;Tetsuro IKEDA&quot; &lt;ikdttr@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 18 Jul 2007 22:48:51 +0900<br>
+Subject: [mysql 14112] Re: 稀に mysql_query  処理から戻ってこなくなる<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんばんは。池田です。
+
+&quot;show processlist&quot;を見れば下記症状が出ていると思われる
+接続の状態を調べることができると思います。
+
+07/07/18 に Koki Takeda&lt;koh@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; はじめまして。竹田と申します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この度、MySQL を利用した php プログラムを作成致しました。</span>
+<span class="quote1">&gt; プログラム内で、子プロセスを生成し、子プロセス内で、複数回、</span>
+<span class="quote1">&gt; MySQL クエリを送信しているのですが、下記症状が、稀に発生して困</span>
+<span class="quote1">&gt; っております。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 下記に、詳細をお知らせ致しますので、恐れ入りますが、何か対策を</span>
+<span class="quote1">&gt; ご教授いただければ幸いです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よろしくお願い致します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ---------------------</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■ 動作環境</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; OS:　　Solaris 8</span>
+<span class="quote1">&gt; php:　 4.3.9</span>
+<span class="quote1">&gt; Mysql: Ver 4.0.12-standard for sun-solaris2.8 on sparc</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■ 処理内容</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 作成した php プログラム（仮名：test.php）内で、MySQL関数</span>
+<span class="quote1">&gt; mysql_query により、MySQL クエリ(select、insert)を繰り返し送</span>
+<span class="quote1">&gt; 信しています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; また、test.php は、プロセスをフォークしており、５つの子プロ</span>
+<span class="quote1">&gt; セスが同時に動作しています。子プロセス全体で、2500回程度、</span>
+<span class="quote1">&gt; MySQL クエリを送信しています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 以下に、プログラムの概要とプログラムフローの概略をご説明致し</span>
+<span class="quote1">&gt; ます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ＜test.php プログラム概要＞</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 任意のファイルを別のサーバに転送する処理です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ＜test.php プログラムフロー概略＞</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 開始</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 転送対象ファイル一覧取得クエリ実行（実環境：約６０レコード）</span>
+<span class="quote1">&gt; mysql_query (select)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; サーバ一覧取得クエリ実行（実環境：５レコード）</span>
+<span class="quote1">&gt; mysql_query (select)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ループ１開始（サーバの数分ループ）{</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; プロセスをフォーク</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; if フォーク失敗 {</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; エラー処理</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; } elseif 親プロセス {</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; プロセスIDバックアップ</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; } else { 子プロセス</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ループ２開始（転送対象ファイルの数分ループ）{</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 転送判定クエリ実行</span>
+<span class="quote1">&gt; mysql_query (select)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; if 転送対象でない（転送済） {</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ログ書き出しクエリ実行</span>
+<span class="quote1">&gt; mysql_query (insert)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ループ２継続</span>
+<span class="quote1">&gt; }</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 転送処理実行</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; } ループ２終了</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; }</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; } ループ１終了</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 子プロセス終了待ち処理</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 終了</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■ 症状</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ほとんどの場合は、正常に処理が終了するのですが、稀に、子プロ</span>
+<span class="quote1">&gt; セス処理全体で 200〜250回程度 mysql_query を呼び出した後、</span>
+<span class="quote1">&gt; mysql_query 処理から戻ってこなくなり、処理が止まってしまいま</span>
+<span class="quote1">&gt; す。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql_query 処理から、戻ってこなくなったSQL文は、以下の通り</span>
+<span class="quote1">&gt; です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ・select updated from table_name_1 where code = 98</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ・insert into table_name_2 ( field_name_1,field_name_2,</span>
+<span class="quote1">&gt; field_name_3,field_name_4,field_name_5 ) values ( '1', '',</span>
+<span class="quote1">&gt; '', 1,'サーバ名：ファイル(aaa.txt)の転送処理をスキップしま</span>
+<span class="quote1">&gt; した。' )</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; また、本症状発生中でも、mysqld は、起動したままになっており、</span>
+<span class="quote1">&gt; 他のクエリは、実行できる状態です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 現在は、本症状が発生した場合、親プロセスと、５つの子プロセス</span>
+<span class="quote1">&gt; を全て、kill しています。（mysql の再起動は、行っていません。）</span>
+<span class="quote1">&gt; その後、再度、test.php を実行すると、全ての処理が正常に終了</span>
+<span class="quote1">&gt; 致します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■ 質問内容</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 以上のことを踏まえまして、以下の質問をさせていただきたいと思</span>
+<span class="quote1">&gt; います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ・本症状(mysql_query 処理から、戻ってこなくなる)と同様の症例</span>
+<span class="quote1">&gt; は、ありますでしょうか。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ・同様の症例がある場合、本症状を、どのように解消されたでしょ</span>
+<span class="quote1">&gt; うか。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ・その他、本症状が発生する理由及び、対処策をご存知の方いらっ</span>
+<span class="quote1">&gt; しゃいましたら、ご教授お願い致します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="14111.html">[前]</a><a href="14113.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14110.html">  14110 2007-07-18 18:45 [Koki Takeda &lt;koh@xxx] 稀に mysql_query  処理から戻ってこなくなる</a></span>
+<span class="current">-&gt;&nbsp;<a href="14112.html">  14112 2007-07-18 22:48 ┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14113.html">  14113 2007-07-19 16:22 　┗[Koki Takeda &lt;koh@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14114.html">  14114 2007-07-19 16:43 　　┗[遠藤 俊裕 &lt;endo@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14115.html">  14115 2007-07-19 18:27 　　　┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14116.html">  14116 2007-07-19 18:36 　　　　┗[Koki Takeda &lt;koh@xxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14127.html">  14127 2007-07-23 21:51 　　　　　┗[Koki Takeda &lt;koh@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14128.html">  14128 2007-07-23 22:19 　　　　　　┗[遠藤 俊裕 &lt;endo@xxxx]                           </a></span>
+</pre>
+</body>
+</html>

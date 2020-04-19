@@ -1,0 +1,130 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12595</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12594.html">[前]</a><a href="12596.html">[次]</a><a href="../list/12501-12600.html">[番号順一覧]</a><a href="../thread/12501-12600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12595
+</p>
+<div class="header">
+<p>
+From: 遠藤 俊裕 &lt;遠藤 俊裕 &lt;endo@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 20 Dec 2005 16:00:32 +0900<br>
+Subject: [mysql 12595] sum,avg 等の演算が動かない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+遠藤です。
+
+現象は BDE(Borland Database Engine) + MyODBC + MySQL5.0.x で発症します。
+
+例えば、以下のようなテーブルがあったとします。
+
+CREATE TABLE `aa` (
+  `aa` int(11) NOT NULL auto_increment,
+  PRIMARY KEY  (`aa`)
+);
+
+そこで、
+select sum(aa) from aa;
+を実行すると空行が返って来ます。
+
+3.23.58 では正しく値が返って来ます。
+avg とかでも一緒です。
+
+そこで、
+select cast( sum(aa) as signed ) from aa;
+を実行しました。これは正しく返って来ます。
+これに気づいたのは ODBC のログを見ていてです。
+
+3.23.58 と 5.0.x での決定的な違いは以下のような log です。
+
+&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;3.23.58&gt;
+dbexplor        a10-918	EXIT  SQLDescribeCol  with return code 0 (SQL_SUCCESS)
+		HSTMT               02D73050
+		UWORD                        1 
+		UCHAR *             0x0149D89E [       7] &quot;sum(aa)&quot;
+		SWORD                       32 
+		SWORD *             0x0012F99E (7)
+		SWORD *             0x0012F956 (8)
+		SQLULEN *           0x0012F950 (17)
+		SWORD *             0x0149D8C4 (0)
+		SWORD *             0x0012F99C (1)
+
+dbexplor        a10-918	ENTER SQLBindCol 
+		HSTMT               02D73050
+		UWORD                        1 
+		SWORD                        8 &lt;SQL_C_DOUBLE&gt;
+		PTR                0x0149F7DC
+		SQLLEN                     8
+		SQLLEN *            0x0149F74C
+
+dbexplor        a10-918	EXIT  SQLBindCol  with return code 0 (SQL_SUCCESS)
+		HSTMT               02D73050
+		UWORD                        1 
+		SWORD                        8 &lt;SQL_C_DOUBLE&gt;
+		PTR                0x0149F7DC
+		SQLLEN                     8
+		SQLLEN *            0x0149F74C (-858993460)
+
+&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;5.0.17&gt;
+dbexplor        a10-918	EXIT  SQLDescribeCol  with return code 0 (SQL_SUCCESS)
+		HSTMT               02D73050
+		UWORD                        1 
+		UCHAR *             0x0149E41E [       7] &quot;sum(aa)&quot;
+		SWORD                       32 
+		SWORD *             0x0012F992 (7)
+		SWORD *             0x0012F94A (0)
+		SQLULEN *           0x0012F944 (33)
+		SWORD *             0x0149E444 (0)
+		SWORD *             0x0012F990 (1)
+
+dbexplor        a10-918	ENTER SQLBindCol 
+		HSTMT               02D73050
+		UWORD                        1 
+		SWORD                        1 &lt;SQL_C_CHAR&gt;
+		PTR                0x0149D63C
+		SQLLEN                    34
+		SQLLEN *            0x0149D5AC
+
+dbexplor        a10-918	EXIT  SQLBindCol  with return code 0 (SQL_SUCCESS)
+		HSTMT               02D73050
+		UWORD                        1 
+		SWORD                        1 &lt;SQL_C_CHAR&gt;
+		PTR                0x0149D63C
+		SQLLEN                    34
+		SQLLEN *            0x0149D5AC (0)
+
+おそらく、バージョンが上がってから返って来るデータタイプが
+変わったためであろうと予測しているのですが、これは、いかん
+ともしがたい状態です。
+MySQL が『黒』だと思っておりますが、正しい反論、ご指摘お待
+ち致しております。
+
+もし、『黒』なら直してもらわないとかなりまずい。
+世の中に Delphi + MyODBC + MySQL って少ないのかなぁ？？？
+
+ちなみに、4.x では試しておりません。念のため。
+
+--
+えんどう＠あっぷらぼ
+mail: endo@xxxxxxxxxx, endo_t@xxxxxxxxxx, endo@xxxxxxxxxx
+<a href="http://www.applabo.com/">http://www.applabo.com/</a>
+<a href="http://homepage1.nifty.com/EndoT/">http://homepage1.nifty.com/EndoT/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="12594.html">[前]</a><a href="12596.html">[次]</a><a href="../list/12501-12600.html">[番号順一覧]</a><a href="../thread/12501-12600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="12595.html">  12595 2005-12-20 16:00 [遠藤 俊裕 &lt;endo@xxxx] sum,avg 等の演算が動かない              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12596.html">  12596 2005-12-20 16:22 ┗[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12597.html">  12597 2005-12-20 16:32 　┗[遠藤 俊裕 &lt;endo@xxxx]                                     </a></span>
+</pre>
+</body>
+</html>

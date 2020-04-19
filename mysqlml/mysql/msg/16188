@@ -1,218 +1,0 @@
-<html>
-<head>
-<meta http-equiv="Content-Style-Type" context="text/css">
-<title>mysql:16188</title>
-<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
-</head>
-<body>
-<p class="button"><a href="16187">[前]</a><a href="16189">[次]</a><a href="../list/16101-16200">[番号順一覧]</a><a href="../thread/16101-16200">[スレッド一覧]</a></p>
-<p class="id">
-mysql:16188
-</p>
-<div class="header">
-<p>
-From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
-Date: Mon, 15 Dec 2014 18:32:28 +0900<br>
-Subject: [mysql 16188] Re: [mysql 16187] Re: 高速に「INTO OUTFILE → File.Delete → 繰り返し」でエラー(already exists:1086)となります。<br>
-
-</p>
-</div>
-<div class="body">
-<pre>
-志澤さん
-こんにちは、yoku0825といいます。
-
-サンプルコードありがとうございます。
-
-サンプルの中ではtestFullPath_Out(UNC記法)と
-testFullPathI_IN(ローカルファイル)がありますが、
-実際にはCIFS経由でやっていたりしますか？
-（であれば、実際にファイルが作成されるタイミングはホストしているサーバー側に隠蔽されるので、
-そういうことが起きても不思議がないかなあと思いつつ）
-
-<span class="quote1">&gt;  →INTO OUTFILEは、対象がなくともファイルを生成するので、</span>
-<span class="quote1">&gt; 出現するまでWhileで待ってからFile.Deleteを行う。等</span>
-INTO OUTFILEの内部動作は、
-1. まずファイルが作られる
-2. 行をフェッチする
-3. フェッチした行はバッファにためられる
-4. どこかのタイミングでバッファをfdにフラッシュ
-となっていたので、
-ファイルの出現タイミングが2.〜4.のどこかにズレているのだとしたら、
-それはFSかOSかそのへんに欺かれているんじゃないかなぁと思います。
-
-Console.WriteLineのあたりか、
-System.IO.File.Existsの *直前* あたりに
-sync()に相当する何かを押し込めると幸せになれるんじゃないかと期待しています。。
-
-
-yoku0825,
-
-
-2014年12月15日 15:57 志澤 敦 &lt;atsushi.shizawa@xxxxxxxxxx&gt;:
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;  yoku0825さん</span>
-<span class="quote1">&gt; お返事有り難うございました。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; スタックトレースは未だ行なっていませんが、</span>
-<span class="quote1">&gt; 実行しているのは、C#ですがこの様なフローとなります。</span>
-<span class="quote1">&gt; 恐らくは、yoku0825さんのイメージ頂いているフローではないか。と考えます。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; 毎回発生する訳ではない辺り、</span>
-<span class="quote1">&gt; MySQLではなく、Connectorとファイルシステムとの相関によるものでは。</span>
-<span class="quote1">&gt; との推察が付いたのですが、手詰まりとなりました、、。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; 無理やり機能させるなら、</span>
-<span class="quote1">&gt; while(File.Exists())等で待機させれば出来なくも無いですが、</span>
-<span class="quote1">&gt; それも違うな。と言う事で引き続き解決策を検討している所です。</span>
-<span class="quote1">&gt; →INTO OUTFILEは、対象がなくともファイルを生成するので、</span>
-<span class="quote1">&gt; 出現するまでWhileで待ってからFile.Deleteを行う。等</span>
-<span class="quote1">&gt; →しかしながら、.NETのFile.Deleteはスレッドセーフなので、</span>
-<span class="quote1">&gt; やはりConnector側！？と、堂々巡りに陥ってます。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; ------------------------------------</span>
-<span class="quote1">&gt;         using System;</span>
-<span class="quote1">&gt;         using System.Windows.Forms;</span>
-<span class="quote1">&gt;         using MySql.Data.MySqlClient;</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;         private void test_ctrl()</span>
-<span class="quote1">&gt;         {</span>
-<span class="quote1">&gt;             string host = &quot;host_name&quot;;</span>
-<span class="quote1">&gt;             string user = &quot;userID&quot;;</span>
-<span class="quote1">&gt;             string pass = &quot;password&quot;;</span>
-<span class="quote1">&gt;             string schema = &quot;mysql&quot;;</span>
-<span class="quote1">&gt;             string conString = &quot;SERVER=&quot; + host + &quot;;&quot;</span>
-<span class="quote1">&gt;                     + &quot;DATABASE=&quot; + schema + &quot;;&quot;</span>
-<span class="quote1">&gt;                     + &quot;UID=&quot; + user + &quot;;&quot;</span>
-<span class="quote1">&gt;                     + &quot;PASSWORD=&quot; + pass + &quot;;&quot;;</span>
-<span class="quote1">&gt;             MySqlConnection myConnect = new MySqlConnection(conString);</span>
-<span class="quote1">&gt;             myConnect.Open();</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;             string testDir = @&quot;\\&quot; + host + @&quot;\TEST\&quot;;</span>
-<span class="quote1">&gt;             string testFileName = &quot;test.tsv&quot;;</span>
-<span class="quote1">&gt;             string testFullPath_Out = System.IO.Path.Combine(testDir,</span>
-<span class="quote1">&gt; testFileName);</span>
-<span class="quote1">&gt;             string testFullPathI_IN = @&quot;D:\\TEST\\&quot; + testFileName;</span>
-<span class="quote1">&gt;             string SQL = @&quot;SELECT * FROM mysql.db LIMIT 1&quot;</span>
-<span class="quote1">&gt;                         + &quot; INTO OUTFILE '&quot; + testFullPathI_IN + @&quot;'</span>
-<span class="quote1">&gt; FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\r\n'&quot;;</span>
-<span class="quote1">&gt;             for (int i = 0; i &lt; 1000; i++)</span>
-<span class="quote1">&gt;             {</span>
-<span class="quote1">&gt;                 if (System.IO.File.Exists(testFullPath_Out))</span>
-<span class="quote1">&gt;                 {</span>
-<span class="quote1">&gt;                     System.IO.File.Delete(testFullPath_Out);</span>
-<span class="quote1">&gt;                 }</span>
-<span class="quote1">&gt;                 using (MySqlCommand myCommand = new MySqlCommand(SQL,</span>
-<span class="quote1">&gt; myConnect))</span>
-<span class="quote1">&gt;                 {</span>
-<span class="quote1">&gt;                     try</span>
-<span class="quote1">&gt;                     {</span>
-<span class="quote1">&gt;                         myCommand.ExecuteNonQuery();</span>
-<span class="quote1">&gt;                     }</span>
-<span class="quote1">&gt;                     catch (MySqlException myEx)</span>
-<span class="quote1">&gt;                     {</span>
-<span class="quote1">&gt;                         MessageBox.Show(myEx.ToString());</span>
-<span class="quote1">&gt; //100回に数回レベルでここに到達し、「Already Exists」が発生</span>
-<span class="quote1">&gt;                     }</span>
-<span class="quote1">&gt;                     myCommand.Dispose();</span>
-<span class="quote1">&gt;                 }</span>
-<span class="quote1">&gt;                 Console.WriteLine(i.ToString());</span>
-<span class="quote1">&gt;             }</span>
-<span class="quote1">&gt;             MessageBox.Show(&quot;正常終了&quot;);</span>
-<span class="quote1">&gt;             myConnect.Close();</span>
-<span class="quote1">&gt;             myConnect.Dispose();</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;         }</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; (2014/12/14 23:35), yoku ts. wrote:</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; こんばんは、yoku0825といいます。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;  原因ぽいものは全くわからないのですが、</span>
-<span class="quote1">&gt;</span>
-<span class="quote2">&gt;  &gt; ---検証内容---</span>
-<span class="quote2">&gt;  &gt; ・VS2012でのデバッグ時に、ステップ実行でも発生。</span>
-<span class="quote2">&gt; &gt; ・File.Delete→INTO OUTFILEの間に、Sleepを5秒挟んだりしても発生する。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;  これは ファイルが存在している(?)にも拘わらずFile.ExistsがTRUEで抜けてくるのが問題だと思うので、</span>
-<span class="quote1">&gt; スリープを挟むとしたらINTO OUTFILEとFile.Delete(File.Exists)の間がいいのでははないでしょうか？</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;  1. ファイルの存在チェック</span>
-<span class="quote1">&gt; 2. 存在したら消す</span>
-<span class="quote1">&gt;  3. SELECT .. INTO OUTFILE ..</span>
-<span class="quote1">&gt; -- ここでブレーク --</span>
-<span class="quote1">&gt; 4. ファイルの存在チェック</span>
-<span class="quote1">&gt; 5. 存在したら消す</span>
-<span class="quote1">&gt; 6. SELECT .. INTO OUTFILE ..</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;  ブレークした時に、OSから見てもファイルが存在するのにFile.ExistsがFALSEになるのであれば</span>
-<span class="quote1">&gt; オブジェクトを使いまわしていないか(File.DeleteしたあとのFileオブジェクトが何を返すのかとか)とか、</span>
-<span class="quote1">&gt; OSから見てファイルがまだ存在しないのなら、mysqldのスタックなど見てみるといいのかもしれません。</span>
-<span class="quote1">&gt; 5.0も5.6もselect_export::prepareの割と早い段階でcreate_fileを呼んで(ファイルだ</span>
-<span class="quote1">&gt; け先行して作成される)いるので、</span>
-<span class="quote1">&gt; そこは変わらないような気がするのですが。。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;  yoku0825,</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; 2014年12月12日 14:22 志澤 敦 &lt;atsushi.shizawa@xxxxxxxxxx&gt;:</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; 志澤と申します。</span>
-<span class="quote2">&gt;&gt; 初めて投稿させて頂きます。</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; MySQLWindowsのケースは少ないかとも思いますが、</span>
-<span class="quote2">&gt;&gt; お心あたり御座いましたら、ご頂けると幸いです。</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ---環境---</span>
-<span class="quote2">&gt;&gt; OS ：Windows2012 Std(Memory24GB)</span>
-<span class="quote2">&gt;&gt; DB ：MySQL 5.6.21</span>
-<span class="quote2">&gt;&gt; Coccector ：Net 6.9.5</span>
-<span class="quote2">&gt;&gt; FrameWork ：.NET FrameWork 4.5</span>
-<span class="quote2">&gt;&gt; IDE ：VS2012 Pro</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ---事象---</span>
-<span class="quote2">&gt;&gt; ・同一ファイルパスにおいて、INTO OUTFILE →File.Deleteを高速に行うと、</span>
-<span class="quote2">&gt;&gt; IF(File.Exists==TRUE){File.Delete}が機能せず、</span>
-<span class="quote2">&gt;&gt; SQL発行時にMySqlExceptionが発生。</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ・エラー内容は、「1086：already exists」</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ・その際、OS上にもファイルは残っており、通常のファイルとして読み書きが出 来る状態。</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; ---検証内容---</span>
-<span class="quote2">&gt;&gt; ・VS2012でのデバッグ時に、ステップ実行でも発生。</span>
-<span class="quote2">&gt;&gt; ・File.Delete→INTO OUTFILEの間に、Sleepを5秒挟んだりしても発生する。</span>
-<span class="quote2">&gt;&gt; ・Win2008R2でも同様に発生。</span>
-<span class="quote2">&gt;&gt; ・CentOSでも同様に発生。</span>
-<span class="quote2">&gt;&gt; ・MySQL5.5でも同様に発生。</span>
-<span class="quote2">&gt;&gt; --例外事象--</span>
-<span class="quote2">&gt;&gt; ・MySQL5.0では発生しない。</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt; 以上となります。</span>
-<span class="quote2">&gt;&gt; DBというより、ConnectorやOS由来な気もしておりますが、</span>
-<span class="quote2">&gt;&gt; 何か情報御座いましたら、ご助言の程を何卒お願い致します。</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote2">&gt;&gt;</span>
-<span class="quote1">&gt;</span>
-
-</pre>
-</div>
-<div class="attach">
-<h3 class="attachtitle">添付ファイル</h3>
-<ul>
-<li><a href="http://www.mysql.gr.jp/mysqlml/mysql/msg/16188/0/"> [text/html]</a>
-</ul>
-</div>
-<p class="button"><a href="16187">[前]</a><a href="16189">[次]</a><a href="../list/16101-16200">[番号順一覧]</a><a href="../thread/16101-16200">[スレッド一覧]</a></p>
-<pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="16185">  16185 2014-12-12 14:22 [志澤 敦 &lt;atsushi.shi] 高速に「INTO OUTFILE → File.Delete → 繰り返し」でエラー(already exists:1086)となります。</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16186">@ 16186 2014-12-14 23:35 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16185] 高速に「INTO OUTFILE → File.Delete → 繰り返し」でエラー(already exists:1086)となります。</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16187">@ 16187 2014-12-15 15:57 　┗[志澤 敦 &lt;atsushi.shi] Re: 高速に「INTO OUTFILE → File.Delete → 繰り返し」でエラー(already exists:1086)となります。</a></span>
-<span class="current">-&gt;&nbsp;<a href="16188">@ 16188 2014-12-15 18:32 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16187] Re: 高速に「INTO OUTFILE → File.Delete → 繰り返し」でエラー(already exists:1086)となります。</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16189">  16189 2014-12-15 21:20 　　　┗[HIRATSUKA Sadao &lt;sh2] Re: 高速に「INTO OUTFILE  → File.Delete  → 繰り返し」でエラー(already exists:1086)となります。</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16195">  16195 2014-12-17 16:58 　　　　┗[&quot;atsushi.shizawa&quot; &lt;a]                               </a></span>
-</pre>
-</body>
-</html>

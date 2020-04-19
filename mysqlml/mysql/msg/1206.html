@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1206</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="1205.html">[前]</a><a href="1207.html">[次]</a><a href="../list/1201-1300.html">[番号順一覧]</a><a href="../thread/1201-1300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1206
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Sun, 05 Sep 1999 11:03:19 +0900<br>
+Subject: [mysql 01206] Re: MYSQl 3.23.2 αの不具合？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+パッチです
+これでいかがでしょうか？
+
+============== patch ===========================
+--- include/global.h.orig	Tue Aug 10 08:40:55 1999
++++ include/global.h	Sun Sep  5 10:45:29 1999
+@@ -618,6 +618,7 @@
+ 				  int4store((T),def_temp); \
+ 				  int4store((T+4),def_temp2); \
+ 				}
++#ifdef WORDS_BIGENDIAN
+ #define float4store(T,A)    { *(T)= ((byte *) &amp;A)[3];\
+                               *((T)+1)=(char) ((byte *) &amp;A)[2];\
+                               *((T)+2)=(char) ((byte *) &amp;A)[1];\
+@@ -648,6 +649,13 @@
+                               ((byte*) &amp;def_temp)[6]=(M)[1];\
+                               ((byte*) &amp;def_temp)[7]=(M)[0];\
+ 			      (V) = def_temp; }
++#else
++
++#define float4get(V,M)   memcpy((byte*) &amp;V,(byte*) (M),sizeof(float))
++#define float4store(V,M) memcpy((byte*) &amp;M,(byte*) (V),sizeof(float))
++#define float8get(V,M)   doubleget((V),(M))
++#define float8store(V,M) doublestore((V),(M))
++#endif
+ 
+ #endif /* sint2korr */
+============== patch END ===========================
+
+=========結果=========== 
+mysql&gt; select email, sum(count) as total from count where date &gt; '1999-08-27' and date &lt; '1999-09-04' GROUP by email order by total  desc;
++-------------------------+-------+
+<span class="quote1">| email                   | total |</span>
++-------------------------+-------+
+<span class="quote1">| testtest@xxxxxxxxxx |   242 |</span>
+<span class="quote1">| tateyan@xxxxxxxxxx |    74 |</span>
++-------------------------+-------+
+2 rows in set (0.01 sec)
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+ Soft Agency Co., Ltd. TEL +81-48-661-1527
+ PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
+ [ <a href="http://www.softagency.co.jp/mysql/">http://www.softagency.co.jp/mysql/</a> ]
+ [ MySQL ML: mysql-guide@xxxxxxxxxx ]
+
+</pre>
+</div>
+<p class="button"><a href="1205.html">[前]</a><a href="1207.html">[次]</a><a href="../list/1201-1300.html">[番号順一覧]</a><a href="../thread/1201-1300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1204.html">   1204 1999-09-04 01:49 [舘山　聖司  &lt;tateyan] MYSQl 3.23.2 αの不具合？               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1205.html">   1205 1999-09-04 14:11 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="1206.html">   1206 1999-09-05 11:03 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1207.html">   1207 1999-09-05 22:18 　┗[Yasuaki Tanaka &lt;yasu] 漢字の判別                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1210.html">   1210 1999-09-06 04:50 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+</pre>
+</body>
+</html>

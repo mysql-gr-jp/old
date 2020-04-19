@@ -1,0 +1,129 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13516</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13515.html">[Á°]</a><a href="13517.html">[¼¡]</a><a href="../list/13501-13600.html">[ÈÖ¹æ½ç°ìÍ÷]</a><a href="../thread/13501-13600.html">[¥¹¥ì¥Ã¥É°ìÍ÷]</a></p>
+<p class="id">
+mysql:13516
+</p>
+<div class="header">
+<p>
+From: &lt;atakahashi@xxxxxxxxxx&gt;<br>
+Date: Fri, 17 Nov 2006 15:19:51 +0900<br>
+Subject: [mysql 13516] ado VB ¤Ç¤Îauto_increment¤Î¥Õ¥£¡¼¥ë¥É¤ÎINSERT¹½Ê¸<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+¤ªÀ¤ÏÃ¤Ë¤Ê¤ê¤Þ¤¹¡£MySQL½é¿´¼Ô¤Î¤â¤Î¤Ç¡¢Åê¹Æ¤·¤Þ¤¹¡£
+
+ADO¡¡VB¤Ç³«È¯¤ò¹Ô¤Ã¤Æ¤ª¤ê¤Þ¤¹¤¬¡¢auto_increment¤¬¤Ä¤¤¤Æ¤¤¤ë¥Õ¥£¡¼¥ë¥É¤ËÂÐ¤·
+¤Æ¤É¤Î¤è¤¦¤Ë
+¥ì¥³¡¼¥ÉÄÉ²Ã¤·¤Æ¤¤¤¤¤«Ê¬¤«¤ê¤Þ¤»¤ó¡£¤É¤Ê¤¿¤«ÃÎ¤Ã¤Æ¤é¤Ã¤·¤ã¤ëÊý¤Ï¶µ¤¨¤Æ²¼¤µ
+¤¤¡£
+½é¿´¼Ô¤Ê¼ÁÌä¤Ç¿½¤·Ìõ¤´¤¶¤¤¤Þ¤»¤ó¡¢¡¢¡¢¡¢
+
+
+¥½¡¼¥¹
+¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö
+Sub CSV¼è¹þ½èÍý_Click()
+    Dim myrec As ADODB.Recordset
+    Set myrec = New ADODB.Recordset
+    Dim cn As ADODB.Connection
+    Dim cnt As String
+    Dim sql As String
+
+
+
+    Dim i As Integer
+    Dim myFileName
+
+    cnt = &quot;Provider=MSDASQL.1;Data Source=new_nyukin2&quot;
+
+    On Error GoTo Error1
+
+    ' ¥À¥¤¥¢¥í¥°¤òÉ½¼¨
+    myFileName = Application.GetOpenFilename( _
+               FileFilter:=&quot;CSV ¥Õ¥¡¥¤¥ë(*.CSV), *.CSV&quot;, _
+               Title:=&quot;¥Õ¥¡¥¤¥ë¤òÁªÂò¤·¤Æ²¼¤µ¤¤&quot;, MultiSelect:=False)
+
+
+    If myFileName = False Then
+        Exit Sub
+    End If
+
+    Workbooks.Open myFileName
+
+    Cells.Select
+    Selection.Copy
+    Workbooks.Add
+    Cells.Select
+    ActiveSheet.Paste
+
+    i = 1
+
+    Do Until Cells(i + 1, 1) = &quot;&quot;
+        Cells(i, 7) = myFileName
+        Cells(i, 8).Select
+        ActiveCell.FormulaR1C1 = &quot;=LEFT(RIGHT(RC[-1],8),4)&quot;
+        i = i + 1
+    Loop
+
+    Columns(&quot;H:H&quot;).Select
+    Application.CutCopyMode = False
+    Selection.Copy
+    Columns(&quot;I:I&quot;).Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone,
+SkipBlanks _
+        :=False, Transpose:=False
+    Columns(&quot;G:H&quot;).Select
+    Application.CutCopyMode = False
+    Selection.Delete Shift:=xlToLeft
+
+
+    Set cn = CreateObject(&quot;ADODB.Connection&quot;)
+    cn.Open cnt
+    cn.BeginTrans
+    MsgBox Cells(3, 1)
+
+    sql = &quot;insert into 67ds.u_import(pkid , syohinmei) values(1,&quot; &amp;
+Cells(3, 1) &amp; &quot;);&quot;
+    cn.Execute (sql)
+    cn.CommitTrans
+    cn.Close
+
+    Exit Sub
+
+Error1:
+    MsgBox &quot;¥¨¥é¡¼¤¬È¯À¸¤·¤Þ¤·¤¿¡£&quot;
+    Exit Sub
+End Sub
+¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö
+
+
+¥Æ¡¼¥Ö¥ë
+¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö
+CREATE TABLE `u_import` (
+  `pkid` int(7) NOT NULL auto_increment,
+  `hiduke` date default NULL,
+  `jancode` varchar(13) default NULL,
+  `sum_suryo` smallint(7) default NULL,
+  `sum_kingaku` smallint(13) default NULL,
+  `syohinmei` varchar(13) default NULL,
+  PRIMARY KEY  (`pkid`),
+  KEY `pkid` (`pkid`)
+) TYPE=InnoDB
+¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="13515.html">[Á°]</a><a href="13517.html">[¼¡]</a><a href="../list/13501-13600.html">[ÈÖ¹æ½ç°ìÍ÷]</a><a href="../thread/13501-13600.html">[¥¹¥ì¥Ã¥É°ìÍ÷]</a></p>
+</body>
+</html>

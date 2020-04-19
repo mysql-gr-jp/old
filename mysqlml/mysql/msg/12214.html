@@ -1,0 +1,100 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12214</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12213.html">[前]</a><a href="12215.html">[次]</a><a href="../list/12201-12300.html">[番号順一覧]</a><a href="../thread/12201-12300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12214
+</p>
+<div class="header">
+<p>
+From: Tetsuro IKEDA &lt;Tetsuro IKEDA &lt;tetsuro@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 04 Oct 2005 15:17:18 -0700<br>
+Subject: [mysql 12214] Re: 皆さんの使っているJDBCドライバのバージョン<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+おはようございます。池田です。
+
+テーブル上にデータ値&quot;0000-00-00 00:00:00&quot;があって、
+それをConnector/JからResultSet.getTimestamp()で取得する際の
+振る舞いについて、Mark Matthewsに話を聞いてみました。
+
+既に先ほどのメールで触れたドキュメントに書かれた内容と大きな違いはないのですが、
+このような実装を選んだ背景を少し説明してくれましたのでご紹介します。
+
+・そもそもこの問題はJava側で&quot;0000-00-00 00:00:00&quot;の値を持てないことに発端している
+・サーバ側の値をクライアント側（Connector/J）で正確に持てない場合、取るべき振る舞いは
+　従来のMySQL流の方法（今の例でいうとnullを返す）よりも標準に乗っ取った方法を
+　優先するように考えている（今の例でいうとSQLException)。
+・nullを返す従来の実装では、もともとサーバ側の値が&quot;null&quot;であった場合との判別を
+　付けることができないため、&quot;0000-00-00&quot;であったという情報が欠落してしまう。
+・&quot;0001-01-01 00:00:00&quot;を返す実装も、やはり同様に情報が欠落する。
+
+従ってデフォルトとしてはSQLExceptionをスローする実装を選ぶことになった、とのことでした。
+
+今回の件に限らず、Connector/Jへの疑問、要望、バグと思わしき個所など
+ありましたらお声がけいただけますと助かります。
+
+引き続き何かありましたらよろしくお願いいたします。
+
+Tetsuro IKEDA wrote:
+<span class="quote1">&gt; 池田です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Connector/Jにおけるフィールド値 &quot;0000-00-00 00:00:00&quot;の取り扱いですが、</span>
+<span class="quote1">&gt; 調べていたらどうも既にドキュメントに結論のようなものが書かれておりました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/mysql/en/cj-upgrading.html#cj-upgrading-3-0-to-3-1">http://dev.mysql.com/doc/mysql/en/cj-upgrading.html#cj-upgrading-3-0-to-3-1</a></span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ・JDBC仕様／SQL標準により忠実なのはSQLExceptionをスローする挙動</span>
+<span class="quote1">&gt; ・ver3.1.4から実装を変更した</span>
+<span class="quote1">&gt; ・現在はオプションを指定することで挙動を選ぶことができる</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; プロパティ名：zeroDateTimeBehavior</span>
+<span class="quote1">&gt; 値の候補：exception　・・・SQLExceptionをスローする（デフォルト）</span>
+<span class="quote1">&gt; 値の候補：convertToNull　・・・nullを返す（ver3.0系と同じ動き）</span>
+<span class="quote1">&gt; 値の候補：round　・・・&quot;0001-01-01 00:00:00&quot;を返す</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; とのことです。既にドキュメントにもこう書かれてしまっていますので、</span>
+<span class="quote1">&gt; これを変更するのはちょっと難しいかなと思います・・・。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; この話だけで考えれば、データソース設定なりの部分で</span>
+<span class="quote1">&gt; 渡す接続プロパティを1つ追加（zeroDateTimeBehavior=convertToNull)</span>
+<span class="quote1">&gt; するだけということにはなりますが。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 他にも同URLにver3.0系からver3.1系へアップグレードする際の注意点のようなものが</span>
+<span class="quote1">&gt; 列挙されております。よろしければそちらもご参照ください。</span>
+
+
+
+-- 
+Tetsuro Ikeda, Intern Development &amp; Support
+MySQL Inc, www.mysql.com
+Office: +1-206-336-2030   Mobile: +1-206-661-4293
+Are you MySQL certified?  www.mysql.com/certification
+
+</pre>
+</div>
+<p class="button"><a href="12213.html">[前]</a><a href="12215.html">[次]</a><a href="../list/12201-12300.html">[番号順一覧]</a><a href="../thread/12201-12300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12200.html">  12200 2005-10-01 23:53 [NAGASAWA Teruo &lt;tech] 皆さんの使っているJDBCドライバのバージョン</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12201.html">  12201 2005-10-01 23:53 ┣[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12202.html">  12202 2005-10-01 23:58 ┃┗[&quot;TAKAHASHI, Tomohiro]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12203.html">  12203 2005-10-02 00:23 ┃　┗[NAGASAWA Teruo &lt;tech]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12206.html">  12206 2005-10-03 15:28 ┗[Tetsuro IKEDA &lt;tetsu]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12211.html">  12211 2005-10-05 01:35 　┗[NAGASAWA Teruo &lt;tech]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12212.html">  12212 2005-10-05 02:13 　　┣[Tetsuro IKEDA &lt;ikdtt]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12213.html">  12213 2005-10-05 06:22 　　┣[Tetsuro IKEDA &lt;ikdtt]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="12214.html">  12214 2005-10-05 07:17 　　┃┣[Tetsuro IKEDA &lt;tetsu]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12216.html">  12216 2005-10-05 14:52 　　┃┗[&quot;NAGASAWA Teruo&quot; &lt;te] Re: 皆さんの使っているJDBC= ?ISO-2022-JP?B?GyRCJUklaSUkJVAkTiVQITwlOCVnJXMbKEI=?=</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12217.html">  12217 2005-10-05 15:44 　　┃　┗[&quot;TAKAHASHI, Tomohiro] Re: 皆さんの使っているJDBC=?ISO-202 2-JP?B?GyRCJUklaSUkJVAkTiVQITwlOCVnJXMbKEI=</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12218.html">  12218 2005-10-05 17:00 　　┃　　┗[NAGASAWA Teruo &lt;tech]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12215.html">  12215 2005-10-05 11:21 　　┗[&quot;TAKAHASHI, Tomohiro]                                   </a></span>
+</pre>
+</body>
+</html>

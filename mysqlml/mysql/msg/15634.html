@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15634</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15633.html">[前]</a><a href="15635.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15634
+</p>
+<div class="header">
+<p>
+From: HIRATSUKA Sadao &lt;HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 28 Sep 2011 11:04:51 +0900<br>
+Subject: [mysql 15634] Re: データ更新時のエラーについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、平塚です。
+
+On Tue, 27 Sep 2011 20:31:51 +0900
+Kenji Funasaki &lt;kenji.funasaki@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; Caused by: &lt;openjpa-2.0.1-r422266:989424 fatal store error&gt;</span>
+<span class="quote1">&gt; org.apache.openjpa.persistence.RollbackException: Streaming result set</span>
+<span class="quote1">&gt; com.mysql.jdbc.RowDataDynamic@1cd2b82 is still active. No statements</span>
+<span class="quote1">&gt; may be issued when any</span>
+<span class="quote1">&gt; streaming result sets are open and in use on a given connection.</span>
+
+OpenJPAとMySQLの組み合わせにはいくつか制限事項があるそうで、
+以下のページの下から2つ目の事象にヒットしているように見えます。
+<a href="http://openjpa.apache.org/docs/latest/dbsupport_mysql.html">http://openjpa.apache.org/docs/latest/dbsupport_mysql.html</a>
+
+When using large result sets with MySQL there are a number of
+documented limitations. Please read the section titled &quot;ResultSet&quot;
+in the &quot;MySQL JDBC API Implementation Notes&quot;. The net effect of these
+limitations is that you will have to read all of the rows of a result
+set (or close the connection) before you can issue any other queries
+on the connection, or an exception will be thrown. Setting
+openjpa.FetchBatchSize to any value greater than zero will enable
+streaming result sets. 
+
+
+発生するパターンとして、
+
+・persistence.xmlにおいてFetchBatchSizeが1以上
+  &lt;property name=&quot;openjpa.FetchBatchSize&quot; value=&quot;10&quot; /&gt;
+
+・多くのデータを返すクエリについて、1つ目のクエリで
+  結果セットを全て処理せずに2つ目のクエリを投げる
+  List l = q.getResultList();
+  l = q.getResultList();
+
+で、再現しました。
+
+Exception in thread &quot;main&quot; &lt;openjpa-2.0.1-r422266:989424 nonfatal
+general error&gt; org.apache.openjpa.persistence.PersistenceException:
+Streaming result set com.mysql.jdbc.RowDataDynamic@5dfaf1 is still
+active. No statements may be issued when any streaming result sets
+are open and in use on a given connection. Ensure that you have called
+.close() on any active streaming result sets before attemptin
+g more queries. {prepstmnt 2592387 SELECT t0.id, t0.name FROM Item t0}
+[code=0, state=null]
+FailedObject: SELECT i.id, i.name FROM Item i [java.lang.String]
+ at org.apache.openjpa.jdbc.sql.DBDictionary.narrow(DBDictionary.java:4832)
+ at org.apache.openjpa.jdbc.sql.DBDictionary.newStoreException(DBDictionary.java:4792)
+ at org.apache.openjpa.jdbc.sql.SQLExceptions.getStore(SQLExceptions.java:136)
+ at org.apache.openjpa.jdbc.sql.SQLExceptions.getStore(SQLExceptions.java:118)
+ at org.apache.openjpa.jdbc.sql.SQLExceptions.getStore(SQLExceptions.java:70)
+
+
+更新に失敗するとのことですが、実際には
+更新の1つ前のクエリに原因があるのではないかと思います。
+以下のような対処方法があります。
+
+・結果セットを最後まで処理する
+  l.get(l.size() - 1); // すごい適当ですが
+
+・FetchBatchSizeを使わない
+  &lt;property name=&quot;openjpa.FetchBatchSize&quot; value=&quot;-1&quot; /&gt;
+
+
+よろしくお願いします。
+
+-- 
+平塚貞夫 hiratsuka.sadao@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15633.html">[前]</a><a href="15635.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15633.html">  15633 2011-09-27 20:31 [Kenji Funasaki &lt;kenj] データ更新時のエラーについて            </a></span>
+<span class="current">-&gt;&nbsp;<a href="15634.html">  15634 2011-09-28 11:04 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+</pre>
+</body>
+</html>

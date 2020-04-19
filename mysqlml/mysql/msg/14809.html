@@ -1,0 +1,213 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14809</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14808.html">[前]</a><a href="14810.html">[次]</a><a href="../list/14801-14900.html">[番号順一覧]</a><a href="../thread/14801-14900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14809
+</p>
+<div class="header">
+<p>
+From: Satoshi Tatsuoka &lt;Satoshi Tatsuoka &lt;satoshi@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 17 Apr 2009 21:23:09 +0900<br>
+Subject: [mysql 14809] Re: SJISで文字コードがシフト？してしまい検索できない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+立岡です。
+
+坂井さん。こちらでも試してみました。この現象、確かに起きますね。
+２バイト目がUPPERされました。とりあえずご報告まで。
+
+(2009年04月17日 21:00), SAKAI Kei wrote:
+<span class="quote1">&gt; 坂井です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   ああっ！浅山さん、upper() していたのですね。</span>
+<span class="quote1">&gt;   これがたぶんみんなが一番知りたかった情報です。</span>
+<span class="quote1">&gt;   </span>
+<span class="quote1">&gt;   私のほうでも試してみたところ、どうも charset の設定にかかわらず</span>
+<span class="quote1">&gt;   upper されてしまうような挙動に見えます。不具合な予感。</span>
+<span class="quote1">&gt;   以下皆さんにも判断していただきたく、やったことを書きます。</span>
+<span class="quote1">&gt;   </span>
+<span class="quote1">&gt; --テーブルを作成し、データを３件INSERT。</span>
+<span class="quote1">&gt; mysql&gt; create table t (a varchar(16)) engine=myisam default charset=cp932;</span>
+<span class="quote1">&gt; mysql&gt; insert into t values (&quot;ビタ&quot;);</span>
+<span class="quote1">&gt; mysql&gt; insert into t values (&quot;ABC&quot;);</span>
+<span class="quote1">&gt; mysql&gt; insert into t values (&quot;abc&quot;);</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; --UPPER() の挙動を確認（参考）</span>
+<span class="quote1">&gt; mysql&gt; select * from t WHERE upper(a)=&quot;ABC&quot;;</span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote2">&gt; | a    |</span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote2">&gt; | ABC  | </span>
+<span class="quote2">&gt; | abc  | </span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote1">&gt; 2 rows in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; --問題の日本語文字でUPPER()の挙動を確認</span>
+<span class="quote1">&gt; mysql&gt; select * from t WHERE upper(a)=&quot;ビタ&quot;;</span>
+<span class="quote1">&gt; Empty set (0.01 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; select * from t WHERE upper(a)=&quot;コタ&quot;;</span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote2">&gt; | a    |</span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote2">&gt; | ビタ | </span>
+<span class="quote1">&gt; +------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝</span>
+<span class="quote1">&gt; --UPPER()関数によって CP932の2バイト目がUPPERされてしまっていることの確認（不具合と思います）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; SELECT a, HEX(a), HEX(UPPER(a)) FROM t;</span>
+<span class="quote1">&gt; +------+----------+---------------+</span>
+<span class="quote2">&gt; | a    | HEX(a)   | HEX(UPPER(a)) |</span>
+<span class="quote1">&gt; +------+----------+---------------+</span>
+<span class="quote2">&gt; | ビタ | 8372835E | 8352835E      | </span>
+<span class="quote2">&gt; | ABC  | 414243   | 414243        | </span>
+<span class="quote2">&gt; | abc  | 616263   | 414243        | </span>
+<span class="quote1">&gt; +------+----------+---------------+</span>
+<span class="quote1">&gt; 3 rows in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝</span>
+<span class="quote1">&gt; --環境とか</span>
+<span class="quote1">&gt; mysql&gt; SHOW CREATE TABLE t\G</span>
+<span class="quote1">&gt; *************************** 1. row ***************************</span>
+<span class="quote1">&gt;        Table: t</span>
+<span class="quote1">&gt; Create Table: CREATE TABLE `t` (</span>
+<span class="quote1">&gt;   `a` varchar(16) default NULL</span>
+<span class="quote1">&gt; ) ENGINE=MyISAM DEFAULT CHARSET=cp932</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; status</span>
+<span class="quote1">&gt; --------------</span>
+<span class="quote1">&gt; ：</span>
+<span class="quote1">&gt; Server version:         5.0.45 Source distribution</span>
+<span class="quote1">&gt; ：</span>
+<span class="quote1">&gt; Server characterset:    cp932</span>
+<span class="quote1">&gt; Db     characterset:    cp932</span>
+<span class="quote1">&gt; Client characterset:    cp932</span>
+<span class="quote1">&gt; Conn.  characterset:    cp932</span>
+<span class="quote1">&gt; --------------</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; show create database test;</span>
+<span class="quote1">&gt; +----------+----------------------------------------------------------------+</span>
+<span class="quote2">&gt; | Database | Create Database                                                |</span>
+<span class="quote1">&gt; +----------+----------------------------------------------------------------+</span>
+<span class="quote2">&gt; | test     | CREATE DATABASE `test` /*!40100 DEFAULT CHARACTER SET cp932 */ | </span>
+<span class="quote1">&gt; +----------+----------------------------------------------------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Thank you </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; On Fri, 17 Apr 2009 20:38:31 +0900</span>
+<span class="quote1">&gt; ALCYONE@xxxxxxxxxx (浅山雄三) wrote:</span>
+<span class="quote2">&gt;&gt; 奥野様</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;   浅山です。いつもお世話になります。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;  &gt;その現象はテーブルの文字コードが違うときの現象に似てるんですが、</span>
+<span class="quote3">&gt;&gt;  &gt;もう一度テーブルの文字コードを確認して頂けませんか？</span>
+<span class="quote3">&gt;&gt;  &gt;</span>
+<span class="quote3">&gt;&gt;  &gt;mysql&gt; SHOW CREATE TABLE テーブル名\G</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt; | Aテーブル | CREATE TABLE `Aテーブル` (</span>
+<span class="quote2">&gt;&gt;   `AA_num` varchar(16) NOT NULL,</span>
+<span class="quote2">&gt;&gt;   `BB_num` varchar(16) DEFAULT NULL,</span>
+<span class="quote2">&gt;&gt;   `CC_num` varchar(16) DEFAULT NULL,</span>
+<span class="quote2">&gt;&gt;   `DD_sb` text,</span>
+<span class="quote2">&gt;&gt;   `EE_mei` text,</span>
+<span class="quote2">&gt;&gt; （以下、同様の行が205行）</span>
+<span class="quote2">&gt;&gt;   `biko3` text,</span>
+<span class="quote2">&gt;&gt;   `update_dattim` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON </span>
+<span class="quote2">&gt;&gt; UPDATE CURRENT_TIMESTAMP,</span>
+<span class="quote2">&gt;&gt;   `FF_flg` varchar(1) DEFAULT NULL,</span>
+<span class="quote2">&gt;&gt;   `GG_num` varchar(16) DEFAULT NULL,</span>
+<span class="quote2">&gt;&gt;   `HH_num` varchar(16) DEFAULT NULL,</span>
+<span class="quote2">&gt;&gt;   `II_url` varchar(500) DEFAULT NULL,</span>
+<span class="quote2">&gt;&gt;   `biko4` text,</span>
+<span class="quote2">&gt;&gt;   `biko5` text,</span>
+<span class="quote2">&gt;&gt;   PRIMARY KEY (`AA_num`),</span>
+<span class="quote2">&gt;&gt;   UNIQUE KEY `Aテーブル_uk1` (`JJ_num`),</span>
+<span class="quote2">&gt;&gt;   KEY `Aテーブル_KK_num_idx1` (`LL_num`),</span>
+<span class="quote2">&gt;&gt;   KEY `MM_flg_idx` (`LL_flg`)</span>
+<span class="quote2">&gt;&gt; ) ENGINE=MyISAM DEFAULT CHARSET=cp932 | </span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt; | Bテーブル | CREATE TABLE `Bテーブル` (</span>
+<span class="quote2">&gt;&gt;   `AA_num` varchar(16) NOT NULL DEFAULT '',</span>
+<span class="quote2">&gt;&gt;   `data` longtext,</span>
+<span class="quote2">&gt;&gt;   `ngram` longtext,</span>
+<span class="quote2">&gt;&gt;   PRIMARY KEY (`AA_num`),</span>
+<span class="quote2">&gt;&gt;   FULLTEXT KEY `ngram` (`ngram`)</span>
+<span class="quote2">&gt;&gt; ) ENGINE=MyISAM DEFAULT CHARSET=cp932 |</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;  &gt;あと、問題になってるSELECT文も見せて頂けますでしょうか？</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; select SQL_SMALL_RESULT AA_NUM, BB_NUM, CC_KJ, DD_EN, EE_EN, </span>
+<span class="quote2">&gt;&gt; FF_KJ1,length(trim(BB_NUM)) BB_NUM_LEN from Aテーブル DT, Bテーブル </span>
+<span class="quote2">&gt;&gt; TP where ((upper(DD_EN) like '%ビタミン%' or upper(GG_EN) like '%ビ</span>
+<span class="quote2">&gt;&gt; タミン%' or upper(CC_KJ) like '%ビタミン%') and (upper(DD_EN) like </span>
+<span class="quote2">&gt;&gt; '%サプリメント%' or upper(GG_EN) like '%サプリメント%' or upper</span>
+<span class="quote2">&gt;&gt; (CC_KJ) like '%サプリメント%')) and (upper(substr(HH_CD1,1,1)) = </span>
+<span class="quote2">&gt;&gt; 'B' or upper(substr(II_CD2,1,1)) = 'B' or upper(substr(JJ_CD3,1,1)) </span>
+<span class="quote2">&gt;&gt; = 'B') and AA_NUM = TP.KANRI_NUM and (MATCH(NGRAM) AGAINST('+栄養</span>
+<span class="quote2">&gt;&gt; *' IN BOOLEAN MODE)) order by CC_KJ</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ※ Aテーブルは<a href="14797.html">[mysql 14797]</a>のAテーブル</span>
+<span class="quote2">&gt;&gt;    Bテーブルは<a href="14797.html">[mysql 14797]</a>のBテーブル</span>
+<span class="quote2">&gt;&gt;    フィールド名の一部を実際とはかえています。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;  2009年4月17日 20:38:27 (^o^)浅山雄三</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+</pre>
+</div>
+<p class="button"><a href="14808.html">[前]</a><a href="14810.html">[次]</a><a href="../list/14801-14900.html">[番号順一覧]</a><a href="../thread/14801-14900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14789.html">  14789 2009-04-15 19:14 [&lt;ALCYONE@xxxxxxxxxx&gt;] SJISで文字コードがシフト？してしまい検索できない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14790.html">  14790 2009-04-15 19:28 ┣[Isamu Moriyama &lt;mori]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14791.html">  14791 2009-04-15 19:43 ┃┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14792.html">  14792 2009-04-15 20:17 ┣[SAKAI Kei &lt;sak2@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14795.html">  14795 2009-04-16 15:06 ┃┣[&lt;ALCYONE@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14796.html">  14796 2009-04-16 15:13 ┃┃┣[&lt;ALCYONE@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14800.html">@ 14800 2009-04-16 17:28 ┃┃┃┗[chuuken kenkou &lt;ken_]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14803.html">  14803 2009-04-17 19:51 ┃┃┃　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14805.html">  14805 2009-04-17 20:50 ┃┃┃　　┗[Satoshi Tatsuoka &lt;sa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14802.html">  14802 2009-04-17 17:05 ┃┃┗[SAKAI Kei &lt;sak2@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14806.html">  14806 2009-04-17 20:55 ┃┃　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14801.html">  14801 2009-04-17 15:52 ┃┗[Mikiya Okuno &lt;Mikiya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14804.html">  14804 2009-04-17 20:38 ┃　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14807.html">  14807 2009-04-17 21:00 ┃　　┗[SAKAI Kei &lt;sak2@xxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14808.html">  14808 2009-04-17 21:12 ┃　　　┣[SAKAI Kei &lt;sak2@xxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14810.html">  14810 2009-04-18 13:37 ┃　　　┃┗[Satoshi Tatsuoka &lt;sa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14811.html">  14811 2009-04-18 15:38 ┃　　　┃　┣[Yoshinori Matsunobu ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14813.html">  14813 2009-04-18 17:03 ┃　　　┃　┃┗[Satoshi Tatsuoka &lt;sa]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14814.html">  14814 2009-04-18 17:17 ┃　　　┃　┃　┗[Yoshinori Matsunobu ]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14815.html">  14815 2009-04-20 10:03 ┃　　　┃　┃　　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14821.html">  14821 2009-05-06 14:05 ┃　　　┃　┃　　　┗[SAKAI Kei &lt;sak2@xxxx]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14840.html">  14840 2009-05-09 12:01 ┃　　　┃　┃　　　　┣[SAKAI Kei &lt;sakaik@xx]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14956.html">  14956 2009-07-06 16:57 ┃　　　┃　┃　　　　┗[SAKAI Kei &lt;sak2@xxxx] MySQL 5.1.36 リリース（was Re:  Re: SJISで文字コードがシフト？してしまい検索できない</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14812.html">  14812 2009-04-18 16:10 ┃　　　┃　┗[SAKAI Kei &lt;sak2@xxxx]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="14809.html">  14809 2009-04-17 21:23 ┃　　　┗[Satoshi Tatsuoka &lt;sa]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14794.html">  14794 2009-04-15 23:37 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14797.html">  14797 2009-04-16 15:34 　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14798.html">  14798 2009-04-16 15:41 　　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14799.html">  14799 2009-04-16 16:44 　　　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                 </a></span>
+</pre>
+</body>
+</html>

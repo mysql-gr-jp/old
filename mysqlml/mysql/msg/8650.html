@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8650</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8649.html">[前]</a><a href="8651.html">[次]</a><a href="../list/8601-8700.html">[番号順一覧]</a><a href="../thread/8601-8700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8650
+</p>
+<div class="header">
+<p>
+From: &lt;m-saitoh@xxxxxxxxxx&gt;<br>
+Date: Fri, 23 Jan 2004 12:38:36 +0900<br>
+Subject: [mysql 08650] LEFT JOIN の NULL 値のソートについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+斎藤＠大和と申します。
+
+過去のメールを検索してみたのですが、同じような内容を見つけることが
+出来ませんでしたので投稿させて頂きます。
+もし、同じような内容が既出でしたら番号だけでも教えて頂ければと思い
+ます。
+
+[環境]
+OS : RedHat 9
+DB : mysql 3.23.58
+PG : php 4.2.2
+
+[DB構成]
+CREATE TABLE main (
+  id smallint unsigned NOT NULL auto_increment,
+  post_id smallint unsigned NOT NULL default 0,
+  name varchar(255) binary NOT NULL default '',
+  PRIMARY KEY  (id)
+);
+INSERT INTO main VALUES (1,1,'斉藤');
+INSERT INTO main VALUES (2,2,'田中');
+INSERT INTO main VALUES (3,0,'吉田');
+
+CREATE TABLE post (
+  post_id smallint unsigned NOT NULL default 0,
+  post_order smallint unsigned NOT NULL default 65535,
+  post_title varchar(255) binary NOT NULL default '',
+  PRIMARY KEY  (post_id)
+);
+INSERT INTO post VALUES (1,2,'課長');
+INSERT INTO post VALUES (2,1,'部長');
+
+[質問]
+上記の構成で
+SELECT name, post_title FROM main
+  LEFT JOIN post ON main.post_id=post.post_id
+  ORDER BY post_order;
+のSQL文を実行した場合
+
+ name    post_title
+-------------------
+ 吉田    NULL
+ 斉藤    部長
+ 田中    課長
+
+と結果が帰ってくるのでが、これを
+
+ name    post_title
+-------------------
+ 斉藤    部長
+ 田中    課長
+ 吉田    NULL
+
+の順で結果を返す方法はないでしょうか。
+
+INSERT INTO post VALUES (0,65535,'');
+といったようなデータを入れれば出来なくは無いのですが
+別の処理で弊害が発生するため入れられません。
+
+LEFT JOIN した際のNULLを置換するような処理
+（ post_orderがNULLの時は 65535 に置換える ）
+ようなことが出来ると幸いなのですがいろいろ調べてみたの
+ですが見つけることが出来ませんでした。
+
+ご教授よろしくお願いいたします。
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-
+m-saitoh@xxxxxxxxxx
+
+
+</pre>
+</div>
+<p class="button"><a href="8649.html">[前]</a><a href="8651.html">[次]</a><a href="../list/8601-8700.html">[番号順一覧]</a><a href="../thread/8601-8700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="8650.html">   8650 2004-01-23 12:38 [&lt;m-saitoh@xxxxxxxxxx] LEFT JOIN の NULL 値のソートについて    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8651.html">   8651 2004-01-23 12:57 ┗[&lt;n.futami@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8652.html">   8652 2004-01-23 13:34 　┗[&lt;m-saitoh@xxxxxxxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

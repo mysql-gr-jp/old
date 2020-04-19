@@ -1,0 +1,80 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11742</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11741.html">[前]</a><a href="11743.html">[次]</a><a href="../list/11701-11800.html">[番号順一覧]</a><a href="../thread/11701-11800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11742
+</p>
+<div class="header">
+<p>
+From: &quot;T.Sasaki&quot; &lt;&quot;T.Sasaki&quot; &lt;papasan2000@xxxxxxxxxx&gt;&gt;<br>
+Date: 13 Jul 2005 20:08:56 +0900<br>
+Subject: [mysql 11742] Re: MySQLでの最大項目数につきまして<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+佐々木です。
+
+<span class="quote1">&gt; しかし、これだと追加してたら突然クラッシュというのもありそうですね。</span>
+
+ちょっと調べてみました。
+
+1.MyISAM の列数上限
+　列自体に制限はありません。
+　但し、.frm ファイルの要素数が 4096 までに制限されており、
+　この中に列の定義情報も含まれるため影響を受けます。
+　私の環境では２千数百列程度で
+　　ERROR 1117 (HY000): Too many columns
+　というエラーが発生しました。
+　これは .frm ファイルの書き込み前に行われるチェックで生成されるエラーです。
+
+2.InnoDB の列数上限
+　ユーザーが定義できる列の数は１テーブル辺り 1,000 までです。
+　私の環境では 1,001 列目で
+　　ERROR 1005 (HY000): Can't create table './xxxx/#sql-4c8_51.frm' (errno: 139)
+　というエラーが発生しました。
+　プログラムソースの該当箇所にはコメントが振ってあり、
+　「実際の上限値は 1020 (REC_MAX_N_FIELDS - 3) だと思われるが、ここでは安全に処理する。」
+　みたいなことが書いてあります。
+　引き算をしてるのはシステム用の隠れ列？を考慮しているからでしょうか。
+　#sql-4c8_51.frm というテンポラリテーブルが行数が多いため作成できないと怒られています。
+
+MySQL 5.0.6-beta で確認しました。
+確かにリソース不足でクラッシュする可能性は否定できませんが、
+SQL injection で不正に列項目を増やされてサーバーが落ちる心配はなさそうですね。
+間違ってたらどなたか訂正もしくは補足をお願いします。
+
+</pre>
+</div>
+<p class="button"><a href="11741.html">[前]</a><a href="11743.html">[次]</a><a href="../list/11701-11800.html">[番号順一覧]</a><a href="../thread/11701-11800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11693.html">  11693 2005-07-06 16:07 [Kenta Hashimoto &lt;kem] 全文検索と他条件の組み合わせ            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11694.html">  11694 2005-07-07 00:55 ┣[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11697.html">  11697 2005-07-07 09:58 ┗[&quot;T.Sasaki&quot; &lt;papasan2]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11706.html">  11706 2005-07-07 20:18 　┗[Kenta Hashimoto &lt;kem]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11707.html">  11707 2005-07-07 20:47 　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11712.html">  11712 2005-07-07 21:39 　　　┗[Kenta Hashimoto &lt;kem]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11713.html">  11713 2005-07-07 21:58 　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11714.html">  11714 2005-07-07 22:14 　　　　　┗[Kenta Hashimoto &lt;kem]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11715.html">  11715 2005-07-07 22:56 　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11716.html">  11716 2005-07-07 23:10 　　　　　　　┣[Kenta Hashimoto &lt;kem]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11717.html">  11717 2005-07-07 23:17 　　　　　　　┗[Kazuhiro Osawa &lt;ko@x]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11719.html">  11719 2005-07-08 00:14 　　　　　　　　┣[Kenta Hashimoto &lt;kem]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11720.html">  11720 2005-07-08 06:25 　　　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11734.html">  11734 2005-07-09 13:45 　　　　　　　　　┗[Kazuhiro Osawa &lt;ko@x]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11735.html">  11735 2005-07-09 20:31 　　　　　　　　　　┣[&quot;T.Sasaki&quot; &lt;papasan2]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11736.html">  11736 2005-07-12 15:33 　　　　　　　　　　┗[&quot;Naoi Masaaki&quot; &lt;naoi] MySQLでの最大項目数につきまして</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11737.html">  11737 2005-07-12 16:33 　　　　　　　　　　　┣[Tetsuro IKEDA &lt;ikdtt]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11739.html">  11739 2005-07-12 17:42 　　　　　　　　　　　┃┗[&quot;Naoi Masaaki&quot; &lt;naoi]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11738.html">  11738 2005-07-12 17:10 　　　　　　　　　　　┗[Hiroshi Moriyama &lt;mt]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11740.html">  11740 2005-07-12 17:47 　　　　　　　　　　　　┣[&quot;Naoi Masaaki&quot; &lt;naoi]               </a></span>
+<span class="current">-&gt;&nbsp;<a href="11742.html">  11742 2005-07-13 20:08 　　　　　　　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]               </a></span>
+</pre>
+</body>
+</html>

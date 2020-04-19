@@ -1,0 +1,70 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2622</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="2621.html">[前]</a><a href="2623.html">[次]</a><a href="../list/2601-2700.html">[番号順一覧]</a><a href="../thread/2601-2700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2622
+</p>
+<div class="header">
+<p>
+From: 藤吉　克己 &lt;藤吉　克己 &lt;fujiyoshi@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 20 Oct 2000 21:29:38 +0900<br>
+Subject: [mysql 02622] ２５６バイト超の BLOB 型インデックスが正しく処理されません。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+藤吉です。
+
+ＢＬＯＢ型のカラムに３００バイトのプライマリキーを指定したのですが、ＭｙＳＱ
+Ｌはキー長を４４バイトと認識します（インデックスも同様です）。
+２５５バイトまでは正しくキー長を認識します。
+キー長に２５６バイトを指定すると、ＭｙＳＱＬはキー長０バイト、３００バイトを
+指定すると４４バイトとなります。
+動きを見ると、指定キー長が２５６バイト以上の場合、２５６バイトを減算している
+？（インデックス長を１バイトで管理していて桁落ちしている？）ように思います。
+
+マニュアルにはキー長の最大値は５００バイトとなっているので、３００バイトは問
+題無く処理されてもいいと思います。
+この問題に遭遇された方、対処方法をご教授願いたく、よろしくお願い致します。
+
+＜環境＞
+ Mysql 3.23.25-beta(MyISAM ) , HP-UX 11.00
+
+＜テーブル定義＞
+CREATE TABLE test(
+    data1          BLOB                     NOT NULL,
+    〜途中省略〜
+    PRIMARY KEY     (data1(300))
+);
+
+＜show index＞
+mysql&gt; show index from test;
++-----+----------+-------------+...+-------+...+
+<span class="quote1">| Table  | Non_unique | Key_name         |...| Sub_part | ...|</span>
++-----+----------+-------------+...+-------+...+
+<span class="quote1">| test   |                0 | PRIMARY           |...|         44 | ...|</span>
++-----+----------+-------------+...+-------+...+
+表示内容は一部省略しています。
+
+
+</pre>
+</div>
+<p class="button"><a href="2621.html">[前]</a><a href="2623.html">[次]</a><a href="../list/2601-2700.html">[番号順一覧]</a><a href="../thread/2601-2700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="2622.html">   2622 2000-10-20 21:29 [藤吉　克己 &lt;fujiyosh] ２５６バイト超の BLOB 型インデックスが正しく処理されません。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2624.html">   2624 2000-10-21 00:48 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2644.html">   2644 2000-10-23 17:33 ┃┗[藤吉　克己 &lt;fujiyosh]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2646.html">   2646 2000-10-24 00:05 ┃　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2627.html">   2627 2000-10-21 01:04 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2638.html">   2638 2000-10-22 14:22 　┗[&lt;cotton@xxxxxxxxxx&gt; ] SQL 文の長さについて。              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2640.html">   2640 2000-10-22 15:32 　　┗[Tomohiro Takahashi &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2641.html">   2641 2000-10-22 15:57 　　　┗[&lt;cotton@xxxxxxxxxx&gt; ]                                 </a></span>
+</pre>
+</body>
+</html>

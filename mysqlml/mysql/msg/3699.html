@@ -1,0 +1,230 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3699</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="3698.html">[Á°]</a><a href="3700.html">[¼¡]</a><a href="../list/3601-3700.html">[ÈÖ¹æ½ç°ìÍ÷]</a><a href="../thread/3601-3700.html">[¥¹¥ì¥Ã¥É°ìÍ÷]</a></p>
+<p class="id">
+mysql:3699
+</p>
+<div class="header">
+<p>
+From: Yasuhide OMORI / Âç¿¹ÊÝ±Ñ &lt;Yasuhide OMORI / Âç¿¹ÊÝ±Ñ &lt;omori@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 28 May 2001 16:21:52 +0900<br>
+Subject: [mysql 03699] Re: PHP ¥¢¥¯¥»¥¹¤Ç¥¨¥é¡¼<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+#%define patch_level 2
+
+# anyone update ok :-)
+# See [VineSeed-Plus:00193]
+
+# for Vine-2.1 (default)
+%{!?RH7:%define contentdir /home/httpd/html}
+
+# for RedHat7
+%{?RH7:%define contentdir /var/www}
+
+%{?with_mysql:Requires: MySQL}
+%{?with_mysql:BuildRequires: MySQL-devel}
+
+%{?with_pgsql:Requires: postgresql}
+%{?with_pgsql:BuildRequires: postgresql-devel}
+
+%{?with_mcrypt:Requires: libmcrypt}
+%{?with_mcrypt:BuildRequires: libmcrypt-devel}
+
+%{?with_gd:Requires: gd,VFlib}
+%{?with_gd:BuildRequires: gd-devel,VFlib-devel}
+
+%{?with_jpeg:Requires: libjpeg}
+%{?with_jpeg:BuildRequires: libjpeg-devel}
+
+%{?with_png:Requires: libpng}
+%{?with_png:BuildRequires: libpng-devel}
+
+%{?with_tiff:Requires: libtiff}
+%{?with_tiff:BuildRequires: libtiff-devel}
+
+%define php_mandir manual/php
+
+#%define dso_sysconfdir /etc/httpd/conf
+#%define cgi_sysconfdir /etc/php/cgi
+
+%define sysconfdir /etc
+
+Name: php
+Version: 4.0.5
+Release: 0vl1
+Summary: PHP: Hypertext Preprocessor
+Group: Development/Languages
+License: PHP
+Source0: <a href="http://www.php.net/distributions/php-%">http://www.php.net/distributions/php-%</a>{version}.tar.gz
+Source1: <a href="http://snaps.php.net/manual/ja/manual-ja-current.tar.gz">http://snaps.php.net/manual/ja/manual-ja-current.tar.gz</a>
+Source2: <a href="http://snaps.php.net/manual/en/manual-en-current.tar.gz">http://snaps.php.net/manual/en/manual-en-current.tar.gz</a>
+Source3: <a href="ftp://night.fminn.nagano.nagano.jp/php4/php4_mbregex-1.2.tar.gz">ftp://night.fminn.nagano.nagano.jp/php4/php4_mbregex-1.2.tar.gz</a>
+Source4: <a href="ftp://night.fminn.nagano.nagano.jp/php4/php-4.0RC2_jstring-1.0.tar.gz">ftp://night.fminn.nagano.nagano.jp/php4/php-4.0RC2_jstring-1.0.tar.gz</a>
+Source5: <a href="http://www.php.net/extra/number4.tar.gz">http://www.php.net/extra/number4.tar.gz</a>
+Patch: php-4.0.3pl1-DESTDIR.patch.gz
+Patch1: php-4.0.3pl1.no_apxs_install.patch.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
+NoSource: 0
+
+%description
+PHP: Hypertext Preprocessor
+
+%package manual
+Group: Development/Languages
+Summary: manual for PHP: Hypertext Preprocessor
+%description manual
+manual for PHP: Hypertext Preprocessor
+
+%prep
+#%setup -q -a 1 -n php-%{version}
+#patch -p1 -b --suffix .i18n -s&lt; I18N-ja.diff
+%setup -q -n php-%{version} -a 5
+%patch -p1
+%patch1 -p1
+
+mkdir -p %{php_mandir}/{ja,en}
+tar zxf %{SOURCE1} -C %{php_mandir}/ja
+tar zxf %{SOURCE2} -C %{php_mandir}/en
+for i in %{php_mandir}/{ja,en} ; do
+    ln -s manual.html $i/index.html
+done
+
+tar zxf %{SOURCE2} -C ext
+tar zxf %{SOURCE3} -C ext
+
+%build
+export CFLAGS=&quot;${RPM_OPT_FLAGS}&quot;
+
+# <a href="http://sidecar.ics.es.osaka-u.ac.jp/php-jp/archives/msg04095.html">http://sidecar.ics.es.osaka-u.ac.jp/php-jp/archives/msg04095.html</a>
+rm configure
+./buildconf
+./configure --prefix=%{_prefix} \
+--with-apxs=/usr/sbin/apxs \
+--with-mod_charset=yes \
+%{?with_gd:--with-gd} \
+--enable-jstring \
+%{?with_mysql:--with-mysql=/usr} \
+%{?with_pgsql:--with-pgsql=/usr} \
+%{?with_mcrypt:--with-mcrypt} \
+%{?with_xml:--with-xml} \
+%{?with_ibm_db2:--with-ibm-db2=/usr/IBMdb2/V6.1} \
+--with-zlib-dir=/usr \
+--enable-sysvshm=yes \
+--enable-sysvsem=yes \
+--with-config-file-path=%{sysconfdir} \
+--enable-mbregex \
+--enable-safe-mode=yes \
+--enable-track-vars=yes \
+--enable-magic-quotes=yes \
+--enable-debugger=yes \
+--enable-bcmath=yes \
+--enable-force-cgi-redirect=yes \
+--enable-discard-path=yes \
+--enable-memory-limit=yes \
+--enable-i18n \
+--with-gdbm \
+--enable-versioning \
+%{!?with_jpeg:--without-jpeg} \
+%{!?with_png:--without-png} \
+%{!?with_tiff:--without-tiff} \
+#--with-system-regex=yes \
+
+# `/usr/sbin/apxs -q CFLAGS` adds optflags :-&lt;
+# This is an example for Vine-2.1
+perl -i.bak -p -e 's/-O2 -m486 -fno-strength-reduce//' Makefile */Makefile
+make
+
+%install
+[ -n &quot;$RPM_BUILD_ROOT&quot; -a &quot;$RPM_BUILD_ROOT&quot; != / ] &amp;&amp; rm -rf ${RPM_BUILD_ROOT}
+#make prefix=${RPM_BUILD_ROOT}%{_prefix} install
+make DESTDIR=${RPM_BUILD_ROOT} peardir=${RPM_BUILD_ROOT}%{_datadir}/php install
+
+mkdir -p ${RPM_BUILD_ROOT}/usr/lib/apache
+mkdir -p ${RPM_BUILD_ROOT}%{sysconfdir}
+
+install -m 755 .libs/libphp4.so ${RPM_BUILD_ROOT}/usr/lib/apache/
+install -m 644 php.ini-dist ${RPM_BUILD_ROOT}%{sysconfdir}/php.ini
+
+mkdir -p ${RPM_BUILD_ROOT}%{contentdir}
+tar cf - manual/ | tar xf - -C ${RPM_BUILD_ROOT}%{contentdir}
+
+%clean
+[ -n &quot;${RPM_BUILD_ROOT}&quot; -a &quot;${RPM_BUILD_ROOT}&quot; != / ] &amp;&amp; rm -rf ${RPM_BUILD_ROOT}
+
+%post
+#perl -i.bak -p -e 's/^#(LoadModule\s+php3_module\s+modules\/libphp3\.so).*$/$1/;s/^#(AddModule\s+mod_php3.c).*$/$1/' /etc/httpd/conf/httpd.conf
+echo AddType application/x-httpd-php .php &gt;&gt; /etc/httpd/conf/httpd.conf
+echo AddType application/x-httpd-php-source .phps &gt;&gt; /etc/httpd/conf/httpd.conf
+/etc/rc.d/init.d/httpd reload
+
+%postun
+if [ $1 = 0 ]; then
+    perl -i.bak -p -e 's/^(LoadModule\s+php3_module\s+modules\/libphp3\.so).*$/#$1/;s/^(AddModule\s+mod_php3.c).*$/#$1/;s/^AddType application\/x-httpd-php \.php\n//;s/^AddType application\/x-httpd-php-source .phps\n//' /etc/httpd/conf/httpd.conf
+    /etc/rc.d/init.d/httpd reload
+fi
+
+%files
+%defattr(-,root,root)
+%doc CODING_STANDARDS CREDITS EXTENSIONS FUNCTION_LIST.txt LICENSE NEWS README.BCMATH README.CVS-RULES README.EXT_SKEL README.QNX README.SELF-CONTAINED-EXTENSIONS README.Zeus TODO apidoc*.txt
+/usr/lib/apache/*
+%{sysconfdir}/*
+%{_bindir}/*
+%{_includedir}/*
+%{_libdir}/php
+
+%files manual
+%defattr(-,root,root)
+%{contentdir}/%{php_mandir}
+
+%changelog
+* Fri Dec 15 2000 Yasuhide OOMORI &lt;dasen@xxxxxxxxxx&gt;
+- [php3-3.0.18-0vl2]
+- updated to php-3.0.18-i18n-ja-2
+- bundle English manual too
+
+* Mon Dec 11 2000 Yasuhide OOMORI &lt;dasen@xxxxxxxxxx&gt;
+- [php3-3.0.18-0vl1]
+- use pre-patched source
+
+* Fri Dec  1 2000 Yasuhide OOMORI &lt;dasen@xxxxxxxxxx&gt;
+- [php3-3.0.18-0]
+- first attempt.
+
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">ÅºÉÕ¥Õ¥¡¥¤¥ë</h3>
+<ul>
+<li><a href="3699/0/php3.spec">php3.spec [text/plain]</a>
+</ul>
+</div>
+<p class="button"><a href="3698.html">[Á°]</a><a href="3700.html">[¼¡]</a><a href="../list/3601-3700.html">[ÈÖ¹æ½ç°ìÍ÷]</a><a href="../thread/3601-3700.html">[¥¹¥ì¥Ã¥É°ìÍ÷]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3677.html">   3677 2001-05-24 19:27 [MAO &lt;mao@xxxxxxxxxx&gt;] PHP ¥¢¥¯¥»¥¹¤Ç¥¨¥é¡¼                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3680.html">   3680 2001-05-25 02:05 ¨²[¤È¤ß¤¿¤Þ¤µ¤Ò¤í &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3682.html">   3682 2001-05-25 09:25 ¨­¨±[Shinichi Moritani &lt;m]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3683.html">   3683 2001-05-25 09:53 ¨±[Hiroyuki Hasegawa &lt;a]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3688.html">   3688 2001-05-25 14:44 ¡¡¨²[MAO &lt;mao@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3689.html">   3689 2001-05-25 14:58 ¡¡¨­¨²[Hiroyuki Hasegawa &lt;a]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3691.html">   3691 2001-05-25 19:53 ¡¡¨­¨­¨±[MAO &lt;mao@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3694.html">   3694 2001-05-25 22:17 ¡¡¨­¨­¡¡¨±[MAO &lt;mao@xxxxxxxxxx&gt;] sysdate ¡¦ getdate ¤Î¤è¤¦¤Ê´Ø¿ô</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3695.html">   3695 2001-05-25 22:35 ¡¡¨­¨­¡¡¡¡¨±[MAO &lt;mao@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3690.html">   3690 2001-05-25 15:54 ¡¡¨­¨±[Tomohiro 'Tomo-p' KA] PHP4 with MySQL                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3693.html">   3693 2001-05-25 21:49 ¡¡¨±[Yasuhide OMORI / Âç¿]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3697.html">   3697 2001-05-26 14:19 ¡¡¡¡¨±[Hiroyuki Hasegawa &lt;a]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="3699.html">@  3699 2001-05-28 16:21 ¡¡¡¡¡¡¨²[Yasuhide OMORI / Âç¿]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3700.html">   3700 2001-05-28 16:48 ¡¡¡¡¡¡¨²[Yasuhide OMORI / Âç¿]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3701.html">   3701 2001-05-29 00:24 ¡¡¡¡¡¡¨±[BineÊ¿°æ  &lt;hirai@xxx] ujis ¥Õ¥¡¥¤¥ë¤Î¼èÆÀÊýË¡         </a></span>
+</pre>
+</body>
+</html>

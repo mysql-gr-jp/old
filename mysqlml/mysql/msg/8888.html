@@ -1,0 +1,104 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8888</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8887.html">[前]</a><a href="8889.html">[次]</a><a href="../list/8801-8900.html">[番号順一覧]</a><a href="../thread/8801-8900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8888
+</p>
+<div class="header">
+<p>
+From: 柴垣 &lt;柴垣 &lt;akiro@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 02 Mar 2004 20:50:56 +0900<br>
+Subject: [mysql 08888] Re: 整数フィールドの次の空きを探す sql は<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+かわじ さま、松枝さま、班石さま
+
+　早速の回答、ありがとうございます。
+
+<span class="quote1">&gt; そのシーケンシャルのテーブルを t_seq として</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; select min(t.id) from t_seq left join t using (id)</span>
+<span class="quote1">&gt; where t.id &gt; 2 and t_seq.id is null group by t.id;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; で、いかがでしょう？</span>
+
+　わたしも、似たような方向では考えてみているのですが、
+（上のSQL文は、下記のようでしょうか？ t_seq が跳びの
+ないシーケンシャルなファイルとすると、以下のように
+なると思うのですが、シーケンシャルテーブルの意味が
+私の了解と違うのかもしれません。）
+
+select min(t_seq.id) from t_seq left join t using (id)
+ where t_seq.id &gt; 2 and t.id is null group by t.id;
+
+　ただし、この方法では、シーケンシャルテーブルをどう
+やって作るかが、問題になります。例えば、整数１から
+整数２までのシーケンシャルテーブルを作るにはどうすれば
+いいのでしょうか。はじめに auto increment のフィールドに
+整数１をいれ、その後、（整数２−整数１）個のnull データを
+追加する、といった方法しか今のところ思いつきません。
+
+　これまでに検討した途中経過だけを、一応ご報告しておくと、
+
+プラン１．その次の行とのId フィールドの差分が１より
+大きいレコードの次にId のとびがある、と考える。
+（元テーブル t に、シーケンシャルなフィールドridを追加して
+
+　select t1.id, t1.id - t2.id as dif from t as t1, t as t2
+where t1.rid + 1 = t2.rid having dif &gt; 0;
+
+のようにし、見つかった id の次に跳びがあると考える。
+（実際のSQL文には、これに id の範囲の制限がつく）
+
+プラン２．auto_increment フィールド、auto を持った作業
+テーブル w に、例えば検索の先頭の数字 n より大きいレコードを
+書き出す。数字に空きが生じるレコードは、
+
+select id from w where auto + n != id order by id limit 1;
+
+のように拾い出し、その前のレコードのひとつ先の数字を拾う。
+
+などです。
+
+<span class="quote1">&gt; 　何の目的で数字の抜けを捜さなければならないのか</span>
+
+　とりあえず、先方の要求なのですが、ランダムに使っている数字を
+ムダなく使い切りたい、そのための候補を自動的に提示したい、
+といった用途です。
+
+_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+ 柴垣 akiro@xxxxxxxxxx
+
+_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8887.html">[前]</a><a href="8889.html">[次]</a><a href="../list/8801-8900.html">[番号順一覧]</a><a href="../thread/8801-8900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8880.html">   8880 2004-03-02 15:16 [柴垣　顕郎 &lt;akiro@xx] 整数フィールドの次の空きを探す sql は   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8882.html">   8882 2004-03-02 15:59 ┣[KAWAJI Shinya &lt;kawaj]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8883.html">   8883 2004-03-02 16:04 ┃┗[KAWAJI Shinya &lt;kawaj]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="8888.html">   8888 2004-03-02 20:50 ┃　┗[柴垣 &lt;akiro@xxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8889.html">   8889 2004-03-02 23:40 ┃　　┗[ML account &lt;ml@xxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8890.html">   8890 2004-03-03 08:47 ┃　　　┗[KAWAJI Shinya &lt;kawaj]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8894.html">   8894 2004-03-03 09:28 ┃　　　　┣[柴垣 &lt;akiro@xxxxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8899.html">   8899 2004-03-03 12:54 ┃　　　　┃┗[Seiji Uramoto &lt;uramo]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8895.html">   8895 2004-03-03 10:11 ┃　　　　┣[ML account &lt;ml@xxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8898.html">   8898 2004-03-03 12:35 ┃　　　　┗[班石悦夫 &lt;madara@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8900.html">   8900 2004-03-03 14:44 ┃　　　　　┗[ML account &lt;ml@xxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8885.html">   8885 2004-03-02 16:19 ┣[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8886.html">   8886 2004-03-02 18:48 ┗[班石悦夫 &lt;madara@xxx]                                       </a></span>
+</pre>
+</body>
+</html>

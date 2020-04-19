@@ -1,0 +1,139 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15789</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15788.html">[前]</a><a href="15790.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15789
+</p>
+<div class="header">
+<p>
+From: &lt;a2cf@xxxxxxxxxx&gt;<br>
+Date: Wed, 11 Jul 2012 15:39:25 +0900<br>
+Subject: [mysql 15789] PHPとutf8mb4<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+藤田と申します。
+いつも参考にさせていただいております。
+
+長い質問で申し訳ございません。
+PHPからutf8mb4として4バイトのUTF-8を扱う環境を作りたいと思っています。
+
+【環境】
+・CentOS5.8
+・PHP5.3.3(標準RPM版) (スクリプトは全てUTF-8で統一)
+・MySQL5.5.24(Red Hat&amp;Oracle Linux5(x86,32-bit),RPM版)
+   (MySQLサーバの文字コードは全てutf8mb4で統一)
+
+
+【my.cnf】
+--------
+[client]
+default-character-set = utf8mb4
+
+[mysqld]
+character-set-server = utf8mb4
+--------
+
+
+●上記のような環境でmysqlクライアントからは以下のように表示されています。
+<span class="quote1">&gt; show variables like 'character_set%';</span>
++--------------------------+----------------------------+
+<span class="quote1">| Variable_name            | Value                      |</span>
++--------------------------+----------------------------+
+<span class="quote1">| character_set_client     | utf8mb4                    |</span>
+<span class="quote1">| character_set_connection | utf8mb4                    |</span>
+<span class="quote1">| character_set_database   | utf8mb4                    |</span>
+<span class="quote1">| character_set_filesystem | binary                     |</span>
+<span class="quote1">| character_set_results    | utf8mb4                    |</span>
+<span class="quote1">| character_set_server     | utf8mb4                    |</span>
+<span class="quote1">| character_set_system     | utf8                       |</span>
+<span class="quote1">| character_sets_dir       | /usr/share/mysql/charsets/ |</span>
++--------------------------+----------------------------+
+
+
+●ここでPHPからmysqli関数を使って接続し、「show variables like 'character_set%'」を実行すると
+以下のようになります。
+--------
+character_set_client =&gt; 'latin1'
+character_set_connection =&gt; 'latin1'
+character_set_database =&gt; 'utf8mb4'
+character_set_filesystem =&gt; 'binary'
+character_set_results =&gt; 'latin1'
+character_set_server =&gt; 'utf8mb4'
+character_set_system =&gt; 'utf8'
+character_sets_dir =&gt; '/usr/share/mysql/charsets/'
+--------
+→この状態でinsertを実行すると、DBに入った全角文字は全てラテン文字等に文字化けします。
+
+
+●次にPHPから$mysqli-&gt;set_charset('utf8');を実行してから、「show variables like 'character_set%'」を
+実行すると以下のようになります。
+--------
+character_set_client =&gt; 'utf8'
+character_set_connection =&gt; 'utf8'
+character_set_database =&gt; 'utf8mb4'
+character_set_filesystem =&gt; 'binary'
+character_set_results =&gt; 'utf8'
+character_set_server =&gt; 'utf8mb4'
+character_set_system =&gt; 'utf8'
+character_sets_dir =&gt; '/usr/share/mysql/charsets/'
+--------
+→この状態でinsertを実行すると、BMP領域の文字は全て問題ないですが、
+  4バイトUTF-8文字が「????」となってしまいます。(4つの?)
+
+
+●次にPHPから$mysqli-&gt;set_charset('utf8mb4');を実行すると以下のエラーが発生しました。
+($mysqli-&gt;errorより)
+--------
+Can't initialize character set utf8mb4 (path: /usr/share/mysql/charsets/)]
+--------
+→/usr/share/mysql/charsets/Index.xmlファイルを見ても
+  utf8に関する記述はありますがutf8mb4については記述がないように見えます。
+
+
+●最後に[mysqld]にskip-character-set-client-handshakeをセットしてから
+PHPでは$mysqli-&gt;set_charset('utf8mb4');を行わずにlatin1のままでinsertをすると
+BMP領域の文字も4バイトUTF-8文字も全て正常にDBに書き込まれ、
+PHPからのselectでも正常に読み出すことができました。
+
+
+上記のような状況なのですが、このskip-character-set-client-handshakeをセットして
+latin1のまま接続するというのは正しい方法なのでしょうか？
+なお、PHPもDBもメンテナンス上の理由から標準のRPMで運用したいと思っております。
+皆様のアドバイスを頂ければ幸いです。
+
+
+何とぞよろしくお願いいたします。
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15788.html">[前]</a><a href="15790.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15789.html">  15789 2012-07-11 15:39 [&lt;a2cf@xxxxxxxxxx&gt;   ] PHPとutf8mb4                            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15793.html">  15793 2012-07-12 01:35 ┗[&lt;gotou1213@xxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15797.html">  15797 2012-07-12 10:09 　┗[&lt;a2cf@xxxxxxxxxx&gt;   ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15798.html">  15798 2012-07-12 10:37 　　┗[&lt;gotou1213@xxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15799.html">  15799 2012-07-12 13:48 　　　┗[&lt;a2cf@xxxxxxxxxx&gt;   ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15800.html">  15800 2012-07-12 17:47 　　　　┗[&lt;gotou1213@xxxxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15801.html">  15801 2012-07-12 18:40 　　　　　┗[&lt;a2cf@xxxxxxxxxx&gt;   ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15802.html">  15802 2012-07-12 18:55 　　　　　　┣[yoku ts &lt;yoku0825@xx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15805.html">  15805 2012-07-12 20:49 　　　　　　┃┗[&lt;a2cf@xxxxxxxxxx&gt;   ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15806.html">  15806 2012-07-13 11:20 　　　　　　┃　┣[yoku ts &lt;yoku0825@xx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15807.html">  15807 2012-07-13 13:38 　　　　　　┃　┃┗[&lt;a2cf@xxxxxxxxxx&gt;   ]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15808.html">  15808 2012-07-13 13:42 　　　　　　┃　┃　┗[yoku ts &lt;yoku0825@xx]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15810.html">  15810 2012-07-13 18:04 　　　　　　┃　┗[&lt;a2cf@xxxxxxxxxx&gt;   ]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15803.html">  15803 2012-07-12 19:13 　　　　　　┗[Tomohiro 'Tomo-p' KA]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15804.html">  15804 2012-07-12 20:49 　　　　　　　┗[&lt;a2cf@xxxxxxxxxx&gt;   ]                         </a></span>
+</pre>
+</body>
+</html>

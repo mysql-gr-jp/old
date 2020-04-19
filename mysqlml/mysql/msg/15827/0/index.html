@@ -1,0 +1,44 @@
+ひろです。<div>ご回答ありがとうございます。</div><div><br></div><div>実は「もしかして」と思い、例2のパターンと同じようにcommitを試してみたのですが、</div><div>再ログインするまで最新の結果は取れませんでした。</div><div>そうかと思うと、何もしなくても例１のC3で最新のデータが取れる時もありました。</div><div>それで途方に暮れてしまった次第です。</div><div>裏で実行するプログラムは手動で起動していますので、完了は見届けてから</div>
+<div>selectを発行しています。</div><div><br></div><div>自分一人では確認方法に問題が有るかも知れないと思い、同僚にもクロスチェックして</div><div>貰いましたが同僚も首をかしげていました。</div><div><br></div><div>よろしくお願いします。</div><div><br><br><div class="gmail_quote">2012年8月27日 20:49 Tomohiro &#39;Tomo-p&#39; KATO <span dir="ltr">&lt;<a href="mailto:tomop@teamgedoh.net" target="_blank">tomop@teamgedoh.net</a>&gt;</span>:<br>
+<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">　こんばんは。かとうです。<br>
+<div class="im"><br>
+On 12/08/27 20:28, ひろ wrote:<br>
+<br>
+&gt; ２ではコミットしていますので、３でその結果が見れるものと思っていたのですが<br>
+&gt; 見れたり見れなかったりしたので質問させて頂きました。<br>
+&gt; 同じ操作をした時に、常に同じ結果になるなら、それなりに納得もできるのですが、<br>
+&gt; 何らかのタイミング？で動作が変わってしまうため困っておりました。<br>
+&gt;<br>
+&gt; ２は確かにコミットしている（再ログインで最新の結果が見れるので間違いないはず）のですが、<br>
+&gt; なんで見れたり見れなかったりするのか不明です。<br>
+<br>
+</div>　　勘違いされているようですが、私はmysqlコマンド上でのお話をしています。<br>
+<br>
+&nbsp; *例1<br>
+　　　C1. mysqlコマンドでログイン<br>
+　　　C2. select文発行<br>
+　　　C3. select文発行<br>
+　　　C4. ログアウト<br>
+<br>
+　　例1では、C2.からC4.までが1トランザクションになっており、分離レベル<br>
+　がREPEATABLE READの場合、C3.ではC2.より前にcommitされたデータが読ま<br>
+　れています（C2.とC3.での結果が同一となる）。C2.〜C3.の間にcommitされ<br>
+　たデータを読みたい場合は<br>
+<br>
+&nbsp; *例2<br>
+　　　C1. mysqlコマンドでログイン<br>
+　　　C2. select文発行<br>
+　　　C3. commit/rollback<br>
+　　　C4. select文発行<br>
+　　　C5. ログアウト<br>
+<br>
+　のように、mysqlコマンド上でもトランザクション終了を明示する必要があ<br>
+　ります。例2の場合、C2.〜C3.、C4.〜C5.、の2トランザクションになります。<br>
+<div class="HOEnZb"><div class="h5"><br>
+--<br>
+&nbsp; &nbsp; __________________________________________________<br>
+&nbsp; _/_/ &nbsp;Tomohiro &quot;Tomo-p&quot; KATO &nbsp;&lt;<a href="mailto:tomop@teamgedoh.net">tomop@teamgedoh.net</a>&gt;<br>
+&nbsp;_/_/ &nbsp;Team Gedoh Network &nbsp;<a href="http://www.teamgedoh.net/" target="_blank">http://www.teamgedoh.net/</a><br>
+_/_/ &nbsp;Key fingerprint = A6D8 3981 3575 9F00 EFC3 &nbsp;9C2B F03A 5383 9287 74D9<br>
+<br>
+</div></div></blockquote></div><br></div>

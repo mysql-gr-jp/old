@@ -1,0 +1,154 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9065</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9064.html">[前]</a><a href="9066.html">[次]</a><a href="../list/9001-9100.html">[番号順一覧]</a><a href="../thread/9001-9100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9065
+</p>
+<div class="header">
+<p>
+From: ML account &lt;ML account &lt;ml@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 25 Mar 2004 03:30:47 +0900<br>
+Subject: [mysql 09065] Re: JOIN  で結合すると遅くなります<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+　こんにちは。
+
+&quot;藤田&quot; &lt;t-fujita@xxxxxxxxxx&gt;さんの
+&lt;002901c41196$ae581030$7c37fea9@fujita&gt;
+&quot;<a href="09061.html">[mysql 09061]</a> Re: JOIN で結合すると遅くなります&quot;
+
+
+<span class="quote1">&gt; 菅原さん、いそさん、松枝さん、ご返信ありがとうございます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 現在インデックスを作成しなおそうとしたらえらく時間がかかって操作できない状態</span>
+<span class="quote1">&gt; です・・・</span>
+<span class="quote1">&gt; 終了したらご指摘いただいた点を試してみます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 松枝さん＞　 インデックスは何処に張ってありますか。</span>
+<span class="quote1">&gt; インデックスはdenpyouテーブルのDenpyouNo,T_Code,DenpyouDate、</span>
+<span class="quote1">&gt; denpyoumeisaiテーブルのDenpyouNo,KikakuBangouに張ってあります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; よろしくお願いします。</span>
+
+　ふーむ。
+
+　こちらではそれほど遅くは無いですけど。と言っても、藤田さんとボクとで、
+テーブルの構造も違うでしょうし、データの内容も違うでしょうから、確定では
+無いのですが。
+
+
+　テーブル構造はこんな感じです。
+    create table denpyou (
+      DenpyouNo int not null primary key,
+      T_Code int not null,
+      DenpyouDate char(8),
+      SomeData varchar(64),
+      index (T_Code),
+      index (DenpyouDate)
+    );
+
+    create table denpyoumeisai (
+      DenpyouNo int,
+      KikakuBangou char(16),
+      UriageQty int,
+      SomeData varchar(64),
+      index (DenpyouNo),
+      index (KikakuBangou)
+    );
+
+　denpyouのDenpyouNoには０からの連番、DenpyouNoにはrand()*1000を入れて、
+160万レコードを作りました。denpyoumeisaiのKikakuBangouにはDenpyouNoを０
+パッドした10桁文字列にダッシュ、連番を結合した文字列を、UriageQtyには
+rand()*9+1を入れて、1600万レコードを作りました。
+
+    create table serial (num int);
+
+    insert into serial (num)
+    values (0),(1),(2),(3),(4),(5),(6),(7),(8),(9);
+
+    insert into denpyou (DenpyouNo,T_Code)
+    select s0.num+s1.num*10+s2.num*100+s3.num*1000+s4.num*10000
+          +s5.num*100000+s6.num*1000000
+          ,rand()*1000
+    from serial as s0,serial as s1,serial as s2,serial as s3
+        ,serial as s4,serial as s5,serial as s6
+    limit 1600000;
+
+    insert into denpyoumeisai (DenpyouNo,KikakuBangou,UriageQty)
+    select DenpyouNo
+          ,concat(right(concat('0000000000',DenpyouNo),10),'-',num)
+          ,rand()*9+1
+    from denpyou1,serial;
+
+　このテーブル構造、データでの実行結果は以下の通り。ほとんど瞬時に結果が
+返って来ます。
+
+    mysql&gt; select count(*) as cnt from denpyou inner join denpyoumeisai
+        -&gt; on denpyou.DenpyouNo = denpyoumeisai.DenpyouNo
+        -&gt; where T_Code = '407' and KikakuBangou = '0000100000-1';
+    +-----+
+    | cnt |
+    +-----+
+    |   1 |
+    +-----+
+    1 row in set (0.01 sec)
+
+　explainの結果はこんな感じです。２分割の編集をしてあります。
+
++---------------+--------+------------------------+--------------+
+<span class="quote1">| table         | type   | possible_keys          | key          |</span>
++---------------+--------+------------------------+--------------+
+<span class="quote1">| denpyoumeisai | ref    | DenpyouNo,KikakuBangou | KikakuBangou |</span>
+<span class="quote1">| denpyou       | eq_ref | PRIMARY,T_Code         | PRIMARY      |</span>
++---------------+--------+------------------------+--------------+
+
++---------------+---------+-------------------------+------+------------+
+<span class="quote1">| table         | key_len | ref                     | rows | Extra      |</span>
++---------------+---------+-------------------------+------+------------+
+<span class="quote1">| denpyoumeisai |      17 | const                   |    1 | where used |</span>
+<span class="quote1">| denpyou       |       4 | denpyoumeisai.DenpyouNo |    1 | where used |</span>
++---------------+---------+-------------------------+------+------------+
+
+−−
+
+　ボクが作ったデータは主要なカラム以外にデータが入っていませんし、また規
+則性のあるデータです。上で述べた様に、データ依存で時間が掛かっている可能
+性も捨て切れません。テーブル構造やインデックスの張り方を再考してもパフォー
+マンスが上がらないのであれば、denpyoumeisaiにT_Codeを持つ正規崩しをやっ
+てinner joinを廃した方が良いかも知れません。
+
+　denpyoumeisaiの一意条件が示されていないので、上のテーブル定義の様に重
+複可のインデックスを付けてあります。ただこれだと、denpyoumeisaiを全部舐
+める事になり、処理時間の増大があります。主キーあるいはユニークなインデッ
+クスを張るための条件を考えた方が良いでしょう。
+
+
+　　　　松枝知直　　　　&lt;tomom@xxxxxxxxxx&gt;
+　　　　　　　　　　　　<a href="http://www.argus.ne.jp/~tomom/">http://www.argus.ne.jp/~tomom/</a>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="9064.html">[前]</a><a href="9066.html">[次]</a><a href="../list/9001-9100.html">[番号順一覧]</a><a href="../thread/9001-9100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9052.html">   9052 2004-03-24 18:39 [&quot;藤田&quot; &lt;t-fujita@xxx] JOIN で結合すると遅くなります           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9054.html">   9054 2004-03-24 18:47 ┣[SUGAWARA Hajime &lt;sug]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9062.html">   9062 2004-03-25 00:33 ┃┗[&quot;藤田&quot; &lt;t-fujita@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9066.html">   9066 2004-03-25 08:14 ┃　┗[&quot;藤田&quot; &lt;t-fujita@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9067.html">   9067 2004-03-25 08:43 ┃　　┗[seiji takegata &lt;take]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9058.html">   9058 2004-03-24 20:00 ┣[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9061.html">   9061 2004-03-24 20:53 ┣[&quot;藤田&quot; &lt;t-fujita@xxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="9065.html">   9065 2004-03-25 03:30 ┃┗[ML account &lt;ml@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9064.html">   9064 2004-03-25 01:52 ┗[&quot;UNO Shintaro&quot; &lt;uno@]                                       </a></span>
+</pre>
+</body>
+</html>

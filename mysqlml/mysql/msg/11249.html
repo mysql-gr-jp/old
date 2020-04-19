@@ -1,0 +1,150 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11249</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11248.html">[前]</a><a href="11250.html">[次]</a><a href="../list/11201-11300.html">[番号順一覧]</a><a href="../thread/11201-11300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11249
+</p>
+<div class="header">
+<p>
+From: &quot;zen kishimoto&quot; &lt;&quot;zen kishimoto&quot; &lt;zen@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 24 Mar 2005 14:59:17 -0800<br>
+Subject: [mysql 11249] MySQL 5.0の新機能: Stored Procedure<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<a href="http://dev.mysql.com/tech-resources/articles/mysql-storedprocedures.html">http://dev.mysql.com/tech-resources/articles/mysql-storedprocedures.html</a>
+
+MySQL 5.0の新機能: Stored Procedure
+Peter Gulutzan著
+初めに
+
+この67ページのガイドは第五版での新機能を紹介
+します。（注：但しこの翻訳はその一部です。）
+新機能は簡単に言うとstored procedure, trigger,
+ viewsとinformation_schemaです。詳細には MySQL 5.0
+新機能シリーズです。これはそのシリーズの最初です。
+
+私の意図はこのシリーズの記事がコンピュータを使いながら
+サンプルをテストできるハンズオンに役立てばと思っています。
+このため少しづつ始めて、最後には有益で初めには
+かなり難しいと思われているレベルまで引き上げたい
+と思っています。
+
+定義と例
+
+stored procedureは（データベース内に）格納されている
+（普通のコンピュータ言語に存在するサブルーティーンの
+ような）プロシージャです。正しく言えば、MySQL
+は「ルーティン」をサポートします。2種類の
+ルーティンがあります。呼び出すstored procedureと
+MySQLの既存の関数のpi()の様に値を返還する関数です。
+「ルーティン」というよりも「stored procedure」と
+いう言葉を多く使います。というのは過去にそういうふう
+に使ったからで、皆その言葉に慣れているからです。
+
+stored procedureには名前、パラメータのリストと
+SQLのステートメントがあります。SQLステートメント
+は更にもっと他のSQLステートメントを含むことがあります。
+ローカル変数、エラー対応、ループのコントロール
+とIF条件に対して新しいシンタクスが規定されています。
+stored procedureを生成するステートメントの例です。
+
+CREATE PROCEDURE procedure1                /* 名前 */
+(IN parameter1 INTEGER)                    /* パラメータメーター */
+BEGIN                                      /* ブロックの初め */
+  DECLARE variable1 CHAR(10);                /* 変数 */
+  IF parameter1 = 17 THEN                    /* IFの初め */
+    SET variable1 = 'birds';                   /* アサイン */
+  ELSE
+    SET variable1 = 'beasts';                  /* アサイン */
+  END IF;                                   /* IFの終わり */
+  INSERT INTO table1 VALUES (variable1);    /* ステートメント */
+END                                       /* ブロックの終わり */
+
+stored procedureで出来ることを詳細に
+説明しましょう。もう１つのデータベースの
+オブジェクトであるtriggerを紹介します。trigger
+とstored procedureは密接に関係があるからです。
+
+Stored Procedureを使用する理由
+
+Stored procedureはMySQLに取っては新しい機能です。ですから
+注意して取り扱ってください。今までの実績がありませんから。
+つまり、多くのユーザが既に使ってきたわけではありませんから。
+とはいえ、現状（アプリケーション・ホスト・プログラム
+UDFスクリプト）から新しいstored procedureを使うように
+しましょう。 procedureを使う理由はあります。
+
+Stored procedureは既に認められた技術です。確かにMySQLに
+取っては新しいことですが、同じような機能は他のDBMS
+にあります。大抵の場合はシンタクスも殆ど同じです。
+ですから、概念を借りたり既に既知の人から
+聞いたり雇ったりできます。サードパーティの
+ドキュメント（本やウエブ）があります。
+
+Stored procedureは速いです。MySQLでもそうかは
+まだ言えません。またそれぞれの人の環境は違いますから。
+言えることはMySQLサーバーは prepared statementのように
+キャッシュを利用します。コンパイルは必要ではありません
+ので、SQL stored procedure はCで書かれたプロシージャ
+の様に速くは実行されません。スピードが速くなるのは
+ネットワークのトラフィックを削減できるからです。
+チェック、ループ、複数ステートメントの繰り返し
+でユーザとインターアクションがない場合、サーバー
+に格納されているプロシージャを実行するのが
+良いです。これだとクライアントとサーバの間で
+何回もメッセージが交換されるのを防ぎます。
+
+Stored procedureはコンポーネントです。ホストと
+言語を変えても、問題ありません。ロジックはデータベース
+内にありアプリにあるわけではありません。
+
+SQLでstored procedureを書くとStored proceduresはポータブルです。
+MySQLが実行できる全ての環境で、ランタイムのパッケージ
+をインストールすることもなく、OSでプログラムの
+パーミションを変更する必要もなければコンピュータの
+タイプが違っても違うパッケージを用意する必要なく
+実行できます。これがJavaやCやPHPと違って
+SQL書くことの利点です。もちろん、場合に
+よってはこういった言語で書く必要もあります。
+しかし、こういった言語はSQLで書く場合の
+利点はありません。
+
+Stored procedureは格納されいます。ですから、名前の
+付け方をちゃんとしてプロシージャーを書いたら、
+例えば銀行のトランザクションにchequing_withdrawalと
+書いたら同様のことをしたい人はあなたのプロシージャを
+簡単に見つけることができるでしょう。これはデータベース内
+で「ソースコード」として見ることができます。プログラミング
+の理論のクラスで聞いたように、データを処理するプロセスと
+データをリンクさせることは良いことです。
+
+Stored procedureは他でも使用可能です。MySQLはかなり良く SQL:2003
+スタンダードに従います。他(DB2, Mimer)のもスタンダードに従います。
+その他(Oracle, SQL Server)はあまり従っていません。しかし、
+他のDBMS用に用意されたコードをMySQL用に使用する際の
+ヒントやツールを示します。
+
+全体の記事は大変長いので、PDF形式で提供することにしました。ダウンロードする
+にはここをクリックしてください。登録はいりません。
+<a href="http://dev.mysql.com/tech-resources/articles/mysql-storedprocedures.pdf">http://dev.mysql.com/tech-resources/articles/mysql-storedprocedures.pdf</a>
+（注：PDFは翻訳されていません。）
+---------------------
+Zen Kishimoto                            www.ipdevices.com
+IP Devices, Inc.                           zen@xxxxxxxxxx
+2175 De La Cruz Blvd., Suite 10    (408) 567-9391
+Santa Clara, CA 95050                (801) 720-8847 (FAX)
+
+
+</pre>
+</div>
+<p class="button"><a href="11248.html">[前]</a><a href="11250.html">[次]</a><a href="../list/11201-11300.html">[番号順一覧]</a><a href="../thread/11201-11300.html">[スレッド一覧]</a></p>
+</body>
+</html>

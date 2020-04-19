@@ -1,0 +1,184 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12728</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12727.html">[前]</a><a href="12729.html">[次]</a><a href="../list/12701-12800.html">[番号順一覧]</a><a href="../thread/12701-12800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12728
+</p>
+<div class="header">
+<p>
+From: &quot;yama tan&quot; &lt;&quot;yama tan&quot; &lt;kouji-ya@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 07 Feb 2006 11:41:18 +0900<br>
+Subject: [mysql 12728] mod_auth_mysqlについて教えて下さい。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちはkoujiです。
+
+LAMP環境でHTTPアクセスの認証をmod_auth_mysqlを使用して
+認証をさせたいのでが、うまくいきません。
+お手数ですが、ご教授お願い致します。
+
+[状況]
+ｈｔｔｐ://localhost 等で認証画面は出てくるが、登録した
+ユーザ/パスワードでlogin出来ない。
+
+[環境]
+OS:RedhatES3.0
+
+LAMP: 
+httpd-2.0.55,mod_auth_mysql-2.9.0,mysql-standard-4.1.15-pc-linux-gnu-i686-glibc23
+
+php-4.4.1 すべてソースからコンパイル。
+
+※apacheにsslを組み込み済み。
+
+[設定内容]
+==================================================
+# /usr/local/apache2/bin/apxs -c -L/usr/local/mysql/lib \
+<span class="quote1">&gt; -I/usr/local/mysql/include -lmysqlclient -lm -lz mod_auth_mysql.c</span>
+
+# pwd
+/usr/local/mysql/lib
+# ls
+libdbug.a   libmysql.imp      libmysqlclient_r.a  libmystrings.a
+libmygcc.a  libmysqlclient.a  libmysqld.a         libmysys.a
+
+# /usr/local/apace2/bin/apxs -i mod_auth_mysql.la
+
+# ls /usr/local/apache2/modules/
+ httpd.exp  libphp4.so  mod_auth_mysql.so
+
+# cat  /usr/local/apach2/conf/httpd.conf | grep mysql
+LoadModule mysql_auth_module modules/mod_auth_mysql.so
+
+※apacheを再起動しても問題なし
+
+# mysql -u root
+Welcome to the MySQL monitor.  Commands end with ; or ＼g.
+Your MySQL connection id is 22 to server version: 3.23.58
+
+Type 'help;' or '＼h' for help. Type '＼c' to clear the buffer.
+
+mysql&gt; create database http_auth;
+Query OK, 1 row affected (0.05 sec)
+
+mysql&gt; grant select on http_auth.* to kouji@localhost identified by 
+'kouji';
+Query OK, 0 rows affected (0.05 sec)
+
+mysql&gt; use http_auth;
+Database changed
+mysql&gt; create table mysql_auth (
+    -&gt; user_name   char(30) NOT NULL,
+    -&gt; user_passwd char(20),
+    -&gt; user_group   char(10),
+    -&gt; primary key (user_name)
+    -&gt; );
+   Query OK, 0 rows affected (0.05 sec)
+
+mysql&gt; ＼q
+
+# vi  /var/www/html/.htaccess  (DocumentRoot =&gt; &quot;/var/www/html&quot;)
+   ※httpd.confに記述しても現象は同じ
+
+AuthName &quot;MySQL Testing&quot;
+AuthType Basic
+AuthMySQLHost localhost
+AuthMySQLDB http_auth
+AuthMySQLUserTable mysql_auth
+AuthMySQLEnable On
+require valid-user
+
+# mysql
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 23 to server version: 3.23.58
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql&gt; use http_auth;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+mysql&gt; show databases;
++-------------+
+<span class="quote1">| Database          |</span>
++-------------+
+<span class="quote1">|   http_auth        |</span>
+<span class="quote1">|   mysql             |</span>
+<span class="quote1">|   xoops2           |</span>
+<span class="quote1">| -------------+</span>
+
+Database changed
+mysql&gt; insert into mysql_auth (user_name,user_passwd) values 
+(&quot;test&quot;,&quot;test&quot;);
+Query OK, 1 row affected (0.02 sec)
+
+mysql&gt; select * from mysql_auth;
++-----------+-------------+------------+
+<span class="quote1">| user_name |  user_passwd  | user_group             |</span>
++-----------+-------------+------------+
+<span class="quote1">| test          |  test             | NULL                    |</span>
++-----------+-------------+------------+
+1 row in set (0.00 sec)
+
+mysql&gt; \q
+
+その後、念のため再度apache再起動し、ブラウザから<a href="http://localhost">http://localhost</a>を
+しても認証画面は表示されるが、ID:test,PASS:testでloginすることは出来ない。
+ないか他に必要な設定があるのでしょうか?
+
+# ちなみにXoopsは問題無く動作しています。
+
+[apacheコンパイル]
+./configure --enable-so --enable-module=so --enable-ssl 
+--enable-module=rewrite
+
+[Mysqlコンパイル]
+# groupadd mysql
+# useradd -g mysql mysql
+# cd /usr/local
+# gunzip &lt; 
+/home/yama/src/mysql-standard-4.1.15-pc-linux-gnu-i686-glibc23.tar.gz | tar 
+xvf -
+# ln -s /usr/local/mysql-standard-4.1.15-pc-linux-gnu-i686-glibc23  
+/usr/local/mysql
+# cd mysql
+# ./scripts/mysql_install_db --user=mysql   
+# chown -R root  .
+# chown -R mysql data
+# chgrp -R mysql .
+
+[PHPコンパイル]
+./configure --with-apxs2=/usr/local/apache2/bin/apxs --enable-magic-quotes 
+--with-xml \
+--enable-mbregex --enable-mbstring --enable-zend-multibyte \
+--with-mysql=/usr/local/mysql --enable-ftp --with-zlib
+
+長くてすいません...
+よろしくお願い致します。
+
+_________________________________________________________________
+パソコンでも携帯電話でも使える 「MSN Hotmail」 
+<a href="http://promotion.msn.co.jp/hotmail/">http://promotion.msn.co.jp/hotmail/</a> 
+
+
+</pre>
+</div>
+<p class="button"><a href="12727.html">[前]</a><a href="12729.html">[次]</a><a href="../list/12701-12800.html">[番号順一覧]</a><a href="../thread/12701-12800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="12728.html">  12728 2006-02-07 11:41 [&quot;yama tan&quot; &lt;kouji-ya] mod_auth_mysqlについて教えて下さい。    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12729.html">  12729 2006-02-07 11:55 ┣[島村 優太郎 &lt;ml@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12730.html">  12730 2006-02-07 12:50 ┃┗[&quot;yama tan&quot; &lt;kouji-ya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12733.html">  12733 2006-02-07 13:38 ┃　┗[&lt;y-iida@xxxxxxxxxx&gt; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12734.html">  12734 2006-02-07 14:11 ┃　　┗[&quot;yama tan&quot; &lt;kouji-ya]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12732.html">  12732 2006-02-07 13:32 ┗[bon &lt;bon@xxxxxxxxxx&gt;]                                       </a></span>
+</pre>
+</body>
+</html>

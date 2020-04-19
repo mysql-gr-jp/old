@@ -1,0 +1,93 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1602</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="1601.html">[前]</a><a href="1603.html">[次]</a><a href="../list/1601-1700.html">[番号順一覧]</a><a href="../thread/1601-1700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1602
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Thu, 17 Feb 2000 15:19:50 +0900<br>
+Subject: [mysql 01602] Re: MS-ACCESS で入力した改行コードは LF に変換されるか？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Wed, 16 Feb 2000 10:49:36 +0900,
+Isamu Narimatsu &lt;isamu@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 成松です。</span>
+<span class="quote1">&gt; 以前MS-ACCESSを使ってMySQLにデータを入力していたのですが、改行コードの問題に</span>
+<span class="quote1">&gt; 悩まされていました。</span>
+<span class="quote1">&gt; MS-ACCESSのフォームで改行コードを含む文字を入力し、一回とじ、再度、MS-ACCESS</span>
+<span class="quote1">&gt; から、入力しようとすると改行部分だけ文字化けしていたのでした。</span>
+<span class="quote1">&gt; 確か、文字化けは「・」か「\n」な感じだったとおもいます。</span>
+<span class="quote1">&gt; つまり、ODBC経由でMySQLに改行コードが入る段階、また呼び出される段階でうまく</span>
+<span class="quote1">&gt; 改行されていなかったのだと思います。</span>
+<span class="quote1">&gt; また反対にMySQLのDOSの画面から、改行コードを含んだ文字を入力すると、改行文字</span>
+<span class="quote1">&gt; が「・」になります。</span>
+
+こちらでは再現しませんでした。
+実験環境は
+Server :
+ Linux MySQL-3.22.32 --with-charset=ujis
+ Linux MySQL-3.22.23 --with-charset=sjis
+ Windows98 MySQL-3.22.30 (SJIS)
+クライアントは :
+ Windows98 + MS-Access97
+ MyODBC-2.50.25 EUC と SJIS
+ MySQL-3.22.30 付属のクライアント(mysqlコマンド)
+
+作ったテーブルとデータは:
+
+CREATE TABLE ttt (
+  a int(11),
+  d datetime,
+  c varchar(50)
+);
+
+INSERT INTO ttt VALUES (1,NULL,'あ\r\nい');
+INSERT INTO ttt VALUES (2,NULL,'い\r\nうえお');
+INSERT INTO ttt VALUES (3,NULL,'かき\r\nくけこ');
+
+これは、一度テーブル構造を MSAccess 上で作成し、テーブルをまず
+MySQL サーバーに Export.
+その後、MS-Access 上で、値を入力。
+値の入力時には、改行は、[ctrl]-[enter] キーで入力
+mysql コマンドで値を入力する時には、値に改行を入れる場合は、
+そのまま [enter] キーで入力。
+
+ODBC のトレースを取るようにすると、MS-Access のクエリが見れます。
+また、MySQL サーバー(mysqld)を --log オプションで起動すれば、
+クエリがサーバー側のログファイルに記録されます。
+サーバーに飛んできた時点でクエリが壊れていれば、
+MySQL サーバーのログファイルに、それが記録されているはずです
+ログファイルは、MySQLがデータを保存しているディレクトリに
+作成されます
+
+「・」 というのは、SJIS コードで 0x8145
+CR = 0x0D , LF = 0x0A
+\ = 0x5C
+n = 0x6E , r = 0x72
+で、どう組み合わせても、「・」 ができないです
+なにか変な文字が前後に入力されているか
+漢字コードが一致していないか
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="1601.html">[前]</a><a href="1603.html">[次]</a><a href="../list/1601-1700.html">[番号順一覧]</a><a href="../thread/1601-1700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1594.html">   1594 2000-02-16 10:49 [&quot;Isamu Narimatsu&quot; &lt;i] MS-ACCESS で入力した改行コードは LF に変換されるか？</a></span>
+<span class="current">-&gt;&nbsp;<a href="1602.html">   1602 2000-02-17 15:19 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+</pre>
+</body>
+</html>

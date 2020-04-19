@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7422</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7421.html">[前]</a><a href="7423.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7422
+</p>
+<div class="header">
+<p>
+From: yuji koga &lt;yuji koga &lt;koga-y@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 08 Apr 2003 09:54:36 +0900<br>
+Subject: [mysql 07422] Re: 最新のレコードを○○件残して古いものを削除<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+お世話になります。古賀です。
+東様、かわじ様、レス有り難うございました。
+
+<span class="quote1">&gt; 　元記事には，このデータが随時更新されるデータであるかどうか</span>
+<span class="quote1">&gt; 明記されていませんので，タイムスタンプ優先で考えていたのです</span>
+<span class="quote1">&gt; が，実際のところどうでしょう？</span>
+<span class="quote1">&gt; 　&gt;　yuji koga &lt;koga-y@xxxxxxxxxx&gt;さま</span>
+
+そうですね。ケースバイケースで考えております。
+例えば、レコード内に随時自動更新されるタイムスタンプと、
+最初に登録した日時を記録するdatetime型フィールドの二つを置いておけば、
+それらのどちらかで新旧判別をするかで、
+
+ケース1：更新の有無にかかわらず、初回登録日時の古い物を削除
+ケース2：初回登録日時にかかわらず、更新日時の古い物を削除
+
+のどちらにも対応できるかな、と考えております。
+差し当たって、今必要なのは「ケース1」の処理です。
+
+<span class="quote1">&gt; 　以下のようなsql文でいいのかなぁと思いますが，どうでしょう。</span>
+<span class="quote1">&gt; (総レコード件数が10,000件を超えない場合に10件だけ残すことを</span>
+<span class="quote1">&gt; 想定しています。)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; delete from db_name order by timestamp desc limit 10,10000;</span>
+
+同じような文を考えていましたが、初心者の自分にはマニュアルなどの
+「order by 〜 limit 〜」文法がselect文の説明としてあげられており、
+これが delete文でも使えるのかどうかよく分かりませんでした。
+
+<span class="quote1">&gt; delete 文に order by を使うことが出来るのは、MySQL 4.0 以降のようです。</span>
+<span class="quote1">&gt; (それと、limit に offset は指定できないような気も)</span>
+
+とのことで、それはバージョンにより異なると知り、参考になりました。
+自分の環境は3.23.53ですので、残念なところです。
+今後はMySQL 4.0 以降への乗り換えも考えていきたいと思います。
+
+<span class="quote1">&gt; 元の話ですが、何か auto_increment なフィールドを仮に id とし、</span>
+<span class="quote1">&gt; また、残す件数を 10000 件 として</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 新しいものから10000件前の id を調べて</span>
+<span class="quote1">&gt; select id from db_name order by id desc limit 10000,1;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 上記で id が 得られた場合のみ(10000件以上あった場合のみ)、</span>
+<span class="quote1">&gt; それ以前のものを消す</span>
+<span class="quote1">&gt; delete from db_name where id &lt; (上記のid);</span>
+
+現時点でのケースでは、このやり方が良さそうに思われます。
+是非、試させて頂きます。
+タイムスタンプを優先させるなら、最初のselect文で
+
+select timestamp 〜
+
+としておいて、delete文で
+
+delete from db_name where timestamp &lt; (上記のtimestamp);
+
+と応用することが出来そうです。
+皆様、有り難うございました。
+
+&lt;? /*
+株式会社メディアプレス　　　制作課　　古賀裕二
+　　　　　　　会社：koga-y@xxxxxxxxxx
+　　　　　　　自宅：yuuukunn@xxxxxxxxxx
+*/ ?&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="7421.html">[前]</a><a href="7423.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7412.html">   7412 2003-04-07 18:35 [Satoshi Iwanaga &lt;iwa] インストール・別サーバへ接続            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7413.html">   7413 2003-04-07 19:08 ┗[doumae &lt;doumae@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7414.html">   7414 2003-04-07 19:51 　┣[yuji koga &lt;koga-y@xx] 最新のレコードを○○件残して古いものを削除</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7415.html">   7415 2003-04-07 20:12 　┃┣[Daiju Azuma &lt;daiju_a]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7418.html">   7418 2003-04-07 20:57 　┃┃┗[Shinya Kawaji &lt;kawaj]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7420.html">   7420 2003-04-07 21:24 　┃┃　┗[Daiju Azuma &lt;daiju_a]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="7422.html">   7422 2003-04-08 09:54 　┃┗[yuji koga &lt;koga-y@xx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7416.html">   7416 2003-04-07 20:16 　┣[Satoshi Iwanaga &lt;iwa]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7423.html">   7423 2003-04-08 15:12 　┃┗[Satoshi Iwanaga &lt;iwa]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7424.html">   7424 2003-04-08 15:47 　┃　┗[doumae &lt;doumae@xxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7425.html">   7425 2003-04-08 16:12 　┃　　┗[Satoshi Iwanaga &lt;iwa]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7426.html">   7426 2003-04-08 16:48 　┃　　　┣[&quot;TOYOSHIMA,Masayuki&quot;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7432.html">   7432 2003-04-09 14:26 　┃　　　┗[Satoshi Iwanaga &lt;iwa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7417.html">   7417 2003-04-07 20:21 　┗[doumae &lt;doumae@xxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5519</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="5518.html">[前]</a><a href="5520.html">[次]</a><a href="../list/5501-5600.html">[番号順一覧]</a><a href="../thread/5501-5600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5519
+</p>
+<div class="header">
+<p>
+From: &lt;opaque@xxxxxxxxxx&gt;<br>
+Date: 21 May 2002 07:20:14 +0900<br>
+Subject: [mysql 05519] libMySQL.dll の使用とライセンスについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+初めまして端場と申します。
+
+libMySQL.dllを使用してMySQLのC APIを使用する場合のライセンスについて
+疑問が生じましたので質問させて頂きます。<a href="4402.html">[mysql:4402]</a>以下のMySQLライ
+センスに関するスレッドは拝見致しました。
+疑問が生じた想定ケースは、以下のようなものです。
+
+1. libmysql.dllを通じてMySQLのC APIを使用しMySQL(Windows/Linux問わず)
+へアクセスするMicrosoft Windows用のクライアントアプリケーションを作成した
+2. このアプリケーションを単体で(MySQLサーバはもとよりlibmysql.dll
+も含めずに)、ソース非公開でインターネット上で配布した
+
+以上です。MySQL/libmysql.dllは、バージョン4以降に限定するとします。
+
+MySQLマニュアル1.4.2節の例外1は、mysqlclientライブラリは例外的に
+LGPLとするとありますので、mysqlclient.libの場合は、リンク後にでき
+あがった実行ファイルのリバースエンジニアリングを許可することによって
+LGPLを遵守できますので、留保付きではありますがソース非公開でライ
+ブラリへ静的リンクした実行ファイルが配布できます。
+
+ところが、libmysql.dllについては何ら記述がありませんので、libmysql.dll
+への動的リンクは(GPLは静的動的の別は問いませんので)、結果的な実行
+イメージ(executable)はGPL下に置かれることが予定されていると解釈できます。
+MySQL4のソースアーカイブからlibmysqlをビルドしたときに得られる
+インポートライブラリlibmysql.libを使用せずに(つまり暗黙の動的リンクを
+行わずに)、明示的にLoadLibrary()/GetProcAddress()によりlibmysql.dll
+内の関数ポインタを動的に参照して使用する(明示的リンクなどと呼称します
+が)ことも動的リンクの一種であるとする解釈もあると思います。リチャー
+ド・ストールマンの場合、非常に厳しい解釈を行っています。
+<a href="http://mail.gnu.org/pipermail/classpath/2001-November/001633.html">http://mail.gnu.org/pipermail/classpath/2001-November/001633.html</a>
+もちろん、アプリケーションの実行ファイル自体は、ロードを動的に行う
+までライブラリへリンクされているわけではありませんので、実際にロード
+を行った状態の実行イメージを配布(それはおそらく不可能な行為ですが)
+しない限りGPLには抵触せず、ロードを行いGPLの条件を成立/違反させたのは
+アプリケーション作者ではなくそのアプリケーションを実行したユーザである
+という解釈もできますが、やや強弁であるように思えます。
+
+また、今回上記を考えるにつきlibmysql.dllの実際の使用例を調査しまし
+た。ある所ではMySQL ABとのパートナーシップを結んでいましたので、
+そこには恐らくGPLは適用されないはずですが、例えば(例示相済みませんが)
+<a href="http://www.hi-ho.ne.jp/tsumiki/">http://www.hi-ho.ne.jp/tsumiki/</a> (CSE)
+<a href="http://www.mmdb.net/m_kaneko/">http://www.mmdb.net/m_kaneko/</a> (かねやんMySQLAdmin)
+これらのクライアントツールは、libmysql.dllを使用してMySQLへアク
+セスできますが、GPL下では配布されていません。他のデータベースにも対応
+されていますが、GPL下でもなくコマーシャルライセンス下でもない中間
+状態はMySQL ABが明示的に認めない限り存在しないと思われますので、
+MySQLマニュアル1.4.3.1の条項は関係ないと考えます。私は、デュアルライセンス
+というのはデフォルトがGPLで、それを承服できない場合はコマーシャル
+ライセンスを購入する/パートナー認定を受けるなどして著作権者MySQL AB
+の許諾のもとでGPLを回避しつつ正当なMySQL(ならびにその部品の)使用権
+を得ることである、と解釈しました。少なくともマニュアル上からはそう
+読み取れると思います。(それとも1.4.3.1の第一項が該当して、MySQL
+サーバライセンスを1本購入すればlibmysql.dllでの問題がすべて解決
+するのでしょうか? そうではありませんよね?)
+従って、上記ツールでは、依然としてGPL下のlibmysql.dllを使用しつつ、
+動的ロードを行うことによるGPL適用回避を(MySQL3.23.19以降
+では)行っている、と思われます。あるいは、「かねやんMySQLAdmin」の
+場合は、libmysql.dllが同梱されていますので、3.23.19以前の非GPLの
+dllを使用ということかもしれません。
+
+長々と書きましたが、当方では上記のような理解なのですが、
+ライセンス文言上に根拠のない憶測が多々ありますので、MySQLに
+ついての理解のある方々のご意見または当方の誤りのご指摘を頂きたく
+こちらに参加してポストした次第です。当方としては上記想定ケースを、
+ある程度の社会的コンセンサスの下で(笑)実行できればと考えているの
+ですが、いかがでしょうか。
+
+
+-----------------------------------------
+端場 通
+
+
+</pre>
+</div>
+<p class="button"><a href="5518.html">[前]</a><a href="5520.html">[次]</a><a href="../list/5501-5600.html">[番号順一覧]</a><a href="../thread/5501-5600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="5519.html">   5519 2002-05-21 07:20 [&lt;opaque@xxxxxxxxxx&gt; ] libMySQL.dll の使用とライセンスについて </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5530.html">   5530 2002-05-21 21:04 ┗[&quot;Tsumiki Software&quot; &lt;]                                       </a></span>
+</pre>
+</body>
+</html>

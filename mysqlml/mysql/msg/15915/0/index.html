@@ -1,0 +1,103 @@
+黄さん<div><br></div><div>ご丁寧に返信ありがとうございます。</div><div>すみません、全然ちがっていましたね（汗</div><div>解決したようで、何よりです。</div><div><br></div><div>小宮<br><br><div class="gmail_quote">2013年1月10日 17:57 Hwang Se Won <span dir="ltr">&lt;<a href="mailto:coolguy318@gmail.com" target="_blank">coolguy318@gmail.com</a>&gt;</span>:<br>
+<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+  
+    
+  
+  <div text="#000000" bgcolor="#FFFFFF">
+    <div>小宮さん、<br>
+      こんにちは。黄と申します。<br>
+      私も、バイナリログかと思いましたが、my.cnfに設定されてないことを確認しました。<br>
+      <br>
+      MYSQL/LOG下にpsamというフォルダーがあって、以下のファイルがいっぱいありました。<br>
+      AppInfo_20120507.info<br>
+      RankingDaily_20110811.info<br>
+      <br>
+      一応、開発側で、psam配下のファイルを削除して、現在、以下のように、/MYSQL/LOGの領域が大幅に減りました。<br>
+      親切な回答、ありがとう御座いました。勉強になりました。<br>
+      <br>
+      以上、よろしくお願いいたします。<br>
+      黄世元<br>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+      [root@amsdb1 psam]# df -h<br>
+      Filesystem Size Used Avail Use% Mounted on<br>
+      /dev/xvda2 4.9G 1.4G 3.3G 29% /<br>
+      /dev/xvda7 9.7G 3.9G 5.4G 42% /var<br>
+      /dev/xvda6 9.7G 3.2G 6.0G 35% /usr<br>
+      /dev/xvda5 9.7G 250M 9.0G 3% /mgmt<br>
+      /dev/xvda1 99M 23M 72M 24% /boot<br>
+      tmpfs 8.0G 0 8.0G 0% /dev/shm<br>
+      /dev/mapper/VG01-mysql<br>
+       5.0G 2.8G 2.0G 59% /MYSQL<br>
+      /dev/mapper/VG01-dblog<br>
+       9.9G 1.6G 7.8G 17% /MYSQL/LOG<br>
+      /dev/drbd0 341G 180G 144G 56% /MYSQL_DATA<br>
+      <br>
+      2013-01-10  4:25, yoshiyuki komiya  :<br>
+    </div><div><div class="h5">
+    <blockquote type="cite">
+      <div>こんにちは。小宮と申します。</div>
+      <div>MySQLのログはいくつか種類と方法がありますので</div>
+      <div>どのログが削除対象か、を明記していただくとよいかと思います。</div>
+      <div><br>
+      </div>
+      <div>とりわけ運用中に目立って増えるのはバイナリログ(mysql-bin.******)かと思いましたので</div>
+      <div>確認・削除の方法を簡単に記載しましたのでご参考ください。</div>
+      <div>
+        (まったく別のログファイルの話でしたら見当違いでした。すみません…)</div>
+      <div><br>
+      </div>
+      <div>・バイナリログの一覧を表示</div>
+      <div> mysql&gt; SHOW MASTER LOGS;</div>
+      <div><br>
+      </div>
+      <div>・バイナリログの削除</div>
+      <div>　指定したログファイルの番号より前のバイナリログが削除対象となります。</div>
+      <div> PURGE MASTER LOGS TO &#39;&lt;ログファイル名&gt;&#39;</div>
+      <div><br>
+      </div>
+      <div>　※実行例</div>
+      <div>　mysql&gt; PURGE MASTER LOGS TO &#39;mysql-bin.000010&#39;;</div>
+      <div>　この場合は&quot;mysql-bin.000009&quot;以前のものが削除され、000010以降が残ります。</div>
+      <div><br>
+      </div>
+      <div><br>
+      </div>
+      <div>作業前の注意点としては</div>
+      <div>・必ずmysqlモニター上から実施すること</div>
+      <div>・削除前に、データファイルがどこまでバックアップ済みか、を確認すること</div>
+      <div>・DRBD環境なので、ピアノード側でのログ削除も確認する</div>
+      <div><br>
+      </div>
+      <div>あたりでしょうか。</div>
+      <div>以上、宜しくお願い致します。</div>
+      <br>
+      <div class="gmail_quote">2013年1月10日 14:33 Hwang Se Won <span dir="ltr">&lt;<a href="mailto:coolguy318@gmail.com" target="_blank">coolguy318@gmail.com</a>&gt;</span>:<br>
+        <blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">お疲れ様です。<br>
+          MySQLを担当している黄と申します。<br>
+          <br>
+          MySQLでログを削除することに関して質問があります。<br>
+          <br>
+          以下の構成になっているシステムで、MYSQL/LOGの領域が　９５%です。<br>
+          ログを削除したいですが、MySQLに接続して、ログを削除する方法はありますか？<br>
+          <br>
+          <br>
+          DRBD (Active)<br>
+          Redhat Enterprise Linux 5.4 (64bit)<br>
+          MySQL Community 5.5.25a<br>
+          heartbeat-2.1.3<br>
+          <br>
+          以上、よろしくお願いいたします。<br>
+          <br>
+          <br>
+        </blockquote>
+      </div>
+      <br>
+    </blockquote>
+    <br>
+  </div></div></div>
+
+</blockquote></div><br></div>

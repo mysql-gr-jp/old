@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5289</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="5288.html">[前]</a><a href="5290.html">[次]</a><a href="../list/5201-5300.html">[番号順一覧]</a><a href="../thread/5201-5300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5289
+</p>
+<div class="header">
+<p>
+From: Hiroyuki OYAMA &lt;Hiroyuki OYAMA &lt;oyama@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 1 Apr 2002 00:05:00 +0900<br>
+Subject: [mysql 05289] [rfc] Net::MySQL &amp; DBD::mysqlPP<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+クレイフィッシュの小山と申します。
+
+MySQLの通信プロトコルをなんとなくPure Perlで実装したモ
+ジュールNet::MySQLと、それを利用したDBIのドライバ
+DBD::mysqlPPを書きました。
+# JDBCで言うところのType4 driver
+
+    <a href="http://ymca.infoware.ne.jp/dist/Net-MySQL-0.01.tar.gz">http://ymca.infoware.ne.jp/dist/Net-MySQL-0.01.tar.gz</a>
+    <a href="http://ymca.infoware.ne.jp/dist/DBD-mysqlPP-0.01.tar.gz">http://ymca.infoware.ne.jp/dist/DBD-mysqlPP-0.01.tar.gz</a>
+
+libmysqlを使わずにPerlだけで実装したので、perl5.6.0以降で
+IO::Socketが使える環境であれば基本的にOSを問わずMySQLの
+daemonと*直接*通信できます。既に動作を検証できている環境は
+以下の通りです。
+
+    * FreeBSD 3.4 with perl 5.6.1 build for i386-freebsd
+    * FreeBSD 4.5 with perl 5.6.1 build for i386-freebsd
+    * FreeBSD 4.0 with perl 5.005_03 build for i386-freebsd
+    * Windows2000 with ActivePerl 5.6.1-build631
+    * MacOS X     with perl 5.6.0 build for darwin
+    * MacOS 9.x   with MacPerl 5.6.1r1
+
+
+NULL passwordで良ければもっと動作できる環境は広がります。さ
+らにIO::Socket.pmではなくSocket.pmを使うように書き換えれば
+WindowsCEでも動くはずです。
+
+御意見など頂けると幸いです。
+
+
+Net::MySQL
+==========
+
+対応していないもの
+    * 圧縮プロトコル
+    * UNIX Socketによる接続
+    * データベースの作成などmysqladminがやりそうな処理
+
+    #!perl
+    use Net::MySQL;
+    use strict;
+
+    my $mysql = Net::MySQL-&gt;new(
+        hostname =&gt; 'mysqld.example.jp',
+        database =&gt; 'database',
+        user     =&gt; 'username',
+        password =&gt; 'password'
+    );
+    $mysql-&gt;query(q{SELECT id, name FROM table});
+    my $record = $mysql-&gt;create_record_iterator;
+    while (my $column = $record-&gt;each) {
+        printf &quot;id=%s, name=%s\n&quot;,
+            $column-&gt;[0], $column-&gt;[1];
+    }
+    $mysql-&gt;close;
+    __END__
+
+
+DBD::mysqlPP
+============
+対応していないもの
+    * メタデータの取得
+    * プレースホルダの解析はテキトウ
+
+    #!perl
+    use DBI;
+    use strict;
+
+    my $dbh = DBI-&gt;connect(
+        'dbi:mysqlPP:hostname=mysqld.example.jp;database=database',
+        'username', 'password'
+    );
+    my $sth = $dbh-&gt;prepare(q{SELECT id, name FROM table});
+    $sth-&gt;execute;
+    while (my $col = $sth-&gt;fetchrow_arrayref) {
+        printf &quot;id=%s, name=%s\n&quot;, $col-&gt;[0], $col-&gt;[1];
+    }
+    $dbh-&gt;disconnect;
+    __END__
+______________
+Hiroyuki OYAMA &lt;oyama@xxxxxxxxxx&gt;
+System Operations Dept.
+Crayfish Co.,Ltd. &lt;<a href="http://Crayfish.CO.JP/">http://Crayfish.CO.JP/</a>&gt;
+   &quot;PerlとRubyでYahoo!メッセンジャー&quot;
+   -&gt; <a href="http://ymca.infoware.ne.jp/">http://ymca.infoware.ne.jp/</a>
+
+</pre>
+</div>
+<p class="button"><a href="5288.html">[前]</a><a href="5290.html">[次]</a><a href="../list/5201-5300.html">[番号順一覧]</a><a href="../thread/5201-5300.html">[スレッド一覧]</a></p>
+</body>
+</html>

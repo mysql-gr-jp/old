@@ -1,0 +1,87 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1824</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="1823.html">[前]</a><a href="1825.html">[次]</a><a href="../list/1801-1900.html">[番号順一覧]</a><a href="../thread/1801-1900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1824
+</p>
+<div class="header">
+<p>
+From: とみたまさひろ &lt;とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 29 Mar 2000 00:39:49 +0900<br>
+Subject: [mysql 01824] Re: Quoted column name on mysqldump output<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+とみたです。
+
+At Tue, 28 Mar 2000 18:38:06 +0900,
+takeshi@xxxxxxxxxx wrote:
+
+<span class="quote2">&gt; &gt; mysqldumpでダンプすると、日本語の項目名がquoteされます。</span>
+<span class="quote2">&gt; &gt; それでそのままmysqlにかけると、「You have an error in your </span>
+<span class="quote2">&gt; &gt; SQL syntax near '`項目名`」と怒られてしまいます。</span>
+
+<span class="quote1">&gt; mysqldump version 7 から quote が導入された際に、</span>
+<span class="quote1">&gt; multibytes 文字のことが考慮されていないようです。</span>
+
+おや、そういう問題があったとは…。
+
+<span class="quote1">&gt; MySQL-3.22.27 付属の mysqldump コマンドは version 6.4 で</span>
+<span class="quote1">&gt; この問題は起きないです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 古いバージョンの mysqldump コマンドを使用するか、</span>
+<span class="quote1">&gt; 以下のパッチを当てて、quote をつけないように mysqldump コマンドを</span>
+<span class="quote1">&gt; 変更してみてください</span>
+
+やはり正当な方法としては mysqldump を MB 対応にするってもんでしょう :-)
+ということでパッチです。
+
+--
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;
+
+
+--- mysqldump.c.orig	Fri Feb 11 06:07:42 2000
++++ mysqldump.c	Wed Mar 29 00:08:17 2000
+@@ -469,10 +469,22 @@
+ 
+ static bool test_if_special_chars(const char *str)
+ {
++#if defined(USE_MB) &amp;&amp; defined(USE_MB_IDENT)
++  const char *end;
++  end = str+strlen(str);
++  while (str &lt; end) {
++    int l = 0;
++    if (!isvar(*str) &amp;&amp; *str != '$' &amp;&amp; (l = ismbchar(str, end)) == 0)
++      return 1;
++    str += l? l: 1;
++  }
++  return 0;
++#else
+   for ( ; *str ; str++)
+     if (!isvar(*str) &amp;&amp; *str != '$')
+       return 1;
+   return 0;
++#endif
+ }
+ 
+ /*
+
+</pre>
+</div>
+<p class="button"><a href="1823.html">[前]</a><a href="1825.html">[次]</a><a href="../list/1801-1900.html">[番号順一覧]</a><a href="../thread/1801-1900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1818.html">   1818 2000-03-28 17:36 [Kengo Jinno &lt;kengo@x] Quoted column name on mysqldump output  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1819.html">   1819 2000-03-28 18:38 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1820.html">   1820 2000-03-28 19:18 　┣[Kengo Jinno &lt;kengo@x]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="1824.html">   1824 2000-03-29 00:39 　┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1829.html">   1829 2000-03-29 10:08 　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15139</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15138.html">[前]</a><a href="15140.html">[次]</a><a href="../list/15101-15200.html">[番号順一覧]</a><a href="../thread/15101-15200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15139
+</p>
+<div class="header">
+<p>
+From: SAKAI Kei &lt;SAKAI Kei &lt;sak2@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 08 Jan 2010 13:21:08 +0900<br>
+Subject: [mysql 15139] mysqlコマンドラインプロンプトの変更（Re:  Re: utf8文字化け（森鴎外）<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+坂井です
+  
+  元のスレッドと違う話題ですが、池田さんが示されたサンプルの
+  プロンプトに目を惹かれました:-)
+  
+<span class="quote1">&gt; [test]&gt; select hex(convert(_utf8 0xE9B797 using sjis));</span>
+  
+  プロンプトを、通常の mysql&gt; から データベース名に変更されて
+  いるのですね。
+         実行例) mysql&gt; prompt [\d]&gt;\_
+           (実際は .my.cnf に記述されていると思いますが.)
+  
+  これ現時点での池田さんの「オススメ設定」でしょうか？
+  
+  私も一時期、作業DB(ホスト、スキーマ)やユーザを誤っていた
+  せいでトラブルを起こしかかったことが頻発していた時期に、
+  プロンプトを変えていました。こんな感じ。
+       mysql&gt; prompt (\u)[\h:\d]&gt;\_
+       PROMPT set to '(\u)[\h:\d]&gt;\_'
+       (root)[localhost:test]&gt;
+  
+  プロンプト自体の表示が長くなり結構鬱陶しくなったので、
+  結局いまはデフォルトの mysql&gt; プロンプトに戻っていますが(^^;
+  
+  
+  他のみなさんは、どうでしょう。mysqlコマンドラインプロンプト
+  に何かこだわりを持っていますか？
+  
+
+Thank you
+On Fri, 08 Jan 2010 12:33:22 +0900
+Tetsuro IKEDA &lt;te.ikeda@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; こんにちは。池田です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; #出遅れた感がありますが。。。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 鴎外の旧字は文字集合JISX0213に含まれるもので、MySQLだと以下の</span>
+<span class="quote1">&gt; 文字コードがサポートしています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; utf8</span>
+<span class="quote1">&gt; eucjpms</span>
+<span class="quote1">&gt; ujis</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; cp932、sjisはサポートしていないため、変換が発生すると? (0x3F)に</span>
+<span class="quote1">&gt; 置換されます。これが文字化けの正体です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 戸田さんの記述によると「utf8→sjis」変換が発生するような手順が</span>
+<span class="quote1">&gt; 含まれていましたから、坂井さんが示されたように変換が発生しないように</span>
+<span class="quote1">&gt; すれば文字化けは解消されます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以下、動作確認ログになります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [test]&gt; select 0xE9B797;</span>
+<span class="quote1">&gt; +----------+</span>
+<span class="quote2">&gt; | 0xE9B797 |</span>
+<span class="quote1">&gt; +----------+</span>
+<span class="quote3">&gt; |          |　　　&lt;---鴎外の旧字が手元では見えてます。</span>
+<span class="quote1">&gt; +----------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [test]&gt; select hex(convert(_utf8 0xE9B797 using eucjpms));</span>
+<span class="quote1">&gt; +--------------------------------------------+</span>
+<span class="quote2">&gt; | hex(convert(_utf8 0xE9B797 using eucjpms)) |</span>
+<span class="quote1">&gt; +--------------------------------------------+</span>
+<span class="quote2">&gt; | 8FECBF                                     |</span>
+<span class="quote1">&gt; +--------------------------------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [test]&gt; select hex(convert(_utf8 0xE9B797 using ujis));</span>
+<span class="quote1">&gt; +-----------------------------------------+</span>
+<span class="quote2">&gt; | hex(convert(_utf8 0xE9B797 using ujis)) |</span>
+<span class="quote1">&gt; +-----------------------------------------+</span>
+<span class="quote2">&gt; | 8FECBF                                  |</span>
+<span class="quote1">&gt; +-----------------------------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.01 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [test]&gt; select hex(convert(_utf8 0xE9B797 using cp932));</span>
+<span class="quote1">&gt; +------------------------------------------+</span>
+<span class="quote2">&gt; | hex(convert(_utf8 0xE9B797 using cp932)) |</span>
+<span class="quote1">&gt; +------------------------------------------+</span>
+<span class="quote2">&gt; | 3F                                       |</span>
+<span class="quote1">&gt; +------------------------------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; [test]&gt; select hex(convert(_utf8 0xE9B797 using sjis));</span>
+<span class="quote1">&gt; +-----------------------------------------+</span>
+<span class="quote2">&gt; | hex(convert(_utf8 0xE9B797 using sjis)) |</span>
+<span class="quote1">&gt; +-----------------------------------------+</span>
+<span class="quote2">&gt; | 3F                                      |</span>
+<span class="quote1">&gt; +-----------------------------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 戸田峻 さんは書きました:</span>
+<span class="quote2">&gt; &gt; 坂井さん</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote3">&gt; &gt;&gt;  戸田さん。鴎外の旧字ってヘンの中身が口三つのやつですよね。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; まさにその漢字です</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote3">&gt; &gt;&gt;  最初にINSERT文を作成して確認したのが秀丸エディタなので、</span>
+<span class="quote3">&gt; &gt;&gt;  結果の確認もまずは同じ環境で行ってみたらどうでしょうか。</span>
+<span class="quote3">&gt; &gt;&gt;  （表示ツール側の対応状況により表示されていないだけの気がします）</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;  方法例：</span>
+<span class="quote3">&gt; &gt;&gt;   mysql サーバに接続(utf8で)</span>
+<span class="quote3">&gt; &gt;&gt;   mysql&gt; プロンプトで tee c:\out.txt と入力(ファイル名はご自由に)</span>
+<span class="quote3">&gt; &gt;&gt;   mysql&gt; プロンプトで SELECT * FROM &lt;そのテーブル&gt; を実行</span>
+<span class="quote3">&gt; &gt;&gt;   秀丸エディタで c:\out.txt を確認(utf8で)</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 上記方法例で文字化けがしないことが確認できました。</span>
+<span class="quote2">&gt; &gt; ありがとうございます。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; すばやい返答ありがとうございました。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; また多方面からいろいろな情報をいただき皆様ありがとうございます。</span>
+<span class="quote2">&gt; &gt; ・MySQL5のutf8は3バイトまでしか対応していません。</span>
+<span class="quote2">&gt; &gt; ・UTF-8の4バイト対応は、MySQL6.0.4以降になります。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 以上、ありがとうございました。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 2010年1月8日12:15 SAKAI Kei &lt;sak2@xxxxxxxxxx&gt;:</span>
+<span class="quote3">&gt; &gt;&gt; 坂井です</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;  戸田さん。鴎外の旧字ってヘンの中身が口三つのやつですよね。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;  最初にINSERT文を作成して確認したのが秀丸エディタなので、</span>
+<span class="quote3">&gt; &gt;&gt;  結果の確認もまずは同じ環境で行ってみたらどうでしょうか。</span>
+<span class="quote3">&gt; &gt;&gt;  （表示ツール側の対応状況により表示されていないだけの気がします）</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;  方法例：</span>
+<span class="quote3">&gt; &gt;&gt;   mysql サーバに接続(utf8で)</span>
+<span class="quote3">&gt; &gt;&gt;   mysql&gt; プロンプトで tee c:\out.txt と入力(ファイル名はご自由に)</span>
+<span class="quote3">&gt; &gt;&gt;   mysql&gt; プロンプトで SELECT * FROM &lt;そのテーブル&gt; を実行</span>
+<span class="quote3">&gt; &gt;&gt;   秀丸エディタで c:\out.txt を確認(utf8で)</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;  おそらく正しく表示されると思います。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; Thank you</span>
+<span class="quote3">&gt; &gt;&gt; On Fri, 8 Jan 2010 11:44:30 +0900</span>
+<span class="quote3">&gt; &gt;&gt; 戸田峻 &lt;todappi@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote4">&gt; &gt;&gt;&gt; 戸田と申します。</span>
+<span class="quote4">&gt; &gt;&gt;&gt; 長々と記載して申し訳ありません。</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt; 現在一部のutf8の漢字が文字化けが発生してしまい解決が出来ません。</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt; 下記私の設定情報、現在の状態です。</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt; ・環境</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  Microsoft Windouws XP</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  MySQL5.1</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt; ・DBの文字コードの設定情報（下記コマンド実行）</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  show variables like 'character_set%'</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  結果</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   character_set_client     | utf8</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   character_set_connection | utf8</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   character_set_database   | utf8</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   character_set_filesystem | binary</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   character_set_results    | utf8</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   character_set_server     | utf8</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   character_set_system     | utf8</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   character_sets_dir       | C:\Program Files\MySQL\MySQL Server</span>
+<span class="quote4">&gt; &gt;&gt;&gt; 5.1\share\charsets\</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt; ・入力したデータ（入力した方法）</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  utf8での漢字データの入力</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -varchar(10)属性に下記データ入力</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   aaa</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   常用漢字</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   森鴎外（※鴎：おう 実際は旧漢字を入力してます）</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  方法</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -秀丸エディタにて文字コードをutf8に設定</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -簡単なinsert文を記述し（データに漢字を入力）、.sql拡張子で保存</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -コマンドプロントにてsourceコマンドを使用し上記作成ファイルを実行</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -結果は「Query OK, 0 rows affected (0.00 sec)」</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt; ・入力されたデータの確認（※この時点で文字化け発生）</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  CSEで確認（CSE:sql開発ツール）</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -ODBCコネクタでutf8→sjisに変換（自動的にしてくれる）</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -CSEにてselectクリエ実行</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -出力されたデータ</span>
+<span class="quote4">&gt; &gt;&gt;&gt;    aaa</span>
+<span class="quote4">&gt; &gt;&gt;&gt;    常用漢字</span>
+<span class="quote4">&gt; &gt;&gt;&gt;    森?外（※旧漢字の鴎が?に文字化け）</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  コマンドプロントで確認</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  レジストリを弄り、utf8でMSゴシックを使用できるよう設定</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -レジストリエディタでCodePageとTrueTypeFontで65001を追加</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -コマンドプロントを開き、chcp 65001コマンドを実行（コマンドプロントをsjis→utf8に変換）</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -以下データベースに接続、select文実行</span>
+<span class="quote4">&gt; &gt;&gt;&gt;  -下記結果内容が出力される</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   入力されているはずのデータ</span>
+<span class="quote4">&gt; &gt;&gt;&gt;    aaa</span>
+<span class="quote4">&gt; &gt;&gt;&gt;    常用漢字</span>
+<span class="quote4">&gt; &gt;&gt;&gt;    森鴎外（※鴎：おう 実際は旧漢字を入力してます）</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;   結果</span>
+<span class="quote4">&gt; &gt;&gt;&gt;    aaa</span>
+<span class="quote4">&gt; &gt;&gt;&gt;    常用漢字</span>
+<span class="quote4">&gt; &gt;&gt;&gt;    森?外（※旧漢字の鴎が?に文字化け）</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt; Windouws上でどうutf8の漢字データを入力して、どう確認していいのかが不明です。</span>
+<span class="quote4">&gt; &gt;&gt;&gt; 何かご指摘があればお願いします。</span>
+<span class="quote4">&gt; &gt;&gt;&gt;</span>
+<span class="quote4">&gt; &gt;&gt;&gt; 以上、よろしくお願いします。</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="15138.html">[前]</a><a href="15140.html">[次]</a><a href="../list/15101-15200.html">[番号順一覧]</a><a href="../thread/15101-15200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15131.html">  15131 2010-01-08 11:44 [戸田峻 &lt;todappi@xxxx] utf8文字化け（森鴎外）                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15132.html">  15132 2010-01-08 12:15 ┣[SAKAI Kei &lt;sak2@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15134.html">  15134 2010-01-08 12:26 ┃┗[戸田峻 &lt;todappi@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15135.html">  15135 2010-01-08 12:33 ┃　┣[Tetsuro IKEDA &lt;te.ik]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="15139.html">  15139 2010-01-08 13:21 ┃　┃┗[SAKAI Kei &lt;sak2@xxxx] mysqlコマンドラインプロンプトの変更（Re:  Re: utf8文字化け（森鴎外）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15140.html">  15140 2010-01-08 13:29 ┃　┃　┗[Tetsuro IKEDA &lt;te.ik]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15143.html">  15143 2010-01-13 12:30 ┃　┃　　┗[SAKAI Kei &lt;sak2@xxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15136.html">  15136 2010-01-08 12:47 ┃　┗[SAKAI Kei &lt;sak2@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15137.html">  15137 2010-01-08 12:56 ┃　　┗[荒浪一城 &lt;kazuki.ara] Re: [mysql 15136] Re: utf8文字化け（森鴎外）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15138.html">  15138 2010-01-08 13:19 ┃　　　┗[&quot;Tadayuki Abraham HA] Re: [mysql 15137] Re: [mysql 15136] Re: utf8文字化け（森鴎外）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15133.html">  15133 2010-01-08 12:18 ┗[荒浪一城 &lt;kazuki.ara] Re: [mysql 15131] utf8文字化け（森鴎外）</a></span>
+</pre>
+</body>
+</html>

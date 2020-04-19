@@ -1,0 +1,80 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15752</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15751.html">[前]</a><a href="15753.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15752
+</p>
+<div class="header">
+<p>
+From: &lt;gotou1213@xxxxxxxxxx&gt;<br>
+Date: Mon, 23 Apr 2012 14:17:31 +0900<br>
+Subject: [mysql 15752] Re: 行列変換を行う処理を高速化するには？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+後藤と申します。
+
+<span class="quote1">&gt; 件数が多くなると、検索時間が掛かるようになってきたため、</span>
+<span class="quote1">&gt; 日付のうち、日(1-31)を表す部分を別の列(npdt_d)にして</span>
+
+テーブル定義の変更が許されるのであれば npdt を、年・月・日に分割し、
+（例えば npdt_y, npdt_m, npdt_d）、以下のようなインデックスを作成し、
+
+  CREATE INDEX idx2 on nippo ( sycd, npdt_y, npdt_m, nm );
+
+以下のように検索することで改善されないでしょうか？
+（月指定での集計しか出来ませんが）
+
+  SELECT nm,
+    sum(case when npdt_d=01 then 1 else 0 end) as 'h101',
+    sum(case when npdt_d=02 then 1 else 0 end) as 'h102',
+     :
+    sum(case when npdt_d=30 then 1 else 0 end) as 'h130',
+    sum(case when npdt_d=31 then 1 else 0 end) as 'h131'
+  FROM nippo
+  WHERE sycd = #sycd# AND npdt_y = #npdt_y# AND npdt_m = #npdt_m#
+  GROUP BY nm
+  ORDER BY nm
+
+npdt_y と npdt_m を別列にすることで、検索方法が range では無く ref になるようにして、
+GROUP BY や ORDER BY をソートでは無くINDEX順の走査だけにする、というイメージです。
+なので、年月日に分割しなくても、npdt_ym のように年月の列だけ設けて
+
+    CREATE INDEX idx2 on nippo ( sycd, npdt_ym, nm );
+
+でも大体同じです。
+
+</pre>
+</div>
+<p class="button"><a href="15751.html">[前]</a><a href="15753.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15742.html">  15742 2012-04-20 09:36 [ram &lt;ram@xxxxxxxxxx&gt;] 行列変換を行う処理を高速化するには？    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15743.html">  15743 2012-04-20 11:12 ┣[中川 貴 &lt;takashi.nak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15744.html">  15744 2012-04-20 13:58 ┃┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15745.html">  15745 2012-04-20 15:24 ┃　┗[中川 貴 &lt;takashi.nak]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15747.html">  15747 2012-04-20 17:58 ┃　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15748.html">  15748 2012-04-20 22:05 ┃　　　┣[Tsubasa Tanaka &lt;yoku]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15749.html">  15749 2012-04-21 01:06 ┃　　　┃┗[Tsubasa Tanaka &lt;yoku]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15750.html">  15750 2012-04-21 02:05 ┃　　　┃　┗[Tsubasa Tanaka &lt;yoku]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15753.html">  15753 2012-04-23 15:39 ┃　　　┃　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15756.html">  15756 2012-04-25 14:54 ┃　　　┗[中川 貴 &lt;takashi.nak]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15758.html">  15758 2012-04-25 16:34 ┃　　　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15759.html">  15759 2012-04-25 17:09 ┃　　　　　┗[中川 貴 &lt;takashi.nak]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15760.html">  15760 2012-04-25 17:18 ┃　　　　　　┗[Tomohiro 'Tomo-p' KA]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15761.html">  15761 2012-04-25 18:25 ┃　　　　　　　┗[中川 貴 &lt;takashi.nak]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15762.html">  15762 2012-04-25 19:05 ┃　　　　　　　　┗[Tomohiro 'Tomo-p' KA]                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="15752.html">  15752 2012-04-23 14:17 ┗[&lt;gotou1213@xxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15754.html">  15754 2012-04-23 19:53 　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15755.html">  15755 2012-04-24 13:50 　　┗[&lt;gotou1213@xxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15757.html">  15757 2012-04-25 15:39 　　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15765.html">  15765 2012-04-26 14:12 　　　　┗[&lt;gotou1213@xxxxxxxxx]                               </a></span>
+</pre>
+</body>
+</html>

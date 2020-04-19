@@ -1,0 +1,253 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9992</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9991.html">[前]</a><a href="9993.html">[次]</a><a href="../list/9901-10000.html">[番号順一覧]</a><a href="../thread/9901-10000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9992
+</p>
+<div class="header">
+<p>
+From: &quot;Tomo Ikehara&quot; &lt;&quot;Tomo Ikehara&quot; &lt;tomo_ikehara@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 11 Aug 2004 08:54:15 +0700<br>
+Subject: [mysql 09992] Re: データのロックについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+池原と申します。
+
+私も訳が分からなくなってる人間の１人なので、発言させてください。
+
+<span class="quote1">&gt;     SET AUTOCOMMIT = 0 でオートコミットモードがオフになると、ユーザが</span>
+<span class="quote1">&gt;     常にトランザクションを開いていると見なされます。このユーザが SQL</span>
+<span class="quote1">&gt;     の COMMIT または ROLLBACK ステートメントを実行すると、現在のトラン</span>
+<span class="quote1">&gt;     ザクションが終了し、新しいトランザクションが開始されます。どちらの</span>
+とみたさんが引用してくださった以上の文より、
+１．SET AUTOCOMMIT =0 とすると、常にトランザクションを開いていると見なされ
+る。
+     →トランザクションが閉じている（＝開始されていない）状態をとりえない。
+２．COMMITを実行すると新しいトランザクションが開始される。
+     （これは”１”を前提とすると、そうなるしかないですね。）
+と理解しました。
+
+松枝さんが<a href="09953.html">[mysql 09953]</a>で提示された例のようなテストを、以下のようにやってみ
+た場合、
+どうなるのでしょうか。
+（以下引用に修正を加えています。）
+
+     term1                           | term2
+    ---------------------------------+--------------------
+     set autocommit=0;               |
+                                     | set autocommit=0;	&lt;--(1)
+     select * from BBB;              |
+     update BBB set ID=2 where ID=1; |
+                                     | commit;		&lt;--(2)
+     commit;                         |
+                                     | select * from BBB;	&lt;--(3)
+     select * from BBB;              |
+
+この場合のterm2を見てみると、
+(1)でトランザクションが開始され、
+(2)でトランザクションが終了されると同時に新しいトランザクションが開始され
+る。
+よって(3)ではID=1と表示される、ということでしょうか。
+※読み取りのみのクエリである(3)で新しくトランザクションは開始されないという
+前提で
+   話をしております。
+（今手元にMySQLの環境が無いので、自身でテストしておりません。
+  すみませんがどなたかテストしていただくことは可能でしょうか？）
+
+私は、
+     常にトランザクションを開いていると見なされる。
+     →トランザクションが閉じている（＝開始されていない）状態をとりえない。
+という認識がなかったため、以下のようなケースで混乱します。
+
+１．
+例えば「月間作業予定を表示する画面があって、ユーザーはその画面上である作業の
+内容を変更し、更新ボタンを押下することで変更内容をDBに反映すると同時に、変更
+したもの以外を含む全ての作業予定の最新を画面に表示しなおす。」というシステム
+があったとします。
+更新ボタンが押下された時の処理としては
+  (1)押下したユーザーの入力内容のDBへの反映。（UPDATE--&gt;COMMIT）
+  (2)その時点で最新の月間作業予定データを取得し、画面にセット。（SELECT）
+ と考えられます。
+ここで(2)においてSELECT文を発行して取得したデータは、厳密に言うとその時点で
+最新のものではないのですね？（(1)でCOMMITをした時点のデータが取得されるはず
+だから。）
+私は今まで「(1)の処理でCOMMITした後はトランザクションは開始されていない状
+態」だと考えていたので、(2)では、その時点で最新のデータが取得できると考えて
+いました。
+このようなケースでは、みなさんどのようにコーディングされますか？（SELECT文発
+行直前にわざわざCOMMITする？）
+
+２．
+トランザクションをCOMMITしても、また新しいトランザクションが開始されてしまう
+のであれば、SET AUTOCOMMIT =0 とした場合、最後のトランザクションを終了するの
+はDBに対する接続を閉じた時となるのでしょうか？
+私は今までCOMMITした後は新しいトランザクションは開始されないと理解していたの
+で、UPDATE--&gt;COMMITの後には開始されているトランザクションは存在せず、接続を
+閉じるときには閉じるのみ（おかしな表現ですね）だと考えていました。
+これは特に問題ないのでしょうか？
+例えばWebシステムのようにDB接続のプーリングを使用しているようなケースでも大
+丈夫なのでしょうか？
+（プーリングについてよく理解していないにもかかわらず発言し申し訳ないです
+が、）トランザクションが生きている状態というのはDBMSは何かしらの管理をしなけ
+ればいけないと思うので、「アプリケーションが接続をクローズしてもプーリングを
+管理するコンポーネントとDBとの間の接続はそのまま生きるので、無駄にトランザク
+ションが生きているという状態にならないのでしょうか。
+もしこのようなことが発生するのであれば、アプリケーションにおいてDB接続をク
+ローズ（プールに返す）直前に、SET AUTOCOMMIT=1 とする必要があるのでしょう
+か。
+（何かこのような話を聞いたことがあるような無いような気もしてきた…ようなこな
+いような(＾＾；）
+
+以上 長々と失礼しました。
+ご意見お聞かせいただけると幸甚です。
+
+
+<span class="quote1">&gt; -----Original Message-----</span>
+<span class="quote1">&gt; From: とみたまさひろ [mailto:tommy@xxxxxxxxxx]</span>
+<span class="quote1">&gt; Sent: Tuesday, August 10, 2004 9:40 PM</span>
+<span class="quote1">&gt; To: ml@xxxxxxxxxx</span>
+<span class="quote1">&gt; Subject: <a href="09989.html">[mysql 09989]</a> Re: データのロックについて</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; とみたです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; On Tue, 10 Aug 2004 20:28:36 +0900</span>
+<span class="quote1">&gt; ML account &lt;ml@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; 　なるほど。確かにそれでも説明が付きます。non-autocommitモードだと</span>
+<span class="quote2">&gt; &gt; commit/rollbackの後に自動的にトランザクションが開始される、と言うのは、</span>
+<span class="quote2">&gt; &gt; マニュアルのどの辺に書いてあるのでしょう？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 私もちゃんとマニュアルを調べて発言しているわけではなく、怪しげな記憶に</span>
+<span class="quote1">&gt; 頼って発言していたので、この機にマニュアルを読んでみました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この辺でしょうか…。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/mysql/ja/InnoDB_transaction_model.html">http://dev.mysql.com/doc/mysql/ja/InnoDB_transaction_model.html</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     SET AUTOCOMMIT = 0 でオートコミットモードがオフになると、ユーザが</span>
+<span class="quote1">&gt;     常にトランザクションを開いていると見なされます。このユーザが SQL</span>
+<span class="quote1">&gt;     の COMMIT または ROLLBACK ステートメントを実行すると、現在のトラン</span>
+<span class="quote1">&gt;     ザクションが終了し、新しいトランザクションが開始されます。どちらの</span>
+<span class="quote1">&gt;     ステートメントも、現在のトランザクションで設定されたすべての</span>
+<span class="quote1">&gt;     InnoDB ロックを解除します。COMMIT を実行すると、現在のトランザクショ</span>
+<span class="quote1">&gt;     ンで加えられた変更が確定し、他のユーザが認識できる状態になります。</span>
+<span class="quote1">&gt;     一方、ROLLBACK ステートメントを実行すると、現在のトランザクション</span>
+<span class="quote1">&gt;     によって加えられたすべての変更が取り消されます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; 　ですが、それは相当に異様でしょうね。 commit/rollbackの後に自動的にトラ</span>
+<span class="quote2">&gt; &gt; ンザクションを開始される(自動トランザクション開始、とでも呼びますか)、そ</span>
+<span class="quote2">&gt; &gt; のメリットは何でしょう。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; さあ、なんでしょう。私はトランザクションはあまり使わないので…。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; 　更に、「自動トランザクション開始」を仮定すると、その接続は常にイン・ト</span>
+<span class="quote2">&gt; &gt; ランザクションと言う事ですね。つまり常にアクティブなトランザクションが残</span>
+<span class="quote2">&gt; &gt; る事になります。そうなると、マニュアルの別の所で色々と齟齬を生じてしまい</span>
+<span class="quote2">&gt; &gt; ます。例えば rename tableとか。こんな説明があったりします。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; When you execute RENAME, you can't have any locked tables or active</span>
+<span class="quote3">&gt; &gt; &gt; transactions.</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この記述ははなんでしょうね。実際に試してみたら、BEGIN 後でも RENAME は</span>
+<span class="quote1">&gt; 成功してしまいますし…。こんな記述もありました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/mysql/ja/Implicit_commit.html">http://dev.mysql.com/doc/mysql/ja/Implicit_commit.html</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     次のコマンドでは、トランザクションが（コマンドの実行前に COMMIT を</span>
+<span class="quote1">&gt;     発行した場合と同じように）暗黙的に終了します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     コマンド		コマンド 	コマンド</span>
+<span class="quote1">&gt;     ALTER TABLE 	BEGIN		CREATE INDEX</span>
+<span class="quote1">&gt;     DROP DATABASE 	DROP INDEX 	DROP TABLE</span>
+<span class="quote1">&gt;     LOAD MASTER DATA 	LOCK TABLES 	RENAME TABLE</span>
+<span class="quote1">&gt;     SET AUTOCOMMIT=1 	START TRANSACTION 	TRUNCATE</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; こっちの記述の方が実際の動きに合ってるようです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; 　「自動トランザクション開始」は、read-opの selectでトランザクションが開</span>
+<span class="quote2">&gt; &gt; 始されてしまうのと同程度に異様に見えます。もう、何が何だか訳が分からなく</span>
+<span class="quote2">&gt; &gt; なって来ましたね。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; いえ、私は別に異様とも思いませんし、そんなに訳が分からなくなってはいま</span>
+<span class="quote1">&gt; せん。このスレッドを読んでると、訳が分からなくなってるのは松枝さんだけ</span>
+<span class="quote1">&gt; のような気もしますが :-)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; 日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a></span>
+
+__________________________________________________
+GANBARE! NIPPON!
+Yahoo! JAPAN JOC OFFICIAL INTERNET PORTAL SITE
+<a href="http://mail.ganbare-nippon.yahoo.co.jp/">http://mail.ganbare-nippon.yahoo.co.jp/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="9991.html">[前]</a><a href="9993.html">[次]</a><a href="../list/9901-10000.html">[番号順一覧]</a><a href="../thread/9901-10000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9940.html">   9940 2004-08-04 13:17 [&quot;Mamiya Masataka&quot; &lt;x] データのロックについて                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9943.html">   9943 2004-08-05 10:06 ┣[&quot;Mamiya Masataka&quot; &lt;x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9944.html">   9944 2004-08-05 10:36 ┗[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9945.html">   9945 2004-08-05 11:26 　┣[seiji takegata &lt;take]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9946.html">   9946 2004-08-05 13:30 　┃┣[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9949.html">   9949 2004-08-05 15:24 　┃┃┗[EBIHARA Yuichiro &lt;ui]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9951.html">   9951 2004-08-05 23:09 　┃┃　┗[ML account &lt;ml@xxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9952.html">   9952 2004-08-05 23:19 　┃┃　　┣[&quot;TAKAHASHI, Tomohiro]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9953.html">   9953 2004-08-06 05:37 　┃┃　　┃┗[ML account &lt;ml@xxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9954.html">   9954 2004-08-06 05:51 　┃┃　　┃　┗[ML account &lt;ml@xxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9955.html">   9955 2004-08-06 11:25 　┃┃　　┃　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9957.html">   9957 2004-08-06 13:30 　┃┃　　┃　　　┗[ML account &lt;ml@xxxxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9958.html">   9958 2004-08-06 14:04 　┃┃　　┃　　　　┣[SUGAWARA Hajime &lt;sug]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9959.html">   9959 2004-08-06 14:17 　┃┃　　┃　　　　┣[とみたまさひろ &lt;tomm]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9960.html">   9960 2004-08-06 16:50 　┃┃　　┃　　　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9962.html">   9962 2004-08-07 16:49 　┃┃　　┃　　　　　┗[ML account &lt;ml@xxxxx]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9969.html">   9969 2004-08-09 18:24 　┃┃　　┃　　　　　　┣[&lt;kuyo@xxxxxxxxxx&gt;   ]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9970.html">   9970 2004-08-10 00:20 　┃┃　　┃　　　　　　┃┗[&quot;akira&quot; &lt;akrst@xxxxx]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9975.html">   9975 2004-08-10 09:30 　┃┃　　┃　　　　　　┃　┗[ML account &lt;ml@xxxxx]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9976.html">   9976 2004-08-10 10:48 　┃┃　　┃　　　　　　┃　　┣[&quot;TAKAHASHI, Tomohiro]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9997.html">   9997 2004-08-11 13:03 　┃┃　　┃　　　　　　┃　　┗[&lt;akrst@xxxxxxxxxx&gt;  ]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9983.html">   9983 2004-08-10 18:28 　┃┃　　┃　　　　　　┣[とみたまさひろ &lt;tomm]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9987.html">   9987 2004-08-10 20:28 　┃┃　　┃　　　　　　┃┗[ML account &lt;ml@xxxxx]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9988.html">   9988 2004-08-10 21:26 　┃┃　　┃　　　　　　┃　┣[&lt;kuyo@xxxxxxxxxx&gt;   ]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9994.html">   9994 2004-08-11 11:38 　┃┃　　┃　　　　　　┃　┃┗[ML account &lt;ml@xxxxx]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10004.html">  10004 2004-08-12 01:03 　┃┃　　┃　　　　　　┃　┃　┗[Tomoyuki Ishino &lt;ish]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10006.html">  10006 2004-08-12 08:54 　┃┃　　┃　　　　　　┃　┃　　┗[ML account &lt;ml@xxxxx]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10012.html">  10012 2004-08-13 12:52 　┃┃　　┃　　　　　　┃　┃　　　┗[Tomoyuki Ishino &lt;ish]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10014.html">  10014 2004-08-13 20:08 　┃┃　　┃　　　　　　┃　┃　　　　┗[ML account &lt;ml@xxxxx] </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9989.html">   9989 2004-08-10 23:39 　┃┃　　┃　　　　　　┃　┗[とみたまさひろ &lt;tomm]           </a></span>
+<span class="current">-&gt;&nbsp;<a href="9992.html">   9992 2004-08-11 10:54 　┃┃　　┃　　　　　　┃　　┣[&quot;Tomo Ikehara&quot; &lt;tomo]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9995.html">   9995 2004-08-11 12:08 　┃┃　　┃　　　　　　┃　　┃┣[&quot;TAKAHASHI, Tomohiro]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10001.html">  10001 2004-08-11 16:16 　┃┃　　┃　　　　　　┃　　┃┃┣[&quot;TAKAHASHI, Tomohiro] Re: データのロックについて(余談:START TRANSACTION)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10003.html">  10003 2004-08-12 00:51 　┃┃　　┃　　　　　　┃　　┃┃┃┗[とみたまさひろ &lt;tomm]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10011.html">  10011 2004-08-13 11:06 　┃┃　　┃　　　　　　┃　　┃┃┗[&quot;Tomo Ikehara&quot; &lt;tomo]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9999.html">   9999 2004-08-11 15:40 　┃┃　　┃　　　　　　┃　　┃┗[EBIHARA Yuichiro &lt;ui]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10017.html">  10017 2004-08-13 22:42 　┃┃　　┃　　　　　　┃　　┃　┗[&quot;Tomo Ikehara&quot; &lt;tomo]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9993.html">   9993 2004-08-11 11:38 　┃┃　　┃　　　　　　┃　　┗[ML account &lt;ml@xxxxx]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10000.html">  10000 2004-08-11 15:53 　┃┃　　┃　　　　　　┃　　　┣[EBIHARA Yuichiro &lt;ui]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10008.html">  10008 2004-08-12 10:30 　┃┃　　┃　　　　　　┃　　　┃┗[ML account &lt;ml@xxxxx]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10009.html">  10009 2004-08-12 11:57 　┃┃　　┃　　　　　　┃　　　┃　┗[&lt;kuyo@xxxxxxxxxx&gt;   ]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10013.html">  10013 2004-08-13 20:07 　┃┃　　┃　　　　　　┃　　　┃　　┗[ML account &lt;ml@xxxxx] </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10016.html">  10016 2004-08-13 22:02 　┃┃　　┃　　　　　　┃　　　┃　　　┣[とみたまさひろ &lt;tomm]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10018.html">  10018 2004-08-14 19:58 　┃┃　　┃　　　　　　┃　　　┃　　　┗[&lt;kuyo@xxxxxxxxxx&gt;   ]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10005.html">  10005 2004-08-12 01:32 　┃┃　　┃　　　　　　┃　　　┗[とみたまさひろ &lt;tomm]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10010.html">  10010 2004-08-13 01:25 　┃┃　　┃　　　　　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9956.html">   9956 2004-08-06 11:44 　┃┃　　┗[EBIHARA Yuichiro &lt;ui]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9974.html">   9974 2004-08-10 09:30 　┃┃　　　┗[ML account &lt;ml@xxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9982.html">   9982 2004-08-10 16:41 　┃┃　　　　┗[EBIHARA Yuichiro &lt;ui]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9986.html">   9986 2004-08-10 20:25 　┃┃　　　　　┗[ML account &lt;ml@xxxxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9950.html">   9950 2004-08-05 16:20 　┃┗[HAMAI Kyoichi &lt;k-ham]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9947.html">   9947 2004-08-05 13:35 　┗[&quot;Mamiya Masataka&quot; &lt;x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9948.html">   9948 2004-08-05 15:03 　　┗[ML account &lt;ml@xxxxx]                                   </a></span>
+</pre>
+</body>
+</html>

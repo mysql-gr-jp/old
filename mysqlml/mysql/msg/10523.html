@@ -1,0 +1,340 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10523</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="10522.html">[前]</a><a href="10524.html">[次]</a><a href="../list/10501-10600.html">[番号順一覧]</a><a href="../thread/10501-10600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10523
+</p>
+<div class="header">
+<p>
+From: &quot;zen kishimoto&quot; &lt;&quot;zen kishimoto&quot; &lt;zen@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 26 Nov 2004 14:02:16 -0800<br>
+Subject: [mysql 10523] サブクエリ　（この記事は4.1版の新しい機能を紹介する６番目の記事です。）<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<a href="http://dev.mysql.com/tech-resources/articles/4.1/subqueries.html">http://dev.mysql.com/tech-resources/articles/4.1/subqueries.html</a>
+
+
+この記事は4.1版の新しい機能を紹介する６番目の記事です。
+（4.1版はwww.mysql.com/downloads/mysql/4.1.htmlよりダウンロードできます。）
+4.1版 は今はgenerally-available (GA, or production) リリースと
+して入手できます。
+
+4.1版から1つのクエリで複数のテーブルからデータを取り出す
+方法が2つになりました。: joinを使用するかサブクエリを使用するかです。
+例えば、以下のテーブルがあるとします。
+
+CREATE TABLE clients (
+  clno INT,
+  fname VARCHAR(15),
+  lname VARCHAR(15),
+  job VARCHAR(15),
+  account_balance DECIMAL(7,2));
+
+INSERT INTO clients VALUES
+  (10, 'sam','smith','auditor',5525.75),
+  (20,'james','jones','manager',8960.25);
+
+CREATE TABLE firms (
+  clno INT,
+  company VARCHAR(15),
+  city VARCHAR(15));
+
+INSERT INTO firms VALUES
+  (10,'abc co','leduc'),
+  (20,'def ltd','nisku'),
+  (30,'ghi inc','nisku');
+
+以下のクエリはjoinを使用してclient-10のために全て
+入手可能の情報を取り出します:
+
+SELECT
+  fname, lname, city, job, company, account_balance
+  FROM clients c, firms f
+  WHERE c.clno = f.clno
+    AND c.clno = 10;
+
+しかし、何時もjoinを使用して欲しい情報が入る訳ではありません。
+例えば、一番大きなアカウントの残高を持つクライアントの情報が
+必要だとします。以下のクエリは、正しい情報を返還すると思われますが、
+代わりにエラーを返還します。
+
+SELECT
+  fname, lname, city, job, company, account_balance
+  FROM clients c, firms f
+  WHERE c.clno = f.clno
+    AND c.account_balance = MAX(c.account_balance);
+
+誤りの理由は、グループ関数の使用の間違いです。アグリゲート関数である
+MAXはWHEREのクローズでは使用できません。この時に2番目の方法である
+1つのクエリで複数のテーブルからデータを入手するサブクエリをが使用します。
+この記事で4.1版に追加されたサブクエリの機能の説明をします。
+
+サブクエリは括弧の中のSELECT
+
+簡単に言うと、サブクエリは他のSQLステートメントの内に書かれたSELECTステートメント
+です。それ自身がたまたま他のSELECTであることもあります。サブクエリをそれを
+包んでいる（または外の）クエリと区別するために、括弧の中に入れます。
+以下が例です。
+
+SELECT * FROM clients WHERE clno IN                -- 外のクエリ
+   (SELECT clno FROM firms WHERE city = 'leduc');  -- 内のクエリ
+
+このクエリはクライント・テーブルで、firmテーブルでcityが「leduc」
+である行とclnoが同じ値である、全てのを行を返還します
+
+結果を得るために、DBMSは最初に内側のクエリを処理します。cityが「leduc」である 
+
+全てのfirmsテーブルの行で「clno」を探します。それから、「clno」の値をclients
+テーブルの値と比較して、「clno」の値がマッチする全ての行を返還します。
+firmsテーブルにはサブクエリの条件に当たるのは1つの行しかないので、サブクエリの 
+
+例は次のクエリと同じです。
+
+SELECT * FROM clients WHERE clno = 10;
+
+サブクエリの例はjoinを使用しても書けます。
+
+SELECT
+  c.clno, fname, lname, job, account_balance
+  FROM clients c INNER JOIN firms f USING (clno)
+  WHERE city = 'leduc';
+
+しかしながら、同じことはこのサブクエリに関しては言えません。
+(どのクライアントが一番大きなclnoの値を持っていますか。)
+
+SELECT fname, lname FROM clients WHERE clno =
+  (SELECT MAX(clno) FROM firms);
+
+もし内側のクエリが空のセットを返還すると、サブクエリの結果は
+正しくなりません。例えば、次のクエリを考えましょう。
+
+SELECT * FROM clients WHERE clno =
+  (SELECT clno FROM firms WHERE city = 'gibbons');
+
+内側のクエリだけ処理されると、結果は明らかにゼロ行となります。
+cityが「gibbons」であるfirmsテーブルの行はありません。「空のセット」は
+コラムの値とは比較できません。SQL標準はサブクエリ（ゼロ行と処理された場合）
+の結果はNULLとなります。NULLと同じものはないので、クエリは「空のセット」
+メッセージ(ゼロ行)を返還します。
+
+サブクエリは外側のクエリのなかにネストしているとよく言われます。
+MySQLは他のサブクエリの中に更にネストするのをサポートします。
+
+サブクエリの種類
+
+3種類のサブクエリがあります。結果によってまた返還する行と列の数によって
+それぞれ分かれています。
+
+もしサブクエリがちょうど１つ列と行を返還するのであれば、それはスカラ
+サブクエリとして知られています。スカラ　サブクエリはSQLステートメント
+で通常のスカラ値（例：列の値とかリテラル）が使用できるところ
+はどこでも使用可能です。それは通常比較のオペレータのすぐ後
+のWHEREクローズにあります。
+
+サブクエリは複数の列とちょうど１つの行を返還すると、それは行サブクエリ
+と呼ばれます。行サブクエリは スカラ・サブクエリの派生で、スカラ　サブクエリ
+が使用できるどんな所にも使用可能です。
+
+最後にサブクエリが複数の列と行を返還すると、それはテーブル・サブクエリと
+して知られています。テーブル・サブクエリはSQLのステートメントで
+テーブル参照が出来るところ全てで使用可能です。これには、SELECTの
+FROMクローズを含みます。また、通常INかEXISTS　predicate　または制限比較オペレータ 
+
+のすぐ後のWHEREクローズにも見られます。(制限比較オペレータというのは
+比較オペレータでSOME、ALLまたはANYのクオンティファイアの
+いずれかと使用されるものです。）
+
+スカラとテーブル・サブクエリの違いは微妙です。サブクエリがスカラ・サブクエリと 
+
+して書かれているがそのサブクエリの結果が複数の行を含んでいるときに問題が生じます。
+２つのテーブルに次の行だけがあるとします。
+
+INSERT INTO clients VALUES
+  (10, 'sam','smith','auditor',5525.75);
+
+INSERT INTO firms VALUES
+  (10,'abc co','leduc'),(30,'ghi inc','nisku');
+
+firmsテーブルには２つの行があるので、次のクエリ
+
+SELECT * FROM clients WHERE clno &amp;lt;
+  (SELECT clno FROM firms);
+
+は以下のメッセージを出して正しく動作しません。
+「サブクエリは１つ以上の行を返還する。」
+
+これには２つの解決方法があります。 最初の解はいかなるサブクエリ
+の値を持った外側のクエリ結果と比較するために、クエリをANYで指定される
+テーブル・サブクエリを含むクエリに変更することです。
+
+SELECT * FROM clients WHERE clno &lt; ANY
+  (SELECT clno FROM firms);
+
+この場合、最初のclientとの比較はfalse (10 &lt; 10)です。しかし、
+２番目のclient (10 &lt; 30)に関してはtrueです。ですから、サブクエリの
+結果はclno　10に関してはtrueとなります。ANYに関しての規則は以下の
+ようになります。
+
+ANYは比較オペレータがサブクエリから返還された少なくとも１つの行に対して
+trueであれば、trueを返還。
+
+ANYはサブクエリがゼロ行を返還するか、またはサブクエリによって
+返還された全ての行に対して比較オペレータがfalseであればfalseを返還。
+
+SOMEはANYと同義語でINを使用することはANYを使用するのと同様です。
+
+２番目の解は全てのサブクエリの値を持った外側のクエリと比較するため
+にクエリをALLで指定されたテーブル・サブクエリを含むように
+クエリを変更することです。
+
+SELECT * FROM clients WHERE clno &lt;; ALL
+  (SELECT clno FROM firms);
+
+この場合、最初のclientに関してはfalseですが２番目のclientに関しては
+trueとなります。しかし、今回はサブクエリの結果はfalseでクエリはゼロ
+行を返還します。ALLの規則は：
+
+ALLはサブクエリがゼロ行を返還するかサブクエリで返還された全ての行に関して
+比較オペレーターがtrueを返還すれば、trueを返還。
+
+ALLは比較オペレーターがサブクエリが返還した少なくとも１つの行
+に関してfalseを返還するとfalseを返還。
+
+サブクエリは少なくとも１つの行を返還するのでしょうか？
+
+時に必要な情報はサブクエリからゼロでない行が変換されるかどうか
+ということです。 空のセットに対する[NOT] EXISTS　predeicateテストです。EXISTS
+はサブクエリが少なくとも１つの行を返還すればtrueを返還します。それ以外は
+falseを返還します。NOT EXISTSは正反対で、サブクエリがゼロ行を返還すると
+trueを返還します。それ以外はtrueを返還します。 慣例で[NOT] EXISTSに続く
+サブクエリはSELECTで始まります。その場合、アスタリスク(*)は全ての列
+を示す略記号ではなく、ある列を示します。それぞれのサブクエリから
+返還される結果はそれが所属する外側のクエリの結果と並んで表示されます。
+次に非常に簡単な例を示します。これは全てのclientの値を返還します。
+
+SELECT * FROM clients WHERE EXISTS
+  (SELECT * FROM firms);
+
+この例のWHEREクローズはfirmsテーブルが空でない為にtrueです。しかし、[NOT] 
+EXISTS
+は通常もっと複雑なクエリを形成するために使われます。以下のテーブルがあるとします。
+
+CREATE TABLE passengers (
+   name VARCHAR(15),
+   compartment INT);
+
+INSERT INTO passengers VALUES ('smith',20);
+INSERT INTO passengers VALUES ('jones',25);
+
+CREATE TABLE cars (
+   compartment INT,
+   class VARCHAR(10));
+
+INSERT INTO cars VALUES (20,'first');
+
+ここに良く知られているFORALLの問題があります。
+
+SELECT * FROM cars c1 WHERE NOT EXISTS
+  (SELECT * FROM passengers p1 WHERE NOT EXISTS
+    (SELECT * FROM cars c2
+       WHERE c2.compartment = p1.compartment
+         AND c2.compartment = c1.compartment));
+
+このクエリは全ての乗客が乗っている車両を求めています。結果を理解する
+ためにSmithがcar 20にJonesがcar 25に乗っているが、carsテーブルには
+car 25に対する行がないとします。これが意味することは
+乗客のJonesは存在しない車両に乗っていることになります。(もちろん
+正しくセットされたデータベースでは、こういうことは起こりえません。
+通常、データの完全性を保障するために２つのテーブル間のプライマリー
+とフォーリン鍵を設定します。）この例の２つめNOT EXISTS　サブクエリ
+はJonesに関しては常にtrueです。
+
+更に、car 20に乗っていない乗客のJonesがいます。そのためにこの例の
+NOT EXISTSサブクエリはfalseです。他にチェックする車両がないので、
+クエリの結果は空のセットとなります（ゼロ行）。全ての乗客が乗っている
+車両はありません。
+
+他のサブクエリの使用
+
+1999年のSQLの標準はサブクエリのサポートを求めています。前述の行サブクエリは
+この例です。これがあれば、一度に複数の列を比較できます。
+
+SELECT ROW ('smith', 'auditor') =
+   (SELECT lname, job FROM clients WHERE clno = 10);
+
+この例のサブクエリはsmithとauditorの値を含む行を返還します。この値が
+外側のクエリのROWの値と比較されると、同じとされてクエリは1 (true)を
+返還します。
+
+クエリのFROMクローズにテーブルの名前ではなくてサブクエリを入れることができます。 
+
+(Oracleに詳しい方はこれはinline viewだと分かるでしょう。）
+
+SELECT * FROM
+  (SELECT * FROM clients WHERE job LIKE 'a%') AS cl;
+
+このクエリの結果を入手するために、MySQLサーバーは最初にサブクエリを
+処理して結果のセットにaliasをセットします。この場合はclです。
+それから 外側のSELECTを処理します。実際上記の例は以下のように
+処理されます。
+
+SELECT * FROM cl;
+
+clテーブルがサブクエリで形成された臨時の結果セットとして。
+
+SELECT * FROM clients WHERE job LIKE 'a%';
+
+サブクエリがFROMクローズ内にある場合、AS &lt;alias &gt;の部分は必須です。
+途中の結果テーブルには名前が付けられねばなりません,
+それは外側のクエリから参照されるからです。
+
+サブクエリによるデータ変更
+
+サブクエリはもう１つ違う使い方があります。 サブクエリを使えばデータベース
+内のデータを変更できます。つまり、サブクエリをDELETE、INSERT、UPDATEまたは
+REPLACEステートメントに混ぜることができます。
+例えば
+
+UPDATE clients SET account_balance =
+  (SELECT SUM(amount) FROM accounts where clno=clients.clno);
+
+このUPDATEはそれぞれのclientに関して、account_balanceをaccounts
+テーブルでそのclientの記録されている額の総額に変更します。
+
+１つだけ問題があります。現在サブクエリではテーブルを変更して同じテーブルから
+選択することはできません。
+
+まとめ
+
+サブクエリは4.1版からの新しい機能です。スカラ、行、テーブル　サブクエリ
+をサポートします。
+
+通常の比較オペレータである、&lt;、 &gt;、 &lt;=、 &gt;=などはサブクエリと使用できます。
+[NOT] INと[NOT] EXISTSなどもできます。
+
+テーブル　サブクエリはANY/SOMEやALLの制限を使って比較できます。
+
+サブクエリはデータ変更をするのに使用できます。
+
+MySQLはSQLに対してストラクチャーを追加しました。
+---------------------
+Zen Kishimoto                        zen@xxxxxxxxxx
+IP Devices, Inc.                       (408) 567-9391
+2175 De La Cruz Blvd., Suite 10  (801) 720-8847 (FAX)
+Santa Clara, CA 95050
+
+
+
+</pre>
+</div>
+<p class="button"><a href="10522.html">[前]</a><a href="10524.html">[次]</a><a href="../list/10501-10600.html">[番号順一覧]</a><a href="../thread/10501-10600.html">[スレッド一覧]</a></p>
+</body>
+</html>

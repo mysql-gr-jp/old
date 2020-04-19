@@ -1,0 +1,169 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13673</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13672.html">[前]</a><a href="13674.html">[次]</a><a href="../list/13601-13700.html">[番号順一覧]</a><a href="../thread/13601-13700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13673
+</p>
+<div class="header">
+<p>
+From: &quot;玉越大輝&quot; &lt;&quot;玉越大輝&quot; &lt;hiroki.tamakoshi@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 15 Jan 2007 14:56:40 +0900<br>
+Subject: [mysql 13673] InnoDBの最小テーブルサイズ（Re:  Re:  InnoDBの最大テーブル数）<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、株式会社ビービットの玉越です。
+
+InnoDBのデフォルトのテーブルサイズを少なくする方法はありますでしょうか？
+
+先日、沢山のテーブルを作成することができるかどうか質問させていただきまし
+たが、それは巨大なテーブルを複数のテーブルに分割するためでした。
+
+実際に分割して実験してみたのですが、今度はそれぞれのテーブルのファイルサ
+イズが非常に小さくなったため、デフォルトの10MBではディスクスペースがもっ
+たいなくなったためです。
+
+マニュアルには最小で10MBとあるのですが、これを変えたい場合にはソースを変
+更するしかないのでしょうか？
+<a href="http://dev.mysql.com/doc/refman/4.1/ja/innodb-restrictions.html">http://dev.mysql.com/doc/refman/4.1/ja/innodb-restrictions.html</a>
+
+
+ご存知の方、ご教示いただけますと幸いです。
+
+
+07/01/12 に Hiroki Tamakoshi&lt;hiroki.tamakoshi@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; こんにちは、株式会社ビービットの玉越です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 早速のお返事、ありがとうございます。</span>
+<span class="quote1">&gt; ソースの中身まで見ていただけたのですね、ありがとうございます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; もちろん、テーブルを4,000万個も作りたくはありません。</span>
+<span class="quote1">&gt; 現在実装しているシステムではテーブルを分割せずにデータを蓄積しているので</span>
+<span class="quote1">&gt; すが、1テーブルが極めて巨大になり、性能が低下しつつあるようです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; そのため、性能向上のために分割を検討しており、その数を計算したら4000万と</span>
+<span class="quote1">&gt; いう数字になってしまいました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 分割するにせよ、もっと効率のよい方法があるかもしれないと考え、現在情報を</span>
+<span class="quote1">&gt; 収集しているところです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 今回は調べていただき、本当にありがとうございました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; On Fri, 12 Jan 2007 14:09:45 +0900</span>
+<span class="quote1">&gt; Tetsuro IKEDA &lt;te.ikeda@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; こんにちは。池田＠住商情報システムです。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; innodbのデータディクショナリのソースを読むと、テーブルIDは8バイトで</span>
+<span class="quote2">&gt; &gt; 管理しているようです。</span>
+<span class="quote2">&gt; &gt; (参照：innobase/include/dict0boot.hのDICT_HDR_xxxシリーズ）</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ということで、他の条件を全て無視できるならば、</span>
+<span class="quote2">&gt; &gt; 2^32 = 約40億テーブル、というのがひとつの上限かもしれません。</span>
+<span class="quote2">&gt; &gt; 現実的には他の条件の方が先にひっかかるでしょう。</span>
+<span class="quote2">&gt; &gt; そもそも、PAGE数の上限が40億ページなので。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; しかし4000万個のテーブルって、性能面とかいろいろ心配な気がしますが、、、</span>
+<span class="quote2">&gt; &gt; 上手くいったらコツとか教えてください（＾＾）</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; 株式会社ビービットの玉越です。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; InnoDBで、持てるテーブルの最大数をご存知の方がいらっしゃいましたらご教示</span>
+<span class="quote3">&gt; &gt; &gt; いただけますでしょうか？探した限りでは情報が見つかりませんでした。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; 現在、my.confにinnodb_file_per_tableを記述し、1テーブル＝1ファイルにして</span>
+<span class="quote3">&gt; &gt; &gt; います。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; OSによるファイル数の制限をなしにした場合、1DB内にいくつまでテーブルを作</span>
+<span class="quote3">&gt; &gt; &gt; ることができるでしょうか？</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; 今のところ、4,000万個程度のテーブルを作成しようと考えています。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; ちなみに、実際に実験された方の結果が下記のブログに載っていました。</span>
+<span class="quote3">&gt; &gt; &gt; 262,731個まで作成したところで途中で止まってしまったとのことです。</span>
+<span class="quote3">&gt; &gt; &gt; <a href="http://bobfield.blogspot.com/2006/03/million-tables.html">http://bobfield.blogspot.com/2006/03/million-tables.html</a></span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; この方はWindows Server 2003で、一つのファイルに複数テーブルを作っている</span>
+<span class="quote3">&gt; &gt; &gt; ため、私とは環境が異なります。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; 私の環境は以下の通りです。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; ・OS: Fedora Core</span>
+<span class="quote3">&gt; &gt; &gt; ・ファイルシステム: xfs</span>
+<span class="quote3">&gt; &gt; &gt; ・ulimitはunlimited</span>
+<span class="quote3">&gt; &gt; &gt; ・/proc/sys/fs/file-maxは現在386343です。</span>
+<span class="quote3">&gt; &gt; &gt;   多数のテーブルを作りますが、同時に開くテーブル数は少ないのでこれはその</span>
+<span class="quote3">&gt; &gt; &gt;   ままでもよいと思います。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; よろしくお願い致します。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; --</span>
+<span class="quote3">&gt; &gt; &gt; 株式会社ビービット　玉越 大輝</span>
+<span class="quote3">&gt; &gt; &gt; ユーザビリティ コンサルタント</span>
+<span class="quote3">&gt; &gt; &gt; beBit,Inc. Tamakoshi Hiroki hiroki.tamakoshi@xxxxxxxxxx</span>
+<span class="quote3">&gt; &gt; &gt; --------------------------------------------------------</span>
+<span class="quote3">&gt; &gt; &gt; 〒105-0001 東京都港区虎ノ門1-18-1 虎ノ門10森ビル7F</span>
+<span class="quote3">&gt; &gt; &gt; TEL: 03-3509-7602 / FAX: 03-3509-7605</span>
+<span class="quote3">&gt; &gt; &gt; URL: <a href="http://www.bebit.co.jp/">http://www.bebit.co.jp/</a></span>
+<span class="quote3">&gt; &gt; &gt; --------------------------------------------------------</span>
+<span class="quote3">&gt; &gt; &gt; ◆◆◆お知らせ◆◆◆</span>
+<span class="quote3">&gt; &gt; &gt; ・ビービット新刊書籍 『ユーザ中心ウェブサイト戦略』発売</span>
+<span class="quote3">&gt; &gt; &gt;   <a href="http://www.bebit.co.jp/news/2006/book.html">http://www.bebit.co.jp/news/2006/book.html</a></span>
+<span class="quote3">&gt; &gt; &gt;   <a href="http://www.amazon.co.jp/gp/product/4797333529/">http://www.amazon.co.jp/gp/product/4797333529/</a></span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; -----------------------------------------</span>
+<span class="quote2">&gt; &gt; Tetsuro IKEDA, te.ikeda at jpta.scs.co.jp</span>
+<span class="quote2">&gt; &gt; Kachidoki, Tokyo, Jpan</span>
+<span class="quote2">&gt; &gt; <a href="http://www.scs.co.jp/mysql/">http://www.scs.co.jp/mysql/</a></span>
+<span class="quote2">&gt; &gt; -----------------------------------------</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; 株式会社ビービット　玉越 大輝</span>
+<span class="quote1">&gt; ユーザビリティ コンサルタント</span>
+<span class="quote1">&gt; beBit,Inc. Tamakoshi Hiroki hiroki.tamakoshi@xxxxxxxxxx</span>
+<span class="quote1">&gt; --------------------------------------------------------</span>
+<span class="quote1">&gt; 〒105-0001 東京都港区虎ノ門1-18-1 虎ノ門10森ビル7F</span>
+<span class="quote1">&gt; TEL: 03-3509-7602 / FAX: 03-3509-7605</span>
+<span class="quote1">&gt; URL: <a href="http://www.bebit.co.jp/">http://www.bebit.co.jp/</a></span>
+<span class="quote1">&gt; --------------------------------------------------------</span>
+<span class="quote1">&gt; ◆◆◆お知らせ◆◆◆</span>
+<span class="quote1">&gt; ・ビービット新刊書籍 『ユーザ中心ウェブサイト戦略』発売</span>
+<span class="quote1">&gt;   <a href="http://www.bebit.co.jp/news/2006/book.html">http://www.bebit.co.jp/news/2006/book.html</a></span>
+<span class="quote1">&gt;   <a href="http://www.amazon.co.jp/gp/product/4797333529/">http://www.amazon.co.jp/gp/product/4797333529/</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+-- 
+株式会社ビービット　玉越 大輝
+ユーザビリティ コンサルタント
+beBit,Inc. Tamakoshi Hiroki hiroki.tamakoshi@xxxxxxxxxx
+--------------------------------------------------------
+〒105-0001 東京都港区虎ノ門1-18-1 虎ノ門10森ビル7F
+TEL: 03-3509-7602 / FAX: 03-3509-7605
+URL: <a href="http://www.bebit.co.jp/">http://www.bebit.co.jp/</a>
+--------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="13672.html">[前]</a><a href="13674.html">[次]</a><a href="../list/13601-13700.html">[番号順一覧]</a><a href="../thread/13601-13700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="13673.html">  13673 2007-01-15 14:56 [&quot;玉越大輝&quot; &lt;hiroki.t] InnoDBの最小テーブルサイズ（Re:  Re:  InnoDBの最大テーブル数）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13674.html">  13674 2007-01-15 15:54 ┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13675.html">  13675 2007-01-15 16:05 　┗[&quot;玉越大輝&quot; &lt;hiroki.t]                                     </a></span>
+</pre>
+</body>
+</html>

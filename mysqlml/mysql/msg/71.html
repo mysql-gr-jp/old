@@ -1,0 +1,136 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:71</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="70.html">[前]</a><a href="72.html">[次]</a><a href="../list/1-100.html">[番号順一覧]</a><a href="../thread/1-100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:71
+</p>
+<div class="header">
+<p>
+From: Isamu Seko &lt;Isamu Seko &lt;isamu@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 05 Mar 1998 04:08:38 +0900<br>
+Subject: [mysql 71] create sql<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+#!/bin/sh
+# Copyright (C) 1997  TCX DataKonsult AB &amp; Monty Program KB &amp; Detron HB
+# For a more info consult the file COPYRIGHT distributed with this file
+
+# This scripts creates the privilige tables db, host, user in mysql
+# It should be run from the top level installation directory
+
+if test -f /var/db/mysql/mysql/db.ISM
+then
+  echo &quot;mysql privilege databases already installed. If you want to recreate all&quot;
+  echo &quot;privilige tables, execute 'rm -i /var/db/mysql/mysql/*.IS?'&quot;
+  echo &quot;and run this script again&quot;
+  exit 1
+fi
+if test ! -x /usr/local/bin/mysqladmin
+then
+  echo &quot;Can't execute /usr/local/bin/mysqladmin&quot;
+  if test &quot;/var/db/mysql&quot; = &quot;./data&quot;
+  then
+    echo &quot;You should be in the distribution directory when executing this script&quot;
+  else
+    echo &quot;You should do a 'make install' before executing this script&quot;
+  fi
+  exit 1
+fi
+if test ! -d &quot;./data&quot;
+then
+  echo &quot;You should be in the distribution directory when executing this script&quot;
+  exit 1
+fi
+
+# On IRIX hostname is in /usr/bsd so add this to the path
+PATH=$PATH:/usr/bsd
+
+hostname=`hostname`		# Install this too in the user table
+
+# create database mysql &amp; test
+#
+mkdir /var/db/mysql
+mkdir /var/db/mysql/mysql
+mkdir /var/db/mysql/test
+
+/usr/local/bin/mysqladmin ver &gt; /dev/null 2&gt;&amp;1
+if test $? -eq 0
+then
+  echo &quot;mysql demon is running. Stop it and try again&quot;
+  exit 1;
+else 
+  echo &quot;Starting mysql server&quot;
+  /usr/local/bin/safe_mysqld -Sg -l &amp;
+  while true
+  do
+    sleep 1			# This should be enough
+    /usr/local/bin/mysqladmin ver &gt; /dev/null 2&gt;&amp;1
+    if test $? -eq 0 ; then break; fi
+    sleep 5;			# This must be enough
+    /usr/local/bin/mysqladmin ver &gt; /dev/null 2&gt;&amp;1
+    if test $? -eq 0 ; then break; fi
+    echo &quot;mysql demon is not responding. Please try to start it manually with -Sg&quot;
+    exit 1;
+  done
+fi
+
+# copy the definition files
+#
+if test &quot;/var/db/mysql&quot; != &quot;./data&quot;
+then
+  cp -p ./data/mysql/*.frm /var/db/mysql/mysql
+fi
+
+/usr/local/bin/mysql mysql &lt;&lt;END_OF_DATA
+# Create tables from the .frm files
+#
+delete from db ;
+delete from host;
+delete from user; 
+
+#
+# Dumping data for table 'db'
+#
+
+INSERT INTO db VALUES ('%','test','','Y','Y','Y','Y','Y','Y');
+INSERT INTO db VALUES ('%','test\_%','','Y','Y','Y','Y','Y','Y');
+
+#
+# Dumping data for table 'host'
+#
+
+INSERT INTO host VALUES ('localhost','%','Y','Y','Y','Y','Y','Y');
+INSERT INTO host VALUES ('$hostname','%','Y','Y','Y','Y','Y','Y');
+
+#
+# Dumping data for table 'user'
+#
+
+INSERT INTO user VALUES ('localhost','root','','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y');
+INSERT INTO user VALUES ('localhost','','','N','N','N','N','N','N','N','N','N','N');
+INSERT INTO user VALUES ('$hostname','root','','Y','Y','Y','Y','Y','Y','Y','Y','Y','Y');
+INSERT INTO user VALUES ('$hostname','','','N','N','N','N','N','N','N','N','N','N');
+END_OF_DATA
+
+/usr/local/bin/mysqladmin reload
+echo &quot;mysqld demon is running and mysql grant tables are installed&quot;
+
+
+</pre>
+</div>
+<p class="button"><a href="70.html">[前]</a><a href="72.html">[次]</a><a href="../list/1-100.html">[番号順一覧]</a><a href="../thread/1-100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="71.html">     71 1998-03-05 04:08 [Isamu Seko &lt;isamu@xx] create sql                              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="72.html">     72 1998-03-05 09:02 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="74.html">     74 1998-03-05 09:38 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9547</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9546.html">[前]</a><a href="9548.html">[次]</a><a href="../list/9501-9600.html">[番号順一覧]</a><a href="../thread/9501-9600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9547
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Mon, 07 Jun 2004 19:25:07 +0900<br>
+Subject: [mysql 09547] Re: MySQL 4.1.2 の日本語の扱い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+村上です。
+
+今のままで beta 以上のリリースになったら面倒が起きそうなので、
+この件は、いろいろな意見をフィードバックしたいと思っています。
+
+
+At Fri, 4 Jun 2004 01:51:52 +0900,
+とみたまさひろ wrote:
+
+<span class="quote1">&gt; さて、この変換機能は便利なのでしょうか。それとも、余計なお世話的で不便</span>
+<span class="quote1">&gt; なのでしょうか。</span>
+
+
+
+とみたさんのテストを私なりに追試し、整理してみました。
+
+
+■0. とみたさんのテスト
+
+mysqld サーバーの default-character-set は、Version 4.1.2 の場合、
+
+CREATE TABLE ..... DEFAULT CHARSET=
+
+に反映されるので、これは、テーブルのキャラクタセットと見ることができるとすると、
+考える変数は、
+
+  テーブルのキャラクタセット                    latin1 / ujis
+  mysql のキャラクタセット                      latin1 / ujis
+
+  MYD ファイル内の文字コード
+
+
+【結果】
+
+       [扱う文字が ujis の時]
+TABLE の charset     | latin1   ujis
+---------------------------------------
+mysql(latin1) INSERT |  B        Y
+mysql(latin1) SELECT |  B        Z
+mysql(ujis)   INSERT |  X        A
+mysql(ujis)   SELECT |  B        A
+
+「mysql(latin1) INSERT」 は、mysql クライアントを latin1 で動かして、ujis 文字を INSERT するという意味
+
+ 結果のアルファベットの意味は:
+ A --- OK
+ B --- OK。ただし、ORDER が狂うことがある。
+ X --- 文字破壊。  '?' になる
+ Y --- 文字破壊。
+       ujis 文字を latin1 としてみたてて、それを ujis 変換した値にする
+ Z --- 文字破壊。
+       MYD ファイルに ujis で記録されている文字は壊れて返る。(?になるか壊れるか)
+       Y の状況で INSERT した文字は正しく返ることがあるので、一見 正常のように勘違いする。
+
+
+
+なお、
+MySQL 4.1.2 を ./configure --with-charset=ujis でコンパイルしても、
+mysql コマンドは ./configure --with-charset=latin1 でコンパイルされた物と
+同じ動きをした。
+mysql コマンドに常に --default-character-set=ujis が必要になる。
+
+
+
+
+■1. mysqldump の問題
+
+●1-1. mysqldump クライアント(./configure --with-charset=ujisでコンパイル) を
+オプション無しで実行した結果
+
+% mysqldump --skip-opt -t test | grep INSERT
+INSERT INTO `t4` VALUES (もじばけ , もじばけ);
+
+# 文字化けの部分は UTF になっている
+
+% mysqldump --skip-opt -t test | grep INSERT | lv -Iu8 -Oej
+INSERT INTO `t4` VALUES ('あいうえお', 'あいうえお');
+
+
+●1-2. mysqldump クライアント(./configure --with-charset=ujisでコンパイル) を、
+--default-character-set=ujis オプションを使用して実行
+
+% mysqldump --default-character-set=ujis --skip-opt -t test | grep INSERT
+INSERT INTO `t4` VALUES ('あいうえお', 'あいうえお');
+
+
+
+
+
+■2. 他のクライアントも問題
+PHP, Ruby など、limmysqlclient14 をリンクし直すと、
+mysql コマンドのような、日本語文字が?になる現象が起きる。
+
+Ruby は mysql_option() 関数をコールしているので、
+my.cnf ファイルに default-characer-set オプションを指定できる
+
+PHP は、mysql_option() 関数をコールしていないので、
+default-character-set オプションが使えない。
+# PHP の mysql モジュールのソースを変更すれば OK
+
+
+
+■3. どうすべき/どうあるべきか？
+a. 自動変換はいるのか要らないのか
+b. デフォルトで自動変換を ON にすべきか否か
+c. mysql, myswldump 等のデフォルトの振る舞いをどうすべきか
+
+
+自動変換をスキップするオプションを追加するか、
+デフォルトでは自動変換をしない仕様にして、変換したいときにオプションを追加するようにするか、
+自動変換そのものを削除するか、
+./configure 時のデフォルトに、クライアントも従うようにさせるか、
+
+他ありますか?
+
+以上、宜しくお願い致します
+================
+村上毅 takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="9546.html">[前]</a><a href="9548.html">[次]</a><a href="../list/9501-9600.html">[番号順一覧]</a><a href="../thread/9501-9600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9530.html">   9530 2004-06-03 23:28 [とみたまさひろ &lt;tomm] MySQL 4.1.2 の日本語の扱い              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9531.html">   9531 2004-06-04 01:51 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9533.html">   9533 2004-06-04 08:26 　┣[SUGAWARA Hajime &lt;sug]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="9547.html">   9547 2004-06-07 19:25 　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9550.html">   9550 2004-06-07 21:09 　　┣[&quot;Ryuichiro Munechika]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9556.html">   9556 2004-06-07 22:02 　　┃┗[SUGAWARA Hajime &lt;sug]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9573.html">   9573 2004-06-08 11:51 　　┃　┗[Hirofumi Fujiwara &lt;f]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9586.html">   9586 2004-06-10 02:48 　　┃　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9628.html">   9628 2004-06-13 21:50 　　┃　　　┗[Hirofumi Fujiwara &lt;f]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9578.html">   9578 2004-06-09 08:05 　　┣[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9580.html">   9580 2004-06-09 09:39 　　┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9592.html">   9592 2004-06-11 05:04 　　┗[&lt;shuichi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9596.html">   9596 2004-06-11 11:00 　　　┣[&lt;shuichi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9598.html">   9598 2004-06-12 00:16 　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9611.html">   9611 2004-06-12 21:55 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9687.html">   9687 2004-06-18 09:40 　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9699.html">   9699 2004-06-23 09:41 　　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9728.html">   9728 2004-07-01 11:18 　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9756.html">   9756 2004-07-02 21:14 　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9808.html">   9808 2004-07-10 16:55 　　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9839.html">   9839 2004-07-13 14:26 　　　　　　　　　┗[Shuichi Tamagawa &lt;sh]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9842.html">   9842 2004-07-13 15:12 　　　　　　　　　　┣[Hirofumi Fujiwara &lt;f]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9848.html">   9848 2004-07-14 09:35 　　　　　　　　　　┃┗[&lt;shuichi@xxxxxxxxxx&gt;]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9850.html">   9850 2004-07-14 09:56 　　　　　　　　　　┃　┗[&lt;takeshi@xxxxxxxxxx&gt;]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9852.html">   9852 2004-07-14 12:25 　　　　　　　　　　┃　　┗[Hirofumi Fujiwara &lt;f]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9854.html">   9854 2004-07-14 13:39 　　　　　　　　　　┃　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9858.html">   9858 2004-07-14 15:31 　　　　　　　　　　┃　　　┃┗[Hirofumi Fujiwara &lt;f]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9860.html">   9860 2004-07-14 16:35 　　　　　　　　　　┃　　　┃　┣[&lt;takeshi@xxxxxxxxxx&gt;]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9867.html">   9867 2004-07-16 02:16 　　　　　　　　　　┃　　　┃　┗[Shuichi Tamagawa &lt;sh]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9863.html">   9863 2004-07-15 11:34 　　　　　　　　　　┃　　　┗[&lt;shuichi@xxxxxxxxxx&gt;]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9847.html">   9847 2004-07-14 08:52 　　　　　　　　　　┗[&lt;shuichi@xxxxxxxxxx&gt;]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9849.html">   9849 2004-07-14 09:39 　　　　　　　　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                 </a></span>
+</pre>
+</body>
+</html>

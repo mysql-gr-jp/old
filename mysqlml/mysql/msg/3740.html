@@ -1,0 +1,72 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3740</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="3739.html">[前]</a><a href="3741.html">[次]</a><a href="../list/3701-3800.html">[番号順一覧]</a><a href="../thread/3701-3800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3740
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Sun, 10 Jun 2001 07:49:25 +0900<br>
+Subject: [mysql 03740] Re: mysqlhotcopy でバックアップ中に select ができないんですが ...<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Sat, 9 Jun 2001 02:24:46 +0900,
+とみたまさひろ wrote:
+
+<span class="quote1">&gt; On Thu, 07 Jun 2001 22:20:32 +0900</span>
+<span class="quote1">&gt; Shuhei Tomita &lt;shuhei.tomita@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; mysqlhotcopyのスクリプト中で、</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 1. LOCK TABLES テーブル名 READ</span>
+<span class="quote2">&gt; &gt; 2. FLUSH TABLES</span>
+<span class="quote2">&gt; &gt; 3. cp 元のデータ 行き先のディレクトリ</span>
+<span class="quote2">&gt; &gt; 4. UNLOCK TABLES</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; とやっており、2の処理のあと、他のクライアントからは、</span>
+<span class="quote2">&gt; &gt; SELECTもできなくなります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; あ、ほんとだ…。なんか止まっちまいますね。</span>
+
+以下のパッチでいかがでしょう
+
+===== sql/sql_base.cc 1.79 vs edited =====
+*** /tmp/sql_base.cc-1.79-7972	Tue May 29 16:29:02 2001
+--- edited/sql/sql_base.cc	Sat Jun  9 21:31:43 2001
+***************
+*** 389,394 ****
+--- 389,397 ----
+      thd-&gt;in_lock_tables=1;
+      result=reopen_tables(thd,1,1);
+      thd-&gt;in_lock_tables=0;
++     /* Set version for table */
++     for (TABLE *table=thd-&gt;open_tables; table ; table=table-&gt;next)
++       table-&gt;version=refresh_version;
+    }
+    VOID(pthread_mutex_unlock(&amp;LOCK_open));
+    if (if_wait_for_refresh)
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+ Soft Agency Co., Ltd. TEL +81-48-661-1527
+ PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
+
+</pre>
+</div>
+<p class="button"><a href="3739.html">[前]</a><a href="3741.html">[次]</a><a href="../list/3701-3800.html">[番号順一覧]</a><a href="../thread/3701-3800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3732.html">   3732 2001-06-07 22:20 [Shuhei Tomita &lt;shuhe] mysqlhotcopy でバックアップ中に select ができないんですが ...</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3739.html">   3739 2001-06-09 02:24 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="3740.html">   3740 2001-06-10 07:49 　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                     </a></span>
+</pre>
+</body>
+</html>

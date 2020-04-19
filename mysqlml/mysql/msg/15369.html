@@ -1,0 +1,144 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15369</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15368.html">[前]</a><a href="15370.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15369
+</p>
+<div class="header">
+<p>
+From: SAKAI Kei &lt;SAKAI Kei &lt;sak2@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 17 Aug 2010 15:17:25 +0900<br>
+Subject: [mysql 15369] Re: 上手なお引っ越し<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+坂井です
+
+<span class="quote1">&gt; 動作中でもレプリケーション発動（！）出来るんですか？</span>
+<span class="quote1">&gt; 一回止めるのかな？</span>
+
+  なるべく停めない工夫はできると思いますが、
+  私なら（ダンプを取るかファイルコピーする時間停めることを
+  許されるなら）、停めて実施することを第一案にします。
+  今回の前提が MyISAM を含んでいるということで、
+  mysqldump の --single-transaction は効かないでしょうから(未確認)、
+  いずれにせよ全体へのロックは必要かと思います。
+  
+<span class="quote1">&gt; このタイミングがアレですね。</span>
+<span class="quote1">&gt; 更新しようとしてマスタが止まって・・・orz</span>
+  
+  浅野さんご指摘の通り、両Webサーバから新DBに接続すれば、
+  DNS切り替えに伴う停止時間を最小限にできそうですね。
+  
+  
+<span class="quote1">&gt; ただ、レプリケーション大変ですし、スレーブをマスタ化する</span>
+
+  そんなことないですよ。MySQL徹底入門2版にはレプリケーション
+  載ってないので(笑)、非入門者的と捉えられているかもしれませ
+  んが、
+    (1)マスタと同じデータを用意して（そのpositionも記録しておいて）
+    (2)スレーブからマスタへ接続できるようにして
+    (3)覚えておいたpositionからレプリケーション開始の指示を出す
+  こんだけです。
+  マスタ化と行っても、
+    ・今までマスタからデータもらっていたのをやめて
+    ・アプリからの更新やリクエストが直接自分のところに来るようになる
+  というだけですから（ちょっと端折ってます）。
+  
+  
+thank you
+On Tue, 17 Aug 2010 12:26:12 +0900
+遠藤 俊裕 &lt;endo@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; 坂井さん：</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 課程が無いと、いざというとき（笑）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Tue, 17 Aug 2010 12:05:39 +0900 に、</span>
+<span class="quote1">&gt; SAKAI Kei &lt;sak2@xxxxxxxxxx&gt; さんは書きました:</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; （１）引っ越し先ＤＢをスレーブとしたレプリケーションを構成</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 動作中でもレプリケーション発動（！）出来るんですか？</span>
+<span class="quote1">&gt; 一回止めるのかな？</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; （３）旧サーバ停止。新サーバレプリケーション終了してマスタ化。DNS切替。</span>
+<span class="quote2">&gt; &gt;       DNS切り替えのタイムラグ等で旧サーバに来た人のために、説明の文書</span>
+<span class="quote2">&gt; &gt;       掲示がよさげ。（ここで旧サーバも稼働継続していて、そちらで更新</span>
+<span class="quote2">&gt; &gt;       されちゃうのは最悪）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; このタイミングがアレですね。</span>
+<span class="quote1">&gt; 更新しようとしてマスタが止まって・・・orz</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; でも、私も坂井さんみたいな方法考えてました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ただ、レプリケーション大変ですし、スレーブをマスタ化する</span>
+<span class="quote1">&gt; 手間も大変そうです。第一、DNS 切り替え時点ではどこ向いて</span>
+<span class="quote1">&gt; るか解らんし（笑）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; お互いマスタ、なんてレプリケーション出来ないのかな？（笑）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 実際、みんな、どうやってるんだろう？？？？</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; thank you</span>
+<span class="quote2">&gt; &gt; On Tue, 17 Aug 2010 11:44:55 +0900</span>
+<span class="quote2">&gt; &gt; 遠藤 俊裕 &lt;endo@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote3">&gt; &gt; &gt; 遠藤と申します。</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; 皆様にご質問です。</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; とあるＤＢ（MySQL）を管理していたとします。</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; ＨＤＤの容量や、ＣＰＵの性能アップなどの問題で、お引っ越</span>
+<span class="quote3">&gt; &gt; &gt; しを余儀なくされたとします。</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; 皆さんなら、どうしますか？</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; もちろん、そのＤＢは稼働中で、おいそれと止めることは出来</span>
+<span class="quote3">&gt; &gt; &gt; ません。</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; ＤＢのタイプも MyISAM もあれば、InnoDB もあります。</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; ご意見頂ければ幸いです。</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; --</span>
+<span class="quote3">&gt; &gt; &gt; えんどう</span>
+<span class="quote3">&gt; &gt; &gt; endo@xxxxxxxxxx,endo@xxxxxxxxxx</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; -- </span>
+<span class="quote2">&gt; &gt; SAKAI Kei &lt;sak2@xxxxxxxxxx&gt;</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; えんどう</span>
+<span class="quote1">&gt; endo@xxxxxxxxxx,endo@xxxxxxxxxx</span>
+<span class="quote1">&gt; </span>
+
+-- 
+SAKAI Kei &lt;sak2@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="15368.html">[前]</a><a href="15370.html">[次]</a><a href="../list/15301-15400.html">[番号順一覧]</a><a href="../thread/15301-15400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15364.html">  15364 2010-08-17 11:44 [遠藤 俊裕 &lt;endo@xxxx] 上手なお引っ越し                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15365.html">  15365 2010-08-17 12:05 ┣[SAKAI Kei &lt;sak2@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15366.html">  15366 2010-08-17 12:26 ┃┗[遠藤 俊裕 &lt;endo@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15367.html">  15367 2010-08-17 12:39 ┃　┣[Masahiko Asano &lt;asan]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15371.html">  15371 2010-08-17 16:05 ┃　┃┗[遠藤 俊裕 &lt;endo@xxxx]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="15369.html">  15369 2010-08-17 15:17 ┃　┗[SAKAI Kei &lt;sak2@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15372.html">  15372 2010-08-17 16:05 ┃　　┗[遠藤 俊裕 &lt;endo@xxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15368.html">  15368 2010-08-17 13:51 ┗[Ryuichiro Munechika ] Re: [mysql 15364] 上手なお引っ越し    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15370.html">  15370 2010-08-17 16:05 　┗[遠藤 俊裕 &lt;endo@xxxx] Re: 上手なお引っ越し                </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15754</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15753.html">[前]</a><a href="15755.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15754
+</p>
+<div class="header">
+<p>
+From: ram &lt;ram &lt;ram@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 23 Apr 2012 19:53:20 +0900<br>
+Subject: [mysql 15754] Re: 行列変換を行う処理を高速化するには？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+後藤様
+コメント有難うございました。
+
+年月を分割して、別の列にする方法は
+以下のように一時テーブルを使う方法と、テスト環境を作って、
+テーブルの最後に列を追加して試してみましたが、
+処理時間はほとんど変わりませんでした。
+
+SELECT x.nm,
+sum(case when x.dd = '01' then 1 else 0 end) as 'h101',
+sum(case when x.dd = '02' then 1 else 0 end) as 'h102',
+（中略）
+sum(case when x.dd = '31' then 1 else 0 end) as 'h131'
+FROM (SELECT nm,Mid(CAST(npdt AS CHAR),7,2) as dd
+FROM nippo
+WHERE sycd = #ck_sycd# and npdate&gt;= #from_ymd# and npdate&lt;  #to_ymd# ) as x
+GROUP BY x.nm ORDER BY x.nm
+
+しかし、WHERE条件を簡略化するのと、インデックスを貼り直すのは行っており
+ませんでした
+ので、再度試してみました。
+
+ALTER TABLE nippo ADD yymm char(4);
+ALTER TABLE nippo ADD dd char(2);
+UPDATE nippo SET yymm = Mid(CAST(npdt AS CHAR),1,6);
+UPDATE nippo SET dd = Mid(CAST(npdt AS CHAR),7,2);
+CREATE INDEX idx1 ON nippo(sycd,yymm,nm);
+
+SELECT nm,
+sum(case when dd = '01' then 1 else 0 end) as 'h101',
+sum(case when dd = '02' then 1 else 0 end) as 'h102',
+（中略）
+sum(case when dd = '31' then 1 else 0 end) as 'h131'
+FROM nippo
+WHERE sycd = #ck_sycd# and yymm = #yymm#
+GROUP BY nm ORDER BY nm;
+
+というような感じです。件数を絞ったテスト環境で試してみましたが、
+実行結果はほとんど変わりません。
+若干ですが、遅くなったような数値が出ます。
+
+アドバイス感謝致します。
+--------------------------------------
+初穂　太郎
+
+(2012/04/23 14:17), gotou1213@xxxxxxxxxx wrote:
+<span class="quote1">&gt; 後藤と申します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; 件数が多くなると、検索時間が掛かるようになってきたため、</span>
+<span class="quote2">&gt;&gt; 日付のうち、日(1-31)を表す部分を別の列(npdt_d)にして</span>
+<span class="quote1">&gt; テーブル定義の変更が許されるのであれば npdt を、年・月・日に分割し、</span>
+<span class="quote1">&gt; （例えば npdt_y, npdt_m, npdt_d）、以下のようなインデックスを作成し、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;   CREATE INDEX idx2 on nippo ( sycd, npdt_y, npdt_m, nm );</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 以下のように検索することで改善されないでしょうか？</span>
+<span class="quote1">&gt; （月指定での集計しか出来ませんが）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;   SELECT nm,</span>
+<span class="quote1">&gt;     sum(case when npdt_d=01 then 1 else 0 end) as 'h101',</span>
+<span class="quote1">&gt;     sum(case when npdt_d=02 then 1 else 0 end) as 'h102',</span>
+<span class="quote1">&gt;      :</span>
+<span class="quote1">&gt;     sum(case when npdt_d=30 then 1 else 0 end) as 'h130',</span>
+<span class="quote1">&gt;     sum(case when npdt_d=31 then 1 else 0 end) as 'h131'</span>
+<span class="quote1">&gt;   FROM nippo</span>
+<span class="quote1">&gt;   WHERE sycd = #sycd# AND npdt_y = #npdt_y# AND npdt_m = #npdt_m#</span>
+<span class="quote1">&gt;   GROUP BY nm</span>
+<span class="quote1">&gt;   ORDER BY nm</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; npdt_y と npdt_m を別列にすることで、検索方法が range では無く ref になるようにして、</span>
+<span class="quote1">&gt; GROUP BY や ORDER BY をソートでは無くINDEX順の走査だけにする、というイメージです。</span>
+<span class="quote1">&gt; なので、年月日に分割しなくても、npdt_ym のように年月の列だけ設けて</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;     CREATE INDEX idx2 on nippo ( sycd, npdt_ym, nm );</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; でも大体同じです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="15753.html">[前]</a><a href="15755.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15742.html">  15742 2012-04-20 09:36 [ram &lt;ram@xxxxxxxxxx&gt;] 行列変換を行う処理を高速化するには？    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15743.html">  15743 2012-04-20 11:12 ┣[中川 貴 &lt;takashi.nak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15744.html">  15744 2012-04-20 13:58 ┃┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15745.html">  15745 2012-04-20 15:24 ┃　┗[中川 貴 &lt;takashi.nak]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15747.html">  15747 2012-04-20 17:58 ┃　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15748.html">  15748 2012-04-20 22:05 ┃　　　┣[Tsubasa Tanaka &lt;yoku]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15749.html">  15749 2012-04-21 01:06 ┃　　　┃┗[Tsubasa Tanaka &lt;yoku]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15750.html">  15750 2012-04-21 02:05 ┃　　　┃　┗[Tsubasa Tanaka &lt;yoku]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15753.html">  15753 2012-04-23 15:39 ┃　　　┃　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15756.html">  15756 2012-04-25 14:54 ┃　　　┗[中川 貴 &lt;takashi.nak]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15758.html">  15758 2012-04-25 16:34 ┃　　　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15759.html">  15759 2012-04-25 17:09 ┃　　　　　┗[中川 貴 &lt;takashi.nak]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15760.html">  15760 2012-04-25 17:18 ┃　　　　　　┗[Tomohiro 'Tomo-p' KA]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15761.html">  15761 2012-04-25 18:25 ┃　　　　　　　┗[中川 貴 &lt;takashi.nak]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15762.html">  15762 2012-04-25 19:05 ┃　　　　　　　　┗[Tomohiro 'Tomo-p' KA]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15752.html">  15752 2012-04-23 14:17 ┗[&lt;gotou1213@xxxxxxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="15754.html">  15754 2012-04-23 19:53 　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15755.html">  15755 2012-04-24 13:50 　　┗[&lt;gotou1213@xxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15757.html">  15757 2012-04-25 15:39 　　　┗[ram &lt;ram@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15765.html">  15765 2012-04-26 14:12 　　　　┗[&lt;gotou1213@xxxxxxxxx]                               </a></span>
+</pre>
+</body>
+</html>

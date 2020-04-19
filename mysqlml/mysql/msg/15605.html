@@ -1,0 +1,136 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15605</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15604.html">[前]</a><a href="15606.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15605
+</p>
+<div class="header">
+<p>
+From: 野副　勝己 &lt;野副　勝己 &lt;nozoe@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 2 Aug 2011 13:26:57 +0900<br>
+Subject: [mysql 15605] Indexをつけるとと、update のwhere 句マッチしない [Ver.4.1.23]<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+初めてメールします、野副と申します。
+
+数年前に作成されたシステムのおもりを引き継ぎ、パフォーマンスが
+出ないと言うことでちょっと調べた所、where 句で使われるカラムにindex が付
+い
+ていないという事でインデックス をつける事により、select の検索は格段に早
+く
+なり安堵していたのですが、update でレコードがマッチしないという状況に出
+くわし
+困惑しています。
+
+使っているバージョンが古いので、バージョンアップするのが一番の近道
+だとは思うのですが、現バージョンで何とか回避する方法は無いかと思い、
+メールさせて頂きました。
+
+使っている環境としては、
+
+	OS: Redhat ES4.5
+	MySQL: Ver. 4.1.23
+
+上記環境で、
+
+次の様なテーブルのmac_id_no というカラムにインデックスを付けない場合
+正常にレコードの更新は出来るのですが、インデックスを付けた場合に、
+レコードの更新が出来ないと言う状況に陥っています。
+
+
+mysql&gt; show create table m_mac\G
+*************************** 1. row ***************************
+       Table: m_mac
+Create Table: CREATE TABLE `m_mac` (
+  `sys_mac_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sys_usr_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `sys_asp_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `mac_id_no` varchar(8) NOT NULL DEFAULT '',
+  `mac_name` varchar(60) DEFAULT NULL,
+  `mac_type` varchar(96) DEFAULT NULL,
+  `dvc_type` varchar(16) DEFAULT NULL,
+  `ip_addr` varchar(15) DEFAULT NULL,
+  `last_rcpt_date` datetime DEFAULT NULL,
+  `connect_stat` char(1) NOT NULL DEFAULT '0',
+  `rgst_date` datetime DEFAULT NULL,
+  `updt_date` datetime DEFAULT NULL,
+  `prv_ip_addr` varchar(15) DEFAULT NULL,
+  `mac_addr` varchar(50) DEFAULT NULL,
+  `term_type` int(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`sys_mac_id`,`sys_usr_id`),
+  KEY `m_mac_idx2` (`sys_usr_id`),
+  KEY `m_mac_idx3` (`sys_asp_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15000 DEFAULT CHARSET=utf8
+
+
+
+mysql&gt; update m_mac set ip_addr='3.3.3.3' where mac_id_no = '00012345';
+Query OK, 0 rows affected (0.40 sec)
+Rows matched: 1  Changed: 0  Warnings: 0
+
+mysql&gt; alter table 'm_mac' add index('mac_id_no');
+
+mysql&gt; show create table m_mac\G
+*************************** 1. row ***************************
+       Table: m_mac
+Create Table: CREATE TABLE `m_mac` (
+  `sys_mac_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sys_usr_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `sys_asp_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `mac_id_no` varchar(8) NOT NULL DEFAULT '',
+  `mac_name` varchar(60) DEFAULT NULL,
+  `mac_type` varchar(96) DEFAULT NULL,
+  `dvc_type` varchar(16) DEFAULT NULL,
+  `ip_addr` varchar(15) DEFAULT NULL,
+  `last_rcpt_date` datetime DEFAULT NULL,
+  `connect_stat` char(1) NOT NULL DEFAULT '0',
+  `rgst_date` datetime DEFAULT NULL,
+  `updt_date` datetime DEFAULT NULL,
+  `prv_ip_addr` varchar(15) DEFAULT NULL,
+  `mac_addr` varchar(50) DEFAULT NULL,
+  `term_type` int(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`sys_mac_id`,`sys_usr_id`),
+  KEY `m_mac_idx2` (`sys_usr_id`),
+  KEY `m_mac_idx3` (`sys_asp_id`),
+  KEY `mac_id_no` (`mac_id_no`)
+) ENGINE=InnoDB AUTO_INCREMENT=15000 DEFAULT CHARSET=utf8
+
+
+mysql&gt; update m_mac set ip_addr='3.3.3.3' where mac_id_no = '00012345';
+Query OK, 0 rows affected (0.12 sec)
+Rows matched: 0  Changed: 0  Warnings: 0
+
+mysqlをVer.5 にすれば正常に動作する事は確認済みなのですが、止めると影響
+が
+有るシステムの為、出来るだけ停止する時間を短くインデックスが効果的
+に働く方法が無いか模索しています。
+
+宜しくお願いします。
+
+
+--
+野副　勝己 ＠ CSPフロンティア研究所
+nozoe@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15604.html">[前]</a><a href="15606.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15605.html">  15605 2011-08-02 13:26 [野副　勝己 &lt;nozoe@xx] Indexをつけるとと、update のwhere 句マッチしない [Ver.4.1.23]</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15606.html">  15606 2011-08-02 16:30 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15607.html">  15607 2011-08-02 17:35 　┗[野副　勝己 &lt;nozoe@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15608.html">  15608 2011-08-02 20:30 　　┗[HIRATSUKA Sadao &lt;hir]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15609.html">  15609 2011-08-03 10:46 　　　┗[野副　勝己 &lt;nozoe@xx]                                 </a></span>
+</pre>
+</body>
+</html>

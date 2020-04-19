@@ -1,0 +1,122 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15568</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15567.html">[前]</a><a href="15569.html">[次]</a><a href="../list/15501-15600.html">[番号順一覧]</a><a href="../thread/15501-15600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15568
+</p>
+<div class="header">
+<p>
+From: &quot;Nobuchika.tanaka&quot; &lt;&quot;Nobuchika.tanaka&quot; &lt;tanaka.nobuchika@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 14 Apr 2011 16:29:32 +0900<br>
+Subject: [mysql 15568] Partition pruningについて。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+田中(たなか)と申します。
+
+パーティショニングをしたテーブルから、特定のパーティションにあるデータを
+selectする際、
+特定のパーティション以外のパーティションも選択され困っております。
+特定のパーティションのみ選択され方法をご存知の方がいましたら、
+アドバイスをお願いいたします。
+
+○環境
+　−MySQL:5.5.8
+　−OS:Redhat5.5
+
+○パーティションの設定方法
+　−end_time_date(Date型のカラム)を基準に、1週間毎のデータのパーティショ
+ンを1024個を設定。
+
+PARTITION BY RANGE (to_days(end_time_date)) (
+PARTITION p_2002_8_5 VALUES LESS THAN (to_days('2002_8_12')),
+PARTITION p_2002_8_12 VALUES LESS THAN (to_days('2002_8_19')),
+PARTITION p_2002_8_19 VALUES LESS THAN (to_days('2002_8_26')),
+　#中略
+PARTITION p_2022_2_28 VALUES LESS THAN (to_days('2022_3_7')),
+PARTITION p_2022_3_7 VALUES LESS THAN (to_days('2022_3_14')),
+PARTITION p_maxvalue VALUES LESS THAN maxvalue
+);
+
+○Partition pruning動作確認
+　−2011/03/28から201１/04/03の1週分のデータをselectする際に対象となる
+パーティションを確認
+
+use development;
+
+explain partitions
+
+select
+*
+from
+t1
+where
+end_time_date &gt;= '2011-03-28' and
+end_time_date &lt; '2011-04-03' \G
+
+*************************** 1. row ***************************
+id: 1
+select_type: SIMPLE
+table: t1
+partitions: p_2002_8_5,p_2011_3_28
+type: ALL
+possible_keys: end_time_date_idx
+key: NULL
+key_len: NULL
+ref: NULL
+rows: 266901
+Extra: Using where
+
+※p_2002_8_5という本来検索の対象とならないパーティションが選択されています。
+
+ただし、where句の条件を範囲指定にしない場合、正しくパーティションが選択
+されます。
+
+use development;
+
+explain partitions
+
+select
+*
+from
+t1
+where
+end_time_date = '2011-04-01' \G
+
+*************************** 1. row ***************************
+id: 1
+select_type: SIMPLE
+table: job
+partitions: p_2011_3_28
+type: ref
+possible_keys: end_time_date_idx
+key: end_time_date_idx
+key_len: 3
+ref: const
+rows: 36421
+Extra:
+
+※p_2011_3_28という本来検索の対象となるパーティションのみ選択されます。
+
+以上、よろしくお願いいたします。
+
+田中宣親
+
+</pre>
+</div>
+<p class="button"><a href="15567.html">[前]</a><a href="15569.html">[次]</a><a href="../list/15501-15600.html">[番号順一覧]</a><a href="../thread/15501-15600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15568.html">  15568 2011-04-14 16:29 [&quot;Nobuchika.tanaka&quot; &lt;] Partition pruningについて。             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15569.html">  15569 2011-04-14 16:43 ┗[Mikiya Okuno &lt;mikiya]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15570.html">  15570 2011-04-15 07:58 　┗[&quot;Nobuchika.tanaka&quot; &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15573.html">  15573 2011-04-15 09:47 　　┗[Mikiya Okuno &lt;mikiya]                                   </a></span>
+</pre>
+</body>
+</html>

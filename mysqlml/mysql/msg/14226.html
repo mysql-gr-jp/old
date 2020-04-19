@@ -1,0 +1,100 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14226</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14225.html">[前]</a><a href="14227.html">[次]</a><a href="../list/14201-14300.html">[番号順一覧]</a><a href="../thread/14201-14300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14226
+</p>
+<div class="header">
+<p>
+From: Junichi MORI &lt;Junichi MORI &lt;mori@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 25 Sep 2007 14:39:49 +0900<br>
+Subject: [mysql 14226] レコード件数を条件にしたSQL<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、森と申します。
+
+MySQL 5.0.27を使用しています。
+以下のケースについて、SQLの組み立てに難航して
+おりまして、ご相談させて頂きます。
+
+[Table A]
+NAME, ID, NUM
+-------------
+A      1   2
+B      7   3
+C     12   1
+
+[Table B]
+ID, ...(他にもカラムがあります)
+1
+3
+6
+7
+8
+12
+
+上記２つのテーブルを結合する必要があるのですが。
+その条件は、
+Table1の各レコードに、
+Table2の同じIDから昇順にNUM件のレコードを結合する
+というものになります。
+
+さらにデータの条件として、以下が有ります。
+* ID値は不連続
+* Table Aに紐付くBのIDは重複するケース有り
+* テーブルA,Bのレコード件数はそれぞれ約1千万件
+
+上記条件より以下のテーブルが作成されます。
+
+A.NAME, A.ID, A.NUM, B.ID, ...
+-------------------------------
+A         1      2     1
+A         1      2     3
+B         7      3     7
+B         7      3     8
+B         7      3     12
+C        12      1     12
+
+そこで、以下のようなSQLを作ってみたのですが、
+(LIMITは直値しか使えない?サブクエリで使えない?)
+制限が有るようで。行き詰ってしまいました。
+
+SELECT 	A.*, B.* 
+FROM A, B
+WHERE B.ID IN (
+    SELECT ID
+    FROM B AS 'B2'
+    WHERE B2&gt;=A.ID
+    ORDER BY B2.ID
+    LIMIT A.NUM
+);
+
+今回のケースではどのようなSQL文で実現出来る
+でしょうか？それともSQLではあきらめた方が
+よいのでしょうか？
+
+なお、このようなテーブル仕様となっているのは。
+元は非RDBのデータをRDBに移行するという事情に
+よるもので。カスタマイズ出来るとしても、
+各テーブル内で(ほぼ)完結した変更のみとなって
+おります。
+
+どなたか分かる方がいらっしゃいましたら
+ご教示の程お願い致します。
+
+以上、よろしくお願い致します。
+
+
+</pre>
+</div>
+<p class="button"><a href="14225.html">[前]</a><a href="14227.html">[次]</a><a href="../list/14201-14300.html">[番号順一覧]</a><a href="../thread/14201-14300.html">[スレッド一覧]</a></p>
+</body>
+</html>

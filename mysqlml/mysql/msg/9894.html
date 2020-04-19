@@ -1,0 +1,203 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9894</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9893.html">[前]</a><a href="9895.html">[次]</a><a href="../list/9801-9900.html">[番号順一覧]</a><a href="../thread/9801-9900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9894
+</p>
+<div class="header">
+<p>
+From: Hirofumi Fujiwara &lt;Hirofumi Fujiwara &lt;fuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 22 Jul 2004 14:01:17 +0900 (JST)<br>
+Subject: [mysql 09894] Re: 4.1.3のujis<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+藤原です。
+
+<span class="quote1">&gt; はじめまして、Tatsuと申します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 4.1.1で運用していたものを4.1.3に移行したら</span>
+<span class="quote1">&gt; 特殊文字、（株）がINSERTできなくなりました。</span>
+<span class="quote1">&gt; その他の特殊文字、丸の中の１なども駄目です。</span>
+<span class="quote1">&gt; （NEC特殊文字？）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; サーバーはdefault-character-set=ujisです。</span>
+<span class="quote1">&gt; フィールドのCollationはujis_japanese_ciです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; （株）などはPHPでSJISからEUCに変換した後にINSERTしております。</span>
+<span class="quote1">&gt; ちなみに4.1.2でも同じ症状がでます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 原因が4.1.2から実装されている文字コードの自動変換かと思い、</span>
+<span class="quote1">&gt; 直接EUCの（株）のHEX値 0xADEA をバイナリで入れても駄目でした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; INSERT  INTO test　VALUES ( CAST( 0xADEA AS binary )  );</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 4.1.1では同じSQLでうまく（株）が入ります。</span>
+<span class="quote1">&gt; バイナリで入れているのでクライアント間との</span>
+<span class="quote1">&gt; 文字コード自動変換は関係ないと思われるのですが、</span>
+<span class="quote1">&gt; 回避方法等がもしあるのであれば、</span>
+<span class="quote1">&gt; お知恵を貸していただければと思います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; よろしくお願い致します。</span>
+
+確認してみましたが、その通りのようです。4.1.3にて確認。
+
+とりあえずは、UJIS で色々と入れてみました。
+標準で定義されていない場所と、外字領域と決められている個所以外は駄目み
+たいです。
+
+_ujis, _binary どちらでやっても同じでした。
+
+character set ujis と指定されていると、ujis以外の文字が来たら、それ以
+降は無視されるみたいです。エラーも出さずに、入ったふりをされるのはとて
+も困ったものです。
+
+カラムを binary にしてしまえば、一応何でも入るようにはなって誤魔化せる
+ことは確かなのだが、それを解決というのは違うと思う。
+
+各文字コードにおいて、どの範囲がOKで、どの範囲が駄目というのは特に明記
+されていないようですね。これは、是非記述して欲しい。
+日本語の場合、メーカー外字などの問題が特に大きいので、そのあたりの情報
+は欲しいです。
+
+------------------------------------------------------------------
+★ _ujis の場合
+
+mysql&gt; create table test ( a varchar(10) character set ujis );
+Query OK, 0 rows affected (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_ujis 0xA2AE);
+Query OK, 1 row affected (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_ujis 0xA2AF);
+Query OK, 1 row affected, 1 warning (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_ujis 0xADEA);
+Query OK, 1 row affected, 1 warning (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_ujis 0xF5A1);
+Query OK, 1 row affected (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_ujis 0xF5FE);
+Query OK, 1 row affected (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_ujis 0xF5FF);
+Query OK, 1 row affected, 1 warning (0.00 sec)
+ 
+mysql&gt; select a, hex(a) from test;
++------+--------+
+<span class="quote1">| a    | hex(a) |</span>
++------+--------+
+<span class="quote1">| ＝   | A2AE   |</span>
+<span class="quote3">|      |        |</span>
+<span class="quote3">|      |        |</span>
+<span class="quote1">| ??   | F5A1   |</span>
+<span class="quote1">| ??   | F5FE   |</span>
+<span class="quote3">|      |        |</span>
++------+--------+
+6 rows in set (0.00 sec)
+ 
+★ _binary の場合
+
+mysql&gt; delete from test;
+Query OK, 6 rows affected (0.00 sec)
+
+mysql&gt; INSERT INTO test VALUES (_binary 0xA2AE);
+Query OK, 1 row affected (0.06 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_binary 0xA2AF);
+Query OK, 1 row affected, 1 warning (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_binary 0xADEA);
+Query OK, 1 row affected, 1 warning (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_binary 0xF5A1);
+Query OK, 1 row affected (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_binary 0xF5FE);
+Query OK, 1 row affected (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_ujis 0xF5FF);
+Query OK, 1 row affected, 1 warning (0.00 sec)
+ 
+mysql&gt; select a, hex(a) from test;
+
+mysql&gt; select a, hex(a) from test;
++------+--------+
+<span class="quote1">| a    | hex(a) |</span>
++------+--------+
+<span class="quote1">| ＝   | A2AE   |</span>
+<span class="quote3">|      |        |</span>
+<span class="quote3">|      |        |</span>
+<span class="quote1">| ??   | F5A1   |</span>
+<span class="quote1">| ??   | F5FE   |</span>
+<span class="quote3">|      |        |</span>
++------+--------+
+6 rows in set (0.00 sec)
+
+★ 許容されていない文字を含む場合の例
+
+mysql&gt; delete from test;
+Query OK, 1 row affected (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_binary 0xA2AEA2AFA2BA);
+Query OK, 1 row affected, 1 warning (0.00 sec)
+ 
+mysql&gt; select a, hex(a) from test;
++------+--------+
+<span class="quote1">| a    | hex(a) |</span>
++------+--------+
+<span class="quote1">| ＝   | A2AE   |</span>
++------+--------+
+1 row in set (0.00 sec)
+ 
+★ カラムをbinary にしてしまった場合
+
+mysql&gt; drop table test;
+Query OK, 0 rows affected (0.00 sec)
+ 
+mysql&gt; create table test ( a varchar(10) character set binary );
+Query OK, 0 rows affected (0.05 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_binary 0xA2AEA2AFA2BA);
+Query OK, 1 row affected (0.00 sec)
+ 
+mysql&gt; INSERT INTO test VALUES (_ujis 0xA2AEA2AFA2BA);
+Query OK, 1 row affected (0.00 sec)
+ 
+mysql&gt; select a, hex(a) from test;
++--------+--------------+
+<span class="quote1">| a      | hex(a)       |</span>
++--------+--------------+
+<span class="quote1">| ＝??∈ | A2AEA2AFA2BA |</span>
+<span class="quote1">| ＝??∈ | A2AEA2AFA2BA |</span>
++--------+--------------+
+2 rows in set (0.00 sec)
+
+------------------------------------------------------------------
+株式会社 タイムインターメディア       藤原 博文 fuji@xxxxxxxxxx
+本社 160-0002 東京都新宿区坂町26-27 ＩＰＢビル    TEL 03-5362-9009
+URL  <a href="http://www.timedia.co.jp/">http://www.timedia.co.jp/</a>                    FAX 03-5362-9008
+地図 <a href="http://www.timedia.co.jp/company/map/">http://www.timedia.co.jp/company/map/</a>     新宿線曙橋駅徒歩5分
+------------------------------------------------------------------
+♪  Puzzle Japan  <a href="http://www.puzzle.jp/">http://www.puzzle.jp/</a>  毎日新作パズルで遊ぼう ♪
+------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="9893.html">[前]</a><a href="9895.html">[次]</a><a href="../list/9801-9900.html">[番号順一覧]</a><a href="../thread/9801-9900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9870.html">   9870 2004-07-17 14:49 [&quot;Tatsuya Yoshizawa&quot; ] 4.1.3のujis                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="9894.html">   9894 2004-07-22 14:01 ┗[Hirofumi Fujiwara &lt;f]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9899.html">   9899 2004-07-26 11:44 　┗[&quot;Tatsuya Yoshizawa&quot; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9900.html">   9900 2004-07-27 16:31 　　┗[Hirofumi Fujiwara &lt;f]                                   </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14604</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14603.html">[前]</a><a href="14605.html">[次]</a><a href="../list/14601-14700.html">[番号順一覧]</a><a href="../thread/14601-14700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14604
+</p>
+<div class="header">
+<p>
+From: 松尾　健司 &lt;松尾　健司 &lt;matsuo@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 23 Jun 2008 14:14:40 +0900<br>
+Subject: [mysql 14604] transactionの処理について質問させてください。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして。
+松尾といいます。
+
+replicationを行っているなかでslave側のtransactionの処理でROLLBACKが
+行われない？状態となっておりました。
+私の思い違いなのかもしれませんが。
+
+バージョンはMySQL 4.0.25。
+ストレージエンジンはinnodbです。
+(途中に非トランザクションテーブルの更新がかかっているという事はありませ
+んでした。)
+
+その為レプリケーション側で下記のようなエラーが発生いたしました。
+ERROR: 1062  Duplicate entry '9841620' for key
+Duplicate entryになっているという事は、slave側ではmaster側でROLLBACKされ
+た処理が実行されててしまったのではないかと思ってます。
+
+master側のbin-logを見る限りでは、下記のようになっておりました。
+(個人情報を含むため一部省略させていただきます。)
+■■■■■BEGIN;
+# at 562347345
+#080621 12:06:45 server id 1  log_pos 562309839         Query   thread_id=136278939     exec_time=0     error_code=0
+SET TIMESTAMP=1214017605;
+
+中略
+
+# at 562353083
+#080621 12:06:47 server id 1  log_pos 562353083         Query   thread_id=136278939     exec_time=0     error_code=0
+SET TIMESTAMP=1214017607;
+▲▲▲▲▲ROLLBACK;
+該当時間のslaveのrelay-bin-logはない状態です。
+
+innodb_flush_log_at_trx_commitがmasterでは1になっていますが、
+slaveではinnodb_flush_log_at_trx_commit=0にしております。
+
+私のイメージとしては、master側でROLLBACKされた処理については、slave側で
+もトランザクション処理が行われエラーになったSQLについては、DBに書き込ま
+れないなのでないかと思っております。
+
+slave側でこのような現象になることについてなにか御存じの方がいらっしゃい
+ましたらご教授いただければと思います。
+
+よろしくお願いします。
+
+
+</pre>
+</div>
+<p class="button"><a href="14603.html">[前]</a><a href="14605.html">[次]</a><a href="../list/14601-14700.html">[番号順一覧]</a><a href="../thread/14601-14700.html">[スレッド一覧]</a></p>
+</body>
+</html>

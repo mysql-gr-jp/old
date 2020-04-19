@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12389</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12388.html">[前]</a><a href="12390.html">[次]</a><a href="../list/12301-12400.html">[番号順一覧]</a><a href="../thread/12301-12400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12389
+</p>
+<div class="header">
+<p>
+From: Yasufumi Kinoshita &lt;Yasufumi Kinoshita &lt;kinoshita.yasufumi@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 08 Nov 2005 15:34:53 +0900<br>
+Subject: [mysql 12389] Re: MySQLの eucjpms    と IE    の EUC-JP<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+木下です。
+勉強になります。
+
+<span class="quote2">&gt;&gt;cp51932についての私見を述べさせてください。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;ご指摘の記事の中に出てくる</span>
+<span class="quote2">&gt;&gt;<a href="http://www.rikai.com/library/kanjitables/kanji_codes.euc.shtml">http://www.rikai.com/library/kanjitables/kanji_codes.euc.shtml</a></span>
+<span class="quote2">&gt;&gt;をざっと見たところ、eucJP-openとの違いは、SJISでの「NEC選定IBM拡張文字」(ED40〜EDFC)を</span>
+<span class="quote2">&gt;&gt;そのままの句点コードに対応するEUCでの領域 (F9A1〜FCFE) に割り当てているみたいです。</span>
+<span class="quote2">&gt;&gt;この領域は eucJP-open ではSJISでの 外字領域を保持する部分の一部です。</span>
+<span class="quote2">&gt;&gt;cp51932への対応は少なくともEUCで外字領域を保持することと二者択一になりそうですね。</span>
+<span class="quote2">&gt;&gt;ただ、SJISで直接格納できないPostgreSQLと違い、MySQLのcp932では外字領域が考慮されているので、</span>
+<span class="quote2">&gt;&gt;MySQLではEUCで外字を格納するケースのほうが稀かも知れません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; DB を EUC とするのは、5.8.0 以前の Perl でプログラミングする場合にスクリ</span>
+<span class="quote1">&gt; プトを EUC とする場合に、それにあわせて DB も EUC にするという事はあると</span>
+<span class="quote1">&gt; 思います。その場合、Web ブラウザへの入出力文字コードを EUC にする事で、</span>
+<span class="quote1">&gt; 余計な手間をかけずにプログラミングするという事は一般的なのかもしれませ</span>
+<span class="quote1">&gt; ん。そのようなシステムでは、CP51932 なデータが DB に格納されてしまうとい</span>
+<span class="quote1">&gt; う事が起きます。</span>
+
+まわりくどい言い方をしてしまいましたが、言いたかったことは、
+「EUCで外字領域を保持する必要は無いと思うのでeucjpmsでは外字をやめて
+　そのままの句点コードでNEC選定IBM拡張文字を保持すれば
+　文字コードを増やすことなく対応できるのでは？」
+ということです。
+しかし、NEC選定IBM拡張文字 と JIS補助漢字 の重複については
+
+<span class="quote1">&gt; かなり古い資料になりますが、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; UNIX System V リリース 4 日本語環境共通規約 第 1 版</span>
+<span class="quote1">&gt; 発行所: 株式会社トッパン</span>
+<span class="quote1">&gt; ISBN4-8101-8539-7</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; には、 日本語EUCのコードセット2 (JIS X 0201 片仮名), コードセット3</span>
+<span class="quote1">&gt; (JIS X 0212 補助漢字) は必須ではない事が明記されていましたので、</span>
+<span class="quote1">&gt; IE の不具合とは言い切れないでしょう。</span>
+
+ということで必須ではないとのことですので、cp51932に対応するためには
+UCS-2からcp51932への変換を行う際に、補助漢字はNEC選定IBM拡張文字に
+変換することを優先させなければならないです。
+したがって、eucjpmsをcp51932にも対応させるのは無理で、
+そのためにはやはり新しくcp51932のための文字コードを定義しないといけないのですね。
+失礼しました。
+
+<span class="quote1">&gt; それよりも、CP51932 + JIS X 0212 が表示可能で POST するデータは </span>
+<span class="quote1">&gt; CP51932 だったりすると、FireFox でサポートしている EUC-JP が、</span>
+<span class="quote1">&gt; eucJP-open なのか、CP51932 なのか迷ってしまいそうです。</span>
+
+FireFox、MozillaはLinux版でも同様な表示でした。
+EUCの F9A1〜FCFEに NEC選定IBM拡張文字 が出てくるということは、
+少なくともeucJP-openではなく、
+「cp51932で補助漢字までをサポートもの」として考えるのが適当でしょうね。
+
+eucJP-openは結局一種のローカルルールなので、
+ブラウザの表示や、JIS X 0213への対応などを考えると
+いずれはコードセット１（第１面）がシフトJISと単純に１対１で対応する
+日本語EUC文字コードも別にサポートしなければならなくなるのでは？
+と思いました。
+
+-- 
+ＮＴＴコムウェア
+プロジェクト管理統括部
+技術ＳＥ部門　ＤＢ技術グループ
+
+木下  靖文
+
+e-mail: kinoshita.yasufumi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="12388.html">[前]</a><a href="12390.html">[次]</a><a href="../list/12301-12400.html">[番号順一覧]</a><a href="../thread/12301-12400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12362.html">  12362 2005-11-07 00:52 [MORIYAMA Masayuki &lt;m] MySQLの eucjpms  と IE  の EUC-JP       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12370.html">  12370 2005-11-07 14:06 ┣[&quot;Shuichi Tamagawa&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12375.html">  12375 2005-11-07 23:15 ┃┗[MORIYAMA Masayuki &lt;m]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12379.html">  12379 2005-11-08 09:10 ┃　┗[doumae &lt;doumae@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12407.html">  12407 2005-11-08 22:31 ┃　　┗[MORIYAMA Masayuki &lt;m]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12371.html">  12371 2005-11-07 14:48 ┗[Yasufumi Kinoshita &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12376.html">  12376 2005-11-07 23:15 　┗[MORIYAMA Masayuki &lt;m]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="12389.html">  12389 2005-11-08 15:34 　　┗[Yasufumi Kinoshita &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12408.html">  12408 2005-11-08 23:51 　　　┗[MORIYAMA Masayuki &lt;m]                                 </a></span>
+</pre>
+</body>
+</html>

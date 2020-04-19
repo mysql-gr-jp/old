@@ -1,0 +1,75 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8375</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8374.html">[前]</a><a href="8376.html">[次]</a><a href="../list/8301-8400.html">[番号順一覧]</a><a href="../thread/8301-8400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8375
+</p>
+<div class="header">
+<p>
+From: Okamoto RYO &lt;Okamoto RYO &lt;ryo@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 5 Nov 2003 01:18:49 +0900<br>
+Subject: [mysql 08375] Re: レプリケーションの整合性チェック<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+おかもとです。
+
+ 「<a href="08361.html">[mysql 08361]</a> Re: レプリケーションの整合性チェック」
+/￣￣￣￣￣￣￣
+<span class="quote2">&gt;&gt; 理想的には、master の Position、slave の Read_Master_Log_Pos,</span>
+<span class="quote2">&gt;&gt; Exec_Master_Log_Pos の 3 つの値が常に一致しているとよいのですが、</span>
+<span class="quote2">&gt;&gt; master に更新系のクエリが多かったり、master - slave 間のネットワークが</span>
+<span class="quote2">&gt;&gt; 遅かったり、master に比べて貧弱だったり他の要因で負荷がかかったりして</span>
+<span class="quote2">&gt;&gt; いて slave の SQL スレッドの処理が遅れているなどなどの理由で、これら 3</span>
+<span class="quote2">&gt;&gt; つの値がいつも同一となるとは限らないと思いますし、同一でないからといっ</span>
+<span class="quote2">&gt;&gt; てレプリケーションが正常動作していないとは言えないと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;次のようなロジックのスクリプトを書いたことがあります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;1. log_file と log_pos の値がマスタとスレーブで一致していれば ＯＫ</span>
+<span class="quote1">&gt;2. でなければ、数秒待って log_pos が更新されていれば ＯＫ</span>
+<span class="quote1">&gt;3. でなければ、ＮＧ</span>
+
+これは、マスタサーバのバイナリログである（例えば）server-bin.001
+ファイルのバイト数と log_pos カラムの値が一致していれば、と
+いうことですね。とりあえず、次のようなロジックを組むことに
+しました。
+
+1. log_file のバイト数と log_pos の値が一致していれば OK
+2. でなければ、Slave_IO_Running, Slave_SQL_Running
+	両カラムの値をチェック
+3. どちらかが 'YES' でなければ NG
+
+上記のチェックに失敗した場合は１０秒待って２度まで
+再試行し、それでも失敗したら NG とします。
+
+# う〜ん・・あまり自信無し :-&lt;
+
+=================================
+   @@  Squeeze Lab.  @@
+ mail : ryo@xxxxxxxxxx
+ web  : <a href="http://www.sqz.jp">http://www.sqz.jp</a>
+ written by : Okamoto RYO  :-)
+=================================
+
+</pre>
+</div>
+<p class="button"><a href="8374.html">[前]</a><a href="8376.html">[次]</a><a href="../list/8301-8400.html">[番号順一覧]</a><a href="../thread/8301-8400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8341.html">   8341 2003-10-30 16:42 [Okamoto RYO &lt;ryo@xxx] レプリケーションの整合性チェック        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8359.html">   8359 2003-11-03 18:08 ┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8360.html">   8360 2003-11-03 18:37 　┣[Okamoto RYO &lt;ryo@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8361.html">   8361 2003-11-03 21:52 　┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="8375.html">   8375 2003-11-05 01:18 　　┗[Okamoto RYO &lt;ryo@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8379.html">   8379 2003-11-06 02:05 　　　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8380.html">   8380 2003-11-07 00:05 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+</pre>
+</body>
+</html>

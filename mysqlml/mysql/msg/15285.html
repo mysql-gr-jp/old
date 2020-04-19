@@ -1,0 +1,139 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15285</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15284.html">[前]</a><a href="15286.html">[次]</a><a href="../list/15201-15300.html">[番号順一覧]</a><a href="../thread/15201-15300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15285
+</p>
+<div class="header">
+<p>
+From: 関口一心 &lt;関口一心 &lt;8888.saleen.s7@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 22 Apr 2010 17:23:08 +0900<br>
+Subject: [mysql 15285] Re: ibdata1の初期値とメモリーの関係について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+今井さん
+
+返信有難う御座います。
+
+<span class="quote1">&gt; rpm や yum などでのパッケージインストールでしょうか？</span>
+<span class="quote1">&gt; tar.gz などのソースからのインストールでしょうか？</span>
+→ソースコンパイルでインストール時に./configure --with-plugins=innobase 設定を行いインストールを行いました。
+
+innodb_data_file_path = ibdata1:2G:autoextend
+の場合は正常にInnoDB有効の状態で起動まで行えていることは確認出来ています。
+
+その後、mysql停止→ibdata1、ib_logfile* を削除→my.cnfの記述変更→mysql開始の時
+innodb_data_file_path = ibdata1:3G:autoextend
+とmy.cnfに設定しておくとInnoDBが有効にならない状態で起動してしまいます。
+
+
+
+2010年4月22日17:00 Akio Imai &lt;suzuro2045@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; 今井と申します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; １点確認させていただきたいのですが、MySQL のインストールは</span>
+<span class="quote1">&gt; rpm や yum などでのパッケージインストールでしょうか？</span>
+<span class="quote1">&gt; tar.gz などのソースからのインストールでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 記憶が確かなら、ソースからインストールする場合</span>
+<span class="quote1">&gt; MySQL 5.1.3 からはデフォルトでインストールされないように</span>
+<span class="quote1">&gt; なっていたかと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ./configure --with-plugins=innobase</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; を指定することにより、InnoDB を有効な状態でコンパイルできると思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 以上、ご確認ください。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 2010年4月22日16:50 関口一心 &lt;8888.saleen.s7@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt;&gt; 平塚さん</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 関口です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; アドバイス有難うございます。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 前任者が設定を行っていたmy.cnf だったのでその他の設定値を良く見ずに設定をしてしまったせいで、</span>
+<span class="quote2">&gt;&gt; そもそも</span>
+<span class="quote2">&gt;&gt; innodb_buffer_pool + key_buffer + max_connections * (sort_buffer +</span>
+<span class="quote2">&gt;&gt; read_buffer + read_rnd_buffer) + max_connections * 2 MB</span>
+<span class="quote2">&gt;&gt; この値が2Gを大きく上回っていました。</span>
+<span class="quote2">&gt;&gt; innodb_buffer_pool_size = 1536M</span>
+<span class="quote2">&gt;&gt; この値では当然のようにNGでした。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; アドバイスをきっかけに見直すことが出来ました。</span>
+<span class="quote2">&gt;&gt; 有難う御座います。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 上記作業後、疑問が生まれました。</span>
+<span class="quote2">&gt;&gt; innodb_buffer_pool + key_buffer + max_connections * (sort_buffer +</span>
+<span class="quote2">&gt;&gt; read_buffer + read_rnd_buffer) + max_connections * 2 MB</span>
+<span class="quote2">&gt;&gt; この値を2G以内に抑え、</span>
+<span class="quote2">&gt;&gt; innodb_data_file_path = ibdata1:3G:autoextend</span>
+<span class="quote2">&gt;&gt; にしてもInnoDBが有効にならない状態で起動してしまいます。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; この状態になるのは何故なのか？</span>
+<span class="quote2">&gt;&gt; 私個人の疑問を晴らすために、皆様からのご回答をお待ちしています。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 2010年4月22日12:27 HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;:</span>
+<span class="quote3">&gt;&gt;&gt; ひらつかです。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; On Thu, 22 Apr 2010 11:37:08 +0900</span>
+<span class="quote3">&gt;&gt;&gt; 関口一心 &lt;8888.saleen.s7@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 現在、linux、CentOS5.2（32ビット）、mysql5.1.35の構築を行っており、my.cnfの設定値で悩んでいます。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; innodb_data_file_path = ibdata1:2G:autoextend</span>
+<span class="quote4">&gt;&gt;&gt;&gt; innodb_buffer_pool_size = 1536M</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 32ビット環境でinnodb_buffer_pool_size = 1536Mは厳しいと思います。</span>
+<span class="quote3">&gt;&gt;&gt; innodb_data_file_pathは2Gのままで、</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; innodb_data_file_path = ibdata1:2G:autoextend</span>
+<span class="quote3">&gt;&gt;&gt; innodb_buffer_pool_size = 512M</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; とするといかがでしょうか。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; ibdata1の初期値と起動時に使用するメモリーは、</span>
+<span class="quote4">&gt;&gt;&gt;&gt; どの様な依存関係にあるのかアドバイスが頂ければと思い投稿しました。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; ソースを読んで確認したわけではないですが、</span>
+<span class="quote3">&gt;&gt;&gt; あまり関係ないと思います。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; --</span>
+<span class="quote3">&gt;&gt;&gt; 平塚貞夫 hiratsuka.sadao@xxxxxxxxxx</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="15284.html">[前]</a><a href="15286.html">[次]</a><a href="../list/15201-15300.html">[番号順一覧]</a><a href="../thread/15201-15300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15273.html">  15273 2010-04-22 11:37 [関口一心 &lt;8888.salee] ibdata1の初期値とメモリーの関係について </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15277.html">  15277 2010-04-22 12:27 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15282.html">  15282 2010-04-22 16:50 　┗[関口一心 &lt;8888.salee]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15283.html">  15283 2010-04-22 17:00 　　┣[Akio Imai &lt;suzuro204] Re: [mysql 15282] Re: ibdata1の初期値とメモリーの関係について</a></span>
+<span class="current">-&gt;&nbsp;<a href="15285.html">  15285 2010-04-22 17:23 　　┃┗[関口一心 &lt;8888.salee] Re: ibdata1の初期値とメモリーの関係について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15284.html">  15284 2010-04-22 17:11 　　┗[Mikiya Okuno &lt;Mikiya]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15286.html">  15286 2010-04-22 17:37 　　　┗[関口一心 &lt;8888.salee]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15287.html">  15287 2010-04-22 17:52 　　　　┗[Mikiya Okuno &lt;Mikiya]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15288.html">  15288 2010-04-22 18:29 　　　　　┗[関口一心 &lt;8888.salee]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15289.html">  15289 2010-04-22 18:58 　　　　　　┗[Mikiya Okuno &lt;Mikiya]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15290.html">  15290 2010-04-22 19:05 　　　　　　　┗[HIRATSUKA Sadao &lt;hir]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15291.html">  15291 2010-04-22 21:36 　　　　　　　　┗[Mikiya Okuno &lt;Mikiya]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15292.html">  15292 2010-04-23 18:12 　　　　　　　　　┗[関口一心 &lt;8888.salee]                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5612</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="5611.html">[前]</a><a href="5613.html">[次]</a><a href="../list/5601-5700.html">[番号順一覧]</a><a href="../thread/5601-5700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5612
+</p>
+<div class="header">
+<p>
+From: Youichi Iwakiri &lt;Youichi Iwakiri &lt;yiwakiri@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 11 Jun 2002 12:29:42 +0900<br>
+Subject: [mysql 05612] Re: NULL の select 文<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+いわきりです
+
+<a href="05610.html">[mysql 05610]</a> NULL の select 文
+goudo wrote in &lt;00d101c210f8$844b5ae0$a00a14ac@xxxxxxxxxx&gt;:
+ &gt;すいませんが、何方か教えて欲しいのですが
+ &gt;NULLのselect文がうまくいかなくて困っています。
+ &gt;
+ &gt;select　注文番号　from　nouki　where　
+ &gt;　　　　　　　　　　　　品目番号＝NULL;
+ &gt;
+ &gt;とSQL文で書いても、NULLがあるのに
+ &gt;データを引いてくれません。
+ &gt;NULLデータは確かにあります。
+ &gt;
+ &gt;NULLのデータ抜き出すにはどのように書いたら
+ &gt;良いのでしょうか？。
+
+下記、マニュアルからの抜粋ですが、IS NULLを使うのでしょう。
+
+--------------------------
+A.5.3 NULL 値での問題
+
+SQL の初心者のありがちな混乱は、NULL 値が空文字列 '' と同じ物だと考えることです。これは正しくありません！ 
+例えば、次のステートメントは全く別のものです: 
+
+mysql&gt; INSERT INTO my_table (phone) VALUES (NULL);
+mysql&gt; INSERT INTO my_table (phone) VALUES (&quot;&quot;);
+
+両方の文とも phone フィールドに値を挿入していますが、初めのは NULL 値を挿入し、二番目のは空文字列を挿入しています。
+初めのは ``電話番号を知らない'' と見なされ、二番目のは ``彼女は電話を持っていない'' と見なされます。 
+
+SQL では、 NULL は他の全ての値(たとえ NULL でも)と比較した時に、常に偽になる値です。
+ NULL を含む式は、特に断りがなければ、常に NULL 値を生成します。次の項目は全て NULL を返します: 
+
+mysql&gt; SELECT NULL,1+NULL,CONCAT('Invisible',NULL);
+NULL 値がセットされている項目を検索する場合、 =NULL テストを行わないでください。
+これは expr = NULL が FALSE なので、なんの行も返しません。例えば以下の例： 
+
+mysql&gt; SELECT * FROM my_table WHERE phone = NULL;
+
+NULL 値を持つフィールドを検索したい場合は、IS NULL テストを使用しなくてはいけません。
+
+次は NULL 電話番号と空の電話番号を見つける方法を示しています: 
+
+mysql&gt; SELECT * FROM my_table WHERE phone IS NULL;
+mysql&gt; SELECT * FROM my_table WHERE phone = &quot;&quot;;
+
+</pre>
+</div>
+<p class="button"><a href="5611.html">[前]</a><a href="5613.html">[次]</a><a href="../list/5601-5700.html">[番号順一覧]</a><a href="../thread/5601-5700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="5610.html">   5610 2002-06-11 12:31 [&quot;goudo&quot; &lt;goudo@xxxxx] NULL の select 文                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5611.html">   5611 2002-06-11 12:23 ┣[Tomohiro 'Tomo-p' KA]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5615.html">   5615 2002-06-11 17:15 ┃┗[&quot;goudo&quot; &lt;goudo@xxxxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="5612.html">   5612 2002-06-11 12:29 ┗[Youichi Iwakiri &lt;yiw]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5613.html">   5613 2002-06-11 12:48 　┗[Daiju Azuma &lt;daiju_a]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:545</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="544.html">[前]</a><a href="546.html">[次]</a><a href="../list/501-600.html">[番号順一覧]</a><a href="../thread/501-600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:545
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Wed, 13 Jan 1999 22:48:08 +0900<br>
+Subject: [mysql 545] Re: MySQL speed<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+毅です
+まだダミーデータ350万件程度ですが、
+(小奈様のテーブルの定義にデータ入れてます。
+  PentiumPro, HDD (中身は IDE ですが scsi インターフェースを持たせたものです)
+)
+
+1.index を使用した like
+
+mysql&gt; select count(*) from Test_all_tab where lotno like '11%';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|   111111 |</span>
++----------+
+1 row in set (13.80 sec)
+
+2. between ですが、これは a&gt;b and b&lt;c を使うと凄く速くなります
+  というか、'between' が遅いのです
+
+mysql&gt; select count(*) from Test_all_tab where stop_day &gt; '1997-06-10'
+        and stop_day &lt; '1997-06-15';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|    88136 |</span>
++----------+
+1 row in set (0.98 sec)
+
+mysql&gt; select count(*) from Test_all_tab where stop_day
+       between '1997-06-10' and '1997-06-15';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|    88136 |</span>
++----------+
+1 row in set (3.33 sec)
+
+
+で、民斗さんがおっしゃるように、explain するとわかりますが、
+count(*) であれ、 その他の項目であれ、走査される行数は
+この場合代わりが無いので、(from,where 以下が変わらない限り)
+似たような時間がかかります
+(一部入りきらないので削ってます)
+
+mysql&gt; explain select count(*) from Test_all_tab where lotno like '11%';
+ -+--------+-------+
+  | rows   | Extra |
+ -+--------+-------+
+  | 112190 |       |
+ -+--------+-------+
+
+mysql&gt; explain select lotno from Test_all_tab where lotno like '11%';
+ -+--------+-------+
+  | rows   | Extra |
+ -+--------+-------+
+  | 112190 |       |
+ -+--------+-------+
+
+mysql&gt; select lotno from Test_all_tab where lotno like '11%';
+<span class="quote1">| 1199997 |</span>
+<span class="quote1">| 1199998 |</span>
+<span class="quote1">| 1199999 |</span>
++---------+
+111111 rows in set (11.11 sec)
+
+mysql&gt; select count(*) from Test_all_tab where lotno like '11%';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|   111111 |</span>
++----------+
+1 row in set (14.07 sec)
+
+
+ 村上 毅  takeshi@xxxxxxxxxx
+ PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
+ [ <a href="http://www.softagency.co.jp/mysql/">http://www.softagency.co.jp/mysql/</a> ]
+ [ MySQL ML: mysql-help@xxxxxxxxxx ]
+
+</pre>
+</div>
+<p class="button"><a href="544.html">[前]</a><a href="546.html">[次]</a><a href="../list/501-600.html">[番号順一覧]</a><a href="../thread/501-600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="543.html">    543 1999-01-14 05:27 [Tatsuya Ina &lt;ina@xxx] Re:MySQL speed                          </a></span>
+<span class="current">-&gt;&nbsp;<a href="545.html">    545 1999-01-13 22:48 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="550.html">    550 1999-01-14 11:16 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="552.html">    552 1999-01-14 23:21 　┗[Tatsuya Ina &lt;ina@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="553.html">    553 1999-01-14 19:02 　　┗[民斗 &lt;tommy@xxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="554.html">    554 1999-01-15 00:32 　　　┗[Shogo Hamamoto &lt;KHC0]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="555.html">    555 1999-01-15 12:39 　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+</pre>
+</body>
+</html>

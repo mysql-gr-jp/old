@@ -1,101 +1,0 @@
-<html>
-<head>
-<meta http-equiv="Content-Style-Type" context="text/css">
-<title>mysql:16319</title>
-<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
-</head>
-<body>
-<p class="button"><a href="16318">[前]</a><a href="16320">[次]</a><a href="../list/16301-16400">[番号順一覧]</a><a href="../thread/16301-16400">[スレッド一覧]</a></p>
-<p class="id">
-mysql:16319
-</p>
-<div class="header">
-<p>
-From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
-Date: Sun, 20 Mar 2016 16:46:30 +0900<br>
-Subject: [mysql 16319] Re: [mysql 16318] MySQLのユーザ変数で、分析関数を代用できるか？<br>
-
-</p>
-</div>
-<div class="body">
-<pre>
-yoku0825といいます。
-
-おっしゃる通り、ユーザー定義変数の評価順序は定義されていません。
-<a href="https://bugs.mysql.com/bug.php?id=79753">https://bugs.mysql.com/bug.php?id=79753</a>
-
-至極単純な、たとえばrownumの代用くらいには利用できますが、
-窓関数のような複雑なことはユーザー定義変数では実現できないと思います。
-（ご認識の通り、結果が保証されないので）
-
-他のDBMSにデータをエクスポートして集計した方が良いと思います。
-
-
-yoku0825,
-
-
-
-2016年3月18日 16:33  &lt;vbwnvwnpwvwenemcew@xxxxxxxxxx&gt;:
-<span class="quote1">&gt; HibinoMeguruと申します。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; TeraTailで質問したのですが回答がないので、</span>
-<span class="quote1">&gt; <a href="https://teratail.com/questions/29899">https://teratail.com/questions/29899</a></span>
-<span class="quote1">&gt; こちらで質問させて下さい。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; <a href="http://stackoverflow.com/questions/532878/how-to-perform-grouped-ranking-in-mysql">http://stackoverflow.com/questions/532878/how-to-perform-grouped-ranking-in-mysql</a></span>
-<span class="quote1">&gt; で紹介されてる分析関数をMySQLのユーザ変数で代用するSelect文は、</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; 本番環境で使用するSelect文で、使っていいものなのでしょうか？</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; たとえば、リンク先のStackOverFlowの下記のSelect文において、</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; SELECT id_student, id_class, grade,</span>
-<span class="quote1">&gt;    @student:=CASE WHEN @class &lt;&gt; id_class THEN 0 ELSE @student+1 END AS rn,</span>
-<span class="quote1">&gt;    @class:=id_class AS clset</span>
-<span class="quote1">&gt; FROM</span>
-<span class="quote1">&gt;   (SELECT @student:= -1) s,</span>
-<span class="quote1">&gt;   (SELECT @class:= -1) c,</span>
-<span class="quote1">&gt;   (SELECT *</span>
-<span class="quote1">&gt;    FROM mytable</span>
-<span class="quote1">&gt;    ORDER BY id_class, id_student) t</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; たとえば、</span>
-<span class="quote1">&gt;  全ての行の@class:=id_class という列を評価されてから、</span>
-<span class="quote1">&gt;  全ての行の@student:=CASE WHEN @class &lt;&gt; id_class THEN 0 ELSE @student+1 END AS rn</span>
-<span class="quote1">&gt; を評価するとしたら、結果は期待した通りにならないし</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; そもそも</span>
-<span class="quote1">&gt; ORDER BY id_class, id_studentの順番で、</span>
-<span class="quote1">&gt; かつSelect句の左から右にユーザ変数が評価されない限り</span>
-<span class="quote1">&gt; 期待した結果にならないと思います。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; そして、</span>
-<span class="quote1">&gt; MySQLのマニュアルにも、ユーザ変数の評価順序は、定義されていないと記載されています。</span>
-<span class="quote1">&gt; <a href="http://download.nust.na/pub6/mysql/doc/refman/5.1-olh/ja/user-variables.html">http://download.nust.na/pub6/mysql/doc/refman/5.1-olh/ja/user-variables.html</a></span>
-<span class="quote2">&gt;  &gt;ユーザー変数の評価順序は定義されておらず、</span>
-<span class="quote2">&gt;&gt;与えられたクエリー内の要素に基づいて変更されることがあります。</span>
-<span class="quote2">&gt;&gt;SELECT @a, @a := @a+1 ...では、MySQL は@a を先に評価し次に割り当てが実行されるように見えますが、</span>
-<span class="quote2">&gt;&gt;クエリーの変更（たとえば GROUP BY、HAVING または ORDER BY 節による変更）</span>
-<span class="quote2">&gt;&gt;は評価順序を変更する可能性があります。</span>
-<span class="quote2">&gt;&gt;基本的な規則は、ステートメントの一部でユーザー変数値を割り当てないことおよび</span>
-<span class="quote2">&gt;&gt;同一ステートメント内の他部分で同じ変数を使用しないことです。</span>
-<span class="quote2">&gt;&gt;期待通りの結果を得られるかもしれませんが、これは確約されていません。</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt; 上記の理由から</span>
-<span class="quote1">&gt; select文でユーザ変数を複数回使って、</span>
-<span class="quote1">&gt;  分析関数を代用するSelect文は、結果が保証されないのだから</span>
-<span class="quote1">&gt; 本番環境などでは、全く使い物にならないというのが私の認識なのですが、</span>
-<span class="quote1">&gt; みなさんはどうでしょうか？</span>
-<span class="quote1">&gt;</span>
-<span class="quote1">&gt;</span>
-
-</pre>
-</div>
-<p class="button"><a href="16318">[前]</a><a href="16320">[次]</a><a href="../list/16301-16400">[番号順一覧]</a><a href="../thread/16301-16400">[スレッド一覧]</a></p>
-<pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="16318">  16318 2016-03-18 16:33 [&lt;vbwnvwnpwvwenemcew@] MySQLのユーザ変数で、分析関数を代用できるか？</a></span>
-<span class="current">-&gt;&nbsp;<a href="16319">  16319 2016-03-20 16:46 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16318] MySQLのユーザ変数で、分析関数を代用できるか？</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="16320">  16320 2016-03-22 18:18 　┗[&lt;vbwnvwnpwvwenemcew@] Re: [mysql 16319] Re: [mysql 16318] MySQLのユーザ変数で、分析関数を代用できるか？</a></span>
-</pre>
-</body>
-</html>

@@ -1,0 +1,88 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5002</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="5001.html">[前]</a><a href="5003.html">[次]</a><a href="../list/5001-5100.html">[番号順一覧]</a><a href="../thread/5001-5100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5002
+</p>
+<div class="header">
+<p>
+From: 前田 剛 &lt;前田 剛 &lt;maeda@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 21 Jan 2002 21:25:31 +0900<br>
+Subject: [mysql 05002] Re: sjis サーバの BLOB 項目に画像を登録 ( たぶん解決)<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+　前田＠ワコムアイティです。
+　高橋さん、レスありがとうございました。
+
+
+On Fri, 18 Jan 2002 02:25:45 +0900
+&quot;TAKAHASHI, Tomohiro&quot; &lt;t_takahashi@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt;   TSQLClientDataSet の BeforeUpdateRecordイベントハンドラなどを使う</span>
+<span class="quote1">&gt; ことで、データを変更前に適切に書き換えることで対処はできないでしょ</span>
+<span class="quote1">&gt; うか? </span>
+
+　上記の方法を少し検討してみました。
+
+　BeforeUpdateRecordイベントハンドラに渡される値
+（TDeltaDS.FieldValues）は、libmysql.dllによるescape処理が行われ
+る前のものです。ここでescape処理を行っても、libmysql.dllよってさ
+らにescape処理が行われてしまい、正しい値で更新できないように思わ
+れます。
+
+　ですので、libmysql.cに手を入れずにうまく更新させるには、高橋さ
+んが<a href="04957.html">[mysql 04957]</a>でおっしゃったようにSQL文に0xで始まる16進数の並
+びを書くしかないような気がします。
+
+
+
+（例：BeforeUpdateRecordイベントでescape処理を行った場合）
+元のパターン：              95 27
+BeforeUpdateRecord処理後：  5C &lt;95 5C&gt; 27
+libmysql.dllでのescape後：  5C 5C &lt;95 5C&gt; 5C 27
+サーバ側でのunescape後：    5C &lt;95 5C&gt; 5C 27
+
+
+　ところで、話は変わりますが。
+　実は本日はDelphi 6のADOExpressでBLOB項目の値をセットする方法を
+検討していました。
+
+　libmysql.cのmysql_odbc_escape_string関数にも同様の修正を行い
+mysqlclient.libをビルド、さらにMyODBCをビルドしました。しかし
+escapeの問題以前にstring型に格納された画像の内容がADOExpress内部
+でUnicodeに変換される際にデータが一部変化しているようで、結局SQL
+文に16進数を書く方法で逃げました。
+
+　ADO + MyODBCだとTField.LoadFromStreamの第二引数にftBlobを指定
+すると実行時に「無効なタイプ」というエラーが発生してしまうので仕
+方なくftStringを指定しているのですが、このことが原因だと思います。
+　TField.Valueにバリアント配列（バイト型）を代入しようとしてみた
+のですが、これもうまくいきませんでした（エラー内容失念）。
+
+_________________________________________________________________
+前田　剛（まえだ　ごう） &lt;maeda@xxxxxxxxxx&gt;
+株式会社ワコムアイティ　プロジェクト開発部
+<a href="http://www.wacom-it.co.jp/">http://www.wacom-it.co.jp/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="5001.html">[前]</a><a href="5003.html">[次]</a><a href="../list/5001-5100.html">[番号順一覧]</a><a href="../thread/5001-5100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="4955.html">   4955 2002-01-18 01:50 [前田 剛 &lt;maeda@xxxxx] sjis サーバの BLOB 項目に画像を登録 ( たぶん解決)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4956.html">   4956 2002-01-18 02:25 ┣[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4957.html">   4957 2002-01-18 02:48 ┃┣[&quot;TAKAHASHI, Tomohiro]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="5002.html">   5002 2002-01-21 21:25 ┃┗[前田 剛 &lt;maeda@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5003.html">   5003 2002-01-21 21:39 ┃　┗[&quot;TAKAHASHI, Tomohiro]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5335.html">   5335 2002-04-10 23:30 ┗[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
+</pre>
+</body>
+</html>

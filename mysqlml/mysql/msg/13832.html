@@ -1,0 +1,106 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13832</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13831.html">[前]</a><a href="13833.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13832
+</p>
+<div class="header">
+<p>
+From: YuGo &lt;YuGo &lt;yu.gotou@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 27 Mar 2007 15:11:02 +0900<br>
+Subject: [mysql 13832] Re: テーブルのロックについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<span class="quote1">&gt; テーブルAを以下のように作ったとします。</span>
+<span class="quote1">&gt; ストレージエンジンはMyISAMとInnoDBのいずれかです。</span>
+<span class="quote1">&gt; トランザクションの分離レベルというのはまだよく分からないのでデフォルトのままです。</span>
+<span class="quote1">&gt; CREATE TABLE A (</span>
+<span class="quote1">&gt; ユーザID integer NOT NULL,</span>
+<span class="quote1">&gt; コメント varchar(20),</span>
+<span class="quote1">&gt; 登録日 datetime,</span>
+<span class="quote1">&gt; PRIMARY KEY (ユーザID)</span>
+<span class="quote1">&gt; ) ;</span>
+
+<span class="quote1">&gt; 各PCから</span>
+<span class="quote1">&gt; MyISAMの場合は</span>
+<span class="quote1">&gt; INSERT A SET ユーザID=aaa,コメント=xxxx,登録日=yyyy/mm/dd hh:mm:ss;</span>
+<span class="quote1">&gt; INSERT A SET ユーザID=bbb,コメント=xxxx,登録日=yyyy/mm/dd hh:mm:ss;</span>
+<span class="quote1">&gt; INSERT A SET ユーザID=ccc,コメント=xxxx,登録日=yyyy/mm/dd hh:mm:ss;</span>
+<span class="quote1">&gt; のように実行してInnoDBの場合は</span>
+<span class="quote1">&gt; BEGIN;</span>
+<span class="quote1">&gt; INSERT A SET ユーザID=ddd,コメント=xxxx,登録日=yyyy/mm/dd hh:mm:ss;</span>
+<span class="quote1">&gt; INSERT A SET ユーザID=eee,コメント=xxxx,登録日=yyyy/mm/dd hh:mm:ss;</span>
+<span class="quote1">&gt; INSERT A SET ユーザID=fff,コメント=xxxx,登録日=yyyy/mm/dd hh:mm:ss;</span>
+<span class="quote1">&gt; ・・・</span>
+<span class="quote1">&gt; COMMIT;</span>
+<span class="quote1">&gt; のようにまとめて実行したとします。</span>
+<span class="quote1">&gt; IDは各PCで重複しないように生成するので単独のINSERT文ではエラーにならないとします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これが同時に複数PCから実行された場合に</span>
+<span class="quote1">&gt; ・INSERTしようとしたレコードはロックしなくても全て正しく書き込まれるか</span>
+<span class="quote1">&gt; ・ロックせずに同時に書き込もうとしてテーブルが壊れてしまうような事はないのか</span>
+<span class="quote1">&gt; ・MyISAMとInnoDBで違いはあるのか</span>
+<span class="quote1">&gt; という事です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; UPDATEについても同様で</span>
+<span class="quote1">&gt; 例えば2台のPCからIDの違うレコード(ID=aaaとID=bbb)を</span>
+<span class="quote1">&gt; SELECT * FROM A WHERE ID=aaa; (or ID=bbb;)</span>
+<span class="quote1">&gt; のようにして呼び出して画面に表示した後更新する</span>
+<span class="quote1">&gt; UPDATE A SET コメント=yyyyy,登録日=yyyy/mm/dd hh:mm:ss WHERE ID=aaa; (or ID=bbb;)</span>
+<span class="quote1">&gt; の文を同時に実行した場合に</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ・ID=aaa,bbbのレコードは正しく更新されるのか</span>
+<span class="quote1">&gt; ・テーブルが壊れる事はないのか</span>
+<span class="quote1">&gt; という事です。</span>
+
+問題点はおそらく2点。
+1.SELECT * FROM A WHERE ID=aaa;のとき、誰かが同じデータ(行)を更新してい
+ると今取得したデータは更新前か更新後かわからない。
+2.SELECT ...とUPDATE UPDATE A SET コメント=yyyyy,登録日=yyyy/mm/dd
+hh:mm:ss WHERE ID=aaaのすき間に誰かがその行を更新してしまう。すると、
+SELECTで見たデータではなく更新後のデータを上書きしてしまう。
+
+
+MyISAM（トランザクションなし）のとき。
+1.更新のWRITE ROCKが優先されるので、問題なさそう。
+2.SELECTの前に、LOCK TABLE した方がよさそう。
+
+参考にしたURL
+<a href="http://www.buena-idea.net/~hironobu/mysql/m-2-10.html">http://www.buena-idea.net/~hironobu/mysql/m-2-10.html</a>
+
+InnoDBのとき。
+START TRANSACTION ;
+SELECT * FROM A WHERE ID=aaa　FOR UPDATE　;
+UPDATE A SET コメント=yyyyy,登録日=yyyy/mm/dd hh:mm:ss WHERE ID=aaa;
+COMMIT ;
+としておけば手堅のではないか。
+
+参考にしたURL
+<a href="http://dev.mysql.com/doc/refman/4.1/ja/innodb-locking-reads.html">http://dev.mysql.com/doc/refman/4.1/ja/innodb-locking-reads.html</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="13831.html">[前]</a><a href="13833.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13814.html">  13814 2007-03-22 20:32 [&lt;ml_mysql@xxxxxxxxxx] Mysql　の出力を、UTF8に変換できない     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13815.html">  13815 2007-03-22 21:24 ┗[&quot;TOYOSHIMA,Masayuki&quot;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13816.html">  13816 2007-03-23 15:55 　┗[Tecchi &lt;mugen_ml@xxx] テーブルのロックについて            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13817.html">  13817 2007-03-23 21:30 　　┣[&quot;T.Hirotsu&quot; &lt;hirotsu]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13818.html">  13818 2007-03-24 02:51 　　┃┗[Tecchi &lt;mugen_ml@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13824.html">  13824 2007-03-26 08:47 　　┗[YuGo &lt;yu.gotou@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13830.html">  13830 2007-03-26 18:12 　　　┗[Tecchi &lt;mugen_ml@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13831.html">  13831 2007-03-26 22:01 　　　　┣[&quot;T.Hirotsu&quot; &lt;hirotsu]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="13832.html">  13832 2007-03-27 15:11 　　　　┗[YuGo &lt;yu.gotou@xxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13833.html">  13833 2007-03-27 19:14 　　　　　┗[Tecchi &lt;mugen_ml@xxx]                             </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10614</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="10613.html">[前]</a><a href="10615.html">[次]</a><a href="../list/10601-10700.html">[番号順一覧]</a><a href="../thread/10601-10700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10614
+</p>
+<div class="header">
+<p>
+From: &quot;zen kishimoto&quot; &lt;&quot;zen kishimoto&quot; &lt;zen@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 3 Dec 2004 16:56:00 -0800<br>
+Subject: [mysql 10614] MySQL 5.0.2-アルファのリリース<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<a href="http://lists.mysql.com/announce/242">http://lists.mysql.com/announce/242</a>
+
+MySQL 5.0.2-アルファがリリースされました。ソースとバイナリは以下
+とミラーサイトからダウンロードできます。
+<a href="http://dev.mysql.com/downloads/">http://dev.mysql.com/downloads/</a>
+
+全てのミラーサイトがアップデートされているとは限りません。
+この版がない場合は後でチェックするか、他のミラーサイトを
+お試しください。
+
+これはアルファの開発ツリーのスナップショットです。新しい機能や
+バグ修理を含みます。
+
+    注: これはアルファリリースです。このビルドはテスト集の大部分を
+　　パスし、5.0.1版でレポートされた大部分のバグを修理しました。
+    しかしながら、これは「MySQLの標準リリース」ではありません。
+    まだ修理が出来ていない報告されたバグ(<a href="http://bugs.mysql.com/">http://bugs.mysql.com/</a>) は
+　　まだあります。ビルドプロセスに問題があるプラットフォームがまだ
+　　多数あります。
+
+    現在このバグの修理をしております。バグが修理された時にまた新しい
+　　リリースを行います。 このスナップショットは5.0の機能をテストし、
+　　評価するのにお使いください。
+
+それぞれの修理されていないバグや修理されたバグのの詳細は　
+<a href="http://bugs.mysql.com/">http://bugs.mysql.com/</a> まで。
+
+5.0.2での変更：
+
+   追加または変更された機能:
+     * 警告: コンパチでない変更! NOTの優先順が変わりNOT a BETWEEN b AND c
+　　　は正しく処理されてNOT (a BETWEEN b AND c)となり、(NOT a) BETWEEN b AND 
+c
+　　　ではありません。 5.0前の版では高い優先順を得るにはHIGH_NOT_PRECEDENCE 
+SQL
+　　　モードをオンにすると得られました。
+     * IS [NOT] boolean_value を追加、boolean_valueは TRUE, FALSE, またはUNKNOWN.
+     * InnoDB の幾つかの状態変数を追加 .  5.2.4章のサーバー状態変数を参照。
+     * CREATE VIEWようの WITH CHECK OPTION クローズを実装
+     * SCHEMAと SCHEMAS キーワードはDATABASEと DATABASESと同義語として解釈される。
+     * 最初の基本的なトリガーをサポート(CREATE TRIGGERと DROP TRIGGER ステートメント)
+     * リードだけのサーバーサイドのカーサーに基本的なサポートを追加
+     * mysqldump --single-transaction --master-data は今オンライン（ブロックしない）
+　　　　InnoDBのダンプを取ることができ、対応するバイナリーのログを報告する。
+　　　　これはpoint-in-timeリカバリー、ロール・フォワードやリプリケーション
+　　　　スレーブ形成に適するバックアップとなります。 8.8章のmysqldump データベース 
+
+       バックアップ・プログラムを参照してください。
+     * --start-datetime, --stop-datetime, --start-position,
+       --stop-position オプションをmysqlbinlog (point-in-time
+       リカバリーを容易にする)に追加
+     * Mac OS X 10.3上でMySQLサーバーがSIGHUPやSIGQUITに反応しないように
+　　　　しました。これはMac OSでは必要です。 MySQLサーバーはこういった信号をたくさん
+　　　　受け取ります。 (バグ番号　2030).
+     * --auto-increment-incrementと --auto-increment-offset スタートアップ
+　　　　オプションを追加。これはサーバーが他のサーバとコンフリクトがない
+　　　　auto-increment値を生成するのをサポート。
+     * MySQLはディフォルトで日時をチェックして完全に正しい日時のみ
+　　　をOKします。MySQLのデフォルトでの運営のためには、ALLOW_INVALID_DATES 
+SQL モード
+　　　　をオンにしてください。
+     * STRICT_TRANS_TABLES, STRICT_ALL_TABLES, NO_ZERO_IN_DATE,
+       NO_ZERO_DATE, ERROR_FOR_DIVISION_BY_ZERO, とTRADITIONAL SQL
+       モードを追加. TRADITIONALモードは全ての前のモードの簡略形式です。
+　　　　TRADITIONALモードを使っていると MySQLは列に誤った値を挿入しようとすると
+　　　　エラーをレポートします。一番近い正しい値に調整しません。
+     * MySQLは今どの列がデフォルトの値をもつか覚えておきます。
+　　　　STRICT_TRANS_TABLES/STRICT_ALL_TABLES モードでは、デフォルトの値
+　　　　を持たない全ての列を指定することなしにINSERTをするとエラーが生じます。 
+
+ 　　　　サイドエフェクトは新しいテーブルにSHOW CREATEをすると、デフォルトの値 
+
+　　　　を指定しなかった列のDEFAULTの値を得ることはできません。
+     * コンパイラーのフラッグのDONT_USE_DEFAULT_FIELDSは取り除かれました。それは
+       sql_mode system変数をSTRICT_TRANS_TABLESにセットすることで
+　　　　得られる動作と同じです。
+     * NO_AUTO_CREATE_USER SQLモードを追加して、パスワードが指定されて
+　　　　いないのであれば、GRANTが新しいユーザを生成するのを防ぎます。。
+     * ステートメントをパースし、エラーメッセージを生成する時
+　　　　大き過ぎるフローティング・ポイントの番号を検出する。
+     * sql_updatable_view_key システム変数を名前を変えてupdatable_views_with_limit
+　　　　とした。この変数は２つだけの値を持つ。
+          + 1 or YES: テーブル内のキーを持たないVIEWがアップデートのために
+　　　　　　LIMITクローズと一緒にクエリで使用された際はエラーメッセージは発行しない。
+　　　　　　（警告だけ。）
+          + 0 or NO: VIEWのアップデートを認めない。このVIEWはテーブルのキーを 
+
+　　　　　　含まずクエリはLIMIT クローズを使用。(通常はGUIツールに見られる).
+     * SHOW TABLES のフォーマットを古い5.0.1版の前の形式に戻した。このフォーマット 
+
+　　　　はテーブル列を含まない。 テーブルのタイプをリストする追加の列
+　　　　を入手するには、SHOW FULL TABLESを使用。
+     * mysql_fix_privilege_tablesスクリプトは現在ユーザテーブルの
+　　　　グローバルなCREATE VIEW とSHOW VIEW 特権privilegesをそのテーブルの
+ 　　　　CREATEの値に設定。
+     * ユーザテーブルがヴューに関連した特権列を含むようにアップグレード
+　　　　されていないことをサーバが認識すると、サーバーはそれぞれのアカウントをその
+　　　　CREATEの特権と同じヴューの特権を持つとして扱います。
+     * CHECK TABLE はVIEWs (つまり　check view integrity: 全てのテーブルと
+       列があると)と作動する。
+     * join VIEW (数個のテーブルからなるview)とそのVIEWの中にテーブルの
+　　　　１つをサポートするUPDATE/INSERTをマージするアルゴリズムの追加。
+
+   修理されたバグ:
+     * mysqlbinlog --read-from-remote-serverがコマンドラインで
+　　　２つのバイナリーのログファイルを取ることが出来ないバグを修理(バグ番号　4507)
+     * mysqlbinlog --position --read-from-remote-server がラインの中に間違った 
+
+　　　　番号があるのを修正。(バグ番号　4506)
+     * CREATE TABLE ... TYPE=HEAP ... AS SELECT... リプリケーション・スレーブが
+　　　　停止するのを修理。(バグ番号　4971)
+     * mysql_options(...,MYSQL_OPT_LOCAL_INFILE,...) がLOAD DATA LOCAL 
+INFILEを
+　　　　オフするのに失敗するバグを修理。(バグ番号　5038)
+     * クライアントがmysql_options(...,MYSQL_READ_DEFAULT,...)を使用して
+　　　　コンフィグレーションファイルから読むとdisable-local-infile オプションは
+　　　　影響が全くない。(バグ番号　5073)
+     * SET GLOBAL SYNC_BINLOG があるプラットフォームでは動作しないバグを修理。 
+ (バグ番号 #5064)
+     * インストール・ディレクトリ（makeのインストールの対象）
+　　　からテストを実行したとき、
+　　　　mysql-test-runがrpl_trunc_binlogテストで誤動作するのを修理 (バグ番号　5050)
+     * Unixの「root」でmysql-test-runがgrant_cacheテストしたで誤作動の
+　　　　バグを修理(バグ番号　4678)
+     * KILLを使用する際あまり起こりそうもないデッドロックを修理。
+       (バグ番号　4810)
+     * １つの接続がSTART SLAVEを行うときにKILLされる際に起こるクラッシュを修理(バグ番号　4827)
+     * サーバーがバイナリー・ログをオンにしていれば、
+　　　　FLUSH TABLES WITH READ LOCK ブロックを COMMIT。テーブルのフルバックアップ 
+
+　　　　とバイナリログをする際にバイナリログの場所は信用できます。
+       (バグ番号　4953)
+     * テーブルが臨時の時はauto_increment 列のカウンターはTRUNCATE TABLEで。
+　　　　(バグ番号　5033)
+     * スレーブSQL スレッドを修理。スレーブSQL スレッドがリプリケートする
+　　　　SET COLLATION_SERVER...ステートメントはポジションを進めません。
+　　　　(そのため実際のアップデートされたクエリの前に割り込みが入ると、
+　　　　後にSETをやり直す。） (バグ番号　5705)
+     * クエリで(これは稀ですが)スレーブSQLスレッドがシンタクスのエラーを
+　　　　見つけると停止するというバグを修理 (バグ番号　5711)
+     * MyISAM テーブルへの書き込みがディスクが一杯かディスクの制限
+　　　　を超えると、１０分おきにエラーログを書き、十分なディスク
+　　　　スペースができるまで待ちます。(バグ番号　3248)
+     * 4.0.21で生じたバグを修正。 接続がトランスアクションを始め、アップデート 
+
+　　　　は開始し、FLUSH TABLES WITH READ LOCKを行い、COMMITを行うと
+　　　　リプリケーション　スレーブを停止する。(エラー1223).
+　　　　InnoDB innobackupのスクリプトを使用する際に現われるバグ
+       (バグ番号　5949)
+     * OPTIMIZE TABLE, REPAIR TABLEとANALYZE TABLE はバイナリログにある
+　　　　エラーコードなしにリプリケーとされる。 (バグ番号　5551)
+
+-- 
+マット　ワグナー、プロダクション　エンジニア
+MySQL AB, www.mysql.com
+アメリカ合衆国、ミネソタ州ノースフィールド市
+---------------------
+Zen Kishimoto                        zen@xxxxxxxxxx
+IP Devices, Inc.                       (408) 567-9391
+2175 De La Cruz Blvd., Suite 10  (801) 720-8847 (FAX)
+Santa Clara, CA 95050
+
+
+
+</pre>
+</div>
+<p class="button"><a href="10613.html">[前]</a><a href="10615.html">[次]</a><a href="../list/10601-10700.html">[番号順一覧]</a><a href="../thread/10601-10700.html">[スレッド一覧]</a></p>
+</body>
+</html>

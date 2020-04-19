@@ -1,0 +1,161 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11328</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11327.html">[前]</a><a href="11329.html">[次]</a><a href="../list/11301-11400.html">[番号順一覧]</a><a href="../thread/11301-11400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11328
+</p>
+<div class="header">
+<p>
+From: 柴垣　大樹 &lt;柴垣　大樹 &lt;sibagaki@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 15 Apr 2005 14:12:15 +0900<br>
+Subject: [mysql 11328] Re: レプリケーションについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+松下さんへ
+
+柴垣です。
+
+マスターは正常にシャットダウンさせました。
+
+レプリケーションできなくなった経緯は以下の通りです。
+
+21:05　マスターを再起動
+以下はマスターのログです。
+050414 21:05:57  mysqld started
+050414 21:05:57  InnoDB: Database was not shut down normally.
+InnoDB: Starting recovery from log files...
+InnoDB: Starting log scan based on checkpoint at
+InnoDB: log sequence number 0 3111453
+InnoDB: Doing recovery: scanned up to log sequence number 0 3111453
+InnoDB: Last MySQL binlog file position 0 628221, file name ./マスターのホス
+ト名-bin.003
+050414 21:05:58  InnoDB: Flushing modified pages from the buffer pool...
+050414 21:05:58  InnoDB: Started
+050414 21:05:58 Could not use マスターのホスト名-bin for logging (error 13).
+Turning logging off for the whole duration of th
+e MySQL server process. To turn it on again: fix the cause, shutdown the
+MySQL server and restart it.
+/usr/local/mysql/libexec/mysqld: ready for connections.
+Version: '4.0.24-max-log'  socket: '/tmp/mysql.sock'  port: 3306  Source
+distribution
+
+21:11　この時点でレプリケーションできなくなっていた。
+　　　　仕方がなかったのでこんどはスレーブのmysqlを再起動
+以下はスレーブのログです。
+050414 21:11:49  mysqld started
+050414 21:11:49  InnoDB: Database was not shut down normally.
+InnoDB: Starting recovery from log files...
+InnoDB: Starting log scan based on checkpoint at
+InnoDB: log sequence number 0 3173059
+InnoDB: Doing recovery: scanned up to log sequence number 0 3173059
+InnoDB: In a MySQL replication slave the last master binlog file
+InnoDB: position 0 628159, file name ichthyosaurus-bin.003
+050414 21:11:50  InnoDB: Flushing modified pages from the buffer pool...
+050414 21:11:50  InnoDB: Started
+050414 21:11:50 Slave SQL thread initialized, starting replication in log '
+マスターのホスト名-bin.003' at position 628221, re
+lay log './スレーブのホスト名-relay-bin.004' position: 628317
+050414 21:11:50 Slave I/O thread: connected to master
+'repl@xxxxxxxxxx:3306',  replication started in log 'マスターのホスト
+名-bin.003' at position 628221
+050414 21:11:50 Error reading packet from server: Binary log is not open
+(server_errno=1236)
+050414 21:11:50 Got fatal error 1236: 'Binary log is not open' from master
+when reading data from binary log
+050414 21:11:50 Slave I/O thread exiting, read up to log 'マスターのホスト
+名-bin.003', position 628221
+/usr/local/mysql/libexec/mysqld: ready for connections.
+Version: '4.0.24-max-log'  socket: '/tmp/mysql.sock'  port: 3306  Source
+distribution
+
+簡単に書くとこのような感じです。
+助言おねがいします。
+
+以上です。
+
+----- Original Message ----- 
+From: &quot;Ryuji Matsushita&quot; &lt;maturyu@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Friday, April 15, 2005 9:34 AM
+Subject: <a href="11326.html">[mysql 11326]</a> Re: レプリケーションについて
+
+
+<span class="quote1">&gt; 松下です</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; もう少し状況をお知らせください。</span>
+<span class="quote1">&gt; 下記のログはスレーブ側のログですよね。</span>
+<span class="quote1">&gt; マスター側のログはどのようになっていますか？</span>
+<span class="quote1">&gt; マスターがダウンとは正常にシャットダウンをした場合でしょうか？</span>
+<span class="quote1">&gt; ダウン時の挙動をマスター側、スレーブ側で時系列に整理してください。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; マスター側のバイナリーログがOPEN出来ないようですが</span>
+<span class="quote1">&gt; DBの設定とは異なるところに原因があるのではないでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 私のところでマスター側を再起動した時のログを貼付けます</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; 050415  9:25:42  Slave: received 0 length packet from server, apparent</span>
+master shutdown:
+<span class="quote1">&gt; ↑ここでマスター側をシャットダウン</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; 050415  9:25:42  Slave I/O thread: Failed reading log event,</span>
+reconnecting to retry, log 'ホスト名-bin.001' position XXXXXXX
+<span class="quote1">&gt; ↑当然バイナリーログが読めない</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; 050415  9:25:42  Slave I/O thread: error reconnecting to master 'ユー</span>
+ザー名@マスター側ホスト名:3306': Error: 'Lost connection to MySQL server
+during query'  errno: 2013  retry-time: 60  retries: 86400
+<span class="quote1">&gt; ↑スレーブ側で設定したマスタ側へのI/Oのユーザーが接続できない。再接続待</span>
+ち。
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; 050415  9:26:42  Slave: connected to master 'ユーザー名@マスター側ホスト</span>
+名:3306',replication resumed in log 'マスター側ホスト名-bin.001' at position
+XXXXXXXX
+<span class="quote1">&gt; ↑再接続完了</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; 050414 22:49:01 Error reading packet from server: Binary log is not open</span>
+<span class="quote2">&gt; &gt; (server_errno=1236)</span>
+<span class="quote2">&gt; &gt; 050414 22:49:01 Got fatal error 1236: 'Binary log is not open' from</span>
+master
+<span class="quote2">&gt; &gt; when reading data from binary log</span>
+<span class="quote2">&gt; &gt; 050414 22:49:01 Slave I/O thread exiting, read up to log 'ホスト</span>
+名-bin.003',
+<span class="quote2">&gt; &gt; position 628221</span>
+<span class="quote2">&gt; &gt; /usr/local/mysql/libexec/mysqld: ready for connections.</span>
+<span class="quote2">&gt; &gt; Version: '4.0.24-max-log'  socket: '/tmp/mysql.sock'  port: 3306  Source</span>
+<span class="quote2">&gt; &gt; distribution</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; +++++++++++++++++++++++++++++++++++++++++++++++++++</span>
+<span class="quote1">&gt;  Sony Digital Network Applications Inc.(SDNA)</span>
+<span class="quote1">&gt;  Navigation Track  Information System</span>
+<span class="quote1">&gt;  松下　龍士(Ryuji Matsushita) maturyu@xxxxxxxxxx</span>
+<span class="quote1">&gt; +++++++++++++++++++++++++++++++++++++++++++++++++++</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="11327.html">[前]</a><a href="11329.html">[次]</a><a href="../list/11301-11400.html">[番号順一覧]</a><a href="../thread/11301-11400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11324.html">  11324 2005-04-14 22:59 [柴垣　大樹 &lt;sibagaki] レプリケーションについて                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11326.html">  11326 2005-04-15 09:34 ┗[Ryuji Matsushita &lt;ma]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="11328.html">  11328 2005-04-15 14:12 　┗[柴垣　大樹 &lt;sibagaki]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11329.html">  11329 2005-04-15 15:32 　　┗[Ryuji Matsushita &lt;ma]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11330.html">  11330 2005-04-15 16:22 　　　┗[柴垣　大樹 &lt;sibagaki]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11331.html">  11331 2005-04-15 17:25 　　　　┗[Ryuji Matsushita &lt;ma]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11333.html">  11333 2005-04-18 14:08 　　　　　┗[柴垣　大樹 &lt;sibagaki]                             </a></span>
+</pre>
+</body>
+</html>

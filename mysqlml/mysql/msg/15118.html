@@ -1,0 +1,138 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15118</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15117.html">[前]</a><a href="15119.html">[次]</a><a href="../list/15101-15200.html">[番号順一覧]</a><a href="../thread/15101-15200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15118
+</p>
+<div class="header">
+<p>
+From: &quot;Eigo Mori&quot; &lt;&quot;Eigo Mori&quot; &lt;eigom@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 24 Dec 2009 17:17:27 +0900 (JST)<br>
+Subject: [mysql 15118] Re: バイナリデータの取り込みについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+
+<span class="quote2">&gt;&gt; pD == &quot;&quot;;　←消し忘れです。</span>
+
+だとしても、iidaさんのおっしゃるように
+
+<span class="quote2">&gt;&gt; strcpy(pD, sSqlData);</span>
+
+はうまくいかないのではないでしょうか。
+
+strcpy()は「文字列」をコピーする関数で一般的にバイナリデータをコピーするため
+には使えません。文字列の終端記号('\0')に相当するデータが見つかった時点でコピー
+をやめるのでは。。。ということをiidaさんが言ってるのかと。
+
+Regards,
+Eigo
+
+
+<span class="quote1">&gt; 岩崎と申します。</span>
+<span class="quote1">&gt; すいません。訂正です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; iida様　すいません消し忘れです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; 皆様　お世話になります。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 質問です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 今、私はファイルのバイナリデータをMySQLに取り込みたい</span>
+<span class="quote1">&gt; と</span>
+<span class="quote2">&gt;&gt; 思い悪戦苦闘しおります。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; LAN上でMySQL経由でバイナリファイルを共有したいと思い</span>
+<span class="quote2">&gt;&gt; VS2008 C++でアプリを組み、アプリ内でクエリを発行して</span>
+<span class="quote2">&gt;&gt; データをinsertしたいのですがうまくいきません。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 皆様のお知恵を拝借願えないでしょうか？</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; コードはこんな感じです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; FILE *pStream;</span>
+<span class="quote2">&gt;&gt; CString sPath1(&quot;G:\\file1.***&quot;); // 読込元のファイル</span>
+<span class="quote2">&gt;&gt; CString sPath2(&quot;G:\\file2.***&quot;); // 保存先のファイル</span>
+<span class="quote2">&gt;&gt; CString Sql; // Sqlクエリ</span>
+<span class="quote2">&gt;&gt; CString sSqlData; //</span>
+<span class="quote2">&gt;&gt; MySQLからselectで取り出したデータ</span>
+<span class="quote2">&gt;&gt; char pD[100000]; // ファイルの読み書き用</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; // ファイルの取得(読込モード)</span>
+<span class="quote2">&gt;&gt; fopen_s(&amp;pStream, sPath1, &quot;rb&quot;);</span>
+<span class="quote2">&gt;&gt; int n = fread(pD, sizeof(char), sizeof(pD),</span>
+<span class="quote2">&gt;&gt; pStream);</span>
+<span class="quote2">&gt;&gt; fclose(pStream);</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; // クエリの作成</span>
+<span class="quote2">&gt;&gt; Sql.Format(_T(</span>
+<span class="quote2">&gt;&gt; &quot;INSERT INTO eudc (id, eudc_data, count) &quot;</span>
+<span class="quote2">&gt;&gt; &quot;VALUES (0, '%s', n)&quot;</span>
+<span class="quote2">&gt;&gt; ), cData, n); ←　訂正 cData でなく pD です</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; // Sqlクエリの発行</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; // MySQLからのバイナリデータを取得</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; // char への変換</span>
+<span class="quote2">&gt;&gt; pD == &quot;&quot;;　←消し忘れです。</span>
+<span class="quote2">&gt;&gt; strcpy(pD, sSqlData);</span>
+<span class="quote2">&gt;&gt; // ファイルへの書き込み</span>
+<span class="quote2">&gt;&gt; fopen_s(&amp;pStream, sPath2, &quot;wb&quot;);</span>
+<span class="quote2">&gt;&gt; fwrite(pD, sizeof(char), n, pStream);</span>
+<span class="quote2">&gt;&gt; fclose(pStream);</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; freadでは、ちゃんと取得できてるようですが、</span>
+<span class="quote2">&gt;&gt; pDの先頭がNULLみたいでCStringに変換できません。</span>
+<span class="quote2">&gt;&gt; （%sのところにバイナリデータが入らない。）</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ちなみにテキストファイルの場合は、これで問題ないです。</span>
+<span class="quote2">&gt;&gt; 又、pDを触らずにそのまま別のファイルに書き込んでも</span>
+<span class="quote2">&gt;&gt; 大丈夫みたいです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 使用環境</span>
+<span class="quote2">&gt;&gt; OS　Windows Vista Ultimate SP2</span>
+<span class="quote2">&gt;&gt; 開発ツール　VS2008 C++</span>
+<span class="quote2">&gt;&gt; MySQL Ver5.1</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 以上、初歩的なことかもしれませんが、</span>
+<span class="quote2">&gt;&gt; よろしくお願いします。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; --------------------------------------</span>
+<span class="quote2">&gt;&gt; Get Disney character's mail address on Yahoo! Mail</span>
+<span class="quote2">&gt;&gt; <a href="http://pr.mail.yahoo.co.jp/disney/">http://pr.mail.yahoo.co.jp/disney/</a></span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --------------------------------------</span>
+<span class="quote1">&gt; Get Disney character's mail address on Yahoo! Mail</span>
+<span class="quote1">&gt; <a href="http://pr.mail.yahoo.co.jp/disney/">http://pr.mail.yahoo.co.jp/disney/</a></span>
+<span class="quote1">&gt;</span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15117.html">[前]</a><a href="15119.html">[次]</a><a href="../list/15101-15200.html">[番号順一覧]</a><a href="../thread/15101-15200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15105.html">  15105 2009-12-14 19:00 [Honda Takayuki &lt;hond] レプリケーションエラー(server id was not set)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15106.html">  15106 2009-12-14 20:26 ┗[Honda Takayuki &lt;hond]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15115.html">  15115 2009-12-24 15:54 　┗[岩崎　誠司 &lt;iwasaki_] バイナリデータの取り込みについて    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15116.html">  15116 2009-12-24 16:01 　　┣[&lt;y-iida@xxxxxxxxxx&gt; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15117.html">  15117 2009-12-24 16:25 　　┣[岩崎　誠司 &lt;iwasaki_]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="15118.html">  15118 2009-12-24 17:17 　　┃┗[&quot;Eigo Mori&quot; &lt;eigom@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15121.html">  15121 2009-12-24 19:45 　　┣[Yoshiaki Yanagimoto ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15122.html">  15122 2009-12-25 01:59 　　┗[ちさ &lt;admin@xxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15123.html">  15123 2009-12-25 12:18 　　　┗[岩崎　誠司 &lt;iwasaki_]                                 </a></span>
+</pre>
+</body>
+</html>

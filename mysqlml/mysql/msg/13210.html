@@ -1,0 +1,295 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13210</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13209.html">[前]</a><a href="13211.html">[次]</a><a href="../list/13201-13300.html">[番号順一覧]</a><a href="../thread/13201-13300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13210
+</p>
+<div class="header">
+<p>
+From: &quot;Hiro Yoshioka&quot; &lt;&quot;Hiro Yoshioka&quot; &lt;hyoshiok@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 3 Aug 2006 22:45:55 +0900<br>
+Subject: [mysql 13210] Re: character setの追加<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+よしおかです。
+
+お騒がせしております。
+
+Index.xmlで追加した定義のid番号(今回の例では、99と100)に
+対応する番号をctype-cp51932.cで変更しわすれていました。
+
+$ diff -u strings/ctype-cp51932.c~ strings/ctype-cp51932.c
+--- strings/ctype-cp51932.c~    2006-08-02 16:35:19.610169176 +0900
++++ strings/ctype-cp51932.c     2006-08-03 21:59:42.940496728 +0900
+@@ -8478,7 +8478,7 @@
+
+ CHARSET_INFO my_charset_cp51932_japanese_ci=
+ {
+-    97,0,0,            /* number       */
++    99,0,0,            /* number       */
+    MY_CS_COMPILED|MY_CS_PRIMARY,      /* state        */
+    &quot;cp51932&quot;,         /* cs name    */
+    &quot;cp51932_japanese_ci&quot;,     /* name         */
+@@ -8499,7 +8499,7 @@
+    1,                 /* caseup_multiply  */
+    1,                 /* casedn_multiply  */
+    1,                 /* mbminlen     */
+-    3,                 /* mbmaxlen     */
++    2,                 /* mbmaxlen     */
+    0,                 /* min_sort_char */
+    255,               /* max_sort_char */
+    ' ',               /* pad_char      */
+@@ -8511,7 +8511,7 @@
+
+ CHARSET_INFO my_charset_cp51932_bin=
+ {
+-    98,0,0,            /* number       */
++    100,0,0,           /* number       */
+    MY_CS_COMPILED|MY_CS_BINSORT,      /* state        */
+    &quot;cp51932&quot;,         /* cs name    */
+    &quot;cp51932_bin&quot;,             /* name         */
+@@ -8532,7 +8532,7 @@
+    1,                 /* caseup_multiply  */
+    1,                 /* casedn_multiply  */
+    1,                 /* mbminlen     */
+-    3,                 /* mbmaxlen     */
++    2,                 /* mbmaxlen     */
+    0,                 /* min_sort_char */
+    255,               /* max_sort_char */
+    ' ',               /* pad_char      */
+
+実行結果：
+mysql&gt; show character set like '%cp%';
++---------+-----------------------------------+---------------------+--------+
+<span class="quote1">| Charset | Description                       | Default collation   | Maxlen |</span>
++---------+-----------------------------------+---------------------+--------+
+<span class="quote1">| cp850   | DOS West European                 | cp850_general_ci    |      1 |</span>
+<span class="quote1">| cp1250  | Windows Central European          | cp1250_general_ci   |      1 |</span>
+<span class="quote1">| cp866   | DOS Russian                       | cp866_general_ci    |      1 |</span>
+<span class="quote1">| cp852   | DOS Central European              | cp852_general_ci    |      1 |</span>
+<span class="quote1">| cp1251  | Windows Cyrillic                  | cp1251_general_ci   |      1 |</span>
+<span class="quote1">| cp1256  | Windows Arabic                    | cp1256_general_ci   |      1 |</span>
+<span class="quote1">| cp1257  | Windows Baltic                    | cp1257_general_ci   |      1 |</span>
+<span class="quote1">| cp932   | SJIS for Windows Japanese         | cp932_japanese_ci   |      2 |</span>
+<span class="quote1">| cp51932 | EUC encoding for Windows Japanese | cp51932_japanese_ci |      2 |</span>
++---------+-----------------------------------+---------------------+--------+
+9 rows in set (0.01 sec)
+
+てな感じですかね。
+
+どうもありがとうございました。
+
+よ
+--
+Hiro Yoshioka
+CTO/Miracle Linux Corporation
+<a href="http://blog.miraclelinux.com/yume/">http://blog.miraclelinux.com/yume/</a>
+
+On 8/3/06, Hiro Yoshioka &lt;hyoshiok@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; 御世話になります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 何も考えずにadd_compiled_collationで追加しています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; $ diff -u mysys/charset-def.c~ mysys/charset-def.c</span>
+<span class="quote1">&gt; --- mysys/charset-def.c~        2005-12-22 04:39:55.000000000 +0900</span>
+<span class="quote1">&gt; +++ mysys/charset-def.c 2006-08-02 17:20:43.696045176 +0900</span>
+<span class="quote1">&gt; @@ -95,6 +95,11 @@</span>
+<span class="quote1">&gt;    add_compiled_collation(&amp;my_charset_cp932_bin);</span>
+<span class="quote1">&gt;  #endif</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; +#ifdef HAVE_CHARSET_cp51932</span>
+<span class="quote1">&gt; +  add_compiled_collation(&amp;my_charset_cp51932_japanese_ci);</span>
+<span class="quote1">&gt; +  add_compiled_collation(&amp;my_charset_cp51932_bin);</span>
+<span class="quote1">&gt; +#endif</span>
+<span class="quote1">&gt; +</span>
+<span class="quote1">&gt;  #ifdef HAVE_CHARSET_latin2</span>
+<span class="quote1">&gt;    add_compiled_collation(&amp;my_charset_latin2_czech_ci);</span>
+<span class="quote1">&gt;  #endif</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よ</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; On 8/3/06, Shuichi Tamagawa &lt;tamagawa@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote2">&gt; &gt; 玉川です。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; mysys/charset-def.c　あたりなどどうでしょうか。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 先ほどのメールでは書き忘れましたが、実はマニュアルに載っている</span>
+<span class="quote2">&gt; &gt; 内容は必ずしも十分ではなく、不足分をコメント欄に書いてありますので</span>
+<span class="quote2">&gt; &gt; こちらも参考にしていただければと思います。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; --</span>
+<span class="quote2">&gt; &gt; Shuichi Tamagawa</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; -----Original Message-----</span>
+<span class="quote3">&gt; &gt; &gt; From: Hiro Yoshioka [mailto:hyoshiok@xxxxxxxxxx]</span>
+<span class="quote3">&gt; &gt; &gt; Sent: Thursday, August 03, 2006 7:40 PM</span>
+<span class="quote3">&gt; &gt; &gt; To: ml@xxxxxxxxxx</span>
+<span class="quote3">&gt; &gt; &gt; Subject: <a href="13207.html">[mysql 13207]</a> Re: character setの追加</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; On 8/3/06, Shuichi Tamagawa &lt;tamagawa@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 玉川です。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; 御世話になります。</span>
+<span class="quote3">&gt; &gt; &gt; 早速のリプライありがとうございます。</span>
+<span class="quote3">&gt; &gt; &gt; 大変助かります。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; キャラクターセットの追加について、基本的な流れとしては</span>
+<span class="quote4">&gt; &gt; &gt; &gt; マニュアルにこんなページがあります（あまり知られていませんが）。</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; <a href="http://dev.mysql.com/doc/refman/5.0/en/adding-character-set.html">http://dev.mysql.com/doc/refman/5.0/en/adding-character-set.html</a></span>
+<span class="quote4">&gt; &gt; &gt; &gt; <a href="http://dev.mysql.com/doc/refman/4.1/en/adding-character-set.html">http://dev.mysql.com/doc/refman/4.1/en/adding-character-set.html</a></span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; こちらを参考にしてみて下さい。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; おお、参考になります。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; しかし、</span>
+<span class="quote3">&gt; &gt; &gt; mysql&gt; show character set;</span>
+<span class="quote3">&gt; &gt; &gt; で追加した文字コードが出てこないということは</span>
+<span class="quote3">&gt; &gt; &gt; mysqldあたりにちゃんと組み込まれていない</span>
+<span class="quote3">&gt; &gt; &gt; という感じなんでしょうか？</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; strings mysqld|grep cp51932</span>
+<span class="quote3">&gt; &gt; &gt; とかして実際に組み込まれているのを</span>
+<span class="quote3">&gt; &gt; &gt; 確認してみたりしています。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; BUILD/autorun.sh</span>
+<span class="quote3">&gt; &gt; &gt; で、m4あたりからのconfigure fileやMakefileの</span>
+<span class="quote3">&gt; &gt; &gt; 生成は成功していて、configureやmakeも特に問題は</span>
+<span class="quote3">&gt; &gt; &gt; なさそうです。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; Index.xmlがトリッキーかと思ったのですが、</span>
+<span class="quote3">&gt; &gt; &gt; $ diff -u sql/share/charsets/Index.xml.orig</span>
+<span class="quote3">&gt; &gt; &gt; sql/share/charsets/Index.xml</span>
+<span class="quote3">&gt; &gt; &gt; --- sql/share/charsets/Index.xml.orig   2005-12-22</span>
+<span class="quote3">&gt; &gt; &gt; 04:50:18.000000000 +0900</span>
+<span class="quote3">&gt; &gt; &gt; +++ sql/share/charsets/Index.xml        2006-08-03</span>
+<span class="quote3">&gt; &gt; &gt; 12:59:38.874663512 +0900</span>
+<span class="quote3">&gt; &gt; &gt; @@ -1,6 +1,6 @@</span>
+<span class="quote3">&gt; &gt; &gt;  &lt;?xml version='1.0' encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; -&lt;charsets max-id=&quot;98&quot;&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +&lt;charsets max-id=&quot;100&quot;&gt;</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt;  &lt;copyright&gt;</span>
+<span class="quote3">&gt; &gt; &gt;   Copyright (C) 2003 MySQL AB</span>
+<span class="quote3">&gt; &gt; &gt; @@ -589,5 +589,19 @@</span>
+<span class="quote3">&gt; &gt; &gt;    &lt;/collation&gt;</span>
+<span class="quote3">&gt; &gt; &gt;  &lt;/charset&gt;</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; +&lt;charset name=&quot;cp51932&quot;&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +  &lt;family&gt;Japanese&lt;/family&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +  &lt;description&gt;EUC encoding for Windows Japanese&lt;/description&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +  &lt;alias&gt;cp51932&lt;/alias&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +  &lt;collation name=&quot;cp51932_japanese_ci&quot;    id=&quot;99&quot; order=&quot;Japanese&quot;&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +    &lt;flag&gt;primary&lt;/flag&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +    &lt;flag&gt;compiled&lt;/flag&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +  &lt;/collation&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +  &lt;collation name=&quot;cp51932_bin&quot;    id=&quot;100&quot; order=&quot;Japanese&quot;&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +    &lt;flag&gt;binary&lt;/flag&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +    &lt;flag&gt;compiled&lt;/flag&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +  &lt;/collation&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +&lt;/charset&gt;</span>
+<span class="quote3">&gt; &gt; &gt; +</span>
+<span class="quote3">&gt; &gt; &gt;  &lt;/charsets&gt;</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; と言う感じです。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; よ</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; --</span>
+<span class="quote4">&gt; &gt; &gt; &gt; Shuichi Tamagawa</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; -----Original Message-----</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; From: Hiro Yoshioka [mailto:hyoshiok@xxxxxxxxxx]</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; Sent: Thursday, August 03, 2006 5:53 PM</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; To: ml@xxxxxxxxxx</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; Subject: <a href="13205.html">[mysql 13205]</a> character setの追加</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; よしおかと申します。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; MySQLの実装の質問はここでよろしいのでしょうか？</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 別に適切な場所がありましたら、お手数ですが、教えてください。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; （本家の英語のメーリングリストでもいいですが）</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 質問というのは、デフォルトでサポートされているエンコーディングを</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 拡張しようと考えています。具体的には cp51932というエンコーディングを</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 実装しようとしています。（EUC的なエンコーディングでcp932のレパートリ</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; なんですが、eucjpmsと違い補助漢字をサポートしない）</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; <a href="http://legacy-encoding.sourceforge.jp/wiki/">http://legacy-encoding.sourceforge.jp/wiki/</a></span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; で、ごりごりソースをハックしております。基本的な流れとして</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; eucjpmsを参考に、ctype-cp51932.c みたいなファイルを作成し、</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; そこに各種ルーチンをとじこめる。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; character_sets.m4 にコンパイルルールを追加する。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; INSTALL-SOURCEを良く読む。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; BUILD/autorun.sh でaclocal;autoheader ...相当のことをする</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; ./configure --prefix=/usr/local/mysql --with-charset=utf8</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;       --with-extra-charsets=complex;date</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; make</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; make install</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; で</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; mysql&gt; show character set;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; で追加したキャラクタセットがでてくればめでたしめでたしなんですが</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; どうもうまく出てきません。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; なにか根本的に勘違いをしていますでしょうか？</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; よ</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; --</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; <a href="http://d.hatena.ne.jp/hyoshiok/">http://d.hatena.ne.jp/hyoshiok/</a></span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; <a href="http://blog.miraclelinux.com/yume/">http://blog.miraclelinux.com/yume/</a></span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; mailto:hyoshiok@xxxxxxxxxx</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; --</span>
+<span class="quote3">&gt; &gt; &gt; <a href="http://d.hatena.ne.jp/hyoshiok/">http://d.hatena.ne.jp/hyoshiok/</a></span>
+<span class="quote3">&gt; &gt; &gt; <a href="http://blog.miraclelinux.com/yume/">http://blog.miraclelinux.com/yume/</a></span>
+<span class="quote3">&gt; &gt; &gt; mailto:hyoshiok@xxxxxxxxxx</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; <a href="http://d.hatena.ne.jp/hyoshiok/">http://d.hatena.ne.jp/hyoshiok/</a></span>
+<span class="quote1">&gt; <a href="http://blog.miraclelinux.com/yume/">http://blog.miraclelinux.com/yume/</a></span>
+<span class="quote1">&gt; mailto:hyoshiok@xxxxxxxxxx</span>
+<span class="quote1">&gt;</span>
+
+
+-- 
+<a href="http://d.hatena.ne.jp/hyoshiok/">http://d.hatena.ne.jp/hyoshiok/</a>
+<a href="http://blog.miraclelinux.com/yume/">http://blog.miraclelinux.com/yume/</a>
+mailto:hyoshiok@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="13209.html">[前]</a><a href="13211.html">[次]</a><a href="../list/13201-13300.html">[番号順一覧]</a><a href="../thread/13201-13300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13205.html">  13205 2006-08-03 17:53 [&quot;Hiro Yoshioka&quot; &lt;hyo] character setの追加                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13206.html">  13206 2006-08-03 18:55 ┗[&quot;Shuichi Tamagawa&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13207.html">  13207 2006-08-03 19:39 　┗[&quot;Hiro Yoshioka&quot; &lt;hyo]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13208.html">  13208 2006-08-03 20:56 　　┗[&quot;Shuichi Tamagawa&quot; &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13209.html">  13209 2006-08-03 22:04 　　　┗[&quot;Hiro Yoshioka&quot; &lt;hyo]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="13210.html">  13210 2006-08-03 22:45 　　　　┗[&quot;Hiro Yoshioka&quot; &lt;hyo]                               </a></span>
+</pre>
+</body>
+</html>

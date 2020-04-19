@@ -1,0 +1,104 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9923</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9922.html">[前]</a><a href="9924.html">[次]</a><a href="../list/9901-10000.html">[番号順一覧]</a><a href="../thread/9901-10000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9923
+</p>
+<div class="header">
+<p>
+From: yoshiyama akihiko &lt;yoshiyama akihiko &lt;yoshiyama@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 29 Jul 2004 11:00:17 +0900<br>
+Subject: [mysql 09923] Re: 芋づる式検索について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+松枝さんこんにちは。
+
+私が実現したいと思ったことは、松枝さんがおっしゃっているように
+幾つの過程を経て変化するのがわからないケースに該当します。
+大変参考になります。ありがとうございました。
+
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 　３過程(a-&gt;b, b-&gt;c, c-&gt;NULL)で変化するのが確定なら、検出するのは比較的</span>
+<span class="quote1">&gt; 簡単でしょう。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ----定義と初期化(一回限り実行)----</span>
+<span class="quote1">&gt; create table test08 (before char(1),after char(1));</span>
+<span class="quote1">&gt; insert into test08(before,after) values('a','b');</span>
+<span class="quote1">&gt; insert into test08(before,after) values('b','c');</span>
+<span class="quote1">&gt; insert into test08(before,after) values('c',NULL);</span>
+<span class="quote1">&gt; ----実行----</span>
+<span class="quote1">&gt; select s0.before,s1.before,s2.before,s2.after</span>
+<span class="quote2">&gt; &gt;from test08 as s0 inner join</span>
+<span class="quote1">&gt;     (test08 as s1 inner join test08 as s2 on s1.after=s2.before)</span>
+<span class="quote1">&gt;     on s0.after=s1.before</span>
+<span class="quote1">&gt; where s0.before='a' and s2.after is NULL;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 　速度的にお勧め出来るかは別問題です。インデックスを付けたとしてもレコー</span>
+<span class="quote1">&gt; ド数の三乗に比例して時間が掛かるでしょう。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 　幾つの過程を経て変化するのかが分からない場合、１発のクエリで行うのは無</span>
+<span class="quote1">&gt; 理でしょう。クエリを乱発する必要があるでしょうね。DBMSの種類やバージョン</span>
+<span class="quote1">&gt; 依存で良いのであれば、こんな感じで出来る事は出来ます。一応、循環(a-&gt;b、</span>
+<span class="quote1">&gt; b-&gt;aの様な）や分岐（a-&gt;b、a-&gt;dの２つがある）も考慮しています。過程数には、</span>
+<span class="quote1">&gt; textの文字列長の制限があります（超過すると永久ループ）。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ----定義と初期化(一回限り実行)----</span>
+<span class="quote1">&gt; create table tmp08 (str text,next char(1),steps int);</span>
+<span class="quote1">&gt; set @_first='a';</span>
+<span class="quote1">&gt; insert into tmp08 (str,next,steps)</span>
+<span class="quote1">&gt;   select @_first,after,1</span>
+<span class="quote1">&gt;   from test08</span>
+<span class="quote1">&gt;   where before=@_first;</span>
+<span class="quote1">&gt; ----実行----</span>
+<span class="quote1">&gt; select @_maxsteps:=max(steps) from tmp08;</span>
+<span class="quote1">&gt; insert into tmp08 (str,next,steps) </span>
+<span class="quote1">&gt;   select concat(tmp08.str,test08.before) as newstr</span>
+<span class="quote1">&gt;     ,test08.after as newnext,steps+1 as newsteps</span>
+<span class="quote1">&gt;   from tmp08,test08</span>
+<span class="quote1">&gt;   where tmp08.next=test08.before and tmp08.steps=@_maxsteps </span>
+<span class="quote1">&gt;     and test08.before &lt;&gt; @_first;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 　新規挿入されるレコードがある、あるいはtmp08.nextがNULLのレコードが存在</span>
+<span class="quote1">&gt; しない間は、「実行」の部分のクエリ２発を繰り返し発行します。変化するしな</span>
+<span class="quote1">&gt; いの判定は tmp08.nextがNULLのレコードが存在するかしないかで行います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 　MySQL変数の@_firstと@_maxlenを言語の変数に取る方がまだしも一般形でしょ</span>
+<span class="quote1">&gt; うか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 　　　　松枝知直　　　　&lt;tomom@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; 　　　　　　　　　　　　<a href="http://www.argus.ne.jp/~tomom/">http://www.argus.ne.jp/~tomom/</a></span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+株式会社　ハウインターナショナル
+ソフトウェア開発部
+吉山　彰彦
+
+福岡県飯塚市幸袋560-8 I.B.Court
+tel: 0948-26-3800　fax: 0948-26-3802
+e-mail: yoshiyama@xxxxxxxxxx
+url: <a href="http://www.haw.co.jp/">http://www.haw.co.jp/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="9922.html">[前]</a><a href="9924.html">[次]</a><a href="../list/9901-10000.html">[番号順一覧]</a><a href="../thread/9901-10000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9906.html">   9906 2004-07-28 13:26 [yoshiyama akihiko &lt;y] 芋づる式検索について                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9913.html">   9913 2004-07-28 17:13 ┗[ML account &lt;ml@xxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="9923.html">   9923 2004-07-29 11:00 　┗[yoshiyama akihiko &lt;y]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9925.html">   9925 2004-07-29 13:09 　　┗[SAITO Masaru &lt;daisai]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9927.html">   9927 2004-07-29 14:53 　　　┗[ML account &lt;ml@xxxxx]                                 </a></span>
+</pre>
+</body>
+</html>

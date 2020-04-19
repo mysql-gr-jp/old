@@ -1,0 +1,126 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12834</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12833.html">[前]</a><a href="12835.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12834
+</p>
+<div class="header">
+<p>
+From: Hidenori Makabe &lt;Hidenori Makabe &lt;wall@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 02 Mar 2006 19:28:20 +0900 (JST)<br>
+Subject: [mysql 12834] Re: ダンプファイルの文字化け<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、いつも勉強になっております。
+先日似たような問題にひっかかりましたのでその時の解決手順を
+
+3.22.58(MySQL dump 8.23)でdumpしたものを
+4.1.18に読み込ませて使っていて、さらに
+mysqldumpした時に文字が化けてしまいはまりました。
+
+<span class="quote1">&gt; ダンプファイルの文字の文字コードは何なのか？</span>
+
+これは壊れていて使い物にならないと思います。
+
+<span class="quote1">&gt; ダンプファイルの文字化けを直すためにはどうすればいいのか？</span>
+
+検索してみて次の文章などに行きあたりました。
+
+<a href="../../../frame/modules/bwiki/index.html%3FFAQ.html#content_1_45">http://www.mysql.gr.jp/frame/modules/bwiki/?FAQ#content_1_45</a> (この前後の文章為になります。)
+<a href="http://iandeth.dyndns.org/mt/ian/archives/000108.html">http://iandeth.dyndns.org/mt/ian/archives/000108.html</a>
+
+my.cnf にて次の指定をすることでおちつきました。
+---
+[mysqldump] 
+default-character-set=latin1
+---
+
+テーブル作成時にcharacter-set=ujisにしておけば
+ここをujisにするのが美しいのかなとも思っておりますが
+まだそちらはテストしておりません。
+
+真壁秀宗
+
+--- you wrote ---
+From: sakamoto &lt;sakamoto@xxxxxxxxxx&gt;
+Date: Thu, 02 Mar 2006 11:00:09 +0900
+
+<span class="quote1">&gt; 初めまして。いつも参考にさせていただいています。</span>
+<span class="quote1">&gt; 坂本と申します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 先程、Unicodeにてメールを送信してしまいました。</span>
+<span class="quote1">&gt; メーリングリストに参加している皆様、管理者の方、ご迷惑をかけてしまって本</span>
+<span class="quote1">&gt; 当にすいませんでした。</span>
+<span class="quote1">&gt; 以後このようなことがないように注意します。</span>
+<span class="quote1">&gt; 先程送った内容は以下の通りです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysqldumpを使ってダンプファイルを作成したときに文字化けしてしまう問題が</span>
+<span class="quote1">&gt; 発生しました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ブラウザからmysqlにデ-タを入力するPHPページを作りました。(ブラウザでの文</span>
+<span class="quote1">&gt; 字コードはEUC)</span>
+<span class="quote1">&gt; さらにその入力したデータをデータベースから取得してブラウザに出力するPHP</span>
+<span class="quote1">&gt; ページを作成しました。(ブラウザでの文字コードはEUC)</span>
+<span class="quote1">&gt; この時ブラウザ上では出力されたデータは文字化けしていませんでした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; データベースのバックアップをとるためにmysqldumpコマンドを使いダンプファ</span>
+<span class="quote1">&gt; イルを作成しました。</span>
+<span class="quote1">&gt; mysqldump -u root -p test_database &gt; test_database.dump</span>
+<span class="quote1">&gt; その後そのダンプファイルを使いデータベースを復元するとブラウザ上からデー</span>
+<span class="quote1">&gt; タを取得していた時に文字化けしていました。</span>
+<span class="quote1">&gt; ここでダンプファイルん中身を確認してみるとターミナルの文字コードをEUC-</span>
+<span class="quote1">&gt; JP,UTF8,S-JISとかえてみても文字化けしていました。</span>
+<span class="quote1">&gt; なおcreate database, creaet tableでDEFAULT CHARSETを確認したところいずれ</span>
+<span class="quote1">&gt; もlatin1となっていました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ダンプファイルの文字化けしている入力したデータ「 testしけん試験シケン 」</span>
+<span class="quote1">&gt; というデータの部分にodコマンドを実行すると以下のような結果となりました。</span>
+<span class="quote1">&gt; 0000000 t e s t ~ O &quot; p ? ~ O &quot; p ! ^ ~</span>
+<span class="quote1">&gt; 6574 7473 4f7e f0a2 7e3f a24f a1f0 7ede</span>
+<span class="quote1">&gt; 0000020 O &quot; p ~ O + Q ? ~ O + B ~ O &quot; 1</span>
+<span class="quote1">&gt; a24f 7ef0 ab4f 3fd1 4f7e c2ab 4f7e b1a2</span>
+<span class="quote1">&gt; 0000040 ? \ ~ N \ \ ? \ ~ N \ \ ! ^ \ ~</span>
+<span class="quote1">&gt; 5c3f 4e7e 5c5c 5c3f 4e7e 5c5c dea1 7e5c</span>
+<span class="quote1">&gt; 0000060 N \ \ ~ O + Q nl</span>
+<span class="quote1">&gt; 5c4e 7e5c ab4f 0ad1</span>
+<span class="quote1">&gt; 0000070</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ダンプファイルの文字の文字コードは何なのか？</span>
+<span class="quote1">&gt; ダンプファイルの文字化けを直すためにはどうすればいいのか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; この2点、わかる方ご教授お願いいたします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 環境</span>
+<span class="quote1">&gt; create database:DEFAULT CHARSET=latin1</span>
+<span class="quote1">&gt; creaet tale:DEFAULT CHARSET=latin1</span>
+<span class="quote1">&gt; OS：CentOS</span>
+<span class="quote1">&gt; mysql 4.1.12</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql&gt; show variables like 'character\_set\_%';</span>
+<span class="quote1">&gt; Variable_name | Value</span>
+<span class="quote1">&gt; character_set_client | ujis character_set_connection | ujis</span>
+<span class="quote1">&gt; character_set_database | ujis character_set_results | ujis</span>
+<span class="quote1">&gt; character_set_server | ujis character_set_system | utf8</span>
+<span class="quote1">&gt; よろしくお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+</pre>
+</div>
+<p class="button"><a href="12833.html">[前]</a><a href="12835.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12833.html">  12833 2006-03-02 11:00 [sakamoto &lt;sakamoto@x] ダンプファイルの文字化け                </a></span>
+<span class="current">-&gt;&nbsp;<a href="12834.html">  12834 2006-03-02 19:28 ┗[Hidenori Makabe &lt;wal]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12835.html">  12835 2006-03-02 23:04 　┗[sakamoto &lt;sakamoto@x]                                     </a></span>
+</pre>
+</body>
+</html>

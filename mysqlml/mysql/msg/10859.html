@@ -1,0 +1,122 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10859</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="10858.html">[前]</a><a href="10860.html">[次]</a><a href="../list/10801-10900.html">[番号順一覧]</a><a href="../thread/10801-10900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10859
+</p>
+<div class="header">
+<p>
+From: umemoto &lt;umemoto &lt;umemoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 31 Jan 2005 18:52:54 +0900<br>
+Subject: [mysql 10859] Full-Textによる全文検索について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+いつもお世話になっております。
+うめもとです。
+
+Full-Textを用いた全文検索についての質問を致します。
+
+以下の１．のテーブルに対して、A．B．のような結果を得たいのですが、B．の結果を
+得る手段が思い浮かびません。どなたか、ご存知でしたら教えて頂けませんでしょうか。
+また、A.の方法以外で同じ結果を得られ、より処理速度の速いSQL文をご存知の方おりま
+したらお教え頂けませんでしょうか。
+
+A．サーチワードを「test」とし、サーチワードを含む行のカウント数でのソートを行う。
+B．サーチワードを「test」とし、ドキュメント内にtestをより多く含んでいるレコード
+　 順でのソートを行う。
+
+１．SELECT * FROM article;
++----+------------------------------+------------------------------------------+
+<span class="quote1">| id | title                        | body                                     |</span>
++----+------------------------------+------------------------------------------+
+<span class="quote1">|  1 | MySQL Tutorial               | DBMS stands for DataBase ...             |</span>
+<span class="quote1">|  2 | How To Use MySQL Efficiently | After you went through a ...             |</span>
+<span class="quote1">|  3 | Optimizing MySQL             | In this tutorial we will show ...        |</span>
+<span class="quote1">|  4 | 1001 MySQL Tricks            | 1. Never run mysqld as root. 2. ...      |</span>
+<span class="quote1">|  5 | MySQL vs. YourSQL            | In the following database comparison ... |</span>
+<span class="quote1">|  6 | MySQL Security               | When configured properly, MySQL ...      |</span>
+<span class="quote1">|  7 | test                         | test                                     |</span>
+<span class="quote1">|  8 | test                         | test test                                |</span>
+<span class="quote1">|  9 | test                         | test test test                           |</span>
+<span class="quote1">| 10 | test                         | test test test test                      |</span>
+<span class="quote1">| 11 | test                         | test test test test test                 |</span>
+<span class="quote1">| 12 | test                         | test test test test test test            |</span>
+<span class="quote1">| 13 | test                         | test test test test test test test       |</span>
+<span class="quote1">| 14 | test                         | test test test test test test test test  |</span>
+<span class="quote1">| 15 | aaaa                         | aaaa                                     |</span>
+<span class="quote1">| 16 | bbbb                         | bbbbb                                    |</span>
+<span class="quote1">| 17 | bbbb                         | ccccc                                    |</span>
+<span class="quote1">| 18 | bbbb                         | ddddd                                    |</span>
+<span class="quote1">| 19 | test                         | test test                                |</span>
+<span class="quote1">| 20 | test                         | test test                                |</span>
++----+------------------------------+------------------------------------------+
+
+２．サーチワードを「test」とし、サーチワードを含む行のカウント数でのソートを行う。
+SELECT id,body,count(body LIKE ('%test%')) AS ct FROM articles WHERE MATCH (title,body) AGAINST ('test' IN BOOLEAN MODE) AND body LIKE ('%test%') GROUP BY body ORDER BY ct DESC;
++----+-----------------------------------------+----+
+<span class="quote1">| id | body                                    | ct |</span>
++----+-----------------------------------------+----+
+<span class="quote1">|  8 | test test                               |  3 |</span>
+<span class="quote1">|  7 | test                                    |  1 |</span>
+<span class="quote1">|  9 | test test test                          |  1 |</span>
+<span class="quote1">| 10 | test test test test                     |  1 |</span>
+<span class="quote1">| 11 | test test test test test                |  1 |</span>
+<span class="quote1">| 12 | test test test test test test           |  1 |</span>
+<span class="quote1">| 13 | test test test test test test test      |  1 |</span>
+<span class="quote1">| 14 | test test test test test test test test |  1 |</span>
++----+-----------------------------------------+----+
+
+３．サーチワードを「test」とし、ドキュメント内にtestをより多く含んでいるレコード
+　　順でのソートを行う。
++----+------------------------------+------------------------------------------+
+<span class="quote1">| id | title                        | body                                     |</span>
++----+------------------------------+------------------------------------------+
+<span class="quote1">| 14 | test                         | test test test test test test test test  |</span>
+<span class="quote1">| 13 | test                         | test test test test test test test       |</span>
+<span class="quote1">| 12 | test                         | test test test test test test            |</span>
+<span class="quote1">| 11 | test                         | test test test test test                 |</span>
+<span class="quote1">| 10 | test                         | test test test test                      |</span>
+<span class="quote1">|  9 | test                         | test test test                           |</span>
+<span class="quote1">|  8 | test                         | test test                                |</span>
+<span class="quote1">| 19 | test                         | test test                                |</span>
+<span class="quote1">| 20 | test                         | test test                                |</span>
+<span class="quote1">|  7 | test                         | test                                     |</span>
++----+------------------------------+------------------------------------------+
+
+【テーブルデータ】
+DROP TABLE IF EXISTS `articles`;
+CREATE TABLE `articles` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `title` varchar(200) default NULL,
+  `body` text,
+  PRIMARY KEY  (`id`),
+  FULLTEXT KEY `title` (`title`,`body`)
+) ENGINE=MyISAM DEFAULT CHARSET=sjis;
+
+LOCK TABLES `articles` WRITE;
+INSERT INTO `articles` VALUES (1,'MySQL Tutorial','DBMS stands for DataBase ...'
+),(2,'How To Use MySQL Efficiently','After you went through a ...'),(3,'Optimizi
+ng MySQL','In this tutorial we will show ...'),(4,'1001 MySQL Tricks','1. Never
+run mysqld as root. 2. ...'),(5,'MySQL vs. YourSQL','In the following database c
+omparison ...'),(6,'MySQL Security','When configured properly, MySQL ...'),(7,'t
+est','test'),(8,'test','test test'),(9,'test','test test test'),(10,'test','test
+ test test test'),(11,'test','test test test test test'),(12,'test','test test t
+est test test test'),(13,'test','test test test test test test test'),(14,'test'
+,'test test test test test test test test'),(15,'aaaa','aaaa'),(16,'bbbb','bbbbb
+'),(17,'bbbb','ccccc'),(18,'bbbb','ddddd'),(19,'test','test test'),(20,'test','t
+est test');
+UNLOCK TABLES;
+
+</pre>
+</div>
+<p class="button"><a href="10858.html">[前]</a><a href="10860.html">[次]</a><a href="../list/10801-10900.html">[番号順一覧]</a><a href="../thread/10801-10900.html">[スレッド一覧]</a></p>
+</body>
+</html>

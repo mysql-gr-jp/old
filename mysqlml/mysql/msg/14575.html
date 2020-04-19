@@ -1,0 +1,131 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14575</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14574.html">[前]</a><a href="14576.html">[次]</a><a href="../list/14501-14600.html">[番号順一覧]</a><a href="../thread/14501-14600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14575
+</p>
+<div class="header">
+<p>
+From: Mikiya Okuno &lt;Mikiya Okuno &lt;okuno@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 23 May 2008 19:49:30 +0900<br>
+Subject: [mysql 14575] Re: Can't connect to local MySQL server through socket   (146)のエラーについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんばんは。奥野です。
+
+荒井さん、以下のことについて調べてみて下さい。
+
+mysqld が使用するファイルディスクリプタ数は十分でしょうか？
+ソケットを開く場合、mysqld もファイルディスクリプタをひとつ
+消費します。ファイルディスクリプタ数が足りないと接続を
+確立することが出来ません。
+
+myslqd のエラーログには何も出力されてないでしょうか？
+mysqld が意図的にコネクションをクローズした場合は
+何らかのエラーログが記録されているかも知れません。
+
+上記以外の場合は DTrace で追跡するしかないですね。
+とりあえず DTrace Toolkit の opensnooop でも使ってみましょう。
+--
+Mikiya Okuno
+Support Engineer, MySQL KK
+
+On 2008/05/23, at 19:11, junya_arai wrote:
+<span class="quote1">&gt; お世話になっております。荒井です。</span>
+<span class="quote1">&gt; ご指摘の通り、エラー番号146は、connectシステムコールが</span>
+<span class="quote1">&gt; 接続の拒否によって失敗した場合に発生すると認識しております。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; 146 ECONNREFUSED</span>
+<span class="quote2">&gt;&gt;   * 接続が拒否されました。</span>
+<span class="quote2">&gt;&gt;   * 相手側マシンにより拒否されたので、接続を確立できませんでした。</span>
+<span class="quote2">&gt;&gt;     通常この状態は、リモートホスト上でアクティブになっていないサービスに接続しようとした場合に発生します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 146 ECONNREFUSEDが発生した時間に、別の常駐プロセスは接続できているため、mysqlは正常に動作していると</span>
+<span class="quote1">&gt; 考えられます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; また、ソケット接続のlistenの待ちキューのback_logが溢れた場合に</span>
+<span class="quote1">&gt; 146 ECONNREFUSEDが発生すると思いますが、</span>
+<span class="quote1">&gt; mysqlのback_logの設定値を調べた結果、50に設定されており、</span>
+<span class="quote1">&gt; サーバ側でlistenしているキューの数が足りずに接続拒否になったとは、考えづらく思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 以上調査した2ケースからは、接続拒否となった原因にたどり着けない状況です。</span>
+<span class="quote1">&gt; そのため、他にエラー番号146が発生するケースについて、手がかりを探しています。 </span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ご存知の方、手がかりをお持ちの方がおりましたら、ご教授頂きたく思います。</span>
+<span class="quote1">&gt; よろしくお願いします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; 池田です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 追記です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; すみません、タイトルにエラーメッセージ書いてありましたね。</span>
+<span class="quote2">&gt;&gt; 手元にSolarisマシンがないので146番が以下であると気づくのが遅れました。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 146 ECONNREFUSED</span>
+<span class="quote2">&gt;&gt;   * 接続が拒否されました。</span>
+<span class="quote2">&gt;&gt;   * 相手側マシンにより拒否されたので、接続を確立できませんでした。</span>
+<span class="quote2">&gt;&gt;     通常この状態は、リモートホスト上でアクティブになっていないサービスに接続しようとした場合に発生します。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 2008/05/21 18:48 Tetsuro IKEDA &lt;ikdttr@xxxxxxxxxx&gt;:</span>
+<span class="quote3">&gt;&gt;&gt; 池田です。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; エラー番号146とのことですが、番号だけでなくメッセージも教えてください。</span>
+<span class="quote3">&gt;&gt;&gt; 例えばこんな感じ↓↓で出力されたメッセージそのものをコピペしてもらえれば。 エラーメッセージは割とソース解析の手がかりになります。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; ERROR 2002 (HY000): Can't connect to local MySQL server through socket</span>
+<span class="quote3">&gt;&gt;&gt; '/tmp/mysql.sock' (2)</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 以下のようにconnectシステムコールが失敗しているとのことですが、根拠は何ですか？</span>
+<span class="quote3">&gt;&gt;&gt; （単なる推測でしょうか？あるいは他に何か情報をお持ちですか？）</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 疑問点：</span>
+<span class="quote4">&gt;&gt;&gt;&gt; おそらく、mysql_real_connectライブラリーの中でのconnectシステムコールが</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 失敗していると思いますが、なぜ146になるのかわかりません。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; mysqldがlistenするUnixソケット用キューの数はback_logで指定した値</span>
+<span class="quote3">&gt;&gt;&gt; （デフォルト値=50)だと思います。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; sql/mysqld.cc:    if (listen(unix_sock,(int) back_log) &lt; 0)</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; １、mysqldでlistenしているUnix ソケット用キューの数は幾つでしょうか？</span>
+<span class="quote4">&gt;&gt;&gt;&gt;  mysqlのソース調査して見たのですが、よく分かりません。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 勘違いだったらすみません。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; --</span>
+<span class="quote3">&gt;&gt;&gt; Tritonn <a href="http://qwik.jp/tritonn/">http://qwik.jp/tritonn/</a></span>
+<span class="quote3">&gt;&gt;&gt; hatena <a href="http://d.hatena.ne.jp/mir/">http://d.hatena.ne.jp/mir/</a></span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; -- </span>
+<span class="quote2">&gt;&gt; Tritonn <a href="http://qwik.jp/tritonn/">http://qwik.jp/tritonn/</a></span>
+<span class="quote2">&gt;&gt; hatena <a href="http://d.hatena.ne.jp/mir/">http://d.hatena.ne.jp/mir/</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="14574.html">[前]</a><a href="14576.html">[次]</a><a href="../list/14501-14600.html">[番号順一覧]</a><a href="../thread/14501-14600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14566.html">  14566 2008-05-21 20:37 [&quot;junya_arai&quot; &lt;j.arai] Can't connect to local MySQL server through socket  (146)のエラーについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14567.html">  14567 2008-05-22 10:48 ┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14568.html">  14568 2008-05-22 11:09 　┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14574.html">  14574 2008-05-23 19:11 　　┗[&quot;junya_arai&quot; &lt;j.arai]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="14575.html">  14575 2008-05-23 19:49 　　　┗[Mikiya Okuno &lt;okuno@]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14585.html">  14585 2008-05-28 11:37 　　　　┗[&quot;junya_arai&quot; &lt;j.arai]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14586.html">  14586 2008-05-28 12:04 　　　　　┗[Mikiya Okuno &lt;okuno@]                             </a></span>
+</pre>
+</body>
+</html>

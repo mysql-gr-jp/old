@@ -1,0 +1,184 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7874</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7873.html">[前]</a><a href="7875.html">[次]</a><a href="../list/7801-7900.html">[番号順一覧]</a><a href="../thread/7801-7900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7874
+</p>
+<div class="header">
+<p>
+From: Shinya Kawaji &lt;Shinya Kawaji &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 04 Jun 2003 11:08:57 +0900<br>
+Subject: [mysql 07874] Re: 日付検索について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+かわじ、です。
+
+余計なことをいくつか書いていますが、結論は後半の方にあります。
+
+
+<span class="quote1">&gt; 今回、新たにSQL文についてお聞きしたい事があります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; CREATE TABLE date_tb (</span>
+<span class="quote1">&gt;   date_id bigint(20) unsigned NOT NULL auto_increment,</span>
+<span class="quote1">&gt;   date_name date NOT NULL default '0000-00-00',</span>
+<span class="quote1">&gt;   PRIMARY KEY  (date_id),</span>
+<span class="quote1">&gt;   KEY date_id (date_id)</span>
+<span class="quote1">&gt; ) TYPE=MyISAM';</span>
+
+TYPE=MyISAM'; の後の ' が不要なのと、date_id に PRIMARY KEY と KEY の
+両方を設定しているのは、あまり必要のないことでは？
+
+show index from date_tb;
+
+# それとも、何か効果があるのでしたら、後学のために教えて下されば幸いです
+
+
+<span class="quote1">&gt; CREATE TABLE count_tb (</span>
+<span class="quote1">&gt;   count_id bigint(20) unsigned NOT NULL auto_increment,</span>
+<span class="quote1">&gt;   count_name_id bigint(20) unsigned NOT NULL default '0',</span>
+<span class="quote1">&gt;   count_date_id bigint(20) unsigned NOT NULL default '0',</span>
+<span class="quote1">&gt;   count_i bigint(20) unsigned NOT NULL default '0',</span>
+<span class="quote1">&gt;   count_j bigint(20) unsigned NOT NULL default '0',</span>
+<span class="quote1">&gt;   count_e bigint(20) unsigned NOT NULL default '0',</span>
+<span class="quote1">&gt;   PRIMARY KEY  (count_id),</span>
+<span class="quote1">&gt;   KEY count_id (count_id)</span>
+<span class="quote1">&gt; ) TYPE=MyISAM';</span>
+
+こちらも上記と同様。
+
+
+<span class="quote1">&gt; INSERT INTO count_tb VALUES (1,1,1,'','',1);</span>
+<span class="quote1">&gt; INSERT INTO count_tb VALUES (1,1,2,1,1,1);</span>
+<span class="quote1">&gt; INSERT INTO count_tb VALUES (1,1,3,'','',4);</span>
+<span class="quote1">&gt; INSERT INTO count_tb VALUES (1,2,3,2,3,'');</span>
+<span class="quote1">&gt; INSERT INTO count_tb VALUES (1,1,5,1,4,3);</span>
+<span class="quote1">&gt; INSERT INTO count_tb VALUES (1,1,6,2,1,'');</span>
+<span class="quote1">&gt; INSERT INTO count_tb VALUES (1,2,6,6,'',7);</span>
+<span class="quote1">&gt; INSERT INTO count_tb VALUES (1,1,7,1,4,3);</span>
+
+VALUES の最初の項目（count_id）は、PRIMARY KEY だから、
+複数の行に 1 を設定してもエラーになるはず。正確には以下のようでは？
+（私は 3.23.x ですが、4.x だと違うのかな？）
+
+INSERT INTO count_tb VALUES (NULL,1,1,'','',1);
+INSERT INTO count_tb VALUES (NULL,1,2,1,1,1);
+INSERT INTO count_tb VALUES (NULL,1,3,'','',4);
+INSERT INTO count_tb VALUES (NULL,2,3,2,3,'');
+INSERT INTO count_tb VALUES (NULL,1,5,1,4,3);
+INSERT INTO count_tb VALUES (NULL,1,6,2,1,'');
+INSERT INTO count_tb VALUES (NULL,2,6,6,'',7);
+INSERT INTO count_tb VALUES (NULL,1,7,1,4,3);
+
+
+<span class="quote1">&gt; SELECT date_tb.date_name, count_tb.count_i, count_tb.count_e, count_tb.count_j</span>
+<span class="quote1">&gt;      FROM date_tb LEFT JOIN count_tb ON date_tb.date_id = count_tb.count_date_id</span>
+<span class="quote1">&gt;     WHERE count_tb.count_name_id = $name_id</span>
+<span class="quote1">&gt;       and date_tb.date_name BETWEEN '2003-05-01' AND '2003-05-31'</span>
+<span class="quote1">&gt;    ORDER BY date_tb.date_id&quot;;</span>
+
+これも最後の &quot; が不要（プログラムのソースから抜いたからでしょうが）。
+あと、表にはあった total が抜けています。
+
+
+<span class="quote1">&gt; と、したのですが、count_tb.count_name_id = $name_idがいけないのか、</span>
+<span class="quote1">&gt; アクセスがない日のデータが取得出来ません。</span>
+<span class="quote1">&gt; LEFT JOINって検索にヒットしなくても左側、すなわちdate_tbの情報は</span>
+<span class="quote1">&gt; 必ず出力するのではないのですか？</span>
+<span class="quote1">&gt; 私の考えでは、このSQL文で、5/1〜5/31までの、date_name は出力されて、</span>
+<span class="quote1">&gt; count_tb.count_name_id = $name_idが、なかった場合、count_i等は</span>
+<span class="quote1">&gt; nullだと思ったのですが・・・。</span>
+
+（内部的な実装はともかく、理屈では）LEFT JOIN でテーブルが結合されてから、
+そのテーブルに対し WHERE 節が評価されるはずですから、
+WHERE count_tb.count_name_id = $name_id によって、
+
+<span class="quote1">&gt; count_tb.count_name_id = $name_idが、なかった場合</span>
+
+の行は結合されている結果のテーブルから全て排除されます。
+
+よって、LEFT JOIN 時に 必要な条件を指定してやれば良いと思います。
+
+SELECT
+  date_tb.date_name,
+  count_tb.count_i,
+  count_tb.count_e,
+  count_tb.count_j,
+  count_tb.count_i + count_tb.count_e + count_tb.count_j as total
+FROM
+  date_tb
+  LEFT JOIN count_tb ON date_tb.date_id = count_tb.count_date_id and
+    count_tb.count_name_id = $name_id
+WHERE
+  date_tb.date_name BETWEEN '2003-05-01' AND '2003-05-31'
+ORDER BY
+  date_tb.date_id
+;
+
+
+しかし本来、以下の二つのフィールドの組み合わせは、
+ユニークと仮定できるのでしょうか？
+
+  count_tb.count_name_id
+  count_tb.count_date_id
+
+もしユニークでなければ、上記のSQLでは駄目で（同じ日付の行が複数出力され
+る）、以下のようにする必要があります。この場合は、NULL ではなくて、0 が
+出力されます。
+
+SELECT
+  date_tb.date_name,
+  sum(count_tb.count_i) as count_i,
+  sum(count_tb.count_e) as count_e,
+  sum(count_tb.count_j) as count_j,
+  sum(count_tb.count_i) + sum(count_tb.count_e) +
+    sum(count_tb.count_j) as total
+FROM
+  date_tb
+  LEFT JOIN count_tb ON date_tb.date_id = count_tb.count_date_id and
+    count_tb.count_name_id = $name_id
+WHERE
+  date_tb.date_name BETWEEN '2003-05-01' AND '2003-05-31'
+GROUP BY
+  date_tb.date_name
+ORDER BY
+  date_tb.date_id
+;
+
+また最初の
+
+<span class="quote1">&gt; count_name_id（人名コード）が「１」のみの、５月分のカウントを集計しようとした場合、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;           ｜2003-05-01｜2003-05-02｜2003-05-03｜</span>
+<span class="quote1">&gt; ―――+――――――+―――――+――――――+―</span>
+<span class="quote1">&gt;  count_i｜             0 ｜              1 ｜             0 ｜ </span>
+<span class="quote1">&gt;  count_j｜             0 ｜              1 ｜             0 ｜ </span>
+<span class="quote1">&gt; count_e｜             1 ｜              1 ｜             4 ｜ </span>
+<span class="quote1">&gt;     total｜             1 ｜              3 ｜             4 ｜</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; と、出す方法が分からずご教授をお願いしたいと思いメールしました。</span>
+
+は、かなり難しいと思います。
+
+一般的に SQL では、「項目を横に」「データを縦に」並べるので、それの
+縦横逆は、SQL ではなく、プログラム側で処理する方が簡単だと思います。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="7873.html">[前]</a><a href="7875.html">[次]</a><a href="../list/7801-7900.html">[番号順一覧]</a><a href="../thread/7801-7900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7872.html">   7872 2003-06-04 08:34 [&quot;Tatsuya Kondo&quot; &lt;kon] 日付検索について                        </a></span>
+<span class="current">-&gt;&nbsp;<a href="7874.html">   7874 2003-06-04 11:08 ┗[Shinya Kawaji &lt;kawaj]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7875.html">   7875 2003-06-04 18:57 　┗[&lt;lavlav@xxxxxxxxxx&gt; ]                                     </a></span>
+</pre>
+</body>
+</html>

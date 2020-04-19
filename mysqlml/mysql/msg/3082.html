@@ -1,0 +1,146 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3082</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="3081.html">[前]</a><a href="3083.html">[次]</a><a href="../list/3001-3100.html">[番号順一覧]</a><a href="../thread/3001-3100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3082
+</p>
+<div class="header">
+<p>
+From: Akihiko Toshimitsu &lt;Akihiko Toshimitsu &lt;pq6a-tsmt@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 21 Jan 2001 23:55:02 +0900<br>
+Subject: [mysql 03082] Re: Access のパススルークエリー　リンクサブフォームで・・・<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+利光です。
+
+　こんにちは、遅い反応ですみません。
+
+　個人的には、アクセスはアクセスツールとして
+　使用しています。
+  アクセスで、ＣＳＶ、ＥＸＣＥＬ、ＭＹＳＱＬ、他
+　リンクしてしまうと、全てＤＡＯ等でアクセスできるので
+　非常に便利だと思います。
+
+
+ActivePerlとかだと、下記な感じでかけます。
+（rubyでもできるようです。）
+よく使用するのは、SQLを書くのが面倒だなとか、
+いう場合、クエリーを書いて下記のスクリプトで
+指定しています。アクセス側のみを変更で
+条件等変更できるので、非常に便利です。
+
+use Win32::OLE;
+$mdbfile = 'access.mdb';
+$pq = 'query or table';
+#DAOの種別により違う　　　　
+$dao = Win32::OLE-&gt;new('DAO.DBEngine.36') or die &quot;oops\n&quot;;
+$db  = $dao-&gt;Workspaces(0)-&gt;OpenDatabase($mdbfile) || die &quot;oops OpenDatabase&quot;;	$rs = $db-&gt;OpenRecordset($pq) || die 
+&quot;oops OpenRecordset&quot;;
+until ($rs-&gt;EOF) {
+	print $rs-&gt;Fields(&quot;col_name&quot;)-&gt;{'Value'} . &quot;\n&quot;;
+	$rs-&gt;MoveNext;
+}
+
+
+
+一藤・自宅 さんは書きました:
+<span class="quote1">&gt;  私の周りに「 ACCESS　が遅いのは　データレコード を全部読み込ん</span>
+<span class="quote1">&gt;  でくるから」という人も多く（といってコードなんかできるだけ書き</span>
+<span class="quote1">&gt;  たくないものぐさには結構 Access は 重宝いたしますので）悩んで</span>
+<span class="quote1">&gt;  おりましたがしばらく Access ＋ Mysql でいろいろいじくってみた</span>
+<span class="quote1">&gt;  いと思います。</span>
+
+
+　個人的に認識してるのは、
+　（まちがっている場合は、つっこみお願いします。）
+
+　・アクセスについて
+　ACCESSのパーツ
+　　テーブル、クエリー、フォーム、リポート、関数
+　
+　ACCESSのDB
+　　JET、（VBAからは、DAO、ADO）
+
+　ACCESのパーツでの外部DBへのアクセス
+　　DAO経由
+
+　なので、
+　MySQLを使用すると、
+    DAO−＞（SQL）−＞ODBC−＞（SQL）−＞MYSQL
+　な経路になります。
+　（SQLをチェックする場合は、DAOがはくSQLと
+　ODBCのはくSQLをチェックしないといけない）
+
+　・ここで問題になる場合があるのは、
+　ACCESSのパーツと、外部DBとがまじわる場合
+　DAOがいろいろやってしまうというのが
+　問題になる場合があります。
+
+　・たとえば、全件とってくるという話しですが、
+　アクセスのパーツのフォーム
+　からの値を直接クエリーに書いたりすると、
+　いったん全部クライアント側にもってきて、検索して
+　その結果を表示させることになります。
+　（DAOが非常に昔の場合のみかもしれません。
+　関数とかをクエリーに混ぜるとまずい場合とかは
+　今でもだめだと思います。）
+　
+　・ここまで、極端ではなくても、
+　結合してる先が、MYSQL同士でも
+　クライアント側でやってしまうことが
+　あったりします。
+
+　・というわけで、アクセスで作成すると
+　アクセスの便利な機能を使用するので、
+　アクセスのパーツと外部DBが複雑に絡んだり
+　してくるので、たいした件数でなければ、問題になりませんが、
+　件数が多くなると、注意が必要ですというのがあります。
+
+　・個人的な認識では、上記のようなので、
+　全部読みこんでくるというのは、ACCESSをクライアントとして
+　利用しているとある程度さけられない。
+　避けようとすれば、
+　直接SQLを実行するVBAでのプログラムのみになるので、
+　ＶＢ等他の言語を使用した方が効率がよい場合もあるととおもいます。
+
+　・もちろん、メンテナンスツールとか、ユーザがさまざまな形で
+　SQLを意識しないでデータを見たいというのであれば、
+　よいツールだと思いますので、あくまでケースバイケースで
+　ツールの選択は自由かと思います。
+
+　＃長くてすみませんでした。
+
+以上
+
+</pre>
+</div>
+<p class="button"><a href="3081.html">[前]</a><a href="3083.html">[次]</a><a href="../list/3001-3100.html">[番号順一覧]</a><a href="../thread/3001-3100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2964.html">   2964 2001-01-08 22:54 [&quot;一藤・自宅&quot; &lt;machio] Access のパススルークエリでお尋ねします </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2970.html">   2970 2001-01-09 12:57 ┗[madara &lt;madara@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2971.html">   2971 2001-01-09 18:40 　┣[荒井　哲三 &lt;tetsumi.] 【質問】 perl でのシングルクウォートのエスケープについて教えてください。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2974.html">   2974 2001-01-09 23:49 　┃┣[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2976.html">   2976 2001-01-10 03:20 　┃┗[&quot;K.kajiura&quot; &lt;cgi@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3000.html">   3000 2001-01-11 21:19 　┗[&quot;一藤・自宅&quot; &lt;machio]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3001.html">   3001 2001-01-11 23:24 　　┣[&quot;一藤・自宅&quot; &lt;machio] Access のパススルークエリー　リンクサブフォームで・・・</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3003.html">   3003 2001-01-12 01:17 　　┃┗[&lt;endo_t@xxxxxxxxxx&gt; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3036.html">   3036 2001-01-15 22:28 　　┃　┗[一藤・自宅 &lt;machio@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3037.html">   3037 2001-01-15 22:39 　　┃　　┣[&lt;endo_t@xxxxxxxxxx&gt; ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3056.html">   3056 2001-01-17 23:12 　　┃　　┃┗[&lt;endo_t@xxxxxxxxxx&gt; ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3040.html">   3040 2001-01-16 18:28 　　┃　　┗[madara &lt;madara@xxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3043.html">   3043 2001-01-17 11:17 　　┃　　　┗[&lt;eeb01@xxxxxxxxxx&gt;  ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3044.html">   3044 2001-01-17 12:13 　　┃　　　　┗[madara &lt;madara@xxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3049.html">   3049 2001-01-17 20:24 　　┃　　　　　┗[一藤・自宅 &lt;machio@x]                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="3082.html">   3082 2001-01-21 23:55 　　┃　　　　　　┗[Akihiko Toshimitsu &lt;]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3013.html">   3013 2001-01-12 18:05 　　┗[madara &lt;madara@xxxxx]                                   </a></span>
+</pre>
+</body>
+</html>

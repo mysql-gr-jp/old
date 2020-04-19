@@ -1,0 +1,97 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9642</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9641.html">[前]</a><a href="9643.html">[次]</a><a href="../list/9601-9700.html">[番号順一覧]</a><a href="../thread/9601-9700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9642
+</p>
+<div class="header">
+<p>
+From: &quot;Haruki Nakayama&quot; &lt;&quot;Haruki Nakayama&quot; &lt;haruki@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 14 Jun 2004 21:31:21 +0900<br>
+Subject: [mysql 09642] Re: Insert 毎に接続・切断を繰り返すと不特定な場所でエラーが発生する。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。
+
+中山といいます。
+あまりエラー内容と関係がないかもしれないのですが一応気になったのは
+
+<span class="quote1">&gt;          for (int l = 0; l &lt; 256; l++) {</span>
+<span class="quote1">&gt;            StringBuffer buf = new StringBuffer();</span>
+<span class="quote1">&gt;            buf.append(i).append(COMMA).append(j).append(COMMA);</span>
+<span class="quote1">&gt;            buf.append(k).append(COMMA).append(l);</span>
+<span class="quote1">&gt;            String ip = buf.toString();</span>
+<span class="quote1">&gt;            System.out.println(&quot;ip = &quot; + ip);</span>
+<span class="quote1">&gt;            insert(ip);</span>
+<span class="quote1">&gt;          }</span>
+
+の部分ですね。
+Javaにおいてループ内で変数を宣言してしまうと、そのたびに新たなメモリ領域が確
+保されてしまうはずので、この場合ですとこのStringBufferでかなりメモリが食われ
+ているんじゃないかと思います。
+一応、ブロックから抜ければ次のガーベジコレクションの対象にはなりますが、明示
+的にGCをしない限りいつメモリから開放されるかはJVM任せになってしまいます。
+なので私だったらここは
+
+    StringBuffer buf = null;
+    String ip = null;
+    for (int i = 0; i &lt; 256; i++) {
+      for (int j = 0; j &lt; 256; j++) {
+        for (int k = 0; k &lt; 256; k++) {
+          for (int l = 0; l &lt; 256; l++) {
+            buf = new StringBuffer();
+            buf.append(i).append(COMMA).append(j).append(COMMA);
+            buf.append(k).append(COMMA).append(l);
+            ip = buf.toString();
+            System.out.println(&quot;ip = &quot; + ip);
+            insert(ip);
+          }
+          showStatus();
+        }
+      }
+    }
+
+という風に実装するほうがいいのではないかなー、と。
+メモリが圧迫されればほかの箇所の実行にも影響が出てくると思うので、直接的な原
+因ではないとは思いましたがご指摘させていただきました。
+
+# かくいう私もループの中であろう事か毎回新規のDBの接続をして、パニクったこと
+があります。
+________________________________________________________________________
+
+    _/      _/        _/      _/            Haruki Nakayama
+   _/      _/        _/_/    _/              [中山 晴貴]
+  _/_/_/_/_/        _/  _/  _/      E-Mail :: haruki@xxxxxxxxxx
+ _/      _/        _/    _/_/       Messenger :: clef2@xxxxxxxxxx
+_/      _/   _/   _/      _/        URL :: <a href="http://www.s8.xrea.com/">http://www.s8.xrea.com/</a>
+________________________________________________________________________
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="9641.html">[前]</a><a href="9643.html">[次]</a><a href="../list/9601-9700.html">[番号順一覧]</a><a href="../thread/9601-9700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9640.html">   9640 2004-06-14 20:23 [&quot;Kageyama Takahiro&quot; ] Insert 毎に接続・切断を繰り返すと不特定な場所でエラーが発生する。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9641.html">   9641 2004-06-14 20:59 ┣[ML account &lt;ml@xxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="9642.html">   9642 2004-06-14 21:31 ┣[&quot;Haruki Nakayama&quot; &lt;h]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9645.html">   9645 2004-06-15 10:24 ┃┗[Murayama Toshikiyo &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9643.html">   9643 2004-06-14 23:42 ┣[&lt;oouchi@xxxxxxxxxx&gt; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9644.html">   9644 2004-06-15 00:01 ┃┗[&lt;oouchi@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9651.html">   9651 2004-06-15 18:21 ┗[&lt;yasuyuki@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9652.html">   9652 2004-06-15 19:00 　┣[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9654.html">   9654 2004-06-15 19:29 　┃┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9658.html">   9658 2004-06-16 01:47 　┃　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9655.html">   9655 2004-06-15 19:42 　┗[seiji takegata &lt;take]                                     </a></span>
+</pre>
+</body>
+</html>

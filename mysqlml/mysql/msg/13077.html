@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13077</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13076.html">[前]</a><a href="13078.html">[次]</a><a href="../list/13001-13100.html">[番号順一覧]</a><a href="../thread/13001-13100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13077
+</p>
+<div class="header">
+<p>
+From: 忠犬 KEN &lt;忠犬 KEN &lt;ken_ken_1962@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 06 Jun 2006 03:14:20 +0900<br>
+Subject: [mysql 13077] Re: null値に関して<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+忠犬です。
+
+insertの構文、MySQLのauto_incrementの仕様を、十分に理解できていない
+ように感じられます。
+
+<span class="quote1">&gt;これまで、上記テーブルにデータを登録する際、</span>
+<span class="quote1">&gt;$sql = &quot;insert into saller values(0, '$hiduke', '$id', '$shamei'……</span>
+<span class="quote1">&gt;としており、これは購入した本を参考にしたものです。（全てNullはYESとなってい</span>
+
+<span class="quote1">&gt;た。）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;しかし、先日こちらにて質問させて頂いた際、id は、PrimaryKeyおよび</span>
+<span class="quote1">&gt;auto_increment としてあるから、insert文の最初の 0 </span>
+<span class="quote1">&gt;は必要ないとご指導いただき</span>
+<span class="quote1">&gt;ましたが、これは、私の購入した本が全てNull がYES </span>
+<span class="quote1">&gt;と設定してあったため、0 を</span>
+<span class="quote1">&gt;代入しているだけであり、属性をnot null として設定した場合は、0 </span>
+<span class="quote1">&gt;を代入する必</span>
+<span class="quote1">&gt;要ない。といった解釈で宜しいのでしょうか？</span>
+
+MySQLのauto_incrementの仕様は、0またはnullを挿入すれば、
+（現在の最大値+1）の値が格納されます。
+これは、列がnullでもnot nullでも関係なく有効な仕様です。
+つまり、auto_incrementの列には、nullは格納されません。
+
+insert into 表名 values(値1,値2,...,値n)
+
+とした場合、列名を省略しているため、値は表の構成列数分を指定する必要がありま
+す。
+auto_incrementの列に対しては、0かnullを指定することで、（最大値+1した値）と
+いう意味に
+なり、他の値を指定すると、その指定値が格納されます。
+この構文では、特定の列の値の指定を省略することはできません。
+
+insert into 表名(列名2,列名3,列名4) values(値2,値3,値4)
+
+のように列名を明示指定した場合は、値も指定する必要はないので、列名1が
+auto_incrementの
+列だとすれば、nullを挿入値で指定した場合と同じ意味になります。
+
+<span class="quote1">&gt;また、先に申し上げたように、id 以外は全てnull をYES </span>
+<span class="quote1">&gt;としており、ブラウザ上の</span>
+<span class="quote1">&gt;データを（PHPにて）登録させるのですが、例えば、上記テーブル内の「shamei」を</span>
+
+<span class="quote1">&gt;他のフォームからデータを登録させたいため、入力（登録）フォームには</span>
+「shamei」
+<span class="quote1">&gt;というnameの存在しません。</span>
+<span class="quote1">&gt;このような場合、下記スクリプトを例にすると、$shameiをどのように処理したら宜</span>
+
+<span class="quote1">&gt;しいのでしょうか？</span>
+<span class="quote1">&gt;DBの属性をnot null にすべきなのでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;$sql = &quot;insert into saller values(0, '$hiduke', '$id', '$shamei'……</span>
+
+(1)insert into 表名 values(値1,値2,...,値n)と、列名を省略したい
+
+  insert into saller values(0, '$hiduke', '$id', null,……
+
+ 値のところにnullと指定する。
+
+(2)insert into 表名（列1,列2,...,列n) values(値1,値2,...,値n)と、列名を指定
+
+  列名を指定しなければ、その列にはdefaultがあればその値を、なければnullが
+　格納されます。
+
+(3)MySQLの独自構文(?)
+
+  insert into 表名 set 列1=値1,値2=値2,値n=列nのように、update文の
+　ように列名をそれに対する値を指定できます。
+　 列名を指定しなければ、その列にはdefaultがあればその値を、なければnullが
+　格納されます。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="13076.html">[前]</a><a href="13078.html">[次]</a><a href="../list/13001-13100.html">[番号順一覧]</a><a href="../thread/13001-13100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13072.html">  13072 2006-06-06 00:56 [&quot;chappuru21 chappuru] null値に関して                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13073.html">  13073 2006-06-06 01:14 ┣[Takanori Jokura &lt;jo@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13074.html">  13074 2006-06-06 01:34 ┃┗[&quot;chappuru21 chappuru]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13076.html">  13076 2006-06-06 02:31 ┃　┗[&lt;milk_coffee_2004jp@]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="13077.html">  13077 2006-06-06 03:14 ┣[忠犬 KEN &lt;ken_ken_19]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13078.html">  13078 2006-06-06 03:24 ┣[忠犬 KEN &lt;ken_ken_19]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13079.html">  13079 2006-06-06 05:29 ┗[Mitsutoshi Nakamura ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13083.html">  13083 2006-06-06 21:46 　┗[&quot;chappuru21 chappuru]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<div dir="ltr">こんばんは、yoku0825といいます。<div><br></div><div>原因ぽいものは全くわからないのですが、</div><div><br></div><div>&gt;<span style="font-size:14px">---検証内容---</span><br></div><span style="font-size:14px">&gt; ・VS2012でのデバッグ時に、ステップ実行でも発生。</span><br style="font-size:14px"><span style="font-size:14px">&gt; ・File.Delete→INTO OUTFILEの間に、</span><u style="font-size:14px"></u><span style="font-size:14px">Sleepを5秒挟んだりしても発生する</span><span style="font-size:14px">。</span><div><br></div><div>これは ファイルが存在している(?)にも拘わらずFile.ExistsがTRUEで抜けてくるのが問題だと思うので、</div><div>スリープを挟むとしたらINTO OUTFILEとFile.Delete(File.Exists)の間がいいのでははないでしょうか？</div><div><br></div><div>1. ファイルの存在チェック</div><div>2. 存在したら消す<br></div><div>3. SELECT .. INTO OUTFILE ..</div><div>-- ここでブレーク --</div><div>4. ファイルの存在チェック</div><div>5. 存在したら消す</div><div>6. SELECT .. INTO OUTFILE ..</div><div><br></div><div>ブレークした時に、OSから見てもファイルが存在するのにFile.ExistsがFALSEになるのであれば</div><div>オブジェクトを使いまわしていないか(File.DeleteしたあとのFileオブジェクトが何を返すのかとか)とか、</div><div>OSから見てファイルがまだ存在しないのなら、mysqldのスタックなど見てみるといいのかもしれません。</div><div>5.0も5.6もselect_export::prepareの割と早い段階でcreate_fileを呼んで(ファイルだけ先行して作成される)いるので、</div><div>そこは変わらないような気がするのですが。。</div><div><br></div><div><br></div><div>yoku0825,</div><div><br></div></div><div class="gmail_extra"><br><div class="gmail_quote">2014年12月12日 14:22 志澤 敦 <span dir="ltr">&lt;<a href="mailto:atsushi.shizawa@seikodo.co.jp" target="_blank">atsushi.shizawa@seikodo.co.jp</a>&gt;</span>:<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">志澤と申します。<br>
+初めて投稿させて頂きます。<br>
+<br>
+MySQLWindowsのケースは少ないかとも思いますが、<br>
+お心あたり御座いましたら、ご頂けると幸いです。<br>
+<br>
+---環境---<br>
+OS ：Windows2012 Std(Memory24GB)<br>
+DB ：MySQL 5.6.21<br>
+Coccector ：Net 6.9.5<br>
+FrameWork ：.NET FrameWork 4.5<br>
+IDE ：VS2012 Pro<br>
+<br>
+---事象---<br>
+・同一ファイルパスにおいて、INTO OUTFILE →File.Deleteを高速に行うと、<br>
+　IF(File.Exists==TRUE){File.<u></u>Delete}が機能せず、<br>
+SQL発行時にMySqlExceptionが発生。<br>
+<br>
+・エラー内容は、「1086：already exists」<br>
+<br>
+・その際、OS上にもファイルは残っており、<u></u>通常のファイルとして読み書きが出 来る状態。<br>
+<br>
+---検証内容---<br>
+・VS2012でのデバッグ時に、ステップ実行でも発生。<br>
+・File.Delete→INTO OUTFILEの間に、<u></u>Sleepを5秒挟んだりしても発生する。<br>
+・Win2008R2でも同様に発生。<br>
+・CentOSでも同様に発生。<br>
+・MySQL5.5でも同様に発生。<br>
+--例外事象--<br>
+・MySQL5.0では発生しない。<br>
+<br>
+<br>
+以上となります。<br>
+DBというより、<u></u>ConnectorやOS由来な気もしておりますが、<br>
+何か情報御座いましたら、ご助言の程を何卒お願い致します。<br>
+<br>
+</blockquote></div></div>

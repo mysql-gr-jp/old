@@ -1,0 +1,200 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11879</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11878.html">[前]</a><a href="11880.html">[次]</a><a href="../list/11801-11900.html">[番号順一覧]</a><a href="../thread/11801-11900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11879
+</p>
+<div class="header">
+<p>
+From: Shinichiro Yamamoto &lt;Shinichiro Yamamoto &lt;shinichiro.yamamoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 04 Aug 2005 15:00:31 +0900<br>
+Subject: [mysql 11879] File 'NONEXISTENT/charsets/?.conf' not found のエラー<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+山本と申します。
+
+linuxのサーバでmysql4.0.20、php4.3.8で作成したphpを
+実行したところerror_logファイルに下記のようなエラー
+メッセージが出力されてしまいました。
+
+＜error_logファイルに出力されるエラーメッセージ＞
+File 'NONEXISTENT/charsets/?.conf' not found (Errcode: 2)
+Character set '#12' is not a compiled character set and is not specified in the 'NONEXISTENT/charsets/Index' file
+
+ただ、プログラムの動作的にはまったく問題なく、
+文字化けなどの現象も一切発生していません。
+
+でも、エラーメッセージが表示されているのも
+気持ち悪いので調べてみたところ、
+「mysqlクライアントがujisをサポートしていない」
+のような書き込みを見つけました。
+
+いろいろと解決方法を検索してみたのですが
+「makeしてmysqlを入れなおす」とか、基本的にmysqlを
+入れなおさないといけないようなやりかたしか見つけら
+れませんでした。
+
+実は既に稼動中のサーバで、今からmysqlやphp自体を
+入れなおすのはかなり難しい状況なのです。
+なんとか設定ファイルの書き換えなどでこの
+エラーを解決できないものかといろいろと
+調べているところです。
+
+もし、同じ問題を解決した方などいらっしゃいましたら
+教えて頂けないでしょうか？
+参考になるサイトだけなどでもかまいません。
+よろしくお願いします。
+
+下記に詳細な環境を記載しました。
+
+・phpとmysqlはTurbolinux10 SERVERにデフォルトで
+　インストールされていたものをそのまま使っています。
+・mysqlの文字コードをmy.cnfファイルで ujis に設定しました。
+
+＜OS＞
+Turbolinux10 SERVER
+
+＜mysql上で使用できる文字コードを表示した内容＞
+mysql&gt; show variables like 'character_set%';
++----------------+-----------------------------------------------------------
+-----------------------------------------------------------------------------
+---------------------------------------------------------------------------+
+<span class="quote1">| Variable_name  | Value</span>
+                                                                           |
++----------------+-----------------------------------------------------------
+-----------------------------------------------------------------------------
+---------------------------------------------------------------------------+
+<span class="quote1">| character_set  | ujis</span>
+                                                                           |
+<span class="quote1">| character_sets | latin1 big5 cp1251 cp1257 croat czech danish dec8 dos esto</span>
+nia euc_kr gb2312 gbk german1 greek hebrew hp8 hungarian koi8_ru koi8_ukr lat
+in1_de latin2 latin5 sjis swe7 tis620 ujis usa7 win1250 win1251ukr win1251 |
++----------------+-----------------------------------------------------------
+-----------------------------------------------------------------------------
+---------------------------------------------------------------------------+
+2 rows in set (0.00 sec)
+
+＜/etc/my.cnf＞
+[mysqld]
+default-character-set=ujis
+[mysqldump]
+default-character-set=ujis
+[mysql]
+default-character-set=ujis
+
+＜phpの情報＞
+'./configure'
+ '--with-apxs2=/usr/sbin/apxs'
+ '--with-openssl=yes'
+ '--with-expat-dir=/usr'
+ '--with-ming=shared'
+ '--with-gd=shared,/usr'
+ '--with-xpm-dir=/usr/X11R6/lib'
+ '--enable-bz2'
+ '--enable-bcmath'
+ '--enable-mbstring=all'
+ '--enable-mbregex'
+ '--enable-sigchild'
+ '--libdir=/usr/lib/php'
+ '--x-libraries=/usr/X11R6/lib'
+ '--includedir=/usr/include'
+ '--enable-inline-optimization'
+ '--with-pgsql=shared'
+ '--with-imap=/usr/lib'
+ '--with-ldap=shared'
+ '--enable-yp'
+ '--with-mysql=shared'
+ '--with-mysql-sock=/var/lib/mysql/mysql.sock'
+ '--prefix=/usr'
+ '--exec-prefix=/usr'
+ '--mandir=/usr/share/man'
+ '--with-config-file-path=/etc/httpd'
+ '--enable-safe-mode'
+ '--disable-debug'
+ '--with-zlib'
+ '--enable-debugger'
+ '--enable-magic-quotes'
+ '--enable-ftp'
+ '--enable-zend-multibyte'
+ '--with-gettext'
+ '--with-dom'
+ '--with-dom-xslt'
+ '--with-dom-exslt'
+ '--with-xmlrpc'
+ '--with-gdbm=/usr/lib'
+ '--with-ini-file'
+ '--with-flat-file'
+ '--with-db4=/usr/lib'
+ '--enable-dbase'
+ '--enable-dio'
+ '--enable-dbx'
+ '--enable-filepro'
+ '--enable-ftp'
+ '--enable-track-vars' 
+
+＜mysqlのバージョン＞
+$ rpm -qa | grep mysql
+mysql-client-4.0.20-14
+mysql-bench-4.0.20-14
+mysql-shared-4.0.20-14
+mysql-devel-4.0.20-14
+php4-mysql-4.3.8-14
+mysql-server-4.0.20-14
+
+＜phpのバージョン＞
+$ rpm -qa | grep php
+php4-pgsql-4.3.8-14
+php4-ldap-4.3.8-14
+php4-4.3.8-14
+php4-ming-4.3.8-14
+php4-gd-4.3.8-14
+php4-mysql-4.3.8-14
+php4-imap-4.3.8-14
+php-pear-log-1.8.4-2
+
+
+
+</pre>
+</div>
+<p class="button"><a href="11878.html">[前]</a><a href="11880.html">[次]</a><a href="../list/11801-11900.html">[番号順一覧]</a><a href="../thread/11801-11900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11847.html">  11847 2005-08-01 18:16 [相良 しの &lt;oceanblue] JDBCでMysqlコネクトできません           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11848.html">  11848 2005-08-01 18:28 ┣[Hideaki Maekawa &lt;teu]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11849.html">  11849 2005-08-01 18:41 ┃┗[相良 しの &lt;oceanblue]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11850.html">  11850 2005-08-01 18:54 ┃　┗[J.SHIRA &lt;jshira@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11851.html">  11851 2005-08-01 19:08 ┃　　┗[相良 しの &lt;oceanblue]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11852.html">  11852 2005-08-01 20:52 ┃　　　┗[J.SHIRA &lt;jshira@xxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11855.html">  11855 2005-08-02 09:04 ┃　　　　┗[Hideaki Maekawa &lt;teu]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11861.html">  11861 2005-08-02 13:51 ┗[&quot;T.Sasaki&quot; &lt;papasan2]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11866.html">  11866 2005-08-03 03:04 　┗[相良 しの &lt;oceanblue]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11867.html">  11867 2005-08-03 03:56 　　┣[Tetsuro IKEDA &lt;tetsu]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11871.html">  11871 2005-08-03 10:35 　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11878.html">  11878 2005-08-03 21:13 　　　┗[相良 しの &lt;oceanblue]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="11879.html">  11879 2005-08-04 15:00 　　　　┗[Shinichiro Yamamoto ] File 'NONEXISTENT/charsets/?.conf' not found のエラー</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11896.html">  11896 2005-08-05 14:06 　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11900.html">  11900 2005-08-05 14:57 　　　　　┃┗[&quot;T.Sasaki&quot; &lt;papasan2]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11904.html">  11904 2005-08-05 16:24 　　　　　┃　┗[&lt;takeshi@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11907.html">  11907 2005-08-05 17:56 　　　　　┃　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11909.html">  11909 2005-08-05 20:40 　　　　　┃　　　┗[Shinichiro Yamamoto ]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11910.html">  11910 2005-08-05 22:49 　　　　　┗[Hiromasa Ochiai &lt;ohi]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11917.html">  11917 2005-08-08 16:10 　　　　　　┗[Shinichiro Yamamoto ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11923.html">  11923 2005-08-09 00:18 　　　　　　　┗[Hiromasa Ochiai &lt;ohi]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11925.html">  11925 2005-08-09 09:38 　　　　　　　　┗[Shinichiro Yamamoto ]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11926.html">  11926 2005-08-09 10:51 　　　　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11927.html">  11927 2005-08-09 18:14 　　　　　　　　　　┣[Shinichiro Yamamoto ]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11930.html">  11930 2005-08-09 20:08 　　　　　　　　　　┃┣[深海水草 &lt;VYG01106@x]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11931.html">  11931 2005-08-09 21:33 　　　　　　　　　　┃┗[Hiromasa Ochiai &lt;ohi]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11928.html">  11928 2005-08-09 18:48 　　　　　　　　　　┗[深海水草 &lt;VYG01106@x]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11929.html">  11929 2005-08-09 19:04 　　　　　　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                 </a></span>
+</pre>
+</body>
+</html>

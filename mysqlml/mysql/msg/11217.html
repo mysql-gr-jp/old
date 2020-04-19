@@ -1,0 +1,86 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11217</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11216.html">[前]</a><a href="11218.html">[次]</a><a href="../list/11201-11300.html">[番号順一覧]</a><a href="../thread/11201-11300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11217
+</p>
+<div class="header">
+<p>
+From: Hirokazu Aoyama &lt;Hirokazu Aoyama &lt;aoyama@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 20 Mar 2005 17:01:44 +0900<br>
+Subject: [mysql 11217] Re: 4.1.1と3.23.58での違い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、青山と申します。
+
+<span class="quote1">&gt; 1100: Table 'tempid' was not locked with LOCK TABLES</span>
+<span class="quote1">&gt; と出ました。insert処理の前に他のテーブルをロックし、insert後にこのロックを解除ていたのですが、これが問題だった様です。</span>
+<span class="quote1">&gt; 他のテーブルをロックした場合、insert処理対象のテーブルもロックしなくてはならないのでしょうか？</span>
+<span class="quote1">&gt; 初歩的なことばかりですみません。</span>
+
+MySQLのマニュアルのLOCK TABLESのところを読むと、
+
+「LOCK TABLES の使用時には、使用するテーブルをすべてロックし、
+  またクエリで使用するエイリアスと同じ名前を使用する必要があります。
+  1 つのクエリで同じテーブルを何度も指定する（エイリアスを使用して）
+  場合は、各エイリアスに対してロックを取得しなければなりません。」
+
+とあります。
+「使用する全てのテーブルをロック」しなければならない仕様のようです。
+
+上記のように個々のエイリアスがロック対象となるので、例えば
+
+INSERT INTO table1 〜;
+SELECT 〜 FROM table1 x, table2 y;
+
+という2つのクエリーを発行する場合は、
+
+LOCK TABLES table1 WRITE, 
+            table1 AS x WRITE,
+            table2 AS y WRITE;
+
+のように、一つのテーブルでも複数のロックを発行する必要がある
+ケースがあります。
+
+また、エイリアスは一意に決まっている必要があり、
+
+LOCK TABLES table1 WRITE, 
+            table1 AS x WRITE,
+            table2 AS y WRITE,
+            table3 AS y WRITE;  ==&gt; テーブルは異なるがエイリアスyが重複
+
+というロックはかけられません。
+
+そのため、SQL文を作る場合には、テーブル名と１対１に対応する
+エイリアス名を予め決めておかないといけないようです。(ちょっと面倒)
+
+
+-- 
+Hirokazu Aoyama &lt;aoyama@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="11216.html">[前]</a><a href="11218.html">[次]</a><a href="../list/11201-11300.html">[番号順一覧]</a><a href="../thread/11201-11300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11209.html">  11209 2005-03-19 22:41 [荒木　満 &lt;araki@xxxx] 4.1.1と3.23.58での違い                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11210.html">  11210 2005-03-19 23:34 ┗[kiseki &lt;ml@xxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11211.html">  11211 2005-03-19 23:58 　┗[kiseki &lt;ml@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11212.html">  11212 2005-03-19 23:57 　　┗[荒木　満 &lt;araki@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11213.html">  11213 2005-03-20 00:56 　　　┗[kiseki &lt;ml@xxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11214.html">  11214 2005-03-20 09:19 　　　　┗[荒木　満 &lt;araki@xxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11215.html">  11215 2005-03-20 10:06 　　　　　┗[Tadashi Jokagi &lt;ml@x]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11216.html">  11216 2005-03-20 10:25 　　　　　　┗[荒木　満 &lt;araki@xxxx]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="11217.html">  11217 2005-03-20 17:01 　　　　　　　┗[Hirokazu Aoyama &lt;aoy]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11221.html">  11221 2005-03-21 00:26 　　　　　　　　┗[荒木　満 &lt;araki@xxxx]                       </a></span>
+</pre>
+</body>
+</html>

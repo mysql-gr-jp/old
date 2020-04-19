@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5325</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="5324.html">[前]</a><a href="5326.html">[次]</a><a href="../list/5301-5400.html">[番号順一覧]</a><a href="../thread/5301-5400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5325
+</p>
+<div class="header">
+<p>
+From: &quot;KAWAI,Takanori&quot; &lt;&quot;KAWAI,Takanori&quot; &lt;GCD00051@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 6 Apr 2002 08:19:44 +0900<br>
+Subject: [mysql 05325] Re: 画像ファイルのインサート<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+川合孝典です。
+
+----- Original Message -----
+From: &quot;Tybalt of Capulet&quot; &lt;ice-man@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Friday, April 05, 2002 12:24 PM
+Subject: <a href="05316.html">[mysql 05316]</a> Re: 画像ファイルのインサート
+
+
+<span class="quote1">&gt; 神崎です。</span>
+（中略）
+<span class="quote1">&gt; addslashesを加えることにより解決しました。</span>
+<span class="quote1">&gt; Perlの場合はこれらの処理をもしかしてCGI.pmがやってくれていたんですかね？</span>
+どのようなコードを書いたのかわかりませんが、基本的にはありえない
+話です。たまたま使ったデータに問題を起こすような文字が入っていなかったか、
+何らかのエンコードされた値を取り出して、取り出したときに元に戻すような
+操作をしているとかといったことでは？反対にCGI.pmを使ったら勝手に
+エスケープされているのでは、ファイルのアップロードのときに元に戻す
+操作が必要ってことになりかねません。
+
+<span class="quote1">&gt; PHPの場合は自分でやらないとダメだったんですね。</span>
+PerlだろうがPHPだろうが、そのあたりは違いはないでしょう。
+＃最終的にはなんらかの形でMySQLにそのSQL文を渡すわけですし。
+変数の値を利用する場合には特殊な文字（クォート文字だの\など）を
+エスケープするために、何らかの処理が必要と考えるべきでしょう。
+バイナリの場合には問題が発生しやすいというだけで、普通の
+文字列だからといってクォートが入っていないとは限りませんから。
+
+Perlだったら
+my $hDb = DBI-&gt;connect('dbi:mysql:dbname=mysql;host=localhost',
+  'hogeusr', 'hogepass', {RaiseError=&gt;1}) || die $DBI::errstr;
+my $sData = '';
+my $i;
+for($i=0;$i&lt;256;$i++) {
+    $sData .= chr($i);
+}
+$hDb-&gt;do('REPLACE INTO tmp_img VALUES(?, ?)', undef, 'perl', $sData);
+あるいは
+my $sQ = $hDb-&gt;quote($sData);
+$hDb-&gt;do(&quot;REPLACE INTO tmp_img VALUES('perl2', $sQ)&quot;);
+といった感じ。
+
+PHPでは
+$sData1=addslashes($sData);
+mysql_query(
+&quot;REPLACE INTO tmp_img (id,photoimg) VALUES ('php1','$sData1')&quot;);
+echo &quot;ERROR:&quot;, mysql_errno().&quot;: &quot;.mysql_error();
+$sData2=mysql_escape_string($sData);
+mysql_query(
+&quot;REPLACE INTO tmp_img (id,photoimg) VALUES ('php2','$sData2')&quot;);
+echo &quot;ERROR:&quot;, mysql_errno().&quot;: &quot;.mysql_error();
+
+は両方ともうまくいっていくようです。
+＃PEARでどうなるか、までは知らない　:-P
+
+===================================================
+川合 孝典 (Hippo2000)
+   DBI日本語メーリングリスト管理人、Kansai.pm所属
+   kwitknr@xxxxxxxxxx GCD00051@xxxxxxxxxx
+   <a href="http://member.nifty.ne.jp/hippo2000">http://member.nifty.ne.jp/hippo2000</a>
+   <a href="http://www.hippo2000.info/">http://www.hippo2000.info/</a>
+「Perlを256倍使うための本　DBI編」　発売中
+<a href="http://member.nifty.ne.jp/hippo2000/p256dbi/p256dbi.htm">http://member.nifty.ne.jp/hippo2000/p256dbi/p256dbi.htm</a>
+===================================================
+
+
+</pre>
+</div>
+<p class="button"><a href="5324.html">[前]</a><a href="5326.html">[次]</a><a href="../list/5301-5400.html">[番号順一覧]</a><a href="../thread/5301-5400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="5313.html">   5313 2002-04-05 00:54 [Tybalt of Capulet &lt;i] 画像ファイルのインサート                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5314.html">   5314 2002-04-05 04:52 ┣[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5315.html">   5315 2002-04-05 11:49 ┗[&quot;SADB MIYATSU&quot; &lt;mid@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5316.html">   5316 2002-04-05 12:24 　┗[Tybalt of Capulet &lt;i]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="5325.html">   5325 2002-04-06 08:19 　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                   </a></span>
+</pre>
+</body>
+</html>

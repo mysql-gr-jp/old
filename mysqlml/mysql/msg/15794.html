@@ -1,0 +1,80 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15794</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15793.html">[前]</a><a href="15795.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15794
+</p>
+<div class="header">
+<p>
+From: &lt;shin-1@xxxxxxxxxx&gt;<br>
+Date: Thu, 12 Jul 2012 03:38:41 +0900<br>
+Subject: [mysql 15794] Re: カテゴリ毎の上位3件<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+shin1です。
+
+<span class="quote1">&gt;個人的にはカテゴリ別にSQLをプログラムから投げるほうが好ましい気がしますが、、、</span>
+
+これもカテゴリ数によってはTCP通信が発生する場合など
+別な部分で遅くなりそうですね；；
+
+<span class="quote1">&gt;予め順位のカラムを追加するバージョンを考えてみました</span>
+
+from (select * from xxx2) as t2 は驚きましたw
+MySQLはこんな所にもいやな縛りが出てくるんですね(泣)
+
+「同じ値段のものはIDが小さいほうが上位」という事で少し省略できますね。
+
+-- 順位更新
+UPDATE xxx2 t
+set
+  rank = ( -- 自分より値段が低いか同じ値段でIDが小さいものをカウント
+    select
+      count(*)
+    from
+      (select * from xxx2) as t2
+    where
+      t2.nen = t.nen
+      and (t2.gaku &lt; t.gaku
+      or (t2.gaku = t.gaku
+      and t2.id &lt; t.id) )
+  ) + 1
+
+今回のケースは、実務のほうでは他にも色々な抽出条件が加わっていて、
+さらに結果のソート順も複雑でして、この「ランクを振っておいてから
+抽出する」という考えが本当は一番スマートだったかも知れません。
+
+ランクだけで無く他の抽出条件も加味して、一度テンポラリに抜き出して
+からじっくりsortしても良かったかな。なんて。
+今回はサブクエリだけで抽出する方法で強引に対応してしまいましたが・・
+
+ありがとうございました。
+次回はこのアイデアも参考にさせていただきます。
+
+</pre>
+</div>
+<p class="button"><a href="15793.html">[前]</a><a href="15795.html">[次]</a><a href="../list/15701-15800.html">[番号順一覧]</a><a href="../thread/15701-15800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15783.html">  15783 2012-07-11 02:56 [&lt;shin-1@xxxxxxxxxx&gt; ] カテゴリ毎の上位3件                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15784.html">  15784 2012-07-11 10:27 ┣[高橋政利 &lt;takahashi@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15785.html">  15785 2012-07-11 12:28 ┣[中川 貴 &lt;takashi.nak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15796.html">  15796 2012-07-12 04:10 ┃┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15786.html">  15786 2012-07-11 13:49 ┗[&lt;gotou1213@xxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15787.html">  15787 2012-07-11 14:17 　┣[&lt;gotou1213@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15788.html">  15788 2012-07-11 15:00 　┃┗[中川 貴 &lt;takashi.nak]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15790.html">  15790 2012-07-11 16:09 　┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15791.html">  15791 2012-07-11 17:11 　　┣[あきら &lt;akirainfoml@]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="15794.html">  15794 2012-07-12 03:38 　　┃┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15792.html">  15792 2012-07-12 00:40 　　┗[&lt;gotou1213@xxxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15795.html">  15795 2012-07-12 03:42 　　　┗[&lt;shin-1@xxxxxxxxxx&gt; ]                                 </a></span>
+</pre>
+</body>
+</html>

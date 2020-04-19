@@ -1,0 +1,176 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15944</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15943.html">[前]</a><a href="15945.html">[次]</a><a href="../list/15901-16000.html">[番号順一覧]</a><a href="../thread/15901-16000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15944
+</p>
+<div class="header">
+<p>
+From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 27 Feb 2013 23:21:57 +0900<br>
+Subject: [mysql 15944] Re: mysql-5.6.9 vs mysql-5.1.68<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんばんは。
+
+確かに再現しました。
+
+↓この残念なロジックのような気がします。
+
+<a href="15624.html">http://www.mysql.gr.jp/mysqlml/mysql/msg/15624</a>
+
+'20:5:0'問題は、character_set_clientがsjisとucs2の時に誤った結果を返しました。
+また、tm&lt;=cast('20:5:0' as time)と明示的にキャストしてあげると正しい結果を返します。
+
+utf8以外は冷遇されてますね。。
+
+
+yoku ts.
+
+
+2013/2/27 Etsuo SUMIYA &lt;sumiya-e@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; sumiyaといいます。別件で時間がとれませんでした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; From: HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; Subject: <a href="15940.html">[mysql 15940]</a> Re: mysql-5.6.9 vs mysql-5.1.68</span>
+<span class="quote1">&gt; Date: Thu, 21 Feb 2013 09:51:01 +0900</span>
+<span class="quote1">&gt; Message-ID: &lt;20130221095100.B1B3.C8FC6C14@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 5.6系のmysqlのバージョンは5.6.10でした。申し訳ありませんでした。</span>
+<span class="quote1">&gt; その後、調査したところ、'set names'が影響しているということがわか</span>
+<span class="quote1">&gt; りました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --- ここから</span>
+<span class="quote1">&gt; mysql&gt; set names sjis;</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; explain select name,tm,v from t2 where name='n1' and tm&lt;='20:05:00';</span>
+<span class="quote1">&gt; +----+-------------+-------+------+---------------+------+---------+-------+----</span>
+<span class="quote1">&gt; --+-----------------------+</span>
+<span class="quote2">&gt; | id | select_type | table | type | possible_keys | key  | key_len | ref   | row</span>
+<span class="quote1">&gt; s | Extra                 |</span>
+<span class="quote1">&gt; +----+-------------+-------+------+---------------+------+---------+-------+----</span>
+<span class="quote1">&gt; --+-----------------------+</span>
+<span class="quote2">&gt; |  1 | SIMPLE      | t2    | ref  | ix            | ix   | 67      | const |   1</span>
+<span class="quote1">&gt; 0 | Using index condition |</span>
+<span class="quote1">&gt; +----+-------------+-------+------+---------------+------+---------+-------+----</span>
+<span class="quote1">&gt; --+-----------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; set names latin1;</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; explain select name,tm,v from t2 where name='n1' and tm&lt;='20:05:00';</span>
+<span class="quote1">&gt; +----+-------------+-------+------+---------------+------+---------+-------+----</span>
+<span class="quote1">&gt; --+-----------------------+</span>
+<span class="quote2">&gt; | id | select_type | table | type | possible_keys | key  | key_len | ref   | row</span>
+<span class="quote1">&gt; s | Extra                 |</span>
+<span class="quote1">&gt; +----+-------------+-------+------+---------------+------+---------+-------+----</span>
+<span class="quote1">&gt; --+-----------------------+</span>
+<span class="quote2">&gt; |  1 | SIMPLE      | t2    | ref  | ix            | ix   | 67      | const |</span>
+<span class="quote1">&gt; 2 | Using index condition |</span>
+<span class="quote1">&gt; +----+-------------+-------+------+---------------+------+---------+-------+----</span>
+<span class="quote1">&gt; --+-----------------------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt;</span>
+<span class="quote1">&gt; --- ここまで</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 実際のレコード数は</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; select count(*) from t4;</span>
+<span class="quote1">&gt; +----------+</span>
+<span class="quote2">&gt; | count(*) |</span>
+<span class="quote1">&gt; +----------+</span>
+<span class="quote2">&gt; |  3570024 |</span>
+<span class="quote1">&gt; +----------+</span>
+<span class="quote1">&gt; 1 row in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; あります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; set names sjis;</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; queryの実行。</span>
+<span class="quote1">&gt; :</span>
+<span class="quote1">&gt; 50 rows in set (3.23 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; set names latin1;</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; queryの実行。</span>
+<span class="quote1">&gt; :</span>
+<span class="quote1">&gt; 50 rows in set (0.01 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; となります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; また、以下のサンプルではqueryの結果が正しくありません。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --- ここから</span>
+<span class="quote1">&gt; mysql&gt; set names sjis;</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; select name,tm,v from t2 where name='n1' and tm&lt;='20:5:0';</span>
+<span class="quote1">&gt; +------+----------+------+</span>
+<span class="quote2">&gt; | name | tm       | v    |</span>
+<span class="quote1">&gt; +------+----------+------+</span>
+<span class="quote2">&gt; | n1   | 20:00:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:01:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:02:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:03:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:04:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:05:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:06:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:07:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:08:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:09:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:10:00 | v1   |</span>
+<span class="quote1">&gt; +------+----------+------+</span>
+<span class="quote1">&gt; 11 rows in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; set names latin1;</span>
+<span class="quote1">&gt; Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; select name,tm,v from t2 where name='n1' and tm&lt;='20:5:0';</span>
+<span class="quote1">&gt; +------+----------+------+</span>
+<span class="quote2">&gt; | name | tm       | v    |</span>
+<span class="quote1">&gt; +------+----------+------+</span>
+<span class="quote2">&gt; | n1   | 20:00:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:01:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:02:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:03:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:04:00 | v1   |</span>
+<span class="quote2">&gt; | n1   | 20:05:00 | v1   |</span>
+<span class="quote1">&gt; +------+----------+------+</span>
+<span class="quote1">&gt; 6 rows in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --- ここまで</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="15943.html">[前]</a><a href="15945.html">[次]</a><a href="../list/15901-16000.html">[番号順一覧]</a><a href="../thread/15901-16000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15935.html">  15935 2013-02-19 17:49 [Etsuo SUMIYA &lt;sumiya] mysql-5.6.9 vs mysql-5.1.68             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15938.html">  15938 2013-02-20 23:10 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15939.html">@ 15939 2013-02-21 00:19 　┗[&quot;yoku ts.&quot; &lt;yoku0825]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15940.html">  15940 2013-02-21 09:51 　　┗[HIRATSUKA Sadao &lt;hir]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15943.html">  15943 2013-02-27 17:14 　　　┗[Etsuo SUMIYA &lt;sumiya]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="15944.html">  15944 2013-02-27 23:21 　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15946.html">  15946 2013-02-28 18:10 　　　　　┗[Etsuo SUMIYA &lt;sumiya]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15947.html">  15947 2013-02-28 18:35 　　　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15948.html">  15948 2013-03-01 11:45 　　　　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                         </a></span>
+</pre>
+</body>
+</html>

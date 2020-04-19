@@ -1,0 +1,137 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11451</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11450.html">[前]</a><a href="11452.html">[次]</a><a href="../list/11401-11500.html">[番号順一覧]</a><a href="../thread/11401-11500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11451
+</p>
+<div class="header">
+<p>
+From: Ryutaro Amano &lt;Ryutaro Amano &lt;wn9r-amn@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 26 May 2005 20:34:20 +0900<br>
+Subject: [mysql 11451] Re: Mac10.4でのmake<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+天野です。
+
+opparaさんが05.5.26 4:18 AMに書きました：
+
+結局現状ではこうなりました。
+
+まず下記のエラーがでていた。
+
+item_strfunc.cc: In member function `virtual String* Item_func_
+encrypt::val_str(String*)':
+item_strfunc.cc:1460: error: ‘crypt’ was not declared in this scope
+make[4]: *** [item_strfunc.o] Error 1
+make[3]: *** [all-recursive] Error 1
+make[2]: *** [all] Error 2
+make[1]: *** [all-recursive] Error 1
+make: *** [all] Error 2
+
+mysql-4.1.12/libmysqld/item_strfunc.ccを見ると、
+'crypt'は、エラーメッセージの通り1460行目にしか出てきません。このファ
+イルの頭の部分は下記のようになっています。
+
+----------------------------------------------------------------------
+/* This file defines all string functions
+** Warning: Some string functions doesn't always put and end-null on 
+a String
+** (This shouldn't be needed)
+*/
+
+#ifdef __GNUC__
+#pragma implementation        // gcc: Class implementation
+#endif
+
+#include &quot;mysql_priv.h&quot;
+#include &lt;m_ctype.h&gt;
+#ifdef HAVE_OPENSSL
+#include &lt;openssl/des.h&gt;
+#endif /* HAVE_OPENSSL */
+#include &quot;md5.h&quot;
+#include &quot;sha1.h&quot;
+#include &quot;my_aes.h&quot;
+C_MODE_START
+#include &quot;../mysys/my_static.h&quot;     // For soundex_map
+C_MODE_END
+----------------------------------------------------------------------
+-
+
+そこで、configureから--with-openssl=/usrをはずしてみました。
+makeすると
+
+/usr/bin/ld: warning multiple definitions of symbol _regcomp
+../regex/libregex.a(regcomp.o) definition of _regcomp in section (__
+TEXT,__text)
+/usr/lib/gcc/powerpc-apple-darwin8/4.0.0/../../../libdl.dylib(regcomp.
+So) definition of _regcomp
+/usr/bin/ld: warning multiple definitions of symbol _regexec
+../regex/libregex.a(regexec.o) definition of _regexec in section (__
+TEXT,__text)
+/usr/lib/gcc/powerpc-apple-darwin8/4.0.0/../../../libdl.dylib(regexec.
+So) definition of _regexec
+/usr/bin/ld: warning multiple definitions of symbol _regfree
+../regex/libregex.a(regfree.o) definition of _regfree in section (__
+TEXT,__text)
+/usr/lib/gcc/powerpc-apple-darwin8/4.0.0/../../../libdl.dylib(regfree.
+So) definition of _regfree
+/usr/bin/ld: warning multiple definitions of symbol _qsort
+../mysys/libmysys.a(mf_qsort.o) definition of _qsort in section (__
+TEXT,__text)
+/usr/lib/gcc/powerpc-apple-darwin8/4.0.0/../../../libdl.dylib(qsort.
+So) definition of _qsort
+/usr/bin/ld: Undefined symbols:
+___cxa_pure_virtual
+operator delete[](void*)
+operator delete(void*)
+operator new[](unsigned long)
+operator new(unsigned long)
+collect2: ld returned 1 exit status
+make[4]: *** [mysqld] Error 1
+make[3]: *** [all-recursive] Error 1
+make[2]: *** [all] Error 2
+make[1]: *** [all-recursive] Error 1
+make: *** [all] Error 2
+
+というわけで、ここでgccを3.3に切り替えて同じconfigure（下記のもの）で
+makeしたところエラーがでずインストールも問題なく行えました。
+早速mysqlを立ち上げたところ日本語の確定後の削除も問題なく行えました。
+
+CFLAGS=&quot;-O3&quot; CXX=gcc CXXFLAGS=&quot;-O3 -felide-constructors -fno-
+exceptions -fno-rtti&quot; ./configure --prefix=/usr/local/mysql --
+localstatedir=/usr/local/mysql/data --enable-thread-safe-client --
+with-unix-socket-path=/private/tmp/mysql.sock --without-readline --
+with-extra-charsets=all --with-mysqld-user=mysql
+
+しかし10.3.xでは--with-openssl=/usrを付けてもmake installまでエラーな
+く通りました。
+10.3.9の/usr/include/openssl/des.hと10.4.1の/usr/include/openssl/des.
+hをdiffしましたが、全く同じファイルでした。
+
+僕に追求できるのはこのあたりまでなので、当座はこのままにしておきます。
+「お隣の方」の情報などありましたら教えていただければうれしいです。
+
+
+Ryutaro Amano
+wn9r-amn@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="11450.html">[前]</a><a href="11452.html">[次]</a><a href="../list/11401-11500.html">[番号順一覧]</a><a href="../thread/11401-11500.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11428.html">  11428 2005-05-25 00:22 [Ryutaro Amano &lt;wn9r-] Mac10.4でのmake                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11433.html">  11433 2005-05-25 10:25 ┗[oppara &lt;mlml@xxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11440.html">  11440 2005-05-26 04:18 　┗[oppara &lt;mlml@xxxxxxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="11451.html">  11451 2005-05-26 20:34 　　┗[Ryutaro Amano &lt;wn9r-]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11457.html">  11457 2005-05-27 07:09 　　　┗[oppara &lt;mlml@xxxxxxx]                                 </a></span>
+</pre>
+</body>
+</html>

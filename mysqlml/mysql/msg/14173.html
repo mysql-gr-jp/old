@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14173</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14172.html">[前]</a><a href="14174.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14173
+</p>
+<div class="header">
+<p>
+From: 島村秀世 &lt;島村秀世 &lt;h.shimamura@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 13 Aug 2007 09:55:06 +0900<br>
+Subject: [mysql 14173] Copying to tmp table　と Lockの関係について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+いつもお世話になっています。
+
+早速ですが Copying to tmp table と Lock の関係について、教えてください。
+
+
+現在私どもでは、スケジューラ、休暇/残業申請等からなるグループウェアの
+ＤＢに MySQL5.0.18 を用いています。
+
+グループウェアであることから、9:00AMの出勤時にアクセスが重なり、ＤＢの
+負荷が上昇し、load average が100を超えてしまうような事も稀にですが発生
+しています。
+10分程度で、load average が 2 以下に下がることから余り気にしていなかっ
+たのですが、以下のコマンドで状況を確認したところ、何れの場合も Copyi
+ng to tmp table が発生した際に Lock がかかっていることがわかりました。
+
+確認したところ、Copying to tmp table となっているＳＱＬは、外部結合な
+どを多用した比較的複雑なＳＱＬでした。
+また、State が Locked となっているＳＱＬについては、何れも Lock を行わ
+ないＳＱＬであり、かつシンプルなＳＱＬでした。
+
+
+そこで質問なのですが、
+
+１．MySQLでは、外部結合などを多用する複雑なＳＱＬを発行すると、Copying 
+    to tmp table が発生するつくりなのでしょうか？
+
+２．Copying to tmp table が発生した場合、他のＳＱＬは Lock されてしまう
+    のでしょうか？
+    また、これを回避する方法などはないでしょうか？
+
+
+※ Copying to tmp table を発生させている一部システムの利用開始時間を9:15
+　 以降にずらす等の対処は行うつもりですので、それ以外の対応があればお教
+　 え下さい。
+
+
+
+[確認コマンド]
+mysqladmin -u root -p -i4 process status &gt; process_status.log
+
+[process_status.logからの抜粋]
++---------+------+----------------------+-----------------------------+
+<span class="quote1">| Command | Time | State                | Info                        |</span>
++---------+------+----------------------+-----------------------------+
+<span class="quote1">| Sleep   | 816  |                      |                             |</span>
+<span class="quote1">| Query   | 23   | Copying to tmp table | select r1.deptno, p.dispname|</span>
+<span class="quote1">| Query   | 23   | Locked               | select p.deptno, p.fullname,|</span>
+<span class="quote1">| Query   | 23   | Locked               | select leave_code, sum(use_t|</span>
+<span class="quote1">| Query   | 23   | Locked               | UPDATE leaverecord SET appli|</span>
+<span class="quote1">| Query   | 22   | Locked               | update public_servant set cu|</span>
+<span class="quote1">| Query   | 22   | Locked               | select dp.depname, d.divname|</span>
+<span class="quote1">| Query   | 22   | Locked               | SELECT deptno, fullname, div|</span>
+
+＜中略＞
+
+<span class="quote1">| Query   | 1    | Locked               | update public_servant set cu|</span>
+<span class="quote1">| Query   | 1    | Locked               | select deptno, divcode, team|</span>
+<span class="quote1">| Query   | 1    | Locked               | SELECT deptno FROM public_se|</span>
+<span class="quote1">| Query   | 1    | Locked               | SELECT deptno FROM public_se|</span>
+<span class="quote1">| Query   | 0    |                      | show processlist            |</span>
++---------+------+----------------------+-----------------------------+
+Uptime: 4108990  Threads: 55  Questions: 203816547  Slow queries: 0  
+Opens: 0  Flush tables: 1  Open tables: 256  
+Queries per second avg: 49.603
+
+
+[ＯＳ環境など]
+OS: CentOS4.3
+CPU:Pen3 3.4GHz
+MEM: 4GByte
+MySQL: MySQL5.0.18
+ＤＢ専用のサーバです。
+
+
+
+-----
+島村秀世
+
+
+</pre>
+</div>
+<p class="button"><a href="14172.html">[前]</a><a href="14174.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14167.html">  14167 2007-08-11 20:29 [&lt;kozu@xxxxxxxxxx&gt;   ] レプリケーションについて                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14168.html">  14168 2007-08-11 20:47 ┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14169.html">  14169 2007-08-11 23:06 　┗[&lt;kozu@xxxxxxxxxx&gt;   ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14170.html">  14170 2007-08-12 02:55 　　┗[&quot;Katsuyuki Sakai&quot; &lt;s]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14171.html">  14171 2007-08-12 10:54 　　　┣[&lt;kozu@xxxxxxxxxx&gt;   ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14172.html">  14172 2007-08-12 19:35 　　　┣[&quot;Katsuyuki Sakai&quot; &lt;s]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="14173.html">  14173 2007-08-13 09:55 　　　┗[島村秀世 &lt;h.shimamur] Copying to tmp table　と Lockの関係について</a></span>
+</pre>
+</body>
+</html>

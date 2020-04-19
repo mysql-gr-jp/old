@@ -1,0 +1,101 @@
+<div>藤原です。</div><div><br></div><div>黄世元様、ご回答ありがとうございます。</div><div><br></div><div>DRBDについても調べてみます。</div><div><br></div><div>インフラ担当者より、vmware HAを使えるのでは？という話を聞いたのですが、MySQLの冗長構成としてvmware HAというのはどうなのでしょうか。</div><div><br></div><div>この辺りの知見がある方からも、ご意見いただけますと幸いです。</div><div><br></div><div>少し調べてみると、vmware HA を採用するくらいなら、他のクラスター構成の手段もあるよというご意見も歓迎です。</div><div><br></div><div>よろしくお願い致します。</div><div><br></div><div>藤原</div><div><br></div><div><br><div class="gmail_quote"><div>2017年6月6日(火) 14:57 Sewon Hwang (黄 世元) &lt;<a href="mailto:sewon.hwang@cdnetworks.co.jp">sewon.hwang@cdnetworks.co.jp</a>&gt;:<br></div><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+
+
+
+
+
+<div lang="JA" link="#0563C1" vlink="#954F72">
+<div class="m_2732154816444133240WordSection1">
+<p class="MsoNormal">藤原さん、<span lang="EN-US"><u></u><u></u></span></p>
+<p class="MsoNormal">お疲れ様です。黄世元申します。<span lang="EN-US"><u></u><u></u></span></p>
+<p class="MsoNormal"><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">冗長構成としては　２台構成であれば<span lang="EN-US">DRBD+Herbeat+MySQL</span>構成があります。<span lang="EN-US"><u></u><u></u></span></span></p>
+<p class="MsoNormal"><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">以前の現場で上記の構成で<span lang="EN-US">300</span>台くらいの<span lang="EN-US">MySQL</span>を管理したんですが、<span lang="EN-US"><u></u><u></u></span></span></p>
+<p class="MsoNormal"><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">非常に安定的でよかったです。<span lang="EN-US"><u></u><u></u></span></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><u></u><u></u></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">DRBD+Herbeat+MySQL</span><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">参考ページ<span lang="EN-US"><u></u><u></u></span></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><a href="http://bougaidenpa.org/wanatabe/archives/20" target="_blank">http://bougaidenpa.org/wanatabe/archives/20</a><u></u><u></u></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><u></u><u></u></span></p>
+<h1><span style="font-size:12.0pt">メリット：障害時にスレーブサーバへ自動で切り替える<span lang="EN-US"><u></u><u></u></span></span></h1>
+<p class="MsoNormal"><b>デメリット：</b><span class="m_2732154816444133240shorttext"><span lang="EN-US">Heartbeat</span>の誤動作</span><b>による</b><b><span lang="EN-US" style="font-family:&quot;Malgun Gothic&quot;,sans-serif">Split
+</span><span lang="EN-US">Brain</span>の恐れがあります。<span lang="EN-US"><u></u><u></u></span></b></p>
+<p class="MsoNormal"><b><span lang="EN-US">Heartbeat</span>が<span lang="EN-US">Master</span>が死んじゃったと思って、<span lang="EN-US">Master</span>と<span lang="EN-US">Slave</span>を切り替えしてしまう現状です。<span lang="EN-US"><u></u><u></u></span></b></p>
+<p class="MsoNormal"><b><span style="font-family:&quot;Yu Gothic&quot;">この問題を防ぐためには、</span></b><b><span lang="EN-US">Hearbeat</span></b><b><span style="font-family:&quot;Yu Gothic&quot;">の</span></b><b><span lang="EN-US">Deadtime</span></b><b><span style="font-family:&quot;Yu Gothic&quot;">の設定が鍵です。</span></b><b><span lang="EN-US"><u></u><u></u></span></b></p>
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">Hearbeat</span><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">のパラメタに関しては下記の<span lang="EN-US">URL</span>を参考してください。<span lang="EN-US"><u></u><u></u></span></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><a href="http://itpro.nikkeibp.co.jp/article/COLUMN/20090224/325384/?rt=nocnt" target="_blank">http://itpro.nikkeibp.co.jp/article/COLUMN/20090224/325384/?rt=nocnt</a><u></u><u></u></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><u></u><u></u></span></p>
+<p class="MsoNormal"><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">３</span><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">台構成であれば</span><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Segoe UI Symbol&quot;,sans-serif">MHA</span><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">構成もお勧めです。</span><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Segoe UI Symbol&quot;,sans-serif"><u></u><u></u></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Malgun Gothic&quot;,sans-serif">MHA</span><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">参考ページ<span lang="EN-US"><u></u><u></u></span></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><a href="http://qiita.com/youyo_/items/035cce5b8d0052228dfc" target="_blank">http://qiita.com/youyo_/items/035cce5b8d0052228dfc</a><u></u><u></u></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><u></u><u></u></span></p>
+<p class="MsoNormal"><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">参考にならないかもしれないですが、<span lang="EN-US"><u></u><u></u></span></span></p>
+<p class="MsoNormal"><span style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;">よろしくお願いします。<span lang="EN-US"><u></u><u></u></span></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><u></u><u></u></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><u></u><u></u></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><u></u><u></u></span></p>
+<p class="MsoNormal" style="background:white"><span lang="EN-US" style="font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d">///******************************************************</span><span lang="EN-US" style="font-size:10.0pt;font-family:&quot;\00ff2d\00ff33  \00660e\00671d&quot;,serif;color:#1f497d"><br>
+</span><b><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Arial&quot;,sans-serif;color:#1f497d"></span></b><b><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d">Sewon Hwang</span></b><b><span lang="EN-US" style="font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d"></span></b><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d">
+ Techinical Division System Team</span><b><span lang="EN-US" style="font-size:14.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#135788"><br>
+</span></b><b><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#135788"></span></b><b><span lang="EN-US" style="font-family:&quot;Tahoma&quot;,sans-serif;color:#135788">CDNetworks Japan</span></b><span lang="EN-US" style="font-size:9.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#135788">Co.,
+ Ltd</span><span lang="EN-US" style="font-size:9.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d"><br>
+</span><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d">Email</span><span style="font-size:8.0pt;font-family:&quot;\00ff2d\00ff33  \0030b4\0030b7\0030c3\0030af&quot;;color:#1f497d">：</span><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d"><a href="mailto:sewon.hwang@cdnetworks.co.jp" target="_blank"><span style="color:blue">sewon.hwang@cdnetworks.co.jp</span></a></span><span lang="EN-US" style="font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d"><br>
+</span><span lang="EN" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:black"></span><span lang="EN" style="font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:black">NittochiNishi-shinjuku Bldg 8<sup>th</sup>Floor</span><span lang="EN-US" style="font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d"><br>
+</span><span lang="EN" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:black"></span><span lang="EN" style="font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:black">6-10-1, Nishi-Shinjuku, Shinjuku-ku</span><span lang="EN-US" style="font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d">,
+ Tokyo, Japan 160-0023</span><span lang="EN-US" style="font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#3a3a3a"><br>
+</span><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d"> Office</span><span style="font-size:8.0pt;font-family:&quot;\00ff2d\00ff33  \00660e\00671d&quot;,serif;color:#1f497d">：</span><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d">+81.3.5909.3329|
+ FAX</span><span style="font-size:8.0pt;font-family:&quot;\00ff2d\00ff33  \00660e\00671d&quot;,serif;color:#1f497d">：</span><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d">+81.3.5909.3360| Cell</span><span style="font-size:8.0pt;font-family:&quot;\00ff2d\00ff33  \0030b4\0030b7\0030c3\0030af&quot;;color:#1f497d">：</span><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d">+81.90.9137.8608</span><span lang="EN-US" style="font-size:9.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d"><br>
+</span><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d"> URL</span><span style="font-size:8.0pt;font-family:&quot;\00ff2d\00ff33  \00660e\00671d&quot;,serif;color:#1f497d">：</span><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Arial&quot;,sans-serif;color:#1f497d"><a href="http://www.cdnetworks.co.jp/" title="blocked::http://www.cdnetworks.co.jp/" target="_blank"><span style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#0000cc">www.cdnetworks.co.jp</span></a></span><span lang="EN-US" style="font-size:10.5pt;font-family:&quot;Yu Gothic&quot;;color:#212121"><u></u><u></u></span></p>
+<p class="MsoNormal" style="background:white"><span lang="EN-US" style="font-size:9.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d"><br>
+</span><span lang="EN-US" style="font-size:8.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d"></span><span lang="EN-US" style="font-size:10.0pt;font-family:&quot;Tahoma&quot;,sans-serif;color:#1f497d">******************************************************///</span><span lang="EN-US" style="font-size:10.5pt;font-family:&quot;Yu Gothic&quot;;color:#212121"><u></u><u></u></span></p>
+<p class="MsoNormal"><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Yu Gothic&quot;"><u></u><u></u></span></p>
+<p class="MsoNormal"><b><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Calibri&quot;,sans-serif">From:</span></b><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Calibri&quot;,sans-serif"> Yuji Fujihara [mailto:<a href="mailto:yflab73@gmail.com" target="_blank">yflab73@gmail.com</a>]
+<br>
+<b>Sent:</b> Tuesday, June 6, 2017 2:32 PM<br>
+<b>To:</b> <a href="mailto:ml@mysql.gr.jp" target="_blank">ml@mysql.gr.jp</a><br>
+<b>Subject:</b> [mysql 16407] MySQL</span><span style="font-size:11.0pt">の代表的な冗長構成について</span><span lang="EN-US" style="font-size:11.0pt;font-family:&quot;Calibri&quot;,sans-serif"><u></u><u></u></span></p></div></div><div lang="JA" link="#0563C1" vlink="#954F72"><div class="m_2732154816444133240WordSection1">
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+<p class="MsoNormal">藤原と申します。<span lang="EN-US"><u></u><u></u></span></p>
+<div>
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+<div>
+<p class="MsoNormal">現在、<span lang="EN-US">MySQL</span>の冗長構成を検討しております。<span lang="EN-US"><u></u><u></u></span></p>
+</div>
+</div>
+<div>
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal">そこで、<span lang="EN-US">MySQL</span>の代表的な冗長構成の例について、どなたかご教示いただけますと幸いです。<span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal">基本的にはレプリケーションによる、マスター、スレーブ構成ではなく、その一歩上の冗長構成を検討しております。<span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal">現在検討しているのは、共有ディスクを使用したアクティブ、スタンバイの冗長構成を検討しております。<span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal">具体的にどのような<span lang="EN-US">HA</span>関連の技術およびソフトウェアを使用する構成が良いか、メリット、デメリットなどアドバイスいただけますと幸いです。<span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal">以上、よろしくお願い致します。<span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+</div>
+<div>
+<p class="MsoNormal">藤原<span lang="EN-US"><u></u><u></u></span></p>
+</div>
+</div></div></blockquote></div></div>
+

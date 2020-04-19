@@ -1,0 +1,76 @@
+<div dir="ltr">yokuさん　大垣さん<div>ご返信ありがとうございます。</div><div>広江です。</div><div><br></div><div>メモリは32GB積んでいて、バッチ動かす前は使用メモリが18GBぐらいなのが</div><div>バッチ実行後２時間ほどで32GBフル＋スワップ100MBほど使っているようです。</div><div><br></div><div>Linuxの場合、スワップ発生は当然と思っていましたが認識が間違っているのでしょうか。</div>
+<div>現在innotopをインストールして情報を集めようと、見方を調べているところです。</div><div><br></div><div>yokuさん</div><div>なるほどです、</div><div><span style="font-family:arial,sans-serif;font-size:14px">innodb_buffer_pool_size</span><span style="font-family:arial,sans-serif;font-size:14px">&nbsp;は19G-&gt;16Gに下げ</span></div>
+<div><span style="font-family:arial,sans-serif;font-size:14px">innodb_log_buffer_size を8M-&gt;64Mにあげてやってみようと思います。</span><font face="arial, sans-serif"><span style="font-size:14px"><br></span></font></div><div><br></div><div>
+<span style="font-family:arial,sans-serif;font-size:14px"><br></span></div><div><font face="arial, sans-serif"><span style="font-size:14px">大垣さん</span></font></div><div><span style="font-family:arial,sans-serif;font-size:14px">「mysqlをデバッグビルド」というのはもしやC言語の知識が必要でしょうか？</span><font face="arial, sans-serif"><span style="font-size:14px"><br>
+</span></font></div><div>勉強不足でおはずかしい限りですが。</div><div>プロセスをps -efでみると</div><div>mysqld &lt;defunct&gt;になっていてkillしてもスルーされゾンビでした。</div><div><br></div><div><span style="font-family:arial,sans-serif;font-size:14px"><br></span></div>
+<div><span style="font-family:arial,sans-serif;font-size:14px"><br></span></div><div><br></div><div><br></div></div><div class="gmail_extra"><br><br><div class="gmail_quote">2013年7月31日 15:45 Yasuo Ohgaki <span dir="ltr">&lt;<a href="mailto:yohgaki@ohgaki.net" target="_blank">yohgaki@ohgaki.net</a>&gt;</span>:<br>
+<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><div dir="ltr">大垣です。<div><br></div><div>他の方が指摘されているようにメモリが足りないのかも知れませんが、</div><div>本当にハングしているならmysqlをデバッグビルドしてgdbでアタッチ</div>
+<div>して調べると原因が分かると思います。</div></div><div class="gmail_extra"><br clear="all"><div>--<br>Yasuo Ohgaki <br>
+
+<a href="mailto:yohgaki@ohgaki.net" target="_blank">yohgaki@ohgaki.net</a></div><div><div class="h5">
+<br><br><div class="gmail_quote">2013/7/30 ayako hiroe <span dir="ltr">&lt;<a href="mailto:roeaya03@gmail.com" target="_blank">roeaya03@gmail.com</a>&gt;</span><br><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+
+
+<div dir="ltr"><div><div>お世話になります。</div><div>広江彩子と申します。</div><div><br></div><div>サーバー移行のため数億件のレストアテストをしております。</div><div>３００万件ずつのtab区切りプレインテキストのダンプを</div><div>バッチで何度もload infeを繰りかえしているうちmysqldが突然ハングします。</div><div><br></div>
+
+
+
+<div>ハングの具体的な現象は</div><div>・load中のCPU使用率からすると突然それが下がる</div><div>・mysql関連のコマンドがすべてハング（killするしかない）</div><div>・mysqladmin shutdownもハング</div><div>・mysqldのスクリプトを実行してもハング</div><div><br></div><div>上記のような状態になると結局killallなどするしかありません。</div>
+
+
+
+<div>エラーログはハングの時点では何も吐いていません。</div><div>killallでmysqldのプロセスを停止するので、システムをリブートしてmysqld startするときに</div><div>リカバリ・ロールバックプロセスががんがん走るのをエラーログが吐いているようになります。</div><div><br></div><div>バッチをまわし始めるとだんだん使用メモリが増え、しばらくするとスワップが発生します。</div>
+
+
+
+<div>それが原因かもわかりません。</div><div>innodb使用です。</div><div><br></div><div>何かお気づきの方がおられましたら</div><div>ご教授いただけますと幸いです。</div><div><br></div><div><br></div><div><br></div><div>OS:</div><div>Linux CentOS release6.4</div><div><br></div>
+
+
+
+<div>MySQL：</div><div>MySQL 5.5.32 Remi</div><div><br></div><div>ロケール：</div><div>utf8</div><div><br></div><div>my.cnf</div><div><br></div><div>[mysqld]</div><div>innodb_file_per_table</div><div>back_log = 50</div><div>max_connections = 500</div>
+
+
+
+<div>max_connect_errors = 10</div><div>table_open_cache = 2048</div><div>max_allowed_packet = 16M</div><div>binlog_cache_size = 1M</div><div>max_heap_table_size = 64M</div><div>read_buffer_size = 512M</div><div>read_rnd_buffer_size = 1M</div>
+
+
+
+<div>ted per thread if sort is needed.</div><div>sort_buffer_size = 8M</div><div>join_buffer_size = 8M</div><div>thread_cache_size = 180</div><div>thread_concurrency = 8</div><div>query_cache_size = 64M</div><div>query_cache_limit = 2M</div>
+
+
+
+<div><br></div><div>ft_min_word_len = 4</div><div><br></div><div>default-storage-engine = InnoDB</div><div>thread_stack = 192K</div><div>transaction_isolation = REPEATABLE-READ</div><div>tmp_table_size = 64M</div><div><br>
+
+
+
+</div><div>binlog_format=mixed</div><div>slow_query_log</div><div>log-error=/var/log/myerror.log</div><div>log-warnings=1</div><div>long_query_time = 120</div><div>key_buffer_size = 32M</div><div>bulk_insert_buffer_size = 64M</div>
+
+
+
+<div>myisam_sort_buffer_size = 128M</div><div>myisam_max_sort_file_size = 10G</div><div>myisam_repair_threads = 1</div><div><br></div><div>myisam_recover</div><div>innodb_io_capacity=2000</div><div>innodb_additional_mem_pool_size = 16M</div>
+
+
+
+<div>innodb_buffer_pool_size = 19G</div><div><br></div><div>innodb_data_file_path = ibdata1:10M:autoextend</div><div>innodb_write_io_threads = 8</div><div>innodb_read_io_threads = 8</div><div>innodb_thread_concurrency = 16</div>
+
+
+
+<div><br></div><div>innodb_flush_log_at_trx_commit = 1</div><div>innodb_log_buffer_size = 8M</div><div><br></div><div>innodb_log_file_size = 1G</div><div>innodb_log_files_in_group = 3</div><div><br></div><div>innodb_max_dirty_pages_pct = 90</div>
+
+
+
+<div>innodb_lock_wait_timeout = 120</div><div><br></div><div><br></div><div>[mysqldump]</div><div>quick</div><div><br></div><div>max_allowed_packet = 16M</div><div>default-character-set=utf8</div><div><br></div><div>[mysql]</div>
+
+
+
+<div>no-auto-rehash</div><div><br></div><div># Only allow UPDATEs and DELETEs that use keys.</div><div>#safe-updates</div><div>default-character-set=utf8</div><div><br></div><div>[myisamchk]</div><div>key_buffer_size = 512M</div>
+
+
+
+<div>sort_buffer_size = 512M</div><div>read_buffer = 8M</div><div>write_buffer = 8M</div><div><br></div><div>[mysqlhotcopy]</div><div>interactive-timeout</div><div><br></div><div>[mysqld_safe]</div><div>open-files-limit = 8192</div>
+
+
+
+<div><br></div></div></div>
+</blockquote></div><br></div></div></div>
+</blockquote></div><br></div>

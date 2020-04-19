@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:555</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="554.html">[前]</a><a href="556.html">[次]</a><a href="../list/501-600.html">[番号順一覧]</a><a href="../thread/501-600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:555
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Fri, 15 Jan 1999 12:39:26 +0900<br>
+Subject: [mysql 555] Re: MySQL speed<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+毅です
+
+mysql&gt; explain select count(*) from Test_all_tab where lotno like 'D15A0%';
+の結果をみると、だいたい妥当な感じです。
+で MySQL の場合、like を使用すると、それの正当性をいちいちチャックして回ります
+すなわち、単に数え上げているわけでなく、内部では verify しているようです
+で、MySQL3.22 のルーチンでは、今回のような場合において、
+MySQL は 遅くなる事がわかりました。(monty は限られた場合と言ってます)
+TcX にあげたら、これは、3.23 で fix されます。
+
+mysql&gt; explain select count(*) from Test_all_tab where stop_day &gt;'1998-11-14' and stop_day &lt;'1998-12-14';
+からは、
+monty いわく、
+&quot;こんなに違うのはとても興味深く&quot; (なかば信じられない)てかんじで、
+私は empress の特徴をつかんでいないのですが、
+↓の場合、(columnは何を指す？) Empress は速くなるそうです。
+&quot; Do you happen to know how Empress saves data?  If they save everything 
+by column, this could explain why this is fast.  This would of course mean
+that if you retrieve a couple of columns of data things would get
+extremely slow.&quot;
+
+mysql&gt; show status;
+からは、(ハマさんや民斗さんの言うとおりIOで、)
+MySQL は 22793 個のキーを探し、(この場合、disk を探しに行っています)
+disk seek に 10ms, 計 227秒かかっています。
+Linux 側の file system の利用が
+足を引っ張っているのではないかとのかんがえです。↓
+
+&quot;The only reason I can explain why Empress does the later query in 6 seconds is
+that Empress uses prealloced files or a pre-allocated disk partition and
+that it the MySQL tables are very distributed on the disk (by Linux).&quot;
+
+また、IOのために遅くなっているので、key_buffer を増やします。
+(monty は empress にあたえているメモリーと同じぐらいにするとどうなの？
+　と言ってます -O key_buffer=16M
+
+
+で、少しでも速くするには、4つ方法があり、
+a).
+mysqladmin flush-tables
+isamchk -r database/Test_all_tab
+
+とするとisamchk が最適化してくれます。
+これは 相当な 時間がかかります.
+
+また、tmpdir を使用しますので、元データが1Gあると、十分に大きなところを
+tmpdir に指定してから実行してください。
+でないと、失敗し、復旧できなくなるかもしれません。
+--tmpdir=　で指定してきどうするか、/tmp をおおきくするか。
+
+b) ISAM のバッファの変更
+Pentium400 クラスだと、ISAM で使用している
+MySQL 標準のキーブロックサイズ(1024)が少ないようで、
+これはソースに埋め込まれているので、ソース変更してリビルドします
+
+isam/static.c:
+nisam_block_size=1024
+を
+nisam_block_size=8192
+に変更
+
+c) char binary 型の使用
+ alter table する場合も(a)と同様、tmpdir の容量と、
+ database directory のあるパーティションの容量に気をつけてください。
+
+d) key_buffer= の十分なわりあて
+
+
+以上、ご報告いただけるとありがたいです。
+また、参考のためにも、
+empress でテーブルやメモリー割り当て、ファイルアロケーションなどをどのように
+したか、教えていただくとありがたいです。
+
+
+ 村上 毅  takeshi@xxxxxxxxxx
+ Soft Agency Co., Ltd. TEL 048-661-1527
+ PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
+ [ <a href="http://www.softagency.co.jp/mysql/">http://www.softagency.co.jp/mysql/</a> ]
+ [ MySQL ML: mysql-help@xxxxxxxxxx ]
+
+</pre>
+</div>
+<p class="button"><a href="554.html">[前]</a><a href="556.html">[次]</a><a href="../list/501-600.html">[番号順一覧]</a><a href="../thread/501-600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="543.html">    543 1999-01-14 05:27 [Tatsuya Ina &lt;ina@xxx] Re:MySQL speed                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="545.html">    545 1999-01-13 22:48 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="550.html">    550 1999-01-14 11:16 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="552.html">    552 1999-01-14 23:21 　┗[Tatsuya Ina &lt;ina@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="553.html">    553 1999-01-14 19:02 　　┗[民斗 &lt;tommy@xxxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="554.html">    554 1999-01-15 00:32 　　　┗[Shogo Hamamoto &lt;KHC0]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="555.html">    555 1999-01-15 12:39 　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+</pre>
+</body>
+</html>

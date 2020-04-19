@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:919</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="918.html">[前]</a><a href="920.html">[次]</a><a href="../list/901-1000.html">[番号順一覧]</a><a href="../thread/901-1000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:919
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Wed, 26 May 1999 20:59:48 +0900<br>
+Subject: [mysql 00919] Re: About Compile Error!<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Wed, 26 May 1999 18:25:31 +0900,
+胡 愈 &lt;hu@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 始めまして、ネオナジー＠胡です。</span>
+はじめまして
+
+<span class="quote1">&gt; いまSolaris2.6 for Intel で mod_auth_mysqlモジュール</span>
+<span class="quote1">&gt; をインストールするとき、Apache再コンペルーエラーありますので</span>
+<span class="quote1">&gt; 誰が教えてもらえませんが？</span>
+
+<span class="quote1">&gt; WWWサーバとモジュール：</span>
+<span class="quote1">&gt; apache_1_3_6_tar.gz</span>
+<span class="quote1">&gt; mod_auth_mysql-2_20_tar.gz</span>
+<span class="quote1">&gt; ---------------------------------------</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mod_auth_mysql.cをコンパイルＯＫ</span>
+<span class="quote1">&gt; Apache Configure OK!</span>
+<span class="quote1">&gt; #-- Path: /usr/local/src/apache_1.3.6/src ----#</span>
+<span class="quote1">&gt; #./Configure</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; # make</span>
+
+<span class="quote1">&gt; gcc  -DSOLARIS2=260 -I/usr/local/mysql/include/mysql</span>
+<span class="quote1">&gt; -L/usr/local/mysql/lib/mysql  \</span>
+<span class="quote1">&gt;       -o httpd buildmark.o modules.o  modules/standard/libstandard.a</span>
+<span class="quote1">&gt; main/libmain.a  ./os/unix/libos.a  ap/libap.a  -lmysqlclient -lm</span>
+<span class="quote1">&gt; -lsocket -lnsl</span>
+<span class="quote1">&gt; 未定義の                        最初に参照している</span>
+<span class="quote1">&gt; シンボル                            ファイル</span>
+<span class="quote1">&gt; pcalloc</span>
+<span class="quote1">&gt; modules/standard/libstandard.a(mod_auth_mysql.o)</span>
+<span class="quote1">&gt; modules/standard/libstandard.a(mod_auth_mysql.o)</span>
+<span class="quote1">&gt; ....</span>
+<span class="quote1">&gt; ld: 重大なエラー: シンボル参照エラー。httpd</span>
+<span class="quote1">&gt; に書き込まれる出力は?りません</span>
+<span class="quote1">&gt; *** Error code 1</span>
+<span class="quote1">&gt; make: Fatal error: Command failed for target `target_static'</span>
+
+mod_auth_mysql-2.20 を自分の手で移動してませんか？
+もしそうなら、auth-mysql-2.20 を
+自分でファイルを移動したりコンパイルするのはやめましょう
+
+apache-1.3.6, mod_auth_mysql-2.20 ならば、以下の手順です
+
+0. apache 展開
+ tar -zxvf apache-1.3.6.tar.gz
+
+1. auth_mysql module install
+ tar -zxvf mod_auth_mysql-....
+ cd mod_auth_mysql-..
+ ./configure --with-apache=/your/apache/source/path/
+ make
+
+ ここで apache の src/modules/auth_mysql/ にファイルがコピーされる
+ エラーのように、src/modules/standard/ には移動しません。
+
+2. apache コンパイル
+ cd /your/apache/source/path/
+ if [ -f Makefile ]; then
+   make distclean
+ fi
+ vi src/Configuration
+ ./configure --.....
+ make
+   :
+ gcc  -DSOLARIS2=270 -DTARGET=\&quot;httpsd\&quot;  `./apaci`  \
+   -o httpsd buildmark.o modules.o modules/extra/libextra.a \
+   modules/auth_mysql/libauth_mysql.a modules/standard/libstandard.a \
+   main/libmain.a ./os/unix/libos.a ap/libap.a  \
+  -L/usr/local/lib/mysql -lmysqlclient -lm -lz -lsocket -lnsl 
+
+
+ このように、modules/auth_mysql/libauth_mysql.a がリンクされるはずです
+ ( DSO でなければ )
+ libstandard.a に mod_auth_mysql.o が入ることは無いはず
+
+
+前の Makefile がある場合など、一度
+ make distclean できれいにしてからやり直します
+
+# pcalloc は src/include/ap_compat.h で ap_pcalloc と
+# 再定義されているので普通エラーにならないはずですが
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="918.html">[前]</a><a href="920.html">[次]</a><a href="../list/901-1000.html">[番号順一覧]</a><a href="../thread/901-1000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="918.html">    918 1999-05-26 18:25 [胡 愈 &lt;hu@xxxxxxxxxx] About Compile Error!                    </a></span>
+<span class="current">-&gt;&nbsp;<a href="919.html">    919 1999-05-26 20:59 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15952</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15951.html">[前]</a><a href="15953.html">[次]</a><a href="../list/15901-16000.html">[番号順一覧]</a><a href="../thread/15901-16000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15952
+</p>
+<div class="header">
+<p>
+From: ochiai &lt;ochiai &lt;s.ochiai@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 13 Mar 2013 15:17:43 +0900<br>
+Subject: [mysql 15952] Re: レプリケーション構築について（長文です）（質問）_解決まとめ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+yoku様、渡辺様
+
+レプリケーションがうまく動かなかった件ですが、皆様のおかげで解決しまし
+た。ありがとうございました。
+
+自分のためにも問題点と解決方法をまとめて報告しておきます。
+結論は、mysqldが別のiniを見ていたことです。これに至る経緯と留意点をまと
+めます。
+
+＜できなかったこと＞
+既存データを運用中のサーバーAと新規にMySQLをインストールしたサーバーBとで、
+運用中のサーバーAをマスターに、新規のサーバーBをスレーブにしたレプリケー
+ション構成ができなかった。
+CHANGE MASTER TO　コマンドを実行すると、下記のエラーが発生。
+ERROR 1201 (HY000): Could not initialize master info structures; more
+error messages can be found in the MySQL error log
+
+START SLAVE;コマンドを実行しても、CHANGE MASTER TO　がうまくいっていない
+ので、ここでもERROR 1201 (HY000)がでて、スレーブ（スレッド）は起動せず、
+レプリケーションが有効にならない。
+
+＜作業環境＞
+１．サーバーA：マスターの環境
+　　OS：Windows 7 Professional SP1(32bit)
+　　PC：DELL Vostro(Intel Core 2 Duo,CPU E7500 2.93GHz) RAM 2.00GB
+
+　　MySQLサーバ：バージョン5.5.25
+　　（mysql-5.5.25-win32.msi）
+　　Workbench：バージョン5.2.39CE Revision 8757
+　　（mysql-workbench-gpl-5.2.39-win32.msi）
+
+２．サーバーB：スレーブの環境
+　　サーバマシンと同じ構成のPC
+　　MySQLサーバ、Workbenchのバージョンも同じ
+
+
+＜発見した問題点と解決策＞
+
+１．MySQLサーバ起動時に読み込むiniファイルと異なるiniファイルで設定を
+行っていた
+
+１）Windows用インストールパッケージ*.msiの特性
+MySQLサーバのWindows用インストールパッケージ*.msiでインストールすると、
+デフォルトで起動時に読み込むiniファイルはMySQLサーバのインストールディレ
+クトリー（C:\Program Files\MySQL\MySQL Server 5.5）配下のmy.iniに固定さ
+れる。起動時読み込みiniファイルは変更できない。
+
+【ここでの結論】
+Windows用インストールパッケージ*.msiを使ってMySQLをインストールした場合は、
+●WorkbenchのConfiguration/Options fileの画面でOptionの変更は行わない。
+●起動時読み込みiniファイルが何かを確認する。
+　確認方法は、windowsの「サービス」に登録されているMySQLのサービス
+（例：MySQK55）のプロパティの「実行ファイルのパス」 に書かれ ている
+「--defaults-file=」の内容を確認する。そこに書かれているiniファイルが起
+動時に読み込まれるiniファイル。
+●起動時読み込みiniファイル（C:\Program Files\MySQL\MySQL Server
+5.5\my.ini）を変更できないので、Optionの設定は必ずデフォルトのiniファイ
+ルに対して行う。変更前のiniファイルは適宜バックアッ プする。
+●なお、iniファイルをテキストエディタ（メモ帳）で変更し、上書き保存しよう
+としたら、「アクセスが拒否されました」となる場合は、書き込み 権限のある
+場所に一旦保存し、そのiniファイルをデフォルトのiniファイルと置き換える。
+
+２）WorkBenchの特性
+WorkbenchのServer AdministrationでManage Server Instancesダイアログの
+System Profileタブで“Configureation File:”に設定されているデフォルトの値
+（C:\Program Files\MySQL\MySQL Server 5.5\my.ini）を変更しても、MySQL
+サーバ起動時に読み込まれるiniファイルはデフォルトのままで、System
+Profileタブでの設定が変わっていたとしても、反映されない。
+
+しかし、その後、WorkbenchでServer administrationを起動し、
+Configuration/Options fileをクリックし、Options Fileの各種変数を編集する
+画面を開いて、“server-id”などのOptionの値を変更すると、System Profileタ
+ブで“Configureation File:”に設定したiniファイルの内容が更新されている。
+しかし、このiniファイルはMySQLサーバ起動時に読み込まれないため、
+Workbenchで変更したOptionはMySQLサーバに反映 されない。
+
+一方、WorkbenchのConfiguration/Options fileの画面にはSystem Profileタブ
+で“Configureation File:”に設定したiniファイルの内容が反映されている。
+
+【ここでの結論】
+●System Profileタブの“Configureation File:”に設定されているデフォルトの
+値（C:\Program Files\MySQL\MySQL Server 5.5\my.ini）は変更しない。
+●WorkbenchのConfiguration/Options fileの画面でOptionの変更は行わない。見
+るだけ。
+●なお、上記のようにしていれば、変更されたデフォルトのiniファイルの内容
+は、Workbenchの Configuration/Options fileの画面に反映されているはず。
+
+
+２．マスター用サーバーにスレーブ用サーバにかかわるファイルが存在していた
+
+マスター用サーバに、以下のファイルが存在していた。これらのファイルは、正
+常にレプリケーション構成ができた場合にスレーブ用サーバにでるファ イル
+で、マスター用サーバで色々と試していて時にできた残骸のようなものと思われる。
+master.info
+relay-log.*
+
+【ここでの結論】
+●マスター用サーバーにスレーブ用サーバにかかわるファイルが存在する場合、
+邪魔にはならないと思うが、わかりやすくするためにそれらのファイル を削除
+する。
+
+
+３．“リレーログファイルなどが見つからない”というエラー
+
+エラーログを見たところ、下記のエラーが発生していて、iniファイルの設定と
+実際の状況とが整合していなことが分かった。
+[ERROR] Failed to open the relay log '.\Toshijoho_0427-relay-bin.000001'
+(relay_log_pos 4)
+[ERROR] Could not find target log during relay log initialization
+
+これも１．のところで混乱していたためと思われる。
+
+注）エラーログのファイル（拡張子err）
+エラーログはテキストファイルで、my.ini の log-error=で指定したファイルに
+書き出される。たとえば、
+log-error = log-error　または
+log-error=“C:/Program Files/MySQL/MySQL Server 5.5/ log-error”　または
+log-error=” C:/ProgramData/MySQL/MySQL Server 5.5/Log/error.log”　など
+
+【ここでの結論】
+●iniファイルの設定どおりにログファイルが作成されているかを確認する。
+　できていない場合は、起動時読み込みiniファイルが何かを確認する。⇒確認方
+法は前出の通り
+●START SLAVE;コマンド実行後に、スレーブ用サーバでスレーブの状況をshow
+slave status\Gコマンドを実行し、確認する。
+mysql&gt; show slave status\G　　
+最低限確認すべき項目：
+Slave_IO_State：動いているか？
+Master_Host：CHANGE MASTER TO　コマンドで設定したとおり内容か？
+Master_User：CHANGE MASTER TO　コマンドで設定したとおり内容か？
+Master_Log_File：CHANGE MASTER TO　コマンドで設定したとおり内容か？
+　　（そのログファイルはマスター用サーバに存在するか？）
+Read_Master_Log_Pos：CHANGE MASTER TO　コマンドで設定したとおり内容か？
+Relay_Log_File：対応するファイルはスレーブ用サーバに存在するか？
+Relay_Master_Log_File：対応するファイルはスレーブ用サーバに存在するか？
+Slave_IO_Running：動いているか？
+Slave_SQL_Running：動いているか？
+Master_Server_Id：マスター用サーバに設定したServer_Idの値と一致しているか？
+
+（参考）8.5.5.36. SHOW SLAVE STATUS 構文
+<a href="http://dev.mysql.com/doc/refman/5.1-olh/ja/show-slave-status.html">http://dev.mysql.com/doc/refman/5.1-olh/ja/show-slave-status.html</a>
+
+General Logがマスター用サーバになかったり、Relay Logがスレーブ用サーバに
+なかったりする場合、起動時読み込みiniファイルを再確認する。
+
+
+０．環境設定中はMySQLのサービスの「スタートアップの種類」を「手動」に設定
+
+構成を書き換えるにあたって、MySQLサーバを停止したり、再起動したりするので、
+作業開始前に、MySQLサーバが自動で起動しないように、MySQLのサービスの「ス
+タートアップの種類」を「手動」に設定しておく。
+作業が完了したら、「自動」に設定する。
+
+
+【最後に】レプリケーション構成完成後のiniファイル
+
+＜マスター用サーバのiniファイル＞
+server-id = 4
+log-bin = mysql-bin
+binlog-format = MIXED
+general-log
+general_log_file = host_name.log
+log-error = log-error
+show-slave-auth-info
+auto_increment_increment = 1
+auto_increment_offset = 1
+sync_binlog = 1
+
+＜スレーブ用サーバのiniファイル＞
+server-id = 5
+log-bin = mysql-bin
+binlog-format = MIXED
+general-log
+general_log_file = host_name.log
+log-error = log-error
+relay-log = relay-log
+relay_log_info_file = relay-log.info
+
+
+</pre>
+</div>
+<p class="button"><a href="15951.html">[前]</a><a href="15953.html">[次]</a><a href="../list/15901-16000.html">[番号順一覧]</a><a href="../thread/15901-16000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15925.html">@ 15925 2013-02-13 16:39 [&quot;ochiai&quot; &lt;s.ochiai@x] レプリケーション構築について（長文です）（質問）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15926.html">@ 15926 2013-02-14 09:14 ┗[Watanabe Tomoyuki &lt;W]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15928.html">@ 15928 2013-02-15 10:50 　┗[&quot;ochiai&quot; &lt;s.ochiai@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15929.html">@ 15929 2013-02-15 14:54 　　┗[Watanabe Tomoyuki &lt;W]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15930.html">  15930 2013-02-15 15:02 　　　┣[&quot;yoku ts.&quot; &lt;yoku0825]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15932.html">@ 15932 2013-02-15 16:48 　　　┃┗[&quot;ochiai&quot; &lt;s.ochiai@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15933.html">  15933 2013-02-15 18:47 　　　┃　┗[&quot;yoku ts.&quot; &lt;yoku0825]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15936.html">@ 15936 2013-02-20 11:31 　　　┃　　┗[&quot;ochiai&quot; &lt;s.ochiai@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15937.html">  15937 2013-02-20 15:24 　　　┃　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15941.html">  15941 2013-02-27 12:28 　　　┃　　　　┗[Watanabe Tomoyuki &lt;W]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15942.html">  15942 2013-02-27 13:03 　　　┃　　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="15952.html">  15952 2013-03-13 15:17 　　　┃　　　　　　┗[ochiai &lt;s.ochiai@xxx] Re: レプリケーション構築について（長文です）（質問）_解決まとめ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15953.html">  15953 2013-03-13 15:38 　　　┃　　　　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15954.html">  15954 2013-03-13 16:49 　　　┃　　　　　　　　┗[ochiai &lt;s.ochiai@xxx]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15931.html">@ 15931 2013-02-15 16:35 　　　┗[&quot;ochiai&quot; &lt;s.ochiai@x] RE:[mysql 15929] Re: レプリケーション構築について（長文です）（質問）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15934.html">@ 15934 2013-02-15 19:06 　　　　┗[Watanabe Tomoyuki &lt;W] RE: [mysql 15931] RE:[mysql 15929] Re: レプリケーション構築について（長文です）（質問）</a></span>
+</pre>
+</body>
+</html>

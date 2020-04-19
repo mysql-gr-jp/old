@@ -1,0 +1,221 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16571</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16570.html">[前]</a><a href="16572.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16571
+</p>
+<div class="header">
+<p>
+From: yoku0825 &lt;yoku0825 &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 11 Mar 2020 14:04:59 +0900<br>
+Subject: [mysql 16571] Re: [mysql 16570] Re: [mysql 16567] LOAD DATA INFILEでdefault値がないというエラー（Field 'SHAPE' doesn't have a default value）<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+yoku0825といいます。
+
+いただいたデータで試してみましたが、8.0.12ではおっしゃる通りのエラーに、
+8.0.19ではエラーにならず正しく格納されました。
+(LOAD DATA LOCAL INFILEでも蹴られるんですね)
+
+というわけで取り急ぎ「最新版でお試しください」みたいな感じになりました。
+
+yoku0825,
+
+2020年3月11日(水) 11:46 落合 司郎 &lt;s.ochiai@xxxxxxxxxx&gt;:
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; yoku0825さま</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; いつもお世話になります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; インプットのCSVファイルは、統計局の「地図で見る統計(統計GIS)データダウンロード」サイトでダウンロードした平成２８年経済センサス-活動調査−世界測地系平面直角座標系（500ｍメッシュ）のshapeファイルをGDAL</span>
+<span class="quote1">&gt; 2.4.2に含まれていたogr2ogr.exeでCSVファイルに変換したものです。</span>
+<span class="quote1">&gt; <a href="https://www.e-stat.go.jp/gis/statmap-search?page=6&amp;type=2&amp;aggregateUnitForBoundary=Q&amp;coordsys=2&amp;format=shape">https://www.e-stat.go.jp/gis/statmap-search?page=6&amp;type=2&amp;aggregateUnitForBoundary=Q&amp;coordsys=2&amp;format=shape</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; (SHAPE to CSV)</span>
+<span class="quote1">&gt; ogr2ogr.exe -f CSV C:...\MESH05439.csv C:...\MESH05439.shp -lco</span>
+<span class="quote1">&gt; GEOMETRY=AS_WKT</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; なお、ogr2ogr.exeでCSVファイルを直接MySQLのテーブルに取り込むことはできましたが、どうも、１行ごとにINSERTしているようなので、我慢できないほど時間がかかったので、MySQLのLOAD</span>
+<span class="quote1">&gt; DATA LOCAL INFILEで取り込むことにしました。</span>
+<span class="quote1">&gt; (CSV to MySQL)</span>
+<span class="quote1">&gt; ogr2ogr.exe -f MySQL MySQL:..... C:...\QXYSWQ5439\MESH05439.csv</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; なお、ogr2ogr.exeでshapeファイルを直接MySQLのテーブルに取り込むのは、CSVファイルとテーブル、カラムとのキャラクタセットの関係で取り込めない場合があるので、一旦CSVファイルに変換し、ファイルを確認し、MySQLに取り込む手順とした次第です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; サンプルデータとして、上記CSVファイルの前後の各１０レコード、合計２０レコードを抽出したファイルを送ります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よろしくご確認願います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ところで、ご教示いただいた</span>
+<span class="quote2">&gt;  &gt;     `SHAPE` geometry NOT NULL DEFAULT (ST_GeometryFromText(wkt_tmp,</span>
+<span class="quote1">&gt; 2451)),</span>
+<span class="quote1">&gt; は構文エラーでテーブル定義できませんでした。</span>
+<span class="quote1">&gt; Error Code: 1064. You have an error in your SQL syntax; check the manual</span>
+<span class="quote1">&gt; that corresponds to your MySQL server version for the right syntax to</span>
+<span class="quote1">&gt; use near '(ST_GeometryFromText(wkt_tmp, 2451)),     PRIMARY KEY</span>
+<span class="quote1">&gt; `OGR_FID` (`OGR_FID`),    ' at line 11</span>
+<span class="quote1">&gt; 実行環境は、8.0.12(MySQL Community Server - GPL)です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 下記マニュアルを確認したところ、Handling of Explicit Defaults as of MySQL</span>
+<span class="quote1">&gt; 8.0.13の項に</span>
+<span class="quote1">&gt; The default value specified in a DEFAULT clause can be a literal</span>
+<span class="quote1">&gt; constant or an expression. With one exception, enclose expression</span>
+<span class="quote1">&gt; default values within parentheses to distinguish them from literal</span>
+<span class="quote1">&gt; constant default values.</span>
+<span class="quote1">&gt; とありました。</span>
+<span class="quote1">&gt; そこで、MySQL 8.0.13で試してみます。</span>
+<span class="quote1">&gt; 結果は後日ご報告。</span>
+<span class="quote1">&gt; <a href="https://dev.mysql.com/doc/refman/8.0/en/data-type-defaults.html">https://dev.mysql.com/doc/refman/8.0/en/data-type-defaults.html</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; On 2020/03/08 12:07, yoku0825 wrote:</span>
+<span class="quote2">&gt; &gt; yoku0825といいます。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt;&gt; そこで、止む無く下記のようにGeometryフィールドをdefault NULLとし、SPATIAL</span>
+<span class="quote3">&gt; &gt;&gt; KEYも設定せずにテーブルを定義し、上記のLOAD DATA</span>
+<span class="quote3">&gt; &gt;&gt; INFILEを実行すると、エラーは発生しません。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; この時、中身にはジオメトリ型のデータがちゃんと入っていそうですか？ （NULLにはなっていない？</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; NULLになってしまっているなら、渡すデータが何かしらおかしい気がしますし、</span>
+<span class="quote2">&gt; &gt; ちゃんとデータが入っているなら↓の通りになるんだと思います。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt;&gt; LOAD DATA INFILEのSET構文でSpatial</span>
+<span class="quote3">&gt; &gt;&gt; Functionを使う場合にバグがあるのではないでしょうか？</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; MySQLのユーザー定義変数(この場合は @wkt_tmp )にはデータ型がないので、</span>
+<span class="quote2">&gt; &gt; ST_GeometryFromTextが許容する以外のデータ型として一度格納されてしまっているんじゃないかなあと想像しています。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; @wkt_tmpに入れている文字列を1つで良いのでサンプルとして出してもらえないでしょうか？</span>
+<span class="quote2">&gt; &gt; （それで再現するならバグレポートもできるので）</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ところで本文中、 LOAD DATA INFILEとLOAD DATA LOCAL INFILEがちょこちょこ混じっていて、</span>
+<span class="quote2">&gt; &gt; LOAD DATA LOCAL INFILEの方は「常にエラーをIGNOREする」ような動きになる気がするのですが、</span>
+<span class="quote2">&gt; &gt; これはLOAD DATA INFILEの方でやった結果ですかね…？ （でないと今度はドキュメント間違いの可能性が</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt;&gt; With LOAD DATA LOCAL, data-interpretation and duplicate-key errors become warnings and the operation continues because the server has no way to stop transmission of the file in the middle of the operation. For duplicate-key errors, this is the same as if IGNORE is specified. IGNORE is explained further later in this section.</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; <a href="https://dev.mysql.com/doc/refman/8.0/en/load-data.html">https://dev.mysql.com/doc/refman/8.0/en/load-data.html</a></span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; このカラムが残っても良いなら、wkt_tmpそのものを一度カラムに格納させてしまって式デフォルトを使ってSHAPEカラムを派生させたりできないでしょうかね…。</span>
+<span class="quote2">&gt; &gt; （不要なら最後にwkt_tmpカラムをDROPしてしまう…この時式デフォルトもいじらないとエラーになりそうな予感がしてきましたが）</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; CREATE TABLE `mesh05439` (</span>
+<span class="quote2">&gt; &gt;     `OGR_FID` int(11) NOT NULL AUTO_INCREMENT,</span>
+<span class="quote2">&gt; &gt;     `wkt_tmp` text,</span>
+<span class="quote2">&gt; &gt;     `key_code` text,</span>
+<span class="quote2">&gt; &gt;     `mesh1_id` text,</span>
+<span class="quote2">&gt; &gt;     `mesh2_id` text,</span>
+<span class="quote2">&gt; &gt;     `mesh3_id` text,</span>
+<span class="quote2">&gt; &gt;     `mesh4_id` text,</span>
+<span class="quote2">&gt; &gt;     `mesh5_id` text,</span>
+<span class="quote2">&gt; &gt;     `obj_id` text,</span>
+<span class="quote2">&gt; &gt;     `SHAPE` geometry NOT NULL DEFAULT (ST_GeometryFromText(wkt_tmp, 2451)),</span>
+<span class="quote2">&gt; &gt;      PRIMARY KEY `OGR_FID` (`OGR_FID`),</span>
+<span class="quote2">&gt; &gt;     SPATIAL KEY `SHAPE` (`SHAPE`)</span>
+<span class="quote2">&gt; &gt; ) ENGINE=InnoDB;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 2020年3月4日(水) 11:49 落合 司郎 &lt;s.ochiai@xxxxxxxxxx&gt;:</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; いつもお世話になります。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; WKT形式で記述されたGeometryデータを含むCSVファイルをLOAD DATA</span>
+<span class="quote3">&gt; &gt;&gt; INFILEでテーブルに取り込もうとしています。</span>
+<span class="quote3">&gt; &gt;&gt; Geometryデータを取り込むGeometryフィールドにはSPATIAL KEYを設定したいため、NOT</span>
+<span class="quote3">&gt; &gt;&gt; NULL制約をつける必要があり、取り込み先のテーブルを以下のようにGeometryフィールドをNOT</span>
+<span class="quote3">&gt; &gt;&gt; NULL、default値を設定しないで定義しました。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; #エラーが発生したときのテーブル</span>
+<span class="quote3">&gt; &gt;&gt; # geometry型（NOT NULL）を含むテーブル定義</span>
+<span class="quote3">&gt; &gt;&gt; drop tables if exists mesh05439;</span>
+<span class="quote3">&gt; &gt;&gt; CREATE TABLE `mesh05439` (</span>
+<span class="quote3">&gt; &gt;&gt;     `OGR_FID` int(11) NOT NULL AUTO_INCREMENT,</span>
+<span class="quote3">&gt; &gt;&gt;     `SHAPE` geometry NOT NULL,</span>
+<span class="quote3">&gt; &gt;&gt;     `key_code` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `mesh1_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `mesh2_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `mesh3_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `mesh4_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `mesh5_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `obj_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     PRIMARY KEY `OGR_FID` (`OGR_FID`),</span>
+<span class="quote3">&gt; &gt;&gt;     SPATIAL KEY `SHAPE` (`SHAPE`)</span>
+<span class="quote3">&gt; &gt;&gt; ) ENGINE=InnoDB;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 下記に示すLOAD DATA</span>
+<span class="quote3">&gt; &gt;&gt; INFILEを実行すると、CSVファイルのすべてのレコードにデータに値があっても、default値がないというエラーが発生しました。</span>
+<span class="quote3">&gt; &gt;&gt; なお、LOAD DATA</span>
+<span class="quote3">&gt; &gt;&gt; INFILEで取り込むCSVファイルはtextファイルでなければならないので、CSVファイルのGeometryデータはWKTフォーマットの文字列としています。</span>
+<span class="quote3">&gt; &gt;&gt; LOAD DATA</span>
+<span class="quote3">&gt; &gt;&gt; INFILEではGeometryデータをワーク変数を割り当て、SET構文でST_GeometryFromText()でGeometryフィールドに値をセットしています。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; #実行したLOAD DATA INFILE</span>
+<span class="quote3">&gt; &gt;&gt; # LOAD DATA</span>
+<span class="quote3">&gt; &gt;&gt; INFILEで取り込むCSVファイルはtextファイルでなければならないので、</span>
+<span class="quote3">&gt; &gt;&gt; # CSVファイルではGeometryデータはWKTフォーマットの文字列とし、LOAD DATA</span>
+<span class="quote3">&gt; &gt;&gt; INFILEではワーク変数を割り当て、</span>
+<span class="quote3">&gt; &gt;&gt; # SET構文でST_GeometryFromText()でGeometryフィールドに値をセットします。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; LOAD DATA LOCAL INFILE 'C:******/MESH05439.csv' INTO TABLE mesh05439</span>
+<span class="quote3">&gt; &gt;&gt; FIELDS TERMINATED BY ',' ENCLOSED BY '&quot;' LINES TERMINATED BY '\r\n'</span>
+<span class="quote3">&gt; &gt;&gt; IGNORE 1 LINES</span>
+<span class="quote3">&gt; &gt;&gt; (@wkt_tmp, key_code, mesh1_id, mesh2_id, mesh3_id, mesh4_id, mesh5_id,</span>
+<span class="quote3">&gt; &gt;&gt; obj_id) SET SHAPE=ST_GeometryFromText(@wkt_tmp,2451);</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; # 発生したエラー</span>
+<span class="quote3">&gt; &gt;&gt; Error Code: 1364. Field 'SHAPE' doesn't have a default value</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; そこで、止む無く下記のようにGeometryフィールドをdefault NULLとし、SPATIAL</span>
+<span class="quote3">&gt; &gt;&gt; KEYも設定せずにテーブルを定義し、上記のLOAD DATA</span>
+<span class="quote3">&gt; &gt;&gt; INFILEを実行すると、エラーは発生しません。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; drop tables if exists mesh05439;</span>
+<span class="quote3">&gt; &gt;&gt; CREATE TABLE `mesh05439` (</span>
+<span class="quote3">&gt; &gt;&gt;     `OGR_FID` int(11) NOT NULL AUTO_INCREMENT,</span>
+<span class="quote3">&gt; &gt;&gt;     `SHAPE` geometry default NULL,</span>
+<span class="quote3">&gt; &gt;&gt;     `key_code` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `mesh1_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `mesh2_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `mesh3_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `mesh4_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `mesh5_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     `obj_id` text,</span>
+<span class="quote3">&gt; &gt;&gt;     PRIMARY KEY `OGR_FID` (`OGR_FID`)</span>
+<span class="quote3">&gt; &gt;&gt; ) ENGINE=InnoDB;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; GeometryフィールドにはSPATIAL KEYを設定したいので、取り込んだ後に、ALTER TABLEでGeometryフィールドをNOT</span>
+<span class="quote3">&gt; &gt;&gt; NULLに、また、SPATIAL KEYを追加する手順としています。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; ALTER TABLE `mesh05439`</span>
+<span class="quote3">&gt; &gt;&gt; CHANGE COLUMN `SHAPE` `SHAPE` GEOMETRY NOT NULL ,</span>
+<span class="quote3">&gt; &gt;&gt; ADD SPATIAL KEY `SHAPE` (`SHAPE`);</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; ところで、LOAD DATA INFILEでワーク変数を割り当て、SET構文でテーブルのNOT</span>
+<span class="quote3">&gt; &gt;&gt; NULLで定義されたフィールドに値を設定することは、Geometry型以外のフィールドならばSpatial</span>
+<span class="quote3">&gt; &gt;&gt; Functionを含まない計算式なら問題なくできます。</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; LOAD DATA INFILEのSET構文でSpatial</span>
+<span class="quote3">&gt; &gt;&gt; Functionを使う場合にバグがあるのではないでしょうか？</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+<span class="quote3">&gt; &gt;&gt; 実行環境：</span>
+<span class="quote3">&gt; &gt;&gt; OS:Windows 8.0 64ビット</span>
+<span class="quote3">&gt; &gt;&gt; MySQL:Ver.8.0.12　GPL版</span>
+<span class="quote3">&gt; &gt;&gt; Workbench:Ver.6.3.9</span>
+<span class="quote3">&gt; &gt;&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="16570.html">[前]</a><a href="16572.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
+</body>
+</html>

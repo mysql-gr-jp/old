@@ -1,0 +1,117 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16129</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16128.html">[前]</a><a href="16130.html">[次]</a><a href="../list/16101-16200.html">[番号順一覧]</a><a href="../thread/16101-16200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16129
+</p>
+<div class="header">
+<p>
+From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 3 Jun 2014 11:10:38 +0900<br>
+Subject: [mysql 16129] Re: [mysql 16128] MySQLのfloat型の有効桁数について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、yoku0825といいます。
+
+内部的にはCのfloatを使っているので、格納はされているけれど丸められているんだと思います。
+（↓5.6ですが）
+
+mysql56&gt; CREATE TABLE t1 (num float not null, num_20 float(20, 16));
+Query OK, 0 rows affected (0.05 sec)
+
+mysql56&gt; INSERT INTO t1 VALUES (1.2345678901234567890,
+1.2345678901234567890);
+Query OK, 1 row affected (0.01 sec)
+
+mysql56&gt; SELECT * FROM t1;
++---------+--------------------+
+<span class="quote1">| num     | num_20             |</span>
++---------+--------------------+
+<span class="quote1">| 1.23457 | 1.2345678806304932 |</span>
++---------+--------------------+
+1 row in set (0.00 sec)
+
+mysql56&gt; SELECT num* 10000, num_20* 10000 FROM t1;
++--------------------+------------------------+
+<span class="quote1">| num* 10000         | num_20* 10000          |</span>
++--------------------+------------------------+
+<span class="quote1">| 12345.678806304932 | 12345.6788063049320000 |</span>
++--------------------+------------------------+
+1 row in set (0.00 sec)
+
+掛け算で値が狂うのは、浮動小数点数なのでご愛嬌（？）
+表示桁数の制御はこのあたりですかね。。
+
+<a href="http://dev.mysql.com/doc/refman/5.6/en/floating-point-types.html">http://dev.mysql.com/doc/refman/5.6/en/floating-point-types.html</a>
+
+
+yoku0825
+
+
+2014年6月3日 10:38 ktsa5236@xxxxxxxxxx &lt;ktsa5236@xxxxxxxxxx&gt;:
+
+<span class="quote1">&gt; いつもお世話になっております。ktsaと申します。</span>
+<span class="quote1">&gt; 表題の件について教えていただきたいのですが、</span>
+<span class="quote1">&gt; MySQLのfloat型は、IEEE754に則っているのでしょうか？</span>
+<span class="quote1">&gt; 7桁ではなく、常に有効数字6桁までしか保存されないように思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 環境とテスト内容ですが、</span>
+<span class="quote1">&gt; MySQL5.0.22-community-nt</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; データベースはInnoDB</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; CREATE TABLE `testtb` (</span>
+<span class="quote1">&gt;   `A` tinyint(4) NOT NULL default '0',</span>
+<span class="quote1">&gt;   `B_dbl` double default NULL,</span>
+<span class="quote1">&gt;   `C_float` float default NULL,</span>
+<span class="quote1">&gt;   PRIMARY KEY  (`A`)</span>
+<span class="quote1">&gt; ) ENGINE=InnoDB DEFAULT CHARSET=sjis;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Insert into testtb values(11,1.2345678901234567890,1.2345678901234567890);</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; を実行する。</span>
+<span class="quote1">&gt; コンソール実行画面結果は、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; Insert into testtb</span>
+<span class="quote1">&gt; values(11,1.2345678901234567890,1.2345678901234567890);</span>
+<span class="quote1">&gt; Query OK, 1 row affected</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; select * from testtb where A=11;</span>
+<span class="quote1">&gt; +----+------------------+---------+</span>
+<span class="quote2">&gt; | A  | B_dbl            | C_float |</span>
+<span class="quote1">&gt; +----+------------------+---------+</span>
+<span class="quote2">&gt; | 11 | 1.23456789012346 | 1.23457 |</span>
+<span class="quote1">&gt; +----+------------------+---------+</span>
+<span class="quote1">&gt; 1 row in set</span>
+<span class="quote1">&gt; とC_float列は7桁目が丸めまれ常に有効数字が6桁になります。</span>
+<span class="quote1">&gt; 他の値でも試しましたが同様でした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よろしくお願いいたします。</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="16129/0/index.html"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="16128.html">[前]</a><a href="16130.html">[次]</a><a href="../list/16101-16200.html">[番号順一覧]</a><a href="../thread/16101-16200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16128.html">@ 16128 2014-06-03 10:38 [&quot;ktsa5236@xxxxxxxxxx] MySQLのfloat型の有効桁数について        </a></span>
+<span class="current">-&gt;&nbsp;<a href="16129.html">@ 16129 2014-06-03 11:10 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16128] MySQLのfloat型の有効桁数について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16130.html">@ 16130 2014-06-09 00:38 　┗[&quot;ktsa5236@xxxxxxxxxx] Re: [mysql 16129] Re: [mysql 16128] MySQLのfloat型の有効桁数について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16131.html">@ 16131 2014-06-09 10:31 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16130] Re: [mysql 16129] Re: [mysql 16128] MySQLのfloat型の有効桁数について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16132.html">@ 16132 2014-06-11 11:37 　　　┗[&quot;ktsa5236@xxxxxxxxxx] Re: [mysql 16131] Re: [mysql 16130] Re: [mysql 16129] Re: [mysql 16128] MySQLのfloat型の有効桁数について</a></span>
+</pre>
+</body>
+</html>

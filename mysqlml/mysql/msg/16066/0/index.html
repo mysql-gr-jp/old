@@ -1,0 +1,152 @@
+<div class="gmail_quote">2013. 12. 16.  4:14 &quot;&quot; &lt;<a href="mailto:coolguy318@gmail.com">coolguy318@gmail.com</a>&gt; :<br type="attribution"><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+<p dir="ltr"><a href="mailto:ml@mysql.gr.jp" target="_blank">ml@mysql.gr.jp</a></p>
+<div class="gmail_quote">2013. 12. 16.  4:12 &quot;&quot; &lt;<a href="mailto:swhwang@linuxdata.co.kr" target="_blank">swhwang@linuxdata.co.kr</a>&gt; :<br type="attribution"><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+
+
+<div lang="KO" link="#0563C1" vlink="#954F72"><div><p class="MsoNormal"><span lang="JA">お</span><span lang="JA">疲</span><span lang="JA">れ</span><span lang="JA">様</span><span lang="JA">です。</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="JA">黄</span><span lang="JA">と</span><span lang="JA">申</span><span lang="JA">します。</span><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="JA">今</span><span lang="JA">、</span><span lang="EN-US">MySQL</span><span lang="JA">の</span><span lang="EN-US">Tunning</span><span lang="JA">に</span><span lang="JA">関</span><span lang="JA">して、</span><span lang="JA">悩</span><span lang="JA">んでいます。</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="JA">クエリは</span><span lang="JA">以下</span><span lang="JA">になります。</span><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal">
+
+<span lang="EN-US">select count(group_code) from tb_ims_sip<u></u><u></u></span></p><p class="MsoNormal"><span lang="JA">このクエリをどうやって、</span><span lang="EN-US"> Tunning</span><span lang="JA">すればいいのか、</span><span lang="JA">教</span><span lang="JA">えていた</span><span lang="EN-US">q</span><span lang="JA">だけませんか？</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">mysql&gt; select count(*) from TB_IMS_SIP;<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">+----------+<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| count(*) |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+----------+<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| 13844348 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+----------+<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">1 row in set (8 min 17.94 sec)<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">mysql&gt; select count(group_code) from TB_IMS_SIP;<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+-------------------+<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| count(group_code) |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+-------------------+<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| 13857208 |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">+-------------------+<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">1 row in set (8 min 9.95 sec)<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">mysql&gt; show profiles;<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+----------+--------------+------------------------------------------+<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| Query_ID | Duration | Query |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+----------+--------------+------------------------------------------+<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| 1 | 0.00014000 | select count(group_code) from tb_ims_sip |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| 2 | 490.01962800 | select count(group_code) from TB_IMS_SIP |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">+----------+--------------+------------------------------------------+<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">2 rows in set (0.00 sec)<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">mysql&gt; show profile for QUERY 1;<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+----------------------+----------+<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| Status | Duration |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+----------------------+----------+<u></u><u></u></span></p><p class="MsoNormal">
+
+<span lang="EN-US">| starting | 0.000054 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| checking permissions | 0.000009 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| Opening tables | 0.000054 |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| query end | 0.000003 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| closing tables | 0.000003 |<u></u><u></u></span></p><p class="MsoNormal">
+
+<span lang="EN-US">| freeing items | 0.000013 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| logging slow query | 0.000002 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| cleaning up | 0.000002 |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">+----------------------+----------+<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">8 rows in set (0.00 sec)<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">mysql&gt; show profile for QUERY 2;<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">+----------------------+------------+<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| Status | Duration |<u></u><u></u></span></p><p class="MsoNormal">
+
+<span lang="EN-US">+----------------------+------------+<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| starting | 0.000049 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| checking permissions | 0.000009 |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| Opening tables | 0.000019 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| System lock | 0.000010 |<u></u><u></u></span></p><p class="MsoNormal">
+
+<span lang="EN-US">| init | 0.000016 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| optimizing | 0.000005 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| statistics | 0.000011 |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| preparing | 0.000009 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| executing | 0.000006 |<u></u><u></u></span></p><p class="MsoNormal">
+
+<span lang="EN-US">| Sending data | 490.019393 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| end | 0.000013 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| query end | 0.000006 |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| closing tables | 0.000008 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| freeing items | 0.000015 |<u></u><u></u></span></p><p class="MsoNormal">
+
+<span lang="EN-US">| logging slow query | 0.000003 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| logging slow query | 0.000050 |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| cleaning up | 0.000006 |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">+----------------------+------------+<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">17 rows in set (0.00 sec)<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">mysql&gt; explain select count(group_code) from TB_IMS_SIP;<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+----+-------------+------------+-------+---------------+-----------------------+---------+------+----------+-------------+<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| id | select_type | table | type | possible_keys | key | key_len | ref | rows | Extra |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+----+-------------+------------+-------+---------------+-----------------------+---------+------+----------+-------------+<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| 1 | SIMPLE | TB_IMS_SIP | index | NULL | IDX_TB_IMS_SIP_SERVER | 30 | NULL | 12730949 | Using index |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+----+-------------+------------+-------+---------------+-----------------------+---------+------+----------+-------------+<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">1 row in set (0.00 sec)<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+<p class="MsoNormal">
+<span lang="EN-US">mysql&gt; explain select count(group_code) from TB_IMS_SIP\G<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">*************************** 1. row ***************************<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"> id: 1<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"> select_type: SIMPLE<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"> table: TB_IMS_SIP<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"> type: index<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">possible_keys: NULL<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"> key: IDX_TB_IMS_SIP_SERVER<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"> key_len: 30<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"> ref: NULL<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"> rows: 14140764<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"> Extra: Using index<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">1 row in set (0.00 sec)<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">mysql&gt; describe TB_IMS_SIP;<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+-------------------+----------+------+-----+---------+-------+<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| Field | Type | Null | Key | Default | Extra |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">+-------------------+----------+------+-----+---------+-------+<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| GROUP_CODE | char(10) | NO | PRI | NULL | |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| SERVER_NAME | char(20) | NO | PRI | NULL | |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| OBJECT_ID | int(11) | NO | PRI | NULL | |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| SERVICE_TYPE_CODE | char(20) | NO | PRI | NULL | |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| SERVICE_NAME | char(20) | NO | PRI | NULL | |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| STAT_TYPE | int(11) | NO | PRI | NULL | |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| DATETIME | char(14) | NO | PRI | NULL | |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| SERVER | char(16) | NO | PRI | | |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| SERVICE | char(16) | NO | PRI | | |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| NUM_TYPE | char(16) | NO | PRI | | |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| BRANCH | char(16) | NO | PRI | | |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| IO_TYPE | char(8) | NO | PRI | | |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| ATTEMPT | int(11) | YES | | 0 | |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| SUCCESS | int(11) | YES | | 0 | |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| COMPLETE | int(11) | YES | | 0 | |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| PROVISIONING | int(11) | YES | | 0 | |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| SUCCESS_RATE | int(11) | YES | | 0 | |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| COMPLETE_RATE | int(11) | YES | | 0 | |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">| PROVISIONING_RATE | int(11) | YES | | 0 | |<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">| COUNT | int(11) | YES | | NULL | |<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">+-------------------+----------+------+-----+---------+-------+<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">20 rows in set (0.00 sec)<u></u><u></u></span></p><p class="MsoNormal">
+
+<span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">Slowquery</span>の結果<span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal">
+
+<span lang="EN-US"># Time: 131216 10:42:25<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"># User@Host: root[root] @ localhost []<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"># Query_time: 490.019558 Lock_time: 0.000073 Rows_sent: 1 Rows_examined: 13857208<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">SET timestamp=1387158145;<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">select count(group_code) from TB_IMS_SIP;<u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="JA">開</span><span lang="JA">発社</span><span lang="JA">からの</span><span lang="JA">依</span><span lang="JA">頼</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="JA">一般的</span><span lang="JA">なクエリ（</span><span lang="JA">単純</span><span lang="JA">なカウント</span><span lang="EN-US"> - PK</span><span lang="JA">）をする</span><span lang="JA">場合</span><span lang="JA">にも、</span><span lang="JA">場合</span><span lang="JA">によっては、</span><span lang="EN-US">6</span><span lang="JA">分以上</span><span lang="JA">を</span><span lang="JA">示</span><span lang="JA">しています。</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="JA">デ</span><span lang="JA">ー</span><span lang="JA">タの</span><span lang="JA">数</span><span lang="JA">が</span><span lang="JA">約</span><span lang="EN-US">800</span><span lang="JA">万件程度</span><span lang="JA">と、</span><span lang="JA">通常</span><span lang="JA">は</span><span lang="EN-US">0.1ms</span><span lang="JA">以</span><span lang="JA">内</span><span lang="JA">に</span><span lang="JA">応答</span><span lang="JA">を</span><span lang="JA">与</span><span lang="JA">えるのですが、</span><span lang="JA">現在</span><span lang="JA">インスト</span><span lang="JA">ー</span><span lang="JA">ルされて</span><span lang="EN-US">Mysql</span><span lang="JA">は</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="JA">応答速度</span><span lang="JA">が</span><span lang="EN-US">6m</span><span lang="JA">を</span><span lang="JA">超</span><span lang="JA">えています。</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US">mysql</span><span lang="JA">の</span><span lang="EN-US">Insert</span><span lang="JA">が</span><span lang="JA">多</span><span lang="JA">く</span><span lang="JA">発生</span><span lang="JA">（</span><span lang="EN-US">IO</span><span lang="JA">）しているからであろうと</span><span lang="JA">推定</span><span lang="JA">されます。</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="JA">もう</span><span lang="JA">一</span><span lang="JA">つの</span><span lang="JA">影響</span><span lang="JA">では、</span><span lang="EN-US">DB</span><span lang="JA">が</span><span lang="JA">保存</span><span lang="JA">されるパスは、</span><span lang="JA">現在</span><span lang="JA">の</span><span lang="EN-US">NAS</span><span lang="JA">になっており、このために</span><span lang="JA">発生</span><span lang="JA">する</span><span lang="JA">影響</span><span lang="JA">もあると</span><span lang="JA">思</span><span lang="JA">います。</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal"><span lang="EN-US">Mysql</span><span lang="JA">エンジニア【かにサポ</span><span lang="JA">ー</span><span lang="JA">トを</span><span lang="JA">受</span><span lang="JA">ける</span><span lang="JA">部分</span><span lang="JA">は、</span><span lang="JA">現在</span><span lang="JA">のクエリをした</span><span lang="JA">場合</span><span lang="JA">の</span><span lang="JA">結果</span><span lang="JA">が</span><span lang="JA">正常</span><span lang="JA">であることを</span><span lang="JA">確認</span><span lang="JA">お</span><span lang="JA">願</span><span lang="JA">いしており、その</span><span lang="JA">部分</span><span lang="JA">に</span><span lang="JA">問題</span><span lang="JA">がある</span><span lang="JA">場合</span><span lang="JA">、どのよう</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="JA">チュ</span><span lang="JA">ー</span><span lang="JA">ニングをするか、チュ</span><span lang="JA">ー</span><span lang="JA">ニングポイントを</span><span lang="JA">探</span><span lang="JA">してほしいという</span><span lang="JA">要求</span><span lang="JA">です</span><span lang="EN-US"><u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p><p class="MsoNormal" align="left" style="text-align:left;text-autospace:ideograph-other;word-break:keep-all"><span lang="EN-US" style="font-size:9.0pt;font-family:">==============================<u></u><u></u></span></p>
+
+<p class="MsoNormal" align="left" style="text-align:left;text-autospace:ideograph-other;word-break:keep-all"><span lang="EN-US" style="font-size:9.0pt;font-family:">(</span><span style="font-size:9.0pt;font-family:"><span lang="EN-US">)</span><span lang="EN-US"><u></u><u></u></span></span></p>
+
+<p class="MsoNormal" align="left" style="text-align:left;text-autospace:ideograph-other;word-break:keep-all"><span lang="EN-US" style="font-size:9.0pt;font-family:">SK </span><span style="font-size:9.0pt;font-family:">  <span lang="EN-US"><u></u><u></u></span></span></p>
+
+<p class="MsoNormal" align="left" style="text-align:left;text-autospace:ideograph-other;word-break:keep-all"><span lang="EN-US" style="font-size:9.0pt;font-family:">Mobile. 010-6718-1196<u></u><u></u></span></p><p class="MsoNormal" align="left" style="text-align:left;text-autospace:ideograph-other;word-break:keep-all">
+
+<span lang="EN-US" style="font-size:9.0pt;font-family:">Tel. 02-6207-1159,1160<u></u><u></u></span></p><p class="MsoNormal" align="left" style="text-align:left;text-autospace:ideograph-other;word-break:keep-all"><span lang="EN-US" style="font-size:9.0pt;font-family:">Fax. 02-6207-1161<u></u><u></u></span></p>
+
+<p class="MsoNormal" align="left" style="text-align:left;text-autospace:ideograph-other;word-break:keep-all"><span lang="EN-US" style="font-size:9.0pt;font-family:">E-mail. <a href="mailto:swhwang@linuxdata.co.kr" target="_blank"><span style="color:blue">swhwang@linuxdata.co.kr</span></a><u></u><u></u></span></p>
+
+<p class="MsoNormal" align="left" style="text-align:left;text-autospace:ideograph-other;word-break:keep-all"><span style="font-size:9.0pt;font-family:">  <span lang="EN-US"> 166-5 </span><span lang="EN-US"> 2F<u></u><u></u></span></span></p>
+
+<p class="MsoNormal" align="left" style="text-align:left;text-autospace:ideograph-other;word-break:keep-all"><span style="font-size:9.0pt;font-family:"><span lang="EN-US">:135-090</span></span><span lang="EN-US" style="font-size:9.0pt;font-family:&quot;Courier New&quot;"></span><span lang="EN-US" style="font-size:9.0pt;font-family:"><u></u><u></u></span></p>
+
+<p class="MsoNormal" align="left" style="text-align:left;text-autospace:ideograph-other;word-break:keep-all"><span lang="EN-US" style="font-size:9.0pt;font-family:">==============================<u></u><u></u></span></p>
+
+<p class="MsoNormal"><span lang="EN-US"><u></u><u></u></span></p></div></div></blockquote></div>
+</blockquote></div>
+

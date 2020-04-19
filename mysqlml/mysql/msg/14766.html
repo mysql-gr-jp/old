@@ -1,0 +1,150 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14766</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14765.html">[前]</a><a href="14767.html">[次]</a><a href="../list/14701-14800.html">[番号順一覧]</a><a href="../thread/14701-14800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14766
+</p>
+<div class="header">
+<p>
+From: Hiroyuki Ogawa &lt;Hiroyuki Ogawa &lt;eng16danbo@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 10 Mar 2009 13:46:31 +0900<br>
+Subject: [mysql 14766] Re: MySQLクラスタの性能についての質問<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+ご返信ありがとうございます。
+いただいたメールのご意見を参考にしたいと思います。
+
+度々の質問で申し訳ないのですが、以下の質問を
+追加させてください。
+質問は以下の４点となります。
+
+(1)MySQL Clusterを構成する複数のマシンについてCPUなどのスペックの低いマシンがあった場合、他のマシンに影響を及ぼすのでしょうか。
+
+(2)複数のノードに対してクライアントからクエリを送信したとき、１体のマシンにテーブルデータが集中するのでしょうか。
+データノードのデータは各ノードに分散しているという認識なので１台のデータノードに集中することはないのかと思っています。
+
+(3)レプリケーションを使用せず、データノードのどれか１台がダウンした場合、それまでのテーブルデータは消去されずに
+残っているのでしょうか。
+
+(4)MySQLクラスタではメモリをかなり消費する場合があるかと思いますが、使用するメモリを増やす方法などはあるのでしょうか。
+
+以上、度々の質問で申し訳ありませんが、ご教授お願いいたします。
+2009/03/10 10:55 Mikiya Okuno &lt;Mikiya.Okuno@xxxxxxxxxx&gt;:
+
+<span class="quote1">&gt; おはようございます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQL Clusterの性能がデータノードの追加によってスケールするかどうかは</span>
+<span class="quote1">&gt; 処理の内容やシステム構成に因ります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; まず言えるのは、MySQL Clusterは主キーの内容によってデータを格納する</span>
+<span class="quote1">&gt; ノードを分けているので、主キーによる参照や1行だけの更新はとても高速であり、</span>
+<span class="quote1">&gt; ノードの台数を増やすことによってスケールするということです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; そうでない場合は注意が必要です。特に範囲検索やインデックスを利用しないスキャンでは</span>
+<span class="quote1">&gt; インターコネクトがボトルネックになって一定以上スケールしない可能性があります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQL Clusterでは、SQLノードがトランザクションを開始すると、</span>
+<span class="quote1">&gt; 一つのデータノードをTC（トランザクション・コーディネータ）として選択し、</span>
+<span class="quote1">&gt; そのトランザクションが終了するまで同じTCを経由してリクエストを送信します。</span>
+<span class="quote1">&gt; 主キーによる参照や更新の場合でも、一回のトランザクション内で連続して</span>
+<span class="quote1">&gt; 何度も処理を行うような場合には、TC上にデータが存在しない場合があり、</span>
+<span class="quote1">&gt; その場合はデータノード間で通信する必要があるので上記と同じく</span>
+<span class="quote1">&gt; インターコネクトがボトルネックになる可能性があります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この問題は、JOINやサブクエリにおいて顕著になります。ただしMySQL 6.0からは</span>
+<span class="quote1">&gt; BKAという最適化手法が追加されるので、これらのボトルネックは多少マシになるでしょう。</span>
+<span class="quote1">&gt; （MySQL 6.0 + NDB 6.xという組み合わせという意味です。）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 上記のような場合、インターコネクトのボトルネックを解消すればスケールします。</span>
+<span class="quote1">&gt; 多数のノードを接続しないといけない場合には、SCIや10GbEなど高速な</span>
+<span class="quote1">&gt; インターコネクトを使いましょう。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; インメモリ型ではなくディスクテーブルを利用する場合、データノードが増える</span>
+<span class="quote1">&gt; ことによるメリットが大きいです。ディスクはメモリやネットワークよりずっと</span>
+<span class="quote1">&gt; 低速であるため、ディスクへの更新や参照がノード間に分散すれば、処理性能が</span>
+<span class="quote1">&gt; 上がる可能性があります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; まとめると、次のような場合に性能が上がりやすいことになります。</span>
+<span class="quote1">&gt; ・細かい処理が大量に発生する。</span>
+<span class="quote1">&gt; ・クエリで主キーを指定している。</span>
+<span class="quote1">&gt; ・高速なインターコネクトを利用している。</span>
+<span class="quote1">&gt; ・ディスクテーブルを利用している。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 次のような場合にはスケールしない可能性があります。</span>
+<span class="quote1">&gt; ・複雑なクエリを処理する。</span>
+<span class="quote1">&gt;  ×JOIN、サブクエリ</span>
+<span class="quote1">&gt;  ×一度に大量に更新するトランザクション</span>
+<span class="quote1">&gt; ・範囲検索など、主キー（ハッシュ）を利用しないクエリが多い。</span>
+<span class="quote1">&gt; ・インターコネクトが遅い。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ただし、スケールしないと言っても十分実用に耐えるレベルですので、</span>
+<span class="quote1">&gt; Active/Activeで使いたい場合や、手軽にHA化したい場合にはMySQL Clusterは便利です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; というわけで、システムにかけられる予算やアプリケーションの特性をよく考慮して</span>
+<span class="quote1">&gt; 利用する場合を見極めましょう。</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; Mikiya Okuno, MySQL Support Engineer</span>
+<span class="quote1">&gt; Sun Microsystems KK, Tokyo, Japan</span>
+<span class="quote1">&gt; <a href="http://www-jp.mysql.com/">http://www-jp.mysql.com/</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; On 10/03/2009, at 10:22 AM, Hiroyuki Ogawa wrote:</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; いつもお世話になっております。</span>
+<span class="quote2">&gt; &gt; 現在、MySQLクラスタの性能について調べています。</span>
+<span class="quote2">&gt; &gt; まず、調査としては複数のPCを用意してそれぞれのPC１台に</span>
+<span class="quote2">&gt; &gt; 管理ノード、データノード、</span>
+<span class="quote2">&gt; &gt; SQLノードをすべてインストールします。</span>
+<span class="quote2">&gt; &gt; １台目で構成したとき１秒当たりinsertの処理件数は２台、３台、４台で</span>
+<span class="quote2">&gt; &gt; 構成した場合と比較して、性能は上がるのでしょうか。</span>
+<span class="quote2">&gt; &gt; 各PCのOSはすべてLinux（CentOS５．２）です。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; selectではPC（Linux）とPC（Windows)を接続してWindows</span>
+<span class="quote2">&gt; &gt; PCで１秒間当たり何件selectできるかを調査しています。</span>
+<span class="quote2">&gt; &gt; このときもPC（Linux)の台数を２台から４台に増やした場合、</span>
+<span class="quote2">&gt; &gt; 性能があがるかを調べています。</span>
+<span class="quote2">&gt; &gt; MySQLクラスタはデータノードなどが増えると性能は</span>
+<span class="quote2">&gt; &gt; あがるのでしょうか。</span>
+<span class="quote2">&gt; &gt; それとも、ある台数に達すると性能は収束するのでしょうか。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 分かりにくく長い質問になってしまいましたが、ご教授を</span>
+<span class="quote2">&gt; &gt; お願いいたします。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 使用するMySQL Clusterのバージョンは6.3.20を使用します。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 以上、よろしくお願いいたします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="14766/0/index.html"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="14765.html">[前]</a><a href="14767.html">[次]</a><a href="../list/14701-14800.html">[番号順一覧]</a><a href="../thread/14701-14800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14763.html">@ 14763 2009-03-10 10:22 [Hiroyuki Ogawa &lt;eng1] MySQLクラスタの性能についての質問       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14764.html">  14764 2009-03-10 10:35 ┣[Tetsuro IKEDA &lt;te.ik]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14765.html">  14765 2009-03-10 10:55 ┗[Mikiya Okuno &lt;Mikiya]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14766.html">@ 14766 2009-03-10 13:46 　┗[Hiroyuki Ogawa &lt;eng1]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14767.html">  14767 2009-03-10 14:00 　　┗[Mikiya Okuno &lt;Mikiya]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14768.html">@ 14768 2009-03-10 15:43 　　　┗[Hiroyuki Ogawa &lt;eng1]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14769.html">  14769 2009-03-10 15:56 　　　　┗[Mikiya Okuno &lt;Mikiya]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14770.html">@ 14770 2009-03-10 18:55 　　　　　┗[Hiroyuki Ogawa &lt;eng1]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14771.html">  14771 2009-03-10 22:03 　　　　　　┗[Mikiya Okuno &lt;Mikiya]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14772.html">@ 14772 2009-03-10 23:14 　　　　　　　┗[Hiroyuki Ogawa &lt;eng1]                         </a></span>
+</pre>
+</body>
+</html>

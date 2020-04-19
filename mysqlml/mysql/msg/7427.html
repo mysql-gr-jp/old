@@ -1,0 +1,136 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7427</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7426.html">[前]</a><a href="7428.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7427
+</p>
+<div class="header">
+<p>
+From: &quot;Kondo Tatsuya&quot; &lt;&quot;Kondo Tatsuya&quot; &lt;konet@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 9 Apr 2003 01:11:35 +0900<br>
+Subject: [mysql 07427] Re: 数値型の許容範囲を越えそうな場合の処理方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+近藤です。
+森口さん、かわじさん、返信ありがとうございます。
+
+かわじさん
+<span class="quote1">&gt; とかして、data_name ごとに date_id を採番するやり方です。</span>
+<span class="quote1">&gt; <a href="../../msg.cgi%3Fml=mysql&amp;id=4267.html">http://www.mysql.gr.jp/mysqlml/msg.cgi?ml=mysql&amp;id=4267</a></span>
+
+参考になります。^^
+情報ありがとうございます。
+
+森口さん
+<span class="quote1">&gt; 1秒間に1000件ずつ増加し続けても上限に達するまでに5億年以上かかります。</span>
+<span class="quote1">&gt; というわけでBIGINT(20)なら「date_idに格納出来る許容範囲を越えてしまう」</span>
+<span class="quote1">&gt; ことまで普通は考えなくても良いのではないでしょうか。</span>
+
+はい、まったくその通りですね。
+現状のDB構造では、多くても１時間で2000レコード程度の増加なので、
+「date_idに格納出来る許容範囲を越えてしまう」は気にしなくて済みそうです。
+
+ですが、１時間で2000レコードの増加は多いですよね？
+現在、アクセスカウンターを作成しています。
+
+CREATE TABLE count_tb (
+  count_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  count_user_id CHAR(255) NOT NULL,
+  count_date BIGINT(20) UNSIGNED NOT NULL,
+  count_time TINYINT(2) UNSIGNED NOT NULL,
+  count_pc BIGINT(20) UNSIGNED NOT NULL,
+  count_i BIGINT(20) UNSIGNED NOT NULL,
+  count_j BIGINT(20) UNSIGNED NOT NULL,
+  count_e BIGINT(20) UNSIGNED NOT NULL ,
+  RIMARY KEY (count_id), INDEX (count_id)
+) 
+
+CREATE TABLE date_tb (
+  date_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  date_date DATE NOT NULL
+)
+insert date_tb set date_date = '2003-4-1'
+
+
+
+
+
+
+
+
+
+
+----- Original Message ----- 
+From: &quot;MORIGUCHI Hirokazu&quot; &lt;kito@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Monday, April 07, 2003 7:58 AM
+Subject: <a href="07410.html">[mysql 07410]</a> Re: 数値型の許容範囲を越えそうな場合の処理方法
+
+
+<span class="quote1">&gt; 初めまして。森口というものです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 直接の回答ではありませんが、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; On Mon, 7 Apr 2003 05:12:41 +0900</span>
+<span class="quote1">&gt; &quot;Kondo Tatsuya&quot; &lt;konet@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; CREATE TABLE date_tb</span>
+<span class="quote2">&gt; &gt; (date_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,</span>
+<span class="quote2">&gt; &gt;  date_name CHAR(255) NOT NULL , PRIMARY KEY (date_id))</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; とした場合、date_idには、18446744073709551615まで格納出来ると思うのですが、</span>
+<span class="quote2">&gt; &gt; データがそれ以上に膨大になり、date_idに格納出来る許容範囲を越えてしまう恐れ</span>
+<span class="quote2">&gt; &gt; がある場合、みなさんならどのようにしておられるのでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 60(秒/分) * 60(分/時) * 24(時/日) * 365(日/年) = 31536000(秒/年)</span>
+<span class="quote1">&gt; 2^64 = 18446744073709551616</span>
+<span class="quote1">&gt; (2^64) / 31536000 = 584942417355 (年)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 1秒間に1000件ずつ増加し続けても上限に達するまでに5億年以上かかります。</span>
+<span class="quote1">&gt; というわけでBIGINT(20)なら「date_idに格納出来る許容範囲を越えてしまう」</span>
+<span class="quote1">&gt; ことまで普通は考えなくても良いのではないでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; HDD容量なりCPU処理速度なりの方が先に限界を迎えると思われます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; MORIGUCHI Hirokazu &lt;kito@xxxxxxxxxx&gt;, &lt;kito@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+</pre>
+</div>
+<p class="button"><a href="7426.html">[前]</a><a href="7428.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7409.html">   7409 2003-04-07 05:12 [&quot;Kondo Tatsuya&quot; &lt;kon] 数値型の許容範囲を越えそうな場合の処理方法</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7410.html">   7410 2003-04-07 07:58 ┣[MORIGUCHI Hirokazu &lt;]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="7427.html">   7427 2003-04-09 01:11 ┃┣[&quot;Kondo Tatsuya&quot; &lt;kon]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7429.html">   7429 2003-04-09 10:02 ┃┃┗[&quot;JUNSIK LIM&quot; &lt;koniwe] UNION のようなもの？              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7430.html">   7430 2003-04-09 10:52 ┃┃　┗[Shinya Kawaji &lt;kawaj]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7497.html">   7497 2003-04-16 13:51 ┃┃　　┗[&quot;janreno&quot; &lt;janreno@x] auto_increment でレコードの無しの場合常に 1 から始めたい。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7499.html">   7499 2003-04-16 15:20 ┃┃　　　┗[GUSTAV &lt;beatle@xxxxx] Re: auto_increment でレコードの無しの場合常に 1</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7500.html">   7500 2003-04-16 15:35 ┃┃　　　　┗[Isao Tanaka &lt;isao@xx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7502.html">   7502 2003-04-16 17:00 ┃┃　　　　　┣[&lt;lavlav@xxxxxxxxxx&gt; ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7505.html">   7505 2003-04-16 18:40 ┃┃　　　　　┗[&quot;janreno&quot; &lt;janreno@x]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7506.html">   7506 2003-04-16 18:57 ┃┃　　　　　　┣[Isao Tanaka &lt;isao@xx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7508.html">   7508 2003-04-16 19:05 ┃┃　　　　　　┣[GUSTAV &lt;beatle@xxxxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7515.html">   7515 2003-04-17 01:16 ┃┃　　　　　　┣[とみたまさひろ &lt;tomm]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7518.html">   7518 2003-04-17 01:44 ┃┃　　　　　　┃┗[&quot;Kondo Tatsuya&quot; &lt;kon]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7519.html">   7519 2003-04-17 10:15 ┃┃　　　　　　┗[takeyuki miyagawa &lt;m]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7525.html">   7525 2003-04-17 16:20 ┃┃　　　　　　　┗[&quot;janreno&quot; &lt;janreno@x]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7526.html">   7526 2003-04-17 16:57 ┃┃　　　　　　　　┗[とみたまさひろ &lt;tomm]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7528.html">   7528 2003-04-17 17:35 ┃┃　　　　　　　　　┗[&quot;janreno&quot; &lt;janreno@x]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7531.html">   7531 2003-04-17 18:20 ┃┃　　　　　　　　　　┗[とみたまさひろ &lt;tomm]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7428.html">   7428 2003-04-09 01:26 ┃┗[&quot;Kondo Tatsuya&quot; &lt;kon]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7434.html">   7434 2003-04-10 01:16 ┃　┗[&quot;Kondo Tatsuya&quot; &lt;kon]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7411.html">   7411 2003-04-07 12:32 ┗[Shinya Kawaji &lt;kawaj]                                       </a></span>
+</pre>
+</body>
+</html>

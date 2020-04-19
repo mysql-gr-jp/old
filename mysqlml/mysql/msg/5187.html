@@ -1,0 +1,209 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5187</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="5186.html">[前]</a><a href="5188.html">[次]</a><a href="../list/5101-5200.html">[番号順一覧]</a><a href="../thread/5101-5200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5187
+</p>
+<div class="header">
+<p>
+From: &quot;j-ken/office&quot; &lt;&quot;j-ken/office&quot; &lt;office@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 22 Feb 2002 01:18:16 +0900<br>
+Subject: [mysql 05187] サーバーパラメーターのチューニングの目安？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+たけ＠J研です。
+
+マニュアル等にも目をとうしたのですが、
+いまいちよい結果がです。困っています。
+
+サーバーは
+CPU	Pentium III 1GHz
+メモリー	512M
+OSはVine Linux 2.1です。
+
+mysql	3.23.39
+php	4.05
+の環境で携帯用のWEBサイトを作っています。
+
+
+現在mysqladmin status で確認すると以下のような状態にあります。
+Uptime: 7133  Threads: 3  Questions: 143491  Slow queries: 255
+Opens: 947  Flush tables: 1  Open tables: 400 Queries per second avg: 20.117
+
+問い合わせ平均応答秒数が20秒もかかり、オープンしているテーブルもMAXの400
+になっています。このよな結果になるのでもっと最適化したいのですが、みなさ
+んはなにを目安に(もちろんデータベースの設計の問題もあるとは思うのですが)
+パラメータを決めているのでしょうか？
+
+ご教授頂ければ幸いです。
+
+ちなみに
+mysqladmin extended-status 
++--------------------------+------------+
+<span class="quote1">| Variable_name            | Value      |</span>
++--------------------------+------------+
+<span class="quote1">| Aborted_clients          | 7          |</span>
+<span class="quote1">| Aborted_connects         | 296        |</span>
+<span class="quote1">| Bytes_received           | 12429589   |</span>
+<span class="quote1">| Bytes_sent               | 1024713470 |</span>
+<span class="quote1">| Connections              | 27707      |</span>
+<span class="quote1">| Created_tmp_disk_tables  | 591        |</span>
+<span class="quote1">| Created_tmp_tables       | 668        |</span>
+<span class="quote1">| Created_tmp_files        | 8          |</span>
+<span class="quote1">| Delayed_insert_threads   | 0          |</span>
+<span class="quote1">| Delayed_writes           | 0          |</span>
+<span class="quote1">| Delayed_errors           | 0          |</span>
+<span class="quote1">| Flush_commands           | 1          |</span>
+<span class="quote1">| Handler_delete           | 0          |</span>
+<span class="quote1">| Handler_read_first       | 15412      |</span>
+<span class="quote1">| Handler_read_key         | 7810759    |</span>
+<span class="quote1">| Handler_read_next        | 16681767   |</span>
+<span class="quote1">| Handler_read_prev        | 9          |</span>
+<span class="quote1">| Handler_read_rnd         | 2539361    |</span>
+<span class="quote1">| Handler_read_rnd_next    | 77564412   |</span>
+<span class="quote1">| Handler_update           | 2470496    |</span>
+<span class="quote1">| Handler_write            | 1502355    |</span>
+<span class="quote1">| Key_blocks_used          | 26688      |</span>
+<span class="quote1">| Key_read_requests        | 18389584   |</span>
+<span class="quote1">| Key_reads                | 9693       |</span>
+<span class="quote1">| Key_write_requests       | 1463345    |</span>
+<span class="quote1">| Key_writes               | 4848       |</span>
+<span class="quote1">| Max_used_connections     | 100        |</span>
+<span class="quote1">| Not_flushed_key_blocks   | 0          |</span>
+<span class="quote1">| Not_flushed_delayed_rows | 0          |</span>
+<span class="quote1">| Open_tables              | 400        |</span>
+<span class="quote1">| Open_files               | 469        |</span>
+<span class="quote1">| Open_streams             | 0          |</span>
+<span class="quote1">| Opened_tables            | 947        |</span>
+<span class="quote1">| Questions                | 146741     |</span>
+<span class="quote1">| Select_full_join         | 4          |</span>
+<span class="quote1">| Select_full_range_join   | 0          |</span>
+<span class="quote1">| Select_range             | 15701      |</span>
+<span class="quote1">| Select_range_check       | 0          |</span>
+<span class="quote1">| Select_scan              | 14022      |</span>
+<span class="quote1">| Slave_running            | OFF        |</span>
+<span class="quote1">| Slave_open_temp_tables   | 0          |</span>
+<span class="quote1">| Slow_launch_threads      | 26         |</span>
+<span class="quote1">| Slow_queries             | 255        |</span>
+<span class="quote1">| Sort_merge_passes        | 4          |</span>
+<span class="quote1">| Sort_range               | 3683       |</span>
+<span class="quote1">| Sort_rows                | 3176350    |</span>
+<span class="quote1">| Sort_scan                | 3910       |</span>
+<span class="quote1">| Table_locks_immediate    | 164559     |</span>
+<span class="quote1">| Table_locks_waited       | 2130       |</span>
+<span class="quote1">| Threads_cached           | 0          |</span>
+<span class="quote1">| Threads_created          | 27706      |</span>
+<span class="quote1">| Threads_connected        | 3          |</span>
+<span class="quote1">| Threads_running          | 1          |</span>
+<span class="quote1">| Uptime                   | 7302       |</span>
++--------------------------+------------+
+
+mysql&gt;show variables 
+----------------------------------------------------------------------------+
+<span class="quote1">| Variable_name                   | Value                                   |</span>
++---------------------------------+-----------------------------------------+
+<span class="quote1">| ansi_mode                       | OFF                                     |</span>
+<span class="quote1">| back_log                        | 50                                      |</span>
+<span class="quote1">| basedir                         | /usr/local/                             |</span>
+<span class="quote1">| binlog_cache_size               | 32768                                   |</span>
+<span class="quote1">| character_set                   | sjis                                    |</span>
+<span class="quote1">| concurrent_insert               | ON                                      |</span>
+<span class="quote1">| connect_timeout                 | 5                                       |</span>
+<span class="quote1">| datadir                         | /usr/local/var/                         |</span>
+<span class="quote1">| delay_key_write                 | ON                                      |</span>
+<span class="quote1">| delayed_insert_limit            | 100                                     |</span>
+<span class="quote1">| delayed_insert_timeout          | 300                                     |</span>
+<span class="quote1">| delayed_queue_size              | 1000                                    |</span>
+<span class="quote1">| flush                           | OFF                                     |</span>
+<span class="quote1">| flush_time                      | 0                                       |</span>
+<span class="quote1">| have_bdb                        | NO                                      |</span>
+<span class="quote1">| have_gemini                     | NO                                      |</span>
+<span class="quote1">| have_innodb                     | NO                                      |</span>
+<span class="quote1">| have_isam                       | YES                                     |</span>
+<span class="quote1">| have_raid                       | NO                                      |</span>
+<span class="quote1">| have_ssl                        | NO                                      |</span>
+<span class="quote1">| init_file                       |                                         |</span>
+<span class="quote1">| interactive_timeout             | 28800                                   |</span>
+<span class="quote1">| join_buffer_size                | 131072                                  |</span>
+<span class="quote1">| key_buffer_size                 | 73396224                                |</span>
+<span class="quote1">| language                        | /usr/local/share/mysql/english/         |</span>
+<span class="quote1">| large_files_support             | ON                                      |</span>
+<span class="quote1">| locked_in_memory                | OFF                                     |</span>
+<span class="quote1">| log                             | OFF                                     |</span>
+<span class="quote1">| log_update                      | OFF                                     |</span>
+<span class="quote1">| log_bin                         | ON                                      |</span>
+<span class="quote1">| log_slave_updates               | OFF                                     |</span>
+<span class="quote1">| long_query_time                 | 10                                      |</span>
+<span class="quote1">| low_priority_updates            | OFF                                     |</span>
+<span class="quote1">| lower_case_table_names          | 0                                       |</span>
+<span class="quote1">| max_allowed_packet              | 2096128                                 |</span>
+<span class="quote1">| max_binlog_cache_size           | 4294967295                              |</span>
+<span class="quote1">| max_binlog_size                 | 1073741824                              |</span>
+<span class="quote1">| max_connections                 | 100                                     |</span>
+<span class="quote1">| max_connect_errors              | 10                                      |</span>
+<span class="quote1">| max_delayed_threads             | 20                                      |</span>
+<span class="quote1">| max_heap_table_size             | 16777216                                |</span>
+<span class="quote1">| max_join_size                   | 4294967295                              |</span>
+<span class="quote1">| max_sort_length                 | 1024                                    |</span>
+<span class="quote1">| max_user_connections            | 0                                       |</span>
+<span class="quote1">| max_tmp_tables                  | 32                                      |</span>
+<span class="quote1">| max_write_lock_count            | 4294967295                              |</span>
+<span class="quote1">| myisam_recover_options          | OFF                                     |</span>
+<span class="quote1">| myisam_max_extra_sort_file_size | 256                                     |</span>
+<span class="quote1">| myisam_max_sort_file_size       | 2047                                    |</span>
+<span class="quote1">| myisam_sort_buffer_size         | 8388608                                 |</span>
+<span class="quote1">| net_buffer_length               | 80896                                   |</span>
+<span class="quote1">| net_read_timeout                | 30                                      |</span>
+<span class="quote1">| net_retry_count                 | 10                                      |</span>
+<span class="quote1">| net_write_timeout               | 60                                      |</span>
+<span class="quote1">| open_files_limit                | 0                                       |</span>
+<span class="quote1">| port                            | 3306                                    |</span>
+<span class="quote1">| protocol_version                | 10                                      |</span>
+<span class="quote1">| record_buffer                   | 2093056                                 |</span>
+<span class="quote1">| query_buffer_size               | 0                                       |</span>
+<span class="quote1">| safe_show_database              | OFF                                     |</span>
+<span class="quote1">| server_id                       | 1                                       |</span>
+<span class="quote1">| skip_locking                    | ON                                      |</span>
+<span class="quote1">| skip_networking                 | OFF                                     |</span>
+<span class="quote1">| skip_show_database              | OFF                                     |</span>
+<span class="quote1">| slow_launch_time                | 2                                       |</span>
+<span class="quote1">| socket                          | /tmp/mysql.sock                         |</span>
+<span class="quote1">| sort_buffer                     | 9437176                                 |</span>
+<span class="quote1">| table_cache                     | 400                                     |</span>
+<span class="quote1">| table_type                      | MYISAM                                  |</span>
+<span class="quote1">| thread_cache_size               | 0                                       |</span>
+<span class="quote1">| thread_stack                    | 65536                                   |</span>
+<span class="quote1">| transaction_isolation           | READ-COMMITTED                          |</span>
+<span class="quote1">| timezone                        | JST                                     |</span>
+<span class="quote1">| tmp_table_size                  | 12582912                                |</span>
+<span class="quote1">| tmpdir                          | /tmp/                                   |</span>
+<span class="quote1">| version                         | 3.23.39-log                             |</span>
+<span class="quote1">| wait_timeout                    | 28800                                   |</span>
++---------------------------------+------------------------------------------
+
+こんな感じです。
+
+***********************************
+J-SKY研究所	<a href="http://j-ken.com">http://j-ken.com</a>
+		mailto:take@xxxxxxxxxx
+***********************************
+
+</pre>
+</div>
+<p class="button"><a href="5186.html">[前]</a><a href="5188.html">[次]</a><a href="../list/5101-5200.html">[番号順一覧]</a><a href="../thread/5101-5200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="5187.html">   5187 2002-02-22 01:18 [&quot;j-ken/office&quot; &lt;offi] サーバーパラメーターのチューニングの目安？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5189.html">   5189 2002-02-22 23:09 ┗[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5190.html">   5190 2002-02-23 00:44 　┗[&quot;j-ken/office&quot; &lt;offi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5191.html">   5191 2002-02-24 02:16 　　┗[Tomoyuki Ishino &lt;ish]                                   </a></span>
+</pre>
+</body>
+</html>

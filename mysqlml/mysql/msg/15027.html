@@ -1,0 +1,211 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15027</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15026.html">[前]</a><a href="15028.html">[次]</a><a href="../list/15001-15100.html">[番号順一覧]</a><a href="../thread/15001-15100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15027
+</p>
+<div class="header">
+<p>
+From: Nakase &lt;Nakase &lt;h_nakase@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 18 Sep 2009 17:02:25 +0900<br>
+Subject: [mysql 15027] Re: DBをどこまで正規化すべきか？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+中瀬といいます。
+
+自分は正規化する・しないの観点として、
+・カラムの参照結果が見る時期によって変化するものかどうか
+・カラムを用意する事によって、そのカラムが利用されるか
+をポイントにしてます。
+
+なので商品購入の際の商品名・単価・数量までは必ず必要な情報
+であり、合計・小計・消費税額等はデータ登録時から暫くは固定
+かもしれないですが、将来消費税率が変更するかもしれないと
+いう状況もありえるのでこれらもテーブルのカラムとして保持する
+ようにしてます。
+
+またデータの入出力時の画面への出力数とDBへのカラム数は必ず
+しも一致する必要はないわけで、住所の場合
+画面上は
+・郵便番号
+・都道府県
+・市区町村
+・その下（番地など）
+のように分割しても、テーブル上は郵便番号と住所として纏めて
+も構わないと思ってます。
+（もっともこの住所の情報を使って絞り込みを行いたいというので
+あれば分割したままでもよいかもしれませんし、今であれば郵便番号
+で絞り込む事も可能ですが）
+
+自分は画面入力用に
+・都道府県
+・市区町村
+のテーブルを持ち、実際住所を格納する際は○○県△△市☆☆町XX
+番地のように１つのカラムに収めていました。
+
+
+&lt;200909180232.AA01376@xxxxxxxxxx&gt; の、
+   &quot;<a href="15024.html">[mysql 15024]</a> Re: DBをどこまで正規化すべきか？&quot; において、
+   &quot;n.futami@xxxxxxxxxx (二見)&quot;さんは書きました：
+
+<span class="quote1">&gt; 二見と申します、初めまして</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 下記の件</span>
+<span class="quote1">&gt; 恐らく参考書には、一旦最低限な項目に絞ってみる</span>
+<span class="quote1">&gt; という正規化の事が書いてあるんじゃないかと思います</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 一旦全て正規化して考え、逆正規化の様な事を行い</span>
+<span class="quote1">&gt; 自分が良くＳｅｌｅｃｔする単位に欲しいカラムを用意する事が</span>
+<span class="quote1">&gt; 当方は重要だと思ってます</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 例えば伝票（下記でいう受注履歴）と明細（同注文明細）なんて言い方をしますが</span>
+<span class="quote1">&gt; １明細の小計を明細ＤＢの１カラムに格納するなど私は必要だと思いますし</span>
+<span class="quote1">&gt; 伝票には消費税や合計金額のカラムが有ることも当然だと思っています</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 中にはお店側の計算方法が変わったりしますので</span>
+<span class="quote1">&gt; 途中から計算が変わった場合など、計算式で求めている場合は対応が面倒です</span>
+<span class="quote1">&gt; 　＃消費税の計算が、四捨五入から切り捨てになったとか</span>
+<span class="quote1">&gt; 　　明細単位に消費税を積み上げていたが、購入金額の総合計に消費税を掛けるようになったとか</span>
+<span class="quote1">&gt; 法律の改正で変わる事も有り得なくもないと思います</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; また、下記の例で言うと</span>
+<span class="quote1">&gt; 同じ商品番号で単価が変わってしまう商品などが有る場合は</span>
+<span class="quote1">&gt; 当然売った時の単価を明細側に持っておく必要が有るかと思いますし</span>
+<span class="quote1">&gt; 管理画面等で商品の単価を変えれるなら持っておいたほうが無難かも知れません</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; この先段階的に消費税が上がることも考えられますので</span>
+<span class="quote1">&gt; 先のことを考慮しながら設計できると良いと思います</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; また、郵便番号の件は少々別の話で</span>
+<span class="quote1">&gt; ＤＢ側のカラムを加工して検索するとインデックスを使えなくなったりしますので</span>
+<span class="quote1">&gt; 検索用の項目もアリかなと思います</span>
+<span class="quote1">&gt; 　＃コレは実際に大量のデータで試してみると良いかも</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 余り参考になりませんが</span>
+<span class="quote1">&gt; ＤＢ設計がんばってください</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以上、宜しくお願い致します</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; わたせさんが［2009/09/18 00:00:57］に出された</span>
+<span class="quote1">&gt; 題名「<a href="15022.html">[mysql 15022]</a> DBをどこまで正規化すべきか？」に付いての返信です</span>
+<span class="quote1">&gt; ---------------Original Message-------------------------</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt;プログラム歴は結構長いですが、ＳＱＬはかなり初心者です。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;ＤＢの設計をしているのですが、参考書などには必ず正規化の事が載っています。</span>
+<span class="quote2">&gt; &gt;たとえばその中で、「計算で求められる事を項目にしない」ってのがあります。</span>
+<span class="quote2">&gt; &gt;「導出フィールドの削除」って書いてあります。</span>
+<span class="quote2">&gt; &gt;『商品単価×数量で合計が求められるから、合計の項目は不要』というヤツです。</span>
+<span class="quote2">&gt; &gt;で、私が持っている本を読むと確かにそう書いてあるのですが、</span>
+<span class="quote2">&gt; &gt;必ずしもそれが正しいのだろか？と疑問に思っています。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;例えば、数種類のジャムの販売のＤＢを作る場合、</span>
+<span class="quote2">&gt; &gt;顧客テーブル、受注履歴テーブル、注文明細テーブル、商品テーブル</span>
+<span class="quote2">&gt; &gt;を考えたとします。</span>
+<span class="quote2">&gt; &gt;受注履歴は、１販売毎に１レコード。</span>
+<span class="quote2">&gt; &gt;その受注ＩＤを持つ注文明細テーブルが複数あり、それが商品テーブルＩＤと</span>
+<span class="quote2">&gt; &gt;数量を持つとします。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;■具体的には</span>
+<span class="quote2">&gt; &gt;２種類のジャムを、それぞれ２個、１個買ったとすると…</span>
+<span class="quote2">&gt; &gt;・受注テーブル１件(受注ID)</span>
+<span class="quote2">&gt; &gt;001</span>
+<span class="quote2">&gt; &gt;・注文明細が２件(受注ID,明細ID,商品ID,数量)</span>
+<span class="quote2">&gt; &gt;001,01,A,2</span>
+<span class="quote2">&gt; &gt;001,02,B,1</span>
+<span class="quote2">&gt; &gt;・商品テーブル(商品ID,名前,単価)</span>
+<span class="quote2">&gt; &gt;A,りんごジャム,100</span>
+<span class="quote2">&gt; &gt;B,いちごジャム,70</span>
+<span class="quote2">&gt; &gt;だと、受注ID=001の合計額は</span>
+<span class="quote2">&gt; &gt;100*2+70=170円となります。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;これが、数千レコード分を一覧表で出そうとすると、全て単価×数量を</span>
+<span class="quote2">&gt; &gt;計算しないと出せないワケですよね。</span>
+<span class="quote2">&gt; &gt;しかし、受注テーブルに合計があれば、簡単に出せます。</span>
+<span class="quote2">&gt; &gt;ＳＱＬ文を書いてしまえば、簡単も複雑も関係ないでしょうが、</span>
+<span class="quote2">&gt; &gt;これって、ＤＢのサイズを優先するか、ＳＱＬの実行時間を優先するか？</span>
+<span class="quote2">&gt; &gt;って事で選ぶので良いのでしょうか？</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;当然、注文明細を操作した場合は、受注テーブルの金額を書き直す事を</span>
+<span class="quote2">&gt; &gt;厳守する必要がありますし、商品単価も変更しないという前提が必要ですが。</span>
+<span class="quote2">&gt; &gt;（商品単価は今後の価格改定の可能性を考えると、注文明細に覚えこまして</span>
+<span class="quote2">&gt; &gt;しまうべきなんですよね？）</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;本を読んでると、正規化は正義のような書き方をしているような感じもしますが、</span>
+<span class="quote2">&gt; &gt;本来しなくてもいいようなレベルの事でも、本では説明をする為に、正規化を</span>
+<span class="quote2">&gt; &gt;しているような気がするのです。</span>
+<span class="quote2">&gt; &gt;例えば、上記のようなテーブル例の場合はどうなんでしょうか？</span>
+<span class="quote2">&gt; &gt;私は、受注テーブルに合計を覚えるほうが良いと思うのですが…</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;消費税なんかも悩ましいところです。</span>
+<span class="quote2">&gt; &gt;計算で出せますが、今後税率が変わった場合、レコードの作成時期によって</span>
+<span class="quote2">&gt; &gt;税率を変えるのはかなり非効率だと思うのですが。</span>
+<span class="quote2">&gt; &gt;そうなると、小計、税額、合計を覚える必要があるって事になりますよね？</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;なんだか、１つの質問で長々と書いてしまいましたが、どなたかアドバイスお願</span>
+<span class="quote2">&gt; &gt;いします。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;他にも、郵便番号を123-456と覚えていた場合、</span>
+<span class="quote2">&gt; &gt;2345や12-345の文字列で検索した場合でも類似として検索できるように、</span>
+<span class="quote2">&gt; &gt;表示用フィールド('123-456')と検索用フィールド('123456')の</span>
+<span class="quote2">&gt; &gt;両方を覚えて、検索するときは数字のみにした値を、検索用フィールド</span>
+<span class="quote2">&gt; &gt;に対して検索させています。</span>
+<span class="quote2">&gt; &gt;確かに、検索するたびにSQLで'-'を抜いたフィールドを作る事も可能だと</span>
+<span class="quote2">&gt; &gt;思いますが、検索用フィールドを常に別で持つのは、古いＤＢの</span>
+<span class="quote2">&gt; &gt;考え方なのでしょうか？</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;-- </span>
+<span class="quote2">&gt; &gt;わたせ &lt;watase@xxxxxxxxxx&gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ※部署名が変わりました</span>
+<span class="quote1">&gt; -------------------------------------------------------</span>
+<span class="quote1">&gt;   DNP DIGITALCOM</span>
+<span class="quote1">&gt; 　システムソリューション本部</span>
+<span class="quote1">&gt;   プロジェクトマネジメント室　第２ＰＭグループ</span>
+<span class="quote1">&gt; 　　　二見　修康</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   〒141-8001</span>
+<span class="quote1">&gt;     品川区西五反田3-5-20 ＤＮＰ五反田ビル5Ｆ</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;     TEL 03-6431-6324 内線 6324</span>
+<span class="quote1">&gt;     FAX 03-6431-6193 携帯 080-2022-6984</span>
+<span class="quote1">&gt; 　  Mail: n.futami@xxxxxxxxxx</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+--------------------------
+中瀬　浩昭
+
+h_nakase@xxxxxxxxxx
+<a href="http://cmssvr.sytes.net/">http://cmssvr.sytes.net/</a>
+--------------------------
+
+
+</pre>
+</div>
+<p class="button"><a href="15026.html">[前]</a><a href="15028.html">[次]</a><a href="../list/15001-15100.html">[番号順一覧]</a><a href="../thread/15001-15100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15022.html">  15022 2009-09-18 00:00 [わたせ &lt;watase@xxxxx] DBをどこまで正規化すべきか？            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15023.html">  15023 2009-09-18 05:47 ┣[Masaki Miyata &lt;catlo]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15024.html">  15024 2009-09-18 11:32 ┗[&lt;n.futami@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15025.html">  15025 2009-09-18 15:08 　┣[&quot;sugimoto&quot; &lt;sugimoto]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15026.html">  15026 2009-09-18 15:24 　┃┗[otk &lt;rolling@xxxxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="15027.html">  15027 2009-09-18 17:02 　┣[Nakase &lt;h_nakase@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15028.html">  15028 2009-09-19 20:46 　┗[わたせ &lt;watase@xxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

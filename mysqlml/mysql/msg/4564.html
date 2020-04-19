@@ -1,0 +1,1159 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4564</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="4563.html">[前]</a><a href="4565.html">[次]</a><a href="../list/4501-4600.html">[番号順一覧]</a><a href="../thread/4501-4600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4564
+</p>
+<div class="header">
+<p>
+From: とみたまさひろ &lt;とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 25 Oct 2001 23:59:29 +0900<br>
+Subject: [mysql 04564] Re: Proftpd + qmail + vpopmail<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+とみたです。
+
+On Thu, 25 Oct 2001 09:27:00 +0900
+&quot;Taro Yamamoto&quot; &lt;taro.y@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; とりあえず、段階踏んで普通に Proftpd + MySQL で環境を作ってみようと思いま</span>
+<span class="quote1">&gt; す。</span>
+<span class="quote1">&gt; 鶴長さんのアドバイスと README を必死に訳して四苦八苦してみます(^-^;</span>
+
+そういえば、以前 Proftpd 1.2.2 の README.mod_sql を訳したことを
+思い出しました。添付します。参考になりますでしょうか。
+
+# こういうのを個人で抱えちゃってるのは良くないっすね (^^;
+
+<span class="quote1">&gt; 一つだけ質問なのですが、Proftpd + MySQL で環境を構築した場合、</span>
+<span class="quote1">&gt; ユーザの追加はどうやってするのでしょうか？</span>
+<span class="quote1">&gt; 自分で insert するのでしょうか？</span>
+
+だと思います。
+
+--
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;
+日本MySQLユーザ会 <a href="../../../index.html">http://www.mysql.gr.jp</a>
+
+
+******************************************************************************
+IMPORTANT UPGRADE INFORMATION
+
+If you're moving from the mod_sqlpw which was included with
+versions of ProFTPD prior to 1.2rc3, and all you want to do is
+maintain your current setup, you MUST set the following two
+directives:
+
+'SQLDoGroupAuth' to OFF.
+'SQLEncryptedPasswords' to ON unless you've specified it as OFF.
+
+If you use the Postgres backend, and you depend on the PostgresPort to
+default to 0, you now need to make that explicit by setting:
+
+'PostgresPort' to 0.
+
+Please read the 'Setup Notes' section, or at least check the directive
+documentation for 'SQLProcessGrEnt' and 'SQLProcessPwEnt'.  These
+directives can have a significant effect on the way mod_sql plays with
+your database.
+
+Please read the section on Deprecated Directives.  This will effect
+EVERYONE for all versions of ProFTPD &gt; 1.2 final.
+
+New Directives:
+
+SQLAuthTypes, SQLConnectInfo, SQLDefaultGID, SQLDefaultUID, SQLDoAuth,
+SQLDoGroupAuth, SQLGroupGIDField, SQLGroupMembersField, SQLGroupTable,
+SQLGroupnameField, SQLHomedirOnDemand, SQLMinID, SQLMinUserUID,
+SQLMinUserGID, SQLLog, SQLProcessGrEnt, SQLProcessPwEnt,
+SQLShellField, SQLUserTable, SQLWhereClause
+
+Deprecated Directives:
+
+MySQLInfo, PostgresInfo, PostgresPort, SQLEmptyPasswords,
+SQLEncryptedPasswords, SQLKey, SQLKeyField, SQLPlaintextPasswords,
+SQLSSLHashedPasswords, SQLScrambledPasswords 
+
+This header will be removed for all versions of ProFTPD &gt; 1.2 
+******************************************************************************
+
+mod_sql v.3.2.3
+=======
+
+mod_sql は、ProFTPD が SQL データベースに対するユーザ認証と名前
+/UID/GID 検索を行なえるようにするためのモジュールです。バックエンドモジュー
+ルは現在は MySQL と Postgres 用に提供されています。
+
+ソースやこのファイルの更新については mod_sql ホームページをチェックして
+ください: <a href="http://www.lastditcheffort.org/aah/mod_sql.html">http://www.lastditcheffort.org/aah/mod_sql.html</a>
+
+Sections:
+
+1. ProFTPD で mod_sql を使用する方法
+2. 自分の SQL データベースを mod_sql で使用するように設定する方法
+3. 設定の注意
+4. 命令
+5. 非難される命令
+6. mod_sqlpw v.2.0 から mod_sql v.3.0 への変更
+7. 謝辞
+8. 作者
+
+=====================================
+1. ProFTPD で mod_sql を使用する方法
+=====================================
+
+mod_sql の現在のサポートバージョンは ProFTPD と共に配布されています。
+
+この tarball 内のすべては ProFTPD ソースツリーの contrib サブディレクト
+リ内に置きます:
+
+# cd contrib
+# tar -xzvf mod_sql-3.2.3.tar.gz
+
+ProFTPD を mod_sql サポートで作成するためには、configure を(たとえば)次
+の引数で呼び出します:
+
+MySQL バックエンドを使用する場合:
+
+./configure --with-modules=mod_sql:mod_sql_mysql
+
+Postgres バックエンドを使用する場合:
+
+./configure --with-modules=mod_sql:mod_sql_postgres
+
+データベース固有のライブラリとへッダファイルを見つける方法を configure 
+に伝える必要があります; 私は MySQL バックエンドを使用して、次のように 
+configure を呼んでいます:
+
+./configure --with-modules=mod_sql:mod_sql_mysql \
+            --with-includes=/usr/local/include \
+            --with-libraries=/usr/local/lib/mysql 
+
+さあ、下の命令セクションを読んでください。
+
+===================================================
+2. 自分の SQL データベースを mod_sql で使用するように設定する方法
+===================================================
+
+あなたが自分のデータベースシステムを使用する方法を知っているとみなします。
+
+最低限、mod_sql は２つのカラム: userid と passwd でテーブルにアクセスで
+きる必要があります。完全な機能のためには、グループ情報を保持する他のデー
+タベーステーブルの生成も含め、もっと必要となります。
+
+次のテーブルへッダでは、'COLUMN' はカラム名、'TYPE' は期待されるデータ型
+(文字列(text)または数値(numeric))、'R' は「必須カラム」を意味し、'N' は
+「カラムが存在する場合 NULL 値が許されるかどうか」を意味します。'USE' は
+何に用いられるかの *とても* 短い説明です。
+
+
+USERTABLE:  このテーブルはデータベースに存在しなければならない。
+
+COLUMN		TYPE	R	N	USE
+---------------------------------------------------------
+userid		text	Y	N	user's login id
+uid		num	N	Y	user's uid
+gid		num	N	Y	user's gid
+passwd		text	Y	N	user's password
+shell		text	N	Y	user's shell
+homedir**	text	N	Y	user's homedir
+count		num	N	N	login counter
+
+**命令 SQLHomedir と SQLHomedirField の説明を参照
+
+
+
+GROUPTABLE: このモジュールの完全な機能のために、このテーブルは存在すべき
+です。これを生成しないことを選択した場合は、'SQLDoGroupAuth' 命令を 
+'OFF' に設定しなければなりません。
+
+COLUMN		TYPE	R	N	USE
+---------------------------------------------------------
+groupname	text	Y	N	group's name
+gid		num	Y	N	group's gid
+members		text	Y	Y	group's members
+
+注意: グループ毎の複数のメンバは、カンマで区切る必要があります。空白を含
+めてはいけません。
+
+注意: mod_sql は適合するすべてのグループレコードを結合します -- つまり、
+グループ毎に一人だけのメンバを持つ各グループ用に複数レコードを持つことが
+できます。または、複数グループを持つ一つのレコード持つことができます。ま
+たは、混在して適合することができます。
+
+==============
+3. 設定の注意
+==============
+
+proftpd-users メーリングリストでのよくある質問は、「なぜ mod_sql はデー
+タベース内のすべてのユーザを通して繰り返すのか？」です。ここで理由を示し
+ます。
+
+mod_sql は ProFTPD core が投げるすべての認証関数を処理するようにデザイン
+されています。これは、すべてのユーザを通して繰り返す関数(setpwent,
+getpwent, endpwent)と、すべてのグループを通して繰り返す関数(setgrent,
+getgrent, endgrent)を含んでいます。
+
+mod_sql がすべてのグループやユーザを通して繰り返すように見える場合、それ
+は ProFTPD core によって問い合わせられているためです(ひねくれた内部の要
+求のためではありません)。
+
+我々がすでに持っているよりも多くのさまざまなバックエンドモジュールを追加
+することなしに、open query around を保持する良い方法がないため、
+mod_sql は setpwent() が呼び出された時にすべてのユーザを事前にキャッシュ
+し、setpwent() が呼び出された時にすべてのグループを事前にキャッシュしま
+す。これは getpwent() と getgrent() 呼び出しをシンプルにします。at the
+cost of front-loading the time cost
+
+単純な状況では、これらの関数は二度と呼ばれません。ディレクトリやファイル
+またはユーザやグループを元にするさまざまな FTP コマンドへのアクセスの制
+限を始めた時に、ProFTPD は、パーミッションをチェックするためにユーザとグ
+ループを通して繰り返すことを必要とします。基本的な ftp サーバ - 仮想サー
+バや匿名サーバを含む - は、これらの(潜在的にとても)高価な呼び出しは発生
+しません。
+
+SQLProcessPwEnt と SQLProcessGrEnt はdumbing-down mod_sql の方法を提供す
+るために追加されました; デフォルトでは、mod_sql はさまざまな pwent() と 
+grent() 呼び出しを処理します。これらの命令が off に設定された場合、認証
+ハンドラがシステムに存在していても mod_sql は単純に要求をパスします。こ
+れらの命令を使用するということは、ProFTPD がユーザの認証のために同じ情報
+を使用*しない*という意味であるということを覚えておいてください。それはセッ
+ション中にユーザアクションを制御することです。
+
+過去に mod_sql を使用した人のためには、これらの命令はおそらく「off」に設
+定すべきです。mod_sql 3.2.0 以前のバージョン(またはこの前後)では、すべて
+について {set|get|end}{pw|gr}ent 呼び出しの処理を行ないませんでした。そ
+のため、これらの命令を off に設定することで、機能を失うことはありません。
+mod_sql を新しく使う人は、必要に応じて考慮してください -- データベースに
+格納されているすべてのユーザを通して繰り返すことのコストはデータベースか
+らユーザ／グループを元にするアクセス制限の機能に値しますか？そうでなけれ
+ば、データベースを使用しない方法と、どこにあなたのユーザ／グループ情報を
+格納すべきかを再度検討する必要があります。
+
+最後に、使用されるキャッシング方法は次の ProFTPD のメジャーリリースで変
+更される計画があります。その時点で、我々は、データはセッションが開始毎に
+再読み込みされないような、データベース情報のクロスセッションキャッシュを
+行なう方法を持つべきです。
+
+=============
+4. 命令
+=============
+
+命令はアルファベット順に並んでいます。mod_sql を始める場合は、
+'SQLConnectInfo', 'SQLAuthTypes' とデータを取り出すテーブルとフィールド
+を制御するさまざまな命令('SQLUserTable', 'SQLUserField', etc) にもっとも
+興味を持つでしょう。多くの命令は適当なデフォルトを持っています;極端な場
+合、このモジュールを動作させるためには、３つの命令を設定する必要があるだ
+けです: 'SQLConnectInfo', 'SQLAuthTypes', 'SQLHomedir'。
+
+互換性は、mod_sql / mod_sqlpw のバージョンではなく ProFTPD のバージョン
+を参照します。
+
+-------------------
+SQLAuthTypes
+
+Syntax: SQLAuthTypes [OpenSSL] [Crypt] [Backend] [Plaintext] [Empty]
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+この命令は 'SQLEmptyPasswords', 'SQLScrambledPasswords',
+'SQLSSLHashedPasswords', 'SQLPlaintextPasswords',
+'SQLEncryptedPasswords' を非難します。
+
+許可される認証型とチェック順を指定します。少なくとも一つの認証方法を指定
+しなければなりません。
+
+例:
+
+SQLAuthTypes Crypt Empty
+
+これはデータベース内のパスワードが UNIX crypt() 形式に一致するかどうかを
+チェックすることを意味します; それが失敗した場合、データベース内のパスワー
+ドが(与えられたパスワードと一致する)空かどうかをチェックします; それが失
+敗した場合、mod_sql はユーザ認証を拒否します。
+
+現在の型
+
+Plaintext: データベース内のパスワードをプレーンテキストにすることを許し
+	   ます。
+
+OpenSSL:   データベース内のパスワードを '{digestname}hashedvalue' 形式に
+	   することを許します。これは proftpd コンパイル時に 
+	   'HAVE_OPENSSL' を定義して、OpenSSL 'crypto' ライブラリとリン
+	   クした場合のみに有効です。
+
+Crypt:	   データベース内のパスワードを UNIX crypt() 形式にすることを許
+	   します。
+
+Backend:   データベース固有のバックエンドチェック関数。すべてのバックエ
+	   ンドでこれがサポートされるわけではありません。特に MySQL バッ
+	   クエンドはこの型を使用して、MySQL 'PASSWORD()' で暗号化された
+	   パスワードを認証します。Postgres バックエンドは何もしません。
+	   注意。MySQL 実行ログが誰にでも読める場合、ユーザパスワードも
+	   見られてしまいます。
+
+Empty:     データベース内に空のパスワード(ユーザが入力したもの対して適合
+	   する)を許します。データベースフィールドは本当に空の文字列でな
+	   ければなりません -- つまり、NULL 値は認められません。この 
+	   AUTHTYPE はとても注意してください。
+
+
+-------------------
+SQLAuthoritative
+
+Syntax: SQLAuthoritative on|off
+Default: off
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+mod_sql で認証を停止するか他の認証ハンドラを試すかどうかを記述します。デ
+フォルトは off です -- 他のハンドラが試されます。
+
+これは*とても*強力な命令です。SQLAuthoritative が設定された場合、*すべて
+の*認証が SQL データベースを通ります -- グループ検索、UID 検索、その他。
+'SQLDoAuth' と 'SQLDoGroupAuth' 命令も参照してください。
+
+-------------------
+SQLConnectInfo
+
+Syntax: SQLConnectInfo connection-info [username] [password]
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+この命令は 'MySQLInfo', 'PostgresInfo', 'PostgresPort' を非難します。
+
+接続情報を記述します。connection-info はデータベース、ホスト、ポート、そ
+の他のバックエンド固有情報を記述します。username と password はそれぞれ
+接続するためのユーザ名とパスワードを記述します。両方ともデフォルトは 
+NULL です。これはバックエンドはバックエンド固有マナーと同じように取り扱
+います。password を記述した場合は、username も記述しなければなりません。
+
+与えられたバックエンドは、proftpd の起動時に connection-info フィールド
+で文法エラーをチェックするための機会(義務ではない)を持ちます。しかし 
+mod_sql が与えられたホストへの接続を試みるまで、semantic エラー(すなわち、
+データベースに接続できない等)が捕捉されることを期待すべきではありません。
+
+MySQL と Postgres バックエンドの connection-info は次の形式を期待します:
+
+database[@hostname][:port]
+
+hostname のデフォルトはバックエンド固有のホスト名です(MySQL と 
+Postgres バックエンドの両方で 'localhost')。port のデフォルトはバックエ
+ンド固有のデフォルトポートです(MySQL バックエンドは 3306、Postgres バッ
+クエンドは 5432)。
+
+例:
+
+SQLConnectInfo  ftpusers@xxxxxxxxxx
+
+これは「'foo.com' のデフォルトポートを経由して、データベース 'ftpuser' 
+への接続を試みろ。ユーザ名 NULL とパスワード NULL を使用しろ」を意味しま
+す。
+
+SQLConnectInfo  ftpusers:3000 admin
+
+これは「'localhost' のポート 3000 を経由して、データベース 'ftpuser' へ
+の接続を試みろ。ユーザ名 'admin' とパスワード NULL を使用しろ」を意味し
+ます。
+
+SQLConnectInfo  ftpusers@xxxxxxxxxx:3000 admin mypassword
+
+これは「'foo.com' のポート 3000 を経由して、データベース 'ftpuser' に接
+続を試みろ。ユーザ名 'admin' とパスワード 'mypassword' を使用しろ」を意
+味します。
+
+バックエンドは connection-info に異なった情報を要求します; バックエンド
+モジュールの使用をチェックしてください。
+
+-------------------
+SQLDefaultGID
+
+Syntax: SQLDefaultGID defaultgid
+Default: 65533
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+ユーザのデフォルト GID を設定します。SQLMinUserGID よりも大きくなくては
+なりません。
+
+-------------------
+SQLDefaultUID
+
+Syntax: SQLDefaultUID defaultuid
+Default: 65533
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+ユーザのデフォルト UID を設定します。SQLMinUserUID よりも大きくなくては
+なりません。
+
+-------------------
+SQLDoAuth
+
+Syntax: SQLDoAuth on|off
+Default: on
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+SQL 認証を有効にします。これは他のすべての命令を無効にします --
+SQLDoGroupAuth と SQLAuthoritative は SQLDoAuth が off の場合効果があり
+ません。
+
+-------------------
+SQLDoGroupAuth
+
+Syntax: SQLDoGroupAuth on|off
+Default: on
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+この命令は mod_sql にグループ情報を持っていないふりをさせます。mod_sql 
+は現在、この命令が OFF でない限りグループ情報が有効だとみなすため、必然
+的に 1.2.0rc2 までの ALL CONFIG FILES を破壊します。
+
+これは SQLAuthoritative を無効にしません -- SQLAuthoritative が 'On' に
+設定されて SQLDoGroupAuth が 'Off' に設定される場合、すべえてのグループ
+関連クエリは、処理の機会を他のモジュールに与えることなく失敗します。
+
+1.2.0 以前では、データベースからグループ情報を提供する方法がありませんで
+した。これはいくつかのバグを引き起こし、このモジュールの機能を縮小させま
+した。
+
+-------------------
+SQLGidField
+
+Syntax: SQLGidField fieldname
+Default: gid
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+ユーザの GID を保持するユーザテーブル内のフィールドを記述します。GID が
+データベースから取り出される時、SQLMinUserGID の値に対してチェックされま
+す。データベースが値をもたない(カラムがない)場合または取り出された値が 
+SQLMinUserGID よりも小さい場合、ユーザの GID は SQLDefaultGID に設定され
+ます。
+
+-------------------
+SQLGroupGIDField
+
+Syntax: SQLGroupGIDField fieldname
+Default: gid
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+グループの GID を保持するグループテーブルのフィールドを記述します。
+
+-------------------
+SQLGroupMembersField
+
+Syntax: SQLGroupMembersField fieldname
+Default: members
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+グループのメンバリストを保持するグループテーブルのフィールドを記述します。
+
+-------------------
+SQLGroupTable
+
+Syntax: SQLGroupTable tablename
+Default: groups
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+グループ情報を保持するテーブルの名前を記述します。
+
+-------------------
+SQLGroupnameField
+
+Syntax:	SQLGroupnameField fieldname
+Default: groupname
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+グループ名を保持するグループテーブルのフィールドを記述します。
+
+-------------------
+SQLHomedir
+
+Syntax: SQLHomedir /path/to/virtual/site
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+このモジュールで認証されたすべてのユーザのデフォルトの homedir を記述し
+ます。SQLHomedirField 命令を無効にします。どの命令でも homedir が設定さ
+れない場合、認証は失敗します。
+
+-------------------
+SQLHomedirField
+
+Syntax: SQLHomedirField fieldname
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+ユーザのホームディレクトリを保持するユーザテーブルのフィールドを記述しま
+す。ディレクトリは 'SQLHomedir' 命令を使用しても定義されます。どの命令で
+も homedir が設定されない場合、認証は失敗します。
+
+-------------------
+SQLHomedirOnDemand
+
+Syntax: SQLHomedirOnDemand on|off
+Default: off
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+ユーザのホームディレクトリがログイン時に存在していない場合、それを自動的
+に生成するかどうかを記述します。
+
+-------------------
+SQLLog
+
+Syntax: SQLLog cmd-set {insert | update} tablename query-string
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.1 and later
+
+'SQLConnectInfo' 命令を経由してアクセスできるテーブルに情報を記録します。
+任意のコマンドについて、複数の SQLLog 命令が影響を持ちます; たとえば、命
+令を変更するユーザはログの複数の状態をトリガできます。
+
+'LogFormat' と 'ExtendedLog' 命令のドキュメントを読むことを*強く*推奨し
+ます, as the meta-sequences available to 'SQLLog' are largely
+equivalent.
+
+SQLLog の最初の引数 cmd-set は、コンマで区切られた(空白は含めない)、この
+ログコマンドがトリガとなる FTP コマンドのリストです。コマンドのリストは
+全体をリストするととても長いです; コマンドは CWD, DELE, HELP, LIST,
+MKD, MODE, NLST, PASS, PASV, PORT さらにもと多くを含みます。完全なリスト
+は FTP RFC をチェックしてください。
+
+二番目の引数は 'insert' または 'update' です。このログコマンドがテーブル
+を更新するのか、テーブルに情報を追加するのかを指定します。
+
+三番目の引数は、この SQLLog ステートメントが影響するテーブルの名前です。
+
+四番目の引数はデータベースクエリの実体です; これは二番目の引数の形式に適
+合すべきです。有効な meta-sequence は、次が有効でないことを除いて、正確
+に 'LogFormat' 命令に等しいです:
+
+  %{FOOBAR}e:  'LogFormat' では、環境変数 'FOOBAR' の内容を記録します。
+	       これは mod_sql では有効ではありません。
+  %{format}t:  これら２つの meta-sequence はローカルサーバ時刻を記録しま
+   and %t   :  す; データベースは時刻を得る他の方法を確実に提供していま
+	       す; たとえば、MySQL は now() 関数を提供します。
+
+次は 'LogFormat' meta-sequene に対する追加です:
+
+  %d        :  現在の作業ディレクトリ、または存在しない場合は '-'。
+
+例:
+
+  SQLLog PASS update users &quot;count=count+1 where userid='%u'&quot;
+
+replicates 'SQLLoginCountField count';  if the current user was 'aah',
+this would translate into the query &quot;update users set count=count+1
+where userid='aah'&quot;.  This query would run whenever a user was first
+authenticated.
+
+  SQLLog CWD update users &quot;cwd='%d' where userid='%u'&quot;
+
+replicates the logging side of 'SQLLogDirs cwd';  if the current user
+was 'aah' and my current working directory were '/tmp', this would
+translate into the query &quot;update users set cwd='/tmp' where
+userid='aah'&quot;.  This query would run whenever a user was first
+authenticated. 
+
+  SQLLog RETR,STOR insert filehistory &quot;'%f', %b, '%u@%v', now()&quot;
+
+would log the name of any file stored or retrieved, the number of
+bytes transferred, the user and host doing the transfer, and the time
+of transfer (at least in MySQL).  This would translate into the query
+&quot;insert into filehistory values ('whateverfile', 12345,
+'aah@xxxxxxxxxx', '21-05-2001 20:01:00')&quot;
+
+
+Notes: 
+
+The second and third arguments could easily have been folded into the
+query-string;  the only reason they're separated is to provide a small
+amount of safety;  otherwise queries like 'DELETE ...' or 'DROP
+TABLE..' or 'SELECT..' or what have you could potentially be passed.
+
+'SQLLog' is intended to become the only method of logging from
+mod_sql; it currently supercedes the 'SQLLoginCountField' directive,
+and with the addition of the (as-yet-unimplemented) 'SQLShowInfo'
+directive, it will replace the 'SQLLogDirs', 'SQLLogHits',
+'SQLLogHosts', and 'SQLLogStats' directives. 
+
+
+
+-------------------
+SQLLogDirs
+
+Syntax: SQLLogDirs on|off
+Default: 
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+最後にユーザが変更したディレクトリの記録を有効にします。これはすべての 
+CHDIR コマンド後に行なわれます - &quot;/&quot; への初期ログインはカウントされませ
+ん。また、最後のディレクトリは次のの形式でログイン中に表示されます:
+
+230 &quot;/pub/debian/Incoming&quot; was last directory. 
+
+-------------------
+SQLLogHits
+
+Syntax:
+Default:
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility:
+
+-------------------
+SQLLogHosts
+
+Syntax:
+Default:
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility:
+
+-------------------
+SQLLogStats
+
+Syntax:
+Default:
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility:
+
+-------------------
+SQLLoginCountField
+
+Syntax: SQLLoginCountField fieldname
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+増加するログインカウンタを保持するユーザテーブルのフィールドを記述します。
+各 PASS コマンドの成功直後に、このフィールドが増加します。
+
+-------------------
+SQLMinID
+
+Syntax: SQLMinID minimumid
+Default: 999
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+SQLMinID は SQLMinUserGID と SQLMinUserUID の両方を素早く設定する方法で
+す。これらの値はユーザの GID と UID を取り出す時はいつもチェックされます。
+'SQLMinUserGID' と 'SQLMinUserUID' 命令を見てください。
+
+-------------------
+SQLMinUserGID
+
+Syntax: SQLMinUserGID minimumuid
+Default: 999
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+SQLMinUserGID はユーザの GID を取り出す時はいつもチェックされます。GID 
+用に取り出された値が SQLMinUserGID の値よりも小さい場合、
+'SQLDefaultGID' の値として報告されます。
+
+-------------------
+SQLMinUserUID
+
+Syntax: SQLMinUserUID minimumuid
+Default: 999
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+SQLMinUserUID はユーザの UID を取り出す時はいつもチェックされます。UID 
+用に取り出された値が SQLMinUserUID の値よりも小さい場合、
+'SQLDefaultUID' の値として報告されます。
+
+-------------------
+SQLPasswordField
+
+Syntax: SQLPasswordField fieldname
+Default: password
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+ユーザのパスワードを保持するユーザテーブルのフィールドを記述します。
+
+-------------------
+SQLProcessGrEnt
+
+Syntax: SQLProcessGrEnt on|off
+Default: on
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.2 or later
+
+'on' の場合、mod_sql は「正しく」setgrent, getgrent, endgrent 呼び出しを
+内部的に処理します。
+
+'off' の場合、mod_sql は [set|get|end]grent 呼び出しを内部的に処理*しま
+せん*。多くのグループがあるサイトでは、これはログインの速度を劇的に増し
+ます。グループメンバーシップによるアクセス制御や機能制御能力を削除します。
+
+-------------------
+SQLProcessPwEnt
+
+Syntax: SQLProcessPwEnt on|off
+Default: on
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.2 or later
+
+'on' の場合、mod_sql は「正しく」setpwent, getpwent, endpwent 呼び出しを
+内部的に処理します。
+
+'off' の場合、mod_sql は [set|get|end]pwent 呼び出しを内部的に処理*しま
+せん*。多くのグループがあるサイトでは、これはログインの速度を劇的に増し
+ます。
+
+-------------------
+SQLRatios
+
+Syntax:
+Default:
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility:
+
+-------------------
+SQLShellField
+
+Syntax: SQLShellField fieldname
+Default: shell
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+ユーザのシェルを保持するユーザテーブルのフィールドを記述します。このフィー
+ルドが存在しなかったり、クエリの結果が NULL の場合、シェルは &quot;&quot; として報
+告されます。
+
+-------------------
+SQLUidField
+
+Syntax: SQLUidField fieldname
+Default: uid
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+ユーザの UID を保持するユーザテーブルのフィールドを記述します。UID がデー
+タベースから取り出されるとき、SQLMinUserUID の値に対してチェックされます。
+データベースが値を持っていない(カラムがない)場合、または取り出された値が 
+SQLMinUserUID よりも小さい場合、ユーザの UID は SQLDefaultUID に設定され
+ます。
+
+-------------------
+SQLUserTable
+
+Syntax: SQLUserTable tablename
+Default: users
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+ユーザ情報を保持するテーブルの名前を記述します。
+
+-------------------
+SQLUsernameField
+
+Syntax: SQLUsernameField fieldname
+Default: userid
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+ユーザの userid を保持するユーザテーブルのフィールドを記述します。
+
+-------------------
+SQLWhereClause
+
+Syntax: SQLWhereClause whereclause
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+この命令は 'SQLKey' と 'SQLKeyField' を非難します。
+
+すべてのユーザクエリに追加する where 節を記述します(これはグループクエリ
+には影響しません)。where 節はすべての適切な句読点を含んでいなければなり
+ません。そして、'and' で始まっていてはいけません。
+
+古い形式の 'SQLKey' と 'SQLKeyField' 命令からの切り替えの例。次を持って
+いた場合:
+
+SQLKey           true
+SQLKeyfield      LoginAllowed
+
+現在は次を使用してください:
+
+SQLWhereClause   &quot;LoginAllowed = 'true'&quot;
+
+これはすべてのユーザ関連クエリに次の文字列を追加します。
+
+&quot; and (LoginAllowed = 'true')&quot;
+
+-------------------
+
+
+========================
+5. 非難される命令
+========================
+
+The following directives are DEPRECATED.  Their functionality has been
+subsumed by one or more of the directives above.  They are presented
+here for historical reasons, but when the ProFTPD 1.3 release cycle
+begins they will no longer be supported.
+
+
+-------------------
+MySQLInfo
+
+Syntax: MySQLInfo hostname sqluser sqlpass dbname
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql ( prior to 1.2.0, mod_mysql )
+Compatibility: 1.2.0rc2 and later
+
+This directive is DEPRECATED.  Please use SQLConnectInfo instead.
+
+Configures the MySQL database driver (the database may be remote). A
+connection isn't made until use of a SQL feature requires it, after
+which it may be held open for the lifetime of the FTP session
+depending on the directives in use. Use `&quot;&quot;' to specify a null
+password.
+
+-------------------
+PostgresInfo
+
+Syntax: PostgresInfo hostname [sqluser sqlpass] dbname
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql ( prior to 1.2.0, mod_pgsql )
+Compatibility: 1.2.0rc2 and later
+
+This directive is DEPRECATED.  Please use SQLConnectInfo instead.
+
+Configures the Posgresql database driver (the database may be
+remote). A connection isn't made until use of a SQL feature requires
+it, after which it may be held open for the lifetime of the FTP
+session depending on the directives in use. 
+
+Examples:
+
+PostgresInfo myserver.example.com proftpd wibble ftpusers
+
+PostgresInfo myserver.example.com ftpusers
+
+-------------------
+PostgresPort
+
+Syntax: PostgresPort port-number
+Default: 5432
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql ( prior to 1.2.0, mod_pgsql )
+Compatibility: 1.2.0rc2 and later
+
+This directive is DEPRECATED.  Please use SQLConnectInfo instead.
+
+Specifies which TCP/IP port to use for connecting. Default is 5432, or
+UNIX socket for localhost. 
+
+Example:
+
+PostgresPort 3306
+
+-------------------
+SQLEmptyPasswords
+
+Syntax: SQLEmptyPasswords on|off
+Default: off
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+This directive is DEPRECATED.  Please use SQLAuthTypes instead.
+
+Specifies whether an empty (non-NULL but zero-length) password is
+accepted from the database. Default is no, and truly NULL passwords are
+never accepted. If the retrieved password is empty then whatever
+password the user typed is accepted as valid.
+
+Example:
+
+SQLEmptyPasswords on
+
+-------------------
+SQLEncryptedPasswords
+
+Syntax: SQLEncryptedPasswords on|off
+Default: off
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+This directive is DEPRECATED.  Please use SQLAuthTypes instead.
+
+Specifies whether the password in the database may be in UNIX crypt()
+format. 
+
+-------------------
+SQLKey
+
+Syntax: SQLKey value
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+This directive is DEPRECATED.  Please use SQLWhereClause instead.
+
+Sets the value that the SQLKeyField needs to match for user queries.
+
+-------------------
+SQLKeyField
+
+Syntax: SQLKeyField fieldname
+Default: none
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0.rc2 and later
+
+This directive is DEPRECATED.  Please use SQLWhereClause instead.
+
+Sepcifies the field in the user table used for matching against SQLKey.
+
+-------------------
+SQLPlaintextPasswords
+
+Syntax: SQLPlaintextPasswords on|off
+Default: off
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0rc2 and later
+
+This directive is DEPRECATED.  Please use SQLAuthTypes instead.
+
+Specifies whether to accept plaintext passwords from the database.
+
+-------------------
+SQLSSLHashedPasswords
+
+Syntax: SQLSSLHashedPasswords on|off
+Default: off
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+This directive is DEPRECATED.  Please use SQLAuthTypes instead.
+
+Specifies whether to accept passwords of the form
+{digestname}hashedpassword from the database.  This directive is only
+available if you define 'HAVE_OPENSSL' when you compile proftd and you
+link with the OpenSSL 'crypto' library.  As an example, any of the
+following password entries in the database would match if the user
+typed the password 'testpassword':
+
+{SHA}IoFZRnP0iujh/70lps6DjKPgwkk=
+{SHA1}i7YRj4/Wk1rQh2o740pxfTJwj/0=
+{MD2}nS6iguewvAdrCnOMyQjB1w==
+{MD4}5wsGtJCkyXBzDJoVsQKjSg==
+{MD5}4WsquNEjFL9O+9YgOQbqbA==
+
+-------------------
+SQLScrambledPasswords
+
+Syntax: SQLScrambledPasswords on|off
+Default: off
+Context: server config, &lt;Global&gt;, &lt;VirtualHost&gt;
+Module: mod_sql
+Compatibility: 1.2.0 and later
+
+This directive is DEPRECATED.  Please use SQLAuthTypes instead.
+
+Specifies whether to accept passwords in a backend specific format.
+For the MySQL backend, this means 'PASSWORD()' scrambled passwords.
+For the Postgres backend, this check does nothing.
+
+-------------------
+
+
+================================================
+6. mod_sqlpw v.2.0 から mod_sql v.3.0 への変更
+================================================
+
+2001-02-10: bumped all versions to 3.0
+
+2001-02-09: changed name to mod_sql; reflects the fact we do logging and
+	    a variety of other fun things in here, besides
+	    authentication
+
+2001-02-08: Implemented SQLAuthTypes, new defines for random
+	    encryption schemes, et al.
+
+2001-02-08: Caused all deprecated directives to log messages to debug
+	    and to syslog
+
+2001-02-08: Changed all directives to go through specific handlers
+	    rather than directly through generic handlers
+
+2001-02-08: Created all missing auth functions as no-ops
+
+2001-02-08: Style changes, shifted functions around, added some
+	    comments 
+
+2001-02-08: Added internal #defines for debug logging, and changed all
+	    log_debug calls to use the new #defines.
+
+2001-02-07: Fixed Bug #405 -- &quot;SQLAuthoritative directive is broken&quot;
+
+2001-02-07: Fixed Bug #446 -- &quot;nonstandard C code in mod_sql&quot; 
+
+2001-02-07: Fixed Bug #458 -- &quot;mysql.h requirement breaks module 
+	    independence&quot;
+
+2001-02-07: Fixed Bug #438 -- &quot;MD5 passwords with mod_sql do not work
+	    in latest CVS&quot;
+
+2001-02-07: Fixed Bug #330 -- &quot;Cached passwords are not cleared when user
+	    attempts to change login id&quot;
+
+2001-02-07: Fixed Bug #459 -- &quot;Feature Request: add ability to handle 
+	    {digestname}hashedpassword passwords..&quot;
+
+2001-02-06: &lt;aah@xxxxxxxxxx&gt; took over maintainership
+
+2000-03-16: Added SQLKeyField and SQLKey directive, which should allow
+	    authentication of different logins for different
+	    VirtualHosts to be in the same database table. Jake
+	    Buchholz &lt;jake@xxxxxxxxxx&gt;
+
+1999-09-19: v2.0: Backend directives split into mod_mysql. Runtime API
+	    added.  Username/passwords now escaped for
+	    SQL. &lt;johnie@xxxxxxxxxx&gt;
+
+1999-09-16: v1.0: Added documentation, made directives more generic
+	    (&quot;MySQL&quot; -&gt; &quot;SQL&quot; except for MySQLInfo).  Dir part of
+	    SQLLogDirs finally made optional. &lt;johnie@xxxxxxxxxx&gt;
+
+1999-06-01: v0.3: fixed segfault, changed 'strncmp' typo which
+	    should have been copy.  Made uid/gid support
+	    optional. &lt;johnie@xxxxxxxxxx&gt;
+   
+1999-05-03: v0.2: Removed dead code, fix bug with interaction with
+	    anon-user support.  Added MySQLLogHits and MySQLHomedir
+	    directives.  Fixed atoi() invocation that could
+	    segfault. Copious debugging code
+	    added. &lt;johnie@xxxxxxxxxx&gt;
+
+1999-04-09: v0.1: Initial attempt (mod_mysql). &lt;johnie@xxxxxxxxxx&gt;
+
+=========
+7. 謝辞
+=========
+
+* Johnie Ingram &lt;johnie@xxxxxxxxxx&gt; for the original mod_sqlpw.
+* TJ Saunders &amp;&amp; Jesse Sipprell for dealing with my inane questions.
+* John Morrissey for mod_ldap, which lit the way, here and there.
+* Zeev Suraski &lt;bourbon@xxxxxxxxxx&gt; for the Apache
+  mod_auth_mysql module, which informed the 'SQLAuthTypes' directive.
+
+=========
+8. 作者
+=========
+
+mod_sqlpw was originally written and maintained by Johnie Ingram 
+&lt;johnie@xxxxxxxxxx&gt;.
+
+mod_sql is based on mod_sqlpw and shares much of the same code.  It
+is being developed and maintained by Andrew Houghton &lt;aah@xxxxxxxxxx&gt;
+
+Please file any bug reports/suggestions/feature requests with the ProFTPD 
+bug database at <a href="http://www.ProFTPD.org">http://www.ProFTPD.org</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="4563.html">[前]</a><a href="4565.html">[次]</a><a href="../list/4501-4600.html">[番号順一覧]</a><a href="../thread/4501-4600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="4489.html">   4489 2001-10-16 18:33 [&quot;Taro Yamamoto&quot; &lt;tar] Proftpd + qmail + vpopmail              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4492.html">   4492 2001-10-16 21:10 ┗[Shin-ichi Tsurunaga ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4497.html">   4497 2001-10-17 08:45 　┗[&quot;Taro Yamamoto&quot; &lt;tar]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4498.html">   4498 2001-10-17 08:56 　　┣[&quot;Taro Yamamoto&quot; &lt;tar]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4505.html">   4505 2001-10-18 01:44 　　┗[Shin-ichi Tsurunaga ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4509.html">   4509 2001-10-18 09:40 　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4511.html">   4511 2001-10-18 14:06 　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4524.html">   4524 2001-10-19 19:53 　　　　　┗[Shin-ichi Tsurunaga ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4525.html">   4525 2001-10-20 10:21 　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4526.html">   4526 2001-10-20 17:29 　　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4527.html">   4527 2001-10-20 18:18 　　　　　　　　┗[Shin-ichi Tsurunaga ]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4528.html">   4528 2001-10-21 01:26 　　　　　　　　　┣[Shin-ichi Tsurunaga ]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4529.html">   4529 2001-10-21 02:12 　　　　　　　　　┣[&quot;Taro Yamamoto&quot; &lt;tar]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4531.html">   4531 2001-10-21 13:05 　　　　　　　　　┃┗[Shin-ichi Tsurunaga ]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4532.html">   4532 2001-10-21 15:40 　　　　　　　　　┃　┗[&quot;Taro Yamamoto&quot; &lt;tar]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4533.html">   4533 2001-10-21 22:49 　　　　　　　　　┃　　┗[&quot;Taro Yamamoto&quot; &lt;tar]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4535.html">   4535 2001-10-22 00:20 　　　　　　　　　┃　　　┣[&quot;Taro Yamamoto&quot; &lt;tar]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4536.html">   4536 2001-10-23 04:05 　　　　　　　　　┃　　　┗[Shin-ichi Tsurunaga ]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4537.html">   4537 2001-10-23 07:53 　　　　　　　　　┃　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4538.html">   4538 2001-10-23 11:26 　　　　　　　　　┃　　　　　┗[Shin-ichi Tsurunaga ]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4543.html">   4543 2001-10-23 21:43 　　　　　　　　　┃　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4556.html">   4556 2001-10-25 09:27 　　　　　　　　　┃　　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4559.html">   4559 2001-10-25 10:53 　　　　　　　　　┃　　　　　　　　┣[Shin-ichi Tsurunaga ]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4584.html">   4584 2001-10-27 00:34 　　　　　　　　　┃　　　　　　　　┃┗[&quot;Taro Yamamoto&quot; &lt;tar] </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4595.html">   4595 2001-10-29 12:29 　　　　　　　　　┃　　　　　　　　┃　┗[Shin-ichi Tsurunaga ]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4596.html">   4596 2001-10-29 15:26 　　　　　　　　　┃　　　　　　　　┃　　┣[Seiji Tateyama &lt;tate]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4600.html">   4600 2001-10-30 02:29 　　　　　　　　　┃　　　　　　　　┃　　┃┗[&quot;Taro Yamamoto&quot; &lt;tar]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4599.html">   4599 2001-10-30 02:25 　　　　　　　　　┃　　　　　　　　┃　　┗[&quot;Taro Yamamoto&quot; &lt;tar]     </a></span>
+<span class="current">-&gt;&nbsp;<a href="4564.html">   4564 2001-10-25 23:59 　　　　　　　　　┃　　　　　　　　┗[とみたまさひろ &lt;tomm]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4585.html">   4585 2001-10-27 00:38 　　　　　　　　　┃　　　　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar] </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4530.html">   4530 2001-10-21 02:21 　　　　　　　　　┗[&quot;Taro Yamamoto&quot; &lt;tar]                     </a></span>
+</pre>
+</body>
+</html>

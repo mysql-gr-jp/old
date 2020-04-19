@@ -1,0 +1,159 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15995</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15994.html">[前]</a><a href="15996.html">[次]</a><a href="../list/15901-16000.html">[番号順一覧]</a><a href="../thread/15901-16000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15995
+</p>
+<div class="header">
+<p>
+From: Yuya Hirokawa &lt;Yuya Hirokawa &lt;yu_ya45@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 13 Jul 2013 10:01:35 +0900<br>
+Subject: [mysql 15995] Re: 30sec以上SleepのプロセスでERROR 2013 Lost  connectionが出る問題の対策<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+おおあささん
+
+お世話になります。廣川です。
+
+一つ前のメール見逃していましたすみません。
+VMWareについてもまだ知識が乏しいので参考とさせていただきます。
+
+さて、今回ESETに問い合わせの結果完全に問題が解消しましたのでご連絡致します。
+今回の掲題の件の事象はESETのパーソナルファイアウォールが30秒以上無通信のTCP
+接続を遮断することが原因でした。
+事象発生時にESETログには「TCPパケットはどのオープン接続にも属していません」
+と残っているため
+ESETサポートに問い合わせの結果下記設定変更で解消することが出来ました。
+・詳細設定 &gt; ネットワーク &gt; パーソナルファイアウォール &gt; ルールとゾーン &gt; 信
+頼ゾーン &gt; 設定 &gt; 全サブネットを自宅/職場ネットワークへ設定
+・詳細設定 &gt; ネットワーク &gt; パーソナルファイアウォール &gt; IDSと詳細オプション
+<span class="quote1">&gt; 許可するサービス &gt; 「アクティブでないTCP接続を維持」をチェックON</span>
+・詳細設定 &gt; ネットワーク &gt; パーソナルファイアウォール &gt; IDSと詳細オプション
+<span class="quote1">&gt; パケットのチェック &gt; 「TCP接続状態のチェック」をチェックOFF</span>
+
+4日間悩みましたが無事正常にクエリーが発行できる状態となりました。
+色々とアドバイスをいただいた渡辺さん、おおあささんありがとうございました。
+
+廣川
+
+-----Original Message-----
+From: Yu Oasa [mailto:you@xxxxxxxxxx]
+Sent: Friday, July 12, 2013 11:37 AM
+To: ml@xxxxxxxxxx
+Subject: <a href="15994.html">[mysql 15994]</a> Re: 30sec以上SleepのプロセスでERROR 2013 Lost
+connectionが出る問題の対策
+
+おおあさです。
+
+解決されたということなので余談になってしまうかもしれませんが、ESETで
+あやしい設定といえば、こんなところでしょうか。
+
+
+[IDSと詳細オプション]
+
+許可するサービス
+* アクティブでないTCP接続を維持
+* ブリッジ接続の通信を許可
+
+パケットのチェック
+* TCP接続状態のチェック
+
+
+場面によっては、ロギングも原因特定に使えるかもしれません。
+
+トラブルシューティング
+* 遮断された接続をすべて記録
+
+
+--
+Yu Oasa  E-mail: you@xxxxxxxxxx
+
+
+Fri, 12 Jul 2013 00:38:51 +0900
+	Yuya Hirokawa &lt;yu_ya45@xxxxxxxxxx&gt; said:
+<span class="quote1">&gt;渡辺さん</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;お世話になります、廣川です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;完全に盲点になっていました。</span>
+<span class="quote1">&gt;結果としてWindows7上のセキュリティソフトがビンゴでした。</span>
+<span class="quote1">&gt;最近ESETに乗り換えてまだどの設定が原因か突き詰めることが出来ないでいますが</span>
+<span class="quote1">&gt;ファイアウォールを切ると問題ないことが確認出来たのでもう少しかなと思ってま</span>
+<span class="quote1">&gt;す。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;パケットキャプチャリングしてみたところ問題のクエリを一つ発行すると</span>
+<span class="quote1">&gt;client &gt; server: ID 0 len 9 COM_QUERY: select 1 server &gt; client: ID 1</span>
+<span class="quote1">&gt;len 1 1 Fields</span>
+<span class="quote1">&gt;	ID 2 len 23 Field: ..1 &lt;type longlong (33032) size 1&gt;</span>
+<span class="quote1">&gt;	ID 3 len 5 End &lt;warnings 0&gt;</span>
+<span class="quote1">&gt;	ID 4 len 2 || 1 ||</span>
+<span class="quote1">&gt;	ID 5 len 5 End &lt;warnings 0&gt;</span>
+<span class="quote1">&gt;以後同様のパケットが繰り返し飛び交うことから完全にクライアント側でサーバー</span>
+か
+<span class="quote1">&gt;らのレスポンスを拒否しているみたいです。</span>
+<span class="quote1">&gt;それで試行回数が限度に来てLost connectionしているのかなって思いました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;初歩的な所でまさか引っかかってるとは思ってもみなかったです。</span>
+<span class="quote1">&gt;アドバイス頂きありがとうございました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;廣川</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;-----Original Message-----</span>
+<span class="quote1">&gt;From: Watanabe Tomoyuki</span>
+<span class="quote1">&gt;[mailto:WATANABE.TOMOYUKI.2@xxxxxxxxxx]</span>
+<span class="quote1">&gt;Sent: Thursday, July 11, 2013 7:12 PM</span>
+<span class="quote1">&gt;To: ml@xxxxxxxxxx</span>
+<span class="quote1">&gt;Subject: <a href="15991.html">[mysql 15991]</a> Re: 30sec以上SleepのプロセスでERROR 2013 Lost</span>
+<span class="quote1">&gt;connectionが出る問題の対策</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;こんにちは。渡辺です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;思いつきです。全く見当外れかもしれません。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;・クライアント、サーバー間のルーターの設定</span>
+<span class="quote1">&gt;・Windows7上のセキュリティソフト</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;あたりを疑ってみるというのはいかがでしょうか。</span>
+<span class="quote1">&gt;(例えば無線LANルーターの自動接続自動切断設定とか。)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;どうぞよろしく。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;-----Original Message-----</span>
+<span class="quote1">&gt;From: Yuya Hirokawa [mailto:yu_ya45@xxxxxxxxxx]</span>
+<span class="quote1">&gt;Sent: Thursday, July 11, 2013 1:19 AM</span>
+<span class="quote1">&gt;To: ml@xxxxxxxxxx</span>
+<span class="quote1">&gt;Subject: <a href="15989.html">[mysql 15989]</a> 30sec以上SleepのプロセスでERROR 2013 Lost connection</span>
+<span class="quote1">&gt;が出る問題の対策</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;(以下略)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15994.html">[前]</a><a href="15996.html">[次]</a><a href="../list/15901-16000.html">[番号順一覧]</a><a href="../thread/15901-16000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15989.html">  15989 2013-07-11 01:19 [Yuya Hirokawa &lt;yu_ya] 30sec以上SleepのプロセスでERROR 2013 Lost  connectionが出る問題の対策</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15991.html">  15991 2013-07-11 19:12 ┗[Watanabe Tomoyuki &lt;W]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15992.html">  15992 2013-07-11 20:27 　┣[Yu Oasa &lt;you@xxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15993.html">  15993 2013-07-12 00:38 　┗[Yuya Hirokawa &lt;yu_ya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15994.html">  15994 2013-07-12 11:36 　　┗[Yu Oasa &lt;you@xxxxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="15995.html">  15995 2013-07-13 10:01 　　　┗[Yuya Hirokawa &lt;yu_ya]                                 </a></span>
+</pre>
+</body>
+</html>

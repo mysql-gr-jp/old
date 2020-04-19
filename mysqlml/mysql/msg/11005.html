@@ -1,0 +1,141 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11005</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11004.html">[前]</a><a href="11006.html">[次]</a><a href="../list/11001-11100.html">[番号順一覧]</a><a href="../thread/11001-11100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11005
+</p>
+<div class="header">
+<p>
+From: &quot;KAWAI,Takanori&quot; &lt;&quot;KAWAI,Takanori&quot; &lt;GCD00051@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 16 Feb 2005 08:19:02 +0900<br>
+Subject: [mysql 11005] Re: 大量にinsertするとブルースクリーンになる<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+川合孝典です。
+
+----- Original Message ----- 
+From: &quot;naya&quot; &lt;SNA02388@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Tuesday, February 15, 2005 11:42 PM
+Subject: <a href="11001.html">[mysql 11001]</a> Re: 大量にinsertするとブルースクリーンになる
+
+（中略）
+<span class="quote1">&gt; 明日ご教示のもの試してみます。</span>
+<span class="quote1">&gt; insertしたいレコード＝１行でつらつら書けばいいんですよね？？</span>
+まぁそうなんですが...
+あれは元のデータがおかしいというよりコマンドラインユーティリティーである
+mysqlのバッファ長の問題じゃないかというだけで、その確認のために
+DBIを使っただけです。テーブルを丸ごと置き換えるのであれば
+一度ファイルを出力しているわけですし、LOAD DATA INFILEを使ったほうが
+効率的でしょう。（おそらくPerlを使って置き換える必要もないはず）
+下のex1なら1秒足らずだけどex2だと20秒はたっぷりかかります。
+
+PerlでFile::Find,DBIを使って簡単に書くとex3のようにもかけるでしょうけど
+あらためて見直してみたら
+
+DIR /s /b c:\ &gt; c:\file.txt
+mysql -uhogehoge -e
+&quot;LOAD DATA INFILE 'c:/file.txt' REPLACE INTO TABLE t_url&quot; url
+
+といった2行のバッチでよいのでは？
+#長いので-eの後ろで改行を入れました。あと-uのユーザ名とかは適当に
+
+[ex.1]
+use strict;
+print 'START:' . scalar(localtime), &quot;\n&quot;;
+use constant LOADFILE =&gt; 'c:/temp/t1load.txt';
+my $sRec = 'SOMEDATA';
+open OUT, '&gt;', LOADFILE;
+for(my $i=0;$i&lt;30_000;$i++) {
+  print OUT &quot;$i\\$sRec\n&quot;;
+}
+close OUT;
+my $sCmd = q{TRUNCATE TABLE t_url;LOAD DATA INFILE '} .
+           LOADFILE . q{' REPLACE INTO TABLE t_url};
+system(qq{mysql -uroot -e &quot;$sCmd&quot; test});
+print 'END  :' . scalar(localtime), &quot;\n&quot;;
+
+[ex.2]
+use strict;
+print 'START:' . scalar(localtime), &quot;\n&quot;;
+use DBI;
+my $hDb = DBI-&gt;connect('dbi:mysql:test', 'root', '',
+              {AutoCommit=&gt;1, RaiseError=&gt;1}) or die;
+$hDb-&gt;do('TRUNCATE TABLE t_url');
+$hDb-&gt;do('LOCK TABLE t_url WRITE');
+my $hSt = $hDb-&gt;prepare(
+     'INSERT INTO t_url(fullpath) VALUES(?)');
+my $sRec = 'SOMEDATA';
+for(my $i=0;$i&lt;30_000;$i++) {
+  $hSt-&gt;execute(&quot;$i\\$sRec&quot;);
+}
+$hDb-&gt;do('UNLOCK TABLES');
+$hDb-&gt;disconnect;
+print 'END  :' . scalar(localtime), &quot;\n&quot;;
+
+[ex3]
+#!/home/bin/perl
+use strict;
+use File::Find;
+use DBI;
+die &quot;Usage: $0 &lt;対象ディレクトリ&gt;&quot; unless(defined($ARGV[0]));
+my $hDb = DBI-&gt;connect('dbi:mysql:test', 'root', '',
+              {AutoCommit=&gt;1, RaiseError=&gt;1}) or die;
+$hDb-&gt;do('truncate table t_url');
+my $hSt = $hDb-&gt;prepare(
+     'INSERT INTO t_url(fullpath) VALUES(?)');
+
+sub prnFile {
+    #ディレクトリは読み飛ばし
+    return if(-d $_);  #$File::Find::name);
+    #$_はファイル名
+    #$File::Find::dirはディレクトリ名
+    #$File::Find::nameはフルパス
+    my $sPath = $File::Find::name;
+    # $sPath =~ s|/|\\|g; #まぁ好みの問題？
+    $hSt-&gt;execute($sPath);
+}
+find(\&amp;prnFile, $ARGV[0]);
+
+===================================================
+川合 孝典 (Hippo2000)
+   DBI日本語メーリングリスト管理人、Kansai.pm所属
+   kwitknr@xxxxxxxxxx GCD00051@xxxxxxxxxx
+   <a href="http://homepage3.nifty.com/hippo2000/">http://homepage3.nifty.com/hippo2000/</a>、<a href="http://www.hippo2000.info/">http://www.hippo2000.info/</a>
+perldocの日本語情報ならperldocjp：翻訳してみませんか？
+  <a href="http://perldocjp.sourceforge.jp/">http://perldocjp.sourceforge.jp/</a>
+===================================================
+
+
+</pre>
+</div>
+<p class="button"><a href="11004.html">[前]</a><a href="11006.html">[次]</a><a href="../list/11001-11100.html">[番号順一覧]</a><a href="../thread/11001-11100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="10992.html">  10992 2005-02-15 13:58 [naya &lt;SNA02388@xxxxx] 大量にinsertするとブルースクリーンになる</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10995.html">  10995 2005-02-15 15:30 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10997.html">  10997 2005-02-15 17:34 ┃┗[naya &lt;SNA02388@xxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10998.html">  10998 2005-02-15 19:09 ┃　┗[川合孝典 &lt;gcd00051@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10999.html">  10999 2005-02-15 22:00 ┃　　┣[Kikuo Taniguchi &lt;ki-]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11000.html">  11000 2005-02-15 22:16 ┃　　┃┣[Kikuo Taniguchi &lt;ki-]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11002.html">  11002 2005-02-15 23:46 ┃　　┃┗[naya &lt;SNA02388@xxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11003.html">  11003 2005-02-16 05:47 ┃　　┃　┗[Daiju &lt;d.is.here@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11001.html">  11001 2005-02-15 23:42 ┃　　┗[naya &lt;SNA02388@xxxxx]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="11005.html">  11005 2005-02-16 08:19 ┃　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11007.html">  11007 2005-02-16 13:06 ┃　　　　┗[naya &lt;SNA02388@xxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11008.html">  11008 2005-02-16 13:20 ┃　　　　　┗[Daiju &lt;d.is.here@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10996.html">  10996 2005-02-15 16:34 ┣[Daiju &lt;d.is.here@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11006.html">  11006 2005-02-16 12:38 ┣[bon &lt;bon@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11025.html">  11025 2005-02-21 13:04 ┗[naya &lt;SNA02388@xxxxx] 【御礼】 Re: 大量にinsertするとブルースクリーンになる</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11027.html">  11027 2005-02-21 14:13 　┗[sheep &lt;sheep@xxxxxxx] Re: Windowsのタスクによる任意間隔の実行</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11028.html">  11028 2005-02-21 14:59 　　┗[naya &lt;SNA02388@xxxxx] （御礼）Re: Windowsのタスクによる任意間隔の実行</a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3830</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="3829.html">[前]</a><a href="3831.html">[次]</a><a href="../list/3801-3900.html">[番号順一覧]</a><a href="../thread/3801-3900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3830
+</p>
+<div class="header">
+<p>
+From: takase &lt;takase &lt;takase@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 27 Jun 2001 04:54:08 +0900<br>
+Subject: [mysql 03830] DELETE w/o index key<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして。
+
+MySQL 3.23.39 for win32 を使っています。
+
+DELETE構文での動作がおかしいのではないかと思ったので報告します。
+
+以下のようなテーブル(link)で、
+
+name1	varchar(5)
+id		varchar(32)
+name2	varchar(4)
+name3	varchar(4)
+id2		varchar(45)
+(すべてNULL許可、キーなし)
+
+name1	00092
+id		6c9a089c0342f4959024587edb079a14
+name2	NULL
+name3	NULL
+id2		6c9a089c0342f4959024587edb079a14000920001
+
+というレコード(レコード1)があります。
+name2フィールドがNULLであることは、ISNULLを使って確認しました。
+
+このレコードを
+
+DELETE FROM link WHERE name1='00092' AND
+ id='6c9a089c0342f4959024587edb079a14' AND name2=''
+
+としても、
+
+DELETE FROM link WHERE name1='00092' AND
+ id='6c9a089c0342f4959024587edb079a14' AND name2=NULL
+
+としても削除できません。
+
+name2の部分だけ異なる、
+
+name1	00092
+id		6c9a089c0342f4959024587edb079a14
+name2	0001
+name3	NULL
+id2		6c9a089c0342f4959024587edb079a14000920001
+
+というレコード(レコード2)は
+
+DELETE FROM link WHERE name1='00092' AND
+ id='6c9a089c0342f4959024587edb079a14' AND name2='0001'
+
+で削除できます。
+
+また、
+
+SELECT FROM link WHERE name1='00092' AND
+ id='6c9a089c0342f4959024587edb079a14'
+
+とすると、レコード1もレコード2も表示されます。
+
+さらに、
+
+DELETE FROM link WHERE name1='00092' AND
+ id='6c9a089c0342f4959024587edb079a14'
+
+とすると、両レコードは削除されます。
+
+何故、フィールドname2を含んだDELETE文は正常に動作しないのでしょうか？
+
+takase
+
+
+</pre>
+</div>
+<p class="button"><a href="3829.html">[前]</a><a href="3831.html">[次]</a><a href="../list/3801-3900.html">[番号順一覧]</a><a href="../thread/3801-3900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="3830.html">   3830 2001-06-27 04:54 [takase &lt;takase@xxxxx] DELETE w/o index key                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3831.html">   3831 2001-06-27 05:26 ┗[takase &lt;takase@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3832.html">   3832 2001-06-27 05:47 　┗[takase &lt;takase@xxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

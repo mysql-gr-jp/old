@@ -1,0 +1,98 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12837</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12836.html">[前]</a><a href="12838.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12837
+</p>
+<div class="header">
+<p>
+From: &lt;a2cf@xxxxxxxxxx&gt;<br>
+Date: Mon, 06 Mar 2006 21:14:29 +0900<br>
+Subject: [mysql 12837] mysqldumpの--hex-blobオプションにより「0x」<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+atsushiです。
+いつも参考にさせていただいております。
+
+mysqldumpの--hex-blobオプションについて不思議な動作がありました。
+--hex-blobオプションを使用したときに--extended-insertオプションと併用すれば問題ないのですが、--hex-blobオプションだけを使用した場合、列の値が空('')の時、ダンプファイルが「0x」となってしまいます。
+
+
+「値が空('')の時の--hex-blobと--extended-insertの関係」
+●共にオプションなし → OK(hexにはならない)
+●--hex-blobのみ → 「0x」となる。
+● --hex-blobと--extended-insert → OK
+● --extended-insertのみ → OK(hexにはならない)
+
+
+これは自分の使用方法に問題があるのでしょうか？
+詳細のテスト結果を以下に示します。
+なお、InnoDBでなくMyISAMでもNGでした。cp932をlatin1にしても同様でした。
+
+
+何とぞよろしくお願いします。
+
+
+######## 詳  細 ########
+
+環境: MySQL4.1.15 Linux (Standard, x86) 版
+
+create database testdb;
+use testdb;
+
+create table t1(c1 varchar(50)) engine = innodb default
+  character set = cp932;
+
+insert into t1 values('abc');
+insert into t1 values('');
+insert into t1 values(NULL);
+insert into t1 values('def');
+
+grant SELECT,LOCK TABLES
+  on *.* to bkupuser@localhost
+  identified by 'pass';
+
+●mysqldump --skip-opt -h localhost -u bkupuser --password=pass testdb t1 &gt; dump_nohex_noextins.sql
+→OK  元々は問題ない。
+INSERT INTO `t1` VALUES ('abc');
+INSERT INTO `t1` VALUES ('');
+INSERT INTO `t1` VALUES (NULL);
+INSERT INTO `t1` VALUES ('def');
+
+●mysqldump --skip-opt --hex-blob -h localhost -u bkupuser --password=pass testdb t1 &gt; dump_withhex_noextins.sql
+→NG  --hex-blobだけでは0xとなる。
+INSERT INTO `t1` VALUES (0x616263);
+INSERT INTO `t1` VALUES (0x);
+INSERT INTO `t1` VALUES (NULL);
+INSERT INTO `t1` VALUES (0x646566);
+
+●mysqldump --skip-opt --hex-blob --extended-insert -h localhost -u bkupuser --password=pass testdb t1 &gt; dump_withhex_withextins.sql
+→OK  --extended-insertがあれば問題ない。
+INSERT INTO `t1` VALUES (0x616263),(''),(NULL),(0x646566);
+
+●mysqldump --skip-opt --extended-insert -h localhost -u bkupuser --password=pass testdb t1 &gt; dump_nohex_withextins.sql
+→OK --extended-insertだけでも問題ない。
+INSERT INTO `t1` VALUES ('abc'),(''),(NULL),('def');
+
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="12836.html">[前]</a><a href="12838.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="12837.html">  12837 2006-03-06 21:14 [&lt;a2cf@xxxxxxxxxx&gt;   ] mysqldumpの--hex-blobオプションにより「0x」</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12838.html">  12838 2006-03-06 21:41 ┗[SAKAI Kei &lt;sak@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12839.html">  12839 2006-03-07 08:32 　┗[&lt;a2cf@xxxxxxxxxx&gt;   ]                                     </a></span>
+</pre>
+</body>
+</html>

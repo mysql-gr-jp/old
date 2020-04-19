@@ -1,0 +1,95 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4465</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="4464.html">[前]</a><a href="4466.html">[次]</a><a href="../list/4401-4500.html">[番号順一覧]</a><a href="../thread/4401-4500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4465
+</p>
+<div class="header">
+<p>
+From: &quot;mino&quot; &lt;&quot;mino&quot; &lt;mysql@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 12 Oct 2001 10:36:54 +0900<br>
+Subject: [mysql 04465] Re: ステートメントハンドル属性取得<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+小林様、宮川様、アドバイス頂きありがとう御座いました。
+
+<span class="quote1">&gt;小林様</span>
+<span class="quote1">&gt;desc table_name</span>
+<span class="quote1">&gt;をDBIで呼べば取得できます。</span>
+
+<span class="quote1">&gt;宮川様</span>
+<span class="quote1">&gt;my $sth = $dbh-&gt;prepare('DESC tablename');</span>
+<span class="quote1">&gt; $sth-&gt;execute;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;して fetch すれば、カラムの情報が取得できます。</span>
+
+上記を参考に、CGI（Perl）で試してみました。
+
+#--------------#
+# クエリー実行 　　#
+#--------------#
+$sth = $dbh-&gt;prepare(&quot;DESC $cgi{'table_name'}&quot;);
+$sth-&gt;execute ();
+
+#--------------------#
+# autoincrementの取得#
+#--------------------#
+while($value = $sth-&gt;fetchrow_array){
+	print &quot; $value\n&quot;;
+}
+
+結果：
+
+auto_increment　と表示されました。
+
+が、auto_increment　と表示されのは、以下のパターンでした。
+auto_incrementの指定が、一行目にある場合です。
++-----+-------+----+----+-------+-------------+
+<span class="quote1">| Field  | Type     | Null |  Key | Default  | Extra               |</span>
++-----+-------+----+----+-------+-------------+
+aaa      tinyint(4)           PRI    NULL      auto_increment
+sss       tinyint(4)                    NULL
+ddd       tinyint(4)                    NULL
++-----+-------+----+----+-------+-------------+
+
+そこで、auto_increment　指定を以下の様にして、再度実行してみました。
++-----+-------+----+----+-------+-------------+
+<span class="quote1">| Field  | Type     | Null |  Key | Default  | Extra               |</span>
++-----+-------+----+----+-------+-------------+
+aaa      tinyint(4)           PRI    NULL
+sss       tinyint(4)                    NULL
+ddd       tinyint(4)                    NULL　　　auto_increment
++-----+-------+----+----+-------+-------------+
+
+結果は、何も表示されませんでした。
+
+誠に申し訳ありませんが、どこかおかしな取得方法をしていましたら
+アドバイスを頂ければと思います。
+
+宜しくお願い致します。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="4464.html">[前]</a><a href="4466.html">[次]</a><a href="../list/4401-4500.html">[番号順一覧]</a><a href="../thread/4401-4500.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="4460.html">   4460 2001-10-11 19:07 [&quot;mino&quot; &lt;mysql@xxxxxx] ステートメントハンドル属性取得          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4461.html">   4461 2001-10-11 19:09 ┣[KOBAYASI Hiroyuki &lt;k]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4462.html">   4462 2001-10-11 19:10 ┗[Tatsuhiko Miyagawa &lt;]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="4465.html">   4465 2001-10-12 10:36 　┗[&quot;mino&quot; &lt;mysql@xxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4466.html">   4466 2001-10-12 10:51 　　┗[Tatsuhiko Miyagawa &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4467.html">   4467 2001-10-12 10:53 　　　┗[Tatsuhiko Miyagawa &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4468.html">   4468 2001-10-12 11:26 　　　　┗[&quot;mino&quot; &lt;mysql@xxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4470.html">   4470 2001-10-12 12:24 　　　　　┗[&quot;Kawai,Takanori&quot; &lt;GC]                             </a></span>
+</pre>
+</body>
+</html>

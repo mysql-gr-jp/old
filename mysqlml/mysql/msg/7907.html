@@ -1,0 +1,78 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7907</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7906.html">[前]</a><a href="7908.html">[次]</a><a href="../list/7901-8000.html">[番号順一覧]</a><a href="../thread/7901-8000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7907
+</p>
+<div class="header">
+<p>
+From: Shinichi Nouzumi &lt;Shinichi Nouzumi &lt;nouzumi03@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 16 Jun 2003 18:32:26 +0900<br>
+Subject: [mysql 07907] Re: クォーテーションのある文字列の登録<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+<span class="quote4">&gt; &gt; &gt; &gt; $sql = sprintf(&quot;UPDATE usertbl SET name = '%s'&quot;,$sql);</span>
+<span class="quote4">&gt; &gt; &gt; &gt; </span>
+<span class="quote4">&gt; &gt; &gt; &gt; この sql 文を実行したところ MySQL には、</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 能銀\&quot; と、\ 文字が付加されてしまいます。</span>
+<span class="quote3">&gt; &gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; PHP上で、ここでの$sqlを表示させてみてください。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; $str = '能銀&quot;';</span>
+<span class="quote2">&gt; &gt; echo mysql_escape_string($str);</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; とした場合、「能銀&quot;」は正しく、クォートされ</span>
+<span class="quote2">&gt; &gt; 「能\銀\&quot;」</span>
+<span class="quote2">&gt; &gt; と表示されています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 一つの変数 $str しか使っていないので、混乱しますが、見たかったのは</span>
+<span class="quote1">&gt;  $sql = sprintf(&quot;UPDATE usertbl SET name = '%s'&quot;,$sql);</span>
+<span class="quote1">&gt; を実行したあとなんですけど。</span>
+
+すみません。コードも間違えていたようです。
+
+$str = '能銀&quot;';
+$str =  mysql_escape_string($str);
+$sql = sprintf(&quot;UPDATE usertbl SET name = '%s'&quot;,$str);
+echo $sql;
+
+とした場合、表示は
+
+UPDATE usertbl SET name = '能\銀\&quot;'
+
+となります。
+
+<span class="quote1">&gt; ええと、なんで mysql_escape_string のようなエスケープを</span>
+<span class="quote1">&gt; する関数が用意されているのかを考えてもらうと、そのやりかた</span>
+<span class="quote1">&gt; だとセキュリティホールが生ずる可能性があるので、避けた</span>
+<span class="quote1">&gt; ほうがよろしいかと。</span>
+<span class="quote1">&gt; # SQLインジェクションなど</span>
+
+PHP のマニュアルに書いてあったのですが、
+やっぱりそうですか・・・。
+mysql_escape_string を使わず、addSlashes を利用しても、
+同様の結果です。
+やはり、PHP 側の問題かな・・・。
+ありがとうございました。
+
+</pre>
+</div>
+<p class="button"><a href="7906.html">[前]</a><a href="7908.html">[次]</a><a href="../list/7901-8000.html">[番号順一覧]</a><a href="../thread/7901-8000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7899.html">   7899 2003-06-14 12:15 [Shinichi Nouzumi &lt;no] クォーテーションのある文字列の登録      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7903.html">   7903 2003-06-16 16:09 ┗[IWASAKI Dai &lt;dai@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7905.html">   7905 2003-06-16 17:57 　┗[Shinichi Nouzumi &lt;no]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7906.html">   7906 2003-06-16 18:12 　　┗[IWASAKI Dai &lt;dai@xxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="7907.html">   7907 2003-06-16 18:32 　　　┗[Shinichi Nouzumi &lt;no]                                 </a></span>
+</pre>
+</body>
+</html>

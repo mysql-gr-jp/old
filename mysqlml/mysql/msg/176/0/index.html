@@ -1,0 +1,64 @@
+Date: Fri, 5 Jun 1998 14:23:21 +0000 (UTC)
+From: "Jose' Soares Da Silva" <sferac@bo.nettuno.it>
+X-Sender: sferac@proxy.bazzanese.com
+To: Pat Sherrill <patrick@coconet.com>
+cc: "Corey S. McFadden" <corey@pentrel.com>, mysql@tcx.se
+Subject: Re: mysql: MS Access problems
+In-Reply-To: <007501bd8fbe$3439bfc0$5660b0cc@hovel1.coconet.com>
+Message-ID: <Pine.LNX.3.96.980605114209.998B-100000@proxy.bazzanese.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Sender: owner-mysql@tcx.se
+Precedence: bulk
+
+On Thu, 4 Jun 1998, Pat Sherrill wrote:
+
+> Make sure you have a primary key and a timestamp field in the table you are
+> trying to update.
+> 
+> If this fails to correct your problem, e-mail your table or database schema,
+> the version of myodbc you are using and the version of access you are using
+> and I'll see if I can help you.
+> 
+> Pat...
+Thank you Pat, it's very kind of you.
+Finally we realized that MySQL can't use DATE type with MS-Access 
+because MS-Access hasn't date format YYYY-MM-DD.
+We have to change all DATE columns to DATETIME.
+
+The problem born because MySQL don't say nothing when you try to insert a
+wrong date into a DATE column, and it inserts 0000-00-00 without say nothing.
+0000-00-00 is not a valid date.
+SQL92 says that legal dates should be in the range of 0001-01-01 to 9999-12-31.
+At least one expects a warnning message.
+
+mysql> select azienda, fine_attivita from utenti;
++---------+---------------+
+| azienda | fine_attivita |
++---------+---------------+
+| ASSDAS  | NULL          |
+| 123     | NULL          |
+| 123     | NULL          |
++---------+---------------+
+3 rows in set (0.01 sec)
+
+mysql> update utenti set fine_attivita='31-12-1998';
+Query OK, 3 rows affected (0.01 sec)
+
+mysql> select azienda, fine_attivita from utenti;
++---------+---------------+
+| azienda | fine_attivita |
++---------+---------------+
+| ASSDAS  | 0000-00-00    |      <----------- invalid date !!
+| 123     | 0000-00-00    |      <----------- invalid date !!
+| 123     | 0000-00-00    |      <----------- invalid date !!
++---------+---------------+
+3 rows in set (0.01 sec)
+                                                  Jose'
+
+-----------------------------------------------------------
+Send a mail to mdomo@tcx.se with
+unsubscribe mysql your@subscription.address
+in the body of the message to unsubscribe from this list.
+
+

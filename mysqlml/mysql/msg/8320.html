@@ -1,0 +1,126 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8320</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8319.html">[前]</a><a href="8321.html">[次]</a><a href="../list/8301-8400.html">[番号順一覧]</a><a href="../thread/8301-8400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8320
+</p>
+<div class="header">
+<p>
+From: tateyan &lt;tateyan &lt;tateyan@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 24 Oct 2003 22:15:47 +0900<br>
+Subject: [mysql 08320] Re: MySQL4.1 で mysqldump が動作しない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+たてやんっす　
+
+　（ちなみに　さん　は不要　っす^_^;　　「さんさん」と呼ばれてるようで）
+
+infoさんの
+題名「<a href="08318.html">[mysql 08318]</a> Re: MySQL4.1 で mysqldump が動作しない」のメールからの引用です
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; お返事ありがとうございます。</span>
+<span class="quote1">&gt; 角田です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 実は質問のメールを出してから、MySQL4.1のバイナリ版を入れ、データも</span>
+<span class="quote1">&gt; 入れなおして試してみましたところ、問題なく動いてしまいました。</span>
+<span class="quote1">&gt; 下のページにも書いてあります通り、RedHatでソース版は</span>
+<span class="quote1">&gt; 今でも鬼門なのでしょうか？</span>
+<span class="quote1">&gt; <a href="http://www.mysql.jp/mysql/TIPS/compile.html#redhat">http://www.mysql.jp/mysql/TIPS/compile.html#redhat</a></span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; たてやんさんに教えていただきましたコマンドの実行結果を以下に記します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; 確認　１）mysqldump のバージョンは適正か？</span>
+<span class="quote2">&gt; &gt; 　　　　　　mysqldump -V</span>
+<span class="quote2">&gt; &gt; 　　　　　私の場合</span>
+<span class="quote2">&gt; &gt; 　　　　　mysqldump  Ver 10.2 Distrib 4.1.0-alpha, for pc-linux (i686)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ・ソース版</span>
+<span class="quote1">&gt; /usr/local/mysql_from_src/bin/mysqldump: error while loading shared libraries: libmysqlclient.so.14:</span>
+<span class="quote1">&gt;  cannot open shared object file: No such file or directory</span>
+これは　シェアードライブラリが見つかっていないためですね
+ということで
+  ld.so.conf にlibmysqlclient.so.14のあるディレクトリを入れてやればよい
+です
+　--prefix=/usr/local/mysql　の指定ですので
+ ld.so.conf に　/usr/local/mysql/lib を追加記述後,
+ ldconfig コマンドを実行します
+
+
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ・バイナリ版</span>
+<span class="quote1">&gt; /usr/local/mysql/bin/mysqldump  Ver 10.2 Distrib 4.1.0-alpha, for pc-linux (i686)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; 　　　２）mysqldump の使うシェアードライブラリは適正でしょうか？</span>
+<span class="quote2">&gt; &gt;           whereis mysqldump</span>
+<span class="quote2">&gt; &gt;           多分　/usr/local/bin/mysqldumpかと思うので</span>
+<span class="quote2">&gt; &gt;           ldd /usr/local/bin/mysqldump</span>
+<span class="quote2">&gt; &gt;           で　libmysqlclient.so.14 が使われているかを確認してみて</span>
+<span class="quote2">&gt; &gt; 　　　　　ください(/usr/bin/mysqldump が使われていたりしませんか）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ・ソース版</span>
+<span class="quote1">&gt; libmysqlclient.so.14 =&gt; not found</span>
+　　　　　　　　　　　　　~~~~~~~~~~が問題になるわけです
+
+<span class="quote1">&gt; libz.so.1 =&gt; /usr/lib/libz.so.1 (0x4001d000)</span>
+<span class="quote1">&gt; libcrypt.so.1 =&gt; /lib/libcrypt.so.1 (0x4002b000)</span>
+<span class="quote1">&gt; libnsl.so.1 =&gt; /lib/libnsl.so.1 (0x40058000)</span>
+<span class="quote1">&gt; libm.so.6 =&gt; /lib/tls/libm.so.6 (0x4006d000)</span>
+<span class="quote1">&gt; libc.so.6 =&gt; /lib/tls/libc.so.6 (0x42000000)</span>
+<span class="quote1">&gt; /lib/ld-linux.so.2 =&gt; /lib/ld-linux.so.2 (0x40000000)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ・バイナリ版</span>
+<span class="quote1">&gt; libc.so.6 =&gt; /lib/tls/libc.so.6 (0x42000000)</span>
+<span class="quote1">&gt; libnss_files.so.2 =&gt; /lib/libnss_files.so.2 (0x4001d000)</span>
+<span class="quote1">&gt; libnss_dns.so.2 =&gt; /lib/libnss_dns.so.2 (0x40029000)</span>
+<span class="quote1">&gt; libresolv.so.2 =&gt; /lib/libresolv.so.2 (0x4002d000)</span>
+<span class="quote1">&gt; libz.so.1 =&gt; /usr/lib/libz.so.1 (0x4003f000)</span>
+<span class="quote1">&gt; libcrypt.so.1 =&gt; /lib/libcrypt.so.1 (0x4004d000)</span>
+<span class="quote1">&gt; libnsl.so.1 =&gt; /lib/libnsl.so.1 (0x4007b000)</span>
+<span class="quote1">&gt; libm.so.6 =&gt; /lib/tls/libm.so.6 (0x40090000)</span>
+<span class="quote1">&gt; /lib/ld-linux.so.2 =&gt; /lib/ld-linux.so.2 (0x40000000)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以上です。</span>
+<span class="quote1">&gt; この辺りのレベルの話になってきますと、私の知識ではちょっと</span>
+<span class="quote1">&gt; よく分からないのですが、ソース版ではインストール時に「libmysqlclient.so.14」</span>
+<span class="quote1">&gt; をセットアップすることができなかったということでしょうか。</span>
+<span class="quote1">&gt; 今度、turbolinuxなど、他のLinuxでも試してみようと思います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; たてやんさんには以前もMySQL4.1の件で、一度ご教授いただきました。</span>
+<span class="quote1">&gt; 4.1の情報は、書籍や日本語のページではまだあまり出回っていないので、</span>
+<span class="quote1">&gt; ほんとに助かります。</span>
+<span class="quote1">&gt; この度は誠にありがとうございました。</span>
+あんまり　私もサポートできませんけど^_^;
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  彡彡从        たてやんっす
+ d□/□-ｂ      &lt;tateyan@xxxxxxxxxx&gt;
+ ヽ&quot;ー&quot;丿
+
+Key fingerprint = 5D56 8EA3 B9FE A721 4866  FB4A 0041 672C 08DD C33A
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8319.html">[前]</a><a href="8321.html">[次]</a><a href="../list/8301-8400.html">[番号順一覧]</a><a href="../thread/8301-8400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8315.html">   8315 2003-10-22 19:35 [&lt;info@xxxxxxxxxx&gt;   ] MySQL4.1 で mysqldump が動作しない      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8316.html">   8316 2003-10-22 23:36 ┗[tateyan &lt;tateyan@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8318.html">   8318 2003-10-23 17:13 　┗[&lt;info@xxxxxxxxxx&gt;   ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8319.html">   8319 2003-10-23 18:30 　　┣[&lt;tutui@xxxxxxxxxx&gt;  ] Re: MySQL4.1 で mysqldump   が動作しな</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8327.html">   8327 2003-10-27 09:44 　　┃┗[&lt;info@xxxxxxxxxx&gt;   ]                                 </a></span>
+<span class="current">-&gt;&nbsp;<a href="8320.html">   8320 2003-10-24 22:15 　　┗[tateyan &lt;tateyan@xxx]                                   </a></span>
+</pre>
+</body>
+</html>

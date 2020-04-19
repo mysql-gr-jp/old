@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12962</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12961.html">[前]</a><a href="12963.html">[次]</a><a href="../list/12901-13000.html">[番号順一覧]</a><a href="../thread/12901-13000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12962
+</p>
+<div class="header">
+<p>
+From: 忠犬 KEN &lt;忠犬 KEN &lt;ken_ken_1962@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 29 Apr 2006 13:32:53 +0900<br>
+Subject: [mysql 12962] Re: チュートリアルの外部キーの使用について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+chukenと申します。
+
+<span class="quote1">&gt;「標準MySQL」なる書籍を読みながら、自分のためのデータベースを作るべくMySQL</span>
+チュー
+<span class="quote1">&gt;トリアルを試していたんですが、3.6.6外部キーの使用のところでつまずいていま</span>
+す。
+<span class="quote1">&gt;<a href="http://dev.mysql.com/doc/refman/4.1/ja/example-foreign-keys.html">http://dev.mysql.com/doc/refman/4.1/ja/example-foreign-keys.html</a></span>
+<span class="quote1">&gt;のとおり、テーブルを作ったのですが、</span>
+<span class="quote1">&gt;+++++++++++++++++++++++++++</span>
+<span class="quote1">&gt;mysql&gt; select * from person;</span>
+<span class="quote1">&gt;+----+--------------------+</span>
+<span class="quote2">&gt;| id | name               |</span>
+<span class="quote1">&gt;+----+--------------------+</span>
+<span class="quote2">&gt;|  1 | Antonio Paz        |</span>
+<span class="quote2">&gt;|  2 | Lillana Angelovska |</span>
+<span class="quote1">&gt;+----+--------------------+</span>
+<span class="quote1">&gt;2 rows in set (0.00 sec)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;mysql&gt; select * from shirt;</span>
+<span class="quote1">&gt;+----+---------+--------+-------+</span>
+<span class="quote2">&gt;| id | style   | color  | owner |</span>
+<span class="quote1">&gt;+----+---------+--------+-------+</span>
+<span class="quote2">&gt;|  1 | polo    | blue   |     1 |</span>
+<span class="quote2">&gt;|  2 | dress   | white  |     1 |</span>
+<span class="quote2">&gt;|  3 | t-shirt | blue   |     2 |</span>
+<span class="quote2">&gt;|  4 | dress   | orange |     2 |</span>
+<span class="quote2">&gt;|  5 | polo    | red    |     4 |</span>
+<span class="quote2">&gt;|  6 | dress   | blue   |     5 |</span>
+<span class="quote2">&gt;|  7 | t-shirt | white  |     6 |</span>
+<span class="quote1">&gt;+----+---------+--------+-------+</span>
+<span class="quote1">&gt;7 rows in set (0.00 sec)</span>
+<span class="quote1">&gt;++++++++++++++++++++++++++++++++++</span>
+<span class="quote1">&gt;テーブルshirtのownerは、personのid 1,2しかないはずですが、チュートリアルの</span>
+ように
+<span class="quote1">&gt;なりません。</span>
+<span class="quote1">&gt;LAST_INSERT_ID()では、personのidを返して欲しいのですが、shirtのレコードを挿</span>
+入し
+<span class="quote1">&gt;たときのidが返ってきているようなのです。何か注意する点がありましたら教えて</span>
+いただ
+<span class="quote1">&gt;けないでしょうか。</span>
+
+結論から言うと、マニュアルの例題が間違っています。
+
+バージョン５の英文マニュアルでは、例題が修正されています。
+<a href="http://dev.mysql.com/doc/refman/5.0/en/example-foreign-keys.html">http://dev.mysql.com/doc/refman/5.0/en/example-foreign-keys.html</a>
+
+person表にinsertした後、変数@lastにLAST_INSERT_ID()を退避し、
+shirt表のinsert時に@lastを利用するように修正されています。
+
+INSERT INTO person VALUES (NULL, 'Antonio Paz');
+
+SELECT @last := LAST_INSERT_ID();
+
+INSERT INTO shirt VALUES
+(NULL, 'polo', 'blue', @last),
+(NULL, 'dress', 'white', @last),
+(NULL, 't-shirt', 'blue', @last);
+
+INSERT INTO person VALUES (NULL, 'Lilliana Angelovska');
+
+SELECT @last := LAST_INSERT_ID();
+
+INSERT INTO shirt VALUES
+(NULL, 'dress', 'orange', @last),
+(NULL, 'polo', 'red', @last),
+(NULL, 'dress', 'blue', @last),
+(NULL, 't-shirt', 'white', @last);
+
+
+
+</pre>
+</div>
+<p class="button"><a href="12961.html">[前]</a><a href="12963.html">[次]</a><a href="../list/12901-13000.html">[番号順一覧]</a><a href="../thread/12901-13000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12960.html">  12960 2006-04-29 10:41 [wada toshiki &lt;wada-t] チュートリアルの外部キーの使用について  </a></span>
+<span class="current">-&gt;&nbsp;<a href="12962.html">  12962 2006-04-29 13:32 ┗[忠犬 KEN &lt;ken_ken_19]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12963.html">  12963 2006-04-29 15:17 　┗[wada toshiki &lt;wada-t] Re: [解決]チュートリアルの外部キーの使用について</a></span>
+</pre>
+</body>
+</html>

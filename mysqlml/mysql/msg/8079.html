@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8079</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8078.html">[前]</a><a href="8080.html">[次]</a><a href="../list/8001-8100.html">[番号順一覧]</a><a href="../thread/8001-8100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8079
+</p>
+<div class="header">
+<p>
+From: つちや &lt;つちや &lt;kajika@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 27 Jul 2003 16:54:31 +0900<br>
+Subject: [mysql 08079] GPL 関連で、ソフトを公開しようか迷ってます<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして。つちやと申します。
+
+MySQLおよびGPLが関連することで、疑問が出てまいりましたので、
+ご意見をお聞かせいただければと思います。
+
+まず、具体的な状況ですが、WSH(Windows Script Host)から、MySQLを操作する
+方法の一つとして、MySQLDB.DLLを試させていただいたのですが、For文を使って
+一気に全フィールド名を取得しようとすると、今ひとつ思い通りの結果が出ず
+(※1)、ま、それだったら自分で作ってみるかと、GPLライセンスで公開されてい
+るDirectSQL(<a href="http://sourceforge.net/projects/directsql">http://sourceforge.net/projects/directsql</a>)を使用して、Delphi
+にてMySQLCOM.DLLというオートメーションサーバー（リンクして使用するDLLで
+はなく、ActiveX化し、VBなどからCreateObjectして使用します）を作成してみ
+ました。（ADOの操作により近づけたかったということもあります(※2)）
+
+
+そこで、このMySQLCOM.DLLを公開する際に、GPLライセンスに基づいて公開する
+ことになるとは思いますが、関連して疑問が生じました。
+
+(1) たとえ、MySQLのコマーシャルライセンスを取得したとしても、DirectSQLの
+  ライセンスに基づき、MySQLCOM.DLLはGPLである必要があるのでしょうか。
+  (もちろん、MyODBCやMySQLDBは、
+   <a href="http://www.softagency.co.jp/mysql/licensing.html">http://www.softagency.co.jp/mysql/licensing.html</a>
+  にて、GPLだとしても、MySQL本体のライセンスに準拠するわけですよね)
+
+(2) このMySQLCOM.DLLを（静的/動的リンクではなく）CreateObjectしてオート
+  メーション操作しながらMySQLを操作するVBのソフト、WSHやASPのスクリプト
+  等も、GPLの影響を受けることになるのでしょうか。
+
+(3) では、(2)のWSHスクリプトを、自分の他のアプリケーションのマクロとして
+  使用する場合は、
+  <a href="http://www.gnu.org/licenses/gpl-faq.ja.html#GPLPluginsInNF">http://www.gnu.org/licenses/gpl-faq.ja.html#GPLPluginsInNF</a>
+  に基づき、アプリケーションそのものは、GPLの適用外にあるとみていいので
+  しょうか。
+
+の３ですが、３つとも「そうである」と思ったのですが、そういうことでよろし
+いのでしょうか。
+
+
+もしも、(3)がOKでないと、たとえばExcelのVBAでMySQLを操作したいとして、
+VBAマクロ自体をGPLとするのはいいのですが、VBAはExcelと「お互いにファン
+クションコールを使ってデータ構造を共有している場合」（上記(3)のサイトか
+ら引用）と解釈できれば、ExcelそのものもGPLでなければならないなんてことに
+なってしまいかねないですよね。
+
+たとえMySQLのコマーシャルライセンスを取得したとしても、GPL公開が必要であ
+り、しかも、GPLライセンスの制限によって、VBAから使うことすら許されないな
+んて言われたら、（本音はGPL公開だって気が引くのに）やっぱり公開するのや
+めようと思うので質問させていただいたのでした。
+（実は公開するような出来ではなかったというようなオチは、まだ考えないでお
+きましょう）
+
+
+(注)
+※1
+作成したMySQLDBオブジェクトをobjCNとして接続し、SELECT文を発行した後、
+For i = 0 to objCN.FieldCount-1
+  S = S &amp; objCN.FieldProperty(i+1,1) &amp; vbTab
+Next
+MsgBox S
+とすると、最初の２〜３のフィールド名が正しく取得できないのでした。
+一つ一つの処理で、MsgBoxで処理をストップして確認すると、正しくなっている
+のですが、、、
+
+※2
+作ってみたらあんまりADO似じゃなかったのですが、レコードセット取得後後こ
+んなメソッドやプロパティを作ってます（一部だけ紹介します）。
+  ◇Move(RecordIndex)…指定したレコードに移動します。
+  ◇MoveFirst…最初のレコードに移動します。
+  ◇MoveNext…次のレコードに移動します。
+  ◇MoveLast…最後のレコードに移動します。
+  ◇MovePrevious…前のレコードに移動します。
+  ◇GetRow…現在の行のすべてのフィールド値を配列でかえします。
+  ◇GetRecords…現在のレコードセットのすべての値を２次元配列でかえします。
+  ◇BOF…BOFの時Trueを返します
+  ◇EOF…EOFの時Trueを返します
+  ◇RecordCount…取得したレコード数を返します
+  ◇FieldCount…フィールド数を返します
+  ◇FieldNames…全フィールド名を配列で返します
+  ◇FieldName(FieldIndex)…FieldIndexで指定されたフィールド名を返します
+  ◇Field(FieldName)…FieldNameで指定されたフィールドの値を返します
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8078.html">[前]</a><a href="8080.html">[次]</a><a href="../list/8001-8100.html">[番号順一覧]</a><a href="../thread/8001-8100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="8079.html">   8079 2003-07-27 16:54 [つちや &lt;kajika@xxxxx] GPL 関連で、ソフトを公開しようか迷ってます</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8080.html">   8080 2003-07-28 05:56 ┗[nisi &lt;lemo@xxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8084.html">   8084 2003-07-29 00:06 　┗[つちや &lt;kajika@xxxxx]                                     </a></span>
+</pre>
+</body>
+</html>

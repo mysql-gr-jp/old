@@ -1,0 +1,122 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12105</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12104.html">[前]</a><a href="12106.html">[次]</a><a href="../list/12101-12200.html">[番号順一覧]</a><a href="../thread/12101-12200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12105
+</p>
+<div class="header">
+<p>
+From: &quot;Shuichi Tamagawa&quot; &lt;&quot;Shuichi Tamagawa&quot; &lt;shuichi@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 7 Sep 2005 16:42:37 -0700<br>
+Subject: [mysql 12105] Re: MySQL4.1.14でのLIKE演算子<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+玉川です。
+
+私の環境でも同様の現象が確認できましたので、
+新たにバグとして登録しておきました。
+<a href="http://bugs.mysql.com/bug.php?id=13046">http://bugs.mysql.com/bug.php?id=13046</a>
+
+既に'Verified'のステータスになってるので近々
+修正されると思います。
+
+--
+Shuichi Tamagawa
+shuichi@xxxxxxxxxx
+tamagawa@xxxxxxxxxx
+
+<span class="quote1">&gt; -----Original Message-----</span>
+<span class="quote1">&gt; From: a2cf@xxxxxxxxxx [mailto:a2cf@xxxxxxxxxx]</span>
+<span class="quote1">&gt; Sent: Wednesday, September 07, 2005 4:54 AM</span>
+<span class="quote1">&gt; To: ml@xxxxxxxxxx</span>
+<span class="quote1">&gt; Subject: <a href="12103.html">[mysql 12103]</a> MySQL4.1.14でのLIKE演算子</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; atsushiです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 2ヶ月ほど前にMySQL4.1.12でのLIKE演算子に関して質問したものです。</span>
+<span class="quote1">&gt; (<a href="11642.html">[mysql 11642]</a>  <a href="http://bugs.mysql.com/bug.php?id=11650">http://bugs.mysql.com/bug.php?id=11650</a> )</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; その後、これを修正したMySQL4.1.14がダウンロードできるようになったので</span>
+すが、また新たな問題が発生しました。
+<span class="quote1">&gt; 前回同様、バイト数指定のインデックスを張ったテーブルに対してselectをす</span>
+ると、値に「_」や「%」を含む時、条件によって検
+<span class="quote1">&gt; 索結果が0件になります。</span>
+<span class="quote1">&gt; 具体的には、以下で作成したテストテーブルで、インデックスに指定した3バ</span>
+イト目までの部分の値に「_」や「%」を含む時、マッチしなくなります。
+<span class="quote1">&gt; 3バイトより後の部分に「_」や「%」を含む場合は問題ありません。</span>
+<span class="quote1">&gt; また、バイト数指定のインデックスでない場合は、全て問題ありませんでし</span>
+た。
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 他の方でも同様の問題は発生しておりますでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 環境: MySQL4.1.14 Linux (x86, glibc-2.2, static, gcc) Standard版</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ----------------------</span>
+<span class="quote1">&gt; ●テストテーブル作成</span>
+<span class="quote1">&gt; drop table if exists t1;</span>
+<span class="quote1">&gt; create table t1(c1 varchar(50) not null, index(c1(3))) engine</span>
+<span class="quote1">&gt; = innodb default</span>
+<span class="quote1">&gt; character set = cp932;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; insert into t1 values('abcdef');</span>
+<span class="quote1">&gt; insert into t1 values('_bcdef');</span>
+<span class="quote1">&gt; insert into t1 values('a_cdef');</span>
+<span class="quote1">&gt; insert into t1 values('ab_def');</span>
+<span class="quote1">&gt; insert into t1 values('abc_ef');</span>
+<span class="quote1">&gt; insert into t1 values('abcd_f');</span>
+<span class="quote1">&gt; insert into t1 values('abcde_');</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ●テスト結果</span>
+<span class="quote1">&gt; select * from t1 where c1 like 'ab_def';  →2件 正常</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; select * from t1 where c1 like 'ab\_def';  →0件 異常 「ab_def」のはず</span>
+<span class="quote1">&gt; select * from t1 where c1 like 'ab#_def' escape '#';  →0件 異常 同上</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; (インデックスに指定したバイト数より後のところでは正しい)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; select * from t1 where c1 like 'abc_ef';  →2件 正常</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; select * from t1 where c1 like 'abc\_ef';  →1件 正常</span>
+<span class="quote1">&gt; select * from t1 where c1 like 'abc#_ef' escape '#';  →1件 正常</span>
+<span class="quote1">&gt; ----------------------</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 上記の「_」を「%」に変えたテストも同様でした。</span>
+<span class="quote1">&gt; また、cp932以外にutf8、ascii、latin1でも同様でした。(%はテストしていま</span>
+せん)
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; sjisにした場合は、「\」の扱いからか、以下のSQLだけ検索結果が異なりまし</span>
+た。
+<span class="quote1">&gt; これは自分のSQL記述の問題かと思いますが・・・。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; select * from t1 where c1 like 'abc\_ef';  →0件 異常? 「abc_ef」のは</span>
+ず
+<span class="quote1">&gt; select * from t1 where c1 like 'abc\\_ef';  →0件 異常? 同上</span>
+<span class="quote1">&gt; select * from t1 where c1 like 'abc#_ef' escape '#';  →1件 正常</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 何とぞよろしくお願いします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="12104.html">[前]</a><a href="12106.html">[次]</a><a href="../list/12101-12200.html">[番号順一覧]</a><a href="../thread/12101-12200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12103.html">  12103 2005-09-07 20:54 [&lt;a2cf@xxxxxxxxxx&gt;   ] MySQL4.1.14でのLIKE演算子               </a></span>
+<span class="current">-&gt;&nbsp;<a href="12105.html">  12105 2005-09-08 08:42 ┗[&quot;Shuichi Tamagawa&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12106.html">  12106 2005-09-08 09:03 　┗[&lt;a2cf@xxxxxxxxxx&gt;   ]                                     </a></span>
+</pre>
+</body>
+</html>

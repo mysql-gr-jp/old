@@ -1,0 +1,152 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9587</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9586.html">[前]</a><a href="9588.html">[次]</a><a href="../list/9501-9600.html">[番号順一覧]</a><a href="../thread/9501-9600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9587
+</p>
+<div class="header">
+<p>
+From: bon &lt;bon &lt;bon@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 10 Jun 2004 16:54:21 +0900<br>
+Subject: [mysql 09587] 更新する行が見つからない。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+bonです。
+
+OS:Windows 2000 Server
+MySQL:mysql-4.0.18-win.zip
+ODBC:MyODBC-3.51.06.exe
+を使用しています。
+ODBCのオプションは
+Don't optimize column width
+Return matching rows
+にチェックしています。
+
+以下のテーブルとデータを使用し、
+−−−−−ここから−−−−−
+DROP TABLE IF EXISTS testtbl;
+CREATE TABLE testtbl (
+  did varchar(16) NOT NULL default '',
+  dt datetime default NULL,
+  PRIMARY KEY  (did)
+) TYPE=MyISAM;
+
+INSERT INTO testtbl VALUES ('1','');
+INSERT INTO testtbl VALUES ('2',NULL);
+−−−−−ここまで−−−−−
+
+データを放り込んだ結果は
+mysql&gt; desc testtbl;
++-------+-------------+------+-----+---------+-------+
+<span class="quote1">| Field | Type        | Null | Key | Default | Extra |</span>
++-------+-------------+------+-----+---------+-------+
+<span class="quote1">| did   | varchar(16) |      | PRI |         |       |</span>
+<span class="quote1">| dt    | datetime    | YES  |     | NULL    |       |</span>
++-------+-------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+mysql&gt; select * from testtbl;
++-----+---------------------+
+<span class="quote1">| did | dt                  |</span>
++-----+---------------------+
+<span class="quote1">| 1   | 0000-00-00 00:00:00 |</span>
+<span class="quote1">| 2   | NULL                |</span>
++-----+---------------------+
+2 rows in set (0.00 sec)
+です。
+
+そして、以下を拡張子vbsで保存し
+−−−−−ここから−−−−−
+Const C_ActConn	= &quot;dsn=hoge;uid=hogeuser;pwd=hogepass&quot;
+
+MsgBox ChgData(1),,&quot;1&quot;
+MsgBox ChgData(2),,&quot;2&quot;
+
+Function ChgData(a_did)
+
+On Error Resume Next
+	Set rs = CreateObject(&quot;ADODB.Recordset&quot;)
+	strSql = &quot;select * from testtbl where did='&quot; &amp; a_did &amp; &quot;'&quot;
+	rs.CursorType = 2
+	rs.LockType = 3
+	rs.Open strSql, C_ActConn
+	If rs.EOF &lt;&gt; True Then
+		rs.Fields(&quot;dt&quot;) = Date &amp; &quot; &quot; &amp; Time
+		rs.Update
+		If Err Then
+			ChgData = &quot;ERR&quot;
+		Else
+			ChgData = &quot;OK&quot;
+		End If
+	End If
+	rs.Close
+	Set rs = Nothing
+End Function
+−−−−−ここまで−−−−−
+実行すると、
+最初はERRを表示され、次はOKと表示されます。
+
+エラーの内容は
+「更新する行が見つからなかったため、クエリ_ベースの更新に失敗しました。」
+です。
+更新する行があるにもかかわらずです。
+
+
+これは、
+datetimeに、''を挿入した場合、'0000-00-00 00:00:00'になる
+MySQLのバグでしょうか？
+SQL Serverでは、'1900-01-01 00:00:00.000'になり
+select * from testtbl where isnull(dt,0)=0;
+select * from testtbl where dt='1900-01-01';
+で、２つのSQL文ともdid=2が返りますが、
+MySQLでは、
+mysql&gt; select * from testtbl where isnull(dt)=1;
++-----+------+
+<span class="quote1">| did | dt   |</span>
++-----+------+
+<span class="quote1">| 2   | NULL |</span>
++-----+------+
+1 row in set (0.00 sec)
+
+mysql&gt; select * from testtbl where dt='0000-00-00';
++-----+---------------------+
+<span class="quote1">| did | dt                  |</span>
++-----+---------------------+
+<span class="quote1">| 1   | 0000-00-00 00:00:00 |</span>
++-----+---------------------+
+1 row in set (0.00 sec)
+
+NULLと'0000-00-00'は別扱いでした。
+
+それとも、
+ODBCのバグでしょうか？
+それとも
+日付にnullか正当な値以外を挿入したら動作は保証できない
+ということでしょうか？
+
+
+よろしくお願いします。
+
+
+-----------------
+bon@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="9586.html">[前]</a><a href="9588.html">[次]</a><a href="../list/9501-9600.html">[番号順一覧]</a><a href="../thread/9501-9600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="9587.html">   9587 2004-06-10 16:54 [bon &lt;bon@xxxxxxxxxx&gt;] 更新する行が見つからない。              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9594.html">   9594 2004-06-11 07:13 ┗[Kenji Irie &lt;kenji@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9595.html">   9595 2004-06-11 10:12 　┗[bon &lt;bon@xxxxxxxxxx&gt;]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:687</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="686.html">[前]</a><a href="688.html">[次]</a><a href="../list/601-700.html">[番号順一覧]</a><a href="../thread/601-700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:687
+</p>
+<div class="header">
+<p>
+From: 奥田  典子 &lt;奥田  典子 &lt;okud_no@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 13 Feb 1999 18:36:42 +0900<br>
+Subject: [mysql 00687] プレースホルダーを使った execute で Out of memory<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして。奥田と申します。
+
+先日は、&lt;mysql-ctl&gt; 宛てのコマンドをこちらにsendしてしまい、失礼致し
+ました。
+
+現在、PerlのDBIインタフェースを使用して、典型的なパターンのテストをし
+ております。そこで、プレースホルダーを使ったSelect〜executeを8000回近く
+繰り返すと、Out of memory なるエラーでPerlスクリプトが挫折してしまう、
+という現象に出くわしました。
+
+テストしたスクリプトと、テーブル定義は、以下のとおりです。
+          $state  =  &quot;SELECT USRYAK from USER where USUSER = ?&quot;;
+          $USERh  =  $dbh-&gt;prepare($state) || die $dbh-&gt;errstr;
+
+          for ($i = 0; $i &lt;= 900000; $i++) {
+              $USERCD = sprintf(&quot;%08.8d&quot;, $i);
+              $USERh-&gt;execute('00003810') || die $USERh-&gt;errstr, &quot;i=$i&quot;;
+#1            $USERh-&gt;execute($USERCD) || die $USERh-&gt;errstr, &quot;i=$i&quot;;
+              $USERh-&gt;bind_col(1, \$USRYAK);
+              while($USERh-&gt;fetchrow_arrayref()) {
+                  print &quot;USERCD=($USERCD) USRYAK=($USRYAK)\n&quot;;
+              }
+          }
+
+注 #1: 最初、こちらの記述でテストしてエラーになりました。
+       executeの引数として使用した変数の設定に問題があるのかと思い、
+       定数にしてみたところ、同じ結果です。
+
+Database: bics  Table: USER  Rows: 3482
++--------+-----------------+------+-----+------------+-------+
+<span class="quote1">| Field  | Type            | Null | Key | Default    | Extra |</span>
++--------+-----------------+------+-----+------------+-------+
+<span class="quote1">| USUSER | char(8) binary  |      | PRI |            |       |</span>
+<span class="quote1">| USRMEI | char(8) binary  |      |     |            |       |</span>
+<span class="quote1">| USUSRM | char(40) binary |      |     |            |       |</span>
+<span class="quote1">| USRYAK | char(20) binary |      |     |            |       |</span>
+<span class="quote1">| USYUBN | char(6) binary  |      |     |            |       |</span>
+<span class="quote1">| USTEL  | char(12) binary |      |     |            |       |</span>
+<span class="quote1">| USJYU1 | char(24) binary |      |     |            |       |</span>
+<span class="quote1">| USJYU2 | char(24) binary |      |     |            |       |</span>
+<span class="quote1">| USBILL | char(24) binary |      |     |            |       |</span>
+<span class="quote1">| USTIKU | char(5) binary  |      |     |            |       |</span>
+<span class="quote1">| USSTI  | char(20) binary |      |     |            |       |</span>
+<span class="quote1">| USDMEI | char(16) binary |      |     |            |       |</span>
+<span class="quote1">| USTNTO | char(16) binary |      |     |            |       |</span>
+<span class="quote1">| USMNCD | char(5) binary  |      |     |            |       |</span>
+<span class="quote1">| USGYOC | char(5) binary  |      |     |            |       |</span>
+<span class="quote1">| USOSCD | char(5) binary  |      |     |            |       |</span>
+<span class="quote1">| USSTNS | char(8) binary  |      |     |            |       |</span>
+<span class="quote1">| USSTAN | char(6) binary  |      |     |            |       |</span>
+<span class="quote1">| USETNK | char(3) binary  |      |     |            |       |</span>
+<span class="quote1">| USETNB | char(6) binary  |      |     |            |       |</span>
+<span class="quote1">| USETSM | char(32) binary |      |     |            |       |</span>
+<span class="quote1">| USETTM | char(16) binary |      |     |            |       |</span>
+<span class="quote1">| USFTNB | char(6) binary  |      |     |            |       |</span>
+<span class="quote1">| USFTSM | char(32) binary |      |     |            |       |</span>
+<span class="quote1">| USFJTM | char(16) binary |      |     |            |       |</span>
+<span class="quote1">| USTRBI | date            |      |     | 0000-00-00 |       |</span>
+<span class="quote1">| USNEWH | date            |      |     | 0000-00-00 |       |</span>
+<span class="quote1">| USNEWS | char(6) binary  |      |     |            |       |</span>
+<span class="quote1">| EXTUCD | char(8) binary  |      |     |            |       |</span>
+<span class="quote1">| USHIND | char(1) binary  |      |     |            |       |</span>
+<span class="quote1">| USKKCD | char(8) binary  |      |     |            |       |</span>
+<span class="quote1">| USMNC2 | char(6) binary  |      |     |            |       |</span>
+<span class="quote1">| USOLD  | char(8) binary  |      |     |            |       |</span>
+<span class="quote1">| USYB71 | char(3) binary  |      |     |            |       |</span>
+<span class="quote1">| USYB72 | char(4) binary  |      |     |            |       |</span>
++--------+-----------------+------+-----+------------+-------+
+
+エラーメッセージは、以下のとおりです。
+Out of memory (Needed 8164 bytes)
+MySQL client got out of memory at ./Fetch_DBI4.pl line 24.
+MySQL client got out of memoryi=8002 at ./Fetch_DBI4.pl line 24.
+
+ (iの数は、実行の都度、微妙に変わりますが、8000前後です)
+
+テスト環境は、以下のとおりです。
+MySQL   3.21.30
+DBI.pm  v 1.86 
+
+
+プレースホルダーの使い方に何か問題があるでしょうか。
+何か情報がありましたら教えていただきたいと思います。
+よろしくお願いします。
+-----------------------------------------------------------------
+奥田  典子 &lt;okud_no@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="686.html">[前]</a><a href="688.html">[次]</a><a href="../list/601-700.html">[番号順一覧]</a><a href="../thread/601-700.html">[スレッド一覧]</a></p>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14193</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14192.html">[前]</a><a href="14194.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14193
+</p>
+<div class="header">
+<p>
+From: 山本 孝一 &lt;山本 孝一 &lt;yamamoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 11 Sep 2007 21:55:59 +0900<br>
+Subject: [mysql 14193] mysqldでout of memoryが多発<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+長文です。お許しください。
+【問題点】
+　月に２度くらいの頻度でmysqldでout of memoryが短時間に多発してサーバが反応しなくなる。
+【環境】
+　Turbo Linux Sever 8
+　Mysql 3.23.58-log
+　Memory 512MB
+【状況】
+　Movable Typeを利用するためにMySQLを利用しています。利用当初は問題なかったの
+ですが、今年の３月頃から月に２度くらいの頻度でmysqldでout of memoryが発生して
+サーバを操作できなくなります。原因かもしれないと思われるのは、２月初旬にMTを
+MT3.32-ja→MT3.34にバージョンアップしたことかもしれません。現在はMT3.35ですが、
+状況は同じです。当初はメモリー不足かと思って256MB→512MBをしましたが、頻度が
+少し減った程度です。
+　どうしたらout of memoryを出させなくできるでしょうか？ご存じの方、教えていた
+だけたら幸いです。
+
+【資料】
+[root@ns etc]# mysqladmin -u XXXXXX -p version
+Enter password:
+mysqladmin Ver 8.23 Distrib 3.23.58, for pc-linux on i686
+Copyright (C) 2000 MySQL AB &amp; MySQL Finland AB &amp; TCX DataKonsult AB
+This software comes with ABSOLUTELY NO WARRANTY. This is free software,
+and you are welcome to modify and redistribute it under the GPL license
+
+Server version 3.23.58-log
+Protocol version 10
+Connection Localhost via UNIX socket
+UNIX socket /var/lib/mysql/mysql.sock
+Uptime: 4 hours 52 min 30 sec
+
+Threads: 1 Questions: 10354 Slow queries: 0 Opens: 25 Flush tables: 1 Open tables: 19 Queries per second avg: 0.590
+
+[root@ns etc]# cat my.cnf
+# Example mysql config file for medium systems.
+#
+# This is for a system with little memory (32M - 64M) where MySQL plays
+# a important part and systems up to 128M very MySQL is used together with
+# other programs (like a web server)
+#
+# You can copy this file to
+# /etc/my.cnf to set global options,
+# mysql-data-dir/my.cnf to set server-specific options (in this
+# installation this directory is /var/lib/mysql) or
+# ~/.my.cnf to set user-specific options.
+#
+# One can in this file use all long options that the program supports.
+# If you want to know which options a program support, run the program
+# with --help option.
+
+# The following options will be passed to all MySQL clients
+[client]
+#password = your_password
+port = 3306
+socket = /var/lib/mysql/mysql.sock
+
+# Here follows entries for some specific programs
+
+# The MySQL server
+[mysqld]
+datadir = /var/lib/mysql
+port = 3306
+socket = /var/lib/mysql/mysql.sock
+skip-locking
+skip-innodb
+set-variable = key_buffer=16M
+set-variable = max_allowed_packet=1M
+set-variable = table_cache=64
+set-variable = sort_buffer=512K
+set-variable = net_buffer_length=8K
+set-variable = myisam_sort_buffer_size=8M
+log-bin
+server-id = 1
+
+# language
+#language=/usr/share/mysql/japanese
+#language=/usr/share/mysql/korean
+#language=/usr/share/mysql/czech
+#default-character-set=euc
+
+# Point the following paths to different dedicated disks
+#tmpdir = /tmp/
+#log-update = /path-to-dedicated-directory/hostname
+
+# Uncomment the following if you are using BDB tables
+#set-variable = bdb_cache_size=4M
+#set-variable = bdb_max_lock=10000
+
+# Uncomment the following if you are using Innobase tables
+#innodb_data_file_path = ibdata1:400M
+#innodb_data_home_dir = /var/lib/mysql/
+#innodb_log_group_home_dir = /var/lib/mysql/
+#innodb_log_arch_dir = /var/lib/mysql/
+#set-variable = innodb_mirrored_log_groups=1
+#set-variable = innodb_log_files_in_group=3
+#set-variable = innodb_log_file_size=5M
+#set-variable = innodb_log_buffer_size=8M
+#innodb_flush_log_at_trx_commit=1
+#innodb_log_archive=0
+#set-variable = innodb_buffer_pool_size=16M
+#set-variable = innodb_additional_mem_pool_size=2M
+#set-variable = innodb_file_io_threads=4
+#set-variable = innodb_lock_wait_timeout=50
+
+[mysqldump]
+quick
+set-variable = max_allowed_packet=16M
+
+[mysql]
+no-auto-rehash
+# Remove the next comment character if you are not familiar with SQL
+#safe-updates
+
+[isamchk]
+set-variable = key_buffer=20M
+set-variable = sort_buffer=20M
+set-variable = read_buffer=2M
+set-variable = write_buffer=2M
+
+[myisamchk]
+set-variable = key_buffer=20M
+set-variable = sort_buffer=20M
+set-variable = read_buffer=2M
+set-variable = write_buffer=2M
+
+[mysqlhotcopy]
+interactive-timeout
+
+[mysql.server]
+user=mysql
+basedir=/var/lib
+
+[safe_mysqld]
+err-log=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+
+// 山本孝一             //
+// yamamoto@xxxxxxxxxx //
+
+
+</pre>
+</div>
+<p class="button"><a href="14192.html">[前]</a><a href="14194.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="14193.html">  14193 2007-09-11 21:55 [山本 孝一 &lt;yamamoto@] mysqldでout of memoryが多発             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14194.html">  14194 2007-09-11 22:46 ┣[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14202.html">  14202 2007-09-14 10:41 ┗[Katsutoshi Nakatomi ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14203.html">  14203 2007-09-14 13:03 　┗[山本 孝一 &lt;yamamoto@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14204.html">  14204 2007-09-14 14:31 　　┗[Katsutoshi Nakatomi ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14205.html">  14205 2007-09-14 15:21 　　　┗[山本 孝一 &lt;yamamoto@]                                 </a></span>
+</pre>
+</body>
+</html>

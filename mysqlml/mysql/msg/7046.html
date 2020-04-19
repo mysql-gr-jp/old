@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7046</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7045.html">[前]</a><a href="7047.html">[次]</a><a href="../list/7001-7100.html">[番号順一覧]</a><a href="../thread/7001-7100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7046
+</p>
+<div class="header">
+<p>
+From: Kengo Jinno &lt;Kengo Jinno &lt;kengo@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 25 Feb 2003 13:35:43 +0900<br>
+Subject: [mysql 07046] Re: ODBC 経由の UPDATE  でエラーにならない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+神野です。
+
+Tue, 25 Feb 2003 13:16:32 +0900 ごろに
+&lt;3E5AEE20.882CAB06@xxxxxxxxxx&gt; の
+&quot;<a href="07043.html">[mysql 07043]</a> Re: ODBC 経由の UPDATE でエラーにならない&quot; のメールで
+kazuo kaku &lt;kkaku@xxxxxxxxxx&gt; さんは書きました。
+
+<span class="quote1">&gt; ＯＤＢＣ経由で、ＵＰＤＡＴＥでエラーにならないのなら</span>
+<span class="quote1">&gt; 上記のような回避方法は、思いつくのですが、</span>
+<span class="quote1">&gt; ＯＤＢＣ経由であれば、ＵＰＤＡＴＥで一致するキーが無い時に</span>
+<span class="quote1">&gt; エラーが返って来ないのは、普通なのでしょうか？</span>
+
+ODBCドライバ依存なのでは？
+
+ODBCドライバがやっているのは
+・プログラムから与えられたクエリー文をDBMSに投げつける
+・DBMSから返された結果をプログラムに返す
+だけでしょう。
+
+「普通」かどうかはちょっとわかりかねます。
+＃SQLの定義やら、ODBCの仕様やら、調べてみないことには…？
+
+＃参考までに。
+＃VC++のCRecordsetクラスでは、UPDATE実行後に「updateが反映された行数」
+＃を調べて(ということはODBCドライバからは返されているのでしょう)、
+＃それがゼロだったら例外を発生させる、という処理をしていたように
+＃記憶しています。
+＃＃ODBCドライバがやっているのではなく、CRecordset(＝ODBCドライバ
+＃＃から見たら「プログラム」)がやっていることに注意。
+
+<span class="quote1">&gt; コマンドプロンプトからＭＹＳＱＬへＵＰＤＡＴＥコマンドを発行すれば</span>
+<span class="quote1">&gt; 一致するキーがないとエラーになります。</span>
+
+こちらのテストでは、ならないようですが。↓
+
+<span class="quote1">| mysql&gt; create table foo ( bar char(10), baz char(10) );</span>
+<span class="quote1">| Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">| </span>
+<span class="quote1">| mysql&gt; insert into foo values ( 'bar', 'baz' );</span>
+<span class="quote1">| Query OK, 1 row affected (0.00 sec)</span>
+<span class="quote1">| </span>
+<span class="quote1">| mysql&gt; select * from foo;</span>
+<span class="quote1">| +------+------+</span>
+<span class="quote2">| | bar  | baz  |</span>
+<span class="quote1">| +------+------+</span>
+<span class="quote2">| | bar  | baz  |</span>
+<span class="quote1">| +------+------+</span>
+<span class="quote1">| 1 row in set (0.00 sec)</span>
+<span class="quote1">| </span>
+<span class="quote1">| mysql&gt; update foo set baz = 'piyo' where bar = 'hoge';</span>
+<span class="quote1">| Query OK, 0 rows affected (0.00 sec)</span>
+<span class="quote1">| Rows matched: 0  Changed: 0  Warnings: 0</span>
+
+「ゼロ件更新した」と言ってますね。
+
+-- 
+神野健吾 &lt;kengo@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="7045.html">[前]</a><a href="7047.html">[次]</a><a href="../list/7001-7100.html">[番号順一覧]</a><a href="../thread/7001-7100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7031.html">   7031 2003-02-25 10:35 [kazuo kaku &lt;kkaku@xx] ODBC 経由の UPDATE でエラーにならない   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7037.html">   7037 2003-02-25 11:29 ┗[Kengo Jinno &lt;kengo@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7039.html">   7039 2003-02-25 12:00 　┗[kazuo kaku &lt;kkaku@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7040.html">   7040 2003-02-25 12:11 　　┣[Kengo Jinno &lt;kengo@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7043.html">   7043 2003-02-25 13:16 　　┃┗[kazuo kaku &lt;kkaku@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7045.html">   7045 2003-02-25 13:24 　　┃　┣[Ryuichiro Munechika ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7048.html">   7048 2003-02-25 13:44 　　┃　┃┗[kazuo kaku &lt;kkaku@xx]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="7046.html">   7046 2003-02-25 13:35 　　┃　┣[Kengo Jinno &lt;kengo@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7049.html">   7049 2003-02-25 13:51 　　┃　┃┗[kazuo kaku &lt;kkaku@xx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7047.html">   7047 2003-02-25 13:39 　　┃　┗[SUGAWARA Hajime &lt;sug]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7041.html">   7041 2003-02-25 12:13 　　┣[Daiju Azuma &lt;daiju_a]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7042.html">   7042 2003-02-25 12:58 　　┗[遠藤 俊裕 &lt;endo_t@xx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7044.html">   7044 2003-02-25 13:20 　　　┗[kazuo kaku &lt;kkaku@xx]                                 </a></span>
+</pre>
+</body>
+</html>

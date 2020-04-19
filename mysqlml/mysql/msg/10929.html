@@ -1,0 +1,149 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10929</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="10928.html">[前]</a><a href="10930.html">[次]</a><a href="../list/10901-11000.html">[番号順一覧]</a><a href="../thread/10901-11000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10929
+</p>
+<div class="header">
+<p>
+From: 深海水草 &lt;深海水草 &lt;VYG01106@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 09 Feb 2005 23:40:13 +0900<br>
+Subject: [mysql 10929] Re: 画像10万枚を検索させたいという相談を受けました<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+長谷です
+
+<span class="quote1">&gt; 3MB程度のjpg画像がおよそ10万枚と、それらに関する文字情報。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; とのことで、それらを</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 年代やキーワードなど、いくつかの項目で検索→画像を表示→印刷</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; という流れで利用することを実現したいと思っているとのことでした。</span>
+<span class="quote1">&gt; 今は実験的にFileMakerを試しているけども1000枚当たりで動かなくなったと。</span>
+
+「画像データはＤＢに直接入れないでフォルダに入れてリンクを張る」
+なら FileMaker でもできなくもないでしょう。パフォーマンスは別
+にして。しかし、
+
+<span class="quote1">&gt; ここで、単にフォルダー管理で画像を置いてしまうと、</span>
+<span class="quote1">&gt; 外部から画像を取り放題、設定によっては置き放題となったりして</span>
+<span class="quote1">&gt; セキュリティ的には宜しくないのでは.</span>
+
+という意見にも賛成です。万が一、画像データをハッキングされて
+引き出されたくない(或いは著作権の問題で外部には出したくない)
+のなら、あまりお薦めではないです。
+
+この方法はもう一つ問題が有ります。
+データの大きさに依りますが、多少 HDD の容量を損するのです。
+１クラスタ＝2048byte だとした場合、データがたった 1byte でも
+実際には HDD は 2048byte を喰ってしまいます。
+従って将来のデータ追加分の事も考えれば、現在存在する画像の
+総容量の３、４倍の HDD 容量が欲しいところです。
+
+一方でこの方法は表示が面倒じゃない(画像ファイルが存在してい
+るならシンボリックリンクだけ示せばよい)、管理が楽、という利点
+はあるでしょうが。
+
+私が作るなら、何らかの大分類で、DB を分けて作成し、そこに画像
+データそのものをバイナリで突っ込む作戦にします。
+勿論管理テーブルの DB は別に持ち、検索用のキーワードが色々ある
+ようですから、画像 DB へのリンクと一緒に持って管理します。
+この場合は表示の時の問題が発生します。DB から画像データを引っ
+張ってきたら、一時的に表示するファイルを作ってぶちこませなけ
+ればいけないことです。
+
+<span class="quote1">&gt; でも、SCSIのHDDについては相当に予算がないとダメですね。。。</span>
+
+そうですね。あと発熱にも注意しないといけないでしょう。
+私がやってしまったのですが、10,000rpmもあるような SCSI の
+HDD は確実に冷却しないと熱で壊れてしまいます。
+
+信頼性は若干低くなりますが、ATA には大容量が多くなりました
+ので、それで Hardware RAID5 を組むのが安上がりでしょう。
+パラレルATA では一枚の RAID で４台しか使えない、RAID5 では
+なく RAID 0+1 になるのが難点ですが。
+
+まぁどっちにしても大容量で発熱もそれなりにあるでしょうから、
+コンシューマ向けの PC でやるのにはちょっと無理があるでしょう。
+
+<span class="quote1">&gt; そこで、MySQLというのはこのようなケースでお薦めしてよいのかどうかを</span>
+<span class="quote1">&gt; 知りたいのです。</span>
+
+というより「画像をデータベース管理する」というのは割と古くか
+らの問題でして、専門に構築する会社があります。
+google でググッてみると幾つか見つかると思います。
+
+もしそういう会社に頼む予算が無く、自前で作るのでしたら、DB
+の基本設計を十分やってからでないと、何の DB を使うにしても
+パフォーマンスは出ないと思いますし、その後の管理も大変です。
+
+結論を言えば、パフォーマンスは別にして MySQL だろうが Oracle
+だろうが、出来るのは出来ると思います。でもお薦めできるかでき
+ないか、という事になれば、貴方が聴かれて分からないくらいなの
+ですから、素直に分からない、と言った方がよくはありませんか。
+仮に出来そうだ、と答えてしまうと、貴方のほうが中身を良くわか
+っているから、と DB の基本設計を丸投げされたり、一々電話で聴
+いたりしてきて対応に苦慮すると思いますけど、如何でしょう？
+
+-- 
+長谷 &lt;VYG01106@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="10928.html">[前]</a><a href="10930.html">[次]</a><a href="../list/10901-11000.html">[番号順一覧]</a><a href="../thread/10901-11000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="10915.html">  10915 2005-02-09 16:38 [弥永悦子 &lt;minaga@xxx] 画像10万枚を検索させたいという相談を受けました</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10916.html">  10916 2005-02-09 17:05 ┣[Yoshio Kano &lt;kano@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10917.html">  10917 2005-02-09 17:13 ┃┗[ShimizuKazuo &lt;ozz@xx] C++Builder                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10919.html">  10919 2005-02-09 17:28 ┃　┗[&quot;TAKAHASHI, Tomohiro]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10921.html">  10921 2005-02-09 17:52 ┃　　┗[ShimizuKazuo &lt;ozz@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10918.html">  10918 2005-02-09 17:18 ┣[Shinji Sato &lt;subscri] Re: 画像10万枚を検索させたいという相談を</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10922.html">  10922 2005-02-09 17:57 ┃┣[軽部　篤 &lt;matics@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10923.html">  10923 2005-02-09 18:00 ┃┗[Masaaki Yamamoto &lt;m-]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10924.html">  10924 2005-02-09 18:10 ┃　┗[&quot;waya&quot; &lt;wayama@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10920.html">  10920 2005-02-09 17:45 ┣[&quot;waya&quot; &lt;wayama@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10925.html">  10925 2005-02-09 19:36 ┣[弥永悦子 &lt;minaga@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10926.html">  10926 2005-02-09 20:16 ┃┗[&quot;KKuji_T1A4&quot; &lt;kkuji@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10928.html">  10928 2005-02-09 23:04 ┃　┗[弥永悦子 &lt;minaga@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10930.html">  10930 2005-02-09 23:44 ┃　　┣[MURAKAMI Yukio &lt;m_yu] Re: 画像10万枚を検索させたいという相談</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10934.html">  10934 2005-02-10 06:03 ┃　　┣[&quot;KKuji_T1A4&quot; &lt;kkuji@]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10936.html">  10936 2005-02-10 09:19 ┃　　┃┗[tadashi nagao &lt;tadas]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10950.html">  10950 2005-02-10 22:01 ┃　　┗[弥永悦子 &lt;minaga@xxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10951.html">  10951 2005-02-10 23:02 ┃　　　┣[荒木　満 &lt;araki@xxxx] 重複のチェック                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10953.html">  10953 2005-02-11 18:40 ┃　　　┃┣[平松 幸治 &lt;kouji@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10954.html">  10954 2005-02-11 18:52 ┃　　　┃┃┗[tadashi nagao &lt;tadas]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10955.html">  10955 2005-02-12 08:38 ┃　　　┃┣[Ryuichiro Munechika ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10956.html">  10956 2005-02-12 10:42 ┃　　　┃┗[Kenji Irie &lt;kenji@xx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10970.html">  10970 2005-02-13 15:01 ┃　　　┃　┗[荒木　満 &lt;araki@xxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10957.html">  10957 2005-02-12 11:49 ┃　　　┗[深海水草 &lt;VYG01106@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10958.html">  10958 2005-02-12 13:11 ┃　　　　┗[tadashi nagao &lt;tadas]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10962.html">  10962 2005-02-12 23:46 ┃　　　　　┗[深海水草 &lt;VYG01106@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10963.html">  10963 2005-02-13 01:18 ┃　　　　　　┗[tadashi nagao &lt;tadas]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10966.html">  10966 2005-02-13 07:18 ┃　　　　　　　┗[&quot;KKuji_T1A4&quot; &lt;kkuji@]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10967.html">  10967 2005-02-13 08:38 ┃　　　　　　　　┣[Hiromasa Ochiai &lt;ohi]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10972.html">  10972 2005-02-13 18:46 ┃　　　　　　　　┃┗[tadashi nagao &lt;tadas]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10973.html">  10973 2005-02-13 20:35 ┃　　　　　　　　┗[深海水草 &lt;VYG01106@x]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10986.html">  10986 2005-02-14 22:21 ┃　　　　　　　　　┗[弥永悦子 &lt;minaga@xxx]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10987.html">  10987 2005-02-15 01:46 ┃　　　　　　　　　　┗[tadashi nagao &lt;tadas]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10994.html">  10994 2005-02-15 15:10 ┃　　　　　　　　　　　┗[深海水草 &lt;VYG01106@x]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11102.html">  11102 2005-02-28 22:46 ┃　　　　　　　　　　　　┗[弥永悦子 &lt;minaga@xxx] 【お礼】Re:  Re:  画像10万枚を検索させたいという相談を受けました</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11105.html">  11105 2005-03-01 01:04 ┃　　　　　　　　　　　　　┗[tadashi nagao &lt;tadas]           </a></span>
+<span class="current">-&gt;&nbsp;<a href="10929.html">  10929 2005-02-09 23:40 ┣[深海水草 &lt;VYG01106@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10935.html">  10935 2005-02-10 01:32 ┣[Hiroshi　Suzuki &lt;suz]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10937.html">  10937 2005-02-10 10:29 ┣[&quot;pinet&quot; &lt;juusirou@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11019.html">  11019 2005-02-18 14:05 ┗[弥永悦子 &lt;minaga@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11020.html">  11020 2005-02-18 15:00 　┗[MURAKAMI Tomokazu &lt;t]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11021.html">  11021 2005-02-18 16:34 　　┗[&quot;KKuji_T1A4&quot; &lt;kkuji@]                                   </a></span>
+</pre>
+</body>
+</html>

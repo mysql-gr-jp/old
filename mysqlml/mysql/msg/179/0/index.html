@@ -1,0 +1,42 @@
+From: Michael Widenius <monty@monty.pp.sci.fi>
+To: takeshi@SoftAgency.co.jp
+Cc: mysql@tcx.se
+Subject: mysql: column_name trouble
+
+mysql> select foo.1abc,foo.2xyz from foo,bar;
+takeshi> ERROR 1064: parse error near '.1abc,foo.2xyz from foo bar' at line 1
+
+Fix:
+
+Apply this patch:
+
+*** /my/monty/master/mysql-3.22.0a-alpha/sql/sql_lex.cc Fri May 15 13:33:22 1998
+--- ./sql_lex.cc        Thu Jun 11 17:08:20 1998
+***************
+*** 766,772 ****
+  #else
+        while (isalnum(c=yyGet()) || c == '_') ;
+  #endif
+!       if (c == '.' && isalpha(yyPeek()))
+        lex->next_state=STATE_IDENT_SEP;
+        else
+        {                                       // '(' must follow directly if function
+--- 768,774 ----
+  #else
+        while (isalnum(c=yyGet()) || c == '_') ;
+  #endif
+!       if (c == '.' && isalnum(yyPeek()))
+        lex->next_state=STATE_IDENT_SEP;
+        else
+        {                                       // '(' must follow directly if function
+
+Or use the following syntax:
+
+select foo . 1abc,foo . 2xyz from foo,bar;
+
+(notice the spaces)
+
+Yours,
+Monty
+
+

@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8125</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8124.html">[前]</a><a href="8126.html">[次]</a><a href="../list/8101-8200.html">[番号順一覧]</a><a href="../thread/8101-8200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8125
+</p>
+<div class="header">
+<p>
+From: &quot;Kawaji, Shinya&quot; &lt;&quot;Kawaji, Shinya&quot; &lt;kawaji@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 09 Aug 2003 23:37:26 +0900<br>
+Subject: [mysql 08125] Re: 特定フィールドの異なりによる抽出<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+かわじ、です。
+
+
+<span class="quote1">&gt; このとき、SOURCE ごとに一つずつ取り出した次のような結果を得たいのです。</span>
+
+正確に言えば
+
+  SOURCE ごとに「IDが最小の行を」一つずつ取り出した次のような結果
+
+ということですよね？
+
+
+MySQL 4.1 以上になると副問い合わせが出来ますが、まだ安定版ではないので、
+それ以下でする場合は、以下のマニュアルに記されている方法になるかと
+思います。
+<a href="http://www.mysql.com/doc/en/example-Maximum-column-group-row.html">http://www.mysql.com/doc/en/example-Maximum-column-group-row.html</a>
+
+temporary table を使うやり方と、&quot;MAX-CONCAT trick&quot; なるものを使うやり方
+が書かれています。
+
+後者の方を、今回の場合に用いると、以下のようになります。
+（MAX ではなく、&quot;MIN-CONCAT trick&quot; ですが）
+
+
+-- 10 や 11 のところは、ID の最大文字長に合わせて下さい。
+select
+  0 + left(  min(concat(lpad(ID, 10, '0'), ID) ), 10) as ID,
+  SOURCE,
+  CONTENT,
+  substring( min(concat(lpad(ID, 10, '0'), NOTE)), 11) as NOTE
+from
+  SAMPLE
+where
+  CONTENT = 'x'
+group by
+  SOURCE
+;
++------+--------+---------+------+
+<span class="quote1">| ID   | SOURCE | CONTENT | NOTE |</span>
++------+--------+---------+------+
+<span class="quote1">|    1 | A      | x       | abc  |</span>
+<span class="quote1">|    6 | C      | x       | rst  |</span>
++------+--------+---------+------+
+
+select
+  0 + left(  min(concat(lpad(ID, 10, '0'), ID) ), 10) as ID,
+  SOURCE,
+  CONTENT,
+  substring( min(concat(lpad(ID, 10, '0'), NOTE)), 11) as NOTE
+from
+  SAMPLE
+where
+  CONTENT = 'y'
+group by
+  SOURCE
+;
++------+--------+---------+------+
+<span class="quote1">| ID   | SOURCE | CONTENT | NOTE |</span>
++------+--------+---------+------+
+<span class="quote1">|    3 | A      | y       | hij  |</span>
+<span class="quote1">|    4 | B      | y       | klm  |</span>
+<span class="quote1">|    7 | C      | y       | vwx  |</span>
++------+--------+---------+------+
+
+
+エレガントとは言いづらいですし、保守しやすいとも言えませんが、
+一応、SQL一発で出来るということで・・・
+
+マニュアルにある temporary table 作成の方法は、一つしか table を
+作らないので、その方が良いかも知れません。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8124.html">[前]</a><a href="8126.html">[次]</a><a href="../list/8101-8200.html">[番号順一覧]</a><a href="../thread/8101-8200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8122.html">   8122 2003-08-09 21:39 [&quot;TOYOSHIMA,Masayuki&quot;] 特定フィールドの異なりによる抽出        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8123.html">   8123 2003-08-09 22:33 ┣[yamada &lt;tirutiru@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8124.html">   8124 2003-08-09 22:53 ┃┗[yamada &lt;tirutiru@xxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="8125.html">   8125 2003-08-09 23:37 ┗[&quot;Kawaji, Shinya&quot; &lt;ka]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8126.html">   8126 2003-08-10 07:21 　┣[&quot;TOYOSHIMA,Masayuki&quot;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8127.html">   8127 2003-08-10 08:17 　┃┗[&quot;Kawaji, Shinya&quot; &lt;ka]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8128.html">   8128 2003-08-10 08:59 　┃　┗[&quot;TOYOSHIMA,Masayuki&quot;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8129.html">   8129 2003-08-10 09:24 　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8130.html">   8130 2003-08-10 13:07 　　┗[&quot;TOYOSHIMA,Masayuki&quot;]                                   </a></span>
+</pre>
+</body>
+</html>

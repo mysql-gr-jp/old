@@ -1,0 +1,222 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15570</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15569.html">[前]</a><a href="15571.html">[次]</a><a href="../list/15501-15600.html">[番号順一覧]</a><a href="../thread/15501-15600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15570
+</p>
+<div class="header">
+<p>
+From: &quot;Nobuchika.tanaka&quot; &lt;&quot;Nobuchika.tanaka&quot; &lt;tanaka.nobuchika@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 15 Apr 2011 07:58:12 +0900<br>
+Subject: [mysql 15570] Re: Partition pruningについて。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+田中です。
+
+ご説明いただいた仕様にて、なぜ先頭のパーティションも
+選択されれるのかを理解することが出来ました。
+
+いただいた情報を基にインターネットをj検索した所、
+海外のフォーラムにて、同じ内容がすでに議論されている事がわかりました。
+
+Re: Partition Pruning
+<a href="http://forums.mysql.com/read.php?106">http://forums.mysql.com/read.php?106</a>,386051,387925#msg-387925
+
+奥野さんからご指摘いただいた通り、TO_DAYS()が単調写像ではなく
+NULLを返す可能性があるため、NULLのデータが保存される
+先頭のパーティションも選択されるとの事です。
+
+対策としては、RANGE COLUMNSパーティショニングを使う事にしました。
+この方法であれば、TO_DAYS()関数を使用しないので、
+先頭のパーティションが選択されなくなりました。
+
+○パーティションの設定方法
+PARTITION BY RANGE COLUMNS(end_time_date) (
+  PARTITION p_2002_8_5   VALUES LESS THAN ('2002-8-12'),
+  PARTITION p_2002_8_12  VALUES LESS THAN ('2002-8-19'),
+  PARTITION p_2002_8_19  VALUES LESS THAN ('2002-8-26'),
+　#中略
+  PARTITION p_2022_2_28  VALUES LESS THAN ('2022-3-7'),
+  PARTITION p_2022_3_7   VALUES LESS THAN ('2022-3-14'),
+  PARTITION p_maxvalue   VALUES LESS THAN maxvalue
+);
+
+○Partition pruning動作確認
+
+use development;
+
+explain partitions
+
+select
+  *
+from
+  t1
+where
+  end_time_date&gt;= '2011-03-28' and
+  end_time_date&lt;  '2011-04-03' \G
+
+*************************** 1. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: t1
+   partitions: p_2011_3_28
+         type: ALL
+possible_keys: end_time_date_idx
+          key: NULL
+      key_len: NULL
+          ref: NULL
+         rows: 266901
+        Extra: Using where
+
+※p_2011_3_28という本来検索の対象となるパーティションのみ選択されるようになりました。
+
+これにて、無事問題が解決いたしました。
+アドバイスありがとうございました。
+
+田中宣親
+
+
+(2011/04/14 16:43), Mikiya Okuno wrote:
+<span class="quote1">&gt; 奥野です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この挙動はMySQLの仕様です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQLのパーティショニングでは、評価式の結果がNULLになった場合、</span>
+<span class="quote1">&gt; 先頭のパーティションにレコードが格納されます。</span>
+<span class="quote1">&gt; TO_DAYS()はzero date（月や日が0の日付）などを入力すると</span>
+<span class="quote1">&gt; NULLを出力するのですが、WHERE句の条件ではzero dateが含まれるかどうか</span>
+<span class="quote1">&gt; までは分かりませんので、評価式の結果がNULLとなる可能性が否定できません。</span>
+<span class="quote1">&gt; そのため、評価式の結果がNULLとなるレコードが格納されている先頭の</span>
+<span class="quote1">&gt; パーティションもSELECTの対象になるのです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 対策として、先頭に空のパーティションを設定しておくことをおすすめいたします。</span>
+<span class="quote1">&gt; （コマンドはALTER TABLE ... REORGANIZE PARTITION ...です。）</span>
+<span class="quote1">&gt; VALUES LESS THANの値を極端に小さくしておけば、そのパーティションには</span>
+<span class="quote1">&gt; レコードが含まれませんので、SELECTをしてもパフォーマンスの</span>
+<span class="quote1">&gt; オーバーヘッドは生じません。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ではでは。</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; 奥野 幹也 </span>
+<span class="quote1">&gt; <a href="http://www.google.com/profiles/mikiya.okuno">http://www.google.com/profiles/mikiya.okuno</a></span>
+<span class="quote1">&gt; <a href="http://nippondanji.blogspot.com/">http://nippondanji.blogspot.com/</a> </span>
+<span class="quote1">&gt; <a href="http://twitter.com/nippondanji">http://twitter.com/nippondanji</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; On 04/14/2011 04:29 PM, Nobuchika.tanaka wrote:</span>
+<span class="quote1">&gt;   </span>
+<span class="quote2">&gt;&gt; 田中(たなか)と申します。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; パーティショニングをしたテーブルから、特定のパーティションにあるデータを</span>
+<span class="quote2">&gt;&gt; selectする際、</span>
+<span class="quote2">&gt;&gt; 特定のパーティション以外のパーティションも選択され困っております。</span>
+<span class="quote2">&gt;&gt; 特定のパーティションのみ選択され方法をご存知の方がいましたら、</span>
+<span class="quote2">&gt;&gt; アドバイスをお願いいたします。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ○環境</span>
+<span class="quote2">&gt;&gt; 　−MySQL:5.5.8</span>
+<span class="quote2">&gt;&gt; 　−OS:Redhat5.5</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ○パーティションの設定方法</span>
+<span class="quote2">&gt;&gt; 　−end_time_date(Date型のカラム)を基準に、1週間毎のデータのパーティショ</span>
+<span class="quote2">&gt;&gt; ンを1024個を設定。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; PARTITION BY RANGE (to_days(end_time_date)) (</span>
+<span class="quote2">&gt;&gt; PARTITION p_2002_8_5 VALUES LESS THAN (to_days('2002_8_12')),</span>
+<span class="quote2">&gt;&gt; PARTITION p_2002_8_12 VALUES LESS THAN (to_days('2002_8_19')),</span>
+<span class="quote2">&gt;&gt; PARTITION p_2002_8_19 VALUES LESS THAN (to_days('2002_8_26')),</span>
+<span class="quote2">&gt;&gt; 　#中略</span>
+<span class="quote2">&gt;&gt; PARTITION p_2022_2_28 VALUES LESS THAN (to_days('2022_3_7')),</span>
+<span class="quote2">&gt;&gt; PARTITION p_2022_3_7 VALUES LESS THAN (to_days('2022_3_14')),</span>
+<span class="quote2">&gt;&gt; PARTITION p_maxvalue VALUES LESS THAN maxvalue</span>
+<span class="quote2">&gt;&gt; );</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ○Partition pruning動作確認</span>
+<span class="quote2">&gt;&gt; 　−2011/03/28から201１/04/03の1週分のデータをselectする際に対象となる</span>
+<span class="quote2">&gt;&gt; パーティションを確認</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; use development;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; explain partitions</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; select</span>
+<span class="quote2">&gt;&gt; *</span>
+<span class="quote2">&gt;&gt; from</span>
+<span class="quote2">&gt;&gt; t1</span>
+<span class="quote2">&gt;&gt; where</span>
+<span class="quote2">&gt;&gt; end_time_date&gt;= '2011-03-28' and</span>
+<span class="quote2">&gt;&gt; end_time_date&lt;  '2011-04-03' \G</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; *************************** 1. row ***************************</span>
+<span class="quote2">&gt;&gt; id: 1</span>
+<span class="quote2">&gt;&gt; select_type: SIMPLE</span>
+<span class="quote2">&gt;&gt; table: t1</span>
+<span class="quote2">&gt;&gt; partitions: p_2002_8_5,p_2011_3_28</span>
+<span class="quote2">&gt;&gt; type: ALL</span>
+<span class="quote2">&gt;&gt; possible_keys: end_time_date_idx</span>
+<span class="quote2">&gt;&gt; key: NULL</span>
+<span class="quote2">&gt;&gt; key_len: NULL</span>
+<span class="quote2">&gt;&gt; ref: NULL</span>
+<span class="quote2">&gt;&gt; rows: 266901</span>
+<span class="quote2">&gt;&gt; Extra: Using where</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ※p_2002_8_5という本来検索の対象とならないパーティションが選択されています。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ただし、where句の条件を範囲指定にしない場合、正しくパーティションが選択</span>
+<span class="quote2">&gt;&gt; されます。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; use development;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; explain partitions</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; select</span>
+<span class="quote2">&gt;&gt; *</span>
+<span class="quote2">&gt;&gt; from</span>
+<span class="quote2">&gt;&gt; t1</span>
+<span class="quote2">&gt;&gt; where</span>
+<span class="quote2">&gt;&gt; end_time_date = '2011-04-01' \G</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; *************************** 1. row ***************************</span>
+<span class="quote2">&gt;&gt; id: 1</span>
+<span class="quote2">&gt;&gt; select_type: SIMPLE</span>
+<span class="quote2">&gt;&gt; table: job</span>
+<span class="quote2">&gt;&gt; partitions: p_2011_3_28</span>
+<span class="quote2">&gt;&gt; type: ref</span>
+<span class="quote2">&gt;&gt; possible_keys: end_time_date_idx</span>
+<span class="quote2">&gt;&gt; key: end_time_date_idx</span>
+<span class="quote2">&gt;&gt; key_len: 3</span>
+<span class="quote2">&gt;&gt; ref: const</span>
+<span class="quote2">&gt;&gt; rows: 36421</span>
+<span class="quote2">&gt;&gt; Extra:</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ※p_2011_3_28という本来検索の対象となるパーティションのみ選択されます。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 以上、よろしくお願いいたします。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 田中宣親</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;     </span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;   </span>
+
+
+</pre>
+</div>
+<p class="button"><a href="15569.html">[前]</a><a href="15571.html">[次]</a><a href="../list/15501-15600.html">[番号順一覧]</a><a href="../thread/15501-15600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15568.html">  15568 2011-04-14 16:29 [&quot;Nobuchika.tanaka&quot; &lt;] Partition pruningについて。             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15569.html">  15569 2011-04-14 16:43 ┗[Mikiya Okuno &lt;mikiya]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="15570.html">  15570 2011-04-15 07:58 　┗[&quot;Nobuchika.tanaka&quot; &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15573.html">  15573 2011-04-15 09:47 　　┗[Mikiya Okuno &lt;mikiya]                                   </a></span>
+</pre>
+</body>
+</html>

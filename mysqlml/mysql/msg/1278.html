@@ -1,0 +1,102 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1278</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="1277.html">[前]</a><a href="1279.html">[次]</a><a href="../list/1201-1300.html">[番号順一覧]</a><a href="../thread/1201-1300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1278
+</p>
+<div class="header">
+<p>
+From: とみたまさひろ &lt;とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 13 Oct 1999 00:59:00 +0900<br>
+Subject: [mysql 01278] Re: お知恵拝借（うまい SQL  の書き方）<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+とみたです。
+
+At Tue, 12 Oct 1999 17:13:38 +0900,
+endo@xxxxxxxxxx (遠藤　俊裕) wrote:
+
+<span class="quote1">&gt; 現在以下のようなテーブルが存在します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; CREATE TABLE WorkSchedule (</span>
+<span class="quote1">&gt;   SerialNumber  INT NOT NULL,</span>
+<span class="quote1">&gt;   SerialCode    INT NOT NULL,</span>
+<span class="quote1">&gt;   CurrentDate   CHAR ( 10 ),</span>
+<span class="quote1">&gt;   CurrentWork   CHAR ( 50 ),</span>
+<span class="quote1">&gt;   CarType	CHAR ( 5 ),</span>
+<span class="quote1">&gt;   Note          CHAR ( 255 )</span>
+<span class="quote1">&gt; );</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; この中には「個人情報」へ繋がる SerialCode とその個人に対する</span>
+<span class="quote1">&gt; 日付(CurrentDate)と作業(CurrentWork)が入っています。</span>
+<span class="quote1">&gt; とりあえず、その他の情報は無視します。</span>
+<span class="quote1">&gt; #「個人情報」は SerialCode と Name が入っているテーブルです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ここで SerialNumber はこのレコードを一意に決める Index 項目です。</span>
+<span class="quote1">&gt; # 宣言はしていませんが、気にしないで下さい。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; で、結果として以下のような帳票を出したいと考えています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; +---------------+-----------+-----------+-----------+-----------+</span>
+<span class="quote2">&gt; |     名　前    |    ４月   |    ５月   |    ６月   |    ７月   | …</span>
+<span class="quote1">&gt; +---------------+---+---+---+---+---+---+---+---+---+---+---+---+</span>
+<span class="quote2">&gt; |  遠藤　俊裕   |  5| 10| 14|  6| 11| 15|  8| 12|   |  4| 16|   | …</span>
+<span class="quote3">&gt; |               | 15| 20| 26|   |   |   |   |   |   |   |   |   |</span>
+<span class="quote1">&gt; +---------------+---+---+---+---+---+---+---+---+---+---+---+---+</span>
+<span class="quote2">&gt; |名無しのごんべ |  4|  9| 18| 11| 18| 25|  7| 17|   |  7|   |   | …</span>
+<span class="quote5">&gt; |               |   |   |   |   |   |   |   |   |   |   |   |   |</span>
+<span class="quote1">&gt; +---------------+---+---+---+---+---+---+---+---+---+---+---+---+</span>
+<span class="quote5">&gt; |               |   |   |   |   |   |   |   |   |   |   |   |   |</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 更にある特定の条件（CurrentWork がある特定の時）数字に○を付けた</span>
+<span class="quote1">&gt; いと思っております。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 抽出条件は「個人情報」にある条件と、WorkSchedule にある日付(CurrentDate)</span>
+<span class="quote1">&gt; が年度内であること、それと、作業(CurrentWork)が必要な情報にマッチ</span>
+<span class="quote1">&gt; していることです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; こんな時どんな SQL を書き、データをどう扱えば良いのでしょうか？</span>
+
+
+もひとつ処理のイメージがわかないんで外しているかもしれませんが、こんなん
+ではどうでしょう？
+
+select SerialCode, CurrentDate, if(CurrentWork=&quot;特定の値&quot;,&quot;*&quot;,&quot;&quot;) as m
+from WorkSchedule where 個人情報の条件 and 日付範囲の条件 order by 1,2;
+
+CurrentWork の条件が合えば &quot;*&quot; が出力されます。結果はこんな↓感じで出ま
+すんで、あとは他の言語で整形すればいいと思います。
+
+	+------------+-------------+---+
+	| SerialCode | CurrentDate | m |
+	+------------+-------------+---+
+	|          1 | 1999-04-05  |   |
+	|          1 | 1999-04-10  |   |
+	|          1 | 1999-04-14  | * |
+			〜〜
+	|          2 | 1999-04-04  |   |
+	|          2 | 1999-04-09  |   |
+	|          2 | 1999-04-18  | * |
+			〜〜
+
+--
+とみたまさひろ &lt;tommy@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="1277.html">[前]</a><a href="1279.html">[次]</a><a href="../list/1201-1300.html">[番号順一覧]</a><a href="../thread/1201-1300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1276.html">   1276 1999-10-12 17:13 [&lt;endo@xxxxxxxxxx&gt;   ] お知恵拝借（うまい SQL の書き方）       </a></span>
+<span class="current">-&gt;&nbsp;<a href="1278.html">   1278 1999-10-13 00:59 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1279.html">   1279 1999-10-13 12:41 　┗[&lt;endo@xxxxxxxxxx&gt;   ]                                     </a></span>
+</pre>
+</body>
+</html>

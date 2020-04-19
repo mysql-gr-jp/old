@@ -1,0 +1,102 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14275</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14274.html">[前]</a><a href="14276.html">[次]</a><a href="../list/14201-14300.html">[番号順一覧]</a><a href="../thread/14201-14300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14275
+</p>
+<div class="header">
+<p>
+From: HIRATSUKA Sadao &lt;HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 30 Oct 2007 13:46:04 +0900<br>
+Subject: [mysql 14275] Re: MySQL 5.0.45 (win32) NULLがあるときのdate()<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+平塚です。こんにちは。
+
+On Tue, 30 Oct 2007 01:56:38 +0900
+Kazuhiro Yoshida &lt;moriq@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; datetime型のカラム (at) に NULL があるとき、</span>
+<span class="quote1">&gt; 条件節の date() がうまく動かないみたいです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 再現しますでしょうか。</span>
+
+手元にあった
+・Windows 5.0.45
+・Linux 5.0.46
+で再現しました。
+
+◆再現する例
+mysql&gt; create table test (c1 datetime);
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; insert into test values (null);
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; select * from test where date(c1) = '2007-01-01';
+Empty set (0.00 sec)
+
+mysql&gt; insert into test values ('2007-01-01 10:00:00');
+Query OK, 1 row affected (0.01 sec)
+
+mysql&gt; select * from test where date(c1) = '2007-01-01';
+Empty set (0.00 sec) ★
+
+mysql&gt; select * from test;
++---------------------+
+<span class="quote1">| c1                  |</span>
++---------------------+
+<span class="quote1">| NULL                |</span>
+<span class="quote1">| 2007-01-01 10:00:00 |</span>
++---------------------+
+2 rows in set (0.00 sec)
+
+
+◆再現しない例
+mysql&gt; create table test (c1 datetime);
+Query OK, 0 rows affected (0.04 sec)
+
+mysql&gt; insert into test values ('2007-01-01 10:00:00');
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; insert into test values (null);
+Query OK, 1 row affected (0.01 sec)
+
+mysql&gt; select * from test where date(c1) = '2007-01-01';
++---------------------+
+<span class="quote1">| c1                  |</span>
++---------------------+
+<span class="quote1">| 2007-01-01 10:00:00 |</span>
++---------------------+
+1 row in set (0.00 sec)
+
+
+条件の評価時にnullにあたるとそこでやめちゃうみたいですね。
+これはまずいですね。
+
+-- 
+平塚貞夫 hiratsuka.sadao@xxxxxxxxxx
+
+
+</pre>
+</div>
+<p class="button"><a href="14274.html">[前]</a><a href="14276.html">[次]</a><a href="../list/14201-14300.html">[番号順一覧]</a><a href="../thread/14201-14300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14274.html">  14274 2007-10-30 01:56 [Kazuhiro Yoshida &lt;mo] MySQL 5.0.45 (win32) NULLがあるときのdate()</a></span>
+<span class="current">-&gt;&nbsp;<a href="14275.html">  14275 2007-10-30 13:46 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14276.html">  14276 2007-10-30 15:50 　┣[HIRATSUKA Sadao &lt;hir]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14278.html">  14278 2007-10-30 16:57 　┃┗[Kazuhiro Yoshida &lt;mo]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14279.html">  14279 2007-10-30 17:22 　┃　┗[HIRATSUKA Sadao &lt;hir]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14280.html">  14280 2007-10-30 17:56 　┃　　┗[&quot;tarou kawauso&quot; &lt;kaw]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14277.html">  14277 2007-10-30 16:55 　┗[&quot;Yasuda, Hiroyuki&quot; &lt;]                                     </a></span>
+</pre>
+</body>
+</html>

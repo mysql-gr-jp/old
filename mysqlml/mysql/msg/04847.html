@@ -1,0 +1,319 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4847</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="4846.html">[前]</a><a href="4848.html">[次]</a><a href="../list/4801-4900.html">[番号順一覧]</a><a href="../thread/4801-4900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4847
+</p>
+<div class="header">
+<p>
+From: &quot;gosikaku&quot; &lt;&quot;gosikaku&quot; &lt;gosikaku@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 27 Dec 2001 13:14:14 +0900<br>
+Subject: [mysql 04847] Re: SELECT が実行できない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+宏です
+
+皆さん、わかりにくい質問に対して答えて頂き本当に有難うございます。
+更に、お返事が遅くなりました申し訳ございません。
+
+宮川さんに教えて頂いた
+
+  my $dbh = DBI-&gt;connect($dsn, $user, $pass, { RaiseError =&gt; 1 })
+      or die $DBI::errstr;
+  eval {
+      my $sth = $dbh-&gt;prepare($sql);
+      $sth-&gt;execute;
+  };
+  if ($@) {
+      warn &quot;SQL error: $@&quot;;
+  }
+
+上記のプログラムを私が最初にメールで記載した、プログラム中に下記の
+[################宮川さんに教えて頂いた部分はここから]の箇所に挿入
+してみたのですが、何も表示されませんでした。
+
+#!perl
+###設定###
+#モジュール＆ライブラリの指定
+require &quot;jcode.pl&quot;;
+use CGI_Lite;
+use DBI;
+
+#CGI_Liteをライブラリ関数をコールする為の宣言
+$cgi= new CGI_Lite();
+
+#フォームデータを受け取り連想配列(%in)に代入
+%in=$cgi-&gt;parse_form_data();
+
+###設定終了###
+
+#MySQLの設定
+my($dns) = &quot;DBI:mysql:userdb:localhost&quot;;
+my($username) = &quot;root&quot;;
+my($password) = &quot;××××&quot;;
+my($dbh,$sth);
+my(@ary);
+
+
+  $remoteuser = $in{'remoteuser'};
+
+
+#編集ここから
+  if($in{'mode'} eq
+it'){ 
+   jcode::convert(\$in{'mail'}, 'euc');
+     if ($in{'mail'} =~ /[\xA1-\xFE][\xA1-\xFE]/ or $in{'mail'} =~ /\x8E/) {
+     print &quot;Content-type: text/html\n\n&quot;;
+     print &quot;メールアドレスは半角英数字で入力して下さい\n&quot;;
+     exit;
+     }
+
+       if($in{'mail'} &amp;&amp; $in{'mail'} !~ /^[\w\+\-\.]+@[\w\+\-]+\.[\w\+\.\-]+$/){
+       &amp;Error(&quot;メールアドレスが正しく入力されていません\n&quot;);
+       }
+
+ 
+#ここではEUCコードでデータのやり取りをする。
+   $name = $in{'name'};
+   &amp;jcode'convert(*name,&quot;euc&quot;);
+   $mail = $in{'mail'};#メール半角英数のみなのでこのまま
+   $nenrei = $in{'nenrei'};
+   &amp;jcode'convert(*nenrei,&quot;euc&quot;);
+   $zyuusyo = $in{'zyuusyo'};
+   &amp;jcode'convert(*zyuusyo,&quot;euc&quot;);
+   $seibetu = $in{'seibetu'};
+   &amp;jcode'convert(*seibetu,&quot;euc&quot;);
+
+   $dbh = DBI -&gt; connect ($dns, $username, $password)
+       or &amp;Error(&quot;データベースへアクセスできません1&quot;);
+   
+   # パスワードの変更があった場合と無かった場合の2つのUPDATE構文を作る。
+   if($in{'name'}){
+   $sth = $dbh-&gt;prepare( qq{ UPDATE userdb
+                             SET name = &quot;$name&quot; WHERE username = 
+                             &quot;$remoteuser&quot;});
+   }
+   if($in{'mail'}){
+   $sth = $dbh-&gt;prepare( qq{ UPDATE userdb
+                             SET mail = &quot;$mail&quot; WHERE username = 
+                             &quot;$remoteuser&quot;});  
+   }
+   if($in{'nenrei'}){
+   $sth = $dbh-&gt;prepare( qq{ UPDATE userdb
+                             SET nenrei = &quot;$nenrei&quot; WHERE username = 
+                             &quot;$remoteuser&quot;});  
+   }
+   if($in{'zyuusyo'}){
+   $sth = $dbh-&gt;prepare( qq{ UPDATE userdb
+                             SET zyuusyo = &quot;$zyuusyo&quot; WHERE username =         
+                             &quot;$remoteuser&quot;});  
+   }
+   if($in{'seibetu'}){
+   $sth = $dbh-&gt;prepare( qq{ UPDATE userdb
+                             SET seibetu = &quot;$seibetu&quot; WHERE username=
+                             &quot;$remoteuser&quot;});  
+   }
+    
+   $sth -&gt; execute()
+       or &amp;Error(&quot;UPDATE userdbを実行できません。&quot;);
+   
+   $sth -&gt; finish();
+   $dbh -&gt; disconnect();
+   
+   &amp;Reload;
+   
+  }
+ ################宮川さんに教えて頂いた部分はここから
+my $dbh = DBI-&gt;connect($dns, $username, $password, { RaiseError =&gt; 1 })
+      or die $DBI::errstr;
+    
+   $sth = $dbh-&gt;prepare( qq{ SELECT * FROM userdb
+                             WHERE id = &quot;$remoteuser&quot;
+                             });
+  eval {
+      my $sth = $dbh-&gt;prepare($sql);
+      $sth-&gt;execute;
+  };
+  if ($@) {
+       print &quot;Content-type: text/html\n\n&quot;;
+      warn &quot;SQL error: $@&quot;;
+  }
+ ################宮川さんに教えて頂いた部分はここまで   
+   $sth -&gt; execute()
+       or &amp;Error(&quot;SELECT * FROM userdb・・・を実行できません。&quot;);
+   
+   @ary = $sth-&gt;fetchrow_array ();
+
+#ここでは面倒かもしれないが、SJISに戻して表示する。
+      $name = $ary[2];
+      &amp;jcode'convert(*name, &quot;sjis&quot;);
+      $id = $ary[0]; #ユーザーネームはそのままでも問題ない。
+      $mail = $ary[3];
+      &amp;jcode'convert(*mail, &quot;sjis&quot;);
+      $nenrei = $ary[4];
+      &amp;jcode'convert(*nenrei, &quot;sjis&quot;);
+
+      $seibetu = $ary[6];
+      &amp;jcode'convert(*seibetu, &quot;sjis&quot;);
+      $zyuusyo = $ary[5];
+      &amp;jcode'convert(*zyuusyo, &quot;sjis&quot;);
+
+      $CurrentUsers .= qq(&lt;tr&gt;\n);
+      $CurrentUsers .= qq(&lt;td width=&quot;80&quot;&gt;$id&lt;/td&gt;\n);
+      $CurrentUsers .= qq(&lt;td width=&quot;80&quot;&gt;$name&lt;/td&gt;\n);
+      $CurrentUsers .= qq(&lt;td width=&quot;80&quot;&gt;$mail&lt;/td&gt;\n);
+      $C
+urrentUsers .= qq(&lt;td width=&quot;80&quot;&gt;$nenrei&lt;/td&gt;\n);
+      $CurrentUsers .= qq(&lt;td width=&quot;160&quot;&gt;$seibetu&lt;/td&gt;\n);
+      $CurrentUsers .= qq(&lt;td width=&quot;80&quot;&gt;$zyuusyo&lt;/td&gt;\n);
+      $CurrentData .= qq(&lt;/tr&gt;\n);
+
+   $sth -&gt; finish();
+   $dbh -&gt; disconnect();
+
+
+  print &quot;Content-type: text/html\n\n&quot;;
+  print&lt;&lt;&quot;__HTML__&quot;;
+  &lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;ユーザーネーム [$remoteuser]&lt;/TITLE&gt;&lt;/HEAD&gt;
+  &lt;BODY TEXT=&quot;#44444&quot; BGCOLOR=&quot;#FFFFFF&quot;&gt;
+  &lt;STYLE TYPE=&quot;text/css&quot;&gt;
+  &lt;!--
+  A:link {color:&quot;pink&quot;; text-decoration: &quot;none&quot; ;}
+  A:visited {color:&quot;pink&quot;; text-decoration: &quot;none&quot; ;}
+  A:hover {color:&quot;blue&quot;; text-decoration: &quot;underline&quot; ;}
+  TD { font-size: 11pt; }
+  --&gt;
+  &lt;/STYLE&gt;
+  &lt;TABLE WIDTH=&quot;100%&quot;&gt;&lt;TR&gt;&lt;TD&gt;
+  &lt;H2&gt;■ユーザーネーム [$remoteuser] データ&lt;/H2&gt;
+  &lt;a href=&quot;./1kaiinpage.cgi#edit&quot;&gt;個人情報編集&lt;/a&gt;
+  &lt;HR SIZE=&quot;0&quot;&gt;
+  &lt;P&gt;
+  &lt;B&gt;●現在の[$remoteuser]登録情報は以下のとおりです。&lt;/B&gt;
+   &lt;table width=&quot;784&quot; cellspacing=&quot;0&quot; border=&quot;1&quot; bordercolor=&quot;gray&quot;&gt;
+    &lt;tr&gt;
+     &lt;td width=&quot;80&quot;&gt;&lt;b&gt;ＩＤ&lt;/b&gt;&lt;/td&gt;
+     &lt;td width=&quot;80&quot;&gt;&lt;b&gt;名前&lt;/b&gt;&lt;/td&gt;
+     &lt;td width=&quot;80&quot;&gt;&lt;b&gt;メールアドレス&lt;/b&gt;&lt;/td&gt;
+     &lt;td width=&quot;80&quot;&gt;&lt;b&gt;年齢&lt;/b&gt;&lt;/td&gt;
+     &lt;td width=&quot;160&quot;&gt;&lt;b&gt;性別&lt;/b&gt;&lt;/td&gt;
+     &lt;td width=&quot;80&quot;&gt;&lt;b&gt;住所&lt;/b&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+   $CurrentData
+   &lt;/table&gt;
+  &lt;P&gt;
+  &lt;HR SIZE=&quot;0&quot;&gt;&lt;A NAME=&quot;edit&quot;&gt;&lt;/A&gt;
+  &lt;P&gt;
+  &lt;B&gt;●個人情報/パスワード編集&lt;/B&gt;
+   &lt;table wdith=&quot;625&quot; cellspacing=&quot;0&quot; border=&quot;1&quot; bordercolor=&quot;gray&quot;&gt;
+    &lt;form method=&quot;post&quot; action=&quot;1kaiinpage.cgi&quot;&gt;
+    &lt;input type=&quot;hidden&quot; name=&quot;mode&quot; value=&quot;edit&quot;&gt;
+&lt;font size=&quot;1&quot;&gt;ニックネーム:&lt;/font&gt;&lt;BR&gt;
+    &lt;INPUT type=&quot;TEXT&quot; name=&quot;name&quot; size=&quot;17&quot;&gt;
+    &lt;BR&gt;
+    &lt;font size=&quot;1&quot;&gt;メールアドレス:【半角】&lt;/font&gt;&lt;BR&gt;
+    &lt;INPUT type=&quot;TEXT&quot; name=&quot;mail&quot; istyle=&quot;3&quot; size=&quot;17&quot;&gt;
+    &lt;br&gt;
+    住所:&lt;br&gt;
+    &lt;select name=&quot;zyuusyo&quot;&gt;
+      &lt;option selected&gt;住所選択&lt;/option&gt;
+      &lt;option&gt;愛知&lt;/option&gt;
+      &lt;option&gt;岐阜&lt;/option&gt;
+      &lt;option&gt;静岡&lt;/option&gt;
+      &lt;option&gt;三重&lt;/option&gt;
+      &lt;option&gt;富山&lt;/option&gt;
+      &lt;option&gt;石川&lt;/option&gt;
+      &lt;option&gt;福井&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;br&gt;
+    &lt;font size=&quot;1&quot;&gt;年齢:&lt;/font&gt;&lt;br&gt;
+    &lt;select name=&quot;nenrei&quot;&gt;
+      &lt;option selected&gt;年齢選択&lt;/option&gt;
+      &lt;option&gt;9以下&lt;/option&gt;
+      &lt;option&gt;10〜14&lt;/option&gt;
+      &lt;option&gt;15〜19&lt;/option&gt;
+      &lt;option&gt;20〜24&lt;/option&gt;
+      &lt;option&gt;25〜29&lt;/option&gt;
+      &lt;option&gt;30〜34&lt;/option&gt;
+      &lt;option&gt;35〜39&lt;/option&gt;
+      &lt;option&gt;40〜44&lt;/option&gt;
+      &lt;option&gt;45〜49&lt;/option&gt;
+      &lt;option&gt;50〜54&lt;/option&gt;
+      &lt;option&gt;55〜59&lt;/option&gt;
+      &lt;option&gt;60以上&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;BR&gt;
+    &lt;font size=&quot;1&quot;&gt;性別:&lt;/font&gt;&lt;br&gt;
+    &lt;font size=&quot;1&quot;&gt;男&lt;/font&gt;
+    &lt;input type=&quot;radio&quot; name=&quot;seibetu&quot; value=&quot;男&quot;&gt;
+    &lt;font size=&quot;1&quot;&gt;女&lt;/font&gt;
+    &lt;input type=&quot;radio&quot; name=&quot;seibetu&quot; value=&quot;女&quot;&gt;
+    &lt;BR&gt;
+    &lt;INPUT type=&quot;SUBMIT&quot; value=&quot;送信&quot;&gt;
+    　
+    &lt;INPUT type=&quot;RESET&quot; value=&quot;取消&quot;&gt;
+  &lt;/P&gt;
+    &lt;/form&gt;
+   &lt;/table&gt;
+  &lt;/TD&gt;&lt;/TR&gt;&lt;/TABLE&gt;
+  &lt;/BODY&gt;
+  &lt;/HTML&gt;
+__HTML__
+
+  sub Error {
+  print &quot;Content-type: text/html\n\n&quot;;
+  print $_[0];
+  print qq(&lt;br&gt;&lt;a href=&quot;javascript:history.back(1)&quot;&gt;戻る&lt;/a&gt;);
+  exit;
+  }
+
+  sub Reload {
+  print &quot;Content-type: text/html\n\n&quot;;
+  print qq(&lt;META HTTP-EQUIV=&quot;Refresh&quot; CONTENT=&quot;0;URL=./1kaiinpage.cgi&quot;&gt;);
+  exit;
+  }
+
+なんで何も表示されないのかなぁっと思い
+
+  if ($@) {
+       print &quot;Content-type: text/html\n\n&quot;;
+      print&quot;test&quot;;
+      warn &quot;SQL error: $@&quot;;
+  }
+
+プログラム中の上記の部分に「print&quot;test&quot;;」というのを付け加えて、「if ($@)」
+は実行されるのか？と思い試してみたところ、ブラウザには「test」と表示され
+ました。
+これは、やはりエラーが発生しているけどエラーメッセージが表示されないだけ
+と判断して良いのでしょうか？
+それとも他に、私が最初のメールで質問させてもらった、
+ブラウザからフォームでデータベースに登録してあるIDを入力し送信すると
+「SELECT * FROM userdb・・・を実行できません。」
+というメッセージが表示されるのは他に原因があるのでしょうか？
+
+
+
+</pre>
+</div>
+<p class="button"><a href="4846.html">[前]</a><a href="4848.html">[次]</a><a href="../list/4801-4900.html">[番号順一覧]</a><a href="../thread/4801-4900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="4834.html">   4834 2001-12-24 15:08 [&quot;gosikaku&quot; &lt;gosikaku] SELECT が実行できない                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4836.html">   4836 2001-12-25 00:35 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4837.html">   4837 2001-12-25 00:44 　┣[&quot;TOYOSHIMA, Masayuki]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4838.html">   4838 2001-12-25 07:13 　┃┗[sin &lt;panocon@xxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4839.html">   4839 2001-12-25 07:28 　┗[Tatsuhiko Miyagawa &lt;]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="4847.html">   4847 2001-12-27 13:14 　　┗[&quot;gosikaku&quot; &lt;gosikaku]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4848.html">   4848 2001-12-27 13:20 　　　┣[Tatsuhiko Miyagawa &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4849.html">   4849 2001-12-27 13:35 　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4850.html">   4850 2001-12-27 14:27 　　　　┗[&quot;gosikaku&quot; &lt;gosikaku]                               </a></span>
+</pre>
+</body>
+</html>

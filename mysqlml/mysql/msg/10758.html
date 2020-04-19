@@ -1,0 +1,259 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10758</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="10757.html">[前]</a><a href="10759.html">[次]</a><a href="../list/10701-10800.html">[番号順一覧]</a><a href="../thread/10701-10800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10758
+</p>
+<div class="header">
+<p>
+From: &quot;zen kishimoto&quot; &lt;&quot;zen kishimoto&quot; &lt;zen@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 7 Jan 2005 18:56:13 -0800<br>
+Subject: [mysql 10758] クラッシュからのリカバリ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+
+<a href="http://dev.mysql.com/tech-resources/articles/recovering-from-crashes.html">http://dev.mysql.com/tech-resources/articles/recovering-from-crashes.html</a>
+
+Guilhem Bichot著
+
+ここでは以下の理由でクラッシュした場合のリカバリー
+の方法について述べます。
+
+   1. OSのクラッシュ
+   2. 電源落ち
+   3. ファイルシステムのクラッシュ
+   4. ハードの問題(ハードドライブとかマザーボードなど).
+
+ここで使うのはMySQL 4.1.8版です。InnoDB ストレッジエンジン
+にデータが格納されているとしましょう。このエンジンには
+トランズアクションと自動クラッシュリカバリーがあります。これから
+の議論ではMySQLは常にクラッシュ時には負荷がかかって
+いるとします。負荷なしではリカバーする理由がありません。
+
+ケース 1) と 2)
+
+このケースの場合リスタートの後でMySQLのディスクのデータに
+アクセス可能とします。リスタートの際InnoDBのデータファイルに
+はクラッシュの際に首尾一貫しているデータが入っているわけでは
+ありません。しかし、InnoDBは自分のログを読み、コミットされた
+かされていない（データファイルにフラッシュされていない）
+ペンディングのトランズアクションリストを見つけて、コミットされて
+いないものに関しては自動的にロールバックして、コミットされて
+いるものについてはデータファイルにフラッシュします。
+リカバリープロセスの情報はMySQLのエラーログを使ってユーザに
+伝えられます。
+
+その一部:
+
+InnoDB: Database was not shut down normally.
+InnoDB: Starting recovery from log files...
+InnoDB: Starting log scan based on checkpoint at
+InnoDB: log sequence number 0 13674004
+InnoDB: Doing recovery: scanned up to log sequence number 0 13739520
+InnoDB: Doing recovery: scanned up to log sequence number 0 13805056
+InnoDB: Doing recovery: scanned up to log sequence number 0 13870592
+InnoDB: Doing recovery: scanned up to log sequence number 0 13936128
+...
+InnoDB: Doing recovery: scanned up to log sequence number 0 20555264
+InnoDB: Doing recovery: scanned up to log sequence number 0 20620800
+InnoDB: Doing recovery: scanned up to log sequence number 0 20664692
+InnoDB: 1 uncommitted transaction(s) which must be rolled back
+InnoDB: Starting rollback of uncommitted transactions
+InnoDB: Rolling back trx no 16745
+InnoDB: Rolling back of trx no 16745 completed
+InnoDB: Rollback of uncommitted transactions completed
+InnoDB: Starting an apply batch of log records to the database...
+InnoDB: Apply batch completed
+InnoDB: Started
+mysqld: ready for connections
+
+ケース 3) と 4)
+
+このケースではリスタートの後MySQLディスクのデータが読めないと
+仮定します。ディスクのデータのある部分が読めなくなったとします。
+この場合MySQLは正しくスタートできなくなります。この場合ディスク
+をフォーマットしなおすか新しいものを導入します。さてここで
+バックアップからデータを取り戻します。そうです、先にバックアップの
+必要がありました。それでは時間を戻してバックアップについて述べましょう。
+
+バックアップのポリシー
+
+バックアックは定期的に行われなければなりません。フルバックアップ
+はMySQLを使って幾つかの方法で行うことができます。InnoDB ホットバックアップ
+はオンライン（ブロックしない）物理的な (データファイルのコピー)
+バックアップを提供します。mysqldump はオンラインのロジカルな
+バックアップを提供します。これからの議論ではこれについて
+話しをします。
+
+例:
+
+mysqldump --single-transaction --all-databases &gt; backup_sunday_1_PM.sql
+
+このコマンドは全てのデータベースのInnoDB テーブルをリードや
+ライトを乱すことなく全てバックアップします。.sqlファイルの中身
+は多くのSQL INSERTステートメントです。（これは負荷の少ない
+日曜の午後１時だとします。）
+
+フルバックアップは必要ですが、何時も便利であるということはありません。
+大きなバックアップファイルが出来て、それに時間も掛かります。
+しかも前のバックアップから変更されていない部分もバックアップしてしまいます。
+増分のみのバックアップはもっと効率がよいです。
+
+増分のみのバックアップをするには、増分がいります。MySQLサーバーが
+データーをアップデートするときに増分をファイルに格納するためには、
+サーバーは常にスタート時に --log-binオプションを必要とします。
+データをアップデートするそれぞれのSQLのステートメントはファイルに
+書き込まれます(これを「MySQLバイナリーログ」と呼びます). 何日か
+実行し続けたMySQLサーバー（--log-binのオプションで）のデータディレクトリ
+を見てみましょう。
+
+-rw-rw----    1 guilhem  guilhem   1277324 Nov 10 23:59 gbichot2-bin.001
+-rw-rw----    1 guilhem  guilhem         4 Nov 10 23:59 gbichot2-bin.002
+-rw-rw----    1 guilhem  guilhem        79 Nov 11 11:06 gbichot2-bin.003
+-rw-rw----    1 guilhem  guilhem       508 Nov 11 11:08 gbichot2-bin.004
+-rw-rw----    1 guilhem  guilhem  220047446 Nov 12 16:47 gbichot2-bin.005
+-rw-rw----    1 guilhem  guilhem    998412 Nov 14 10:08 gbichot2-bin.006
+-rw-rw----    1 guilhem  guilhem       361 Nov 14 10:07 gbichot2-bin.index
+
+サーバーがリスタートするときは何時でも、現在のバイナリーログに書き込む
+のを止めて、新しいログを始めます。新しいのが現在のログとなります。
+このようなスイッチはFLUSH LOGS SQLコマンドでも強制的に出来ます。
+.index ファイルはディレクトリーの全てのMySQLバイナリーログのリスト
+を含みます。（これはリプリケーションに使います。）
+
+MySQLバイナリーログは増分です。それではmysqldumpの実行を少し
+変えてフルバックアップの際にMySQLバイナリログのスイッチ
+が起こるようにしましょう。その上に新しい現在のバイナリーログ
+の名前を聞くようにしましょう。
+
+mysqldump --single-transaction --flush-logs --master-data=2
+--all-databases &gt; backup_sunday_1_PM.sql
+
+これでディレクトリーの中にはgbichot2-bin.007というファイルが
+できます。.sqlファイルの中には次のラインがあります。
+
+-- リプリケーションを始めるポジションかリカバリーを行う時点
+-- CHANGE MASTER TO MASTER_LOG_FILE='gbichot2-bin.007',MASTER_LOG_POS=4;
+
+これが意味することはgbichot2-bin.007よりも古いMySQL バイナリー
+ログに記録されている全てのデータ変更は.sqlファイルに
+存在します、しかしgbichot2-bin.007に記録されたデータ変更または
+それよりも新しいデータの変更は.sqlファイルにはありません。
+月曜の1PMに増分バックアップをするために、mysqladmin
+--flush-logs と打ち込みます。これはbichot2-bin.008という
+ファイルを生成します。日曜の1pmのフルバックアップと月曜の
+1pmの間の変更はとgbichot2-bin.007ファイルです。この重要な
+ファイルを安全なバックアップの場所（テープ、余っている
+マシン、DVD-RWなど）にしまいこみます。
+
+火曜の1 PMに再びmysqladmin --flush-logsを実行します。
+月曜の1pmと火曜の1pmの間の変更はgbichot2-bin.008ファイル
+です。これも安全なところにバックアップしまいます。
+
+MySQLバイナリーログはディスクスペースを必要とします。そのために
+時々スペースを確保する必要があります。一番良いのはもう
+必要がなくなったログを消去することです。つまりフルバックアップ
+をする時に。
+
+mysqldump --single-transaction --flush-logs
+          --delete-master-logs --master-data=2
+          --all-databases　 &gt; backup_sunday_1_PM.sql
+
+バックアップからのリカバリー
+
+水曜の8amにクラッシュがあったとしましょう。フルバックアップ
+からリストアーをします。これは日曜の1pmのものです。スクリプト
+はSQLのステートメントのセットなのでリストアーは簡単です。
+
+mysql &lt; backup_sunday_1_PM.sql
+
+このステートメントの後で日曜の1pmの段階に戻りました。これに増分
+を追加するには、安全な場所にあった増分を取り出して次の
+ようにします。
+
+mysqlbinlog gbichot2-bin.007 | mysql
+mysqlbinlog gbichot2-bin.008 | mysql
+
+これで火曜の1pmまで戻りました。まだこの時点からクラッシュの起こった
+時期までの増分が抜けています。これを逃さないようためには、MySQL
+サーバーはバイナリーログを安全な場所（RAIDやSAN)に格納して
+おく必要があります。その場所はデータファイルが格納されている
+場所とは違った場所で、それはログが破壊されないためです。こうして
+おけば、gbichot2-bin.009があり、それをアプライできクラッシュ
+の時点まで立ち返ることができます。（データは失われません）
+柔軟に対応することもできます。クラッシュではなくて問題が
+間違ったDROP DATABASEだったとします。gbichot2-bin.009を
+アプライすることでちょうど誤ったDROP DATABASEの時点まで
+戻ることができます。例えば、誤ったステートメントが
+7:30amころに実行されたわかっているとします。それならば
+データを7amの時点に戻すことができます。（30分の余裕を見て）
+
+mysqlbinlog --stop-datetime=2004-11-17\ 07:00:00 gbichot2-bin.009 | mysql
+
+これはちょっと正確ではありません (約30分ばかりの変更を失った
+ことになります）しかしこの場合は十分でしょう。他の場合では
+そうもいかないかも知れません。その場合はちょうどDROP DATABASE
+の前までmysqlbinlog を実行します。それには簡単な幾つかの
+方法があります。その１つは
+
+mysqlbinlog gbichot2-bin.009 &gt; a_temp_file.sql.
+
+a_temp_file.sqlをお好みのエディターで処理します。テキストの検索
+機能を使って「DROP DATABASE」を探します。
+
+# at 79
+#041117 07:26:08 server id 1  log_pos 79        Query   thread_id=1
+exec_time=0     error_code=0
+use test;
+DELETE FROM `test`.`hea` WHERE col=879865;
+# at 138
+#041117 07:26:08 server id 1  log_pos 138       Query   thread_id=1
+exec_time=0     error_code=0
+DROP DATABASE our_cherished_database;
+# at 198
+#041117 07:26:08 server id 1  log_pos 198       Query   thread_id=1
+exec_time=0     error_code=0
+DELETE FROM `test`.`hea3`;
+
+DROP DATABASEから始まる全ての行を除去して、a_temp_file.sqlを
+セーブして、mysql &lt; a_temp_file.sqlを実行します。これでおしまいです。
+
+まとめ
+
+   1. OSクラッシュか電源の問題の場合、InnoDBが対処
+   2. MySQLサーバーに常にオプションを与えます、--log-binか
+--log-bin=なんらかのデータディスク以外の安全なメディア　で実行
+こうすることでディスクの負荷分散に宜しい（そして性能改善）
+   3. 前述の最後mysqldumpコマンド（オンラインでブロックをしない
+バックアップです。）
+   4. mysqladminを使用して定期的に増分バックアップをしましょう。
+
+ノート1: 実際の例では --user と --password オプションを
+mysqldumpとmysqloptions に指定する必要があります。
+
+ノート2: サーバーがリプレイケーション・マスター・サーバーであれば
+バイナリーログをmysqldump --delete-master-logsで消去するのは危険です。
+マニュアルのリプリケーションの章にはログを消去する前に確認しなければ
+ならないことをあげています。
+---------------------
+Zen Kishimoto                        zen@xxxxxxxxxx
+IP Devices, Inc.                       (408) 567-9391
+2175 De La Cruz Blvd., Suite 10  (801) 720-8847 (FAX)
+Santa Clara, CA 95050
+
+
+
+</pre>
+</div>
+<p class="button"><a href="10757.html">[前]</a><a href="10759.html">[次]</a><a href="../list/10701-10800.html">[番号順一覧]</a><a href="../thread/10701-10800.html">[スレッド一覧]</a></p>
+</body>
+</html>

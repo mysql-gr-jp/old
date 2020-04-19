@@ -1,0 +1,72 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html;CHARSET=x-ujis">
+<TITLE>アンケートサイト -登録確認画面-</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF">
+
+<?
+	/********************************************************/
+	/* WEBデータベース入門 - PHPスクリプト                  */
+	/* アンケートをデータベースに登録する                   */
+	
+	/******************/
+	/* データチェック */
+	if( $sample == "" || $phpfi == "" || $rdbms == "" || $whole == "" ) {
+		echo "未記入の入力項目があります。[←]ボタンで戻って入力してください。<BR>";
+		exit;
+	}
+	
+	/*********************/
+	/* MySQLへデータ登録 */
+	$result = mysql_db_query("questions", 
+		"insert into www_db (" .
+		" register, email, how_old, sex, ocupation," .
+		" sample,phpfi,rdbms,whole )" .
+		"values (" .
+		" '$register', '$email', $how_old, $sex, $ocupation," .
+		" $sample, $phpfi, $rdbms, $whole ) "
+	);
+
+	/**********************/
+	/* 確認画面表示用処理 */
+	if( $register == "" ) { $register = "無記名"; }
+	if( $email == "" ) { $email = "無記名"; }
+	if( $sex == 1 ) { $sex = "男"; } else { $sex = "女"; }
+	$ocupation_str[1] = "学生";
+	$ocupation_str[2] = "プログラマー";
+	$ocupation_str[3] = "ネットワークエンジニア";
+	$ocupation_str[4] = "アプリケーションエンジニア";
+	$ocupation_str[5] = "システムアナリスト";
+?>
+
+
+<CENTER>
+<IMG SRC="http://www.mysql.gr.jp/mysqlml/mysql/msg/1059/1/gif/gif/board.gif">
+<FONT SIZE=+2><B>アンケート登録内容確認画面</B></FONT>
+<IMG SRC="http://www.mysql.gr.jp/mysqlml/mysql/msg/1059/1/gif/gif/board.gif">
+</CENTER><P>
+
+　お答えいただいたアンケートは以下のように登録されました。どうもありがとうございます。<P>
+
+氏名：<? echo $register ?><BR>
+電子メールアドレス：<? echo $email ?><BR>
+年齢：<? echo $how_old ?>歳台　
+性別：<? echo $sex ?>　
+職業：<? echo $ocupation_str[$ocupation] ?><P>
+<TABLE BORDER=1>
+<CENTER>
+<TR><TD>項目</TD><TD>難易度</TD></TR>
+<TR><TD>サンプル解説は</TD><TD><? echo $sample ?></TD></TR>
+<TR><TD>PHP解説は</TD><TD><? echo $phpfi ?></TD></TR>
+<TR><TD>RDBMS解説は</TD><TD><? echo $rdbms ?></TD></TR>
+<TR><TD>全体は</TD><TD><? echo $whole ?></TD></TR>
+</CENTER>
+</TABLE>
+
+<FONT SIZE=-1><I>※大変分かりやすい(1)〜大変難しい(5)</FONT></I><BR>
+
+
+</BODY>
+</HTML>

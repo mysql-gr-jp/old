@@ -1,0 +1,171 @@
+<div dir="ltr">平塚です。<br><br>a) レプリケーションを用いたマスタ/スレーブ構成<br>b) 共有ディスクを用いたアクティブ/スタンバイ構成<br><br>MySQLの冗長構成の方針を上記の2つに分けたとき、<br>本当に「b)がa)の一歩上」かと言われると、<br>どちらが優れた方法かはケースバイケースです。<br><br>人の褌で相撲を取らせていただくと、メリット/デメリットについては<br>Yahooさんの技術ブログ、それからSatoshi MitaniさんのOSC資料が<br>参考になると思います。<br><a href="https://techblog.yahoo.co.jp/database/mysql_1/">https://techblog.yahoo.co.jp/database/mysql_1/</a><br><a href="https://www.slideshare.net/satoshimitani71/osc-2017-osaka-mysql-db">https://www.slideshare.net/satoshimitani71/osc-2017-osaka-mysql-db</a><br><br>また、情報の入手性や今後の進め方といったところで<br>これら2つには違いが出てきます。<br><br>a) はOSSだけで構築することが一般的で、<br>そのため比較的ネット上での情報入手が容易です。<br><br>b) はLifeKeeper、CLUSTERPRO、DRBDなど商用製品が得意とする分野です。<br>こちらの場合はどの製品が向いているかをざっと検討したうえで、<br>各製品ベンダの営業の方と、導入コンサルの依頼も含め話を進めていく<br>ことになると思います。ストレージなどハードウェアに依存する部分も多く、<br>ネット上でまとまった情報を得るのは難しいです。<br><br>それからVMware HAですが、まずVMwareを使用されますか？<br>b) は物理サーバなのかVMwareなのかOpenStackなのかによって<br>設計が大きく変わります。そこも含めて各ベンダさんと話を<br>する必要があります。<br><br>また、VMware HAは仮想サーバの死活監視までしかできないので、<br>「仮想サーバは生きているがMySQLの応答がない」といった事象に<br>対応できません。VMware HAを使いつつも、ミドルウェアの死活監視を<br>別の手段で行うことになります。<br><br>不安を煽ってしまって申し訳ありませんが、<br>じっくりご検討いただければと思います。<br><br>よろしくお願いします。<br></div><div class="gmail_extra"><br><div class="gmail_quote">2017年6月6日 16:22 Seiichi Araki <span dir="ltr">&lt;<a href="mailto:saraki@iij.ad.jp" target="_blank">saraki@iij.ad.jp</a>&gt;</span>:<br><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">藤原さん<br>
+<br>
+お疲れ様です。荒木誠一と申します。<span class=""><br>
+<br>
+&gt; インフラ担当者より、vmware HAを使えるのでは？という話を聞いたのですが、MySQLの冗<wbr>長構成としてvmware HAというのはどうなのでしょうか。<br>
+&gt;<br>
+&gt; この辺りの知見がある方からも、ご意見いただけますと幸いです<br>
+<br></span>
+冗長構成のレイヤがそもそも違いますので、どうなのというのは難<wbr>しいですが<br>
+<br>
+vmware HA は、仮想サーバでの冗長構成をとることなりますので<br>
+範囲が広いものになります。<br>
+<br>
+MySQLの冗長構成は、MySQLでのデータベース管理システ<wbr>ムでの冗長構成をとるので<br>
+範囲がMySQLでの限定的になります。<br>
+<br>
+規模によりますが、仮想サーバ上のデータベースを置く際には、<br>
+同一ホスト上に冗長構成をしているデータベースサーバがあると<br>
+<br>
+ホストに障害時に、データベースが使えません。。単一障害点にな<wbr>り<br>
+MySQLの冗長構成の意味がありません<br>
+<br>
+<br>
+VmwareHAでの<br>
+MySQLの冗長構成を構築するのであれば、ホストは別けていた<wbr>ほうがよろしいかとおもいます<br>
+コストのは話はあります。<br>
+<br>
+よろしくお願いいたします。<span class=""><br>
+<br>
+<br>
+On 2017/06/06 16:04, Yuji Fujihara wrote:<br>
+</span><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><span class="">
+藤原です。<br>
+<br>
+黄世元様、ご回答ありがとうございます。<br>
+<br>
+DRBDについても調べてみます。<br>
+<br>
+インフラ担当者より、vmware HAを使えるのでは？という話を聞いたのですが、MySQLの冗<wbr>長構成としてvmware HAというのはどうなのでしょうか。<br>
+<br>
+この辺りの知見がある方からも、ご意見いただけますと幸いです。<br>
+<br>
+少し調べてみると、vmware HA を採用するくらいなら、他のクラスター構成の手段もあるよという<wbr>ご意見も歓迎です。<br>
+<br>
+よろしくお願い致します。<br>
+<br>
+藤原<br>
+<br>
+<br></span>
+2017年6月6日(火) 14:57 Sewon Hwang (黄 世元) &lt;<a href="mailto:sewon.hwang@cdnetworks.co.jp" target="_blank">sewon.hwang@cdnetworks.co.jp</a> &lt;mailto:<a href="mailto:sewon.hwang@cdnetworks.co.jp" target="_blank">sewon.hwang@cdnetworks<wbr>.co.jp</a>&gt;&gt;:<br>
+<br>
+  藤原さん、____<br>
+<br>
+  お疲れ様です。黄世元申します。____<br>
+<br>
+  冗長構成としては　２台構成であればDRBD+Herbeat+MySQL構成があ<wbr>ります。____<br>
+<br>
+  以前の現場で上記の構成で300台くらいのMySQLを管理した<wbr>んですが、____<br>
+<br>
+  非常に安定的でよかったです。____<br>
+<br>
+  __ __<br>
+<br>
+  DRBD+Herbeat+MySQL参考ページ____<br>
+<br>
+  <a href="http://bougaidenpa.org/wanatabe/archives/20____" rel="noreferrer" target="_blank">http://bougaidenpa.org/wanatab<wbr>e/archives/20____</a><br>
+<br>
+  __ __<br>
+<br>
+<br>
+   メリット：障害時にスレーブサーバへ自動で切り替える____<br>
+<br>
+  *デメリット：*Heartbeatの誤動作*による**Spl<wbr>it Brainの恐れがあります。____*<br>
+<br>
+  *HeartbeatがMasterが死んじゃったと思って、M<wbr>asterとSlaveを切り替えしてしまう現状です。____<wbr>*<br>
+<br>
+  *この問題を防ぐためには、**Hearbeat**の**De<wbr>adtime**の設定が鍵です。**____*<br>
+<br>
+  __ __<br>
+<br>
+  Hearbeatのパラメタに関しては下記のURLを参考してく<wbr>ださい。____<br>
+<br>
+  <a href="http://itpro.nikkeibp.co.jp/article/COLUMN/20090224/325384/?rt=nocnt____" rel="noreferrer" target="_blank">http://itpro.nikkeibp.co.jp/ar<wbr>ticle/COLUMN/20090224/325384/?<wbr>rt=nocnt____</a><br>
+<br>
+  __ __<br>
+<br>
+  ３台構成であればMHA構成もお勧めです。____<br>
+<br>
+  MHA参考ページ____<br>
+<br>
+  <a href="http://qiita.com/youyo_/items/035cce5b8d0052228dfc____" rel="noreferrer" target="_blank">http://qiita.com/youyo_/items/<wbr>035cce5b8d0052228dfc____</a><br>
+<br>
+  __ __<br>
+<br>
+  参考にならないかもしれないですが、____<br>
+<br>
+  よろしくお願いします。____<br>
+<br>
+  __ __<br>
+<br>
+  __ __<br>
+<br>
+  __ __<br>
+<br>
+  ///***************************<wbr>***************************<br>
+  ***Sewon Hwang***Techinical Division System Team*<br>
+  ****CDNetworks Japan *Co., Ltd<br>
+  Email：<a href="mailto:sewon.hwang@cdnetworks.co.jp" target="_blank">sewon.hwang@cdnetworks.c<wbr>o.jp</a> &lt;mailto:<a href="mailto:sewon.hwang@cdnetworks.co.jp" target="_blank">sewon.hwang@cdnetworks<wbr>.co.jp</a>&gt;<br>
+  NittochiNishi-shinjuku Bldg 8^th Floor<span class=""><br>
+  6-10-1, Nishi-Shinjuku, Shinjuku-ku, Tokyo, Japan 160-0023<br>
+    Office：<a href="tel:%2B81.3.5909.3329" value="+81359093329" target="_blank">+81.3.5909.3329</a> | FAX：<a href="tel:%2B81.3.5909.3360" value="+81359093360" target="_blank">+81.3.5909.3360</a> | Cell：<a href="tel:%2B81.90.9137.8608" value="+819091378608" target="_blank">+81.90.9137.8608</a><br></span>
+    URL：<a href="http://www.cdnetworks.co.jp" rel="noreferrer" target="_blank">www.cdnetworks.co.jp</a> &lt;<a href="http://www.cdnetworks.co.jp/" rel="noreferrer" target="_blank">http://www.cdnetworks.co.jp/</a>&gt;<wbr>____<br>
+<br>
+<br>
+  ******************************<wbr>************************///___<wbr>_<br>
+<br>
+  __ __<br>
+<br>
+  *From:*Yuji Fujihara [mailto:<a href="mailto:yflab73@gmail.com" target="_blank">yflab73@gmail.com</a> &lt;mailto:<a href="mailto:yflab73@gmail.com" target="_blank">yflab73@gmail.com</a>&gt;]<br>
+  *Sent:* Tuesday, June 6, 2017 2:32 PM<br>
+  *To:* <a href="mailto:ml@mysql.gr.jp" target="_blank">ml@mysql.gr.jp</a> &lt;mailto:<a href="mailto:ml@mysql.gr.jp" target="_blank">ml@mysql.gr.jp</a>&gt;<br>
+  *Subject:* [mysql 16407] MySQLの代表的な冗長構成について____<br>
+<br>
+  __ __<br>
+<br>
+  藤原と申します。____<br>
+<br>
+  __ __<br>
+<br>
+  現在、MySQLの冗長構成を検討しております。____<br>
+<br>
+  __ __<br>
+<br>
+  そこで、MySQLの代表的な冗長構成の例について、どなたかご<wbr>教示いただけますと幸いです。____<br>
+<br>
+  __ __<br>
+<br>
+  基本的にはレプリケーションによる、マスター、スレーブ構成では<wbr>なく、その一歩上の冗長構成を検討しております。____<br>
+<br>
+  __ __<br>
+<br>
+  現在検討しているのは、共有ディスクを使用したアクティブ、スタ<wbr>ンバイの冗長構成を検討しております。____<br>
+<br>
+  __ __<br>
+<br>
+  具体的にどのようなHA関連の技術およびソフトウェアを使用する<wbr>構成が良いか、メリット、デメリットなどアドバイスいただけます<wbr>と幸いです。____<br>
+<br>
+  __ __<br>
+<br>
+  以上、よろしくお願い致します。____<br>
+<br>
+  __ __<br>
+<br>
+  藤原____<br>
+<br><span class="HOEnZb"><font color="#888888">
+</font></span></blockquote><span class="HOEnZb"><font color="#888888">
+<br>
+-- <br>
+==============================<wbr>==============================<br>
+荒木　誠一 / Seiichi Araki<br>
+株式会社インターネットイニシアティブ<br>
+クラウド本部　クラウドサービス2部<br>
+データベース技術課　エンジニア<br>
+<br>
+E-mail：<a href="mailto:saraki@iij.ad.jp" target="_blank">saraki@iij.ad.jp</a><br>
+Tel: <a href="tel:03-5305-6342" value="+81353056342" target="_blank">03-5305-6342</a> Fax: <a href="tel:03-5205-6537" value="+81352056537" target="_blank">03-5205-6537</a><br>
+<br>
+==============================<wbr>==============================<br>
+<br>
+</font></span></blockquote></div><br><br clear="all"><br>-- <br><div class="gmail_signature" data-smartmail="gmail_signature">平塚貞夫 &lt;<a href="mailto:sh2@pop01.odn.ne.jp" target="_blank">sh2@pop01.odn.ne.jp</a>&gt;<br></div>
+</div>

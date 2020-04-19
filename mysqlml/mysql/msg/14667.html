@@ -1,0 +1,189 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14667</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14666.html">[前]</a><a href="14668.html">[次]</a><a href="../list/14601-14700.html">[番号順一覧]</a><a href="../thread/14601-14700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14667
+</p>
+<div class="header">
+<p>
+From: Taichiro Yoshida &lt;Taichiro Yoshida &lt;taichiro.yoshida@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 17 Nov 2008 17:03:05 +0900<br>
+Subject: [mysql 14667] Re: phpでの追加について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+吉田です。
+
+加藤さんが仰るように、頭のほうでmysql_select_dbを実行して、
+あとはmysql_queryでやるのがいいかと思います(^^)
+いずれにせよ、mysql_db_queryは廃止予定メソッドなので、、、(&gt;&lt;;)
+
+c-atwork さんは書きました:
+<span class="quote1">&gt; 加藤です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; あ、そういうこともあるんですかね。</span>
+<span class="quote1">&gt; となると、非推奨の mysql_db_query を使わずに</span>
+<span class="quote1">&gt; $result = mysql_query($W_SQL);</span>
+<span class="quote1">&gt; で良いかもですね。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 明示的にしたいならば</span>
+<span class="quote1">&gt; $res    = mysql_select_db($db)</span>
+<span class="quote1">&gt; $result = mysql_query($W_SQL);</span>
+<span class="quote1">&gt; とすれば丁寧でしょうか。不要だとは思いますが。</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt; 吉田です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 試していないので確証はないですが、</span>
+<span class="quote2">&gt;&gt; mysql_db_queryとmysql_queryが混在しているため、</span>
+<span class="quote2">&gt;&gt; コネクションが別になってしまって、トランザクションが効いていない</span>
+<span class="quote2">&gt;&gt; ということはないでしょうか。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; c-atwork さんは書きました:</span>
+<span class="quote3">&gt;&gt;&gt; 加藤です。お世話になります。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; たとえばphpMyAdminなどで、該当のテーブルに</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; INSERT INTO Question(RecType, Qs_CD, Qs_DatE, Qs_Time, Qs_Quetion01,</span>
+<span class="quote3">&gt;&gt;&gt; Qs_Quetion02, Qs_Quetion03, Qs_Quetion04, Qs_Quetion05, Qs_Quetion06,</span>
+<span class="quote3">&gt;&gt;&gt; Qs_Quetion07, Qs_Quetion08, Qs_Quetion09, Qs_Quetion10, SendRecord,</span>
+<span class="quote3">&gt;&gt;&gt; Timestamp ) VALUES ('Qs', 'TRIALE200811', '2008/11/17', '16:27:1', '',</span>
+<span class="quote3">&gt;&gt;&gt; '', '', '', '', '', '', '', '','', '',''</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; を投げるとちゃんとインサートされるということでいいですか？</span>
+<span class="quote3">&gt;&gt;&gt; 実は、nullを許可してないフィールドがあるとかではないですよね？</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; お世話をおかけします。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; tuchida です。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 長文で申し訳ありませんが</span>
+<span class="quote4">&gt;&gt;&gt;&gt; ソースは以下の通りです。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      /*   デバッグ     */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      /* print(&quot;TrialkitDBPut Start&lt;BR&gt;\n&quot;); */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      /*   データベース接続       */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $dbHost = &quot;localhost&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $dbUser = &quot;ancate&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $dbPass = &quot;5506&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $dbName = &quot;v55Ancate&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $db = mysql_pconnect($dbHost, $dbUser, $dbPass);</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      /*   デバッグ   */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      print(&quot;db = &quot; . $db . &quot;&lt;BR&gt;\n&quot; );</span>
+<span class="quote4">&gt;&gt;&gt;&gt;     /*    キャラクタセット設定    */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;     $W_SQL = &quot;SET NAMES UTF-8&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;     $sqlRes = mysql_query($W_SQL);</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      /*   デバッグ   */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      print(&quot;sqlRes (SET NAMES )= &quot; . $sqlRes . &quot;&lt;BR&gt;\n&quot; );</span>
+<span class="quote4">&gt;&gt;&gt;&gt;     /*    トランザクション開始    */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;     $W_SQL = &quot;begin&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;     $sqlRes = mysql_query($W_SQL);</span>
+<span class="quote4">&gt;&gt;&gt;&gt;       /*   デバッグ   */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      print(&quot;sqlRes = &quot; . $sqlRes . &quot;&lt;BR&gt;\n&quot; );</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      /*   データベース出力       */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $d      = getDate();</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_DATE = $d[&quot;year&quot;] . &quot;/&quot; . $d[&quot;mon&quot;] . &quot;/&quot; . $d[&quot;mday&quot;];</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_TIME = $d[&quot;hours&quot;] . &quot;:&quot; . $d[&quot;minutes&quot;] . &quot;:&quot; . $d[&quot;seconds&quot;];</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL =        &quot;INSERT INTO Question(&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.&quot;RecType, Qs_CD, Qs_DatE, Qs_Time, &quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.&quot;Qs_Quetion01, Qs_Quetion02, Qs_Quetion03,</span>
+<span class="quote4">&gt;&gt;&gt;&gt; Qs_Quetion04, Qs_Quetion05, &quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.&quot;Qs_Quetion06, Qs_Quetion07, Qs_Quetion08,</span>
+<span class="quote4">&gt;&gt;&gt;&gt; Qs_Quetion09, Qs_Quetion10, &quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.&quot;SendRecord, Timestamp ) &quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.&quot;VALUES (&quot; ;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.&quot;'Qs', 'TRIALE200811', '&quot; . $W_DATE . &quot;', '&quot; . $W_TIME</span>
+<span class="quote4">&gt;&gt;&gt;&gt; . &quot;', '&quot; . $pName.&quot;', '&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.$pAddress.&quot;', '&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.$pTel.&quot;', '&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.$pEmail.&quot;', '&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.$pSex.&quot;', '&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.$pNenrei.&quot;', '&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.$pQuetion1.&quot;', '&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.$pQuetion2.&quot;', '','', &quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = $W_SQL.&quot;'','')&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      /*   デバッグ   */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      print($W_SQL . &quot;&lt;BR&gt;\n&quot; );</span>
+<span class="quote4">&gt;&gt;&gt;&gt;     $result = mysql_db_query($W_SQL, $db);</span>
+<span class="quote4">&gt;&gt;&gt;&gt;     /*   デバッグ   */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      print(&quot;SQLAfter = &quot; . $result . &quot;&lt;BR&gt;\n&quot; );</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      /*   コミット   */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $W_SQL = &quot;commit&quot;;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      $result = mysql_db_query($W_SQL, $db);</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      /*   デバッグ   */</span>
+<span class="quote4">&gt;&gt;&gt;&gt;      print(&quot;result = &quot; . $result . &quot;&lt;BR&gt;\n&quot; );</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; ----- Original Message ----- </span>
+<span class="quote4">&gt;&gt;&gt;&gt; From: &quot;Tuchida&quot; &lt;tuchida_toshiyuki@xxxxxxxxxx&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; To: &lt;ml@xxxxxxxxxx&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; Sent: Monday, November 17, 2008 9:30 AM</span>
+<span class="quote4">&gt;&gt;&gt;&gt; Subject: <a href="14656.html">[mysql 14656]</a> phpでの追加について</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; tuchidaです</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 本当に久々の投稿です。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 今ｐｈｐでプログラムを書いているのですがINSERT文がうまく実行されません。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; （エラーログの場所がわからないのでちゃんと報告できないでのですが、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; １．データベースのコネクトとUSE文にかんしてはOKと思われる。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; ２．INSERT文のSQL内容についてはデバックで文字列をmysqlコマンドにて確認済み</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 　　（正しく追加されています）</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; ３．mysql_query(）での「bigin」と「Commit」に関しては正常（１が返ってきま</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; す）</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; ４．mysql_query(）でも、mysql_db_query(）でも値が帰らず、か追加されませ</span>
+<span class="quote4">&gt;&gt;&gt;&gt; ん。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; Mysqlのバージョンは4.1.13で、ｐｈｐは４．４．０です。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; __________  ESET Smart Security からの情報, ウイルス定義データベースのバー</span>
+<span class="quote4">&gt;&gt;&gt;&gt; ジョン 3615 (20081115) __________</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; このメッセージは ESET Smart Security によって検査済みです。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; <a href="http://canon-its.jp">http://canon-its.jp</a></span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote1">&gt; </span>
+
+-- 
+吉田　太一郎
+taichiro.yoshida@xxxxxxxxxx
+<a href="http://iddy.jp/profile/dataich/">http://iddy.jp/profile/dataich/</a>
+
+</pre>
+</div>
+<p class="button"><a href="14666.html">[前]</a><a href="14668.html">[次]</a><a href="../list/14601-14700.html">[番号順一覧]</a><a href="../thread/14601-14700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14656.html">  14656 2008-11-17 09:30 [&quot;Tuchida&quot; &lt;tuchida_t] phpでの追加について                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14659.html">  14659 2008-11-17 16:07 ┣[&quot;Tuchida&quot; &lt;tuchida_t]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14660.html">  14660 2008-11-17 16:31 ┃┣[c-atwork &lt;ml@xxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14661.html">  14661 2008-11-17 16:36 ┃┃┗[Taichiro Yoshida &lt;ta]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14663.html">  14663 2008-11-17 16:47 ┃┃　┗[c-atwork &lt;ml@xxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14665.html">  14665 2008-11-17 16:52 ┃┃　　┣[c-atwork &lt;ml@xxxxxxx]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="14667.html">  14667 2008-11-17 17:03 ┃┃　　┗[Taichiro Yoshida &lt;ta]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14662.html">  14662 2008-11-17 16:40 ┃┣[TakeshiOtsuki &lt;t-ots]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14668.html">  14668 2008-11-17 17:21 ┃┗[Taichiro Yoshida &lt;ta]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14669.html">  14669 2008-11-17 18:00 ┃　┗[Takanori Jokura &lt;jo@]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14672.html">  14672 2008-11-17 20:55 ┃　　┗[Taichiro Yoshida &lt;ta]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14666.html">  14666 2008-11-17 16:59 ┣[&quot;Tuchida&quot; &lt;tuchida_t]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14670.html">  14670 2008-11-17 19:30 ┗[&quot;Tuchida&quot; &lt;tuchida_t]                                       </a></span>
+</pre>
+</body>
+</html>

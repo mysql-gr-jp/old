@@ -1,0 +1,129 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14886</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14885.html">[前]</a><a href="14887.html">[次]</a><a href="../list/14801-14900.html">[番号順一覧]</a><a href="../thread/14801-14900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14886
+</p>
+<div class="header">
+<p>
+From: Tetsuro IKEDA &lt;Tetsuro IKEDA &lt;ikdttr@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 26 May 2009 18:51:24 +0900<br>
+Subject: [mysql 14886] Re: バッチ処理のUPDATEでmysqld got signal  11が発生する<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。池田です。
+
+32bitOSだからではとの指摘がありましたが、ログに、
+
+<span class="quote1">&gt; thd: 0xc7064b8</span>
+<span class="quote1">&gt; stack_bottom = 0x24c513b8 thread_stack 0x30000</span>
+
+とでていることから32bitOSであることは間違いないですね。
+
+key_buffer_size=2147483648　←2GB
+
+このkey_buffer_sizeを1.5GBあるいは1GBくらいに減らして
+見てはどうでしょう。
+
+2009/05/26 17:16 浅山雄三 &lt;ALCYONE@xxxxxxxxxx&gt;:
+<span class="quote1">&gt;  浅山と申します。いつもお世話になります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  約20万件のデータをバッチ処理でUPDATEしている途中でmysqld got</span>
+<span class="quote1">&gt; signal 11となり、コネクションが切れてしまいます。同じデータで何回か実行</span>
+<span class="quote1">&gt; してみましたが、ある時は数千件目、またある時は10数万件目と、実行する度</span>
+<span class="quote1">&gt; にsignal 11が発生するレコードが違っています。</span>
+<span class="quote1">&gt;  signal 11を回避する何かいい手立てがありましたらお教えください。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 【環境】</span>
+<span class="quote1">&gt; REDHAT 5.1</span>
+<span class="quote1">&gt; MySQL 5.1.32</span>
+<span class="quote1">&gt; PHP 5.2.8</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 【エラー・ログ】</span>
+<span class="quote1">&gt; 090526  6:13:28 - mysqld got signal 11 ;</span>
+<span class="quote1">&gt; This could be because you hit a bug. It is also possible that this</span>
+<span class="quote1">&gt; binary</span>
+<span class="quote1">&gt; or one of the libraries it was linked against is corrupt, improperly</span>
+<span class="quote1">&gt; built,</span>
+<span class="quote1">&gt; or misconfigured. This error can also be caused by malfunctioning</span>
+<span class="quote1">&gt; hardware.</span>
+<span class="quote1">&gt; We will try our best to scrape up some info that will hopefully help</span>
+<span class="quote1">&gt; diagnose</span>
+<span class="quote1">&gt; the problem, but since we have already crashed, something is definitely</span>
+<span class="quote1">&gt; wrong</span>
+<span class="quote1">&gt; and this may fail.</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; key_buffer_size=2147483648</span>
+<span class="quote1">&gt; read_buffer_size=2097152</span>
+<span class="quote1">&gt; max_used_connections=2</span>
+<span class="quote1">&gt; max_threads=200</span>
+<span class="quote1">&gt; threads_connected=2</span>
+<span class="quote1">&gt; It is possible that mysqld could use up to</span>
+<span class="quote1">&gt; key_buffer_size + (read_buffer_size + sort_buffer_size)*max_threads =</span>
+<span class="quote1">&gt; 2917622 K</span>
+<span class="quote1">&gt; bytes of memory</span>
+<span class="quote1">&gt; Hope that's ok; if not, decrease some variables in the equation.</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; thd: 0xc7064b8</span>
+<span class="quote1">&gt; Attempting backtrace. You can use the following information to find out</span>
+<span class="quote1">&gt; where mysqld died. If you see no messages after this, something went</span>
+<span class="quote1">&gt; terribly wrong...</span>
+<span class="quote1">&gt; stack_bottom = 0x24c513b8 thread_stack 0x30000</span>
+<span class="quote1">&gt; Trying to get some variables.</span>
+<span class="quote1">&gt; Some pointers may be invalid and cause the dump to abort...</span>
+<span class="quote1">&gt; thd-&gt;query at 0xa0bf070 = update tp_catalog set ngram = '〜〜'</span>
+<span class="quote1">&gt; thd-&gt;thread_id=669</span>
+<span class="quote1">&gt; thd-&gt;killed=NOT_KILLED</span>
+<span class="quote1">&gt; The manual page at <a href="http://dev.mysql.com/doc/mysql/en/crashing.html">http://dev.mysql.com/doc/mysql/en/crashing.html</a></span>
+<span class="quote1">&gt; contains</span>
+<span class="quote1">&gt; information that should help you find out what is causing the crash.</span>
+<span class="quote1">&gt; 090526 06:13:28 mysqld_safe Number of processes running now: 0</span>
+<span class="quote1">&gt; 090526 06:13:28 mysqld_safe mysqld restarted</span>
+<span class="quote1">&gt; InnoDB: The log sequence number in ibdata files does not match</span>
+<span class="quote1">&gt; InnoDB: the log sequence number in the ib_logfiles!</span>
+<span class="quote1">&gt; 090526  6:13:29  InnoDB: Database was not shut down normally!</span>
+<span class="quote1">&gt; InnoDB: Starting crash recovery.</span>
+<span class="quote1">&gt; InnoDB: Reading tablespace information from the .ibd files...</span>
+<span class="quote1">&gt; InnoDB: Restoring possible half-written data pages from the doublewrite</span>
+<span class="quote1">&gt; InnoDB: buffer...</span>
+<span class="quote1">&gt; 090526  6:13:29  InnoDB: Started; log sequence number 0 468460067</span>
+<span class="quote1">&gt; 090526  6:13:29 [Note] Event Scheduler: Loaded 0 events</span>
+<span class="quote1">&gt; 090526  6:13:29 [Note] /opac/pp/mysql/bin/bin/mysqld: ready for</span>
+<span class="quote1">&gt; connections.</span>
+<span class="quote1">&gt; Version: '5.1.32'  socket: '/tmp/mysql.sock'  port: 3306  MySQL</span>
+<span class="quote1">&gt; Community Server (GPL)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  2009年5月26日 17:11:29 (^o^)浅山雄三</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="14885.html">[前]</a><a href="14887.html">[次]</a><a href="../list/14801-14900.html">[番号順一覧]</a><a href="../thread/14801-14900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14884.html">  14884 2009-05-26 17:16 [&lt;ALCYONE@xxxxxxxxxx&gt;] バッチ処理のUPDATEでmysqld got signal  11が発生する</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14885.html">  14885 2009-05-26 17:32 ┣[Katsutoshi Nakatomi ]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14886.html">  14886 2009-05-26 18:51 ┗[Tetsuro IKEDA &lt;ikdtt]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14888.html">  14888 2009-05-27 09:24 　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14889.html">  14889 2009-05-28 12:52 　　┗[&lt;ALCYONE@xxxxxxxxxx&gt;] Re: バッチ処理のUPDATEでmysqld got signal  11が発生する  【再発】</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14890.html">  14890 2009-06-05 10:49 　　　┗[&lt;ALCYONE@xxxxxxxxxx&gt;] Re: バッチ処理のUPDATEでmysqld got signal  11が発生する  【再発】他に類似事象？有り</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14891.html">  14891 2009-06-05 11:39 　　　　┗[&quot;Kaname Kuji\(Y7\)&quot; ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14892.html">  14892 2009-06-05 12:16 　　　　　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14893.html">  14893 2009-06-05 12:44 　　　　　　┗[&quot;Kaname Kuji\(Y7\)&quot; ]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14894.html">  14894 2009-06-05 12:53 　　　　　　　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14895.html">  14895 2009-06-05 14:44 　　　　　　　　┗[&quot;Kaname Kuji\(Y7\)&quot; ]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14913.html">  14913 2009-06-10 12:57 　　　　　　　　　┗[&lt;ALCYONE@xxxxxxxxxx&gt;]                     </a></span>
+</pre>
+</body>
+</html>

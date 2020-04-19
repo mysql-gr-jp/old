@@ -1,0 +1,73 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6088</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="6087.html">[前]</a><a href="6089.html">[次]</a><a href="../list/6001-6100.html">[番号順一覧]</a><a href="../thread/6001-6100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6088
+</p>
+<div class="header">
+<p>
+From: &quot;HIROSE, Masaaki&quot; &lt;&quot;HIROSE, Masaaki&quot; &lt;hirose31@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 05 Sep 2002 11:22:53 +0900<br>
+Subject: [mysql 06088] Connector/J 2.0.14 で BINARY キーワード付きカラムの値が正しく得られない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+初めまして。ひろせといいます
+
+次のような環境
+
+  サーバー
+    Red Hat Linux 7.2 / glibc 2.2.4
+    MySQL 3.23.52 / default-character-set = sjis オプション付きで起動
+
+  クライアント
+    Red Hat Linux 7.2 / glibc 2.2.4
+    Java アプリケーション
+    J2SE 1.3.1_01
+    Connector/J 2.0.14 / useUnicode=true&amp;characterEncoding=Shift_JIS
+                         オプション付きで接続
+
+で、
+  CREATE TABLE tbin ( c VARCHAR(32) BINARY );
+なテーブルへの insert, update はうまくいくのですが、select すると
+&quot;[B@〜&quot; という文字列に文字化けしてしまいます。日本語でも US-ASCII な文
+字列でもです。
+
+どうも原因は BINARY キーワードで、実行環境は全く同じで、BINARY キーワー
+ドが付いていないテーブル
+  CREATE TABLE t    ( c VARCHAR(32) );
+に対しては期待通りの文字列が得られます。
+
+これは既知の問題なのでしょうか?
+
+また、対応策として以下のものを考えたのですが、これら以外に何かよい案が
+あればご教授願いたいです。
+# 今のところ、Connector/J 3.0.0-beta を使おうと思っています。
+
+  o Connector/J 3.0.0-beta を使う
+
+  o CREATE TABLE 時に BINARY キーワードをつけないで、比較演算を行う場
+    合は BINARY 演算子を使って大文字小文字の区別をするようにする。
+    ただし、INSERT, UPDATE 時は &quot;hirose&quot; も &quot;HiRoSe&quot; も同値とみなされ
+    るので、一意制約がついている場合は注意が必要。
+
+  o CREATE TABLE 時に BINARY キーワードをつけて、BINARY キーワードがつ
+    いたカラムの値を得るときは ResultSet.getString ではなくて、
+    new String(ResultSet.getBytes(1), &quot;Shift_JIS&quot;) を使う。
+
+
+-- 
+ひろせ
+
+</pre>
+</div>
+<p class="button"><a href="6087.html">[前]</a><a href="6089.html">[次]</a><a href="../list/6001-6100.html">[番号順一覧]</a><a href="../thread/6001-6100.html">[スレッド一覧]</a></p>
+</body>
+</html>

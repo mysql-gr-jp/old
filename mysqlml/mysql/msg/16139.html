@@ -1,0 +1,132 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16139</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16138.html">[前]</a><a href="16140.html">[次]</a><a href="../list/16101-16200.html">[番号順一覧]</a><a href="../thread/16101-16200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16139
+</p>
+<div class="header">
+<p>
+From: &quot;Kenji Kawachi&quot; &lt;&quot;Kenji Kawachi&quot; &lt;k.kawachi@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 10 Jul 2014 10:17:26 +0900<br>
+Subject: [mysql 16139] Re: [mysql 16138] Re: [mysql 16137] root@localhostのグローバル特権の復旧<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+yoku0825さん。
+ありがとうございます。試してみます。
+
+
+From: yoku ts.
+Sent: Wednesday, July 09, 2014 6:40 PM
+To: ml@xxxxxxxxxx
+Subject: <a href="16138.html">[mysql 16138]</a> Re: <a href="16137.html">[mysql 16137]</a> root@localhostのグローバル特権の復旧
+
+こんにちは、yoku0825といいます。
+
+--skip-grant-tables で起動した状態で、mysql.userテーブルにINSERTをかけます。
+
+mysql&gt; SHOW CREATE TABLE mysql.user\G
+*************************** 1. row ***************************
+       Table: user
+Create Table: CREATE TABLE `user` (
+  `Host` char(60) collate utf8_bin NOT NULL default '',
+  `User` char(16) collate utf8_bin NOT NULL default '',
+  `Password` char(41) character set latin1 collate latin1_bin NOT NULL default '',
+  `Select_priv` enum('N','Y') character set utf8 NOT NULL default 'N',
+...
+  `max_connections` int(11) unsigned NOT NULL default '0',
+  `max_user_connections` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`Host`,`User`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='Users and global privileges'
+1 row in set (0.01 sec)
+
+
+* カラム名を調べます。
+
+mysql&gt; INSERT INTO mysql.user SET
+    -&gt; Host= 'localhost',
+    -&gt; User= 'yoku0825',
+    -&gt; Password= PASSWORD('s3cret'),
+    -&gt; Select_priv= 'Y',
+    -&gt; Insert_priv= 'Y',
+...
+    -&gt; ssl_type= '',
+    -&gt; ssl_cipher= '',
+    -&gt; x509_issuer= '',
+    -&gt; x509_subject= '',
+    -&gt; max_questions= 0,
+    -&gt; max_updates= 0,
+    -&gt; max_user_connections= 0
+    -&gt; ;
+Query OK, 1 row affected (0.00 sec)
+
+* INSERT INTO .. SET構文を使っていますが、VALUESでも構いません。
+* なんちゃら_privのカラムを全て'Y'のユーザーを作ります。
+* passwordはPASSWORD関数を通す必要があります。
+
+この後、--skip-grant-tablesを外して再起動すると、追加したユーザーが使えるようになります。
+(↑の例であればyoku0825@localhostでパスワードがs3cret)
+
+
+yoku0825,
+
+
+
+2014年7月9日 17:53 Kenji Kawachi &lt;k.kawachi@xxxxxxxxxx&gt;:
+
+  河内と申します。
+
+  phpmyadminでrootのグローバル特権をすべて外して実行をしてしまいました。
+  回復の方法をご存じの方、ご教授ください。
+
+  my.cnf に
+  --skip-grant-tables
+  を追加し、再起動。
+
+  クエリで以下を実行したのですが、
+  GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
+
+  以下のエラーがでてしまいます。
+  ERROR 1290 (HY000): The MySQL server is running with the --skip-grant-tables option so it cannot execute this statement
+
+  バージョンはmysql5.0.45です。
+
+  よろしくお願いいたします。
+
+
+
+
+
+
+---
+アバスト! アンチウイルス によって保護されているため、このメールはウイルスやマルウェアに感染していません。
+<a href="http://www.avast.com">http://www.avast.com</a>
+
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="16139/0/index.html"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="16138.html">[前]</a><a href="16140.html">[次]</a><a href="../list/16101-16200.html">[番号順一覧]</a><a href="../thread/16101-16200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16083.html">  16083 2014-01-23 16:20 [tutui &lt;tutui@xxxxxxx] 第2回 MariaDB/MySQL  のコミュニティイベント</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16090.html">  16090 2014-02-17 11:54 ┗[tutui &lt;tutui@xxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16091.html">  16091 2014-02-17 12:23 　┣[遠藤 俊裕 &lt;endo@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16092.html">  16092 2014-02-19 19:26 　┃┗[tutui &lt;tutui@xxxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16137.html">  16137 2014-07-09 17:53 　┗[&quot;Kenji Kawachi&quot; &lt;k.k] root@localhostのグローバル特権の復旧</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16138.html">@ 16138 2014-07-09 18:40 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16137] root@localhostのグローバル特権の復旧</a></span>
+<span class="current">-&gt;&nbsp;<a href="16139.html">@ 16139 2014-07-10 10:17 　　　┗[&quot;Kenji Kawachi&quot; &lt;k.k] Re: [mysql 16138] Re: [mysql 16137] root@localhostのグローバル特権の復旧</a></span>
+</pre>
+</body>
+</html>

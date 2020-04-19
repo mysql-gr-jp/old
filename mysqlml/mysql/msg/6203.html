@@ -1,0 +1,121 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6203</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="6202.html">[前]</a><a href="6204.html">[次]</a><a href="../list/6201-6300.html">[番号順一覧]</a><a href="../thread/6201-6300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6203
+</p>
+<div class="header">
+<p>
+From: Tomohiro 'Tomo-p' KATO &lt;Tomohiro 'Tomo-p' KATO &lt;tomop@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 18 Sep 2002 13:05:40 +0900<br>
+Subject: [mysql 06203] Re: テーブル作成数の上限<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+　こんにちは、加藤です。
+
+In message &quot;<a href="06201.html">[mysql 06201]</a> Re: テーブル作成数の上限&quot;,
+Show &lt;for_news@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt;本来は一つのテーブルにまとめたいのですが、そうすると</span>
+<span class="quote1">&gt;今度は最大10000〜15000カラム、最大100万レコード程度の</span>
+<span class="quote1">&gt;巨大テーブルになってしまう可能性があるのです。</span>
+
+　　100 万レコードは『まあ多めかな』くらいに思いますが、フィールド数は
+　異常ですね。正規化してもそうなるのでしょうか。
+
+<span class="quote1">&gt;イメージとしては100万程度の商品レコードがあって、</span>
+<span class="quote1">&gt;5000社がその中のそれぞれ2〜3万レコード（重複あり）に対して</span>
+<span class="quote1">&gt;それぞれ3カラム程度のデータを付与するという感じです。</span>
+
+　　付与データの形式が顧客間で共通であれば、下のようなやり方もあります。
+
+○顧客マスタ
+CREATE TABLE CUSTOMERS
+(
+  CstmID int(11) NOT NULL auto_increment,  ← 顧客 ID
+  CstmName varchar(64),                    ← 顧客名
+  PRIMARY KEY (CustomerID)
+);
+
+○商品マスタ
+CREATE TABLE ITEMS
+(
+  ItemID int(11) NOT NULL auto_increment,  ← 商品 ID
+  ItemName varchar(64),                    ← 商品名
+  Price int(11),                           ← 価格
+  PRIMARY KEY (ItemID)
+);
+
+○顧客・商品対応テーブル
+CREATE TABLE CORRESPOND
+(
+  CrID int(11) NOT NULL auto_increment,    ← 対応 ID  
+  CstmID int(11) NOT NULL,                 ← 顧客 ID
+  ItemID int(11) NOT NULL,                 ← 商品 ID
+  PRIMARY KEY (CrID),
+  KEY (CstmID, ItemID)
+);
+
+○付与データテーブル
+CREATE TABLE ADDITIONAL
+(
+  CrID int(11) NOT NULL,                   ← 対応 ID
+  AddData varchar(64),                     ← 付与データ
+  KEY (CrID)
+);
+
+○顧客ごとの商品名・価格・付与データ
+SELECT ItemName,Price,AddData FROM 
+(ITEMS AS I INNER JOIN CORRESPOND AS C ON I.ItemID=C.ItemID) 
+INNER JOIN ADDITIONAL AS A ON C.CrID=A.CrID 
+WHERE CstmID=n;
+
+○顧客ごとの商品数
+SELECT COUNT(*) FROM CORRESPOND WHERE CstmID=n;
+
+<span class="quote1">&gt;■スピードはそれほど必要としない</span>
+
+　　といっても共用レンタルということはなるべく負荷がかからず、サーバリソースを
+　占有しないように留意しないといけませんね。
+
+--  ________________________________
+  _/_/  Tomohiro &quot;Tomo-p&quot; KATO
+ _/_/  e-mail : tomop@xxxxxxxxxx
+_/_/  <a href="http://www.teamgedoh.net/">http://www.teamgedoh.net/</a>
+
+</pre>
+</div>
+<p class="button"><a href="6202.html">[前]</a><a href="6204.html">[次]</a><a href="../list/6201-6300.html">[番号順一覧]</a><a href="../thread/6201-6300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="6171.html">   6171 2002-09-16 19:18 [&quot;Shuji Urano&quot; &lt;pipo@]                                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6174.html">   6174 2002-09-16 19:49 ┗[&quot;Takashi Yamashita&quot; ] Re: アクセス拒否（仮題）              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6175.html">   6175 2002-09-16 20:57 　┗[&quot;Shuji Urano&quot; &lt;pipo@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6176.html">   6176 2002-09-16 21:20 　　┗[&quot;Takashi Yamashita&quot; ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6181.html">   6181 2002-09-17 04:05 　　　┗[&quot;Shuji Urano&quot; &lt;pipo@] Re: アクセス拒否                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6189.html">   6189 2002-09-17 09:48 　　　　┣[&quot;Takashi Yamashita&quot; ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6192.html">   6192 2002-09-17 10:39 　　　　┗[&quot;Takashi Yamashita&quot; ]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6193.html">   6193 2002-09-17 11:26 　　　　　┗[&quot;Takashi Yamashita&quot; ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6194.html">   6194 2002-09-18 08:28 　　　　　　┗[Show &lt;for_news@xxxxx] テーブル作成数の上限      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6195.html">   6195 2002-09-18 09:10 　　　　　　　┣[遠藤 俊裕 &lt;endo_t@xx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6196.html">   6196 2002-09-18 09:45 　　　　　　　┣[&quot;Takashi Yamashita&quot; ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6199.html">   6199 2002-09-18 10:18 　　　　　　　┃┣[遠藤 俊裕 &lt;endo_t@xx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6200.html">   6200 2002-09-18 10:42 　　　　　　　┃┃┗[&quot;Takashi Yamashita&quot; ]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6201.html">   6201 2002-09-18 11:48 　　　　　　　┃┗[Show &lt;for_news@xxxxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6202.html">   6202 2002-09-18 12:17 　　　　　　　┃　┣[Shingo Yamagai &lt;yama]                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="6203.html">   6203 2002-09-18 13:05 　　　　　　　┃　┣[Tomohiro 'Tomo-p' KA]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6204.html">   6204 2002-09-18 13:17 　　　　　　　┃　┣[&quot;黒木 玲&quot; &lt;kuroki434]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6205.html">   6205 2002-09-18 13:33 　　　　　　　┃　┗[&quot;Takashi Yamashita&quot; ]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6215.html">   6215 2002-09-18 20:48 　　　　　　　┃　　┗[Show &lt;for_news@xxxxx]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6197.html">   6197 2002-09-18 10:00 　　　　　　　┗[&quot;TAKAHASHI, Tomohiro]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6198.html">   6198 2002-09-18 10:14 　　　　　　　　┗[遠藤 俊裕 &lt;endo_t@xx]                       </a></span>
+</pre>
+</body>
+</html>

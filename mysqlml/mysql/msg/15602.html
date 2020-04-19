@@ -1,0 +1,128 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15602</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15601.html">[前]</a><a href="15603.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15602
+</p>
+<div class="header">
+<p>
+From: Seiichirou Hiraoka &lt;Seiichirou Hiraoka &lt;flathill@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 06 Jun 2011 14:02:02 +0900 (JST)<br>
+Subject: [mysql 15602] Re: レプリケーション用スレーブの構築方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+平岡です。
+
+MySQL の公式マニュアルを見直したところ、8) の時点では --skip-slave
+によりレプリケーションをスキップして起動し、9) のバイナリログの適用
+は行わなくて良いみたいですね。
+
+  <a href="http://dev.mysql.com/doc/refman/5.1/ja/replication-howto.html">http://dev.mysql.com/doc/refman/5.1/ja/replication-howto.html</a>
+
+どうもお騒がせしました。
+
+- flathill
+
+From: Seiichirou Hiraoka &lt;flathill@xxxxxxxxxx&gt;
+Subject: <a href="15601.html">[mysql 15601]</a> レプリケーション用スレーブの構築方法
+Date: Mon, 06 Jun 2011 10:56:48 +0900 (JST)
+
+<span class="quote1">&gt; 平岡と申します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 2 台の MySQL でマスタ、スレーブ運用をしております。スレーブで何らかの問題</span>
+<span class="quote1">&gt; が起きて再度スレーブを構築する手順についてコメントを頂けますと幸いです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; - 環境</span>
+<span class="quote1">&gt;   </span>
+<span class="quote1">&gt; . server1 (マスタ)</span>
+<span class="quote1">&gt;   OS: CentOS 5.5 (共通)</span>
+<span class="quote1">&gt;   MySQL 5.5.12 (共通) (手動でコンパイル)</span>
+<span class="quote1">&gt;   /etc/my.cnf</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; server-id      = 1001</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   レプリケーション用ユーザ repl を登録。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; . server2 (スレーブ)</span>
+<span class="quote1">&gt;   /etc/my.cnf</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; server-id      = 1002</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   レプリケーション用ユーザ repl を登録。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; - 手順</span>
+<span class="quote1">&gt;   時間を短縮するため、mysqldump によるダンプリストアではなくディレクトリを直接</span>
+<span class="quote1">&gt;   コピーする方法で以下のようにテストを行っています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 1) スレーブ</span>
+<span class="quote1">&gt;   MySQL を停止。</span>
+<span class="quote1">&gt;     /etc/init.d/mysql top</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 2) マスタ</span>
+<span class="quote1">&gt;   FLUSH TABLES WITH READ LOCK;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 3) マスタ</span>
+<span class="quote1">&gt;   Filename と Position を確認。</span>
+<span class="quote1">&gt;     SHOW MASTER STATUS;</span>
+<span class="quote1">&gt;   </span>
+<span class="quote1">&gt; 4) スレーブ</span>
+<span class="quote1">&gt;   データベースディレクトリを削除。</span>
+<span class="quote1">&gt;     rm -Rf /usr/local/mysql/data</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 5) スレーブ</span>
+<span class="quote1">&gt;   バックアップをスレーブにコピー</span>
+<span class="quote1">&gt;     ssh master &quot;(cd /usr/local/mysql; tar cvfp - data)&quot; | (cd /usr/local; tar xvfp -)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 6) マスタ</span>
+<span class="quote1">&gt;   UNLOCK TABLES;  </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 7) スレーブ</span>
+<span class="quote1">&gt;   不要なファイルを削除。</span>
+<span class="quote1">&gt;     rm /usr/local/mysql/data/*.err</span>
+<span class="quote1">&gt;     rm /usr/local/mysql/data/*.pid</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 8) スレーブ</span>
+<span class="quote1">&gt;   MySQL を起動。</span>
+<span class="quote1">&gt;     /etc/init.d/mysql start</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 9) スレーブ</span>
+<span class="quote1">&gt;   バイナリログの適用。                            ← (a)</span>
+<span class="quote1">&gt;     /usr/local/mysql/bin/mysqlbinlog /usr/local/mysql/data/mysql-bin.0* | \</span>
+<span class="quote1">&gt;       /usr/local/mysql/bin/mysql -u root -p</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 10) スレーブ</span>
+<span class="quote1">&gt;   STOP SLAVE;</span>
+<span class="quote1">&gt;   CHANGE MASTER TO .... (上で確認した Filename と Position を指定)</span>
+<span class="quote1">&gt;   SET GLOBAL READ_ONLY = 1;</span>
+<span class="quote1">&gt;   START SLAVE;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; このようにする事でうまく動いているように見えますが、上記 (a) の箇所に</span>
+<span class="quote1">&gt; ついてコメントを頂きたく思います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; (a) の箇所にて、バイナリログを適用する必要はあるのでしょうか。</span>
+<span class="quote1">&gt; バイナリログに記録されている内容は既にデータベースに反映されているので</span>
+<span class="quote1">&gt; あれば、二重に適用するようになってしまうと考えています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; その他手順中で問題と思われる箇所がありましたら、教えて下さい。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以上、よろしくお願いします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; - flathill</span>
+
+</pre>
+</div>
+<p class="button"><a href="15601.html">[前]</a><a href="15603.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15601.html">  15601 2011-06-06 10:56 [Seiichirou Hiraoka &lt;] レプリケーション用スレーブの構築方法    </a></span>
+<span class="current">-&gt;&nbsp;<a href="15602.html">  15602 2011-06-06 14:02 ┗[Seiichirou Hiraoka &lt;]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4299</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="4298.html">[前]</a><a href="4300.html">[次]</a><a href="../list/4201-4300.html">[番号順一覧]</a><a href="../thread/4201-4300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4299
+</p>
+<div class="header">
+<p>
+From: &lt;sumi@xxxxxxxxxx&gt;<br>
+Date: Wed, 12 Sep 2001 11:26:05 +0900<br>
+Subject: [mysql 04299] INSERT 時に 9 月 9 日問題発生<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、SUMiと申します。
+
+MySQL Ver 11.15 Distrib 3.23.40, for pc-linux-gnu (i686) をDebian上で使
+用しているのですが、INSERT時に9月9日問題と思われる異常動作が発生しました。
+
+以下の手順で再現します。
+
+mysql&gt; CREATE TABLE table1 (
+    -&gt;  field_date TIMESTAMP
+    -&gt;);
+Query OK, 0 rows affected (0.06 sec)
+
+mysql&gt; INSERT INTO table1 values ( now() );
+Query OK, 1 row affected (0.03 sec)
+
+mysql&gt; SELECT UNIX_TIMESTAMP( field_date ) FROM table1;
++------------------------------+
+<span class="quote1">| UNIX_TIMESTAMP( field_date ) |</span>
++------------------------------+
+<span class="quote1">|                   1000262155 |</span>
++------------------------------+
+1 row in set (0.01 sec)
+
+mysql&gt; INSERT INTO table1 values ( 1000262155 );
+Query OK, 1 row affected (0.01 sec)
+
+mysql&gt; SELECT UNIX_TIMESTAMP( field_date ) FROM table1;
++------------------------------+
+<span class="quote1">| UNIX_TIMESTAMP( field_date ) |</span>
++------------------------------+
+<span class="quote1">|                   1000262155 |</span>
+<span class="quote1">|                    970334515 |</span>
++------------------------------+
+2 rows in set (0.01 sec)
+
+mysql&gt; SELECT field_date FROM table1;
++----------------+
+<span class="quote1">| field_date     |</span>
++----------------+
+<span class="quote1">| 20010912113555 |</span>
+<span class="quote1">| 20001001022155 |</span>
++----------------+
+2 rows in set (0.00 sec)
+
+mysql&gt; INSERT INTO table1 values ( '2001/09/12 11:35:55' );
+Query OK, 1 row affected (0.01 sec)
+
+mysql&gt; SELECT field_date FROM table1;
++----------------+
+<span class="quote1">| field_date     |</span>
++----------------+
+<span class="quote1">| 20010912113555 |</span>
+<span class="quote1">| 20001001022155 |</span>
+<span class="quote1">| 20010912113555 |</span>
++----------------+
+3 rows in set (0.01 sec)
+
+上記のように2001/09/12 11:35:55が2000/10/01 02:21:55になってしまいます。
+ただし、
+mysql&gt; INSERT INTO table1 values ( '2001/09/12 11:35:55' );
+の形ならば、正常にINSERTできました。
+UNIX_TIMESTAMPからTIMESTAMPへの型変換がうまくいっていないようなのですが、
+これは件の9月9日問題にかかわるようです。
+
+皆様の環境でも発現するでしょうか？
+また、この異常動作に関する情報などあればお教えください。
+
+
+</pre>
+</div>
+<p class="button"><a href="4298.html">[前]</a><a href="4300.html">[次]</a><a href="../list/4201-4300.html">[番号順一覧]</a><a href="../thread/4201-4300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="4299.html">   4299 2001-09-12 11:26 [&lt;sumi@xxxxxxxxxx&gt;   ] INSERT 時に 9 月 9 日問題発生           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4300.html">   4300 2001-09-12 11:41 ┣[Tatsuhiko Miyagawa &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4302.html">   4302 2001-09-12 11:56 ┃┗[&lt;sumi@xxxxxxxxxx&gt;   ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4309.html">   4309 2001-09-12 21:18 ┃　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4303.html">   4303 2001-09-12 12:21 ┗[Sugawara Hajime &lt;sug]                                       </a></span>
+</pre>
+</body>
+</html>

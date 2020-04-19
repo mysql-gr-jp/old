@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11562</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11561.html">[前]</a><a href="11563.html">[次]</a><a href="../list/11501-11600.html">[番号順一覧]</a><a href="../thread/11501-11600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11562
+</p>
+<div class="header">
+<p>
+From: Kiyotaka Doumae &lt;Kiyotaka Doumae &lt;don@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 14 Jun 2005 18:07:36 +0900<br>
+Subject: [mysql 11562] last_insert_id()  の挙動<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+堂前と申します
+
+last_insert_id() の挙動について悩んでいます。
+同じ現象を確認された方、いらっしゃいませんか？
+(既知のバグ、あるいはそういう仕様？)
+
+以下のバージョンの MySQL を使用しています。
+mysql  Ver 14.7 Distrib 4.1.10a, for portbld-freebsd5.3 (i386)
+
+
+auto_increment を指定したフィールドについて、最後に insert した
+時に生成された値を取得するために last_insert_id() を使用していま
+す。
+このとき、確かに最後に追加された auto_increment の値が帰ってく
+るのですが、なぜか「現在存在するレコード数」分、値が帰ってきます。
+
+<a href="http://dev.mysql.com/doc/mysql/ja/miscellaneous-functions.html">http://dev.mysql.com/doc/mysql/ja/miscellaneous-functions.html</a>
+このあたりの記述だと、1レコードしか返ってこないと思うんですが。
+
+
+
+
+以下の例をご覧いただけると判りやすいかと。
+なお、MyISAM TABLE です。
+
+mysql&gt; desc hoge;
++-------+---------+------+-----+---------+----------------+
+<span class="quote1">| Field | Type    | Null | Key | Default | Extra          |</span>
++-------+---------+------+-----+---------+----------------+
+<span class="quote1">| id    | int(11) |      | PRI | NULL    | auto_increment |</span>
+<span class="quote1">| name  | text    | YES  |     | NULL    |                |</span>
++-------+---------+------+-----+---------+----------------+
+2 rows in set (0.16 sec)
+
+mysql&gt; insert into hoge (name) values (&quot;abc&quot;);
+Query OK, 1 row affected (0.02 sec)
+
+mysql&gt; insert into hoge (name) values (&quot;def&quot;);
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; select last_insert_id() from hoge;
++------------------+
+<span class="quote1">| last_insert_id() |</span>
++------------------+
+<span class="quote1">|                2 |</span>
+<span class="quote1">|                2 |</span>
++------------------+
+2 rows in set (0.00 sec)
+
+mysql&gt; insert into hoge (name) values (&quot;ghi&quot;);
+Query OK, 1 row affected (0.01 sec)
+
+mysql&gt; select last_insert_id() from hoge;
++------------------+
+<span class="quote1">| last_insert_id() |</span>
++------------------+
+<span class="quote1">|                3 |</span>
+<span class="quote1">|                3 |</span>
+<span class="quote1">|                3 |</span>
++------------------+
+3 rows in set (0.00 sec)
+
+
+-- 
+DON (堂前清隆)
+don@xxxxxxxxxx / <a href="http://www.don.am/~don/">http://www.don.am/~don/</a>
+
+</pre>
+</div>
+<p class="button"><a href="11561.html">[前]</a><a href="11563.html">[次]</a><a href="../list/11501-11600.html">[番号順一覧]</a><a href="../thread/11501-11600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="11562.html">  11562 2005-06-14 18:07 [Kiyotaka Doumae &lt;don] last_insert_id()  の挙動                </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11564.html">  11564 2005-06-14 18:15 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11566.html">  11566 2005-06-14 18:50 ┃┗[Kiyotaka Doumae &lt;don]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11565.html">  11565 2005-06-14 18:19 ┗[Shuichi Nakagawa &lt;na]                                       </a></span>
+</pre>
+</body>
+</html>

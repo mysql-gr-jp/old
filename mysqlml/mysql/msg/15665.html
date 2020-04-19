@@ -1,0 +1,144 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15665</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15664.html">[前]</a><a href="15666.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15665
+</p>
+<div class="header">
+<p>
+From: &lt;nwakamatsu@xxxxxxxxxx&gt;<br>
+Date: Tue, 14 Feb 2012 11:27:53 +0900<br>
+Subject: [mysql 15665] MySQL 5.5にConnector/J 5.1経由で接続すると、エラーメッセージが文字化けする。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+初めて投稿させていただます。若松と申します。
+よろしくお願い致します。
+ 
+ 
+Java ApplicationからConnector/J経由でMySQL serverに対してクエリを発行し、
+そのクエリが失敗した際に、エラーメッセージが文字化けします。
+ 
+
+各ソフトウェアのバージョンは下記の通りです。
+JDK 1.7.0_02-b13
+MySQL server 5.5.20
+Connector/J 5.1.18
+ 
+JDK 1.6及び、MySQL server 5.5.17〜5.5.20及び、Connector/J 5.1.5〜5.1.18をテスト済みです。
+ 
+
+また、MySQL serverの言語設定は下記の通りです。
+mysql&gt; SHOW VARIABLES LIKE 'character%';
++--------------------------+----------------------------------+
+<span class="quote1">| Variable_name            | Value                            |</span>
++--------------------------+----------------------------------+
+<span class="quote1">| character_set_client     | utf8                             |</span>
+<span class="quote1">| character_set_connection | utf8                             |</span>
+<span class="quote1">| character_set_database   | utf8                             |</span>
+<span class="quote1">| character_set_filesystem | binary                           |</span>
+<span class="quote1">| character_set_results    | utf8                             |</span>
+<span class="quote1">| character_set_server     | utf8                             |</span>
+<span class="quote1">| character_set_system     | utf8                             |</span>
+<span class="quote1">| character_sets_dir       | /opt/mysql/mysql/share/charsets/ |</span>
++--------------------------+----------------------------------+
+8 rows in set (0.00 sec)
+ 
+mysql&gt; SHOW VARIABLES LIKE 'lc_messages%';
++-----------------+-------------------------+
+<span class="quote1">| Variable_name   | Value                   |</span>
++-----------------+-------------------------+
+<span class="quote1">| lc_messages     | en_US                   |</span>
+<span class="quote1">| lc_messages_dir | /opt/mysql/mysql/share/ |</span>
++-----------------+-------------------------+
+2 rows in set (0.00 sec)
+ 
+ 
+ 
+例えば、Java Applicationから下記のクエリを発行します。
+SELECT * FROM `test`.`ほげほげ`;
+ 
+ 
+ 
+しかし、`ほげほげ`というテーブルは存在しない為、クエリは失敗し、エラーメッセージが返って来ます。
+その際、テーブル名が文字化けして表示されてしまいます。
+jp.co.afy_systems.framework.database.exception.DatabaseException: AFY_DATABASE:0021E:SQL実行時に例外が発生しました。（エラーコード：1146）
+    at jp.co.afy_systems.framework.database.dao.AbstractDao.executeQuery(AbstractDao.java:172)
+    at jp.co.afy_systems.framework.database.dao.direct.SelectDirectDao.execute(SelectDirectDao.java:56)
+    at jp.co.afy_systems.sql_executor.service.impl.ExecuteSQLService.select(ExecuteSQLService.java:117)
+    at jp.co.afy_systems.sql_executor.service.impl.ExecuteSQLService.execute(ExecuteSQLService.java:82)
+    at jp.co.afy_systems.framework.service.manager.XmlServiceManager$1.run(XmlServiceManager.java:287)
+Caused by: com.mysql.jdbc.exceptions.MySQLSyntaxErrorException: Table 'test.??≫??’??≫??’' doesn't exist
+    at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1049)
+    at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3609)
+    at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3541)
+    at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:2002)
+    at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2163)
+    at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2624)
+    at com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.java:2127)
+    at com.mysql.jdbc.PreparedStatement.executeQuery(PreparedStatement.java:2293)
+    at jp.co.afy_systems.framework.database.wrapper.PreparedStatementWrapper.executeQuery(PreparedStatementWrapper.java:46)
+    at jp.co.afy_systems.framework.database.dao.AbstractDao.executeQuery(AbstractDao.java:167)
+    ... 4 more
+ 
+
+同じクエリを、mysql commandから実行すると、テーブル名は正常に返ってきます。
+mysql&gt; SELECT * FROM `test`.`ほげほげ`;
+ERROR 1146 (42S02): Table 'test.ほげほげ' doesn't exist
+ 
+ 
+ 
+この文字化けを起こす原因が、二つある事が分かっています。
+ 
+一つは、Connector/Jがエラーメッセージをエンコードする際に、SHOW VARIABLES LIKE 'language'にて言語を取得し、
+返ってきた言語から対応する文字コードを取得している為です。
+（com.mysql.jdbc.ConnectionImpl 3843行目 と com.mysql.jdbc.CharsetMapping 1017行目）
+環境変数'language'はMySQL server 5.5では廃止され、lc_messagesとlc_messages_dirに置き換えられています。
+Connector/Jは'language'が取得出来ない為、デフォルトのCp1252でエラーメッセージをエンコードします。
+ 
+二つ目は、Connector/Jがエラーメッセージを、エラーメッセージそのものと、テーブル名やカラム名を、
+全て同じ文字コードでエンコードしている為です。
+テーブル名やカラム名の文字コードはMySQL serverの設定に依存しますが、
+エラーメッセージの文字コードは、com.mysql.jdbc.CharsetMapping に直接書かれています。
+ 
+その為、UTF-8で返ってきたテーブル名やカラム名が正常にエンコードされず、文字化けを起こします。
+ 
+
+現在、日本語のテーブル名、カラム名にて開発を行っている為、
+エラーが発生した際にエラー発生個所が分からず、開発に影響が出ています。
+ 
+
+MySQL bugsの方にも報告致しましたが、改善される予定はなさそうです。
+<a href="http://bugs.mysql.com/bug.php?id=64205">http://bugs.mysql.com/bug.php?id=64205</a>
+ 
+
+日本ユーザ会の方から、この問題のバグ報告をして頂けないでしょうか。
+ 
+以上、よろしくお願いします。
+
+
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="15665/0/index.html"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="15664.html">[前]</a><a href="15666.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15665.html">@ 15665 2012-02-14 11:27 [&lt;nwakamatsu@xxxxxxxx] MySQL 5.5にConnector/J 5.1経由で接続すると、エラーメッセージが文字化けする。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15681.html">  15681 2012-02-23 16:35 ┗[&lt;nwakamatsu@xxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15682.html">  15682 2012-02-23 16:55 　┗[HIRATSUKA Sadao &lt;hir]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15685.html">  15685 2012-02-24 13:47 　　┗[&lt;nwakamatsu@xxxxxxxx]                                   </a></span>
+</pre>
+</body>
+</html>

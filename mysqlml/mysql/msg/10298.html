@@ -1,0 +1,133 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:10298</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="10297.html">[前]</a><a href="10299.html">[次]</a><a href="../list/10201-10300.html">[番号順一覧]</a><a href="../thread/10201-10300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:10298
+</p>
+<div class="header">
+<p>
+From: Ryutaro Amano &lt;Ryutaro Amano &lt;wn9r-amn@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 6 Oct 2004 18:24:17 +0900<br>
+Subject: [mysql 10298] Re: osx_utf8<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+天野です。4.1.5gammaにインストーラ付きを試しました。
+
+とりあえず、/etc/my.cnfを作らずに普通にサーバーを起動。latin1状態です。
+
+mysql&gt; create database utf_test character set utf8;
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; use utf_test;
+Database changed
+mysql&gt; create table test1(scode char(6),sname varchar(30));
+Query OK, 0 rows affected (0.01 sec)
+
+mysql&gt; insert into test1(scode,sname)values('100','テストです');
+Query OK, 1 row affected (0.00 sec)
+
+おー、化けないぞと思ったのですが、
+
+mysql&gt; select * from test1;
++-------+-----------------+
+<span class="quote1">| scode | sname           |</span>
++-------+-----------------+
+<span class="quote1">| 100   | テスト?????? |</span>
++-------+-----------------+
+1 row in set (0.00 sec)
+
+mysql&gt; insert into test1(scode,sname) values('101','りんご');
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; select * from test1;
++-------+-----------------+
+<span class="quote1">| scode | sname           |</span>
++-------+-----------------+
+<span class="quote1">| 100   | テスト?????? |</span>
+<span class="quote1">| 101   | りん???       |</span>
++-------+-----------------+
+2 rows in set (0.00 sec)
+
+いったん終了して、default-character-set=utf8で/etc/my.cnfを作ります。
+サーバー起動。
+mysql&gt; status;
+--------------
+mysql  Ver 14.6 Distrib 4.1.5-gamma, for apple-darwin7.5.0 (powerpc)
+
+.....
+Server characterset:    utf8
+Db     characterset:    utf8
+Client characterset:    utf8
+Conn.  characterset:    utf8
+Threads: 1  Questions: 3  Slow queries: 0  Opens: 11  Flush tables: 1  
+Open tables: 0  Queries per second avg: 0.143
+......
+
+mysql&gt; use utf_test;
+Database changed
+mysql&gt; select *from test1;
++-------+---------------------------------+
+<span class="quote1">| scode | sname                           |</span>
++-------+---------------------------------+
+<span class="quote1">| 100   | ??†????????§??                  |</span>
+<span class="quote1">| 101   | ?????“??”                       |</span>
++-------+---------------------------------+
+2 rows in set (0.04 sec)
+latin1状態でデータベースを作る際にcharacter set=utf8を付けて作ったものは
+上記のような有様でした。
+
+mysql&gt; create database utf_test2;
+Query OK, 1 row affected (0.01 sec)
+
+mysql&gt; use utf_test2;
+Database changed
+
+mysql&gt; create table test1(scode varchar(6),sname varchar(30));
+Query OK, 0 rows affected (0.17 sec)
+
+mysql&gt; insert into test1(scode,sname)values('001','パイナップル');
+Query OK, 1 row affected (0.01 sec)
+
+mysql&gt; select * from test1;
++-------+--------------------+
+<span class="quote1">| scode | sname              |</span>
++-------+--------------------+
+<span class="quote1">| 001   | パイナップル       |</span>
++-------+--------------------+
+1 row in set (0.00 sec)
+
+
+というわけで、4.1.5gammaでは、/etc/my.cnfでutf8にしておけば大丈夫のよう
+です。
+LOAD DATA INFILEも問題なしでした。
+4.1.3betaのOSX用のバイナリーは、どうも問題ありのようでした。
+皆様有り難うございました。
+
+Ryutaro Amano
+wn9r-amn@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="10297.html">[前]</a><a href="10299.html">[次]</a><a href="../list/10201-10300.html">[番号順一覧]</a><a href="../thread/10201-10300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="10282.html">  10282 2004-10-05 21:16 [&quot;Matsunobu, Yoshinor] Re: osx_utf8                            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10284.html">  10284 2004-10-05 22:55 ┗[Ryutaro Amano &lt;wn9r-]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10285.html">  10285 2004-10-05 23:03 　┗[&quot;村上 幸雄&quot; &lt;m_yukio]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10286.html">  10286 2004-10-05 23:52 　　┗[Ryutaro Amano &lt;wn9r-]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10287.html">  10287 2004-10-06 01:14 　　　┗[森下　克徳 &lt;mokkosan]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10289.html">  10289 2004-10-06 08:07 　　　　┗[Ryutaro Amano &lt;wn9r-]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10294.html">  10294 2004-10-06 14:21 　　　　　┣[oppara &lt;mlml@xxxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="10297.html">  10297 2004-10-06 18:19 　　　　　┃┗[Ryutaro Amano &lt;wn9r-]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="10298.html">  10298 2004-10-06 18:24 　　　　　┗[Ryutaro Amano &lt;wn9r-]                             </a></span>
+</pre>
+</body>
+</html>

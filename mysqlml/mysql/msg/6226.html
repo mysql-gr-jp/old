@@ -1,0 +1,219 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:6226</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="6225.html">[前]</a><a href="6227.html">[次]</a><a href="../list/6201-6300.html">[番号順一覧]</a><a href="../thread/6201-6300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:6226
+</p>
+<div class="header">
+<p>
+From: &quot;kosugi&quot; &lt;&quot;kosugi&quot; &lt;kosugi@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 19 Sep 2002 06:39:43 +0900<br>
+Subject: [mysql 06226] Re: スレッド式掲示板のテーブル構造について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+小杉です。
+
+自己レス：訂正です
+
+  ID    | rootNo |  oyaNo  | treeString(char)
+---------------------------
+ 354   |  354   |       0      |   1
+ 355   |  354   |   354      |    11
+ 356   |  354   |   355      |    111
+ 400   |  354   |   356      |    1111
+ 357   |  354   |   354      |    12
+ 358   |  354   |   357      |    121
+ 401   |  354   |   358      |    1211
+ 502   |  354   |   357      |    122
+ 506   |  354   |   502      |    1221
+ 508   |  354   |   506      |    12211
+snip...
+ 805   |  354   |   708      |    139
+ 806   |  354   |   805      |    1391
+ 807   |  354   |   708      |    13a
+
+treeStringは一桁で順序を示す順序キーです。桁上がり
+の防止と、正しくソートするために、文字列型を使って
+います。その分、次の文字列をプログラムで与えなけれ
+ばなりません。（配列＋順序）
+
+たとえば、502は357に対するレスですが、すでに358で
+レスがついているため、357のtreeString の12に2を付
+け加えて、122をtreeStringとします。
+805は、708に対する9番目のレス。806は805に対するレ
+ス。807は708に対する10番目のレスです。
+ちなみに、708は書いていませんが354に対する3番目の
+レスであることがわかります。
+
+このテーブルでは下記のようなことが簡単に実現できま
+す。
+rootNoでスレッド全体を取り出す
+oyaNoで特定のメッセージについた直レスを取り出す。
+treeStringで特定のメッセージ以下のtreeをすべて取り
+出す。
+個々のメッセージはスレrootと直親を持つ
+treeが深くなったときは、任意の階層まででレプリケー
+トできる。
+
+文字列を利用したためのレス数の制限は、前記した例外
+処理でも回避できますが、フラグフィールドを別に設け
+ればtreeをネストして利用することも出来ます。
+また、treeStingは、1桁で数値とアルファベットを利用
+して35までの順序をつけられますが、二桁区切りにすれ
+ば、35*35=1225までの順序を与えられます。
+
+
+----- Original Message -----
+From: &quot;kosugi&quot; &lt;kosugi@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Wednesday, September 18, 2002 10:10 PM
+Subject: <a href="06221.html">[mysql 06221]</a> Re: スレッド式掲示板のテー
+ブル構造について
+
+
+<span class="quote1">&gt; 小杉です</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 掲示板を作るときに注意するのは登録時よりも閲覧時</span>
+にスピードが要求される点では
+<span class="quote1">&gt; ないでしょうか？</span>
+<span class="quote1">&gt; 個々のメッセージがoyanoを持って再帰的に呼び出す</span>
+方法よりも、メッセージの登録
+<span class="quote1">&gt; 時にツリー構造を持たせる方法を提案します。(問題</span>
+はいくつかありますが）
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 任意のレスメッセージはルートメッセージとしての</span>
+oyanoを持ちます。
+<span class="quote1">&gt; 問題は再帰的方法以外に、ツリー構造を再現する方法</span>
+です。
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 下記のようなメッセージ構造があったとすると、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ---------(1)　　　</span>
+<span class="quote1">&gt;    ---------(2)</span>
+<span class="quote1">&gt;      ---------(3)</span>
+<span class="quote1">&gt;        ---------(4)</span>
+<span class="quote1">&gt;    ---------(5)</span>
+<span class="quote1">&gt;      ---------(6)</span>
+<span class="quote1">&gt;        ---------(7)</span>
+<span class="quote1">&gt;      ---------(8)</span>
+<span class="quote1">&gt;        ---------(9)</span>
+<span class="quote1">&gt;          ---------(10)</span>
+<span class="quote1">&gt; それぞれを下記のようにtreeStringを与えて登録する</span>
+<span class="quote1">&gt;   ID    |  oyano  | treeString(char)</span>
+<span class="quote1">&gt; ---------------------------</span>
+<span class="quote1">&gt;  354   |    354   |     1</span>
+<span class="quote1">&gt;  355   |    354   |     1.1</span>
+<span class="quote1">&gt;  356   |    354   |     1.1.1</span>
+<span class="quote1">&gt;  400   |    354   |     1.1.1.1</span>
+<span class="quote1">&gt;  357   |    354   |     1.2</span>
+<span class="quote1">&gt;  358   |    354   |     1.2.1</span>
+<span class="quote1">&gt;  401   |    354   |     1.2.1.1</span>
+<span class="quote1">&gt;  502   |    354   |     1.2.2</span>
+<span class="quote1">&gt;  506   |    354   |     1.2.2.1</span>
+<span class="quote1">&gt;  508   |    354   |     1.2.2.1.1</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; /*  .dotは不要です・・</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この方法ですと、oyano 354で呼び出されたレコード</span>
+をtreeStringでソートすること
+<span class="quote1">&gt; により、上記の順で取り出せます。（数値型や</span>
+autoincrementだとこのようにはソー
+<span class="quote1">&gt; トされません）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 基本的な考え方は以上ですが、</span>
+<span class="quote1">&gt; 9の次はa,b,c・・・とつづけて、zでエラーを返す。</span>
+<span class="quote1">&gt; charサイズの限界でエラーを返す</span>
+<span class="quote1">&gt; という例外処理が必要になります。</span>
+<span class="quote1">&gt; charの桁数までしかレスがつけられないのでは実用的</span>
+ではないため、
+<span class="quote1">&gt; childTreeStringフィールドをいくつか作っておき、</span>
+限界が発生したところで
+<span class="quote1">&gt; childTreeStringに移行します。</span>
+<span class="quote1">&gt; これで掲示板としてはまっとうなレスの数を維持でき</span>
+ます。
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; いかがでしょう？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; Tomoaki Kosugi</span>
+<span class="quote1">&gt; kosugi@xxxxxxxxxx</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="6225.html">[前]</a><a href="6227.html">[次]</a><a href="../list/6201-6300.html">[番号順一覧]</a><a href="../thread/6201-6300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="6207.html">   6207 2002-09-18 19:27 [Tybalt of Capulet &lt;i] スレッド式掲示板のテーブル構造について  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6208.html">   6208 2002-09-18 19:36 ┣[荒井　哲三 &lt;tetsumi.]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6209.html">   6209 2002-09-18 19:45 ┣[Yuya.Nishida. &lt;yuya@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6210.html">   6210 2002-09-18 20:23 ┃┗[Tybalt of Capulet &lt;i]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6211.html">   6211 2002-09-18 20:33 ┃　┣[Tomohiro 'Tomo-p' KA]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6213.html">   6213 2002-09-18 20:41 ┃　┣[&quot;Kaigai Kohei&quot; &lt;kaig]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6214.html">   6214 2002-09-18 20:49 ┃　┣[Yuya.Nishida. &lt;yuya@]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6216.html">   6216 2002-09-18 20:54 ┃　┗[Takanori Tobe &lt;taka@]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6212.html">   6212 2002-09-18 20:37 ┣[NAGASAWA Teruo &lt;ml@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6217.html">   6217 2002-09-18 21:16 ┣[HAMAI Kyoichi &lt;k-ham]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6225.html">   6225 2002-09-19 03:20 ┃┗[&quot;umemura&quot; &lt;shigemi.u]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6218.html">   6218 2002-09-18 21:17 ┣[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6219.html">   6219 2002-09-18 21:33 ┃┗[Tomohiro 'Tomo-p' KA]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6220.html">   6220 2002-09-18 22:02 ┃　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6222.html">   6222 2002-09-18 22:14 ┃　　┣[&quot;黒木 玲&quot; &lt;kuroki434]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6223.html">   6223 2002-09-19 01:02 ┃　　┃┗[Tybalt of Capulet &lt;i]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6224.html">   6224 2002-09-19 03:16 ┃　　┃　┣[&lt;rio-t@xxxxxxxxxx&gt;  ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6227.html">   6227 2002-09-19 07:15 ┃　　┃　┃┣[&quot;kosugi&quot; &lt;kosugi@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6228.html">   6228 2002-09-19 09:32 ┃　　┃　┃┃┗[&quot;Takashi Yamashita&quot; ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6229.html">   6229 2002-09-19 10:06 ┃　　┃　┃┗[Tybalt of Capulet &lt;i]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6230.html">   6230 2002-09-19 10:21 ┃　　┃　┃　┗[&quot;黒木 玲&quot; &lt;kuroki434]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6232.html">   6232 2002-09-19 11:01 ┃　　┃　┃　　┗[Toyoshima Hiroshi &lt;t]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6233.html">   6233 2002-09-19 11:33 ┃　　┃　┃　　　┗[Tomohiro 'Tomo-p' KA]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6236.html">   6236 2002-09-19 12:26 ┃　　┃　┃　　　　┗[Toyoshima Hiroshi &lt;t]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6237.html">   6237 2002-09-19 12:52 ┃　　┃　┃　　　　　┗[HAMAI Kyoichi &lt;k-ham]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6231.html">   6231 2002-09-19 10:46 ┃　　┃　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6234.html">   6234 2002-09-19 12:18 ┃　　┗[&lt;n.futami@xxxxxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6238.html">   6238 2002-09-19 13:52 ┃　　　┣[&quot;kosugi&quot; &lt;kosugi@xxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6247.html">   6247 2002-09-20 11:50 ┃　　　┗[Tybalt of Capulet &lt;i]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6248.html">   6248 2002-09-20 12:53 ┃　　　　┣[Yuya.Nishida. &lt;yuya@]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6249.html">   6249 2002-09-20 13:21 ┃　　　　┃┗[&quot;KAWAI,Takanori&quot; &lt;GC]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6252.html">   6252 2002-09-20 13:59 ┃　　　　┃　┗[Yuya.Nishida. &lt;yuya@]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6251.html">   6251 2002-09-20 13:51 ┃　　　　┣[&quot;KAWAI,Takanori&quot; &lt;GC]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6255.html">   6255 2002-09-20 22:53 ┃　　　　┗[&quot;kosugi&quot; &lt;kosugi@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6257.html">   6257 2002-09-21 02:31 ┃　　　　　┗[Tybalt of Capulet &lt;i]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6258.html">   6258 2002-09-21 05:18 ┃　　　　　　┗[&quot;kosugi&quot; &lt;kosugi@xxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6259.html">   6259 2002-09-21 08:18 ┃　　　　　　　┣[&quot;黒木 玲&quot; &lt;kuroki434]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6260.html">   6260 2002-09-21 09:40 ┃　　　　　　　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6261.html">   6261 2002-09-21 11:16 ┃　　　　　　　　┗[&quot;kosugi&quot; &lt;kosugi@xxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6262.html">   6262 2002-09-21 11:46 ┃　　　　　　　　　┗[&quot;kosugi&quot; &lt;kosugi@xxx]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6221.html">   6221 2002-09-18 22:10 ┣[&quot;kosugi&quot; &lt;kosugi@xxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="6226.html">   6226 2002-09-19 06:39 ┃┗[&quot;kosugi&quot; &lt;kosugi@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6235.html">   6235 2002-09-19 12:25 ┣[You2 &lt;ml-mysql@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6239.html">   6239 2002-09-19 15:01 ┗[平松　幸治 &lt;kouji@xx] OR と AND を複数使った検索で・・・    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6240.html">   6240 2002-09-19 15:09 　┣[平松　幸治 &lt;kouji@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6243.html">   6243 2002-09-19 15:35 　┃┗[平松　幸治 &lt;kouji@xx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6244.html">   6244 2002-09-19 16:34 　┃　┗[&quot;Takashi Yamashita&quot; ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6250.html">   6250 2002-09-20 13:40 　┃　　┗[平松　幸治 &lt;kouji@xx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6241.html">   6241 2002-09-19 15:16 　┣[SAKIMURA Noriyuki &lt;s]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6242.html">   6242 2002-09-19 15:16 　┗[Daiju Azuma &lt;daiju_a]                                     </a></span>
+</pre>
+</body>
+</html>

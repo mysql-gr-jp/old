@@ -1,0 +1,295 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16326</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16325.html">[前]</a><a href="16327.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16326
+</p>
+<div class="header">
+<p>
+From: Masaki Miyata &lt;Masaki Miyata &lt;catlover@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 30 Apr 2016 10:39:59 +0900<br>
+Subject: [mysql 16326] Re: [mysql 16325] Re: [mysql 16324] 処理速度が遅い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは。
+宮田と申します。
+
+頭の体操にちょっとやってみました。
+
+そのSQLで求めるなら、
+最低限、「keycode, hizuke」の複合インデックスが必要ですね。
+
+2013/1/1 から日次でサンプルデータを作って試してみました。
+WindowsのノートPC、Core i5-4200Uメモリ 8GB、MySQLのメモリーチューニング無しの状態で、
+1日分で5〜10秒くらい。
+
+まぁ、自己結合で日付を最大1年とはいえクロス結合するので、
+1日分で73万件（2000*365）処理することになるので、妥当じゃないでしょうか。
+
+過去分が変わらないのであれば、1日分をサマリーテーブルに入れていけばよいです。
+
+-- ■日次のサマリ作成
+insert into tb_sum
+  (hizuke, keycode,
+   7d_1_HEIKIN, 7d_2_HEIKIN, 31d_1_HEIKIN, 31d_2_HEIKIN,
+   180d_1_HEIKIN, 180d_2_HEIKIN, 365d_1_HEIKIN, 365d_2_HEIKIN)
+select
+  A.hizuke,
+  A.keycode,
+  avg(case when  B.hizuke &gt;= date_add(A.hizuke, interval   -7 day) then
+ B.num1 else null end ) as   '7d_1_HEIKIN',
+  avg(case when  B.hizuke &gt;= date_add(A.hizuke, interval   -7 day) then
+ B.num2 else null end ) as   '7d_2_HEIKIN',
+  avg(case when  B.hizuke &gt;= date_add(A.hizuke, interval  -31 day) then
+ B.num1 else null end ) as  '31d_1_HEIKIN',
+  avg(case when  B.hizuke &gt;= date_add(A.hizuke, interval  -31 day) then
+ B.num2 else null end ) as  '31d_2_HEIKIN',
+  avg(case when  B.hizuke &gt;= date_add(A.hizuke, interval -150 day) then
+ B.num1 else null end ) as '180d_1_HEIKIN',
+  avg(case when  B.hizuke &gt;= date_add(A.hizuke, interval -150 day) then
+ B.num2 else null end ) as '180d_2_HEIKIN',
+  avg(case when  B.hizuke &gt;= date_add(A.hizuke, interval -365 day) then
+ B.num1 else null end ) as '365d_1_HEIKIN',
+  avg(case when  B.hizuke &gt;= date_add(A.hizuke, interval -365 day) then
+ B.num2 else null end ) as '365d_2_HEIKIN'
+  from tb A, tb B
+ where  A.keycode = B.keycode
+   and  A.hizuke  =  '2016-04-29'
+   and  B.hizuke  between date_add(A.hizuke, interval -365 day) and A.hizuke
+ group by A.keycode, A.hizuke;
+
+-- ■テーブルやテストデータ作成のプロシージャなど
+
+-- phpMyAdmin SQL Dump
+-- version 4.2.7.1
+-- <a href="http://www.phpmyadmin.net">http://www.phpmyadmin.net</a>
+--
+-- サーバのバージョン： 5.6.20
+-- PHP Version: 5.5.15
+
+SET SQL_MODE = &quot;NO_AUTO_VALUE_ON_ZERO&quot;;
+SET time_zone = &quot;+00:00&quot;;
+
+--
+-- Database: 'test1'
+--
+
+DELIMITER $$
+--
+-- プロシージャ
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `ins`()
+    NO SQL
+BEGIN
+START TRANSACTION;
+SET @k = 1;
+SET @d =  '2013-01-01';
+
+WHILE '2016-04-29' &gt;= @d DO
+  WHILE 2001 &gt; @k DO
+    insert into tb (`keycode`,`hizuke`,`num1`,`num2`)
+      values( @k, @d, CEIL(RAND() * 1000), CEIL(RAND() * 2000));
+    SET @k = @k +1;
+  END WHILE;
+  SET @k = 1;
+  SET @d = date_add(@d, interval +1 day);
+END WHILE;
+COMMIT;
+END$$
+
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 'tb'
+--
+
+CREATE TABLE IF NOT EXISTS tb (
+id int(10) unsigned NOT NULL,
+  keycode int(10) unsigned NOT NULL,
+  hizuke date NOT NULL,
+  num1 int(10) unsigned NOT NULL,
+  num2 int(10) unsigned NOT NULL
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2778524 ;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 'tb_sum'
+--
+
+CREATE TABLE IF NOT EXISTS tb_sum (
+id int(10) unsigned NOT NULL,
+  keycode int(10) unsigned NOT NULL,
+  hizuke date NOT NULL,
+  7d_1_HEIKIN double unsigned NOT NULL,
+  7d_2_HEIKIN double unsigned NOT NULL,
+  31d_1_HEIKIN double unsigned NOT NULL,
+  31d_2_HEIKIN double unsigned NOT NULL,
+  180d_1_HEIKIN double unsigned NOT NULL,
+  180d_2_HEIKIN double unsigned NOT NULL,
+  365d_1_HEIKIN double unsigned NOT NULL,
+  365d_2_HEIKIN double unsigned NOT NULL
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2048 ;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table tb
+--
+ALTER TABLE tb
+ ADD PRIMARY KEY (keycode,hizuke), ADD UNIQUE KEY id (id), ADD UNIQUE KEY
+uq (hizuke,keycode);
+
+--
+-- Indexes for table tb_sum
+--
+ALTER TABLE tb_sum
+ ADD PRIMARY KEY (keycode,hizuke), ADD UNIQUE KEY id (id), ADD UNIQUE KEY
+uq (hizuke,keycode);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table tb
+--
+ALTER TABLE tb
+MODIFY id int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2778524;
+--
+-- AUTO_INCREMENT for table tb_sum
+--
+ALTER TABLE tb_sum
+MODIFY id int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2048;
+
+
+
+宮田 昌紀
+catlover@xxxxxxxxxx
+
+2016年4月30日 0:13 HIRATSUKA Sadao &lt;sh2@xxxxxxxxxx&gt;:
+
+<span class="quote1">&gt; ユメ吉さん</span>
+<span class="quote1">&gt; こんばんは、平塚といいます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; なんとなくですが、株式などの市場データでしょうか。</span>
+<span class="quote1">&gt; 数値1が最高値、数値2が最安値、それで直近1週間、1か月、</span>
+<span class="quote1">&gt; 半年(180日ではなくて？)、1年の移動平均を出したい、</span>
+<span class="quote1">&gt; ということでイメージ合うでしょうか。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; この、移動平均をかなりの力技で計算しているので、</span>
+<span class="quote1">&gt; MySQL的につらいことになっていると思われます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; EXPLAINを見てインデックスを追加するというMySQLの技術力よりも、</span>
+<span class="quote1">&gt; RDBMSで移動平均をどうやって計算すればよいのだろう、</span>
+<span class="quote1">&gt; といったところに工夫が求められる感じです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; それから、</span>
+<span class="quote1">&gt; 過去にさかのぼって数値1、数値2が変化することはありますか？</span>
+<span class="quote1">&gt; もし市場データでしたら過去のデータは変わらないですよね。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 4か月分の計算に96分かかったのことですが、前日までのデータは</span>
+<span class="quote1">&gt; 1回計算すればそれを記録しておけばよい、といったことはないでしょうか。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 昨日までのデータがすでに計算してあるのならば、</span>
+<span class="quote1">&gt; 今日の分を9.6秒かけて計算して、末尾に追加するだけ、</span>
+<span class="quote1">&gt; といった運用ができるかもしれませんね。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; とはいえMySQLの技術力でどうにかねじ伏せられるかどうかについては</span>
+<span class="quote1">&gt; 思いついたらメールしてみようと思います。</span>
+<span class="quote1">&gt; ＃今日は思いつきませんでした(^^;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 2016年4月29日 23:28 ユメ吉 &lt;yume_tana@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt; &gt; MySQLをはじめて1ヶ月の初心者です。以前、他のRDBを少しかじった程度ですが</span>
+<span class="quote2">&gt; &gt; 本格的にものにしようと勉強中です。</span>
+<span class="quote2">&gt; &gt; ところが、MySQLの処理速度が遅いので困惑しており、メールをしたところです。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; テーブルは日付、 keycode、数値1、数値2と簡単ですが、データ量は毎日取込んでおりで</span>
+<span class="quote2">&gt; &gt;  keycodeが2000種程になるので今では200万件を超えております。</span>
+<span class="quote2">&gt; &gt; 今回MySQLに移植しなおして、ためしにselect * from テーブル名(tb)de開けたところ3.2秒かかりました。</span>
+<span class="quote2">&gt; &gt; まだインデックスは付けていませんが、 keycodeだけ付けましたが2.2秒とあまり変わりません。</span>
+<span class="quote2">&gt; &gt; その時、EXPLAINを見ましたが type = ALL  Key=NULL Extra = NULL  になっていました。</span>
+<span class="quote2">&gt; &gt; 今回は自己結合を使って日付、 keycodeごとに1週間分、1か月分、半年分、一年分の平均を算出していきたく</span>
+<span class="quote2">&gt; &gt; クエリーを作りました。 A.日付  &gt;=  '2016-04-29' にして直近だけで9.6秒かかりました。</span>
+<span class="quote2">&gt; &gt; ちなみに今年から（A.日付  &gt;=  '2016-01-01' )では 96分かかっていました。本当は2年分程を5〜6分以内に</span>
+<span class="quote2">&gt; &gt; できないか思っております。</span>
+<span class="quote2">&gt; &gt; この時の条件は 日付とkeycodeを単独でインデックスを作りました。</span>
+<span class="quote2">&gt; &gt; explain は tb A  type = range ,key=日付    ,extra =Using index condition;</span>
+<span class="quote1">&gt; Using</span>
+<span class="quote2">&gt; &gt; MRR; Using temporary; Using filesort</span>
+<span class="quote2">&gt; &gt;            tb B  type = ref   ,key=keycode ,extra =Using where</span>
+<span class="quote2">&gt; &gt; MYSQLのVer=5.7  モメリー＝4Ｇ ＯＳ=WIN7pro</span>
+<span class="quote2">&gt; &gt; explainは初めてで良くわかりませんが、速度アップのためのご指導頂けないでしょうか。</span>
+<span class="quote2">&gt; &gt; ***************************************************************</span>
+<span class="quote2">&gt; &gt; select</span>
+<span class="quote2">&gt; &gt;    A.hizuke         as   &quot;HIZUKE&quot;  ,</span>
+<span class="quote2">&gt; &gt;    A.keycode        as   &quot;KEYCODE&quot;,</span>
+<span class="quote2">&gt; &gt;   avg(case when  B.日付 &gt;= date_add(A.日付,interval -7 day) then  B.数値1</span>
+<span class="quote1">&gt;  else</span>
+<span class="quote2">&gt; &gt; null end )  as  &quot;7d_1_HEIKIN&quot;  ,</span>
+<span class="quote2">&gt; &gt;   avg(case when  B.日付 &gt;= date_add(A.日付,interval -7 day) then  B.数値2</span>
+<span class="quote1">&gt;  else</span>
+<span class="quote2">&gt; &gt; null end )  as  &quot;7d_2_HEIKIN&quot;  ,</span>
+<span class="quote2">&gt; &gt;   avg(case when  B.日付 &gt;= date_add(A.日付,interval -31 day) then  B.数値1</span>
+<span class="quote1">&gt;  else</span>
+<span class="quote2">&gt; &gt; null end )  as  &quot;31d_1_HEIKIN&quot;  ,</span>
+<span class="quote2">&gt; &gt;   avg(case when  B.日付 &gt;= date_add(A.日付,interval -31 day) then  B.数値2</span>
+<span class="quote1">&gt;  else</span>
+<span class="quote2">&gt; &gt; null end )  as  &quot;31d_2_HEIKIN&quot;  ,</span>
+<span class="quote2">&gt; &gt;   avg(case when  B.日付 &gt;= date_add(A.日付,interval -150 day) then  B.数値1</span>
+<span class="quote1">&gt;  else</span>
+<span class="quote2">&gt; &gt; null end )  as  &quot;180d_1_HEIKIN&quot;  ,</span>
+<span class="quote2">&gt; &gt;   avg(case when  B.日付 &gt;= date_add(A.日付,interval -150 day) then  B.数値2</span>
+<span class="quote1">&gt;  else</span>
+<span class="quote2">&gt; &gt; null end )  as  &quot;180d_2_HEIKIN&quot;  ,</span>
+<span class="quote2">&gt; &gt;   avg(case when  B.日付 &gt;=  date_add(A.日付,interval -365 day) then  B.数値1</span>
+<span class="quote2">&gt; &gt; else null end )  as  &quot;365d_1_HEIKIN&quot;  ,</span>
+<span class="quote2">&gt; &gt;   avg(case when  B.日付 &gt;=  date_add(A.日付,interval -365 day)  then  B.数値2</span>
+<span class="quote2">&gt; &gt; else null end )  as  &quot;365d_2_HEIKIN&quot;  ,</span>
+<span class="quote2">&gt; &gt;   from   tb A , tb B</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;  where  A.keycode   =  B.keycode</span>
+<span class="quote2">&gt; &gt;  and    A.日付  &gt;=  '2016-04-29'</span>
+<span class="quote2">&gt; &gt;  and    B.日付  between    date_add(A.日付,interval -365 day)   and   A.日付</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;  group by  A.keycode ,A.日付</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ******************************************************************</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; 平塚貞夫 &lt;sh2@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="16326/0/index.html"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="16325.html">[前]</a><a href="16327.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16324.html">@ 16324 2016-04-29 23:28 [ユメ吉 &lt;yume_tana@xx] 処理速度が遅い                          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16325.html">  16325 2016-04-30 00:13 ┗[HIRATSUKA Sadao &lt;sh2] Re: [mysql 16324] 処理速度が遅い      </a></span>
+<span class="current">-&gt;&nbsp;<a href="16326.html">@ 16326 2016-04-30 10:39 　┗[Masaki Miyata &lt;catlo] Re: [mysql 16325] Re: [mysql 16324] 処理速度が遅い</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16327.html">@ 16327 2016-04-30 14:10 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16326] Re: [mysql 16325] Re: [mysql 16324] 処理速度が遅い</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16328.html">@ 16328 2016-05-01 09:25 　　　┗[Masaki Miyata &lt;catlo] Re: [mysql 16327] Re: [mysql 16326] Re: [mysql 16325] Re: [mysql 16324] 処理速度が遅い</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16329.html">@ 16329 2016-05-01 11:50 　　　　┗[ユメ吉 &lt;yume_tana@xx] Re: [mysql 16328] Re: [mysql 16327] Re: [mysql 16326] Re: [mysql 16325] Re: [mysql 16324] 処理速度が遅い</a></span>
+</pre>
+</body>
+</html>

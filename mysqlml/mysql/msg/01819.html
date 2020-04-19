@@ -1,0 +1,98 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1819</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="1818.html">[前]</a><a href="1820.html">[次]</a><a href="../list/1801-1900.html">[番号順一覧]</a><a href="../thread/1801-1900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1819
+</p>
+<div class="header">
+<p>
+From: &lt;takeshi@xxxxxxxxxx&gt;<br>
+Date: Tue, 28 Mar 2000 18:38:06 +0900<br>
+Subject: [mysql 01819] Re: Quoted column name on mysqldump output<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+At Tue, 28 Mar 2000 17:36:09 +0900,
+Kengo Jinno &lt;kengo@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 神野です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Linuxでmysql 3.22.32 (ujis)を使っています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysqldumpでダンプすると、日本語の項目名がquoteされます。</span>
+<span class="quote1">&gt; それでそのままmysqlにかけると、「You have an error in your </span>
+<span class="quote1">&gt; SQL syntax near '`項目名`」と怒られてしまいます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 具体的には、</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; | create table テスト (</span>
+<span class="quote2">&gt; |   english int,</span>
+<span class="quote2">&gt; |   日本語 int</span>
+<span class="quote2">&gt; | );</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; というようなテーブルを作成し、mysqldump -d でダンプします。</span>
+<span class="quote1">&gt; すると、こうなります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; | CREATE TABLE テスト (</span>
+<span class="quote2">&gt; |   english int(11),</span>
+<span class="quote2">&gt; |   `日本語` int(11)</span>
+<span class="quote2">&gt; | );</span>
+
+&lt;cut&gt;
+
+<span class="quote1">&gt; それぞれのバージョンは、以下の通りです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; | foo:~$ mysql --version</span>
+<span class="quote2">&gt; | mysql  Ver 9.38 Distrib 3.22.32, for pc-linux-gnu (i686)</span>
+<span class="quote2">&gt; | foo:~$ mysqldump --version</span>
+<span class="quote2">&gt; | mysqldump  Ver 7.1 Distrib 3.22.32, for pc-linux-gnu (i686)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ・そもそもquoteされてしまうのが、どこかおかしいのでしょうか？</span>
+<span class="quote1">&gt; ・このquoteを抑止する方法は無いでしょうか？</span>
+<span class="quote1">&gt; 　--quote-namesの逆のオプションがあればいいのですが。</span>
+
+mysqldump version 7 から quote が導入された際に、
+multibytes 文字のことが考慮されていないようです。
+
+MySQL-3.22.27 付属の mysqldump コマンドは version 6.4 で
+この問題は起きないです。
+
+古いバージョンの mysqldump コマンドを使用するか、
+以下のパッチを当てて、quote をつけないように mysqldump コマンドを
+変更してみてください
+
+--- mysqldump.c.orig	Fri Feb 11 06:07:42 2000
++++ mysqldump.c	Tue Mar 28 18:31:04 2000
+@@ -559,7 +559,8 @@
+       strpos=strmov(strpos,row[SHOW_FIELDNAME]);
+     if (!tFlag)
+     {
+-      if (opt_quoted || test_if_special_chars(row[SHOW_FIELDNAME]))
++/*      if (opt_quoted || test_if_special_chars(row[SHOW_FIELDNAME]))*/
++      if (opt_quoted)
+ 	fprintf(sql_file, &quot;  %c%s%c %s&quot;, QUOTE_CHAR,row[SHOW_FIELDNAME],
+ 		QUOTE_CHAR, row[SHOW_TYPE]);
+       else if (opt_keywords)
+
+-- 
+ 村上 毅  takeshi@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="1818.html">[前]</a><a href="1820.html">[次]</a><a href="../list/1801-1900.html">[番号順一覧]</a><a href="../thread/1801-1900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="1818.html">   1818 2000-03-28 17:36 [Kengo Jinno &lt;kengo@x] Quoted column name on mysqldump output  </a></span>
+<span class="current">-&gt;&nbsp;<a href="1819.html">   1819 2000-03-28 18:38 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1820.html">   1820 2000-03-28 19:18 　┣[Kengo Jinno &lt;kengo@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1824.html">   1824 2000-03-29 00:39 　┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="1829.html">   1829 2000-03-29 10:08 　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+</pre>
+</body>
+</html>

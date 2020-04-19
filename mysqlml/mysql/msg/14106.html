@@ -1,0 +1,119 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14106</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14105.html">[前]</a><a href="14107.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14106
+</p>
+<div class="header">
+<p>
+From: hama &lt;hama &lt;smilestyle55@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 10 Jul 2007 11:35:04 +0900<br>
+Subject: [mysql 14106] Re: ログのカウント方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは☆
+
+SQL文の実行が遅いな〜と感じたら、インデックスを使うと早くなる場合がありますね！
+
+MySQL:インデックスまとめメモ
+<a href="http://www.res-system.com/item/550">http://www.res-system.com/item/550</a>
+複合インデックス
+<a href="http://dev.mysql.com/doc/refman/4.1/ja/multiple-column-indexes.html">http://dev.mysql.com/doc/refman/4.1/ja/multiple-column-indexes.html</a>
+
+検索が早くなるかな？(・∀・)
+
+07/07/09 に Hisamitsu Issei&lt;ds1i-hsmt@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 久光です</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; (2)count関数中にcase式を入れて、一度で複数の日付の範囲を集計できるようにしま</span>
+<span class="quote1">&gt; す。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;  count(case when dt between '2007-03-01 00:00:00' and '2007-03-31 23:59:59'</span>
+<span class="quote1">&gt; then 1 else null end) as a1,</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; from material left join log_mate on material.id=log_mate.mate_id</span>
+<span class="quote1">&gt; and dt between '2007-1-31 0:0:0' and '2007-7-31 23:59:59' group by id,name</span>
+<span class="quote1">&gt; order by id,name ;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ・CASEを使って条件に合うものを別個に集計する方法</span>
+<span class="quote1">&gt; ・FROMの中に日付の絞り込みも入れてしまう方法</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 　CASEはここで使えることが思いつかなかったです。言われてみれば使えま</span>
+<span class="quote1">&gt; すねコレが。FROMにいたってはこんな形で絞り込む条件が入れられるとは知</span>
+<span class="quote1">&gt; りませんでした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 　で、さっそく試してみたのですが、3時間ほど計算しても実行結果が返っ</span>
+<span class="quote1">&gt; てこなかったです。SQL文が間違ってたのかと思い、あれやこれや試したん</span>
+<span class="quote1">&gt; ですが全然実行結果が返ってこず。</span>
+<span class="quote1">&gt; 　ログファイルが大きすぎるのかもしれないと思って、79万行あるデータを</span>
+<span class="quote1">&gt; 今年の6月30日〜7月1日の2日間だけの2600行に減らして、さらにSQL文を下</span>
+<span class="quote1">&gt; 記のように単純にしたところ</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; SELECT</span>
+<span class="quote1">&gt; material.id,</span>
+<span class="quote1">&gt; COUNT(</span>
+<span class="quote1">&gt; CASE WHEN log_mate.datetime</span>
+<span class="quote1">&gt; BETWEEN '2007-06-30 00:00:00'</span>
+<span class="quote1">&gt; AND '2007-06-30 23:59:59'</span>
+<span class="quote1">&gt; THEN 1</span>
+<span class="quote1">&gt; ELSE NULL</span>
+<span class="quote1">&gt; END ) AS a1</span>
+<span class="quote1">&gt; FROM material</span>
+<span class="quote1">&gt; LEFT JOIN log_mate ON material.id = log_mate.mate_id</span>
+<span class="quote1">&gt; AND test.datetime</span>
+<span class="quote1">&gt; BETWEEN '2007-6-29 0:0:0'</span>
+<span class="quote1">&gt; AND '2007-7-1 23:59:59'</span>
+<span class="quote1">&gt; GROUP BY material.id</span>
+<span class="quote1">&gt; ORDER BY material.id</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 　130秒くらいでようやく実行結果が返ってきました。結果は私が欲しがっ</span>
+<span class="quote1">&gt; ていたとおり、利用がなければ「0」が返ってくる部品一覧表になっていま</span>
+<span class="quote1">&gt; した。すごいです。ありがとうございました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 　こんどの問題は実行時間が非常に長い点です。自分のパソコン（CoreDuo</span>
+<span class="quote1">&gt; 2GHz）の処理能力がひどく劣っているとも思えないし、でもSQL文はちゃん</span>
+<span class="quote1">&gt; と動作することがわかったので、まずは気長に一晩くらい回しっぱなしにし</span>
+<span class="quote1">&gt; てみます。EXCELにペタペタ貼付けてエッサホッサと行のずれを揃える仕事</span>
+<span class="quote1">&gt; を考えれば、一晩ほっといて結果一覧がでる方がかなり効率的なので。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 　あとはSQL一発ってわけにはいかないけどテンポラリー・テーブルを組み</span>
+<span class="quote1">&gt; 合わせる方法も現実的な速度でPHPを使わずに一覧表が作れるかもしれない</span>
+<span class="quote1">&gt; と考えてます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 　なんにせよおかげさまで進歩しました。ありがとうございます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; =================================</span>
+<span class="quote1">&gt; ==       HISAMITSU ISSEI       ==</span>
+<span class="quote1">&gt; ==  DS1I-HSMT@xxxxxxxxxx  ==</span>
+<span class="quote1">&gt; <a href="http://www.ne.jp/asahi/pro/his/">http://www.ne.jp/asahi/pro/his/</a></span>
+<span class="quote1">&gt; =================================</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="14105.html">[前]</a><a href="14107.html">[次]</a><a href="../list/14101-14200.html">[番号順一覧]</a><a href="../thread/14101-14200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14100.html">  14100 2007-07-08 16:41 [Hisamitsu Issei &lt;ds1] ログのカウント方法                      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14101.html">  14101 2007-07-08 19:04 ┣[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14102.html">  14102 2007-07-08 21:14 ┗[忠犬 KEN公 &lt;ken_ken_]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14103.html">@ 14103 2007-07-09 21:19 　┗[Hisamitsu Issei &lt;ds1]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14104.html">  14104 2007-07-09 21:55 　　┣[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="14106.html">  14106 2007-07-10 11:35 　　┗[hama &lt;smilestyle55@x]                                   </a></span>
+</pre>
+</body>
+</html>

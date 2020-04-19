@@ -1,0 +1,132 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14394</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14393.html">[前]</a><a href="14395.html">[次]</a><a href="../list/14301-14400.html">[番号順一覧]</a><a href="../thread/14301-14400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14394
+</p>
+<div class="header">
+<p>
+From: chuuken kenkou &lt;chuuken kenkou &lt;ken_ken_1962@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 22 Feb 2008 17:47:39 +0900<br>
+Subject: [mysql 14394] Re: データ更新の履歴<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+更新前のデータを履歴に残したいのだから、「BEFORE INSERT ON t」でなく、「BEFORE UPDATE ON t」になります。
+更新前データは、「OLD.列名」で参照でき、更新後データは、「NEW.列名」で参照できます。
+
+
+-- 表定義例
+create table tbl1
+(clm1      int  primary key,
+ clm2      int,
+ clm3      varchar(10));
+create table log_tbl1
+(clm1      int,
+ clm2      int,
+ clm3      varchar(10),
+ upd_user  varchar(30),
+ tmst      timestamp);
+
+-- トリガ定義例
+delimiter //            -- 終端記号を変更
+create trigger upd_tbl1 before update on tbl1
+ for each row
+  begin
+   insert into log_tbl1(clm1,clm2,clm3,upd_user)
+    values(old.clm1,old.clm2,old.clm3,current_user);
+  end
+;
+// 
+delimiter ;             -- 終端記号を元に戻す
+
+
+-- テスト用データ格納例
+insert into tbl1 values(1,0,'a');
+insert into tbl1 values(2,0,'b');
+insert into tbl1 values(3,0,'c');
+insert into tbl1 values(4,0,'d');
+insert into tbl1 values(5,0,'e');
+
+-- 更新してみる
+update tbl1
+ set clm2=clm2+1,clm3=concat(clm3,'x')
+ where clm1=3;
+
+-- トリガの結果確認
+select * from log_tbl1;
+
+
+<span class="quote1">&gt; Date: Fri, 22 Feb 2008 17:27:16 +0900</span>
+<span class="quote1">&gt; From: alex_backspin@xxxxxxxxxx</span>
+<span class="quote1">&gt; Subject: <a href="14393.html">[mysql 14393]</a> Re: データ更新の履歴</span>
+<span class="quote1">&gt; To: ml@xxxxxxxxxx</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 近藤さま、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 解答ありがとうございます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; バージョンは5.0.22で、ubuntu 6.06.1 LTS にて使っています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; トリガーを使用するとき、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; CREATE TRIGGER t_bi</span>
+<span class="quote1">&gt; -&gt; BEFORE INSERT ON t</span>
+<span class="quote1">&gt; -&gt; FOR EACH ROW</span>
+<span class="quote1">&gt; -&gt; INSERT INTO bk_table value ・・・？;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 更新前のデータを別のテーブルにインサートするには、上記のような形となるの</span>
+<span class="quote1">&gt; でしょうか？</span>
+<span class="quote1">&gt; このとき、INSERT構文をどのように書けばよいのかご教授頂けませんでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; nobu wrote:</span>
+<span class="quote2">&gt;&gt; 近藤です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; MySQLのバージョンはいくつでしょうか？</span>
+<span class="quote2">&gt;&gt; MySQLに限ったことではありませんが、そのような要件の際に私はトリガー</span>
+<span class="quote2">&gt;&gt; を使用しています。MySQL5.0以上であればトリガーが使えたかと思います。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 以上</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; Alex さんは書きました:</span>
+<span class="quote3">&gt;&gt;&gt; こんにちは、ALEXです。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; MySQLの任意のテーブル内のでデータを更新したとき、更新前のデータを自動的</span>
+<span class="quote3">&gt;&gt;&gt; にどこかに保管するような仕組みはないものでしょうか。</span>
+<span class="quote3">&gt;&gt;&gt; データが変更されたときの履歴を取りたいのが目的です。</span>
+<span class="quote3">&gt;&gt;&gt; よろしくお願い致します。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt;</span>
+
+_________________________________________________________________
+「脳内メーカー」の次は「鞄の中身メーカー」？ Live Search で検索！
+<a href="http://search.msn.co.jp/results.aspx?q=%E9%9E%84%E3%81%AE%E4%B8%AD%E8%BA%AB%E3%83%A1%E3%83%BC%E3%82%AB%E3%83%BC&amp;FORM=MGCEAA">http://search.msn.co.jp/results.aspx?q=%E9%9E%84%E3%81%AE%E4%B8%AD%E8%BA%AB%E3%83%A1%E3%83%BC%E3%82%AB%E3%83%BC&amp;FORM=MGCEAA</a>
+
+</pre>
+</div>
+<p class="button"><a href="14393.html">[前]</a><a href="14395.html">[次]</a><a href="../list/14301-14400.html">[番号順一覧]</a><a href="../thread/14301-14400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14391.html">  14391 2008-02-22 15:18 [Alex &lt;alex_backspin@] データ更新の履歴                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14392.html">  14392 2008-02-22 15:48 ┗[nobu &lt;mininobu@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14393.html">  14393 2008-02-22 17:27 　┗[Alex &lt;alex_backspin@]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="14394.html">  14394 2008-02-22 17:47 　　┗[chuuken kenkou &lt;ken_]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14395.html">  14395 2008-02-22 17:53 　　　┗[chuuken kenkou &lt;ken_]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14397.html">  14397 2008-02-26 08:53 　　　　┗[Alex &lt;alex_backspin@]                               </a></span>
+</pre>
+</body>
+</html>

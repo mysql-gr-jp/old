@@ -1,0 +1,102 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:291</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="290.html">[前]</a><a href="292.html">[次]</a><a href="../list/201-300.html">[番号順一覧]</a><a href="../thread/201-300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:291
+</p>
+<div class="header">
+<p>
+From: Satoshi Koiwa &lt;Satoshi Koiwa &lt;koiwa@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 21 Oct 98 22:39:14 +0900<br>
+Subject: [mysql 291] Re: DynaLoader.pmに怒られています<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+村上さん、早速にアドバイスありがとうございます。
+
+<span class="quote1">&gt;&lt;考えられること1&gt;</span>
+<span class="quote1">&gt;新しくインストールしたものが同じ 3.21 ならいいはずです。</span>
+<span class="quote1">&gt;3.22 から mysql のソースに perl が含まれていないので、</span>
+<span class="quote1">&gt;もし 3.22 で新規にサーバーを作ったのでしたら動かないと思います。</span>
+
+一週間くらい前に動いていた状態と全く同じディレクトリの中で./configureをする
+際の--with-charset=のところを変えた「だけ」の「つもり」なんです。3.22には手
+を出しておりません。
+
+<span class="quote1">&gt;&lt;考えられること3&gt;</span>
+<span class="quote1">&gt;perl が変な残り方、あるいは変なインストールと</span>
+<span class="quote1">&gt;なっているのではないでしょうか？</span>
+<span class="quote1">&gt;perl のパスから外れているだけかもしれません。</span>
+<span class="quote1">&gt;perl への登録がおかしくなっているだけかもしれません。</span>
+
+3の方を先に。
+MySQLのインストールを繰り返しているだけで、Perl本体はいじっていないんですが
+、ロードされるモジュールの引っ張り先をどこで定義しているのかってことが狂っ
+ているってことだろうとはDynaLoader.pmを見てなんとなくわかったような気になっ
+ているんですが、具体的にどこを直せばよいのかがさっぱり……。
+MySQLとかDBDとかDBIとかのファイル名が見える/usr/lib/perl5/site_perlの下の方
+をゴッソリ削除してから再度MySQLのインストールをすると改めて
+/usr/lib/perl5/site_perlの下に諸々のモジュールができるんですが、それでもや
+っぱりダメなんです。
+
+<span class="quote1">&gt;&lt;考えられること2&gt;</span>
+<span class="quote1">&gt;perl をコンパイルするときを注意深く観察してほしいのですが、</span>
+<span class="quote1">&gt;/usr/..../gcc-lib/.... -lgcc  </span>
+<span class="quote1">&gt;(あるいは /usr/..../gcc-lib/.../libgcc.a)</span>
+<span class="quote1">&gt;などというライブラリーの指定は含まれているでしょうか？</span>
+<span class="quote1">&gt;もちろん、mysql をコンパイルしたときに付加されたライブラリー</span>
+<span class="quote1">&gt;(-lm とか -lz とか、システムによって違います)</span>
+<span class="quote1">&gt;も同時に付加されていなくては動かないと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;確認方法は、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;nm --dynamic /usr/...../mysql.so</span>
+<span class="quote1">&gt;として、divd3 とかが U であれば、libgcc が付加されていません。</span>
+
+divd3という文字列は出てこない……です。うーむ。
+
+<span class="quote1">&gt;(gcc-2.7.2.1 では -lgcc でもリンクしてくれないので、</span>
+<span class="quote1">&gt; gcc-2.7.2.3 にしなくてはなりません。)</span>
+
+# gcc -v
+Reading specs from 
+/usr/lib/gcc-lib/i586-unknown-linux-gnulibc1/2.7.2.3/specs
+gcc version 2.7.2.3
+
+ということなんで、これそのものはそんなに違ってはいないだろうと思います。
+
+<span class="quote1">&gt;ldd /usr/...../mysql.so</span>
+<span class="quote1">&gt;でその他の -lm などのライブラリーが付加されて</span>
+<span class="quote1">&gt;コンパイルされているか確認できます</span>
+
+lddだと
+
+# ldd Mysql.so
+ldd: can't execute Mysql.so (No such file or directory)
+
+といわれてしまいます。
+
+今さっき思い出したんですが、一週間ほど前までちゃんと動いていた
+mysql-3.21.33bは、もともとmysql-3.21.33だったものを上書きインストールのよう
+なことをしたものだったんです。とすると、そのあたりなのか。しかし現状をどう
+すればいいんだぁっ。
+とりあえず、/usr/local/mysql/perl/Mysql-modules/Mysqlの中にあるMysql.cとか
+Makfile.PLとかを見てみることにします。
+
+</pre>
+</div>
+<p class="button"><a href="290.html">[前]</a><a href="292.html">[次]</a><a href="../list/201-300.html">[番号順一覧]</a><a href="../thread/201-300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="291.html">    291 1998-10-21 22:39 [Satoshi Koiwa &lt;koiwa] Re: DynaLoader.pmに怒られています       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="294.html">    294 1998-10-22 00:57 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+</pre>
+</body>
+</html>

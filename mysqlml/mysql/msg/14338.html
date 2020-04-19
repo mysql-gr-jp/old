@@ -1,0 +1,244 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14338</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14337.html">[前]</a><a href="14339.html">[次]</a><a href="../list/14301-14400.html">[番号順一覧]</a><a href="../thread/14301-14400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14338
+</p>
+<div class="header">
+<p>
+From: 秋山満邦 &lt;秋山満邦 &lt;manpou@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 13 Jan 2008 10:36:13 +0900<br>
+Subject: [mysql 14338] Re: 【Q】関連するテーブルは異なるデータベース上にあっても良いのでしょうか？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、Akiyamaといいます。
+
+日野さん、伊東さん、広津さん、ありがとうございます。
+説明不足でご迷惑おかけしました。
+
+いきさつは、
+同じデータベースだからやり方は MS-ACCESS と変わらないだろうと思い、
+勉強を兼ねて業務日報を管理するデータベース（daily_report）を作りました。
+取りあえずということでこの中に社員テーブルを作っています。
+後日、既存のMS-ACCESSで作った社員データベースを移行させるときに移すつもりでした。
+で、その作業に取りかかろうとして、関連するテーブルを別々のデータベースにしたとき、
+これまでMS-ACCESSでやれていたことがやれる？という疑問にぶつかりました。
+参考書やWebやMLを探しても、
+異なるデータベース間のやりとりに関する例は参照以外は見つけることができませんでした。
+それで、もしかしたら出来ないんだろうかと思った次第です。
+駄目であればやろうとしていたことを変えないといけませんので。
+
+やろうとしていたのは（機能的に良いか悪いかは別として）、
+多数のデータベースを作った場合、
+カレントデータベースを毎回意識するのは嫌ですから、
+ダミーの空の（空でなくても良い）カレントのデータベースを作り、
+そこから他のデータベースを操作する。
+ということです。
+
+やれるかやれないか試しにやってみました。
+次の３つのデータベースを作りました。
+test:ダミーのカレントデータベース・・もともとあった。
+shouhin:商品のデータベース
+kakaku:価格のデータベース
+
+testデータベースをカレントデータベースにして、
+他のデータベースのテーブル作成、レコード挿入、削除、参照をやってみました。
+結果としては、やれましたが、他所でこんな参考例を見たことありませんので、
+もしかしたらとんでもないことやってる？のかもしれません。
+妥当なのかそうでないのかが判りませんのでご指摘ください。
+
+# /usr/bin/mysql --default-character-set=utf8
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 25 to server version: 5.0.22
+
+Type 'help;' or '\h' for help. Type '\c' to clear the buffer.
+
+mysql&gt; create database shouhin;
+Query OK, 1 row affected (0.01 sec)
+
+mysql&gt; create database kakaku;
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; use shouhin;
+Database changed
+mysql&gt; create table tb_shouhin (name char(100) , kakaku_no int(11));
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; use kakaku;
+Database changed
+mysql&gt; create table tb_kakaku (kakaku_no int(11) , kakaku int(11));
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; use test;　　・・・・以降はtestデータベースがカレントデータベースに
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql&gt; insert into shouhin.tb_shouhin values ('mikan' , 1), ('ringo' , 2), ('kaki' , 3);
+Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql&gt; select * from shouhin.tb_shouhin;
++-------+-----------+
+<span class="quote1">| name  | kakaku_no |</span>
++-------+-----------+
+<span class="quote1">| mikan |         1 | </span>
+<span class="quote1">| ringo |         2 | </span>
+<span class="quote1">| kaki  |         3 | </span>
++-------+-----------+
+3 rows in set (0.00 sec)
+
+mysql&gt; insert into kakaku.tb_kakaku values (1 , 100), (2 , 200), (3 , 150);
+Query OK, 3 rows affected (0.00 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql&gt; select * from kakaku.tb_kakaku;
++-----------+--------+
+<span class="quote1">| kakaku_no | kakaku |</span>
++-----------+--------+
+<span class="quote1">|         1 |    100 | </span>
+<span class="quote1">|         2 |    200 | </span>
+<span class="quote1">|         3 |    150 | </span>
++-----------+--------+
+3 rows in set (0.00 sec)
+
+mysql&gt; select name , kakaku from shouhin.tb_shouhin , kakaku.tb_kakaku where shouhin.tb_shouhin.kakaku_no = kakaku.tb_kakaku.kakaku_no;
++-------+--------+
+<span class="quote1">| name  | kakaku |</span>
++-------+--------+
+<span class="quote1">| mikan |    100 | </span>
+<span class="quote1">| ringo |    200 | </span>
+<span class="quote1">| kaki  |    150 | </span>
++-------+--------+
+3 rows in set (0.01 sec)
+
+mysql&gt; insert into shouhin.tb_shouhin values ('budou' , 2), ('kuri' , 1), ('banana' , 3);
+Query OK, 3 rows affected (0.00 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql&gt; select name , kakaku from shouhin.tb_shouhin , kakaku.tb_kakaku where shouhin.tb_shouhin.kakaku_no = kakaku.tb_kakaku.kakaku_no;
++--------+--------+
+<span class="quote1">| name   | kakaku |</span>
++--------+--------+
+<span class="quote1">| mikan  |    100 | </span>
+<span class="quote1">| ringo  |    200 | </span>
+<span class="quote1">| kaki   |    150 | </span>
+<span class="quote1">| budou  |    200 | </span>
+<span class="quote1">| kuri   |    100 | </span>
+<span class="quote1">| banana |    150 | </span>
++--------+--------+
+6 rows in set (0.00 sec)
+
+mysql&gt; insert into shouhin.tb_shouhin values ('nasi' , 4), ('biwa' , 1), ('uri' , 5);Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql&gt; insert into kakaku.tb_kakaku values (4 , 180), (5 , 130);
+Query OK, 2 rows affected (0.00 sec)
+Records: 2  Duplicates: 0  Warnings: 0
+
+mysql&gt; select name , kakaku from shouhin.tb_shouhin , kakaku.tb_kakaku where shouhin.tb_shouhin.kakaku_no = kakaku.tb_kakaku.kakaku_no;
++--------+--------+
+<span class="quote1">| name   | kakaku |</span>
++--------+--------+
+<span class="quote1">| mikan  |    100 | </span>
+<span class="quote1">| ringo  |    200 | </span>
+<span class="quote1">| kaki   |    150 | </span>
+<span class="quote1">| budou  |    200 | </span>
+<span class="quote1">| kuri   |    100 | </span>
+<span class="quote1">| banana |    150 | </span>
+<span class="quote1">| nasi   |    180 | </span>
+<span class="quote1">| biwa   |    100 | </span>
+<span class="quote1">| uri    |    130 | </span>
++--------+--------+
+9 rows in set (0.00 sec)
+
+mysql&gt; update kakaku.tb_kakaku set kakaku=250 where kakaku_no=2;
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql&gt; select * from kakaku.tb_kakaku;
++-----------+--------+
+<span class="quote1">| kakaku_no | kakaku |</span>
++-----------+--------+
+<span class="quote1">|         1 |    100 | </span>
+<span class="quote1">|         2 |    250 | </span>
+<span class="quote1">|         3 |    150 | </span>
+<span class="quote1">|         4 |    180 | </span>
+<span class="quote1">|         5 |    130 | </span>
++-----------+--------+
+5 rows in set (0.00 sec)
+
+mysql&gt; delete from shouhin.tb_shouhin where name='mikan';
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; select name , kakaku from shouhin.tb_shouhin , kakaku.tb_kakaku where shouhin.tb_shouhin.kakaku_no = kakaku.tb_kakaku.kakaku_no;
++--------+--------+
+<span class="quote1">| name   | kakaku |</span>
++--------+--------+
+<span class="quote1">| ringo  |    250 | </span>
+<span class="quote1">| kaki   |    150 | </span>
+<span class="quote1">| budou  |    250 | </span>
+<span class="quote1">| kuri   |    100 | </span>
+<span class="quote1">| banana |    150 | </span>
+<span class="quote1">| nasi   |    180 | </span>
+<span class="quote1">| biwa   |    100 | </span>
+<span class="quote1">| uri    |    130 | </span>
++--------+--------+
+8 rows in set (0.00 sec)
+
+mysql&gt; create table shouhin.tb_shouhin2 (name char(100) , kakaku_no int(11));
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; insert into shouhin.tb_shouhin2 values ('tomato' , 4), ('nasu' , 1), ('kyuri' , 5);
+Query OK, 3 rows affected (0.00 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql&gt; select name , kakaku from shouhin.tb_shouhin2 , kakaku.tb_kakaku where shouhin.tb_shouhin2.kakaku_no = kakaku.tb_kakaku.kakaku_no;
++--------+--------+
+<span class="quote1">| name   | kakaku |</span>
++--------+--------+
+<span class="quote1">| nasu   |    100 | </span>
+<span class="quote1">| tomato |    180 | </span>
+<span class="quote1">| kyuri  |    130 | </span>
++--------+--------+
+3 rows in set (0.00 sec)
+
+mysql&gt; select database();
++------------+
+<span class="quote1">| database() |</span>
++------------+
+<span class="quote1">| test       | </span>
++------------+
+1 row in set (0.01 sec)
+
+mysql&gt; \q
+Bye
+# 
+以上が、結果です。
+-- 
+_____σ(^ ^)__m_a_n_p_o_u______
+<a href="http://www1.bbiq.jp/manpou">http://www1.bbiq.jp/manpou</a>
+
+</pre>
+</div>
+<p class="button"><a href="14337.html">[前]</a><a href="14339.html">[次]</a><a href="../list/14301-14400.html">[番号順一覧]</a><a href="../thread/14301-14400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14333.html">  14333 2008-01-11 22:36 [秋山満邦 &lt;manpou@xxx] 【Q】関連するテーブルは異なるデータベース上にあっても良いのでしょうか？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14334.html">  14334 2008-01-12 13:30 ┣[&quot;日野洋一郎&quot; &lt;hino@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14335.html">  14335 2008-01-12 13:48 ┃┗[&quot;yusuke ito&quot; &lt;ito.ys]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14337.html">  14337 2008-01-12 18:35 ┃　┗[&quot;日野洋一郎&quot; &lt;hino@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14336.html">  14336 2008-01-12 16:23 ┣[&quot;T.Hirotsu&quot; &lt;hirotsu]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14338.html">  14338 2008-01-13 10:36 ┗[秋山満邦 &lt;manpou@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14339.html">  14339 2008-01-13 19:49 　┗[&quot;T.Hirotsu&quot; &lt;hirotsu]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14341.html">  14341 2008-01-14 00:50 　　┗[秋山満邦 &lt;manpou@xxx]                                   </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3192</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="3191.html">[前]</a><a href="3193.html">[次]</a><a href="../list/3101-3200.html">[番号順一覧]</a><a href="../thread/3101-3200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3192
+</p>
+<div class="header">
+<p>
+From: Toshihiro Fujimori &lt;Toshihiro Fujimori &lt;fuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 07 Feb 2001 21:46:08 +0900<br>
+Subject: [mysql 03192] Re: バイナリーデータの扱いについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+Mitsuru Marunoさんの&lt;003101c090b3$abb02f50$6b01a8c0@maru&gt;から
+<span class="quote1">&gt;INSERT INTO文でバイナリを16進表記文字列に変換して挿入できました。</span>
+
+一応、回避策が見つかったということで、
+以下蛇足になるかもしれませんが・・・
+
+サーバのソースを眺めてみると、エスケープ処理が含まれる関数では、
+ほとんどが、
+1. マルチバイト文字の処理
+2. エスケープ処理
+という順番になっていて、しかも 1. にマッチした場合は、
+2. はスキップされています。
+
+ということで、SJIS 版サーバで 0x88 0x5c という文字列は
+マルチバイト文字の方にマッチしてしまい、エスケープを
+取り除く処理がスキップされてしまうのだと思われます。
+
+ただ、そうなると、php で addslashes() を使った場合も、
+同じ現象になるはず・・・？
+
+# 以下、さらに余談
+
+Mitsuru Marunoさんの&lt;005301c090a5$9562fd30$6b01a8c0@maru&gt;から
+<span class="quote1">&gt;ソースを見てみましたが、libmysqlプロジェクトでは、やはり</span>
+<span class="quote1">&gt;mysql_real_escape_string関数をエクスポートしていませんでした。</span>
+<span class="quote1">&gt;また、mysql_real_escape_stringとmysql_escape_stringを見てみると</span>
+<span class="quote1">&gt;両者ともmysql_sub_escape_string関数を呼び出しているだけので、</span>
+<span class="quote1">&gt;内容的には全く同じ物ですね。。。</span>
+
+エクスポートされてなくても、static link で使えるのでは
+ないでしょうか。
+ドキュメントにも以下のように書かれてますし。
+<span class="quote2">&gt;&gt; 22.1 MySQL C API</span>
+<span class="quote2">&gt;&gt;  C API コードは MySQL とともに配布されます。これは</span>
+<span class="quote2">&gt;&gt;  libmysqlclient ライブラリに含まれ、C プログラムから</span>
+<span class="quote2">&gt;&gt;  データベースへのアクセスを許します。 </span>
+
+それから、ソースにあるように、mysql_escape_string() とは違い、
+mysql_real_escape_string() の処理は charset によって変化するので、
+例えば、0x95 0x5c というバイナリを変換する場合、
+SJIS の場合、マルチバイトとして扱われるので、そのまま -&gt; 0x95 0x5c
+EUC の場合は、エスケープ処理される -&gt; 0x95 0x5c 0x5c
+となるように思えます。
+最終的には、INSERT して SELECT すると、
+SJIS・・・ そのまま -&gt; 0x95 0x5c
+EUC ・・・ エスケープを取り除く -&gt; 0x95 0x5c
+となって、同じ結果ではありますが。
+
+-- 
+Toshihiro Fujimori (藤森 利浩)
+Taisei Inc.
+PGP Key ID: 0xBE1C7568 (DH/DSS)
+<a href="http://www.rcc.or.jp/%7Efuji/">http://www.rcc.or.jp/%7Efuji/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="3191.html">[前]</a><a href="3193.html">[次]</a><a href="../list/3101-3200.html">[番号順一覧]</a><a href="../thread/3101-3200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3156.html">   3156 2001-02-05 16:31 [&quot;Mitsuru Maruno&quot; &lt;ma] バイナリーデータの扱いについて          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3158.html">   3158 2001-02-05 23:19 ┣[Toshihiro Fujimori &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3160.html">   3160 2001-02-06 10:26 ┃┗[&quot;Mitsuru Maruno&quot; &lt;ma]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3161.html">   3161 2001-02-06 10:43 ┃　┗[Yoshiyuki Asano &lt;asa]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3162.html">   3162 2001-02-06 11:06 ┃　　┗[&quot;Mitsuru Maruno&quot; &lt;ma]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3163.html">   3163 2001-02-06 12:56 ┃　　　┗[Yoshiyuki Asano &lt;asa]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3164.html">   3164 2001-02-06 13:24 ┃　　　　┣[Yoshiyuki Asano &lt;asa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3165.html">   3165 2001-02-06 13:32 ┃　　　　┗[&quot;Mitsuru Maruno&quot; &lt;ma]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3166.html">   3166 2001-02-06 14:07 ┃　　　　　┗[Yoshiyuki Asano &lt;asa]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3168.html">   3168 2001-02-06 14:30 ┃　　　　　　┣[&quot;Mitsuru Maruno&quot; &lt;ma]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3169.html">   3169 2001-02-06 14:52 ┃　　　　　　┗[Akihiko Shinohara &lt;s]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3170.html">   3170 2001-02-06 15:09 ┃　　　　　　　┣[Yoshiyuki Asano &lt;asa]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3171.html">   3171 2001-02-06 15:11 ┃　　　　　　　┗[&quot;Mitsuru Maruno&quot; &lt;ma]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3172.html">   3172 2001-02-06 17:02 ┃　　　　　　　　┗[Tomohiro KATO &lt;tomop]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3173.html">   3173 2001-02-06 17:19 ┃　　　　　　　　　┗[&quot;Mitsuru Maruno&quot; &lt;ma]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3174.html">   3174 2001-02-06 17:28 ┃　　　　　　　　　　┣[Tomohiro KATO &lt;tomop]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3182.html">   3182 2001-02-07 10:11 ┃　　　　　　　　　　┃┗[&quot;Mitsuru Maruno&quot; &lt;ma]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3175.html">   3175 2001-02-06 17:29 ┃　　　　　　　　　　┗[&quot;Mitsuru Maruno&quot; &lt;ma]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3179.html">   3179 2001-02-06 23:45 ┃　　　　　　　　　　　┗[Toshihiro Fujimori &lt;]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3180.html">   3180 2001-02-07 00:41 ┃　　　　　　　　　　　　┣[Toshihiro Fujimori &lt;]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3183.html">   3183 2001-02-07 10:30 ┃　　　　　　　　　　　　┗[&quot;Mitsuru Maruno&quot; &lt;ma]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3184.html">   3184 2001-02-07 10:50 ┃　　　　　　　　　　　　　┗[Akihiko Shinohara &lt;s]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3185.html">   3185 2001-02-07 11:13 ┃　　　　　　　　　　　　　　┗[&quot;Mitsuru Maruno&quot; &lt;ma]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3186.html">   3186 2001-02-07 12:11 ┃　　　　　　　　　　　　　　　┗[&quot;Mitsuru Maruno&quot; &lt;ma]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3187.html">   3187 2001-02-07 12:57 ┃　　　　　　　　　　　　　　　　┣[楠吉彦  &lt;moredebu@xx]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3188.html">   3188 2001-02-07 15:29 ┃　　　　　　　　　　　　　　　　┣[Akihiko Shinohara &lt;s]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3189.html">   3189 2001-02-07 15:35 ┃　　　　　　　　　　　　　　　　┃┗[Akihiko Shinohara &lt;s]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3190.html">   3190 2001-02-07 16:02 ┃　　　　　　　　　　　　　　　　┃　┗[&quot;Mitsuru Maruno&quot; &lt;ma] </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3191.html">   3191 2001-02-07 18:18 ┃　　　　　　　　　　　　　　　　┃　　┗[Akihiko Shinohara &lt;s]   </a></span>
+<span class="current">-&gt;&nbsp;<a href="3192.html">   3192 2001-02-07 21:46 ┃　　　　　　　　　　　　　　　　┗[Toshihiro Fujimori &lt;]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3195.html">   3195 2001-02-08 01:16 ┃　　　　　　　　　　　　　　　　　┗[とみたまさひろ &lt;tomm]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3177.html">   3177 2001-02-06 23:05 ┗[Tomohiro Takahashi &lt;]                                       </a></span>
+</pre>
+</body>
+</html>

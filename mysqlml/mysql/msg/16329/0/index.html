@@ -1,0 +1,252 @@
+<html><body><div style="color:; background-color:; font-family:MS PGothic, sans-serif;font-size:12pt"><div><span>ゆめ吉です。</span></div><div><br></div><div>昨日は不在で、返事が遅れました。</div><div><br></div><div>みなさんからのアドバイスから判断して、あまりおかしくなさそうです。</div><div>MySQLは高速と聞いていたので、もしかしておかしいのかな思っていました。</div><div><br></div><div>確かにデータは変わらないので毎日追加するほうが得策ですね！</div><span><div><br></div><div>宮田さんからのプロシージャを参考に考えて見ます。</div><div><br></div><div>今後もよろしくお願いします。</div></span><div><br><blockquote style="padding-left: 5px; margin-top: 5px; margin-left: 5px; border-left-color: rgb(16, 16, 255); border-left-width: 2px; border-left-style: solid;">    <div style="font-family: MS PGothic,
+ sans-serif; font-size: 12pt;">        <div style="font-family: MS PGothic, sans-serif; font-size: 12pt;">            <div dir="ltr">            <font face="Arial" size="2">                ----- Original Message -----<br>                <b><span style="font-weight: bold;">From:</span></b> Masaki Miyata &lt;catlover@38ta.com&gt;<br>                <b><span style="font-weight: bold;">To:</span></b> ml@mysql.gr.jp                <br>                <b><span style="font-weight: bold;">Date:</span></b> 2016/5/1, Sun 09:25<br>                <b><span style="font-weight: bold;">Subject:</span></b> [mysql 16328] Re: [mysql 16327] Re: [mysql 16326] Re: [mysql 16325] Re: [mysql 16324] 処理速度が遅い<br>            </font>            </div>            <br><div id="yiv100783394"><div dir="ltr">こんにちは。宮田です。<div><br></div><div><div>&gt; &gt; avg(case when &nbsp;B.日付 &gt;= date_add(A.日付,interval -7 day)　 then &nbsp;B.数値1 &nbsp;
+ else null end ) &nbsp;as &nbsp;"7d_1_HEIKIN" &nbsp;,</div><div>&gt; と、A.日付で終端されてないので、4/28のレコードを固定化しても4/29以降の値を含んで、固定化難しいんじゃないかなとか思ってました(間違い？)</div><div><br></div><div>where &nbsp;B.hizuke &nbsp;between date_add(A.hizuke, interval -365 day) and A.hizuke</div><div><br></div><div>上記のJOIN条件にて、between で範囲指定してあるので、</div><div>A.hizuke 以降は含まれないようになっていますね。</div><div><br></div><div class="yiv100783394gmail_extra"><br clear="all"><div><div class="yiv100783394gmail_signature">宮田 昌紀<br><a href="mailto:catlover@38ta.com" target="_blank" rel="nofollow" ymailto="mailto:catlover@38ta.com">catlover@38ta.com</a></div></div>
+<br><div class="yiv100783394gmail_quote">2016年4月30日 14:10 yoku ts. <span dir="ltr">&lt;<a href="mailto:yoku0825@gmail.com" target="_blank" rel="nofollow" ymailto="mailto:yoku0825@gmail.com">yoku0825@gmail.com</a>&gt;</span>:<br><blockquote class="yiv100783394gmail_quote" style="margin: 0px 0px 0px 0.8ex; padding-left: 1ex; border-left-color: rgb(204, 204, 204); border-left-width: 1px; border-left-style: solid;"><div dir="ltr">こんにちは、yoku0825といいます。</div>
+<div dir="ltr">これ、元の式が</div>
+<div dir="ltr">&gt; avg(case when&nbsp; B.日付 &gt;= date_add(A.日付,interval -7 day)　 then&nbsp; B.数値1&nbsp;&nbsp; else null end )&nbsp; as&nbsp; "7d_1_HEIKIN"&nbsp; ,</div>
+<div dir="ltr">と、A.日付で終端されてないので、4/28のレコードを固定化しても4/29以降の値を含んで、固定化難しいんじゃないかなとか思ってました(間違い？)</div>
+<div dir="ltr">求められている回答とは違うんですが、InfiniDBでやったらまともな処理速度が出そうだったので、Window関数を持っている他のRDBMSが良いんじゃないかなと思います。<br></div>
+<div dir="ltr">yoku0825, <br></div>
+<div dir="ltr">2016/04/30 10:42 "Masaki Miyata" &lt;<a href="mailto:catlover@38ta.com" target="_blank" rel="nofollow" ymailto="mailto:catlover@38ta.com">catlover@38ta.com</a>&gt;:<br>
+&gt;<br>
+&gt; こんにちは。<br>
+&gt; 宮田と申します。<br>
+&gt;<br>
+&gt; 頭の体操にちょっとやってみました。<br>
+&gt;<br>
+&gt; そのSQLで求めるなら、<br>
+&gt; 最低限、「keycode,&nbsp;hizuke」の複合インデックスが必要ですね。<br>
+&gt;<br>
+&gt; 2013/1/1 から日次でサンプルデータを作って試してみました。<br>
+&gt; WindowsのノートPC、Core i5-4200Uメモリ 8GB、MySQLのメモリーチューニング無しの状態で、<br>
+&gt; 1日分で5〜10秒くらい。<br>
+&gt;<br>
+&gt; まぁ、自己結合で日付を最大1年とはいえクロス結合するので、<br>
+&gt; 1日分で73万件（2000*365）処理することになるので、妥当じゃないでしょうか。<br>
+&gt;<br>
+&gt; 過去分が変わらないのであれば、1日分をサマリーテーブルに入れていけばよいです。<br>
+&gt;<br>
+&gt; -- ■日次のサマリ作成<br>
+&gt; insert into tb_sum<br>
+&gt; &nbsp; (hizuke, keycode,<br>
+&gt; &nbsp; &nbsp;7d_1_HEIKIN, 7d_2_HEIKIN, 31d_1_HEIKIN, 31d_2_HEIKIN,<br>
+&gt; &nbsp; &nbsp;180d_1_HEIKIN, 180d_2_HEIKIN, 365d_1_HEIKIN, 365d_2_HEIKIN)<br>
+&gt; select<br>
+&gt; &nbsp; A.hizuke,<br>
+&gt; &nbsp; A.keycode,<br>
+&gt; &nbsp; avg(case when &nbsp;B.hizuke &gt;= date_add(A.hizuke, interval &nbsp; -7 day) then &nbsp;B.num1 else null end ) as &nbsp; '7d_1_HEIKIN',<br>
+&gt; &nbsp; avg(case when &nbsp;B.hizuke &gt;= date_add(A.hizuke, interval &nbsp; -7 day) then &nbsp;B.num2 else null end ) as &nbsp; '7d_2_HEIKIN',<br>
+&gt; &nbsp; avg(case when &nbsp;B.hizuke &gt;= date_add(A.hizuke, interval &nbsp;-31 day) then &nbsp;B.num1 else null end ) as &nbsp;'31d_1_HEIKIN',<br>
+&gt; &nbsp; avg(case when &nbsp;B.hizuke &gt;= date_add(A.hizuke, interval &nbsp;-31 day) then &nbsp;B.num2 else null end ) as &nbsp;'31d_2_HEIKIN',<br>
+&gt; &nbsp; avg(case when &nbsp;B.hizuke &gt;= date_add(A.hizuke, interval -150 day) then &nbsp;B.num1 else null end ) as '180d_1_HEIKIN',<br>
+&gt; &nbsp; avg(case when &nbsp;B.hizuke &gt;= date_add(A.hizuke, interval -150 day) then &nbsp;B.num2 else null end ) as '180d_2_HEIKIN',<br>
+&gt; &nbsp; avg(case when &nbsp;B.hizuke &gt;= date_add(A.hizuke, interval -365 day) then &nbsp;B.num1 else null end ) as '365d_1_HEIKIN',<br>
+&gt; &nbsp; avg(case when &nbsp;B.hizuke &gt;= date_add(A.hizuke, interval -365 day) then &nbsp;B.num2 else null end ) as '365d_2_HEIKIN'<br>
+&gt; &nbsp; from tb A, tb B<br>
+&gt; &nbsp;where &nbsp;A.keycode = B.keycode<br>
+&gt; &nbsp; &nbsp;and &nbsp;A.hizuke &nbsp;= &nbsp;'2016-04-29'&nbsp;<br>
+&gt; &nbsp; &nbsp;and &nbsp;B.hizuke &nbsp;between date_add(A.hizuke, interval -365 day) and A.hizuke<br>
+&gt; &nbsp;group by A.keycode, A.hizuke;<br>
+&gt;<br>
+&gt; -- ■テーブルやテストデータ作成のプロシージャなど<br>
+&gt;<br>
+&gt; -- phpMyAdmin SQL Dump<br>
+&gt; -- version 4.2.7.1<br>
+&gt; -- <a href="http://www.phpmyadmin.net/" target="_blank" rel="nofollow">http://www.phpmyadmin.net/</a><br>
+&gt; --<br>
+&gt; -- サーバのバージョン： 5.6.20<br>
+&gt; -- PHP Version: 5.5.15<br>
+&gt;<br>
+&gt; SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";<br>
+&gt; SET time_zone = "+00:00";<br>
+&gt;<br>
+&gt; --<br>
+&gt; -- Database: 'test1'<br>
+&gt; --<br>
+&gt;<br>
+&gt; DELIMITER $$<br>
+&gt; --<br>
+&gt; -- プロシージャ<br>
+&gt; --<br>
+&gt; CREATE DEFINER=`root`@`localhost` PROCEDURE `ins`()<br>
+&gt; &nbsp; &nbsp; NO SQL<br>
+&gt; BEGIN<br>
+&gt; START TRANSACTION;<br>
+&gt; SET @k = 1;<br>
+&gt; SET @d = &nbsp;'2013-01-01';<br>
+&gt;<br>
+&gt; WHILE '2016-04-29' &gt;= @d DO<br>
+&gt; &nbsp; WHILE 2001 &gt; @k DO<br>
+&gt; &nbsp; &nbsp; insert into tb (`keycode`,`hizuke`,`num1`,`num2`)<br>
+&gt; &nbsp; &nbsp; &nbsp; values( @k, @d, CEIL(RAND() * 1000), CEIL(RAND() * 2000));<br>
+&gt; &nbsp; &nbsp; SET @k = @k +1;<br>
+&gt; &nbsp; END WHILE;<br>
+&gt; &nbsp; SET @k = 1;<br>
+&gt; &nbsp; SET @d = date_add(@d, interval +1 day);<br>
+&gt; END WHILE;<br>
+&gt; COMMIT;<br>
+&gt; END$$<br>
+&gt;<br>
+&gt; DELIMITER ;<br>
+&gt;<br>
+&gt; -- --------------------------------------------------------<br>
+&gt;<br>
+&gt; --<br>
+&gt; -- テーブルの構造 'tb'<br>
+&gt; --<br>
+&gt;<br>
+&gt; CREATE TABLE IF NOT EXISTS tb (<br>
+&gt; id int(10) unsigned NOT NULL,<br>
+&gt; &nbsp; keycode int(10) unsigned NOT NULL,<br>
+&gt; &nbsp; hizuke date NOT NULL,<br>
+&gt; &nbsp; num1 int(10) unsigned NOT NULL,<br>
+&gt; &nbsp; num2 int(10) unsigned NOT NULL<br>
+&gt; ) ENGINE=InnoDB &nbsp;DEFAULT CHARSET=utf8 AUTO_INCREMENT=2778524 ;<br>
+&gt;<br>
+&gt; -- --------------------------------------------------------<br>
+&gt;<br>
+&gt; --<br>
+&gt; -- テーブルの構造 'tb_sum'<br>
+&gt; --<br>
+&gt;<br>
+&gt; CREATE TABLE IF NOT EXISTS tb_sum (<br>
+&gt; id int(10) unsigned NOT NULL,<br>
+&gt; &nbsp; keycode int(10) unsigned NOT NULL,<br>
+&gt; &nbsp; hizuke date NOT NULL,<br>
+&gt; &nbsp; 7d_1_HEIKIN double unsigned NOT NULL,<br>
+&gt; &nbsp; 7d_2_HEIKIN double unsigned NOT NULL,<br>
+&gt; &nbsp; 31d_1_HEIKIN double unsigned NOT NULL,<br>
+&gt; &nbsp; 31d_2_HEIKIN double unsigned NOT NULL,<br>
+&gt; &nbsp; 180d_1_HEIKIN double unsigned NOT NULL,<br>
+&gt; &nbsp; 180d_2_HEIKIN double unsigned NOT NULL,<br>
+&gt; &nbsp; 365d_1_HEIKIN double unsigned NOT NULL,<br>
+&gt; &nbsp; 365d_2_HEIKIN double unsigned NOT NULL<br>
+&gt; ) ENGINE=InnoDB &nbsp;DEFAULT CHARSET=utf8 AUTO_INCREMENT=2048 ;<br>
+&gt;<br>
+&gt; --<br>
+&gt; -- Indexes for dumped tables<br>
+&gt; --<br>
+&gt;<br>
+&gt; --<br>
+&gt; -- Indexes for table tb<br>
+&gt; --<br>
+&gt; ALTER TABLE tb<br>
+&gt; &nbsp;ADD PRIMARY KEY (keycode,hizuke), ADD UNIQUE KEY id (id), ADD UNIQUE KEY uq (hizuke,keycode);<br>
+&gt;<br>
+&gt; --<br>
+&gt; -- Indexes for table tb_sum<br>
+&gt; --<br>
+&gt; ALTER TABLE tb_sum<br>
+&gt; &nbsp;ADD PRIMARY KEY (keycode,hizuke), ADD UNIQUE KEY id (id), ADD UNIQUE KEY uq (hizuke,keycode);<br>
+&gt;<br>
+&gt; --<br>
+&gt; -- AUTO_INCREMENT for dumped tables<br>
+&gt; --<br>
+&gt;<br>
+&gt; --<br>
+&gt; -- AUTO_INCREMENT for table tb<br>
+&gt; --<br>
+&gt; ALTER TABLE tb<br>
+&gt; MODIFY id int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2778524;<br>
+&gt; --<br>
+&gt; -- AUTO_INCREMENT for table tb_sum<br>
+&gt; --<br>
+&gt; ALTER TABLE tb_sum<br>
+&gt; MODIFY id int(10) unsigned NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2048;<br>
+&gt;<br>
+&gt;<br>
+&gt;<br>
+&gt; 宮田 昌紀<br>
+&gt; <a href="mailto:catlover@38ta.com" target="_blank" rel="nofollow" ymailto="mailto:catlover@38ta.com">catlover@38ta.com</a><br>
+&gt;<br>
+&gt; 2016年4月30日 0:13 HIRATSUKA Sadao &lt;<a href="mailto:sh2@pop01.odn.ne.jp" target="_blank" rel="nofollow" ymailto="mailto:sh2@pop01.odn.ne.jp">sh2@pop01.odn.ne.jp</a>&gt;:<br>
+&gt;<br>
+&gt;&gt; ユメ吉さん<br>
+&gt;&gt; こんばんは、平塚といいます。<br>
+&gt;&gt;<br>
+&gt;&gt; なんとなくですが、株式などの市場データでしょうか。<br>
+&gt;&gt; 数値1が最高値、数値2が最安値、それで直近1週間、1か月、<br>
+&gt;&gt; 半年(180日ではなくて？)、1年の移動平均を出したい、<br>
+&gt;&gt; ということでイメージ合うでしょうか。<br>
+&gt;&gt;<br>
+&gt;&gt; この、移動平均をかなりの力技で計算しているので、<br>
+&gt;&gt; MySQL的につらいことになっていると思われます。<br>
+&gt;&gt;<br>
+&gt;&gt; EXPLAINを見てインデックスを追加するというMySQLの技術力よりも、<br>
+&gt;&gt; RDBMSで移動平均をどうやって計算すればよいのだろう、<br>
+&gt;&gt; といったところに工夫が求められる感じです。<br>
+&gt;&gt;<br>
+&gt;&gt; それから、<br>
+&gt;&gt; 過去にさかのぼって数値1、数値2が変化することはありますか？<br>
+&gt;&gt; もし市場データでしたら過去のデータは変わらないですよね。<br>
+&gt;&gt;<br>
+&gt;&gt; 4か月分の計算に96分かかったのことですが、前日までのデータは<br>
+&gt;&gt; 1回計算すればそれを記録しておけばよい、といったことはないでしょうか。<br>
+&gt;&gt;<br>
+&gt;&gt; 昨日までのデータがすでに計算してあるのならば、<br>
+&gt;&gt; 今日の分を9.6秒かけて計算して、末尾に追加するだけ、<br>
+&gt;&gt; といった運用ができるかもしれませんね。<br>
+&gt;&gt;<br>
+&gt;&gt; とはいえMySQLの技術力でどうにかねじ伏せられるかどうかについては<br>
+&gt;&gt; 思いついたらメールしてみようと思います。<br>
+&gt;&gt; ＃今日は思いつきませんでした(^^;<br>
+&gt;&gt;<br>
+&gt;&gt; 2016年4月29日 23:28 ユメ吉 &lt;<a href="mailto:yume_tana@yahoo.co.jp" target="_blank" rel="nofollow" ymailto="mailto:yume_tana@yahoo.co.jp">yume_tana@yahoo.co.jp</a>&gt;:<br>
+&gt;&gt; &gt; MySQLをはじめて1ヶ月の初心者です。以前、他のRDBを少しかじった程度ですが<br>
+&gt;&gt; &gt; 本格的にものにしようと勉強中です。<br>
+&gt;&gt; &gt; ところが、MySQLの処理速度が遅いので困惑しており、メールをしたところです。<br>
+&gt;&gt; &gt;<br>
+&gt;&gt; &gt; テーブルは日付、 keycode、数値1、数値2と簡単ですが、データ量は毎日取込んでおりで<br>
+&gt;&gt; &gt;&nbsp; keycodeが2000種程になるので今では200万件を超えております。<br>
+&gt;&gt; &gt; 今回MySQLに移植しなおして、ためしにselect * from テーブル名(tb)de開けたところ3.2秒かかりました。<br>
+&gt;&gt; &gt; まだインデックスは付けていませんが、 keycodeだけ付けましたが2.2秒とあまり変わりません。<br>
+&gt;&gt; &gt; その時、EXPLAINを見ましたが　type = ALL&nbsp; Key=NULL Extra = NULL&nbsp; になっていました。<br>
+&gt;&gt; &gt; 今回は自己結合を使って日付、 keycodeごとに1週間分、1か月分、半年分、一年分の平均を算出していきたく<br>
+&gt;&gt; &gt; クエリーを作りました。　A.日付&nbsp; &gt;=&nbsp; '2016-04-29' にして直近だけで9.6秒かかりました。<br>
+&gt;&gt; &gt; ちなみに今年から（A.日付&nbsp; &gt;=&nbsp; '2016-01-01' )では　96分かかっていました。本当は2年分程を5〜6分以内に<br>
+&gt;&gt; &gt; できないか思っております。<br>
+&gt;&gt; &gt; この時の条件は　日付とkeycodeを単独でインデックスを作りました。<br>
+&gt;&gt; &gt; explain は tb A&nbsp; type = range ,key=日付&nbsp; &nbsp; ,extra =Using index condition; Using<br>
+&gt;&gt; &gt; MRR; Using temporary; Using filesort<br>
+&gt;&gt; &gt;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; tb B&nbsp; type = ref&nbsp; &nbsp;,key=keycode ,extra =Using where<br>
+&gt;&gt; &gt; MYSQLのVer=5.7&nbsp; モメリー＝4Ｇ　　ＯＳ=WIN7pro<br>
+&gt;&gt; &gt; explainは初めてで良くわかりませんが、速度アップのためのご指導頂けないでしょうか。<br>
+&gt;&gt; &gt; ***************************************************************<br>
+&gt;&gt; &gt; select<br>
+&gt;&gt; &gt;&nbsp; &nbsp; A.hizuke&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;as&nbsp; &nbsp;"HIZUKE"&nbsp; ,<br>
+&gt;&gt; &gt;&nbsp; &nbsp; A.keycode&nbsp; &nbsp; &nbsp; &nbsp; as&nbsp; &nbsp;"KEYCODE",<br>
+&gt;&gt; &gt;&nbsp; &nbsp;avg(case when&nbsp; B.日付 &gt;= date_add(A.日付,interval -7 day)　 then&nbsp; B.数値1&nbsp; &nbsp;else<br>
+&gt;&gt; &gt; null end )&nbsp; as&nbsp; "7d_1_HEIKIN"&nbsp; ,<br>
+&gt;&gt; &gt;&nbsp; &nbsp;avg(case when&nbsp; B.日付 &gt;= date_add(A.日付,interval -7 day)　 then&nbsp; B.数値2&nbsp; &nbsp;else<br>
+&gt;&gt; &gt; null end )&nbsp; as&nbsp; "7d_2_HEIKIN"&nbsp; ,<br>
+&gt;&gt; &gt;&nbsp; &nbsp;avg(case when&nbsp; B.日付 &gt;= date_add(A.日付,interval -31 day) then&nbsp; B.数値1&nbsp; &nbsp;else<br>
+&gt;&gt; &gt; null end )&nbsp; as&nbsp; "31d_1_HEIKIN"&nbsp; ,<br>
+&gt;&gt; &gt;&nbsp; &nbsp;avg(case when&nbsp; B.日付 &gt;= date_add(A.日付,interval -31 day) then&nbsp; B.数値2&nbsp; &nbsp;else<br>
+&gt;&gt; &gt; null end )&nbsp; as&nbsp; "31d_2_HEIKIN"&nbsp; ,<br>
+&gt;&gt; &gt;&nbsp; &nbsp;avg(case when&nbsp; B.日付 &gt;= date_add(A.日付,interval -150 day) then&nbsp; B.数値1&nbsp; &nbsp;else<br>
+&gt;&gt; &gt; null end )&nbsp; as&nbsp; "180d_1_HEIKIN"&nbsp; ,<br>
+&gt;&gt; &gt;&nbsp; &nbsp;avg(case when&nbsp; B.日付 &gt;= date_add(A.日付,interval -150 day) then&nbsp; B.数値2&nbsp; &nbsp;else<br>
+&gt;&gt; &gt; null end )&nbsp; as&nbsp; "180d_2_HEIKIN"&nbsp; ,<br>
+&gt;&gt; &gt;&nbsp; &nbsp;avg(case when&nbsp; B.日付 &gt;=&nbsp; date_add(A.日付,interval -365 day)　then&nbsp; B.数値1<br>
+&gt;&gt; &gt; else null end )&nbsp; as&nbsp; "365d_1_HEIKIN"&nbsp; ,<br>
+&gt;&gt; &gt;&nbsp; &nbsp;avg(case when&nbsp; B.日付 &gt;=&nbsp; date_add(A.日付,interval -365 day)&nbsp; then&nbsp; B.数値2<br>
+&gt;&gt; &gt; else null end )&nbsp; as&nbsp; "365d_2_HEIKIN"&nbsp; ,<br>
+&gt;&gt; &gt;&nbsp; &nbsp;from&nbsp; &nbsp;tb A , tb B<br>
+&gt;&gt; &gt;<br>
+&gt;&gt; &gt;&nbsp; where&nbsp; A.keycode&nbsp; &nbsp;=&nbsp; B.keycode<br>
+&gt;&gt; &gt;&nbsp; and&nbsp; &nbsp; A.日付&nbsp; &gt;=&nbsp; '2016-04-29'<br>
+&gt;&gt; &gt;&nbsp; and&nbsp; &nbsp; B.日付&nbsp; between&nbsp; &nbsp; date_add(A.日付,interval -365 day)&nbsp; &nbsp;and&nbsp; &nbsp;A.日付<br>
+&gt;&gt; &gt;<br>
+&gt;&gt; &gt;&nbsp; group by&nbsp; A.keycode ,A.日付<br>
+&gt;&gt; &gt;<br>
+&gt;&gt; &gt; ******************************************************************<br>
+&gt;&gt;<br>
+&gt;&gt;<span class="yiv100783394"><font color="#888888"><br>
+&gt;&gt;<br>
+&gt;&gt; --<br>
+&gt;&gt; 平塚貞夫 &lt;<a href="mailto:sh2@pop01.odn.ne.jp" target="_blank" rel="nofollow" ymailto="mailto:sh2@pop01.odn.ne.jp">sh2@pop01.odn.ne.jp</a>&gt;<br>
+&gt;<br>
+&gt;<br>
+</font></span></div>
+</blockquote></div><br></div></div></div>
+</div><br><br>        </div>    </div>    </blockquote></div>    </div></body></html>

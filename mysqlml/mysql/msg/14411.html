@@ -1,0 +1,113 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14411</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14410.html">[前]</a><a href="14412.html">[次]</a><a href="../list/14401-14500.html">[番号順一覧]</a><a href="../thread/14401-14500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14411
+</p>
+<div class="header">
+<p>
+From: &quot;Yoshinori Matsunobu&quot; &lt;&quot;Yoshinori Matsunobu&quot; &lt;ymatsunobu@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 11 Mar 2008 08:55:16 +0900<br>
+Subject: [mysql 14411] MySQL 6.0.4 alphaリリース (UTF-8  4バイト文字対応)<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+松信です。
+
+MySQL 6.0系の最新のアルファ版となる6.0.4がリリースされました。
+<a href="http://dev.mysql.com/downloads/mysql/6.0.html">http://dev.mysql.com/downloads/mysql/6.0.html</a>
+
+このバージョンからは、かねてからの懸念事項であった、
+UTF-8の4バイト文字対応(サロゲートペアの対応)が実装されました。
+※当初バージョン5.2という計画があったのですが、5.2そのものが無くなり、5.1→
+6.0というリリース順序になりました。
+
+基本的には、以前本ML(<a href="13823.html">[mysql 13823]</a>)で挙げた、
+<span class="quote1">&gt; 3.現行エンコーディングutf8(3バイト)の名称をutf8_oldに変更する。そして</span>
+<span class="quote1">&gt; UTF-8 4バイト対応のエンコーディングutf8を追加する。(残るのはutf8_oldと新</span>
+<span class="quote1">&gt; utf8)</span>
+が採用されました(utf8mb3とutf8)。
+森山さんはじめ、当時フィードバックをくださった方々に感謝しています。
+
+具体的な使い方については、近いうちにどこかに解説を書こうと思っています。
+興味のある方はぜひ試してみてください。
+また、仕様等が納得いかないと思われた方はご連絡ください。
+(アルファ版の段階であればある程度の修正も可能なので)
+バグを発見された場合バグレポートに投稿してくださると非常に助かります。
+
+
+---(以下リリースノートから当該部分を抜粋)
+* Incompatible Change: The Unicode implementation has been
+   extended to provide support for supplementary characters that
+   lie outside the Basic Multilingual Plane (BMP). Noteworthy
+   features:
+   + utf16 and utf32 character sets have been added. These correspond to
+     the UTF-16 and UTF-32 encodings of the Unicode character set, and
+     they both support supplementary characters.
+   + The utf8 character set from previous versions of MySQL
+     has been renamed to utf8mb3, to reflect that its encoding
+     uses a maximum of three bytes for multi-byte characters.
+     (Old tables that previously used utf8 will be reported as
+     using utf8mb3 after an in-place upgrade to MySQL 6.0, but
+     otherwise work as before.)
+   + The new utf8 character set in MySQL 6.0 is similar to
+     utf8mb3, but its encoding allows up to four bytes per
+     character to enable support for supplementary characters.
+   + The ucs2 character set is essentially unchanged except
+     for the inclusion of some newer BMP characters.
+   In most respects, upgrading from MySQL 5.1 to 6.0 should
+   present few problems with regard to Unicode usage, although
+   there are some potential areas of incompatibility. Some
+   examples:
+   + For the variable-length character data types (VARCHAR and
+     the TEXT types), the maximum length in characters for
+     utf8 columns is less in MySQL 6.0 than previously.
+   + For all character data types (CHAR, VARCHAR, and the TEXT
+     types), the maximum number of characters for utf8 columns
+     that can be indexed is less in MySQL 6.0 than previously.
+   Consequently, if you want to upgrade tables from the old utf8
+   (now utf8mb3) to the current utf8, it may be necessary to
+   change some column or index definitions.
+   For additional details about the new Unicode character sets
+   and potential incompatibilities, see Section 9.1.8, &quot;Unicode
+   Support,&quot; and Section 9.1.9, &quot;Upgrading from Previous to
+   Current Unicode Support.&quot;
+   If you use events, a known issue is that if you upgrade from
+   MySQL 5.1 to 6.0.4, the event scheduler will not work, even
+   after you run mysql_upgrade. (This is an issue only for an
+   upgrade, not for a new installation of MySQL 6.0.4.) To work
+   around this upgrading problem, use these instructions:
+   1. In MySQL 5.1, before upgrading, create a dump file
+      containing your mysql.event table:
+shell&gt; mysqldump -uroot -p mysql event &gt; event.sql
+   2. Stop the server, upgrade to MySQL 6.0, and start the server.
+   3. Recreate the mysql.event table using the dump file:
+shell&gt; mysql -uroot -p mysql &lt; event.sql
+   4. Run mysql_upgrade to upgrade the other system tables in
+      the mysql database:
+shell&gt; mysql_upgrade -uroot -p
+   5. Restart the server. The event scheduler should run normally.
+---
+
+以上です。
+----
+Yoshinori Matsunobu
+Senior Consultant
+MySQL, <a href="http://www.mysql.com">http://www.mysql.com</a>
+
+MySQL Consulting Services:
+<a href="http://www-jp.mysql.com/consulting/">http://www-jp.mysql.com/consulting/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="14410.html">[前]</a><a href="14412.html">[次]</a><a href="../list/14401-14500.html">[番号順一覧]</a><a href="../thread/14401-14500.html">[スレッド一覧]</a></p>
+</body>
+</html>

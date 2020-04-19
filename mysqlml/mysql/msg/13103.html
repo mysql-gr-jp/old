@@ -1,0 +1,230 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13103</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13102.html">[前]</a><a href="13104.html">[次]</a><a href="../list/13101-13200.html">[番号順一覧]</a><a href="../thread/13101-13200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13103
+</p>
+<div class="header">
+<p>
+From: TOMTOM &lt;TOMTOM &lt;tomf1@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 19 Jun 2006 14:21:07 +0900<br>
+Subject: [mysql 13103] Re: : 排他制御？？？？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+こんにちは、池田さん、
+
+返信ありがとうございます。
+
+いろいろ、試してみたのですが、
+lock tablesが、期待したように、動作するみたいです。
+ありがとうございました。
+
+
+On Mon, 19 Jun 2006 09:46:49 +0900
+Tetsuro IKEDA &lt;te.ikeda@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; 池田です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; これって、排他制御というのですか。？？？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 概ね合っていると思います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 以下のコードではINSERT文同士をぶつけようとしていますよね。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 従ってInnoDBの場合なら、接続を確立した後に分離レベルを</span>
+<span class="quote1">&gt; SERIALIZABLEに変更するとかどうでしょう。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; con = DriverManager.getConnection(url,user,pass);</span>
+<span class="quote1">&gt; con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; あるいはMyISAMの場合などですが、テーブルロックを使うとか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; stat.executeUpdate(&quot;LOCK TABLES ff WRITE&quot;);</span>
+<span class="quote1">&gt; for(int i =0;i&lt;100;i++){</span>
+<span class="quote1">&gt;    ・・・処理・・・</span>
+<span class="quote1">&gt; }</span>
+<span class="quote1">&gt; stat.executeUpdate(&quot;UNLOCK TABLES&quot;);</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; いろいろ動かしながらイメージをつかんでいただければ・・・。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; TOMTOM wrote:</span>
+<span class="quote2">&gt; &gt; こんにちは、</span>
+<span class="quote2">&gt; &gt; 教えて欲しいことがあるのですが、</span>
+<span class="quote2">&gt; &gt; 例えば、二台のパソコンから、mysqlにデータを</span>
+<span class="quote2">&gt; &gt; 追加している時、一方のパソコンが、追加している時は、</span>
+<span class="quote2">&gt; &gt; 他方は、待機して、追加が終わったとき、</span>
+<span class="quote2">&gt; &gt; 待機していた方が、追加更新を始めるようにしたいのです。</span>
+<span class="quote2">&gt; &gt; これって、排他制御というのですか。？？？</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; パソコンが一台しか、無いので、</span>
+<span class="quote2">&gt; &gt; javaで、スレット処理を利用して、あたかも、二台から、アクセス</span>
+<span class="quote2">&gt; &gt; しているようなコードにして、実行したのですが、</span>
+<span class="quote2">&gt; &gt; 二つのスレットが交互にアクセスしているみたいで、</span>
+<span class="quote2">&gt; &gt; どうの様にしたら、期待した、</span>
+<span class="quote2">&gt; &gt; アクセスになるか、以下のプログラムを</span>
+<span class="quote2">&gt; &gt; どのように、改造したらいいのか、教えてください。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; 環境　win xp</span>
+<span class="quote2">&gt; &gt;       jdk 1.5</span>
+<span class="quote2">&gt; &gt;       mysql 5.0</span>
+<span class="quote2">&gt; &gt;       connector 3.1.11</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; *******************************************</span>
+<span class="quote2">&gt; &gt; package threadsql;</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; import java.sql.Connection;</span>
+<span class="quote2">&gt; &gt; import java.sql.DriverManager;</span>
+<span class="quote2">&gt; &gt; import java.sql.SQLException;</span>
+<span class="quote2">&gt; &gt; import java.sql.Statement;</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; /**</span>
+<span class="quote2">&gt; &gt;  *</span>
+<span class="quote2">&gt; &gt;  * @author </span>
+<span class="quote2">&gt; &gt;  */</span>
+<span class="quote2">&gt; &gt; class tsql extends Thread {</span>
+<span class="quote2">&gt; &gt;     Connection con=null;</span>
+<span class="quote2">&gt; &gt;     Statement stat = null;</span>
+<span class="quote2">&gt; &gt;     String data=null;</span>
+<span class="quote2">&gt; &gt;     </span>
+<span class="quote2">&gt; &gt;     public tsql(String url,String user,String pass,String data) {</span>
+<span class="quote2">&gt; &gt;         try {</span>
+<span class="quote2">&gt; &gt;             Class.forName(&quot;com.mysql.jdbc.Driver&quot;);</span>
+<span class="quote2">&gt; &gt;             con = DriverManager.getConnection(url,user,pass);</span>
+<span class="quote2">&gt; &gt;             stat = con.createStatement();</span>
+<span class="quote2">&gt; &gt;             con.setAutoCommit(false);</span>
+<span class="quote2">&gt; &gt;         } catch (ClassNotFoundException ex) {</span>
+<span class="quote2">&gt; &gt;             ex.printStackTrace();</span>
+<span class="quote2">&gt; &gt;         } catch (SQLException ex) {</span>
+<span class="quote2">&gt; &gt;             ex.printStackTrace();</span>
+<span class="quote2">&gt; &gt;         }</span>
+<span class="quote2">&gt; &gt;         this.data=data;</span>
+<span class="quote2">&gt; &gt;         </span>
+<span class="quote2">&gt; &gt;     }</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt;     public void run() {</span>
+<span class="quote2">&gt; &gt;         String sql = &quot;insert into ff values('&quot;+data+&quot;')&quot;;</span>
+<span class="quote2">&gt; &gt;         for(int i =0;i&lt;100;i++){</span>
+<span class="quote2">&gt; &gt;             try {</span>
+<span class="quote2">&gt; &gt;                 </span>
+<span class="quote2">&gt; &gt;                 int k = stat.executeUpdate(sql);</span>
+<span class="quote2">&gt; &gt;                 System.out.println(data+&quot;  &quot;+ i);</span>
+<span class="quote2">&gt; &gt;                 Thread.sleep(100);</span>
+<span class="quote2">&gt; &gt;             } catch (InterruptedException ex) {</span>
+<span class="quote2">&gt; &gt;                 ex.printStackTrace();</span>
+<span class="quote2">&gt; &gt;             } catch (SQLException ex) {</span>
+<span class="quote2">&gt; &gt;                 ex.printStackTrace();</span>
+<span class="quote2">&gt; &gt;             }</span>
+<span class="quote2">&gt; &gt;         }</span>
+<span class="quote2">&gt; &gt;         try {</span>
+<span class="quote2">&gt; &gt;             con.commit();</span>
+<span class="quote2">&gt; &gt;             stat.close();</span>
+<span class="quote2">&gt; &gt;             con.close();</span>
+<span class="quote2">&gt; &gt;         } catch (SQLException ex) {</span>
+<span class="quote2">&gt; &gt;             ex.printStackTrace();</span>
+<span class="quote2">&gt; &gt;         }</span>
+<span class="quote2">&gt; &gt;         </span>
+<span class="quote2">&gt; &gt;     }</span>
+<span class="quote2">&gt; &gt;     </span>
+<span class="quote2">&gt; &gt; }</span>
+<span class="quote2">&gt; &gt; public class threadsql {</span>
+<span class="quote2">&gt; &gt;     </span>
+<span class="quote2">&gt; &gt;     /** Creates a new instance of threadsql */</span>
+<span class="quote2">&gt; &gt;     public threadsql() {</span>
+<span class="quote2">&gt; &gt;         String url=&quot;jdbc:mysql://localhost/test&quot;;</span>
+<span class="quote2">&gt; &gt;         String user = &quot;root&quot;;</span>
+<span class="quote2">&gt; &gt;         String pass = &quot;*********&quot;;</span>
+<span class="quote2">&gt; &gt;         String data =&quot;user1&quot;;</span>
+<span class="quote2">&gt; &gt;         tsql t1 = new tsql(url,user,pass,data);</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt;         String url1=&quot;jdbc:mysql://prim/test&quot;;</span>
+<span class="quote2">&gt; &gt;         String user1 = &quot;user2&quot;;</span>
+<span class="quote2">&gt; &gt;         String pass1 = &quot;*********&quot;;</span>
+<span class="quote2">&gt; &gt;         String data1 =&quot;user2&quot;;</span>
+<span class="quote2">&gt; &gt;         tsql t2 = new tsql(url1,user1,pass1,data1);</span>
+<span class="quote2">&gt; &gt;         </span>
+<span class="quote2">&gt; &gt;         </span>
+<span class="quote2">&gt; &gt;         t1.start();</span>
+<span class="quote2">&gt; &gt;         t2.start();</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt;     }</span>
+<span class="quote2">&gt; &gt;     </span>
+<span class="quote2">&gt; &gt;     /**</span>
+<span class="quote2">&gt; &gt;      * @param args the command line arguments</span>
+<span class="quote2">&gt; &gt;      */</span>
+<span class="quote2">&gt; &gt;     public static void main(String[] args) {</span>
+<span class="quote2">&gt; &gt;         new threadsql();</span>
+<span class="quote2">&gt; &gt;         // TODO code application logic here</span>
+<span class="quote2">&gt; &gt;     }</span>
+<span class="quote2">&gt; &gt;     </span>
+<span class="quote2">&gt; &gt; }</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; *****************************************************</span>
+<span class="quote2">&gt; &gt; 実行結果、</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; user1  0</span>
+<span class="quote2">&gt; &gt; user2  0</span>
+<span class="quote2">&gt; &gt; user1  1</span>
+<span class="quote2">&gt; &gt; user2  1</span>
+<span class="quote2">&gt; &gt; user1  2</span>
+<span class="quote2">&gt; &gt; user2  2</span>
+<span class="quote2">&gt; &gt; user1  3</span>
+<span class="quote2">&gt; &gt; user2  3</span>
+<span class="quote2">&gt; &gt; --------</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; これを、以下の様な、実行結果にしたいのです。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; user1  0</span>
+<span class="quote2">&gt; &gt; user1  1</span>
+<span class="quote2">&gt; &gt; user1  2</span>
+<span class="quote2">&gt; &gt; user1  3</span>
+<span class="quote2">&gt; &gt; --------</span>
+<span class="quote2">&gt; &gt; --------</span>
+<span class="quote2">&gt; &gt; user2  0</span>
+<span class="quote2">&gt; &gt; user2  1</span>
+<span class="quote2">&gt; &gt; user2  2</span>
+<span class="quote2">&gt; &gt; user2  3</span>
+<span class="quote2">&gt; &gt; --------</span>
+<span class="quote2">&gt; &gt; --------</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; よろしくお願いいたします。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; Tetsuro IKEDA</span>
+<span class="quote1">&gt; Sumisho Computer Systems Corp.</span>
+<span class="quote1">&gt; Open Source System Div.</span>
+<span class="quote1">&gt; te.ikeda@xxxxxxxxxx</span>
+<span class="quote1">&gt; TEL +81-3-5166-2420</span>
+<span class="quote1">&gt; FAX +81-3-5166-1189</span>
+
+-- 
+溝井　友晴 &lt;tomf1@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="13102.html">[前]</a><a href="13104.html">[次]</a><a href="../list/13101-13200.html">[番号順一覧]</a><a href="../thread/13101-13200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13101.html">  13101 2006-06-19 09:27 [TOMTOM &lt;tomf1@xxxxxx] 排他制御？？？？                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13102.html">  13102 2006-06-19 09:46 ┗[Tetsuro IKEDA &lt;te.ik]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="13103.html">  13103 2006-06-19 14:21 　┗[TOMTOM &lt;tomf1@xxxxxx] Re: : 排他制御？？？？              </a></span>
+</pre>
+</body>
+</html>

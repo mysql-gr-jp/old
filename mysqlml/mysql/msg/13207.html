@@ -1,0 +1,159 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13207</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13206.html">[前]</a><a href="13208.html">[次]</a><a href="../list/13201-13300.html">[番号順一覧]</a><a href="../thread/13201-13300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13207
+</p>
+<div class="header">
+<p>
+From: &quot;Hiro Yoshioka&quot; &lt;&quot;Hiro Yoshioka&quot; &lt;hyoshiok@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 3 Aug 2006 19:39:35 +0900<br>
+Subject: [mysql 13207] Re: character setの追加<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+On 8/3/06, Shuichi Tamagawa &lt;tamagawa@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; 玉川です。</span>
+
+御世話になります。
+早速のリプライありがとうございます。
+大変助かります。
+
+<span class="quote1">&gt; キャラクターセットの追加について、基本的な流れとしては</span>
+<span class="quote1">&gt; マニュアルにこんなページがあります（あまり知られていませんが）。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/refman/5.0/en/adding-character-set.html">http://dev.mysql.com/doc/refman/5.0/en/adding-character-set.html</a></span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/refman/4.1/en/adding-character-set.html">http://dev.mysql.com/doc/refman/4.1/en/adding-character-set.html</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; こちらを参考にしてみて下さい。</span>
+
+おお、参考になります。
+
+しかし、
+mysql&gt; show character set;
+で追加した文字コードが出てこないということは
+mysqldあたりにちゃんと組み込まれていない
+という感じなんでしょうか？
+
+strings mysqld|grep cp51932
+とかして実際に組み込まれているのを
+確認してみたりしています。
+
+BUILD/autorun.sh
+で、m4あたりからのconfigure fileやMakefileの
+生成は成功していて、configureやmakeも特に問題は
+なさそうです。
+
+Index.xmlがトリッキーかと思ったのですが、
+$ diff -u sql/share/charsets/Index.xml.orig sql/share/charsets/Index.xml
+--- sql/share/charsets/Index.xml.orig   2005-12-22 04:50:18.000000000 +0900
++++ sql/share/charsets/Index.xml        2006-08-03 12:59:38.874663512 +0900
+@@ -1,6 +1,6 @@
+ &lt;?xml version='1.0' encoding=&quot;utf-8&quot;?&gt;
+
+-&lt;charsets max-id=&quot;98&quot;&gt;
++&lt;charsets max-id=&quot;100&quot;&gt;
+
+ &lt;copyright&gt;
+  Copyright (C) 2003 MySQL AB
+@@ -589,5 +589,19 @@
+   &lt;/collation&gt;
+ &lt;/charset&gt;
+
++&lt;charset name=&quot;cp51932&quot;&gt;
++  &lt;family&gt;Japanese&lt;/family&gt;
++  &lt;description&gt;EUC encoding for Windows Japanese&lt;/description&gt;
++  &lt;alias&gt;cp51932&lt;/alias&gt;
++  &lt;collation name=&quot;cp51932_japanese_ci&quot;    id=&quot;99&quot; order=&quot;Japanese&quot;&gt;
++    &lt;flag&gt;primary&lt;/flag&gt;
++    &lt;flag&gt;compiled&lt;/flag&gt;
++  &lt;/collation&gt;
++  &lt;collation name=&quot;cp51932_bin&quot;    id=&quot;100&quot; order=&quot;Japanese&quot;&gt;
++    &lt;flag&gt;binary&lt;/flag&gt;
++    &lt;flag&gt;compiled&lt;/flag&gt;
++  &lt;/collation&gt;
++&lt;/charset&gt;
++
+ &lt;/charsets&gt;
+
+と言う感じです。
+
+よ
+
+
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; Shuichi Tamagawa</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; -----Original Message-----</span>
+<span class="quote2">&gt; &gt; From: Hiro Yoshioka [mailto:hyoshiok@xxxxxxxxxx]</span>
+<span class="quote2">&gt; &gt; Sent: Thursday, August 03, 2006 5:53 PM</span>
+<span class="quote2">&gt; &gt; To: ml@xxxxxxxxxx</span>
+<span class="quote2">&gt; &gt; Subject: <a href="13205.html">[mysql 13205]</a> character setの追加</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; よしおかと申します。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; MySQLの実装の質問はここでよろしいのでしょうか？</span>
+<span class="quote2">&gt; &gt; 別に適切な場所がありましたら、お手数ですが、教えてください。</span>
+<span class="quote2">&gt; &gt; （本家の英語のメーリングリストでもいいですが）</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 質問というのは、デフォルトでサポートされているエンコーディングを</span>
+<span class="quote2">&gt; &gt; 拡張しようと考えています。具体的には cp51932というエンコーディングを</span>
+<span class="quote2">&gt; &gt; 実装しようとしています。（EUC的なエンコーディングでcp932のレパートリ</span>
+<span class="quote2">&gt; &gt; なんですが、eucjpmsと違い補助漢字をサポートしない）</span>
+<span class="quote2">&gt; &gt; <a href="http://legacy-encoding.sourceforge.jp/wiki/">http://legacy-encoding.sourceforge.jp/wiki/</a></span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; で、ごりごりソースをハックしております。基本的な流れとして</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; eucjpmsを参考に、ctype-cp51932.c みたいなファイルを作成し、</span>
+<span class="quote2">&gt; &gt; そこに各種ルーチンをとじこめる。</span>
+<span class="quote2">&gt; &gt; character_sets.m4 にコンパイルルールを追加する。</span>
+<span class="quote2">&gt; &gt; INSTALL-SOURCEを良く読む。</span>
+<span class="quote2">&gt; &gt; BUILD/autorun.sh でaclocal;autoheader ...相当のことをする</span>
+<span class="quote2">&gt; &gt; ./configure --prefix=/usr/local/mysql --with-charset=utf8</span>
+<span class="quote2">&gt; &gt;       --with-extra-charsets=complex;date</span>
+<span class="quote2">&gt; &gt; make</span>
+<span class="quote2">&gt; &gt; make install</span>
+<span class="quote2">&gt; &gt; で</span>
+<span class="quote2">&gt; &gt; mysql&gt; show character set;</span>
+<span class="quote2">&gt; &gt; で追加したキャラクタセットがでてくればめでたしめでたしなんですが</span>
+<span class="quote2">&gt; &gt; どうもうまく出てきません。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; なにか根本的に勘違いをしていますでしょうか？</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; よ</span>
+<span class="quote2">&gt; &gt; --</span>
+<span class="quote2">&gt; &gt; <a href="http://d.hatena.ne.jp/hyoshiok/">http://d.hatena.ne.jp/hyoshiok/</a></span>
+<span class="quote2">&gt; &gt; <a href="http://blog.miraclelinux.com/yume/">http://blog.miraclelinux.com/yume/</a></span>
+<span class="quote2">&gt; &gt; mailto:hyoshiok@xxxxxxxxxx</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+-- 
+<a href="http://d.hatena.ne.jp/hyoshiok/">http://d.hatena.ne.jp/hyoshiok/</a>
+<a href="http://blog.miraclelinux.com/yume/">http://blog.miraclelinux.com/yume/</a>
+mailto:hyoshiok@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="13206.html">[前]</a><a href="13208.html">[次]</a><a href="../list/13201-13300.html">[番号順一覧]</a><a href="../thread/13201-13300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13205.html">  13205 2006-08-03 17:53 [&quot;Hiro Yoshioka&quot; &lt;hyo] character setの追加                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13206.html">  13206 2006-08-03 18:55 ┗[&quot;Shuichi Tamagawa&quot; &lt;]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="13207.html">  13207 2006-08-03 19:39 　┗[&quot;Hiro Yoshioka&quot; &lt;hyo]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13208.html">  13208 2006-08-03 20:56 　　┗[&quot;Shuichi Tamagawa&quot; &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13209.html">  13209 2006-08-03 22:04 　　　┗[&quot;Hiro Yoshioka&quot; &lt;hyo]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13210.html">  13210 2006-08-03 22:45 　　　　┗[&quot;Hiro Yoshioka&quot; &lt;hyo]                               </a></span>
+</pre>
+</body>
+</html>

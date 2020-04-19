@@ -1,0 +1,188 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:583</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="582.html">[前]</a><a href="584.html">[次]</a><a href="../list/501-600.html">[番号順一覧]</a><a href="../thread/501-600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:583
+</p>
+<div class="header">
+<p>
+From: Tatsuya Ina &lt;Tatsuya Ina &lt;ina@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 18 Jan 1999 17:05:22 GMT<br>
+Subject: [mysql 00583] Re: MySQL speed<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+伊奈です。
+
+本業の合間にやっているのでなかなか進みませんが、
+
+<span class="quote1">&gt; 毅です</span>
+<span class="quote1">&gt;  〜 中略 〜 </span>
+<span class="quote1">&gt; a).</span>
+<span class="quote1">&gt; mysqladmin flush-tables</span>
+<span class="quote1">&gt; isamchk -r database/Test_all_tab</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; b) ISAM のバッファの変更</span>
+<span class="quote1">&gt; isam/static.c:</span>
+<span class="quote1">&gt; nisam_block_size=1024</span>
+<span class="quote1">&gt; を</span>
+<span class="quote1">&gt; nisam_block_size=8192</span>
+<span class="quote1">&gt; に変更</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; c) char binary 型の使用</span>
+<span class="quote1">&gt;  alter table する場合も(a)と同様、tmpdir の容量と、</span>
+<span class="quote1">&gt;  database directory のあるパーティションの容量に気をつけてください。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; d) key_buffer= の十分なわりあて</span>
+
+やってみました。
+
+<span class="quote1">&gt; c) char binary型の使用</span>
+以外は結果が出たので報告します。
+
+(1)まずはデフォルト設定のまま
+mysql&gt; select count(*) from Test_all_tab where lotno like 'D15A0%';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|   717505 |</span>
++----------+
+1 row in set (9 min 26.46 sec)
+
+
+mysql&gt; select count(*) from Test_all_tab where stop_day between '1998-11-14 00:00:00' and '1998-12-14 23:59:59';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|  1118730 |</span>
++----------+
+1 row in set (5 min 8.02 sec)
+
+(2)バッファーサイズを32mに変更
+-O key_buffer=32m -O sort_buffer=32m -O record_buffer=32m
+ickg140:~$ mysqladmin variable
++----------------------+---------------------------------+
+<span class="quote1">| Variable_name        | Value                           |</span>
++----------------------+---------------------------------+
+<span class="quote1">| back_log             | 5                               |</span>
+<span class="quote1">| connect_timeout      | 5                               |</span>
+<span class="quote1">| basedir              | /usr/local/                     |</span>
+<span class="quote1">| datadir              | /usr/local/var/                 |</span>
+<span class="quote1">| join_buffer          | 131072                          |</span>
+<span class="quote1">| key_buffer           | 33550336                        |</span>
+<span class="quote1">| language             | /usr/local/share/mysql/english/ |</span>
+<span class="quote1">| log                  | ON                              |</span>
+<span class="quote1">| long_query_time      | 10                              |</span>
+<span class="quote1">| low_priority_updates | OFF                             |</span>
+<span class="quote1">| max_allowed_packet   | 1048576                         |</span>
+<span class="quote1">| max_connections      | 90                              |</span>
+<span class="quote1">| max_connect_errors   | 10                              |</span>
+<span class="quote1">| max_join_size        | 4294967295                      |</span>
+<span class="quote1">| max_sort_length      | 1024                            |</span>
+<span class="quote1">| net_buffer_length    | 16384                           |</span>
+<span class="quote1">| port                 | 3306                            |</span>
+<span class="quote1">| record_buffer        | 33550336                        |</span>
+<span class="quote1">| skip_locking         | ON                              |</span>
+<span class="quote1">| socket               | /tmp/mysql.sock                 |</span>
+<span class="quote1">| sort_buffer          | 33554424                        |</span>
+<span class="quote1">| table_cache          | 64                              |</span>
+<span class="quote1">| thread_stack         | 65536                           |</span>
+<span class="quote1">| tmp_table_size       | 1048576                         |</span>
+<span class="quote1">| tmpdir               | /tmp/                           |</span>
+<span class="quote1">| update_log           | OFF                             |</span>
+<span class="quote1">| wait_timeout         | 28800                           |</span>
++----------------------+---------------------------------+
+
+mysql&gt; select count(*) from Test_all_tab where lotno like 'D15A0%';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|   717505 |</span>
++----------+
+1 row in set (9 min 30.93 sec)
+
+mysql&gt; select count(*) from Test_all_tab where stop_day between '1998-11-14 00:00:00' and '1998-12-14 23:59:59';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|  1118730 |</span>
++----------+
+1 row in set (5 min 7.26 sec)
+
+影響はありません。
+
+(3)isamchk -r 実行
+ickg140:/usr/local/bin# ./isamchk -r /usr/local/var/qctrans/Test_all_tab
+- recovering ISAM-table '/usr/local/var/qctrans/Test_all_tab.ISM'
+Data records: 4847180
+- Fixing index 1
+- Fixing index 2
+- Fixing index 3
+
+ちょうど1Hくらいで終了
+
+iamchk後、確認
+mysql&gt; select count(*) from Test_all_tab where lotno like 'D15A0%';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|   717505 |</span>
++----------+
+1 row in set (4 min 35.98 sec)
+
+mysql&gt; select count(*) from Test_all_tab where stop_day between '1998-11-14 00:00:00' and '1998-12-14 23:59:59';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|  1118730 |</span>
++----------+
+1 row in set (1 min 3.75 sec)
+
+おお！ かなり速くなりました。
+
+(4)nisam_block_size=8192として再コンパイル、インストールし直しました。結果は
+
+mysql&gt; select count(*) from Test_all_tab where lotno like 'D15A0%';+----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|   717505 |</span>
++----------+
+1 row in set (4 min 33.17 sec)
+
+
+mysql&gt; select count(*) from Test_all_tab where stop_day between '1998-11-14 00:00:00' and '1998-12-14 23:59:59';
++----------+
+<span class="quote1">| count(*) |</span>
++----------+
+<span class="quote1">|  1118730 |</span>
++----------+
+1 row in set (1 min 5.18 sec)
+
+isamchk -r 後の結果とあまりかわりません。
+
+申し訳ありません。本業(半導体の不良解析エンジニアです)がたて込んでしまって
+いるので、続きは明日行います。
+
+取り合えず、報告まで。
+
+
+伊奈 竜也 (ina@xxxxxxxxxx)
+
+
+
+</pre>
+</div>
+<p class="button"><a href="582.html">[前]</a><a href="584.html">[次]</a><a href="../list/501-600.html">[番号順一覧]</a><a href="../thread/501-600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="583.html">    583 1999-01-19 02:05 [Tatsuya Ina &lt;ina@xxx] Re: MySQL speed                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="597.html">    597 1999-01-19 02:58 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15655</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15654.html">[前]</a><a href="15656.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15655
+</p>
+<div class="header">
+<p>
+From: &lt;ken1.sato@xxxxxxxxxx&gt;<br>
+Date: Mon, 16 Jan 2012 12:30:10 +0900<br>
+Subject: [mysql 15655] Re: mysqldump からのリストアで Can't find any matching row in the user table<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+さとうと申します
+
+リストア後に FLUSH PRIVILEGES が必要ではないでしょうか。
+
+
+2012/1/16 ichikawa kenji &lt;ichikawa@xxxxxxxxxx&gt;:
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 市川 健児 です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 新たに MySQL サーバ を構築し、</span>
+<span class="quote1">&gt; 現在稼働中の MySQL サーバから mysqldump にて、すべてのデータベースをダンプし、</span>
+<span class="quote1">&gt; 新しい MySQL サーバにリストアしたのですが、MySQL への接続時に、</span>
+<span class="quote1">&gt; 「ERROR 1045 (28000): Access denied for user 'ichikawa'@'localhost'」、</span>
+<span class="quote1">&gt; とのメッセージが出ております。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [ichikawa@server ~]$ mysql -uroot -ppassword &lt; ./all_dump.sql</span>
+<span class="quote1">&gt; [ichikawa@server ~]$ mysql -uichikawa -ppassword database</span>
+<span class="quote1">&gt; ERROR 1045 (28000): Access denied for user 'ichikawa'@'localhost' (using password: YES)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 確認のため、show grants を実行すると、</span>
+<span class="quote1">&gt; MySQL に接続するユーザの権限が新しい MySQL サーバに</span>
+<span class="quote1">&gt; 存在しておりませんでした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt;  show grants for ichikawa@localhost;</span>
+<span class="quote1">&gt; ERROR 1141 (42000): There is no such grant defined for user 'ichikawa' on host 'localhost'</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; そこで、grants を用いて、権限を設定しようとしましたが、</span>
+<span class="quote1">&gt; 「Can't find any matching row in the user table」</span>
+<span class="quote1">&gt; とのメッセージが出てしまい、</span>
+<span class="quote1">&gt; ユーザ権限が設定できないようになっております。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; grant all on database.* to ichikawa@localhost identified by 'password';</span>
+<span class="quote1">&gt; ERROR 1133 (42000): Can't find any matching row in the user table</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 結局、テーブル mysql.user から該当ユーザを削除して、</span>
+<span class="quote1">&gt; 新たに grant にてユーザ権限を設定しました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; delete from mysql.user where user = 'ichikawa';</span>
+<span class="quote1">&gt; mysql&gt; grant all on database.* to ichikawa@localhost identified by 'password';</span>
+<span class="quote1">&gt; mysql&gt; flush privileges;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysqldump によってダンプしたファイルで、</span>
+<span class="quote1">&gt; 新しい MySQL サーバにユーザの権限を移行することは可能なのでしょうか ?</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よろしくお願いいたします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [ichikawa@server ~]$ mysqladmin -uroot -ppassword version</span>
+<span class="quote1">&gt; mysqladmin  Ver 8.41 Distrib 5.0.41, for pc-linux-gnu on i686</span>
+<span class="quote1">&gt; Copyright (C) 2000-2006 MySQL AB</span>
+<span class="quote1">&gt; This software comes with ABSOLUTELY NO WARRANTY. This is free software,</span>
+<span class="quote1">&gt; and you are welcome to modify and redistribute it under the GPL license</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Server version          5.0.41</span>
+<span class="quote1">&gt; Protocol version        10</span>
+<span class="quote1">&gt; Connection              Localhost via UNIX socket</span>
+<span class="quote1">&gt; UNIX socket             /tmp/mysql.sock</span>
+<span class="quote1">&gt; Uptime:                 4 days 22 hours 56 min 40 sec</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Threads: 1  Questions: 17278  Slow queries: 0  Opens: 68  Flush tables: 1  Open tables: 12  Queries per second avg: 0.040</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ----------------------------------------------------------------</span>
+<span class="quote1">&gt; ichikawa kenji</span>
+<span class="quote1">&gt; mailto:ichikawa@xxxxxxxxxx</span>
+<span class="quote1">&gt; FAN Communications, Inc.</span>
+<span class="quote1">&gt; Aoyama Diamond Building 8F, 1-1-8, Shibuya, Shibuya-ku, Tokyo 150-0002</span>
+<span class="quote1">&gt; Phone : +081-3-6820-0818</span>
+<span class="quote1">&gt; <a href="http://www.fancs.com/">http://www.fancs.com/</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+
+-- 
+Kenichi Sato
+
+</pre>
+</div>
+<p class="button"><a href="15654.html">[前]</a><a href="15656.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15652.html">  15652 2012-01-16 11:54 [ichikawa kenji &lt;ichi] mysqldump からのリストアで Can't find any matching row in the user table</a></span>
+<span class="current">-&gt;&nbsp;<a href="15655.html">  15655 2012-01-16 12:30 ┗[&lt;ken1.sato@xxxxxxxxx]                                       </a></span>
+</pre>
+</body>
+</html>

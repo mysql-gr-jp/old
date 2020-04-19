@@ -1,0 +1,112 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9243</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9242.html">[前]</a><a href="9244.html">[次]</a><a href="../list/9201-9300.html">[番号順一覧]</a><a href="../thread/9201-9300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9243
+</p>
+<div class="header">
+<p>
+From: &quot;KAWAI,Takanori&quot; &lt;&quot;KAWAI,Takanori&quot; &lt;GCD00051@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 21 Apr 2004 00:30:36 +0900<br>
+Subject: [mysql 09243] Re: MySQL＋DBI/DBD＋Apatchのログについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+川合孝典です。
+
+----- Original Message ----- 
+From: &quot;Atusi Taga&quot; &lt;call_function@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Tuesday, April 20, 2004 11:37 PM
+Subject: <a href="09241.html">[mysql 09241]</a> MySQL＋DBI/DBD＋Apatchのログについて
+
+
+<span class="quote1">&gt; はじめまして多賀＠アルカディアと申します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQL＋DBI/DBD＋Apatch＋Perlで質問させて下さい。</span>
+ウーンとApacheですよね?
+
+<span class="quote1">&gt; $sth = $db-&gt;prepare(&quot;SELECT * FROM hoge_table where year=$ARGV[1]</span>
+ApacheでCGIとして実行させようとしているのではないでしょうか？
+そのときに$ARGV[1]の値はどのように設定されているのでしょうか？
+これが空になっている可能性が高いと思われます。
+
+（中略）
+<span class="quote1">&gt; DBD::mysql::st fetchrow_array failed: fetch() without execute() at</span>
+<span class="quote1">&gt; /Library/WebServer/CGI-Executables/nabunken_setumei/setumei.pl line</span>
+<span class="quote1">&gt; 38.</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; このようなエラーメッセージがApatchのログに書き込まれます。</span>
+その前に
+ DBD::mysql::st execute failed ...
+というメッセージも出力されていると思うのですが、いかがですか？
+
+<span class="quote1">&gt; この現象を回避する方法をご存知でしたら教えて下さい。</span>
+
+とりあえず以下のようにすれば、エラーは抑えることができるでしょう。
+#プレースホルダを使って、executeで指定
+#これなら$ARGV[1]がundefでもとりあえずエラーにはならないはず
+
+ただし$ARGV[1]で何がしたいのか不明です。
+CGIパラメータがとりたいのであれば、CGI.pmなどを利用したほうが
+いいでしょう。
+#参考：　CGI.pm <a href="http://member.nifty.ne.jp/hippo2000/perltips/Cgi.htm">http://member.nifty.ne.jp/hippo2000/perltips/Cgi.htm</a>
+#yearの完全一致なのにorder byの項目というのも...
+
+またDBIの常識として
+(1)use strict（Perlの常識レベルですが）、プレースホルダを
+　使ったほうがよいでしょう。
+(2)rowsをexecute直後に使うのは移植性を損なうもとになります
+  この時点では行数が特定できないDBMSもあります(ex. Oracle)
+#fetchrow_arrayよりfetchrow_arrayrefのほうが好きっていうか効率的
+
+#!/usr/bin/perl -w
+use strict;
+use DBI;
+my $db = DBI-&gt;connect('dbi:mysql:test', 'usr', 'pwd',
+ {RaiseError =&gt; 1, AutoCommit =&gt; 1})
+ or die(&quot;ERROR:&quot; . DBI-&gt;errstr());
+my $sth = $db-&gt;prepare(
+  &quot;SELECT * FROM hoge_table where year=? order by year
+   desc,month desc,mday desc&quot;);
+$sth-&gt;execute($ARGV[1]);
+my $num_rows = $sth-&gt;rows;
+my @tmp=$sth-&gt;fetchrow_array;
+print join(',', @tmp), &quot;\n&quot;;
+
+何を参考にこのスクリプトを書かれたのかわかりませんが、
+ことDBIに関連してはuse strictが書いてないようなスクリプトは、
+あまり信用しないほうがいいでしょう。
+DBIのドキュメントに
+　  (The use strict; isn't required but is strongly recommended.)
+と入ってから4年ぐらい経つんですから。
+
+===================================================
+川合 孝典 (Hippo2000)
+   DBI日本語メーリングリスト管理人、Kansai.pm所属
+   kwitknr@xxxxxxxxxx GCD00051@xxxxxxxxxx
+   <a href="http://member.nifty.ne.jp/hippo2000">http://member.nifty.ne.jp/hippo2000</a>、<a href="http://www.hippo2000.info/">http://www.hippo2000.info/</a>
+perldocの日本語情報ならperldocjp：翻訳してみませんか？
+  <a href="http://perldocjp.sourceforge.jp/">http://perldocjp.sourceforge.jp/</a>
+===================================================
+
+
+</pre>
+</div>
+<p class="button"><a href="9242.html">[前]</a><a href="9244.html">[次]</a><a href="../list/9201-9300.html">[番号順一覧]</a><a href="../thread/9201-9300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9241.html">   9241 2004-04-20 23:37 [&quot;Atusi Taga&quot; &lt;call_f] MySQL＋DBI/DBD＋Apatchのログについて    </a></span>
+<span class="current">-&gt;&nbsp;<a href="9243.html">   9243 2004-04-21 00:30 ┣[&quot;KAWAI,Takanori&quot; &lt;GC]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9260.html">   9260 2004-04-22 10:56 ┃┗[yoshi &lt;yosihisa@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9278.html">   9278 2004-04-23 01:23 ┃　┗[&quot;KAWAI,Takanori&quot; &lt;GC]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9247.html">   9247 2004-04-21 09:41 ┗[Takasi Watanabe &lt;off]                                       </a></span>
+</pre>
+</body>
+</html>

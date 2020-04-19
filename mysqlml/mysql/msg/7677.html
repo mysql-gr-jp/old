@@ -1,0 +1,195 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7677</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7676.html">[前]</a><a href="7678.html">[次]</a><a href="../list/7601-7700.html">[番号順一覧]</a><a href="../thread/7601-7700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7677
+</p>
+<div class="header">
+<p>
+From: yuji koga &lt;yuji koga &lt;koga-y@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 09 May 2003 19:46:06 +0900<br>
+Subject: [mysql 07677] 4 つのテーブルを left join するには（長文）<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+お世話になります。古賀と申します。
+非常に長くなってしまいましたが、宜しくお願い致します。
+
+環境：mySQL3.23.49（not MAX）、PHP4.3.1、Apache1.3.27　Linux
+　　　（以上、レンタルサーバーです）
+
+質問：
+現在、普通の（スレッドでない）ファイルアップBBSを、
+（例えば2chのように）複数管理出来るPHPを制作中です。
+その中で、BBSの一覧を表示するSQL文で詰まってしまい、
+にっちもさっちも行かなくなってしまいました。
+
+用意したテーブルは（投稿用に省略してますが）以下の通りです。
+
+# アクセスログを記録するテーブル
+acc_tbl
+--------------------
+acc_id  ：プライマリキー
+usr_id  ：アクセスした人のID
+thrd_id　：アクセスされたスレッドのID
+acc_ua　：アクセスのユーザーエージェント
+acc_datetime　：アクセス日時
+
+
+# BBS記事とファイル名を記録するテーブル（画像は1記事1枚です）
+file_tbl
+--------------------
+file_id　：プライマリキー
+file_nm　：アップされたファイル名
+file_ttl　：記事のタイトル
+file_note　：記事
+file_datetime　：カキコ日時
+usr_id　：書いた人のID
+thrd_id　：この記事が属するBBSのID
+
+
+# BBSの名前や開設者を記録するテーブル
+thrd_tbl
+--------------------
+thrd_id　：プライマリキー
+thrd_ttl　：BBSの名前
+usr_id　：このBBSを開設した人のID
+
+
+# BBSの名前や備考を記録するテーブル
+usr_tbl
+--------------------
+usr_id　：プライマリキー
+usr_lgnm　：ログインネーム
+usr_pw　：ログインパスワード
+usr_auth　：権限（usrとかadminとか）
+
+
+いくつかのダミーレコードをinsertした後、
+まず以下のようなBBS一覧を求めました。
+（書込人数は、書込件数ではなく、「何人が書き込んだか？」です）
+
+thrd_id thrd_ttl usr_id アクセス数 書込人数 最終更新日時
+------+-------+------+--------+------+--------
+1          風景BBS  2          0             0           （日時・略）
+2          車BBS     1          3             2           （日時・略）
+　　　　　　・
+　　　　　　・
+　　　　　　・
+　　　（最終カキコ時間順）
+
+この時打ったSQLは、以下の通りです。
+
+select 
+thrd_tbl.thrd_id,
+thrd_tbl.thrd_ttl,
+thrd_tbl.usr_id,
+count(distinct acc_tbl.acc_id),
+count(distinct file_tbl.usr_id),
+max(file_tbl.file_datetime)
+from thrd_tbl 
+left join acc_tbl using(thrd_id)
+left join file_tbl using(thrd_id)
+group by thrd_tbl.thrd_id
+order by 'max(file_tbl.file_datetime)' desc ;
+
+
+以上、前置きが長くなりましたが、ここからが本題です。
+
+ここで、伝言板の管理者の名前も出そうとして苦しんでいます。
+期待している結果は次です。
+
+thrd_id thrd_ttl usr_lgnm アクセス数 書込人数 最終更新日時
+------+-------+---------+--------+------+--------
+2          車BBS     hoge           3             2           （日時・略）
+1          風景BBS  koga           0             0           ----
+　　　　　　・
+　　　　　　・
+　　　　　　・
+　　　（最終更新日時順）
+
+ここで次のようなSQLを打ちました。
+
+select 
+thrd_tbl.thrd_id,
+thrd_tbl.thrd_ttl,
+usr_tbl.usr_lgnm,
+count(distinct acc_tbl.acc_id),
+count(distinct file_tbl.usr_id),
+max(file_tbl.file_datetime)
+from thrd_tbl 
+left join acc_tbl using(thrd_id)
+left join file_tbl using(thrd_id)
+left join usr_tbl using(usr_id)
+group by thrd_tbl.thrd_id
+order by 'max(file_tbl.file_datetime)' desc
+
+しかしながら、この結果は次のようになりました。
+
+thrd_id thrd_ttl usr_lgnm アクセス数 書込人数 最終更新日時
+------+-------+---------+--------+------+--------
+2          車BBS     hoge           3             2           （日時・略）
+1          風景BBS  ----           0             0            ----
+　　　　　　・
+　　　　　　・
+　　　　　　・
+　　　（最終更新日時順）
+
+アクセス数・書込数ともにゼロである、風景BBSの管理者がnullとなりました。
+原因は left join の順番かな？と思い、
+
+select 
+thrd_tbl.thrd_id,
+thrd_tbl.thrd_ttl,
+usr_tbl.usr_lgnm,
+count(distinct acc_tbl.acc_id),
+count(distinct file_tbl.usr_id),
+max(file_tbl.file_datetime)
+from thrd_tbl 
+left join usr_tbl using(usr_id) 　&lt;-入れ替わってます
+left join acc_tbl using(thrd_id) 　　　
+left join file_tbl using(thrd_id)
+group by thrd_tbl.thrd_id
+order by 'max(file_tbl.file_datetime)' desc
+
+とすると、今度は
+
+Unknown column 'usr_tbl.thrd_id' in 'on clause'
+
+というエラーが出てしまいます。why？
+以上、非常に長くなってしまい恐縮ですが、ご助言頂ければ幸いです。
+
+
+
+&lt;? /*
+株式会社メディアプレス　　　制作課　　古賀裕二
+　　　　　　　会社：koga-y@xxxxxxxxxx
+　　　　　　　自宅：yuuukunn@xxxxxxxxxx
+*/ ?&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="7676.html">[前]</a><a href="7678.html">[次]</a><a href="../list/7601-7700.html">[番号順一覧]</a><a href="../thread/7601-7700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="7677.html">   7677 2003-05-09 19:46 [yuji koga &lt;koga-y@xx] 4 つのテーブルを left join するには（長文）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7680.html">   7680 2003-05-10 12:14 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7681.html">   7681 2003-05-10 16:16 　┗[yuji koga &lt;koga-y@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7682.html">   7682 2003-05-10 17:48 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7683.html">   7683 2003-05-10 20:41 　　　┗[yuji koga &lt;koga-y@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7685.html">   7685 2003-05-12 17:35 　　　　┗[Hiroshi Honda &lt;honda] MySQL で多言語使用            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7692.html">   7692 2003-05-13 15:36 　　　　　┗[Joel Rees &lt;joel@xxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7698.html">   7698 2003-05-13 21:50 　　　　　　┗[tateyan &lt;tateyan@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7699.html">   7699 2003-05-14 08:31 　　　　　　　┣[Hiroshi Honda &lt;honda]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7719.html">   7719 2003-05-14 23:18 　　　　　　　┃┗[tateyan &lt;tateyan@xxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7712.html">   7712 2003-05-14 19:11 　　　　　　　┗[Joel Rees &lt;joel@xxxx]                         </a></span>
+</pre>
+</body>
+</html>

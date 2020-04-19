@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7708</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7707.html">[前]</a><a href="7709.html">[次]</a><a href="../list/7701-7800.html">[番号順一覧]</a><a href="../thread/7701-7800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7708
+</p>
+<div class="header">
+<p>
+From: Joel Rees &lt;Joel Rees &lt;joel@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 14 May 2003 18:14:39 +0900<br>
+Subject: [mysql 07708] Re: why certain Japanese characters are getting displayed as wrong characters?<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<span class="quote1">&gt; 2. This raises a question.</span>
+<span class="quote1">&gt; Fine we can solve the problem for '\'</span>
+<span class="quote1">&gt; Are there any other characters which MySQL would not like?</span>
+<span class="quote1">&gt; Do I have to take care of any other character(s)?</span>
+
+Look at the manual, section 6.1.1.1 on string literals:
+
+<a href="http://www.mysql.com/doc/en/String_syntax.html">http://www.mysql.com/doc/en/String_syntax.html</a>
+
+As far as I know, you should be escaping these characters (NUL \ ' &quot;)
+anyway, just before you pass them to MySQL, and un-escaping when you
+read from MySQL.
+
+<span class="quote1">&gt; 3. I tried another solution. It seemed to work.</span>
+<span class="quote1">&gt; I do not know how and why.</span>
+<span class="quote1">&gt; here is what I did.</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Instead of doing following</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 	request.setCharacterEncoding (&quot;Shift_JIS&quot;);</span>
+<span class="quote1">&gt; 	String name = request.getParameter(&quot;name&quot;);</span>
+<span class="quote1">&gt; 	String newName = insertSingleQuote(name);	// insert single quote around the</span>
+<span class="quote1">&gt; string</span>
+<span class="quote1">&gt; 	newName = replaceChar(newName, '\\', &quot;\\\\&quot;);</span>
+<span class="quote1">&gt; 	....</span>
+<span class="quote1">&gt; 	String sql = &quot;insert into test_table values (&quot; + newName + &quot;)&quot;;</span>
+<span class="quote1">&gt; 	statement.executeUpdate(sql);</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; I DID FOLLOWING</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 	//request.setCharacterEncoding (&quot;Shift_JIS&quot;);	// do not need this now.</span>
+
+No automatic conversion from Unicode to sJIS.
+
+<span class="quote1">&gt; 	String name = request.getParameter(&quot;name&quot;);</span>
+<span class="quote1">&gt; 	byte [] arrShift_JIS = name.getBytes(&quot;Shift_JIS&quot;);	// instead of using</span>
+
+Explicit conversion, instead.
+
+<span class="quote1">&gt; utf-8 string into the sql query directly use the byte array in shift_jis</span>
+<span class="quote1">&gt; form</span>
+
+Do you understand that utf-8 is byte-style Unicode? In other words,
+what you are putting into arrShift is not utf-8, but shift-JIS.
+
+<span class="quote1">&gt; 	PreparedStatement preparedStatement = connection.prepareStatement(&quot;insert</span>
+<span class="quote1">&gt; into test_table values (?)&quot;);</span>
+
+Is that like a perl DBI placeholder? If so, my guess is that the
+placeholder substitution is handling the escapes for you, which is
+probably the best way to do it. That way, you don't need to think about
+which characters need to be escaped.
+
+<span class="quote1">&gt; 	preparedStatement.setBytes(1, arrShift_JIS);</span>
+<span class="quote1">&gt; 	preparedStatement.executeUpdate();</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Now this seems to solve the problem (possibly the JDBC driver/implementation</span>
+<span class="quote1">&gt; will do appropriate escaping....)</span>
+<span class="quote1">&gt; So my question to u guys is ...</span>
+<span class="quote1">&gt; a. why does this work?</span>
+<span class="quote1">&gt; b. is this a right solution? and</span>
+<span class="quote1">&gt; c. will it take care of all the problematic characters?</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; regards,</span>
+<span class="quote1">&gt; Haresh Gujarathi</span>
+
+-- 
+Joel Rees &lt;joel@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="7707.html">[前]</a><a href="7709.html">[次]</a><a href="../list/7701-7800.html">[番号順一覧]</a><a href="../thread/7701-7800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="7684.html">   7684 2003-05-12 17:36 [&quot;eMantra Information] why certain Japanese characters are getting displayed as wrong characters?</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7686.html">   7686 2003-05-12 19:27 ┣[Masaki Ikeda &lt;masaki]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7694.html">   7694 2003-05-13 16:02 ┃┗[&quot;eMantra Information]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7697.html">   7697 2003-05-13 16:27 ┃　┗[Joel Rees &lt;joel@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7687.html">   7687 2003-05-12 19:45 ┗[&quot;Shimono Osamu&quot; &lt;shi]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7703.html">   7703 2003-05-14 15:47 　┗[&quot;eMantra Information]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7706.html">   7706 2003-05-14 17:27 　　┣[&quot;Shimono Osamu&quot; &lt;shi]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="7708.html">   7708 2003-05-14 18:14 　　┗[Joel Rees &lt;joel@xxxx]                                   </a></span>
+</pre>
+</body>
+</html>

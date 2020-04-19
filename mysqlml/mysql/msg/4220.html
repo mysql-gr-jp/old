@@ -1,0 +1,120 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4220</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="4219.html">[前]</a><a href="4221.html">[次]</a><a href="../list/4201-4300.html">[番号順一覧]</a><a href="../thread/4201-4300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4220
+</p>
+<div class="header">
+<p>
+From: e-oohira &lt;e-oohira &lt;e-oohira@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 26 Aug 2001 23:21:07 +0900<br>
+Subject: [mysql 04220] Re: Ruby から使えない<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+おおひらです。
+
+
+<span class="quote3">&gt; &gt;&gt; bash-2.03# ruby -I. test.rb sparc.kumage-h.ed.jp</span>
+<span class="quote3">&gt; &gt;&gt; test.rb:11:in `require': ld.so.1: ruby: 重大なエラー: 再配置</span>
+エラ
+<span class="quote3">&gt; &gt;&gt; ー: ファイル ./mysql.so: シンボル inet_addr: 参照シンボルが</span>
+見つか
+<span class="quote3">&gt; &gt;&gt; りません。 - ./mysql.so (LoadError)</span>
+<span class="quote3">&gt; &gt;&gt;         from test.rb:11</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ldd mysql.so したら、どうなりますか。</span>
+
+こうなりました。
+bash-2.03# ldd mysql.so
+        libc.so.1 =&gt;     /usr/lib/libc.so.1
+        libdl.so.1 =&gt;    /usr/lib/libdl.so.1
+        /usr/platform/SUNW,Sun-Blade-100/lib/libc_psr.so.1
+
+<span class="quote1">&gt; libmysqlclient.so が見つからないというエラーは出るでしょうか。</span>
+<span class="quote1">&gt; inet_addr の実体が libmysqlclient.a にあるなら、mysql.so の作成</span>
+時に
+<span class="quote1">&gt; スタティックリンクするようにしてあげればいいと思います。</span>
+<span class="quote1">&gt;</span>
+
+MySQLをソースコードから下記のようにインストールし
+たところ
+bash-2.03# ldd mysql.so
+        libmysqlclient.so.10 =&gt;  (ファイルが見つかりません)
+        libz.so =&gt;       /usr/local/lib/libz.so
+        libm.so.1 =&gt;     /usr/lib/libm.so.1
+        libnsl.so.1 =&gt;   /usr/lib/libnsl.so.1
+        libsocket.so.1 =&gt;        /usr/lib/libsocket.so.1
+となるので
+LD_RUN_PATH=(インストール先)/lib/mysql
+と
+libmysqlclient.soなどのありかを指定してやると
+うまくいきました。
+
+今はこんな状態です。
+bash-2.03# ldd mysql.so
+        libmysqlclient.so.10 =&gt; 
+/sol/mysql/lib/mysql//libmysqlclient.so.10
+        libz.so =&gt;       /usr/local/lib/libz.so
+        libm.so.1 =&gt;     /usr/lib/libm.so.1
+        libnsl.so.1 =&gt;   /usr/lib/libnsl.so.1
+        libsocket.so.1 =&gt;        /usr/lib/libsocket.so.1
+        libc.so.1 =&gt;     /usr/lib/libc.so.1
+        libcrypt_i.so.1 =&gt;       /usr/lib/libcrypt_i.so.1
+        libgen.so.1 =&gt;   /usr/lib/libgen.so.1
+        libdl.so.1 =&gt;    /usr/lib/libdl.so.1
+        libmp.so.2 =&gt;    /usr/lib/libmp.so.2
+        /usr/platform/SUNW,Sun-Blade-100/lib/libc_psr.so.1
+
+私は、ライブラリ関係に（も）弱いので
+mysql.so の作成時にスタティックリンクするようにしてあげればいいと
+いう意味と実際の操作方法（どう指定するのか）がよくわからなかった
+ので、これが本質的な解決法なのかもはっきりしません。
+
+ 
+
+<span class="quote3">&gt; &gt;&gt; configure時にエラーをはきます。</span>
+<span class="quote3">&gt; &gt;&gt; </span>
+<span class="quote3">&gt; &gt;&gt; bash-2.03# ./configure --prefix=/usr/local/mysql</span>
+<span class="quote3">&gt; &gt;&gt; --localstatedir=/usr/local/mysqldata \</span>
+<span class="quote4">&gt; &gt;&gt; &gt; --with-charset=ujis</span>
+
+<span class="quote3">&gt; &gt;&gt; checking whether the C++ compiler (c++   ) is a</span>
+cross-compiler...
+<span class="quote3">&gt; &gt;&gt; yes</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; inet_addr の実体が libmysqlclient.a にあるなら、mysql.so の作成</span>
+時に
+<span class="quote1">&gt; これが原因です。</span>
+<span class="quote1">&gt; たぶん、この gcc は 64bit と 32bit の両方のコードが吐けるものな</span>
+ので
+<span class="quote1">&gt; はないでしょうか。</span>
+<span class="quote1">&gt; # 私も、このエラーを経験しましたが、その時は上記のコンパイラで</span>
+コン
+<span class="quote1">&gt; # パイルしたときでした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; で、この時は、cross-compiler オプションを無理矢理 no にするよ</span>
+う、
+<span class="quote1">&gt; configure ファイルを編集して、逃げました。(^^;</span>
+<span class="quote1">&gt; # もっとスマートな方法があるような気もしましたが、時間がなかっ</span>
+たもので...。
+
+とみたさんの指摘で
+       % env CXX=gcc ./configure 〜〜
+とやれば、できました。
+
+-- 
+e-oohira
+
+</pre>
+</div>
+<p class="button"><a href="4219.html">[前]</a><a href="4221.html">[次]</a><a href="../list/4201-4300.html">[番号順一覧]</a><a href="../thread/4201-4300.html">[スレッド一覧]</a></p>
+</body>
+</html>

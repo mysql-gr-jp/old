@@ -1,0 +1,68 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13444</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13443.html">[前]</a><a href="13445.html">[次]</a><a href="../list/13401-13500.html">[番号順一覧]</a><a href="../thread/13401-13500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13444
+</p>
+<div class="header">
+<p>
+From: &quot;Kenta Hashimoto&quot; &lt;&quot;Kenta Hashimoto&quot; &lt;kem@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 1 Nov 2006 16:07:13 +0900<br>
+Subject: [mysql 13444] joinの順番<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+橋本と申します。
+
+MySQL5.0.12以降では、JOIN の順番が変わったんですね。
+<a href="http://dev.mysql.com/doc/refman/5.0/en/join.html">http://dev.mysql.com/doc/refman/5.0/en/join.html</a>
+
+弊社のDBをMySQL4 から MySQL5 にアップグレードしたのですが、
+一部のクエリでエラーが出るようになりました。
+
+
+皆様ご存知かもしれませんが、
+同じような場所でつまずく方がいらっしゃるかと思いますので、共有します。
+
+
+以下のようなクエリは、MySQL5.0.12 以降では、エラーになります。
+
+SELECT a.id
+FROM a , b , c
+LEFT JOIN d ON b.id = d.b_id AND d.c_id = 2
+WHERE a.id = 1 AND a.b_id = b.id AND b.c_id = c.id
+
+以下のように直したら、期待した動きをしました。
+
+SELECT a.id
+FROM a
+INNER JOIN b ON a.b_id = b.id
+INNER JOIN c ON b.c_id = c.id
+LEFT JOIN d ON b.id = d.b_id AND d.c_id = 2
+WHERE a.id = 1
+
+また、以下のように直すとOK らしいです。
+
+SELECT a.id
+FROM ( a,b,c )
+LEFT JOIN d ON b.id = d.b_id AND d.c_id = 2
+WHERE a.id = 1 AND a.b_id = b.id AND b.c_id = c.id
+
+
+-- 
+橋本健太
+世界最大級の料理コミュニティ  「クックパッド」 - <a href="http://cookpad.com">http://cookpad.com</a>
+企画運営アシスタント、デザイナー、大募集中！ - <a href="http://cookpad.com/jobs/">http://cookpad.com/jobs/</a>
+
+</pre>
+</div>
+<p class="button"><a href="13443.html">[前]</a><a href="13445.html">[次]</a><a href="../list/13401-13500.html">[番号順一覧]</a><a href="../thread/13401-13500.html">[スレッド一覧]</a></p>
+</body>
+</html>

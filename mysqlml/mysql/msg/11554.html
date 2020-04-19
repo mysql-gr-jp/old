@@ -1,0 +1,98 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11554</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11553.html">[前]</a><a href="11555.html">[次]</a><a href="../list/11501-11600.html">[番号順一覧]</a><a href="../thread/11501-11600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11554
+</p>
+<div class="header">
+<p>
+From: &quot;T.Sasaki&quot; &lt;&quot;T.Sasaki&quot; &lt;papasan2000@xxxxxxxxxx&gt;&gt;<br>
+Date: 13 Jun 2005 19:54:58 +0900<br>
+Subject: [mysql 11554] Re: データのインポート<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+masa 様
+
+佐々木と申します。
+誰も答えないので・・・、分かる範囲だけコメントさせて頂きます。
+
+<span class="quote1">&gt;sqlファイルは参考書によるとプロンプト上からしか読み込ませれない</span>
+.sql ファイルの内容はSQL文の羅列です。一度エディタ等で眺めてみてください。
+複数のSQL文を同時実行できるツールであればファイル内容を実行できます。
+
+尚、残念ながら私に PHPアドミン (=phpAdmin ?) の知識はありません。
+
+＜おまけ＞
+1.4.0 (win2k) -&gt; 3.23 (linux) コマンドラインの例
+  (1) 共通
+      SQL文
+        SHOW VARIABLES LIKE 'character_set'
+      を発行して、移行元、移行先における MySQL Server の文字コードを取得します。
+      以後、sjis -&gt; ujis と仮定して話を進めます。
+  (2) Windows 2000 側
+      nkf.exe を拾ってきます。(Network Kanji Filter Version 1.xx for DOS)
+      対象となる database の構造・データを SQL へ落とします。
+        SET MYDUMP=&quot;[MySQL path]\bin\mysqldump.exe&quot; -Q --opt -u[user] -p[passward]
+        %MYDUMP% [database] | nkf -Je  &gt; [作業ファイル]
+      [作業ファイル] を適切な方法でホスティングサーバーへコピーします。
+  (3) ホスティングサーバー側
+      [作業ファイル] の SQL 文を一括で実行します。
+        mysql -u[user] -p[passward] &lt; [作業ファイル]
+      作成されたレコード件数を確認します。(任意)
+        echo &quot;SHOW TABLES;&quot; | mysql -u[user] -p[passward] -D[database] \
+        | grep -v &quot;Tables_in_&quot;[database] | tr &quot;\r\n&quot; &quot;;&quot; \
+        | sed -e &quot;s/\([^;]\{1,\}\)\(;\)/SELECT COUNT(*) AS \1 FROM \1;/g&quot; \
+        | mysql -u[user] -p[passward] -D[database]
+
+2.かねやんMySQLAdmin を使う方法
+  移行元、移行先における MySQL Server の文字コードが同じなら、
+  [サーバ]-[他のサーバーからの複製] が利用できます。
+  但し、テーブル単位なので操作が面倒なのと、データ量が多いときに
+  ちょっと時間がかかるかも知れません。
+  あるいは mysqldump で作成した .SQL ファイルを
+  [ファイル]-[ファイルからSQL文発行] で実行させる方法もあります。
+
+3.MySQL Administrator
+  移行元、移行先における MySQL Server の文字コードが共に
+  sjis (4.1以降なら cp932 も可) なら、これが一番分かりやすいでしょう。
+  各々の MySQL Server への接続設定をしておいて、
+    1) 移行元へ接続し、backup を実行します。
+    2) 移行先へ接続し、backup で作成されたファイルを指定して
+       Restore を実行します。
+  これだけでデータベース全体を移行できます。
+  尚、GUI パーツが何となく Oracle の GUI ツールを想起させます・・・。
+
+ホスティングサーバー側の指定で「PHPアドミン」しか使えないなら
+どうしようもありませんが、MySQL Server の TCP Port が外部に
+開かれているなら、あるいはファイル転送とシェルログインが
+許可されているなら、上記のような手段でデータを移行することができます。
+
+</pre>
+</div>
+<p class="button"><a href="11553.html">[前]</a><a href="11555.html">[次]</a><a href="../list/11501-11600.html">[番号順一覧]</a><a href="../thread/11501-11600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="11554.html">  11554 2005-06-13 19:54 [&quot;T.Sasaki&quot; &lt;papasan2] Re: データのインポート                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11574.html">  11574 2005-06-15 21:44 ┗[京極昌彦 &lt;masahiko.k]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11575.html">  11575 2005-06-16 07:41 　┣[&quot;T.Sasaki&quot; &lt;papasan2]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11576.html">  11576 2005-06-16 08:55 　┗[Toshie Suzuki &lt;toshi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11577.html">  11577 2005-06-16 09:04 　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11578.html">  11578 2005-06-16 09:42 　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11579.html">  11579 2005-06-16 10:30 　　　　┣[Toshie Suzuki &lt;toshi]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11580.html">  11580 2005-06-16 10:46 　　　　┃┗[&quot;T.Sasaki&quot; &lt;papasan2]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11581.html">  11581 2005-06-16 12:38 　　　　┗[Sumito_Oda &lt;oda@xxxx] Re: phpAdmin (Re: データのインポート)</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11582.html">  11582 2005-06-16 13:07 　　　　　┣[&quot;T.Sasaki&quot; &lt;papasan2]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11587.html">  11587 2005-06-16 18:58 　　　　　┃┗[Sumito_Oda &lt;oda@xxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11588.html">  11588 2005-06-16 19:14 　　　　　┃　┗[&quot;T.Sasaki&quot; &lt;papasan2]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11583.html">  11583 2005-06-16 15:18 　　　　　┗[Masakazu Nakano &lt;n-m]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11584.html">  11584 2005-06-16 16:03 　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                           </a></span>
+</pre>
+</body>
+</html>

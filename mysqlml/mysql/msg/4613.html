@@ -1,0 +1,148 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:4613</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="4612.html">[前]</a><a href="4614.html">[次]</a><a href="../list/4601-4700.html">[番号順一覧]</a><a href="../thread/4601-4700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:4613
+</p>
+<div class="header">
+<p>
+From: 朝倉　誠 &lt;朝倉　誠 &lt;asakura@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 07 Nov 2001 20:51:52 +0900<br>
+Subject: [mysql 04613] Solaris8+Apache+PHP3+MySQL でインストールエラー<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、朝倉と申します。
+見方によってはPHPの内容なのですが、こちらにも
+出させていただきました。
+何かわかる方、同様の経験をなさった方おられましたら
+アドバイスをよろしくお願いいたします
+
+質問内容なのですが、Solaris8(sparc)+Apache+PHP3+MySQLを
+Apacheのmakeでエラーになってしまいます。
+Apache単体でのコンパイルはうまくいき、現在動作しております。
+
+
+環境は：
+solaris8 (SPARC)
+apache_1.3.20
+mysql-3.23.44(source)
+php-3.0.18-ja-2
+
+/usr/local/src/mysql-3.23.44・・・解凍したmySQL
+/usr/local/src/apache_1.3.20・・・解凍したapache_1.3.20
+/usr/local/src/php-3.0.18-i18n-ja-2・・・解凍したコンパイル済php-3.0.18
+
+以下の手順でコンパイル＆インストールしています。
+ほとんどINSTALLに書かれている「QUICK INSTALL」どおりです。
+
+----- 以下インストール手順 -----
+/usr/local/apache/bin/apachectl stop
+
+cd /usr/local/src
+cd apache_1.3.20
+./configure
+make
+make install
+
+cd ../mysql-3.23.44
+./configure --prefix=/usr/local/mysql
+make
+make install
+
+cd ../php-3.0.18-i18n-ja-2
+./configure --with-mysql=/usr/local/mysql --with-apache=../apache_1.3.20 --enable-track-vars --enable-mbregex --eneble-i18n
+make
+make install
+
+cd ../apache_1.3.20
+./configure --activate-module=src/modules/php3/libphp3.a
+make
+----- ここまでインストール手順 -----
+
+で、ここのmakeでエラーになります。
+
+----- 以下エラーメッセージ -----
+gcc -c  -I./os/unix -I./include   -DSOLARIS2=280 -DUSE_HSREGEX -DUSE_EXPAT -I./lib/expat-lite -DNO_D
+L_NEEDED `./apaci` modules.c
+gcc -c  -I./os/unix -I./include   -DSOLARIS2=280 -DUSE_HSREGEX -DUSE_EXPAT -I./lib/expat-lite -DNO_D
+L_NEEDED `./apaci` buildmark.c
+gcc  -DSOLARIS2=280 -DUSE_HSREGEX -DUSE_EXPAT -I./lib/expat-lite -DNO_DL_NEEDED `./apaci`    \
+      -o httpd buildmark.o modules.o  modules/php3/libphp3.a  modules/standard/libstandard.a  main/l
+ibmain.a  ./os/unix/libos.a  ap/libap.a regex/libregex.a lib/expat-lite/libexpat.a  -R/usr/local/mys
+ql/lib/mysql  -L/usr/local/mysql/lib/mysql -Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lm
+odphp3                        -lpam -lm -lsocket -lnsl  -lresolv  -lsocket -lnsl -lgdbm
+modules/php3/libphp3.a(mysql.o): In function `_free_mysql_result':
+/usr/local/src/php-3.0.18-i18n-ja-2/functions/mysql.c:182: undefined reference to `mysql_free_result'
+modules/php3/libphp3.a(mysql.o): In function `_close_mysql_link':
+/usr/local/src/php-3.0.18-i18n-ja-2/functions/mysql.c:196: undefined reference to `mysql_close'
+
+〜この間には各モジュール(mysql_xxxxx)毎に
+「undefined reference to `mysql_xxxxx'」と直前のエラーのように出てきます〜
+
+collect2: ld returned 1 exit status
+*** Error code 1
+make: Fatal error: Command failed for target `target_static'
+Current working directory /usr/local/src/apache_1.3.20/src
+*** Error code 1
+make: Fatal error: Command failed for target `build-std'
+Current working directory /usr/local/src/apache_1.3.20
+*** Error code 1
+make: Fatal error: Command failed for target `build'
+----- ここまでエラーメッセージ -----
+
+
+
+自分で気がついたことは、
+エラーメッセージの途中のこの部分
+------------------------------
+gcc  -DSOLARIS2=280 -DUSE_HSREGEX -DUSE_EXPAT -I./lib/expat-lite -DNO_DL_NEEDED `./apaci`    \
+      -o httpd buildmark.o modules.o  modules/php3/libphp3.a  modules/standard/libstandard.a  main/l
+ibmain.a  ./os/unix/libos.a  ap/libap.a regex/libregex.a lib/expat-lite/libexpat.a  -R/usr/local/mys
+ql/lib/mysql  -L/usr/local/mysql/lib/mysql -Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lm
+odphp3                        -lpam -lm -lsocket -lnsl  -lresolv  -lsocket -lnsl -lgdbm
+------------------------------
+の最後に「-lmysqlclient」が出ないところが原因のように感じております。
+
+apacheのmakeでこけてますが、phpのconfigure/makeが怪しいように感じるのです。
+理由はphpのMakefileの以下の部分
+------------------------------
+APXS_LDFLAGS = -Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3   -lpam -lm -lsocket
+-lnsl  -lresolv
+------------------------------
+に「-lmysqlclient」がないからです。
+
+
+
+何かわかる方、同様の経験をなさった方おられましたら
+アドバイスをよろしくお願いいたします
+
+-- 
+朝倉　誠 &lt;asakura@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="4612.html">[前]</a><a href="4614.html">[次]</a><a href="../list/4601-4700.html">[番号順一覧]</a><a href="../thread/4601-4700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="4613.html">   4613 2001-11-07 20:51 [朝倉　誠 &lt;asakura@xx] Solaris8+Apache+PHP3+MySQL でインストールエラー</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4617.html">   4617 2001-11-08 02:56 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4619.html">   4619 2001-11-08 14:32 　┗[朝倉　誠 &lt;asakura@xx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4620.html">   4620 2001-11-08 15:16 　　┣[Tomohiro 'Tomo-p' KA]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4621.html">   4621 2001-11-08 16:32 　　┃┗[朝倉　誠 &lt;asakura@xx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4623.html">   4623 2001-11-08 19:22 　　┃　┗[朝倉　誠 &lt;asakura@xx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4627.html">   4627 2001-11-08 22:51 　　┃　　┗[とみたまさひろ &lt;tomm]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4630.html">   4630 2001-11-08 23:52 　　┃　　　┗[朝倉誠 &lt;asakura@xxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4622.html">   4622 2001-11-08 19:02 　　┗[Hiroshi Satou &lt;impre]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4625.html">   4625 2001-11-08 22:11 　　　┗[朝倉　誠 &lt;asakura@xx] Re: Solaris8+Apache+PHP3+MySQL でインストールエラー（解決＆感謝）</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4629.html">   4629 2001-11-08 23:29 　　　　┗[Hiroshi Satou &lt;impre]                               </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11725</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11724.html">[前]</a><a href="11726.html">[次]</a><a href="../list/11701-11800.html">[番号順一覧]</a><a href="../thread/11701-11800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11725
+</p>
+<div class="header">
+<p>
+From: &quot;Shuichi Tamagawa&quot; &lt;&quot;Shuichi Tamagawa&quot; &lt;shuichi@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 7 Jul 2005 19:01:50 -0700<br>
+Subject: [mysql 11725] MySQL 5.0 FAQ - ストアドプロシージャ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+ストアドプロシージャ
+
+SP 1. ストアドプロシージャに関するドキュメントはどこにありますか？
+MySQLレファレンスマニュアルのこちらのページにあります。<a href="http://dev.mysql.">http://dev.mysql.</a>
+com/doc/mysql/en/stored-procedures.html
+
+SP 2. ストアドプロシージャのディスカッションフォーラムはどこにあります
+か？
+<a href="http://forums.mysql.com/list.php?98">http://forums.mysql.com/list.php?98</a>
+
+SP 3. ストアドプロシージャのANSI SQL 2003仕様はどこにありますか？
+残念ながら公式仕様書は無償ではなく、ANSIから購入する必要があります。しか
+しながらPeter Gulutzan、Trudy Pelze共著の&quot;SQL-99 Complete, Really&quot;といっ
+た本もあり、こちらでもストアドプロシージャを含んだSQL標準の包括的概観を
+提供しています。
+
+SP 4. ストアドプロシージャはどの様に管理するのですか？
+ストアドプロシージャの名称に明確な命名体系を用いるというのは、常に良い慣
+行です。ストアドプロシージャはCREATE [FUNCTION|PROCEDURE], ALTER
+[FUNCTION|PROCEDURE], DROP [FUNCTION|PROCEDURE], SHOW CREATE
+[FUNCTION|PROCEDURE], INFORMATION_SCHEMAで管理することができます(詳細は
+こちらをご覧下さい
+<a href="http://dev.mysql.com/doc/mysql/en/routines-table.html">http://dev.mysql.com/doc/mysql/en/routines-table.html</a>) 。
+
+SP 5. データベース内の全てのストアドプロシージャを見る方法はありますか？
+はい。INFORMATION_SCHEMA.ROUTINESテーブルを使用して次のステートメントを
+実行します。: SELECT ROUTINE_TYPE,ROUTINE_NAME FROM
+INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA='dbname'; 詳細について
+はこちらをご覧下さい
+<a href="http://dev.mysql.com/doc/mysql/en/routines-table.html">http://dev.mysql.com/doc/mysql/en/routines-table.html</a>
+
+各ストアドプロシージャの本文はSHOW CREATE [FUNCTION|PROCEDURE] procname;
+を実行することで見ることができます。詳細についてはこちらをご覧下さい。
+<a href="http://dev.mysql.com/doc/mysql/en/show-create-procedure.html">http://dev.mysql.com/doc/mysql/en/show-create-procedure.html</a>
+
+SP 6. ストアドプロシージャはどこに保存されていますか？
+mysqlシステムデータベースのprocテーブルです。しかしながら、システムテー
+ブルに直接アクセスすべきではなく、代わりにSHOW CREATE
+[FUNCTION|PROCEDURE](詳細は
+<a href="http://dev.mysql.com/doc/mysql/en/show-create-procedure.html">http://dev.mysql.com/doc/mysql/en/show-create-procedure.html</a>を参照) もし
+くは INFORMATION_SCHEMA (詳細は
+<a href="http://dev.mysql.com/doc/mysql/en/routines-table.html">http://dev.mysql.com/doc/mysql/en/routines-table.html</a>を参照)を使うように
+して下さい。
+
+SP 7. ストアドプロシージャを（例えばOracleの様に）パッケージとしてグルー
+プ化することはできますか？
+いいえ。現時点ではできません。
+
+SP 8. ストアドプロシージャから他のストアドプロシージャを呼び出すことはで
+きますか？
+はい。
+
+SP 9. ストアドプロシージャからトリガーを呼び出すことはできますか？
+ストアドプロシージャからトリガーを起動するようなSQLステートメント
+（UPDATE文等）を実行することならばできます。
+
+SP 10. ストアドプロシージャは一つのテーブルにアクセスできますか？複数の
+テーブルにもアクセスできますか？
+はい。どちらもできます。
+
+SP 11. ストアドプロシージャではアプリケーションエラーを引き起こす&quot;raise&quot;
+ステートメントが使用できますか？&quot;
+申し訳ありませんが、現時点ではできません。SQL標準であるSIGNALやRESIGNAL
+といったステートメントについては現在TODOリストに載っています。
+
+SP 12. ストアドプロシージャでは例外処理ができますか？
+MySQLはSQL標準に準じて、HANDLER定義を実装しています。詳細はこちらをご覧
+下さい。<a href="http://dev.mysql.com/doc/mysql/en/declare-handlers.html">http://dev.mysql.com/doc/mysql/en/declare-handlers.html</a>
+
+SP 13. ストアドプロシージャはMS SQLやSybaseの様に結果セットを返します
+か？
+はい。ストアドプロシージャ、またはファンクション内で通常のSELECT文を実行
+しているのであれば、結果セットはクライアントに直接返されます。この為には
+MySQL 4.1のクライアント-サーバープロトコルを使用している必要があります。
+つまり、PHPを例に挙げていえば、古いmysql拡張ではなくmysqli拡張を使用する
+必要があることになります。
+
+SP 14. ストアドプロシージャで&quot;WITH RECOMPILE&quot;は使用できますか？
+現時点では使用できません。
+
+SP 15. Oracleはデータベース内のストアドプロシージャを直接呼び出すApache
+上のゲートウェイとしてmod_plsqlを使用しています。MySQLでそれに相当するも
+のは何ですか？
+現時点ではありません。この実装はさほど難しくないはずです。恐らくアクティ
+ブなコミュニティーユーザーが進んで挑戦するのでは？
+
+SP 16. ストアドプロシージャへのパラメータとして配列を渡すことはできます
+か？
+いいえ。
+
+SP 17. ストアドプロシージャへのパラメータとしてカーソルを渡すことはでき
+ますか？
+いいえ。現時点ではカーソルはストアドプロシージャ内でのみ使用可能となって
+います。
+
+SP 18. ストアドプロシージャからのパラメータとしてカーソルを返すことはで
+きますか？
+いいえ。現時点ではカーソルはストアドプロシージャ内でのみ使用可能となって
+います。しかしながら、カーソルを開かないか（クライアントに直接結果が返り
+ます）、SELECT INTO文で変数に値を格納するかによって、SELECT文から結果
+セットを返すことができます。
+
+SP 19. デバッグ目的でストアドプロシージャ内の変数を表示することができま
+すか？
+はい。ストアドプロシージャ、またはファンクション内で通常のSELECT文を実行
+しているのであれば、結果セットはクライアントに直接返されます。この為には
+MySQL 4.1のクライアント-サーバープロトコルを使用している必要があります。
+つまり、PHPを例に挙げていえば、古いmysql拡張ではなくmysqli拡張を使用する
+必要があることになります。
+
+SP 20. ストアドプロシージャ内でトランザクション（セットとしてまとめられ
+たSQLステートメントのCOMMITやROLL BACK）は実行できますか？
+いいえ。
+
+
+</pre>
+</div>
+<p class="button"><a href="11724.html">[前]</a><a href="11726.html">[次]</a><a href="../list/11701-11800.html">[番号順一覧]</a><a href="../thread/11701-11800.html">[スレッド一覧]</a></p>
+</body>
+</html>

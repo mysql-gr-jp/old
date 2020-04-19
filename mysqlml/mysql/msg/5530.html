@@ -1,0 +1,124 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5530</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="5529.html">[前]</a><a href="5531.html">[次]</a><a href="../list/5501-5600.html">[番号順一覧]</a><a href="../thread/5501-5600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5530
+</p>
+<div class="header">
+<p>
+From: &quot;Tsumiki Software&quot; &lt;&quot;Tsumiki Software&quot; &lt;tsumiki@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 21 May 2002 21:04:45 +0900<br>
+Subject: [mysql 05530] Re: libMySQL.dll の使用とライセンスについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+志村＠つみきソフトウェア(CSE製造元)です。
+
+
+# LGPLについては
+# <a href="http://www.debian.or.jp/~mhatta/lesser.ja.txt">http://www.debian.or.jp/~mhatta/lesser.ja.txt</a>を参照しました
+#
+# 動的リンクは
+#「LoadLibrary()を使って実行時にDLLを呼び出す」という意味で使っています
+#
+# 静的リンクは
+# 「libファイルを使ってコンパイル時に実行ファイルに取り込む」
+# という意味で使っています
+
+<span class="quote1">&gt; 1. libmysql.dllを通じてMySQLのC APIを使用しMySQL(Windows/Linux問わず)</span>
+<span class="quote1">&gt; へアクセスするMicrosoft Windows用のクライアントアプリケーションを作成した</span>
+<span class="quote1">&gt; 2. このアプリケーションを単体で(MySQLサーバはもとよりlibmysql.dll</span>
+<span class="quote1">&gt; も含めずに)、ソース非公開でインターネット上で配布した</span>
+当事者ですので呼ばれて参りました(^^;
+
+参考にCSEでのlibmysql.dllの扱いについて説明させて頂きます。
+現在、次のように解釈しています。
+
+(1) libmysql.dllにはLGPLが適用される
+ ↓
+(2) ただし、LoadLibrary()で動的リンクを行う場合はLGPL適用外になる
+ ↓
+(3) CSEでは動的リンクを行っているのでライセンスを気にしなくても良い
+
+(1)については、MySQL4.0ドキュメントの1.4.2の第2項にある
+<span class="quote1">&gt; The client library, and the GNU getopt library, are covered by </span>
+<span class="quote1">&gt; the ``GNU LESSER GENERAL PUBLIC LICENSE.'' </span>
+の記述から判断しています。
+ちなみにdllは実行ファイルではなくライブラリとして判断しました。
+これはLGPLでのライブラリの扱いが
+<span class="quote1">&gt;   あるライブラリがあるプログラムとリンクされる場合、それが静的にリンク</span>
+<span class="quote1">&gt; されるか共有ライブラリとして利用されるかは問わず、両者の結合したものは</span>
+<span class="quote1">&gt; 法的に言って結合著作物、すなわち元のライブラリの派生物となります。この</span>
+<span class="quote1">&gt; ような場合、通常の一般公共利用許諾書では、全体としての結合物がライセン</span>
+<span class="quote1">&gt; スの規定する自由の基準に適合する場合のみそのようなリンクを許可していま</span>
+<span class="quote1">&gt; す。いっぽう劣等一般公共利用許諾書では、ライブラリを他のコードとリンク</span>
+<span class="quote1">&gt; する許可に関して、より緩い基準で評価します。</span>
+のようにスタティック/共有を問わないように見える所から判断しています。
+
+(2)については、「動的にリンクする場合はLGPL適用外」と判断しました。
+これは楽観的すぎるかもしれません。
+ただ、MySQL4.0ドキュメントの1.4.2の第2項を見ると
+<span class="quote1">&gt; The client library, and the GNU getopt library, are covered by the</span>
+<span class="quote1">&gt; ``GNU LESSER GENERAL PUBLIC LICENSE.''</span>
+<span class="quote1">&gt; 「I GNU LESSER GENERAL PUBLIC LICENSE」節参照. </span>
+<span class="quote1">&gt; The aim of this is to make it possible to add MySQL support </span>
+<span class="quote1">&gt; (client side, i.e. the ability to connect to a MySQL server)</span>
+<span class="quote1">&gt; into commercial products without a license. </span>
+とあります。
+The aim of this以降を直訳すると
+「この(クライアントライブラリがLGPLであることの)ねらいは
+&quot;ライセンス無し&quot;で商用の製品にMySQLのサポート
+(クライアントサイド、言い換えればMySQLサーバーへの接続能力)
+を加えることを可能にすることです。」
+となります。
+これを見るとMySQL ABでのLGPLの認識というのは
+クライアントライブラリを使うだけならライセンスは
+要らないという認識なのではないかと思います。
+
+一方で、
+linux-users MLのスレッド
+<a href="http://search.luky.org/linux-users.8/thrd3.html#02570">http://search.luky.org/linux-users.8/thrd3.html#02570</a>
+などを見ると、「動的にリンクする場合もLGPL適用内」の
+解釈の方が正しいような気もします。
+
+LGPLでライブラリを使用するソフトウェアが受ける制約は
+商用であろうとなかろうと
+・ライブラリ使用の明示とLGPLの添付
+・個人でのリバースエンジニアリングを許可すること
+の２つなのであまり差異は無いように思いますが
+出来るだけ束縛から逃れたいということで
+CSEでは今のところ「動的にリンクする場合はLGPL適用外」と解釈しています。
+
+社会的コンセンサスとしては
+ライブラリ(libmysql.dll)の使用(動的/静的)が
+LGPL適用内かそれとも外かの解釈の部分が
+問題になるのではないかと思います。
+
+できれば少しでも拘束をのがれたいというのが本音ですが
+皆さんの意見はいかがでしょうか。
+
+ちなみに、LGPL下でライブラリの再配布がどう扱われているかは調べていません。
+ご存知の方がおられましたら、教えていただけるとありがたいです。
+
+NAME:        Nobuhiro Shimura(Tsumiki Software)
+E-MAIL:      tsumiki@xxxxxxxxxx
+HP:          <a href="http://www.hi-ho.ne.jp/tsumiki/">http://www.hi-ho.ne.jp/tsumiki/</a>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="5529.html">[前]</a><a href="5531.html">[次]</a><a href="../list/5501-5600.html">[番号順一覧]</a><a href="../thread/5501-5600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="5519.html">   5519 2002-05-21 07:20 [&lt;opaque@xxxxxxxxxx&gt; ] libMySQL.dll の使用とライセンスについて </a></span>
+<span class="current">-&gt;&nbsp;<a href="5530.html">   5530 2002-05-21 21:04 ┗[&quot;Tsumiki Software&quot; &lt;]                                       </a></span>
+</pre>
+</body>
+</html>

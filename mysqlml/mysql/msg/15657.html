@@ -1,0 +1,100 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15657</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15656.html">[前]</a><a href="15658.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15657
+</p>
+<div class="header">
+<p>
+From: HIRATSUKA Sadao &lt;HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 16 Jan 2012 18:05:38 +0900<br>
+Subject: [mysql 15657] Re: BarracudaフォーマットのTEXT型項目数制限について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんばんは、平塚です。
+
+On Mon, 16 Jan 2012 14:29:30 +0900
+山田　希 &lt;Yamada_Nozomu@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; ■質問内容</span>
+<span class="quote1">&gt; １．Barracudaフォーマットには項目数等に制限があるのでしょうか？</span>
+<span class="quote1">&gt; 　　制限がある場合、回避する方法はありますでしょうか？</span>
+
+MySQL本体には4,096カラムまでという制限があって、
+InnoDBには1,000カラムまでという制限があります。
+ただし、InnoDBではレコード長にも制限が設けられています。
+
+Barracudaフォーマットの場合、BLOBやTEXTのデータはページ外に格納され
+ページ内には20バイトのポインタのみが格納されます。
+
+InnoDBにはレコード長にページサイズの半分、約8KBの制限があります。
+そのため20バイトのポインタなら約400個格納できるのですが、
+諸々のオーバーヘッドがあって186個になっているのだと思います。
+諸々のオーバーヘッドについてはすいません詳しくないです。
+
+MySQLをコンパイルし直すことでInnoDBのページサイズを64KBまで
+拡張できるそうです…が、私は事例を見たことがないです。
+
+DB設計レベルでテーブルを縦に分割するのが、
+よくある対処方法ではないかと思います。
+
+
+<span class="quote1">&gt; ２．１．の回避が難しい場合最初に出たエラー「Got error 139 from storage</span>
+<span class="quote1">&gt; engine」</span>
+<span class="quote1">&gt; 　　を回避する方法はありますでしょうか？</span>
+
+旧フォーマットの場合、BLOBやTEXTのデータは
+先頭から768バイトまでがページ内に格納されます。
+そのためBarracudaフォーマットのように186個も入らず、
+10個が限界のはずです。
+
+もう一つの違いとして、レコード長の制限に違反した場合、
+BarracudaフォーマットはCREATE TABLEのときにエラーが返るが、
+旧フォーマットは実際にINSERTしたときにエラーが返るというものが
+あります。
+
+「Got error 139 from storage engine」がINSERT時に出ているのは
+この仕様のためで、これはそのようなテーブルを作成してしまった時点で
+失敗ということで、残念ながらINSERT方法を工夫して回避できる類の
+ものではありません。
+
+==
+
+方針として少しでも多くのカラムを格納したいのであれば、
+ROW_FORMAT = DYNAMICで186カラム以内で作成し、溢れた分を
+別テーブルに分割して格納、というのが良いと思います。
+
+また、BarracudaのCOMPRESSEDで試していらっしゃいますが、
+COMPRESSEDはかなり遅いので、特別の理由がなければ
+DYNAMICの方が無難だと思います。
+
+例示いただいたブログではSELECTの性能が落ちていない様子がありますが、
+それはあくまで参照処理の場合であって、更新処理である
+INSERT/DELETE/UPDATEはそれはもう大変なことになります。
+
+
+よろしくお願いいたします。
+
+-- 
+平塚貞夫 hiratsuka.sadao@xxxxxxxxxx
+
+
+
+</pre>
+</div>
+<p class="button"><a href="15656.html">[前]</a><a href="15658.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15656.html">  15656 2012-01-16 14:29 [山田　希 &lt;Yamada_Noz] BarracudaフォーマットのTEXT型項目数制限について</a></span>
+<span class="current">-&gt;&nbsp;<a href="15657.html">  15657 2012-01-16 18:05 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15658.html">  15658 2012-01-16 21:21 　┗[山田　希 &lt;Yamada_Noz]                                     </a></span>
+</pre>
+</body>
+</html>

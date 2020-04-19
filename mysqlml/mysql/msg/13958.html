@@ -1,0 +1,208 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13958</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13957.html">[前]</a><a href="13959.html">[次]</a><a href="../list/13901-14000.html">[番号順一覧]</a><a href="../thread/13901-14000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13958
+</p>
+<div class="header">
+<p>
+From: &quot;Yoshio Kawano&quot; &lt;&quot;Yoshio Kawano&quot; &lt;kawano@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 17 May 2007 23:20:46 +0900<br>
+Subject: [mysql 13958] Re: 高速なデータの書き込み方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+お世話になっております。
+ｙｏｋａです。
+
+見当違いな回答かもしれないので、
+参考にならないかも知れません。
+
+私も、大量なデータを処理した時に、速度の壁にぶち当たりました。
+結果、逐次、ｍｙＳＱＬのテーブルに登録する処理を止めて、
+一時、ファイルに出力し、溜まった時点でｍｙSQLのテーブルにロードする方法に切
+替ました。
+1レコードを書き込むのに、Insert構文だと、0.01msかかっていたものが、
+ファイルの出力にすると、0.003以下に下がったと思います。
+
+ファイルの構成は、書き込むテーブルの構成と同じにしておき
+mysqlimportコマンドが使えるフォーマットにしておきました。
+
+統計を計算する場合、
+　１）ファイルをソートし
+　２）コントロールブレイク方式での演算
+で行いました。
+
+テーブルに登録する前に、データを計算してから登録するので
+かなり早くなりました。
+
+----- Original Message ----- 
+From: &quot;Hiroki Tamakoshi&quot; &lt;hiroki.tamakoshi@xxxxxxxxxx&gt;
+To: &lt;ml@xxxxxxxxxx&gt;
+Sent: Thursday, May 17, 2007 9:01 PM
+Subject: <a href="13957.html">[mysql 13957]</a> 高速なデータの書き込み方法
+
+
+<span class="quote1">&gt; こんにちは、株式会社ビービットの玉越です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 長文で失礼致します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; データを高速に書き込む方法についてご相談させて下さい。</span>
+<span class="quote1">&gt; 方法でなくても、○○を調べてみてはどうか、というご助言だけでもいただけま</span>
+<span class="quote1">&gt; すと本当に助かります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; まず、経緯を最初にご説明します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 現在、Webのアクセスログの解析データをMySQLに格納しています。</span>
+<span class="quote1">&gt; サイトアクセスの数や、サイト閲覧者が検索エンジンで検索してからサイトへ来</span>
+<span class="quote1">&gt; たときのその検索キーワード一覧などを毎時ごと、毎日ごと、毎週ごと・・・に</span>
+<span class="quote1">&gt; 記録しています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; もちろん、閲覧したい条件を指定してSELECT COUNT(*)すれば結果は得られるの</span>
+<span class="quote1">&gt; ですが、ログは毎秒どんどん溜まっていき、数千万行にもなりますので、結果が</span>
+<span class="quote1">&gt; 返ってくるまでに時間が相当かかります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 結果をすぐに知るために、想定される条件それぞれについて予め計算しておき、</span>
+<span class="quote1">&gt; 計算結果をMySQLに格納しています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 計算するごとに書き込むと遅いので、ある程度の量のログを計算しておき、計算</span>
+<span class="quote1">&gt; 結果が溜まったらそれを</span>
+<span class="quote1">&gt; INSERT ... VALUES ..., ..., ... ON DUPLICATE KEY UPDATE a = VALUES(a)+b</span>
+<span class="quote1">&gt; を使用して一気に書き込むようにしていますが、これが遅くて困っています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 上記構文を利用している理由は、既に同じ条件での計算結果があればそれをイン</span>
+<span class="quote1">&gt; クリメントして追加する必要があるためです。</span>
+<span class="quote1">&gt; また、INSERT ... VALUES ..., ..., ... により一度に大量のデータを書き込む</span>
+<span class="quote1">&gt; ことができます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ところが、この1文の実行に2時間以上かかっている場合があります。その間、ディ</span>
+<span class="quote1">&gt; スクへのアクセス音が聞こえ続けますので、本当に書き込みに時間が掛かってい</span>
+<span class="quote1">&gt; ると思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; VALUES ..., ..., ...の部分は多くても128MBです。</span>
+<span class="quote1">&gt; （bulk_insert_buffer_size=128Mにしています。あふれたらエラーになるはずで</span>
+<span class="quote1">&gt; すが、エラーになっていません）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 128MB/2時間=18KB/secですから、いくらなんでもディスクアクセスに時間がかか</span>
+<span class="quote1">&gt; りすぎています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 何を見直せばよいのか分からず途方にくれているのですが、何か検討すべき点は</span>
+<span class="quote1">&gt; ありますでしょうか？</span>
+<span class="quote1">&gt; テーブルの断片化、インデックスの張り過ぎ、etc...</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 下記に現在の構成を記述致します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よろしくお願い致します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■ハードウェア</span>
+<span class="quote1">&gt; ・サードウェーブ</span>
+<span class="quote1">&gt;   ExPrime Server</span>
+<span class="quote1">&gt;   T-75-ECO</span>
+<span class="quote1">&gt;   D-XELT2SATA-SU7520</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ・Intel Xeon LV 2GHz</span>
+<span class="quote1">&gt; ・メモリ 4GB</span>
+<span class="quote1">&gt; ・HDD 1.5TB(RAID5構成)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■OS</span>
+<span class="quote1">&gt; ・Fedora Core 5（5の最新版にはアップデート済み）</span>
+<span class="quote1">&gt;   kernel-2.6.18-2257</span>
+<span class="quote1">&gt;   ファイルシステムはXFS</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■MySQL</span>
+<span class="quote1">&gt; ・5.0.27</span>
+<span class="quote1">&gt;   ストレージエンジンはInnoDB</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ■my.cnfパラメータ</span>
+<span class="quote1">&gt; [mysqld]</span>
+<span class="quote1">&gt; datadir=/var/lib/mysql</span>
+<span class="quote1">&gt; socket=/var/lib/mysql/mysql.sock</span>
+<span class="quote1">&gt; old_passwords=1</span>
+<span class="quote1">&gt; delayed_queue_size=32M</span>
+<span class="quote1">&gt; max_connections=2000</span>
+<span class="quote1">&gt; sort_buffer_size=64M</span>
+<span class="quote1">&gt; myisam_sort_buffer_size=64M</span>
+<span class="quote1">&gt; key_buffer_size=64M</span>
+<span class="quote1">&gt; query_cache_size=128M</span>
+<span class="quote1">&gt; bulk_insert_buffer_size=128M</span>
+<span class="quote1">&gt; max_allowed_packet=128M</span>
+<span class="quote1">&gt; table_cache=512</span>
+<span class="quote1">&gt; thread_cache_size=16</span>
+<span class="quote1">&gt; default-character-set=utf8</span>
+<span class="quote1">&gt; character-set-server=utf8</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; skip-innodb-doublewrite</span>
+<span class="quote1">&gt; innodb_file_per_table</span>
+<span class="quote1">&gt; innodb_buffer_pool_size=1G</span>
+<span class="quote1">&gt; innodb_additional_mem_pool_size=128M</span>
+<span class="quote1">&gt; innodb_log_file_size=500M</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [mysql.server]</span>
+<span class="quote1">&gt; user=mysql</span>
+<span class="quote1">&gt; basedir=/var/lib</span>
+<span class="quote1">&gt; default-character-set=utf8</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [mysqld_safe]</span>
+<span class="quote1">&gt; log-error=/var/log/mysqld.log</span>
+<span class="quote1">&gt; pid-file=/var/run/mysqld/mysqld.pid</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [client]</span>
+<span class="quote1">&gt; default-character-set=utf8</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; 株式会社ビービット　玉越 大輝</span>
+<span class="quote1">&gt; ユーザビリティ コンサルタント</span>
+<span class="quote1">&gt; beBit,Inc. Tamakoshi Hiroki hiroki.tamakoshi@xxxxxxxxxx</span>
+<span class="quote1">&gt; --------------------------------------------------------</span>
+<span class="quote1">&gt; 〒105-0001 東京都港区虎ノ門1-18-1 虎ノ門10森ビル7F</span>
+<span class="quote1">&gt; TEL: 03-3509-7602 / FAX: 03-3509-7605</span>
+<span class="quote1">&gt; URL: <a href="http://www.bebit.co.jp/">http://www.bebit.co.jp/</a></span>
+<span class="quote1">&gt; --------------------------------------------------------</span>
+<span class="quote1">&gt; ◆◆◆お知らせ◆◆◆</span>
+<span class="quote1">&gt; ・ビービット新刊書籍 『ユーザ中心ウェブサイト戦略』発売</span>
+<span class="quote1">&gt;   <a href="http://www.bebit.co.jp/news/2006/book.html">http://www.bebit.co.jp/news/2006/book.html</a></span>
+<span class="quote1">&gt;   <a href="http://www.amazon.co.jp/gp/product/4797333529/">http://www.amazon.co.jp/gp/product/4797333529/</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="13957.html">[前]</a><a href="13959.html">[次]</a><a href="../list/13901-14000.html">[番号順一覧]</a><a href="../thread/13901-14000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13957.html">  13957 2007-05-17 21:01 [Hiroki Tamakoshi &lt;hi] 高速なデータの書き込み方法              </a></span>
+<span class="current">-&gt;&nbsp;<a href="13958.html">  13958 2007-05-17 23:20 ┗[&quot;Yoshio Kawano&quot; &lt;kaw]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13959.html">  13959 2007-05-18 13:02 　┗[Hiroki Tamakoshi &lt;hi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13960.html">  13960 2007-05-18 13:33 　　┣[HIRATSUKA Sadao &lt;hir]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13971.html">  13971 2007-05-21 10:26 　　┃┗[Hiroki Tamakoshi &lt;hi]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13973.html">  13973 2007-05-22 11:46 　　┃　┗[HIRATSUKA Sadao &lt;hir]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13974.html">  13974 2007-05-22 14:54 　　┃　　┗[Hiroki Tamakoshi &lt;hi]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14007.html">  14007 2007-05-25 11:08 　　┃　　　┗[Hiroki Tamakoshi &lt;hi]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14008.html">  14008 2007-05-25 11:15 　　┃　　　　┣[&lt;ml@xxxxxxxxxx&gt;     ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14009.html">  14009 2007-05-25 11:33 　　┃　　　　┃┗[Hiroki Tamakoshi &lt;hi]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14010.html">  14010 2007-05-25 14:10 　　┃　　　　┃　┗[&quot;橋本健太&quot; &lt;kem@xxxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14022.html">  14022 2007-05-28 00:51 　　┃　　　　┗[とみたまさひろ &lt;tomm]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14023.html">  14023 2007-05-28 12:17 　　┃　　　　　┗[Hiroki Tamakoshi &lt;hi]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14024.html">  14024 2007-05-28 14:48 　　┃　　　　　　┗[&quot;KIMURA, Meiji&quot; &lt;kim]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13961.html">  13961 2007-05-19 00:13 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13962.html">  13962 2007-05-19 11:05 　　　┗[坂井 英夫 &lt;hide_s@xx] データベースをRAID5に置く       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13963.html">  13963 2007-05-19 12:13 　　　　┣[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13964.html">  13964 2007-05-19 12:41 　　　　┃┗[坂井 英夫 &lt;hide_s@xx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13965.html">  13965 2007-05-19 13:15 　　　　┣[kurokawa &lt;ml@xxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13966.html">  13966 2007-05-19 13:57 　　　　┃┗[ひでさん &lt;hide_s@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13967.html">  13967 2007-05-19 14:14 　　　　┃　┗[N.Toge &lt;toge@xxxxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13968.html">  13968 2007-05-19 15:10 　　　　┃　　┗[ひでさん &lt;hide_s@xxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13969.html">  13969 2007-05-20 06:58 　　　　┗[Kenji Irie &lt;kenji@xx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13970.html">  13970 2007-05-20 09:31 　　　　　┗[ひでさん &lt;hide_s@xxx]                             </a></span>
+</pre>
+</body>
+</html>

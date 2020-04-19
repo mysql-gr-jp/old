@@ -1,0 +1,109 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2395</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="2394.html">[前]</a><a href="2396.html">[次]</a><a href="../list/2301-2400.html">[番号順一覧]</a><a href="../thread/2301-2400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2395
+</p>
+<div class="header">
+<p>
+From: Akihiko Toshimitsu &lt;Akihiko Toshimitsu &lt;pq6a-tsmt@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 21 Aug 2000 22:53:48 +0900<br>
+Subject: [mysql 02395] Re: export X201kana to MyODBC<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+利光です。
+
+Yukihiro KAWADA さんは書きました:
+<span class="quote1">&gt;MS-Windoze(Acess-97)とかのデータに</span>
+<span class="quote1">&gt;JIS X 201仮名、俗称「半角仮名文字」が含まれている</span>
+<span class="quote1">&gt;場合、MyODBC経由で MySQL serverにexport</span>
+<span class="quote1">&gt;したい時、みなさん、どうされています？</span>
+
+Yukihiro KAWADA さんは書きました:
+<span class="quote1">&gt;「ヒ”タミンA」が「ヒ”タミン」になったりしませんか？</span>
+<span class="quote1">&gt;（「ヒ”タミン」の文字は半角仮名、Aはascii)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;とは別に好みの問題で、X208仮名にしてしまいたいのです。</span>
+<span class="quote1">&gt;なんとかなりませんかね〜？</span>
+
+
+ODBCは使用していないのですが、
+mysql-3.23.22-beta-win.zip
+winclients-3.23.09a-sjis.zip
+にてujisに設定して下記の通り行ってみました。
+・mysql.exe および MySqlManager.exe の結果ですが、ODBCも同じかと
+思います。
+
+
+ウィンドウズクライアントでinsertしたデータ
+  ビタミンA(CB DE C0 D0 DD 41)
+　ビタミンA(83 72 83 5E 83 7E 83 93 41)
+
+を　テーブルtestにインサートします。
+(ソフトエージェンシー殿のEUCクライアント使用)
+
+mysql&gt; desc test;
++-------+----------+------+-----+---------+-------+
+<span class="quote1">| Field | Type     | Null | Key | Default | Extra |</span>
++-------+----------+------+-----+---------+-------+
+<span class="quote1">| name  | char(50) | YES  |     | NULL    |       |</span>
++-------+----------+------+-----+---------+-------+
+
+そうすると下記のように格納されるようです。
+
+c:\&gt;mysql -e &quot;select * from test
+
+ビタミンA(8E CB 8E DE 8E C0 8E D0 8E DD 41)
+ビタミンA(A5 D3 A5 BF A5 DF A5 F3 41)
+
+c:\&gt;mysql -e &quot;select length(name) from test&quot; test
++--------------+
+<span class="quote1">| length(name) |</span>
++--------------+
+<span class="quote1">|           11 |</span>
+<span class="quote1">|            9 |</span>
++--------------+
+
+
+河田＠富士フイルムさんが期待される
+JIS X 201仮名-&gt;208仮名(EUC)はwinclients-3.23.09a-sjis.zipでは
+行っていないようです。
+もし実現なさりたいのであれば、accessであればnkf.dll等を関数として
+プロシージャとして利用するか。
+バッチ的でよければ、mysqldumpした結果をnkfでフィルタリング
+すればよいのではと思います。
+ nkf のreadmeより
+<span class="quote2">&gt;&gt;X0201仮名はデフォルトでX0208に変換される。ただし、シフトJISのX0201仮名</span>
+<span class="quote2">&gt;&gt;はデフォルトではEUCだと解釈されてしまう。これが望ましくない時には -S や</span>
+<span class="quote2">&gt;&gt;-X などのフラグを使えば良い。-Xを指定すると一旦確定したシフトJISから </span>
+<span class="quote2">&gt;&gt;EUCに移行することはない。ESC-(-Iによる X0201は常に認識される。SI/SO</span>
+<span class="quote2">&gt;&gt;SSOは、-lが指定されていなければX0201と解釈する。</span>
+
+また、ビタミンＡ(A5 D3 A5 BF A5 DF A5 F3 A3 C1)でよろしければ、
+班石悦夫さんが言われているようにStrConv(string, 4)簡単かと思います。
+
+＃  nkf のwin32のDLLは www.vector.co.jp(ringサーバ)等から
+＃取得できると思います。
+
+以上
+
+</pre>
+</div>
+<p class="button"><a href="2394.html">[前]</a><a href="2396.html">[次]</a><a href="../list/2301-2400.html">[番号順一覧]</a><a href="../thread/2301-2400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2390.html">   2390 2000-08-21 09:16 [Yukihiro KAWADA &lt;kaw] export X201kana to MyODBC               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2391.html">   2391 2000-08-21 18:05 ┣[madara &lt;madara@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2392.html">   2392 2000-08-21 18:18 ┃┗[Yukihiro KAWADA &lt;kaw]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2393.html">   2393 2000-08-21 18:37 ┃　┗[madara &lt;madara@xxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="2395.html">   2395 2000-08-21 22:53 ┗[Akihiko Toshimitsu &lt;]                                       </a></span>
+</pre>
+</body>
+</html>

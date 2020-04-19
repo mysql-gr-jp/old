@@ -1,0 +1,94 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16513</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16512.html">[前]</a><a href="16514.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16513
+</p>
+<div class="header">
+<p>
+From: SAKAI Kei &lt;SAKAI Kei &lt;sakaik@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 18 Feb 2019 16:50:45 +0900<br>
+Subject: [mysql 16513] Re: [mysql 16511] 関数Polygon(ls1,ls2,...)が動きません<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+坂井です。
+
+POLYGON
+関数、そのように線の断片を与えると結合してくれるようなものではなく（そういう関数もほしいのですが＝LineMerge()みたいに＝まだ見あたらないですね）、
+閉じた LineString 、つまり、単なるポリゴンの縁取り部分の線を、中身の詰まったPOLYGON にしてくれるものだと思います。
+
+なので、
+SELECT ST_AsText(
+        POLYGON(
+            ST_LineFromText('LINESTRING(1 1, 1 5, 5 5, 5  1, 1 1)'),
+            ST_LineFromText('LINESTRING(2 2, 3 3, 3 2, 2 2)')
+        )
+     );
+
+のようにして使います。
+第2引数以下は、WKTのPOLYGONの書き方と同様、くり抜く部分かと思います。
+
+＠変数が使えないのは、渡辺さんもかかれているとおり、何故ですかね。。使えても良さそうな場所でもあり、若干バグ報告な香りもしますが、他の皆さんからの情報も伺いたいところです。
+
+
+
+
+2019年2月18日(月) 11:47 落合 司郎 &lt;s.ochiai@xxxxxxxxxx&gt;:
+
+<span class="quote1">&gt; お世話になります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 関数Polygon(ls1,ls2,...)を以下のように試してみましたが、以下のエラーが出てポリゴンを作れません。</span>
+<span class="quote1">&gt; MySQL ver5.7とver8.0の二つで試しましたが、結果は同じでした。</span>
+<span class="quote1">&gt; ちなみに、Polygon(ls1,ls2,...)の引数として渡したパラメータの型を確認しましたが、全て'LINESTRING'となっています。</span>
+<span class="quote1">&gt; 何がいけないのか、教えてください。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Error Code: 1367. Illegal non geometric '(@`ls1`)' value found during</span>
+<span class="quote1">&gt; parsing</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 実行したスクリプト</span>
+<span class="quote1">&gt; SET</span>
+<span class="quote1">&gt; @ls1 = ST_LineFromText('linestring(4010 5009,4015 5005)'),</span>
+<span class="quote1">&gt; @ls2 = ST_LineFromText('linestring(4015 5005,4018 5010)'),</span>
+<span class="quote1">&gt; @ls3 = ST_LineFromText('linestring(4018 5010,4012 5010)'),</span>
+<span class="quote1">&gt; @ls4 = ST_LineFromText('linestring(4012 5010,4018 5013)'),</span>
+<span class="quote1">&gt; @ls5 = ST_LineFromText('linestring(4018 5013,3995 5013)'),</span>
+<span class="quote1">&gt; @ls6 = ST_LineFromText('linestring(3995 5013,3995 5000)'),</span>
+<span class="quote1">&gt; @ls7 = ST_LineFromText('linestring(3995 5000,4010 5009)');</span>
+<span class="quote1">&gt; select</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ST_GeometryType(@ls1),ST_GeometryType(@ls2),ST_GeometryType(@ls3),ST_GeometryType(@ls4),ST_GeometryType(@ls5),ST_GeometryType(@ls6),ST_GeometryType(@ls7);</span>
+<span class="quote1">&gt; select ST_AsText(@ls1);</span>
+<span class="quote1">&gt; SET @npoly = POLYGON(@ls1,@ls2,@ls3,@ls4,@ls5,@ls6,@ls7);# ここでエラー</span>
+<span class="quote1">&gt; select @npoly,ST_GeometryType(@npoly),ST_AsText(@npoly);</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 実行環境：</span>
+<span class="quote1">&gt; OS:Windows 8.0 64ビット</span>
+<span class="quote1">&gt; MySQL:Ver.5.7.18-log</span>
+<span class="quote1">&gt; Workbench:Ver.6.3.9</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="16513/0/index.html"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="16512.html">[前]</a><a href="16514.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16511.html">  16511 2019-02-18 11:47 [落合 司郎 &lt;s.ochiai@] 関数Polygon(ls1,ls2,...)が動きません    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16512.html">  16512 2019-02-18 16:08 ┣[Watanabe Tomoyuki &lt;W] RE: [mysql 16511] 関数Polygon(ls1,ls2,...)が動きません</a></span>
+<span class="current">-&gt;&nbsp;<a href="16513.html">@ 16513 2019-02-18 16:50 ┗[SAKAI Kei &lt;sakaik@xx] Re: [mysql 16511] 関数Polygon(ls1,ls2,...)が動きません</a></span>
+</pre>
+</body>
+</html>

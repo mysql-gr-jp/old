@@ -1,0 +1,65 @@
+From: 民斗 <tommy@valley.ne.jp>
+To: mysql@ml.database.ne.jp
+Subject: mysql-3.22.9-beta LIKE op bug
+Date: Fri, 23 Oct 1998 11:32:02 +0900
+
+MySQL 3.22.9 がちゃんと MB 対応しているかどうかを確認してたら、
+バグを見つけてしまいました。MB 対応したためのバグではありません。
+多分、3.22.6 あたりから同じ問題があったんではないかと思います。
+
+	mysql> create table test (id char(10));
+	Query OK, 0 rows affected (0.02 sec)
+	
+	mysql> insert into test values ("aaa");
+	Query OK, 1 row affected (0.00 sec)
+	
+	mysql> insert into test values ("abc");
+	Query OK, 1 row affected (0.01 sec)
+	
+	mysql> insert into test values ("abcabc");
+	Query OK, 1 row affected (0.03 sec)
+	
+	mysql> select * from test;                    
+	+--------+
+	| id     |
+	+--------+
+	| aaa    |
+	| abc    |
+	| abcabc |
+	+--------+
+	3 rows in set (0.00 sec)
+	
+	mysql> select * from test where id like "%a";
+	Empty set (0.00 sec)
+！"aaa" が見つからない
+	
+	mysql> select * from test where id like "%c";
+	+------+
+	| id   |
+	+------+
+	| abc  |
+	+------+
+	1 row in set (0.00 sec)
+！"abcabc" が見つからない
+
+パッチを作って、本家 ML に流したので、問題がなければ次のバージョンに
+組み込まれると思います。
+--
+民斗 <tommy@valley.ne.jp>
+
+
+--- sql/sql_string.cc.orig	Mon Oct 19 02:33:57 1998
++++ sql/sql_string.cc	Fri Oct 23 10:27:13 1998
+@@ -416,6 +416,8 @@
+ static int wild_case_compare(const char *str,const char *strend,
+ 			     const char *wildstr,const char *wildend,char escape)
+ {
++  if (wildstr == wildend)
++    return (str != strend);
+   int result= -1;				// Not found, using wildcards
+   while (wildstr != wildend)
+   {
+
+---<cut>------<cut>------<cut>------<cut>------<cut>------<cut>------<cut>---
+
+

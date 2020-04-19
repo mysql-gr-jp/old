@@ -1,0 +1,262 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:5980</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="5979.html">[前]</a><a href="5981.html">[次]</a><a href="../list/5901-6000.html">[番号順一覧]</a><a href="../thread/5901-6000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:5980
+</p>
+<div class="header">
+<p>
+From: 福元 政明 &lt;福元 政明 &lt;fukumoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 22 Aug 2002 19:08:33 +0900<br>
+Subject: [mysql 05980] Re: JDBC での INSERT  と UPDATE で日本語が ?  に化けてしまいます<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+福元です。お世話になります。
+下記のように、うまくいきました、と書きましたが
+実は「\」と「'」を入力し登録すると、MySQLにおいて更新エラーが発生していま
+す。
+あたりまえのような話で恐縮なのですが、
+SQL文の記述などで逃げることはできないのでしょうか？
+なみに MS-ACCESS であれば「\」ではエラーとなりませんでした。
+以上、よろしくお願いいたします。
+
+<span class="quote1">&gt; -----Original Message-----</span>
+<span class="quote1">&gt; From:	福元 政明 [SMTP:fukumoto@xxxxxxxxxx]</span>
+<span class="quote1">&gt; Sent:	Thursday, August 22, 2002 4:57 PM</span>
+<span class="quote1">&gt; To:	ml@xxxxxxxxxx</span>
+<span class="quote1">&gt; Subject:	<a href="05979.html">[mysql 05979]</a> Re: JDBC での INSERT       と UPDATE で日本語</span>
+<span class="quote1">&gt; が ?       に化けてしまいます</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Cold Winter様、村上様、ありがとうございました。</span>
+<span class="quote1">&gt; とりあえず「ー」の問題も解決しました。</span>
+<span class="quote1">&gt; ポイントは接続文字列中の &amp;useUnicode=true&amp;characterEncoding=Shift_JIS でし</span>
+<span class="quote1">&gt; た。</span>
+<span class="quote1">&gt; なぜか Windows では、SJIS と Shift_JIS は異なるもののような気がします。</span>
+<span class="quote1">&gt; TOMCATの使用かもしれませんが.....</span>
+<span class="quote1">&gt; ところで、PreparedStatemennte を使用しても、executeQuery で</span>
+<span class="quote1">&gt; sta = con.prepareStatement(new String(p1.getBytes(&quot;8859_1&quot;),&quot;Shift_JIS&quot;));</span>
+<span class="quote1">&gt; としてやらないとうまく日本語を渡せないようです。</span>
+<span class="quote1">&gt; とりあえず、MS-ACCESSでもMSDEでもＭｙＳＱＬでもうまくいきました。</span>
+<span class="quote1">&gt; ありがとうございました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; -----Original Message-----</span>
+<span class="quote2">&gt; &gt; From:	Cold Winter [SMTP:coldwinter@xxxxxxxxxx]</span>
+<span class="quote2">&gt; &gt; Sent:	Thursday, August 22, 2002 4:09 PM</span>
+<span class="quote2">&gt; &gt; To:	ml@xxxxxxxxxx</span>
+<span class="quote2">&gt; &gt; Subject:	<a href="05977.html">[mysql 05977]</a> Re: JDBC での INSERT      と UPDATE で日本語が</span>
+<span class="quote2">&gt; &gt; ?      に化けてしまいます</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; ところで質問ですが、なぜ PreparedStatement でうまくいったのか？</span>
+<span class="quote3">&gt; &gt; &gt; 私の頭ではピントきません。</span>
+<span class="quote3">&gt; &gt; &gt; よろしければご指導の程お願い致します。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; …PostgreSQL のものなのですが，JDBC ドライバのソースを見ると，</span>
+<span class="quote2">&gt; &gt; PreparedStatement.setString() の処理の中で↓のように '\' の処理</span>
+<span class="quote2">&gt; &gt; をして，文字化けを起さないようにしているようですね。</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; −−−−−−−−−−−−−−−−−−−−−−−−−</span>
+<span class="quote2">&gt; &gt;  public void setString(int parameterIndex, String x) throws SQLException</span>
+<span class="quote2">&gt; &gt;  {</span>
+<span class="quote2">&gt; &gt;   // if the passed string is null, then set this column to null</span>
+<span class="quote2">&gt; &gt;   if (x == null)</span>
+<span class="quote2">&gt; &gt;    setNull(parameterIndex, Types.OTHER);</span>
+<span class="quote2">&gt; &gt;   else</span>
+<span class="quote2">&gt; &gt;   {</span>
+<span class="quote2">&gt; &gt;    // use the shared buffer object. Should never clash but this makes</span>
+<span class="quote2">&gt; &gt;    // us thread safe!</span>
+<span class="quote2">&gt; &gt;    synchronized (sbuf)</span>
+<span class="quote2">&gt; &gt;    {</span>
+<span class="quote2">&gt; &gt;     sbuf.setLength(0);</span>
+<span class="quote2">&gt; &gt;     int i;</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt;     sbuf.append('\'');</span>
+<span class="quote2">&gt; &gt;     for (i = 0 ; i &lt; x.length() ; ++i)</span>
+<span class="quote2">&gt; &gt;     {</span>
+<span class="quote2">&gt; &gt;      char c = x.charAt(i);</span>
+<span class="quote2">&gt; &gt;      if (c == '\\' || c == '\'')</span>
+<span class="quote2">&gt; &gt;       sbuf.append((char)'\\');</span>
+<span class="quote2">&gt; &gt;      sbuf.append(c);</span>
+<span class="quote2">&gt; &gt;     }</span>
+<span class="quote2">&gt; &gt;     sbuf.append('\'');</span>
+<span class="quote2">&gt; &gt;     set(parameterIndex, sbuf.toString());</span>
+<span class="quote2">&gt; &gt;    }</span>
+<span class="quote2">&gt; &gt;   }</span>
+<span class="quote2">&gt; &gt;  }</span>
+<span class="quote2">&gt; &gt; −−−−−−−−−−−−−−−−−−−−</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; ----- Original Message -----</span>
+<span class="quote2">&gt; &gt; From: &quot;福元 政明&quot; &lt;fukumoto@xxxxxxxxxx&gt;</span>
+<span class="quote2">&gt; &gt; To: &lt;ml@xxxxxxxxxx&gt;</span>
+<span class="quote2">&gt; &gt; Sent: Thursday, August 22, 2002 2:40 PM</span>
+<span class="quote2">&gt; &gt; Subject: <a href="05976.html">[mysql 05976]</a> Re: JDBC での INSERT と UPDATE で日本語が ? に化</span>
+<span class="quote1">&gt; け</span>
+<span class="quote2">&gt; &gt; てしまいます</span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote2">&gt; &gt; </span>
+<span class="quote3">&gt; &gt; &gt; ご指導ありがとうございます。</span>
+<span class="quote3">&gt; &gt; &gt; さっそく実行してみました。</span>
+<span class="quote3">&gt; &gt; &gt; 私の理解不足が影響しているせいか、結局</span>
+<span class="quote3">&gt; &gt; &gt; PreparedStatement（入力SQLのSJIS変換なしで）</span>
+<span class="quote3">&gt; &gt; &gt; を使ってみたらうまくいきました。</span>
+<span class="quote3">&gt; &gt; &gt; ただ「−」とかの漢字が文字化けするようです。</span>
+<span class="quote3">&gt; &gt; &gt; なぜだろう？</span>
+<span class="quote3">&gt; &gt; &gt; ちなみに、gweMysql JDBC Driver に対しても</span>
+<span class="quote3">&gt; &gt; &gt; 以下のようにトライしましたが欠局うまくいかずあきらめました。</span>
+<span class="quote3">&gt; &gt; &gt; １、mysql-connector-java-2.0.14.zipをダウンロード</span>
+<span class="quote3">&gt; &gt; &gt; ２、解凍したmysql-connector-java-2.0.14-bin.jarをlibに配置</span>
+<span class="quote3">&gt; &gt; &gt; ３、接続のClass.forName(&quot;com.mysql.jdbc.Driver&quot;).newInstance();の部分</span>
+<span class="quote1">&gt; を</span>
+<span class="quote2">&gt; &gt; 変更</span>
+<span class="quote3">&gt; &gt; &gt; ところで質問ですが、なぜ PreparedStatement でうまくいったのか？</span>
+<span class="quote3">&gt; &gt; &gt; 私の頭ではピントきません。</span>
+<span class="quote3">&gt; &gt; &gt; よろしければご指導の程お願い致します。</span>
+<span class="quote3">&gt; &gt; &gt; 以上</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; -----Original Message-----</span>
+<span class="quote4">&gt; &gt; &gt; &gt; From: Cold Winter [SMTP:coldwinter@xxxxxxxxxx]</span>
+<span class="quote4">&gt; &gt; &gt; &gt; Sent: Thursday, August 22, 2002 12:05 PM</span>
+<span class="quote4">&gt; &gt; &gt; &gt; To: ml@xxxxxxxxxx</span>
+<span class="quote4">&gt; &gt; &gt; &gt; Subject: <a href="05975.html">[mysql 05975]</a> Re: JDBC での INSERT    と UPDATE で日本語が</span>
+<span class="quote1">&gt; ?</span>
+<span class="quote4">&gt; &gt; &gt; &gt; に化けてしまいます</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; SQL のエンコードに「8859_1 → Shift_JIS」の変換を &quot;かけないで&quot;実行</span>
+<span class="quote1">&gt; し</span>
+<span class="quote2">&gt; &gt; てみ</span>
+<span class="quote4">&gt; &gt; &gt; &gt; たら</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 「あいうえお」と入力したら「BDFHJ」と帰ってきました。</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; …そうですか…，となると，次の方法で回避することになると思います。</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; １．&quot;gweMysql JDBC Driver&quot;</span>
+<span class="quote2">&gt; &gt; （<a href="http://www.t3-jpn.com/jdbc/jdbcmysql.html">http://www.t3-jpn.com/jdbc/jdbcmysql.html</a>）を</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 　　使ってみる（過去ログ &quot;<a href="05893.html">[mysql 05893]</a>&quot;）</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ２．PreparedStatement を使ってみる（過去ログ &quot;<a href="05889.html">[mysql 05889]</a>&quot;）</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ３．MySQL DB エンジンそのものを Shift_JIS でコンパイルしなおす</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 　　（過去ログ &quot;<a href="05900.html">[mysql 05900]</a>&quot;）</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ----- Original Message -----</span>
+<span class="quote4">&gt; &gt; &gt; &gt; From: &quot;福元 政明&quot; &lt;fukumoto@xxxxxxxxxx&gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; To: &lt;ml@xxxxxxxxxx&gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; Sent: Thursday, August 22, 2002 11:55 AM</span>
+<span class="quote4">&gt; &gt; &gt; &gt; Subject: <a href="05973.html">[mysql 05973]</a> Re: JDBC での INSERT と UPDATE で日本語が ?</span>
+<span class="quote1">&gt; に</span>
+<span class="quote2">&gt; &gt; 化け</span>
+<span class="quote4">&gt; &gt; &gt; &gt; てしまいます</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; お返事ありがとうございました。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; ちなみに、</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; SQL のエンコードに「8859_1 → Shift_JIS」の変換を &quot;かけないで&quot;実行</span>
+<span class="quote1">&gt; し</span>
+<span class="quote2">&gt; &gt; てみ</span>
+<span class="quote4">&gt; &gt; &gt; &gt; たら</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 「あいうえお」と入力したら「BDFHJ」と帰ってきました。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; とりあえずご報告まで。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; -----Original Message-----</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; From: Cold Winter [SMTP:coldwinter@xxxxxxxxxx]</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; Sent: Thursday, August 22, 2002 11:44 AM</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; To: ml@xxxxxxxxxx</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; Subject: <a href="05972.html">[mysql 05972]</a> Re: JDBC での INSERT  と UPDATE で日本語</span>
+<span class="quote1">&gt; が</span>
+<span class="quote2">&gt; &gt; ?</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; に化けてしまいます</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 福元さん，はじめまして。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 　接続文字列では、</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; jdbc:mysql:///master1?useUnicode=true&amp;characterEncoding=SJIS</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 　UpdateCount = sta.executeUpdate(new</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; String(p1.getBytes(&quot;8859_1&quot;),&quot;Shift_JIS&quot;));</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; のようにきちんとSJIS変換しているつもりなのですが</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; INSERTとUPDATEを行うと、「あ」のような日本後全てが「?」となっ</span>
+<span class="quote1">&gt; て</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; データベースに格納されているようです。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; …次のような点を考慮してみるとよいかもしれません。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; １．SQL のエンコードに「8859_1 → Shift_JIS」の変換を &quot;かけない</span>
+<span class="quote1">&gt; で&quot;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 　　そのまま実行する</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; ２．DB エンジンの起動状態のうち，キャラクターセットの設定を確認</span>
+<span class="quote1">&gt; す</span>
+<span class="quote2">&gt; &gt; る</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 　　# 確認方法</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 　　　&quot;C:\work\&gt; mysqladmin variables&quot; ででてくる表の</span>
+<span class="quote2">&gt; &gt; character_set</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 　　　の行が &quot;sjis&quot; であることを確認する，念の為 character_sets</span>
+<span class="quote1">&gt; に</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 　　　&quot;sjis&quot; が含まれていることも確認する</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; ----- Original Message -----</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; From: &quot;福元 政明&quot; &lt;fukumoto@xxxxxxxxxx&gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; To: &lt;ml@xxxxxxxxxx&gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; Sent: Thursday, August 22, 2002 11:38 AM</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; Subject: <a href="05971.html">[mysql 05971]</a> JDBC での INSERT と UPDATE で日本語が ?</span>
+<span class="quote1">&gt; に</span>
+<span class="quote2">&gt; &gt; 化け</span>
+<span class="quote4">&gt; &gt; &gt; &gt; てし</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; まいます</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 福元と申します。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 環境は、Win2K + JDK1.4 + TOMCAT4.18です。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 実はタイトルのような不具合で悩んでおります。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 処理的には</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 　WEB-INF/lib/mm.mysql-2.0.13-you-must-unjar-me.jar</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 　接続文字列では、</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; jdbc:mysql:///master1?useUnicode=true&amp;characterEncoding=SJIS</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 　UpdateCount = sta.executeUpdate(new</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; String(p1.getBytes(&quot;8859_1&quot;),&quot;Shift_JIS&quot;));</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; のようにきちんとSJIS変換しているつもりなのですが</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; INSERTとUPDATEを行うと、「あ」のような日本後全てが「?」となっ</span>
+<span class="quote1">&gt; て</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; データベースに格納されているようです。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; なみに、mysqlコマンドでINSERT文を実行したレコードについては、</span>
+<span class="quote1">&gt; 読</span>
+<span class="quote2">&gt; &gt; み込</span>
+<span class="quote4">&gt; &gt; &gt; &gt; んだ</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 際に</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; も○きちんと日本語表示されます。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; なみに、本メーリングリストで紹介されていました</span>
+<span class="quote2">&gt; &gt; 「PreparedStatement」</span>
+<span class="quote4">&gt; &gt; &gt; &gt; の動</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 作は</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; まだ検証していません。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; よろしくお願いします。</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="5979.html">[前]</a><a href="5981.html">[次]</a><a href="../list/5901-6000.html">[番号順一覧]</a><a href="../thread/5901-6000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="5980.html">   5980 2002-08-22 19:08 [福元 政明 &lt;fukumoto@] Re: JDBC での INSERT  と UPDATE で日本語が ?  に化けてしまいます</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5981.html">   5981 2002-08-22 19:37 ┗[&quot;Cold Winter&quot; &lt;coldw]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="5983.html">   5983 2002-08-22 20:59 　┗[&quot;TAKAHASHI, Tomohiro]                                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13723</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13722.html">[前]</a><a href="13724.html">[次]</a><a href="../list/13701-13800.html">[番号順一覧]</a><a href="../thread/13701-13800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13723
+</p>
+<div class="header">
+<p>
+From: Tadafumi Kouzato &lt;Tadafumi Kouzato &lt;grego@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 13 Feb 2007 17:45:29 +0900<br>
+Subject: [mysql 13723] Connector/Net でinsertしたレコードのauto_incrementとtimestamp<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+上里＠ぴえろ　です。
+
+Connector/Net(5.0.3)を使ってMySQL(5.0.24)のテーブルに
+レコードをinsertし、そのレコードのTimestampとauto_incrementカラム
+を取得しようとしています。
+が、Timestampとauto_incermentカラムを取得できません。
+
+
+まずテーブルはこんな感じです。
+
+mysql&gt; desc book;
++------------+-----------+------+-----+-------------------+----------------+
+<span class="quote1">| Field      | Type      | Null | Key | Default           | Extra          |</span>
++------------+-----------+------+-----+-------------------+----------------+
+<span class="quote1">| ts         | timestamp | YES  |     | CURRENT_TIMESTAMP |                |</span>
+<span class="quote1">| book_id    | int(11)   | NO   | PRI | NULL              | auto_increment |</span>
+<span class="quote1">| issuer     | int(11)   | YES  |     | NULL              |                |</span>
+<span class="quote1">| issue_date | date      | YES  |     | NULL              |                |</span>
++------------+-----------+------+-----+-------------------+----------------+
+
+下記のようなストアドプロシージャとC#のプログラムを書きました。
+
+--ストアドプロシージャ-----------------------------------------------
+mysql&gt; show create procedure add_new_book\G
+*************************** 1. row ***************************
+       Procedure: add_new_book
+        sql_mode:
+Create Procedure: CREATE DEFINER=`root`@`localhost` PROCEDURE `add_new_book`(in x_issuer integer, in x_issue_date date,
+out t timestamp, out bid int)
+begin
+insert into book (issuer,issue_date) values (x_issuer,x_issue_date);
+set bid = last_insert_id();
+select ts into t from book where book_id = bid;
+end
+1 row in set (0.00 sec)
+
+---------------------------------------------------------------------
+
+
+---- C#(Visual Studio 2005)で書いたクライアントプログラムの一部------
+using System;
+using System.Configuration;
+using System.Collections.Generic;
+using System.Text;
+using System.Data;
+using System.Data.Common;
+using MySql.Data.MySqlClient;
+using NUnit.Framework;
+
+namespace DbMySQLSecondLesson
+{
+    [TestFixture]
+    public class SimpleBookFixture
+    {
+        private string connectionString;
+        private MySqlConnection connection;
+
+        [SetUp]
+        public void SetUp() {
+            connectionString =
+                System.Configuration.ConfigurationManager.AppSettings.Get(&quot;Book.Connection&quot;);
+            Assert.IsNotNull(connectionString);
+
+            connection = new MySqlConnection(connectionString);
+            connection.Open();
+        }
+
+        [TearDown]
+        public void TearDown() {
+            connection.Close();
+        }
+
+        public void CreateNewBook() {
+            MySqlCommand clearCommand = connection.CreateCommand();
+            clearCommand.CommandText = &quot;delete from book&quot;;
+            clearCommand.ExecuteNonQuery();
+
+            MySqlCommand selectCommand = new MySqlCommand(&quot;select ts,book_id,issuer,issue_date from book&quot;, connection);
+            MySqlDataAdapter da = new MySqlDataAdapter();
+            Assert.IsNotNull(da);
+            DataTableMapping TblMap = da.TableMappings.Add(&quot;Table&quot;, &quot;book&quot;);
+            DataColumnMapping ColMap1 = TblMap.ColumnMappings.Add(&quot;ts&quot;, &quot;ts&quot;);
+            DataColumnMapping ColMap2 = TblMap.ColumnMappings.Add(&quot;book_id&quot;, &quot;book_id&quot;);
+
+            da.MissingSchemaAction = MissingSchemaAction.AddWithKey;
+            da.SelectCommand = selectCommand;
+            DataSet ds = new DataSet();
+            Assert.IsNotNull(ds);
+
+            MySqlCommand insertCommand = new MySqlCommand(&quot;add_new_book&quot;, connection);
+            insertCommand.CommandType = CommandType.StoredProcedure;
+            insertCommand.UpdatedRowSource = UpdateRowSource.OutputParameters;
+
+            MySqlParameterCollection icpc = insertCommand.Parameters;
+            MySqlParameter param1 = icpc.Add(&quot;?x_issuer&quot;, MySqlDbType.Int32, 0, &quot;issuer&quot;);
+            param1.Direction = ParameterDirection.Input;
+
+            MySqlParameter param2 = icpc.Add(&quot;?x_issue_date&quot;, MySqlDbType.Date, 0, &quot;issue_date&quot;);
+            param2.Direction = ParameterDirection.Input;
+
+            MySqlParameter param3 = icpc.Add(&quot;?t&quot;, MySqlDbType.Timestamp, 0, &quot;ts&quot;);
+            param3.Direction = ParameterDirection.Output;
+
+            MySqlParameter param4 = icpc.Add(&quot;?bid&quot;, MySqlDbType.Int32, 0, &quot;book_id&quot;);
+            param4.Direction = ParameterDirection.Output;
+
+            da.InsertCommand = insertCommand;
+
+            int RowsRetrieved = da.Fill(ds);
+            Assert.AreEqual(0, RowsRetrieved);
+            DataTable tbl = ds.Tables[&quot;book&quot;];
+
+            DataRow row = tbl.NewRow();
+            row[&quot;issuer&quot;] = 7;
+            row[&quot;issue_date&quot;] = &quot;2007-01-07&quot;;
+            row[&quot;book_id&quot;] = -1;
+            row[&quot;ts&quot;] = &quot;2007-02-07 00:00:00&quot;;
+            tbl.Rows.Add(row);
+
+            da.Update(tbl);
+
+            System.Console.WriteLine(tbl.Rows[0][&quot;ts&quot;]);
+            System.Console.WriteLine(tbl.Rows[0][&quot;book_id&quot;]);
+            System.Console.WriteLine(tbl.Rows[0][&quot;issuer&quot;]);
+            System.Console.WriteLine(tbl.Rows[0][&quot;issue_date&quot;]);
+        }
+    }
+}
+
+--------------------------------------------------------------------------
+
+で、実行結果(Console.Out)は下記です。
+------- Console.Out -------------------------
+2007/02/07 0:00:00
+-1
+7
+2007/01/07 0:00:00
+---------------------------------------------
+
+データベースは、更新(insert)されています。
+----------------------------------------------
+mysql&gt; select * from book;
++---------------------+---------+--------+------------+
+<span class="quote1">| ts                  | book_id | issuer | issue_date |</span>
++---------------------+---------+--------+------------+
+<span class="quote1">| 2007-02-13 17:08:33 |      36 |      7 | 2007-01-07 |</span>
++---------------------+---------+--------+------------+
+1 row in set (0.00 sec)
+
+----------------------------------------------
+
+プログラム中に愛以外の何かが足りないような気がするのですが、
+それが何なのかわかりません。どうすればいいのでしょうか？
+
+-- 
+=========================================================
+   @)@)     PIERROT CO., LTD.       (株)ぴえろ
+  (--- )    Tadafumi Kouzato         上里 直史
+~~~~~~~~~~~                          grego@xxxxxxxxxx
+=========================================================
+
+</pre>
+</div>
+<p class="button"><a href="13722.html">[前]</a><a href="13724.html">[次]</a><a href="../list/13701-13800.html">[番号順一覧]</a><a href="../thread/13701-13800.html">[スレッド一覧]</a></p>
+</body>
+</html>

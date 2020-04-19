@@ -1,0 +1,109 @@
+ひろです。<div>おはようございます。</div><div><br></div><div>私が発行したselectは参照オンリーのselectで、同じselectを同じようなタイミング（裏で実行するプログラムの終了後）に発行しましたが結果が場合により異なるという現象です。</div><div><br></div><div>プログラムの作り方を根本的に何か間違えているのかも知れませんが、java、rubyともに同じような現象になってしまうので、作り方の問題ではないようにも思えます。</div>
+<div><br></div><div>複数のテーブルへのinsertを一括してコミット、ロールバックできていますので、トランザクション内で処理をしていることは確認済みですが、コミットもしくはロールバックしたことをmysqlコマンドが認識できるまでに数秒〜数10秒程度の遅れが発生することはあるのでしょうか？</div><div><br></div><div>よろしくお願いします。</div><div><br><div class="gmail_quote">
+2012年8月28日 1:37 Tomohiro &#39;Tomo-p&#39; KATO <span dir="ltr">&lt;<a href="mailto:tomop@teamgedoh.net" target="_blank">tomop@teamgedoh.net</a>&gt;</span>:<br><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+　こんばんは。かとうです。<br>
+<div class="im"><br>
+On 12/08/28 0:31, ひろ wrote:<br>
+&gt; 実は「もしかして」と思い、例2のパターンと同じようにcommitを試してみたのですが、<br>
+&gt; 再ログインするまで最新の結果は取れませんでした。<br>
+&gt; そうかと思うと、何もしなくても例１のC3で最新のデータが取れる時もありました。<br>
+&gt; それで途方に暮れてしまった次第です。<br>
+<br>
+</div>　　一応実験してみました。同内容で何度かやってみましたが、select文に<br>
+　&quot;LOCK IN SHARE MODE&quot;や&quot;FOR UPDATE&quot; をつけてロックを獲得した場合には、<br>
+　commitせずとも更新後の内容を取得していますが、ロックを獲得しない単<br>
+　純なselect文の場合には更新前の内容しか出てきませんでした。<br>
+<br>
+<br>
+実験環境: VineSeed + MySQL-5.5.25<br>
+<br>
+*実験1: 単純なselect文<br>
+-----------------------------------------------------------------<br>
+mysql&gt; select * from test;<br>
++----+------+<br>
+| id | val &nbsp;|<br>
++----+------+<br>
+| &nbsp;1 | &nbsp;100 |<br>
++----+------+<br>
+1 row in set (0.00 sec)<br>
+<br>
+<br>
+&nbsp; &nbsp;(※) ここで別端末から更新<br>
+<br>
+<br>
+mysql&gt; select * from test;<br>
++----+------+<br>
+| id | val &nbsp;|<br>
++----+------+<br>
+| &nbsp;1 | &nbsp;100 | &nbsp; &nbsp; &nbsp; &lt;--------------------- 変化なし<br>
++----+------+<br>
+1 row in set (0.00 sec)<br>
+<br>
+mysql&gt; select * from test; &nbsp;&lt;------------- 念のため再度実行<br>
++----+------+<br>
+| id | val &nbsp;|<br>
++----+------+<br>
+| &nbsp;1 | &nbsp;100 | &nbsp; &nbsp; &nbsp; &lt;--------------------- 変化なし<br>
++----+------+<br>
+1 row in set (0.01 sec)<br>
+<br>
+mysql&gt; commit; &nbsp; &nbsp; &nbsp;&lt;--------------------- commitしてみる<br>
+Query OK, 0 rows affected (0.00 sec)<br>
+<br>
+mysql&gt; select * from test;<br>
++----+------+<br>
+| id | val &nbsp;|<br>
++----+------+<br>
+| &nbsp;1 | &nbsp;200 | &nbsp; &nbsp; &nbsp; &lt;--------------------- 変化あり<br>
++----+------+<br>
+1 row in set (0.00 sec)<br>
+-----------------------------------------------------------------<br>
+<br>
+<br>
+*実験2: ロックありselect文を使ってみる<br>
+-----------------------------------------------------------------<br>
+mysql&gt; select * from test;<br>
++----+------+<br>
+| id | val &nbsp;|<br>
++----+------+<br>
+| &nbsp;1 | &nbsp;200 |<br>
++----+------+<br>
+1 row in set (0.00 sec)<br>
+<br>
+<br>
+&nbsp; &nbsp;(※) ここで別端末から更新<br>
+<br>
+<br>
+mysql&gt; select * from test;<br>
++----+------+<br>
+| id | val &nbsp;|<br>
++----+------+<br>
+| &nbsp;1 | &nbsp;200 | &nbsp; &nbsp; &nbsp; &lt;--------------------- 変化なし<br>
++----+------+<br>
+1 row in set (0.00 sec)<br>
+<br>
+mysql&gt; select * from test for update; &nbsp;&lt;-- ロックありでselectしてみる<br>
++----+------+<br>
+| id | val &nbsp;|<br>
++----+------+<br>
+| &nbsp;1 | &nbsp;300 | &nbsp; &nbsp; &nbsp; &lt;--------------------- 変化あり<br>
++----+------+<br>
+1 row in set (0.00 sec)<br>
+<br>
+mysql&gt; commit;<br>
+Query OK, 0 rows affected (0.00 sec)<br>
+-----------------------------------------------------------------<br>
+<br>
+<br>
+　　ちょっと古いですが、以下のサイトにトランザクション分離レベルごとの<br>
+　MySQLの挙動の説明がありましたのでご覧ください。<br>
+<br>
+<a href="http://www.y2sunlight.com/ground/?MySQL4.1%2F9.MySQL%A4%CE%BC%C2%B8%B3%2F4.%A5%C8%A5%E9%A5%F3%A5%B6%A5%AF%A5%B7%A5%E7%A5%F3" target="_blank">http://www.y2sunlight.com/ground/?MySQL4.1%2F9.MySQL%A4%CE%BC%C2%B8%B3%2F4.%A5%C8%A5%E9%A5%F3%A5%B6%A5%AF%A5%B7%A5%E7%A5%F3</a><br>
+
+<div class="HOEnZb"><div class="h5">--<br>
+&nbsp; &nbsp; __________________________________________________<br>
+&nbsp; _/_/ &nbsp;Tomohiro &quot;Tomo-p&quot; KATO &nbsp;&lt;<a href="mailto:tomop@teamgedoh.net">tomop@teamgedoh.net</a>&gt;<br>
+&nbsp;_/_/ &nbsp;Team Gedoh Network &nbsp;<a href="http://www.teamgedoh.net/" target="_blank">http://www.teamgedoh.net/</a><br>
+_/_/ &nbsp;Key fingerprint = A6D8 3981 3575 9F00 EFC3 &nbsp;9C2B F03A 5383 9287 74D9<br>
+<br>
+</div></div></blockquote></div><br></div>

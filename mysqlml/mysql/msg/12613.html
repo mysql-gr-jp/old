@@ -1,0 +1,176 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12613</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12612.html">[前]</a><a href="12614.html">[次]</a><a href="../list/12601-12700.html">[番号順一覧]</a><a href="../thread/12601-12700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12613
+</p>
+<div class="header">
+<p>
+From: &quot;Shuichi Tamagawa&quot; &lt;&quot;Shuichi Tamagawa&quot; &lt;tamagawa@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 28 Dec 2005 16:59:50 +0900<br>
+Subject: [mysql 12613] Re: MySQL 日本語問題吐き出し緊急オフ会 -まとめ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+玉川です。
+
+ちょっと間が開いてしまいましたが、MySQLに対して行った、以下のリクエストの
+状況について中間報告をするのと同時に、MySQL側からの回答に対する
+皆さんのご意見をお聞きしたいと思います。
+
+（関連スレッド: <a href="12372.html">http://www.mysql.gr.jp/mysqlml/mysql/msg/12372</a>）
+
+<span class="quote1">&gt; a) 文字コードの自動変換に伴う文字化けへの対応（libmysqlclientの機能強化）</span>
+
+libmysqlclientで環境変数を読みこませるということについては、受け入れられていません。
+「4.0と同様の振舞いをする--skip-character-set-handshakeオプションでは
+なぜ不十分なのか」、「あると便利というレベルではなく、どうしても必要な機能なのか」
+という点で説得材料が不足しているという状況です。
+
+Q. 環境変数を読み込ませる必要性は本当にあるのでしょうか？
+
+また、バイナリ版のデフォルトキャラクターセットをlatin1からutf8に変更する
+という点については、「日本人以外のユーザーも影響を受ける」ということから
+受け入れられていません。これについては、utf8でコンパイルされたバイナリを
+既存の物に加えて別途用意し、「International Version」として提供してはどうか
+という案を提示しています。
+
+<span class="quote1">&gt; b) JISコード範囲外の文字の処理</span>
+
+コード範囲外の文字の処理については、「スキップするかもしくは他の文字に
+置き換えて処理を続行する」という案が、コード範囲外の文字がどれだけの
+長さであるかが判別できないという理由で、受け入れられていません。
+
+Q. この問題はそもそも、以前はなかったコード範囲のチェックが4.1以降で
+導入されていることに起因しているため、以下のようなリクエストにするのが
+妥当なところでしょうか？
+
+「4.0の時と同様にコード範囲のチェックを行わないようにする」、もしくは
+「コード範囲外の文字が含まれている場合には、エラー返す」
+
+<span class="quote1">&gt; c) Unicodeコンソーシアムのルールに基づいたsjis/ujisの変換ルール修正</span>
+<span class="quote1">&gt; d) Unicode -&gt; JIS系文字コードへの変換</span>
+
+これら2点については、MySQL内部にて現在協議中とのことです。
+
+<span class="quote1">&gt; e) sjisバイナリーデータのエスケープ処理</span>
+（バグとして報告: <a href="http://bugs.mysql.com/bug.php?id=15678">http://bugs.mysql.com/bug.php?id=15678</a>）
+
+この点につきましては、バイナリーデータを挿入する際にはmysql_escape_string()
+を使用し、0x形式で挿入してはどうかとのことです。
+
+なお、「クライアントのキャラクターセットがsjis/cp932であったとしても、
+BLOB型のカラムにデータを挿入する場合には、エスケープ解除処理を行う」
+という対処方法は「エスケープ解除処理が行われるのがパーサーレベルであり、
+その時点ではデータがどのカラムに挿入されるか分からない」という理由で
+受け入れられていません。
+
+代替案として次の2点が挙げられています。
+
+1. 新しくデータタイプ・イントロデューサーを追加し、データタイプに応じて
+エスケープ解除処理を変える。
+
+INSERT INTO t1 VALUES (C'escaped string');
+INSERT INTO t1 VALUES (Z'escaped blob');
+
+2. キャラクターセット・イントロデューサーに応じて、エスケープ解除処理を
+変えるよう、パーサーを変更する。
+
+INSERT INTO t1 VALUES (_sjis'escaped string');
+INSERT INTO t1 VALUES (_binary'escaped blob');
+
+Q. mysql_escape_string()を使用する方法と上記の代替案ではどれが
+最も望ましいでしょうか？
+
+<span class="quote1">&gt; その他の点については「このような声もある」という形で報告致します。</span>
+
+その他については、以下の2点のみ、現時点で受け入れられています。
+
+<span class="quote1">&gt; * キャラクタセット名のエイリアスを使えるようにして欲しい</span>
+<span class="quote1">&gt; * 自動変換を停止するセッション変数を追加して欲しい</span>
+
+Q. 自動変換を停止する組み合わせはsjis&lt;-&gt;cp932,  ujis&lt;-&gt;eucjpms以外に
+sjis&lt;-&gt;ujis, cp932&lt;-&gt;eucjpmsについても必要でしょうか？
+
+Q.の部分については、皆さんのご意見を頂ければと思います。
+
+以上、中間報告でした。　
+
+--
+Shuichi Tamagawa
+tamagawa@xxxxxxxxxx
+
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="12612.html">[前]</a><a href="12614.html">[次]</a><a href="../list/12601-12700.html">[番号順一覧]</a><a href="../thread/12601-12700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12372.html">  12372 2005-11-07 18:16 [&quot;Shuichi Tamagawa&quot; &lt;] MySQL 日本語問題吐き出し緊急オフ会 -  まとめ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12373.html">  12373 2005-11-07 20:17 ┣[Yasufumi Kinoshita &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12374.html">  12374 2005-11-07 21:21 ┃┗[&quot;Shuichi Tamagawa&quot; &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12391.html">  12391 2005-11-08 15:59 ┃　┗[Yasufumi Kinoshita &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12400.html">  12400 2005-11-08 20:50 ┃　　┗[&quot;Shuichi Tamagawa&quot; &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12402.html">  12402 2005-11-08 21:14 ┃　　　┗[Hirofumi Fujiwara &lt;f]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12412.html">  12412 2005-11-09 10:21 ┃　　　　┣[Hiro Yoshioka &lt;hyosh]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12413.html">  12413 2005-11-09 10:28 ┃　　　　┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12414.html">  12414 2005-11-09 10:38 ┃　　　　┃　┗[Hiro Yoshioka &lt;hyosh]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12415.html">  12415 2005-11-09 11:56 ┃　　　　┃　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12416.html">  12416 2005-11-09 18:43 ┃　　　　┃　　　┗[Hiro Yoshioka &lt;hyosh]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12428.html">  12428 2005-11-10 14:12 ┃　　　　┃　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12520.html">  12520 2005-11-30 10:49 ┃　　　　┣[Tetsuro IKEDA &lt;tetsu]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12525.html">  12525 2005-12-01 13:26 ┃　　　　┃┗[Hirofumi Fujiwara &lt;f]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12598.html">  12598 2005-12-21 08:20 ┃　　　　┗[Tetsuro IKEDA &lt;tetsu] メタデータに2バイト目が`(60)の漢字を使用する場合の不具合の件</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12599.html">  12599 2005-12-21 12:43 ┃　　　　　┗[Hirofumi Fujiwara &lt;f]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12377.html">  12377 2005-11-07 23:55 ┣[Tadashi Jokagi &lt;ml@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12399.html">  12399 2005-11-08 20:43 ┃┗[&quot;Shuichi Tamagawa&quot; &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12378.html">  12378 2005-11-08 00:11 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12380.html">  12380 2005-11-08 09:27 ┃┣[&quot;Shuichi Tamagawa&quot; &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12381.html">  12381 2005-11-08 09:36 ┃┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12403.html">  12403 2005-11-08 21:22 ┃┃　┗[とみたまさひろ &lt;tomm]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12405.html">  12405 2005-11-08 21:42 ┃┃　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12397.html">  12397 2005-11-08 20:29 ┃┗[&quot;Shuichi Tamagawa&quot; &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12401.html">  12401 2005-11-08 21:11 ┃　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12404.html">  12404 2005-11-08 21:27 ┃　　┣[Hirofumi Fujiwara &lt;f]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12406.html">  12406 2005-11-08 21:52 ┃　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12417.html">  12417 2005-11-09 19:46 ┃　　┃┣[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12418.html">  12418 2005-11-09 20:15 ┃　　┃┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12419.html">  12419 2005-11-10 11:13 ┃　　┃┃　┗[Yasufumi Kinoshita &lt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12425.html">  12425 2005-11-10 13:21 ┃　　┃┃　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12429.html">  12429 2005-11-10 14:47 ┃　　┃┃　　┗[MORIYAMA Masayuki &lt;m]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12432.html">  12432 2005-11-10 20:15 ┃　　┃┃　　　┗[Yasufumi Kinoshita &lt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12433.html">  12433 2005-11-11 00:37 ┃　　┃┃　　　　┗[MORIYAMA Masayuki &lt;m]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12435.html">  12435 2005-11-11 19:54 ┃　　┃┃　　　　　┗[Yasufumi Kinoshita &lt;] Re: MySQL 日本語問題吐き出し緊急オフ会 -まとめ　【c案整理】</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12440.html">  12440 2005-11-12 11:48 ┃　　┃┃　　　　　　┣[MORIYAMA Masayuki &lt;m]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12441.html">  12441 2005-11-12 12:52 ┃　　┃┃　　　　　　┃┗[MORIYAMA Masayuki &lt;m]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12442.html">  12442 2005-11-13 14:06 ┃　　┃┃　　　　　　┣[MORIYAMA Masayuki &lt;m]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12452.html">  12452 2005-11-14 11:20 ┃　　┃┃　　　　　　┃┗[MORIYAMA Masayuki &lt;m]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12453.html">  12453 2005-11-14 12:51 ┃　　┃┃　　　　　　┃　┣[&quot;Shuichi Tamagawa&quot; &lt;]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12462.html">  12462 2005-11-16 11:18 ┃　　┃┃　　　　　　┃　┃┗[MORIYAMA Masayuki &lt;m]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12464.html">  12464 2005-11-16 15:05 ┃　　┃┃　　　　　　┃　┃　┗[&quot;Shuichi Tamagawa&quot; &lt;]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12454.html">  12454 2005-11-14 15:27 ┃　　┃┃　　　　　　┃　┗[Yasufumi Kinoshita &lt;] Re: MySQL 日本語問題吐き出し緊急オフ会 -まとめ　【c案整理】皆様のご意見をお願いします。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12461.html">  12461 2005-11-16 03:10 ┃　　┃┃　　　　　　┃　　┣[MORIYAMA Masayuki &lt;m]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12463.html">  12463 2005-11-16 15:00 ┃　　┃┃　　　　　　┃　　┗[&quot;Shuichi Tamagawa&quot; &lt;]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12466.html">  12466 2005-11-17 11:34 ┃　　┃┃　　　　　　┃　　　┗[Yasufumi Kinoshita &lt;]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12468.html">  12468 2005-11-17 15:46 ┃　　┃┃　　　　　　┃　　　　┗[&quot;Shuichi Tamagawa&quot; &lt;]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12470.html">  12470 2005-11-17 16:36 ┃　　┃┃　　　　　　┃　　　　　┗[Yasufumi Kinoshita &lt;]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12473.html">  12473 2005-11-17 17:48 ┃　　┃┃　　　　　　┃　　　　　　┗[&quot;Shuichi Tamagawa&quot; &lt;]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12448.html">  12448 2005-11-14 09:14 ┃　　┃┃　　　　　　┗[&quot;Shuichi Tamagawa&quot; &lt;]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12426.html">  12426 2005-11-10 13:57 ┃　　┃┗[&quot;Shuichi Tamagawa&quot; &lt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12427.html">  12427 2005-11-10 14:02 ┃　　┃　┗[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12411.html">  12411 2005-11-09 09:15 ┃　　┗[&quot;Shuichi Tamagawa&quot; &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12475.html">  12475 2005-11-18 09:48 ┗[&quot;Shuichi Tamagawa&quot; &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12476.html">  12476 2005-11-18 09:54 　┣[&quot;Ryuichiro Munechika]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="12613.html">  12613 2005-12-28 16:59 　┗[&quot;Shuichi Tamagawa&quot; &lt;]                                     </a></span>
+</pre>
+</body>
+</html>

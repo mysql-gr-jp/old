@@ -1,0 +1,74 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15099</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15098.html">[前]</a><a href="15100.html">[次]</a><a href="../list/15001-15100.html">[番号順一覧]</a><a href="../thread/15001-15100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15099
+</p>
+<div class="header">
+<p>
+From: Mikiya Okuno &lt;Mikiya Okuno &lt;Mikiya.Okuno@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 11 Dec 2009 22:17:43 +0900<br>
+Subject: [mysql 15099] Re: [MySQLクラスタ] SQLノードに当てるメモリ量<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+奥野です。
+
+宝田さん、初めましてこんばんは。
+
+takarada623@xxxxxxxxxx wrote, On 11/12/09 9:19 PM:
+<span class="quote1">&gt; ■下記考察は正しいでしょうか、また、SQLノードのメモリ量算出に関して教えて </span>
+<span class="quote1">&gt; 頂きたく思います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; データノードは、メモリに関してはレコード数・容量に依存、</span>
+<span class="quote1">&gt; ディスクはREDOログの読み書きが発生するため高速なものを考えています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; SQLノードですが、データノードへのクエリの中継及び</span>
+<span class="quote1">&gt; 結果のマージのコストが高くつくと考えられるため、CPUマターと思っています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ただ、MYSQLはメモリを増やすのが一般的です。</span>
+<span class="quote1">&gt; MYSQLクラスタの場合、SQLノードのメモリ量は、どの程度必要でしょうか？</span>
+<span class="quote1">&gt; またSQLノードのチューニングに関して情報が少なく、教えて頂ければ幸いです。</span>
+
+MySQL Clusterの場合、SQLノードにはそれほど大量のメモリは必要ないです。
+なぜなら、InnoDBバッファプールのようなバッファがないからです。
+（データは全てデータノードですし。）
+
+なので、それほど接続数が多くなければmysqld用に1GBもあれば十分過ぎだったりします。
+デフォルトの設定なら、「最大接続数 * 2.5MB + α」程度で良いでしょう。
+
+セッション用のメモリとしては、デフォルトではsort_buffer_size=2Mが一番食います。
+ただし全てのセッションがソートするわけではないので、実際に利用されるのは
+もっと少ないかも知れません。各セッションどの程度メモリを消費するかは
+アプリケーションの負荷のタイプによりますので、負荷テストされることを
+おすすめします。
+
+また、SQLノードはひとつのホストで単一のmysqldを利用して動かすよりも、
+複数のmysqldを（ポートやデータディレクトリを変えて）走らせたほうが
+内部でロック競合が起こりにくい分性能が出るので、もし手間でなければ
+そのように設定するのもアリだと思います。
+
+-- 
+奥野 幹也
+<a href="http://www.google.com/profiles/mikiya.okuno">http://www.google.com/profiles/mikiya.okuno</a>
+<a href="http://nippondanji.blogspot.com/">http://nippondanji.blogspot.com/</a>
+<a href="http://twitter.com/nippondanji">http://twitter.com/nippondanji</a>
+
+</pre>
+</div>
+<p class="button"><a href="15098.html">[前]</a><a href="15100.html">[次]</a><a href="../list/15001-15100.html">[番号順一覧]</a><a href="../thread/15001-15100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15098.html">@ 15098 2009-12-11 21:19 [&lt;takarada623@xxxxxxx] [MySQLクラスタ] SQLノードに当てるメモリ量</a></span>
+<span class="current">-&gt;&nbsp;<a href="15099.html">  15099 2009-12-11 22:17 ┗[Mikiya Okuno &lt;Mikiya]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15100.html">@ 15100 2009-12-11 23:00 　┗[&lt;takarada623@xxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15101.html">  15101 2009-12-12 00:03 　　┗[Mikiya Okuno &lt;Mikiya]                                   </a></span>
+</pre>
+</body>
+</html>

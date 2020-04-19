@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8949</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8948.html">[前]</a><a href="8950.html">[次]</a><a href="../list/8901-9000.html">[番号順一覧]</a><a href="../thread/8901-9000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8949
+</p>
+<div class="header">
+<p>
+From: Hiroaki Sengoku &lt;Hiroaki Sengoku &lt;sengoku@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 11 Mar 2004 12:08:58 +0900<br>
+Subject: [mysql 08949] sjis &amp; BLOB<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+仙石と申します。既知の問題とは思いますが、あまり知られていない問題である
+ような気もしますので、まとめとして報告します。
+
+    default-character-set=sjis としていると、
+    BLOB 型のデータを挿入/更新する時、
+    0x81 〜 0x9F ないし 0xE0 〜 0xFC の次に
+    エスケープ文字が来ても無視される
+
+という問題が、MySQL サーバにあります。4.0.16, 4.0.18, 4.1.1 で確認しました。
+sjis だけでなく、症状から言って他のマルチバイト言語に共通する問題でしょう。
+
+次の perl スクリプトで簡単に検証できます:
+
+------------------------------------------------------------------------
+#!/usr/bin/perl
+for ($i=112; $i &lt; 256; $i++) {
+    $sql .= sprintf(&quot;%c\\0&quot;, $i);
+}
+$sql = &quot;INSERT INTO blobtest(data) VALUES ('$sql')&quot;;
+
+use DBI;
+$db_url = &quot;dbi:mysql:test:localhost&quot;;
+$db_user = 'test';
+$db_password = 'xxxxxxxx';
+$dbh = DBI-&gt;connect($db_url, $db_user, $db_password,
+		    { PrintError =&gt; 1, RaiseError =&gt; 0 });
+if (!defined($dbh)) {
+    print &quot;[NG] connect:\t&quot; . $DBI::errstr;
+    exit 1;
+}
+$sth = $dbh-&gt;prepare($sql);
+if(!($rv = $sth-&gt;execute())){
+    print &quot;[NG] execute:\t$rv:$dbh-&gt;err:$dbh-&gt;strrstr:$dbh-&gt;state\n&quot;;
+    exit(1);
+}
+------------------------------------------------------------------------
+
+このスクリプトを走らせると、
+
+    ○\0○\0○\0○\0○\0...  ( ○ は 0x70 〜 0xFF )
+
+といった感じのデータを blobtest テーブルに挿入するわけですが、
+○が、0x81 〜 0x9F ないし 0xE0 〜 0xFC の範囲にある文字の時だけ、
+その次の「\」が通常の文字と解釈されてしまい、
+「\0」の部分が 0 という NULL 文字ではなく「\0」という文字列として
+挿入されてしまいます。
+
+症状から言って原因は明らかで、BLOB 型なのにリテラルを SJIS 文字列として
+解釈してしまっているからでしょう。実際 4.0.x のソースコードでは、リテラ
+ルを default-character-set な文字列であると決めうちしてしまっています。
+
+4.1.x では、カラムごとに character-set を切り替えられるようですが、
+default-character-set=sjis していると、SJIS として解釈されてしまうようで
+す。_binary'○\0○\0○\0○\0○\0...' とすればいけそうな気がしたのですが、
+4.1.x の機能を私がまだあまり理解できていないためか、今のところうまくいっ
+てません。
+
+BLOB って (どちらかと言えば) 敬遠されているような気配も感じますが ;-)、
+Java の場合は、NULL 文字等のエスケープを JDBC がやってくれるので、
+
+    byte[] data;
+        ...
+    pstmt = con.prepareStatement(&quot;INSERT INTO blobtest(data) VALUES (?)&quot;);
+        ...
+    pstmt.setBytes(1, data);
+    pstmt.execute();
+
+などとそのまま setBytes できて簡単だし、(多少?) 遅いという欠点も BLOB 型
+カラムを検索キーにするわけじゃないので、更新頻度が高くなければ充分使える
+ものだと思っています。
+
+ただ、上記のように default-character-set=sjis している場合は一筋縄にはい
+かないので、どうするのが一番スマートなのかと、悩んでいる今日このごろです。
+
+
+#8793.								仙石 浩明
+<a href="http://www.gcd.org/sengoku/">http://www.gcd.org/sengoku/</a>		Hiroaki Sengoku &lt;sengoku@xxxxxxxxxx&gt;
+
+</pre>
+</div>
+<p class="button"><a href="8948.html">[前]</a><a href="8950.html">[次]</a><a href="../list/8901-9000.html">[番号順一覧]</a><a href="../thread/8901-9000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="8949.html">   8949 2004-03-11 12:08 [Hiroaki Sengoku &lt;sen] sjis &amp;amp; BLOB                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8951.html">   8951 2004-03-11 16:22 ┗[&lt;gcd00051@xxxxxxxxxx]                                       </a></span>
+</pre>
+</body>
+</html>

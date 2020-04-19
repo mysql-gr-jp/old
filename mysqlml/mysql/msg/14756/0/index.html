@@ -1,0 +1,168 @@
+お世話になっております。<br>返事が遅くなって申し訳ありません。<br>my.cnfを確認したところ、設定内容がまちがって<br>いました。<br>[mysqld]セクションにndbclusterが抜けていました。<br>お騒がせして申し訳ありませんでした。<br>以上、よろしくお願いします。<br><br><br><div class="gmail_quote">2009/02/24 14:48 Mikiya Okuno <span dir="ltr">&lt;<a href="mailto:Mikiya.Okuno@sun.com">Mikiya.Okuno@sun.com</a>&gt;</span>:<br>
+<blockquote class="gmail_quote" style="border-left: 1px solid rgb(204, 204, 204); margin: 0pt 0pt 0pt 0.8ex; padding-left: 1ex;">SQLノード側の問題のようですね。NDB Binlog Threadが開始されていませんが<br>
+しかしエラーメッセージにも何もエラーが記録されていませんね。<br>
+<br>
+以下の出力はどんな感じですか？<br>
+<br>
+mysql&gt; SHOW VARIABLES;<br>
+mysql&gt; SHOW ENGINE NDB STATUS\G<br>
+mysql&gt; SHOW TABLES FROM mysql;<br>
+<div class="im"><br>
+--<br>
+Mikiya Okuno, MySQL Support Engineer<br>
+Sun Microsystems KK, Tokyo, Japan<br>
+<a href="http://www-jp.mysql.com/" target="_blank">http://www-jp.mysql.com/</a><br>
+<br>
+</div><div><div></div><div class="h5">On 23/02/2009, at 1:40 PM, Hiroyuki Ogawa wrote:<br>
+<br>
+&gt; お世話になっております。<br>
+&gt; SHOWの結果を忘れていましたのでメールを送ります。<br>
+&gt; 申し訳ありません。<br>
+&gt; [ndbd(NDB)] 2 node(s)<br>
+&gt; id=2  @<a href="http://192.168.116.129" target="_blank">192.168.116.129</a> (mysql-5.1.30 ndb-6.30.20, Nodegroup:0,Master)<br>
+&gt; id=3  @<a href="http://192.168.116.131" target="_blank">192.168.116.131</a> (mysql-5.1.30 ndb-6.30.20, Nodegroup:0)<br>
+&gt;<br>
+&gt; [ndb_mgmd(MGM)] 1 node(s)<br>
+&gt; id=1  @<a href="http://192.168.116.128" target="_blank">192.168.116.128</a> (mysql-5.1.30 ndb-6.30.20)<br>
+&gt;<br>
+&gt; [mysqld(API) 4node(s)<br>
+&gt; id=4 (not connected,accepting connect from 192.168.116.132)<br>
+&gt; id=5 (not connected,accepting connect from 192.168.116.133)<br>
+&gt; id=6 (not connected,accepting connect from any host)<br>
+&gt; id=7 (not connected,accepting connect from any host)<br>
+&gt; ---------- 転送メッセージ ----------<br>
+&gt; From: Hiroyuki Ogawa &lt;<a href="mailto:eng16danbo@gmail.com">eng16danbo@gmail.com</a>&gt;<br>
+&gt; 日付: 2009/02/23 12:45<br>
+&gt; 件名: Re: [mysql 14736] Re: Fwd: Re: Fwd: Re: [mysql cluster]sqlノードの構築<br>
+&gt; To: <a href="mailto:ml@mysql.gr.jp">ml@mysql.gr.jp</a><br>
+&gt;<br>
+&gt;<br>
+&gt; お世話になっています。<br>
+&gt; 各種ファイルの設定は以下の通りとなっています。<br>
+&gt; ■config.iniの内容について<br>
+&gt; [ndbd default]<br>
+&gt; NoOfReplicas= 2<br>
+&gt; MaxNoOfConcurrentOperations= 10000<br>
+&gt; DataMemory= 80M<br>
+&gt; IndexMemory= 24M<br>
+&gt; TimeBetweenWatchDogCheck= 30000<br>
+&gt; DataDir= /var/lib/mysql-cluster<br>
+&gt; MaxNoOfOrderedIndexes= 512<br>
+&gt;<br>
+&gt; [ndb_mgmd default]<br>
+&gt; DataDir= /var/lib/mysql-cluster<br>
+&gt;<br>
+&gt; [ndb_mgmd]<br>
+&gt; Id=1<br>
+&gt; HostName= 192.168.116.128<br>
+&gt;<br>
+&gt; [ndbd]<br>
+&gt; Id= 2<br>
+&gt; HostName= 192.168.116.129<br>
+&gt;<br>
+&gt; [ndbd]<br>
+&gt; Id= 3<br>
+&gt; HostName= 192.168.116.131<br>
+&gt;<br>
+&gt; [mysqld]<br>
+&gt; Id= 4<br>
+&gt; HostName= 192.168.116.132<br>
+&gt;<br>
+&gt; [mysqld]<br>
+&gt; Id= 5<br>
+&gt; HostName= 192.168.116.133<br>
+&gt;<br>
+&gt; [mysqld]<br>
+&gt; Id= 6<br>
+&gt;<br>
+&gt; [mysqld]<br>
+&gt; Id= 7<br>
+&gt;<br>
+&gt; ■sqlノードのmy.cnfの設定について<br>
+&gt; /usr/share/doc/my-large.cnfを/etc/my.cnfにコピー<br>
+&gt; my.cnfの[mysqld]に以下を追加<br>
+&gt; ndbcluster<br>
+&gt; ndb-connectstring = 192.168.116.128<br>
+&gt;<br>
+&gt; ■エラーログについて<br>
+&gt; （ホスト名).errは以下の通りとなっています。<br>
+&gt; 090223 12:03:06 [Note] /usr/sbin/mysqld: Normal shutdown<br>
+&gt;<br>
+&gt; 090223 12:03:06 [Note] Event Scheduler: Purging the queue. 0 events<br>
+&gt; 090223 12:03:06 InnoDB: Starting shutdown...<br>
+&gt; 090223 12:03:07 InnoDB: Shutdown completed; log sequence number 0 46409<br>
+&gt; 090223 12:03:07 [Note] /usr/sbin/mysqld: Shutdown complete<br>
+&gt;<br>
+&gt; 090223 12:03:07 mysqld_safe mysqld from pid file /var/lib/mysql/als803.pid ended<br>
+&gt; 090223 12:03:39 mysqld_safe Starting mysqld daemon with databases from /var/lib/mysql<br>
+&gt; 090223 12:03:39 InnoDB: Started; log sequence number 0 46409<br>
+&gt; 090223 12:03:39 [Note] Event Scheduler: Loaded 0 events<br>
+&gt; 090223 12:03:39 [Note] /usr/sbin/mysqld: ready for connections.<br>
+&gt; Version: &#39;5.1.30-ndb-6.3.20-cluster-gpl&#39; socket: &#39;/var/lib/mysql/mysql.sock&#39; port: 3306 MySQL Cluster Server (GPL)<br>
+&gt;<br>
+&gt; 以上、回答が遅くなってしまい、申し訳ありませんがよろしくお願いいたします。<br>
+&gt; 2009/02/23 10:27 Mikiya Okuno &lt;<a href="mailto:Mikiya.Okuno@sun.com">Mikiya.Okuno@sun.com</a>&gt;:<br>
+&gt;<br>
+&gt; おはようございます。<br>
+&gt;<br>
+&gt; config.ini<br>
+&gt; my.cnf<br>
+&gt; SHOWの出力<br>
+&gt; エラーログ<br>
+&gt;<br>
+&gt; あたりはどうなっていますか？<br>
+&gt; --<br>
+&gt; Mikiya Okuno, MySQL Support Engineer<br>
+&gt; Sun Microsystems KK, Tokyo, Japan<br>
+&gt; <a href="http://www-jp.mysql.com/" target="_blank">http://www-jp.mysql.com/</a><br>
+&gt;<br>
+&gt; On 20/02/2009, at 7:50 PM, Hiroyuki Ogawa wrote:<br>
+&gt;<br>
+&gt; &gt; 管理ノードとデータノード、およびSQLノードは以下のサイトを参考しました。<br>
+&gt; &gt; <a href="http://blog.technology-knowledge.jp/2008/04/16/120/" target="_blank">http://blog.technology-knowledge.jp/2008/04/16/120/</a><br>
+&gt; &gt; <a href="http://blog.technology-knowledge.jp/2008/04/16/122/" target="_blank">http://blog.technology-knowledge.jp/2008/04/16/122/</a><br>
+&gt; &gt; <a href="http://blog.technology-knowledge.jp/2008/04/16/124/" target="_blank">http://blog.technology-knowledge.jp/2008/04/16/124/</a><br>
+&gt; &gt;<br>
+&gt; &gt; ndb_mgm&gt;showを実行したとき、ステータスを確認すると<br>
+&gt; &gt; 管理ノードとデータノードの設定はあっているように思えます。<br>
+&gt; &gt;<br>
+&gt; &gt; 奮闘していますがSQLノードの設定手順がわかりません。<br>
+&gt; &gt; 紹介していただいたサイトを参考にしても状況は変わりません。<br>
+&gt; &gt; どなたか、設定手順についてご教授願います。<br>
+&gt; &gt; ---------- 転送メッセージ ----------<br>
+&gt; &gt; From: Mikiya Okuno &lt;<a href="mailto:Mikiya.Okuno@sun.com">Mikiya.Okuno@sun.com</a>&gt;<br>
+&gt; &gt; 日付: 2009/02/20 18:56<br>
+&gt; &gt; 件名: [mysql 14734] Re: Fwd: Re: [mysql cluster]sqlノードの構築<br>
+&gt; &gt; To: <a href="mailto:ml@mysql.gr.jp">ml@mysql.gr.jp</a><br>
+&gt; &gt;<br>
+&gt; &gt;<br>
+&gt; &gt; こんばんは。<br>
+&gt; &gt;<br>
+&gt; &gt; その手順だと、管理ノードやデータノードの設定がまだなのではないでしょうか。<br>
+&gt; &gt; 設定の手順を以前ThinkITに投稿したのでこの辺を読んで設定してみてください。<br>
+&gt; &gt; <a href="http://www.thinkit.co.jp/article/95/" target="_blank">http://www.thinkit.co.jp/article/95/</a><br>
+&gt; &gt;<br>
+&gt; &gt; &gt; これらはMySQL Serverのパッケージとパフォーマンスは<br>
+&gt; &gt; &gt; 同じなのでしょうか。<br>
+&gt; &gt;<br>
+&gt; &gt; MySQL Clusterが入っている以外は同じです。<br>
+&gt; &gt;<br>
+&gt; &gt; では良い週末を！<br>
+&gt; &gt; --<br>
+&gt; &gt; 奥野 幹也<br>
+&gt; &gt; MySQLサポートエンジニア<br>
+&gt; &gt; サン・マイクロシステムズ株式会社<br>
+&gt; &gt; <a href="http://www-jp.mysql.com/" target="_blank">http://www-jp.mysql.com/</a><br>
+&gt; &gt;<br>
+&gt; &gt; MySQLブログ集約サイト「Planet MySQL」日本語版オープン！<br>
+&gt; &gt; <a href="http://jp.planetmysql.org/" target="_blank">http://jp.planetmysql.org/</a><br>
+&gt; &gt;<br>
+&gt; &gt;<br>
+&gt; &gt;<br>
+&gt;<br>
+&gt;<br>
+&gt;<br>
+&gt;<br>
+<br>
+<br>
+</div></div></blockquote></div><br>

@@ -1,0 +1,170 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9229</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9228.html">[前]</a><a href="9230.html">[次]</a><a href="../list/9201-9300.html">[番号順一覧]</a><a href="../thread/9201-9300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9229
+</p>
+<div class="header">
+<p>
+From: &quot;Matsunobu, Yoshinori&quot; &lt;&quot;Matsunobu, Yoshinori&quot; &lt;Yoshinori.Matsunobu@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 17 Apr 2004 00:43:55 +0900<br>
+Subject: [mysql 09229] Re: 半角カタカナのコード変換<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+松信と申します。
+初投稿です。今後ともよろしくお願い申し上げます。
+
+<span class="quote1">&gt;   「実践MySQL4」にもあった、サーバ・クライアント間の文字コードの自動変</span>
+<span class="quote1">&gt;   換、さらには CONVERT(expr USING transcoding_name) を使った文字コード</span>
+<span class="quote1">&gt;   変換ですが、半角カタカナの場合には動かないようなのです。</span>
+<span class="quote1">&gt;   動くのは、ujis --&gt; utf8 の変換だけみたいです。</span>
+
+バージョン4.1以降の文字コード変換の機能についてですが、
+シフトJIS(sjis)と日本語EUC(ujis)の半角カナが変換時に文字化けするという症状は、
+1ヶ月ほど前に、私の環境でも再現しました(RedHat9+MySQL5.0.0alpha)。
+
+ソースコードを調べたところバグと思われたので、その部分を修正して再コンパイルしたところ正しく動作しました。
+修正部分も含めてMySQL AB社に報告したところ、バグであると認めてもらえ、
+少なくともsjisに関しては修正が終わり、4.1.2から反映されるようです。
+<a href="http://bugs.mysql.com/bug.php?id=3290">http://bugs.mysql.com/bug.php?id=3290</a>
+
+まだ4.1.2は出ていないようですので、私が動作確認した修正箇所(5.0.0alphaですが、
+4.1.1でもおそらく同じではないでしょうか？確認していませんが…)を以下に示しますので、
+もし必要があればお試しください。
+
+---
+半角カナが文字化けする原因は、
+
+●sjisからの変換、sjisへの変換については、sjisは半角カナを1バイトとして扱うのに
+MySQLではなぜかともに2バイトとして扱っている
+●ujisへの変換については、ujisは半角カナを2バイトとして扱うのに
+MySQLではなぜか1バイトとして扱っている(ujisからの変換については
+MySQLが2バイトとして扱っているので問題ない)
+
+というところにあります。その部分を直したところ正しく動作しました。
+
+sjis
+1.ctype-sjis.c
+1-1.my_mb_wc_sjis関数
+
+前:
+....
+  if (hi&lt;0x80)
+  {
+    pwc[0]=hi;
+    return 1;
+  }
+  if (s+2&gt;e)
+    return MY_CS_TOOFEW(0);
+....
+
+後:
+....
+  if (hi&lt;0x80)
+  {
+    pwc[0]=hi;
+    return 1;
+  }
+  
+  if((hi&gt;=0xA1)&amp;&amp;(hi&lt;=0xDF))
+  {
+      pwc[0]=func_sjis_uni_onechar(hi);
+      return 1;
+  }
+
+  if (s+2&gt;e)
+    return MY_CS_TOOFEW(0);
+....
+
+
+1-2.my_mb_wb_sjis関数
+
+前:
+....
+  if (!(code=func_uni_sjis_onechar(wc)))
+    return MY_CS_ILUNI;
+  if (s+2&gt;e)
+    return MY_CS_TOOSMALL;
+  
+  s[0]=code&gt;&gt;8;
+  s[1]=code&amp;0xFF;
+  return 2;
+....
+
+後:
+....
+  if (!(code=func_uni_sjis_onechar(wc)))
+    return MY_CS_ILUNI;
+
+  
+  if((code&gt;=0xA1)&amp;&amp;(code&lt;=0xDF))
+  {
+      s[0]=code;
+      return 1;
+  }
+
+  if (s+2&gt;e)
+    return MY_CS_TOOSMALL;
+  
+  s[0]=code&gt;&gt;8;
+  s[1]=code&amp;0xFF;
+  return 2;
+....
+
+
+ujis
+2.ctype-ujis.c  
+my_wc_mb_euc_jp関数
+
+前:
+....
+  ret=my_wc_mb_jisx0201(c,wc,buf,buf+2);
+  if (ret==1)
+  {
+    if (s+1&gt;e)
+      return MY_CS_TOOSMALL;
+      
+    s[0]=0x8E;
+    s[1]=buf[0];
+    return 1;
+  }
+....
+
+後:
+....
+  ret=my_wc_mb_jisx0201(c,wc,buf,buf+2);
+  if (ret==1)
+  {
+    if (s+1&gt;e)
+      return MY_CS_TOOSMALL;
+      
+    s[0]=0x8E;
+    s[1]=buf[0];
+    return 2;     
+  }
+....
+
+
+以上です。
+
+--
+松信 嘉範 / Matsunobu Yoshinori
+E-mail: Yoshinori.Matsunobu@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="9228.html">[前]</a><a href="9230.html">[次]</a><a href="../list/9201-9300.html">[番号順一覧]</a><a href="../thread/9201-9300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="9229.html">   9229 2004-04-17 00:43 [&quot;Matsunobu, Yoshinor] Re: 半角カタカナのコード変換            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9231.html">   9231 2004-04-19 21:23 ┗[Hirofumi Fujiwara &lt;f]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13246</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13245.html">[前]</a><a href="13247.html">[次]</a><a href="../list/13201-13300.html">[番号順一覧]</a><a href="../thread/13201-13300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13246
+</p>
+<div class="header">
+<p>
+From: &lt;ska_king2005@xxxxxxxxxx&gt;<br>
+Date: Tue, 15 Aug 2006 16:31:18 +0900 (JST)<br>
+Subject: [mysql 13246] Re: FEDERATED ストレージ・エンジンでの日本語取り扱い<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+またまたska kingです。
+自分の読解力の無さに辟易します。。。
+
+<span class="quote1">&gt;TOいけださん</span>
+なるほど。ご丁寧な説明ありがとうございます。
+わかってなかったのは私だけでしょうが、今回の説明といまま
+でのログを見返してようやくわかりました（笑）
+
+mysql_reconnect() -&gt; mysql_real_connect()
+                  -&gt; mysql_set_character_set() -&gt; SET NAME
+の発行
+
+問題のSET NAMESを発行しているのは、
+libmysql/client.cのsprintfからmysql_real_query()のif文あ
+たり（3000-3001行目）でしょうか。。。
+
+バグレポートの結果が楽しみです（^^A
+
+--- Tetsuro IKEDA &lt;te.ikeda@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; こんにちは。いけだです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; saka kingさんが仰っているところの、</span>
+<span class="quote1">&gt; skip-character-set-client-handshakeを指定することで</span>
+<span class="quote1">&gt; クライアント側の文字コード、すなわち</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ・character_set_client</span>
+<span class="quote1">&gt; ・character_set_connection</span>
+<span class="quote1">&gt; ・character_set_result</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; といったものが、character_set_serverの値によって</span>
+<span class="quote1">&gt; 自動的に設定されるというのは合っていると思います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; しかしこの機能には盲点がありまして、</span>
+<span class="quote1">&gt; 明示的に&quot;SET NAMES xxx&quot;を発行すると上記変数を</span>
+<span class="quote1">&gt; 上書きできるというのがあります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 従って、character_set_server=utf8となっていて、</span>
+<span class="quote1">&gt; skip-character-set-client-handshakeが指定されていても</span>
+、
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; SET NAMES latin1;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; というのが発行されると、character_set_result=latin1と</span>
+なるため、
+<span class="quote1">&gt; MySQL</span>
+<span class="quote1">&gt; 4.1から実装された文字コード自動変換機能がここで使用さ</span>
+れる
+<span class="quote1">&gt; ようになり、「utf8→latin1」への変換過程で文字化けが発</span>
+生する、
+<span class="quote1">&gt; ということです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; で、この&quot;SET NAMES</span>
+<span class="quote1">&gt; latin1&quot;というのが、Federatedのローカルmysqldと</span>
+<span class="quote1">&gt; リモートmysqldの接続が切れた場合（かつローカルmysqldが</span>
+それに気づいて
+<span class="quote1">&gt; いない場合）に、発行されるということが、今回のポイント</span>
+ではないかと
+<span class="quote1">&gt; 思います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;</span>
+ここでコンパイル時に--with-charset=utf8としておくと、&quot;SET
+<span class="quote1">&gt; NAMES utf8&quot;</span>
+<span class="quote1">&gt; が発行されるので問題ないのですが、MySQL</span>
+<span class="quote1">&gt; AB配布バイナリを使用すると</span>
+<span class="quote1">&gt; latin1でコンパイルされているために、こういうことが起き</span>
+ることになります。
+
+
+
+--------------------------------------
+Let's start Yahoo! Auction  -  Free Campaign Now!
+<a href="http://pr.mail.yahoo.co.jp/auction/">http://pr.mail.yahoo.co.jp/auction/</a>
+
+</pre>
+</div>
+<p class="button"><a href="13245.html">[前]</a><a href="13247.html">[次]</a><a href="../list/13201-13300.html">[番号順一覧]</a><a href="../thread/13201-13300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13235.html">  13235 2006-08-10 22:41 [tateyan &lt;tateyan@xxx] FEDERATEDストレージ・エンジンでの日本語取り扱い</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13236.html">  13236 2006-08-10 22:57 ┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13237.html">  13237 2006-08-10 23:22 　┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13238.html">  13238 2006-08-11 01:12 　　┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13239.html">  13239 2006-08-11 22:39 　　　┗[Tetsuro IKEDA &lt;te.ik]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13240.html">  13240 2006-08-11 22:57 　　　　┗[tateyan &lt;tateyan@xxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13242.html">@ 13242 2006-08-14 17:39 　　　　　┗[&lt;ska_king2005@xxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13243.html">  13243 2006-08-14 18:04 　　　　　　┗[&quot;Tetsuro IKEDA&quot; &lt;ikd]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13244.html">  13244 2006-08-15 10:06 　　　　　　　┗[&lt;ska_king2005@xxxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13245.html">  13245 2006-08-15 12:25 　　　　　　　　┗[Tetsuro IKEDA &lt;te.ik]                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="13246.html">  13246 2006-08-15 16:31 　　　　　　　　　┗[&lt;ska_king2005@xxxxxx]                     </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12767</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12766.html">[前]</a><a href="12768.html">[次]</a><a href="../list/12701-12800.html">[番号順一覧]</a><a href="../thread/12701-12800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12767
+</p>
+<div class="header">
+<p>
+From: Tetsuro IKEDA &lt;Tetsuro IKEDA &lt;tetsuro@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 16 Feb 2006 07:07:24 -0500<br>
+Subject: [mysql 12767] Re: Mysql　JDBC接続時のサイズ制限<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+池田です。
+
+Connector/J（MySQL JDBC Type4 Driver)でStatementあるいはClient-Sideの
+PreparedStatementを使用する場合の送信可能なクエリの最大長は2GBです。
+（普通はそれよりも先にJVMのHEAPサイズが事実上の制限になると思います）
+
+Connector/Jに限らず、MySQLの全ての種類のクライアントは16MBを超えるSQL文に
+ついては、複数のPacketに分割してサーバへ送信します。
+max_allowed_packetは20MBに設定しているということですので、
+これが原因ということも無いと思います。
+
+<span class="quote2">&gt; |java.sql.SQLException: Got error 139 from table handler</span>
+
+こちらのエラーをPerrorで見るに、
+
+D:\mysql\mysql-4.0.26-win32\bin&gt;perror 139
+MySQL error:  139 = Too big row
+
+これはConnector/Jが作成したエラーではなく、
+サーバから&quot;Too big row&quot;というメッセージでエラーが返ってきたことを意味しています。
+
+何か思い当たる節はありませんか？
+
+kyou tech wrote:
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 質問内容曖昧ですみません。</span>
+<span class="quote1">&gt; 実は</span>
+<span class="quote1">&gt; 画面上の各項目をfull sizeで入力して登録すると</span>
+<span class="quote1">&gt; 下記のエラーが発生しています。</span>
+<span class="quote1">&gt; 各項目を小さいサイズで入力するとうまく登録できます。</span>
+<span class="quote1">&gt; full sizeでのレコードの長さ：100KB</span>
+<span class="quote1">&gt; 一応mysql server(4.0.21) の</span>
+<span class="quote1">&gt; max_allowed_packet</span>
+<span class="quote1">&gt; max_heap_table_sizeをそれぞれ20MBと32MBに調整したが、</span>
+<span class="quote1">&gt; 同じくエラーが出ていますので、</span>
+<span class="quote1">&gt; jdbcのクエリーの長さに制限があるかと思っています。</span>
+<span class="quote1">&gt; ご教授いただければ助かります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; |java.sql.SQLException: Got error 139 from table handler</span>
+<span class="quote2">&gt; |       at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:2921)</span>
+<span class="quote2">&gt; |       at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1570)</span>
+<span class="quote2">&gt; |       at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:1665)</span>
+<span class="quote2">&gt; |       at com.mysql.jdbc.Connection.execSQL(Connection.java:2978)</span>
+<span class="quote2">&gt; |       at com.mysql.jdbc.Connection.execSQL(Connection.java:2902)</span>
+<span class="quote2">&gt; |       at</span>
+<span class="quote1">&gt; com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.ja</span>
+<span class="quote1">&gt; va:930)</span>
+<span class="quote2">&gt; |       at</span>
+<span class="quote1">&gt; com.mysql.jdbc.PreparedStatement.executeUpdate(PreparedStatement.java</span>
+<span class="quote1">&gt; :1159)</span>
+<span class="quote2">&gt; |       at</span>
+<span class="quote1">&gt; com.mysql.jdbc.PreparedStatement.executeUpdate(PreparedStatement.java</span>
+<span class="quote1">&gt; :1076)</span>
+<span class="quote2">&gt; |       at</span>
+<span class="quote1">&gt; com.mysql.jdbc.PreparedStatement.executeUpdate(PreparedStatement.java</span>
+<span class="quote1">&gt; :1061)</span>
+<span class="quote2">&gt; |       at</span>
+<span class="quote1">&gt; org.jboss.resource.adapter.jdbc.WrappedPreparedStatement.executeUpdat</span>
+<span class="quote1">&gt; e(Unknown Source)</span>
+<span class="quote1">&gt; </span>
+<span class="quote3">&gt;&gt; |       at</span>
+<span class="quote2">&gt;&gt; com.sony.framework.util.sqltemplate2.UpdateSQLCommand.runStatement(Up</span>
+<span class="quote2">&gt;&gt; dateSQLCommand.java:65)</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt; From: Tetsuro IKEDA &lt;tetsuro@xxxxxxxxxx&gt;</span>
+<span class="quote2">&gt;&gt; Reply-To: ml@xxxxxxxxxx</span>
+<span class="quote2">&gt;&gt; To: ml@xxxxxxxxxx</span>
+<span class="quote2">&gt;&gt; Subject: <a href="12765.html">[mysql 12765]</a> Re: Mysql　JDBC接続時のサイズ制限</span>
+<span class="quote2">&gt;&gt; Date: Thu, 16 Feb 2006 05:43:19 -0500</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; こんにちは。池田です。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt; &gt; Mysql　JDBC接続時のサイズ制限(stateMentの長さ）がありますか。</span>
+<span class="quote3">&gt;&gt; &gt; もしあれば、どうやって調整（設定）しますでしょうか。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; java.sql.Statementを使う場合にサーバに送信できるクエリの最大長についての</span>
+<span class="quote2">&gt;&gt; ご質問でしょうか？　</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 質問の意図をもう少し詳しく教えてください。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; -- </span>
+<span class="quote2">&gt;&gt; Tetsuro Ikeda, Intern Development &amp; Support</span>
+<span class="quote2">&gt;&gt; MySQL Inc, www.mysql.com</span>
+<span class="quote2">&gt;&gt; Office: +1-206-336-2030   Mobile: +1-206-661-4293</span>
+<span class="quote2">&gt;&gt; Are you MySQL certified?  www.mysql.com/certification</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; _________________________________________________________________</span>
+<span class="quote1">&gt; 迷惑メールやウイルスへの対策も万全「MSN Hotmail」 </span>
+<span class="quote1">&gt; <a href="http://promotion.msn.co.jp/hotmail/">http://promotion.msn.co.jp/hotmail/</a></span>
+<span class="quote1">&gt; </span>
+
+
+-- 
+Tetsuro Ikeda, Intern Development &amp; Support
+MySQL Inc, www.mysql.com
+Office: +1-206-336-2030   Mobile: +1-206-661-4293
+Are you MySQL certified?  www.mysql.com/certification
+
+</pre>
+</div>
+<p class="button"><a href="12766.html">[前]</a><a href="12768.html">[次]</a><a href="../list/12701-12800.html">[番号順一覧]</a><a href="../thread/12701-12800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12763.html">  12763 2006-02-16 13:49 [&quot;Matsunobu, Yoshinor] Re: MySQL のバックアップ・復元について  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12764.html">  12764 2006-02-16 17:24 ┣[&quot;kyou tech&quot; &lt;kyou_te] Mysql　JDBC接続時のサイズ制限         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12765.html">  12765 2006-02-16 19:43 ┃┗[Tetsuro IKEDA &lt;tetsu]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12766.html">  12766 2006-02-16 20:18 ┃　┗[&quot;kyou tech&quot; &lt;kyou_te]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="12767.html">  12767 2006-02-16 21:07 ┃　　┗[Tetsuro IKEDA &lt;tetsu]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12768.html">  12768 2006-02-17 10:37 ┃　　　┗[&quot;kyou tech&quot; &lt;kyou_te]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12769.html">  12769 2006-02-17 12:04 ┃　　　　┗[Tetsuro IKEDA &lt;tetsu]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12770.html">  12770 2006-02-17 14:32 ┃　　　　　┗[&quot;kyou tech&quot; &lt;kyou_te]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12771.html">  12771 2006-02-17 15:02 ┃　　　　　　┗[Tetsuro IKEDA &lt;tetsu]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12772.html">  12772 2006-02-17 15:15 ┃　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12773.html">  12773 2006-02-17 16:42 ┃　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12775.html">  12775 2006-02-18 16:10 ┃　　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12776.html">  12776 2006-02-19 21:08 ┃　　　　　　　　　　┗[&quot;kyou tech&quot; &lt;kyou_te]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12777.html">  12777 2006-02-20 04:06 ┃　　　　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12778.html">  12778 2006-02-20 06:43 ┃　　　　　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12779.html">  12779 2006-02-20 14:51 ┃　　　　　　　　　　　　　┗[&quot;kyou tech&quot; &lt;kyou_te]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12780.html">  12780 2006-02-20 15:01 ┃　　　　　　　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12781.html">  12781 2006-02-20 15:37 ┃　　　　　　　　　　　　　　　┗[&quot;kyou tech&quot; &lt;kyou_te]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12782.html">  12782 2006-02-20 15:45 ┃　　　　　　　　　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12774.html">  12774 2006-02-17 17:59 ┗[baya &lt;bayapbayap@xxx]                                       </a></span>
+</pre>
+</body>
+</html>

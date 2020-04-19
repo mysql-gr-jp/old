@@ -1,0 +1,201 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13965</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13964.html">[前]</a><a href="13966.html">[次]</a><a href="../list/13901-14000.html">[番号順一覧]</a><a href="../thread/13901-14000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13965
+</p>
+<div class="header">
+<p>
+From: kurokawa &lt;kurokawa &lt;ml@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 19 May 2007 13:15:22 +0900<br>
+Subject: [mysql 13965] Re: データベースをRAID5に置く<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして、黒川と申します。
+
+業務用で多数のサーバーを運用・管理していました。
+（ラックで30本程度）
+
+個人的にはRAID5が一番好きで10年以上前から愛用していました。
+
+他のRAIDと比較した場合のマイナス点
+
+・書き込み：遅い
+・読み込み：やや遅い
+・初期構成：遅い〜非常に遅い
+・故障時再構成：非常に遅い
+・信頼性：印象ほど良くない（RAID2以降とあまり変らない）
+・コストパフォーマンス：大規模構成でないと悪い
+　（HDD10本以上構成などで無いと価格優位性が出にくい）
+
+
+
+RAID5は、構造上他のRAIDと比べ処理に時間とプロセッサーパワーを
+消費します。
+3本以上のHDDを使用し、データを、HDD構成台数-1台分に分割
+パリティー情報を算出して、それぞれのHDDのい格納する。
+パリティー情報も特定のHDDに保存しないので堅牢性が高い。
+
+この処理のために計算が増え、保存情報も増えます。
+（パリティーをどのHDDが持つか）
+
+HDD本数が増えるほど、計算量が増えます。
+
+復旧が遅いのは、他のすべてのディスクから計算して
+データを再構成し、それを保存しなければならないためです。
+RAID1（ミラーリング）なら、HDD⇒HDDの物理コピーのみ
+この差が運用上、圧倒的な問題になります。
+
+RAIDが必要な状況で考えますと、故障したときの復旧が遅い
+というのは致命傷になりがちです。
+
+復旧処理（再構成）しつつ運用できますが、データ処理速度の
+劣化がひどく、使えない状況になりやすいです。
+それ以上に、もう一台HDDが壊れると、全データ消滅の恐れもあり
+怖くて運用できなくなります。
+
+
+
+
+他のRAIDは、構成が単純でHDDごとに役割が決まっています。
+その分処理が早いようです。
+
+高速化と安全性では、RAID0（高速化のため）にし、それを
+RAID1（ミラーリング）する。
+ディスクの無駄は多いのですが、比較的高速でハードの
+性能もあまり要求しません。
+
+複数のHDDが同時の故障した場合、RAID5より脆弱です。
+5本未満で構成する場合にはRAID5より、安全性高いです。
+
+多数のHDDを使用する場合、RAID5の計算処理が増える
+マイナスは目立ってきます。
+RAID装置大手のnetapp（ネットアップ）では、RAID4構成
+を採用しています。
+これは、RAID5に近いのですが、パリティー情報を
+特定のHDDに保存します。
+
+パリティー情報格納ディスクが壊れると、非常に危険なので
+推奨はダブルパリティー方式（オプション）
+パリティーディスクのみをミラーリングします。
+
+
+比較的容量が少なく（1TB以内など）、高速性重視なら
+RAID0構成のミラーリング（RAID1）が、やや良いようです。
+低価格なRAID装置では、この構成が多いようです。
+HDD故障時の復旧もRAID5より計算がない分高速です。
+（この部分が重要な気がします）
+
+
+
+大容量と安全性を求めるならnetapp方式で、それをさらに
+多重化する（必須かと思います）。
+netappでは、データ変更量が、オンメモリーで処理できる
+量以内であれば、非常に高速でした。
+それを超えてしまうと、極度に速度が低下します。
+
+メモリー量で価格が倍倍ゲームになっていきますので
+事前の設計が非常に重要です。
+
+
+
+ところで、SATAは、メインのRAIDには、普通選びません。
+RAID構成以前の問題になります（速度を問題にするなら）。
+
+RAID構成でSATAを選択する場合、バックアップ用など
+速度は二の次、コストと容量を確保したい場合に
+選定します。
+ファイバーチャネルか、悪くてSCSIになると思います。
+
+ATAやSATAをメインのデータ処理用に選ぶ場合、
+回転速度（シークタイムと処理速度がともに遅い）が
+遅いので、RAID0で高速化をはかり、それをRAID1構成に
+して、安全性を図るのが適しています。
+
+その構成であればoracleでも商用に耐えました。
+
+
+
+また、RAID高速化を考えるならRAID装置のキャッシュ容量が
+大きく影響します。
+大きいほど高速化します。
+（個人的には、ハードを信頼したくないのでキャッシュが
+大きいものは、あまり選びたくありません。HDDに書き込んでいない
+データが増えるので危険性が増します）
+
+低価格のRAIDカードでも、キャッシュ増設できるものがありました。
+
+RAID装置として外付けするか、筐体内に内蔵しコントローラーに
+各HDDを直結するかでも、状況は変ります。
+
+黒川
+
+
+
+坂井 英夫 wrote:
+<span class="quote1">&gt; hide3です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; On 2007/05/19, at 0:13, とみたまさひろ wrote:</span>
+<span class="quote2">&gt;&gt; On Fri, 18 May 2007 13:02:26 +0900</span>
+<span class="quote2">&gt;&gt; Hiroki Tamakoshi &lt;hiroki.tamakoshi@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; ディスクはSATAでRAID5を組んでいるのですが、やはり遅すぎではないかと思い</span>
+<span class="quote3">&gt;&gt;&gt; ます。シークが大量に発生しているのでしょうか？</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 今回の遅い原因がディスクのIOネックかどうかはわかりませんが、データベー</span>
+<span class="quote2">&gt;&gt; スのように書き込みが多いデータは RAID5 には置かない方がいいんじゃない</span>
+<span class="quote2">&gt;&gt; かと思います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; データベースの入っているDISKを信頼性をあげる目的でRAID5に</span>
+<span class="quote1">&gt; 構成し直そうとしていますが、上記コメントをみて心配になり投稿しました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; Hot swap のRAID5構成にすると、システムダウンも最小限で食い止められ</span>
+<span class="quote1">&gt; データのBack up にもなるように思っています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; MySQL とは若干関係なくなるような気もしますが、</span>
+<span class="quote1">&gt; もう少し説明していただけると助かります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; よろしくお願いいたします。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+</pre>
+</div>
+<p class="button"><a href="13964.html">[前]</a><a href="13966.html">[次]</a><a href="../list/13901-14000.html">[番号順一覧]</a><a href="../thread/13901-14000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13957.html">  13957 2007-05-17 21:01 [Hiroki Tamakoshi &lt;hi] 高速なデータの書き込み方法              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13958.html">  13958 2007-05-17 23:20 ┗[&quot;Yoshio Kawano&quot; &lt;kaw]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13959.html">  13959 2007-05-18 13:02 　┗[Hiroki Tamakoshi &lt;hi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13960.html">  13960 2007-05-18 13:33 　　┣[HIRATSUKA Sadao &lt;hir]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13971.html">  13971 2007-05-21 10:26 　　┃┗[Hiroki Tamakoshi &lt;hi]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13973.html">  13973 2007-05-22 11:46 　　┃　┗[HIRATSUKA Sadao &lt;hir]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13974.html">  13974 2007-05-22 14:54 　　┃　　┗[Hiroki Tamakoshi &lt;hi]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14007.html">  14007 2007-05-25 11:08 　　┃　　　┗[Hiroki Tamakoshi &lt;hi]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14008.html">  14008 2007-05-25 11:15 　　┃　　　　┣[&lt;ml@xxxxxxxxxx&gt;     ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14009.html">  14009 2007-05-25 11:33 　　┃　　　　┃┗[Hiroki Tamakoshi &lt;hi]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14010.html">  14010 2007-05-25 14:10 　　┃　　　　┃　┗[&quot;橋本健太&quot; &lt;kem@xxxx]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14022.html">  14022 2007-05-28 00:51 　　┃　　　　┗[とみたまさひろ &lt;tomm]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14023.html">  14023 2007-05-28 12:17 　　┃　　　　　┗[Hiroki Tamakoshi &lt;hi]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14024.html">  14024 2007-05-28 14:48 　　┃　　　　　　┗[&quot;KIMURA, Meiji&quot; &lt;kim]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13961.html">  13961 2007-05-19 00:13 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13962.html">  13962 2007-05-19 11:05 　　　┗[坂井 英夫 &lt;hide_s@xx] データベースをRAID5に置く       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13963.html">  13963 2007-05-19 12:13 　　　　┣[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13964.html">  13964 2007-05-19 12:41 　　　　┃┗[坂井 英夫 &lt;hide_s@xx]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="13965.html">  13965 2007-05-19 13:15 　　　　┣[kurokawa &lt;ml@xxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13966.html">  13966 2007-05-19 13:57 　　　　┃┗[ひでさん &lt;hide_s@xxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13967.html">  13967 2007-05-19 14:14 　　　　┃　┗[N.Toge &lt;toge@xxxxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13968.html">  13968 2007-05-19 15:10 　　　　┃　　┗[ひでさん &lt;hide_s@xxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13969.html">  13969 2007-05-20 06:58 　　　　┗[Kenji Irie &lt;kenji@xx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13970.html">  13970 2007-05-20 09:31 　　　　　┗[ひでさん &lt;hide_s@xxx]                             </a></span>
+</pre>
+</body>
+</html>

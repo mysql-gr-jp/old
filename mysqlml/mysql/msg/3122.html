@@ -1,0 +1,212 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3122</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="3121.html">[前]</a><a href="3123.html">[次]</a><a href="../list/3101-3200.html">[番号順一覧]</a><a href="../thread/3101-3200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3122
+</p>
+<div class="header">
+<p>
+From: 上西　太 &lt;上西　太 &lt;upw@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 28 Jan 2001 17:43:50 +0900<br>
+Subject: [mysql 03122] データベースの参照不可について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+上西と申します。
+以下の環境にて初めてＷｅｂの作成をしています。
+（redhat 7.0.j-1,apache1.3.12-25,php-mysql-4.0.1pl2-9,mysql3.23.22-6
+をＧｎｏＲＰＭにて自分のパソコンに導入）
+データベースの登録までは、行い、Ｋｔｅｒｍより、rootにて参照できました。
+
+ブラウザより、テストを行った際に「データベースエラーが発生しました。 」
+という表示がされ、原因が分からず、先に進めません。
+ブラウザからＭＹＳＱＬを参照している場合に「ｕｓｅｒ」は何になっているの
+
+かよく理解できていません。
+開示する情報の過不足がよくわかりませんが、長いと思いつつ、関連情報を以下
+にコピーしまし
+た。宜しくご教示の程、お願いします。
+
+
+実行したＰＨＰファイルは、以下の通りです。
+
+ &lt;?
+ /******************************/
+ /* shop touhyou */
+ $result = @mysql_db_query(&quot;teishoku&quot;,
+  &quot;select a.shopname as shopname, a.place as place, b.oksuu as ok,&quot; .
+   &quot; from $db_table_shop a, $db_table_touhyo b &quot; .
+  &quot; where a.shopid = b.shopid&quot; .
+  &quot; order by b.oksuu&quot;
+ );
+ if($result &lt;= 0 ) {
+  echo &quot;データベースエラーが発生しました。 &lt;BR&gt;&quot;;
+  exit;
+ }
+ $num = mysql_numrows($result);
+
+
+ $range = 5;
+?&gt;
+
+
+[root@localhost /root]# mysqladmin processlist
++----+------+-----------+----+---------+------+-------+------------------+
+
+<span class="quote1">| Id | User | Host      | db | Command | Time | State | Info</span>
+<span class="quote1">|</span>
++----+------+-----------+----+---------+------+-------+------------------+
+
+<span class="quote1">| 1  | root | localhost |    | Query   | 0    |       | show processlist</span>
+
+<span class="quote1">|</span>
++----+------+-----------+----+---------+------+-------+------------------+
+
+[root@localhost /root]#
+
+権限が原因かと思い、MYSQLの定義を見てみた所、以下の内容でした。
+
+<span class="quote1">| Host                  | User | Password | Select_priv | Insert_priv |</span>
+Update_priv | Delete_priv | Create_priv | Drop_priv | Reload_priv |
+Shutdown_priv | Process_priv | File_priv | Grant_priv | References_priv
+<span class="quote1">| Index_priv | Alter_priv |</span>
++-----------------------+------+----------+-------------+--
+<span class="quote1">| localhost             | root |          | Y           | Y           |</span>
+Y           | Y           | Y           | Y         | Y           | Y
+          | Y            | Y         | Y          | Y               | Y
+         | Y          |
+<span class="quote1">| localhost.localdomain | root |          | Y           | Y           |</span>
+Y           | Y           | Y           | Y         | Y           | Y
+          | Y            | Y         | Y          | Y               | Y
+         | Y          |
+<span class="quote1">| localhost             |      |          | N           | N           |</span>
+N           | N           | N           | N         | N           | N
+          | N            | N         | N          | N               | N
+         | N          |
+<span class="quote1">| localhost.localdomain |      |          | N           | N           |</span>
+N           | N           | N           | N         | N           | N
+          | N            | N         | N          | N               | N
+         | N          |
++-----------------------+------+----------+-------------
+4 rows in set (0.09 sec)
+
+
++------+----------+------+-------------+-------------+-
+<span class="quote1">| Host | Db       | User | Select_priv | Insert_priv | Update_priv |</span>
+Delete_priv | Create_priv | Drop_priv | Grant_priv | References_priv |
+Index_priv | Alter_priv |
++------+----------+------+-------------+-------------+--
+<span class="quote1">| %    | test     |      | Y           | Y           | Y           | Y</span>
+         | Y           | Y         | N          | Y               | Y
+       | Y          |
+<span class="quote1">| %    | test\_%  |      | Y           | Y           | Y           | Y</span>
+         | Y           | Y         | N          | Y               | Y
+       | Y          |
+<span class="quote1">| %    | teishoku |      | Y           | Y           | Y           | Y</span>
+         | Y           | Y         | Y          | Y               | Y
+       | Y          |
++------+----------+------+-------------+-------------+----
+3 rows in set (0.02 sec)
+
+
+sqlbugを実行した結果は以下の通りです。
+
+END-PR: -*- send-pr -*-
+SEND-PR: Lines starting with `SEND-PR' will be removed automatically, as
+
+SEND-PR: will all comments (text enclosed in `&lt;' and `&gt;').
+SEND-PR:
+From: root
+To: mysql@xxxxxxxxxx
+Subject: [50 character or so descriptive subject here (for reference)]
+
+<span class="quote1">&gt;Description:</span>
+ &lt;precise description of the problem (multiple lines)&gt;
+<span class="quote1">&gt;How-To-Repeat:</span>
+ &lt;code/input/activities to reproduce the problem (multiple lines)&gt;
+<span class="quote1">&gt;Fix:</span>
+ &lt;how to correct or work around the problem, if known (multiple lines)&gt;
+
+<span class="quote1">&gt;Submitter-Id: &lt;submitter ID&gt;</span>
+<span class="quote1">&gt;Originator: root</span>
+<span class="quote1">&gt;Organization:</span>
+ &lt;organization of PR author (multiple lines)&gt;
+<span class="quote1">&gt;MySQL support: [none | licence | email support | extended email support</span>
+
+]
+<span class="quote1">&gt;Synopsis: &lt;synopsis of the problem (one line)&gt;</span>
+<span class="quote1">&gt;Severity: &lt;[ non-critical | serious | critical ] (one line)&gt;</span>
+<span class="quote1">&gt;Priority: &lt;[ low | medium | high ] (one line)&gt;</span>
+<span class="quote1">&gt;Category: mysql</span>
+<span class="quote1">&gt;Class:  &lt;[ sw-bug | doc-bug | change-request | support ] (one line)&gt;</span>
+<span class="quote1">&gt;Release: mysql-3.23.22-beta (Source distribution)</span>
+<span class="quote1">&gt;Server: /usr/bin/mysqladmin  Ver 8.8 Distrib 3.23.22-beta, for</span>
+redhat-linux-gnu on i386
+TCX Datakonsult AB, by Monty
+
+Server version  3.23.22-beta
+Protocol version 10
+Connection  Localhost via UNIX socket
+UNIX socket  /var/lib/mysql/mysql.sock
+Uptime:   5 min 19 sec
+
+Threads: 1  Questions: 3  Slow queries: 0  Opens: 6  Flush tables: 1
+Open tables: 2 Queries per second avg: 0.009
+<span class="quote1">&gt;Environment:</span>
+ &lt;machine, os, target, libraries (multiple lines)&gt;
+System: Linux localhost.localdomain 2.2.16-22 #1 Tue Aug 22 16:49:06 EDT
+
+2000 i686 unknown
+Architecture: i686
+
+Some paths:  /usr/bin/perl /usr/bin/make /usr/bin/gmake /usr/bin/gcc
+/usr/bin/cc
+GCC: Reading specs from /usr/lib/gcc-lib/i386-redhat-linux/2.96/specs
+gcc version 2.96 20000731 (Red Hat Linux 7.0)
+Compilation info: CC='gcc'  CFLAGS='-O2 -march=i386 -mcpu=i686'
+CXX='c++'  CXXFLAGS='-O2 -march=i386 -mcpu=i686'  LDFLAGS=''
+LIBC:
+lrwxrwxrwx    1 root     root           14 12キ・ 4 08:51 /lib/libc.so.6
+
+-&gt; libc-2.1.93.so
+-rwxr-xr-x    1 root     root      4775041  9キ・14 02:26
+/lib/libc-2.1.93.so
+-rw-r--r--    1 root     root     22627520  9キ・14 05:06
+/usr/lib/libc.a
+
+-rw-r--r--    1 root     root          178  9キ・14 05:06
+/usr/lib/libc.so
+Configure command: ./configure  i386-redhat-linux --prefix=/usr
+--exec-prefix=/usr --bindir=/usr/bin
+ --sbindir=/usr/sbin --sysconfdir=/etc --datadir=/usr/share
+--includedir=/usr/include --libdir=/usr/lib
+ --libexecdir=/usr/libexec --localstatedir=/var
+--sharedstatedir=/usr/com --mandir=/usr/share/man --
+infodir=/usr/share/info --without-debug --without-readline
+--enable-shared --with-extra-charsets=complex
+ --without-bench --localstatedir=/var/lib/mysql
+--with-unix-socket-path=/var/lib/mysql/mysql.sock --
+enable-assembler --with-mysqld-user=mysql
+
+
+
+
+
+</pre>
+</div>
+<p class="button"><a href="3121.html">[前]</a><a href="3123.html">[次]</a><a href="../list/3101-3200.html">[番号順一覧]</a><a href="../thread/3101-3200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="3122.html">   3122 2001-01-28 17:43 [上西　太 &lt;upw@xxxxxx] データベースの参照不可について          </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3123.html">   3123 2001-01-28 19:48 ┗[中野 高顕 &lt;nakano@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3124.html">   3124 2001-01-28 21:51 　┗[上西　太 &lt;upw@xxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3139.html">   3139 2001-02-03 16:49 　　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+</pre>
+</body>
+</html>

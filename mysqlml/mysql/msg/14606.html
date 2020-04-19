@@ -1,0 +1,229 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14606</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14605.html">[前]</a><a href="14607.html">[次]</a><a href="../list/14601-14700.html">[番号順一覧]</a><a href="../thread/14601-14700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14606
+</p>
+<div class="header">
+<p>
+From: &quot;YasushiInui&quot; &lt;&quot;YasushiInui&quot; &lt;yasushiinui@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 26 Jun 2008 01:11:12 +0900<br>
+Subject: [mysql 14606] Re: mysqlclusterの最大カラム数について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+乾と申します。
+
+同様の現象を確認しました。
+
+原因が解っているわけではありませんが、config.iniの
+ndbの共通定義の
+data memory
+index memory
+
+のサイズを最低値の1Mに変更した時に起こりました。
+
+デフォルトに戻し
+data memory　８０M
+index memory　１８M
+
+
+初期化スタートさせ、ロググループと、テーブルスペースを再度作成することにより
+テーブル作成可能となりました。
+
+ただ注意することは、現存する、テーブルスペースとログスペースは、停止前にすべて 
+
+drop させてfilesテーブルをきれいにしておかないと、ディスク上に、実データファイルが
+残ってしまう場合があります。
+
+その場合は、強引ですが、ノードサーバのndbのoutログ等が出力されるディレクトリ（mysql-clasuter)、 
+
+のなかに、(ID)_fs(だったような）ディレクトリをばっさり削除すればよろしいかと思います。
+私は、ログファイルまで削除していますが、初期化起動の時に新規に作成されるようで問題になりませんでした。
+
+以上、理由は明確ではありませんが、実践的に回避できた方法を連絡します。
+
+
+
+
+<span class="quote1">&gt; 谷口です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt;  以下のような感じです。結局はカラムの合計の必要サイズが</span>
+<span class="quote2">&gt;&gt;  8Kの制限を越えなければ問題ないのだと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; CREATE TABLE `disk` (</span>
+<span class="quote1">&gt; `id` int(11) NOT NULL AUTO_INCREMENT,</span>
+<span class="quote1">&gt; `data` varchar(50) NOT NULL,</span>
+<span class="quote1">&gt; `data1` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data2` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data3` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data4` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data5` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data6` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data7` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data8` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data9` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data10` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data11` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data12` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data13` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data14` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data15` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data16` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data17` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data18` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data19` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data20` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data21` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data22` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data23` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data24` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data25` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data26` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data27` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data28` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data29` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data30` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data31` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data32` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data33` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data34` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data35` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data36` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data37` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data38` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data39` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; `data40` varchar(50) DEFAULT NULL,</span>
+<span class="quote1">&gt; PRIMARY KEY (`id`)</span>
+<span class="quote1">&gt;  )TABLESPACE ts_1 STORAGE DISK</span>
+<span class="quote1">&gt;    ENGINE NDB;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; とやってみましたが、</span>
+<span class="quote1">&gt; ERROR 1005 (HY000): Can't create table 'hoge.disk' (errno: 157)</span>
+<span class="quote1">&gt; となってしまいました。</span>
+<span class="quote1">&gt; この時</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; SELECT LOGFILE_GROUP_NAME, FILE_NAME, EXTRA     -&gt;  FROM</span>
+<span class="quote1">&gt; INFORMATION_SCHEMA.FILES;</span>
+<span class="quote1">&gt; +--------------------+------------+-----------------------------------------+</span>
+<span class="quote2">&gt; | LOGFILE_GROUP_NAME | FILE_NAME  | EXTRA</span>
+<span class="quote2">&gt;     | </span>
+<span class="quote1">&gt; +--------------------+------------+-----------------------------------------+</span>
+<span class="quote2">&gt; | lg_1               | data_2.dat | CLUSTER_NODE=3</span>
+<span class="quote2">&gt;     |</span>
+<span class="quote2">&gt; | lg_1               | data_2.dat | CLUSTER_NODE=2 </span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; | lg_1               | data_1.dat | CLUSTER_NODE=3 </span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; | lg_1               | data_1.dat | CLUSTER_NODE=2 </span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; | lg_1               | undo_2.dat | </span>
+<span class="quote1">&gt; CLUSTER_NODE=3;UNDO_BUFFER_SIZE=8388608 |</span>
+<span class="quote2">&gt; | lg_1               | undo_2.dat | </span>
+<span class="quote1">&gt; CLUSTER_NODE=2;UNDO_BUFFER_SIZE=8388608 |</span>
+<span class="quote2">&gt; | lg_1               | undo_1.dat | </span>
+<span class="quote1">&gt; CLUSTER_NODE=3;UNDO_BUFFER_SIZE=8388608 |</span>
+<span class="quote2">&gt; | lg_1               | undo_1.dat | </span>
+<span class="quote1">&gt; CLUSTER_NODE=2;UNDO_BUFFER_SIZE=8388608 |</span>
+<span class="quote2">&gt; | lg_1               | NULL       | UNDO_BUFFER_SIZE=8388608 </span>
+<span class="quote2">&gt; |</span>
+<span class="quote1">&gt; +--------------------+------------+-----------------------------------------+</span>
+<span class="quote1">&gt; 9 rows in set (0.01 sec)</span>
+<span class="quote1">&gt; となっております。できない原因として何が考えられるでしょうか。</span>
+<span class="quote1">&gt; ちなみに、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/refman/5.1/ja/mysql-cluster-disk-data.html">http://dev.mysql.com/doc/refman/5.1/ja/mysql-cluster-disk-data.html</a></span>
+<span class="quote1">&gt; にある。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; CREATE LOGFILE GROUP lg_1</span>
+<span class="quote1">&gt;    ADD UNDOFILE 'undo_1.dat'</span>
+<span class="quote1">&gt;    INITIAL_SIZE 16M</span>
+<span class="quote1">&gt;    UNDO_BUFFER_SIZE 2M</span>
+<span class="quote1">&gt;    ENGINE NDB;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; も</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ALTER LOGFILE GROUP lg_1</span>
+<span class="quote1">&gt;    ADD UNDOFILE 'undo_2.dat'</span>
+<span class="quote1">&gt;    INITIAL_SIZE 12M</span>
+<span class="quote1">&gt;    ENGINE NDB;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 共にサイズ指定するとシンタックスエラーになったので、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; CREATE LOGFILE GROUP lg_1</span>
+<span class="quote1">&gt;    ADD UNDOFILE 'undo_1.dat'</span>
+<span class="quote1">&gt;        ENGINE NDB;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; と</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ALTER LOGFILE GROUP lg_1</span>
+<span class="quote1">&gt;    ADD UNDOFILE 'undo_2.dat'</span>
+<span class="quote1">&gt;       ENGINE NDB;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; デフォルトの8Mになってしまってます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; mysql&gt; SELECT LOGFILE_GROUP_NAME, FILE_NAME, EXTRA   FROM</span>
+<span class="quote1">&gt; INFORMATION_SCHEMA.FILES;</span>
+<span class="quote1">&gt; +--------------------+------------+-----------------------------------------+</span>
+<span class="quote2">&gt; | LOGFILE_GROUP_NAME | FILE_NAME  | EXTRA </span>
+<span class="quote2">&gt; |</span>
+<span class="quote1">&gt; +--------------------+------------+-----------------------------------------+</span>
+<span class="quote2">&gt; | lg_1               | data_2.dat | CLUSTER_NODE=3 </span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; | lg_1               | data_2.dat | CLUSTER_NODE=2 </span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; | lg_1               | data_1.dat | CLUSTER_NODE=3 </span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; | lg_1               | data_1.dat | CLUSTER_NODE=2 </span>
+<span class="quote2">&gt; |</span>
+<span class="quote2">&gt; | lg_1               | undo_2.dat | </span>
+<span class="quote1">&gt; CLUSTER_NODE=3;UNDO_BUFFER_SIZE=8388608 |</span>
+<span class="quote2">&gt; | lg_1               | undo_2.dat | </span>
+<span class="quote1">&gt; CLUSTER_NODE=2;UNDO_BUFFER_SIZE=8388608 |</span>
+<span class="quote2">&gt; | lg_1               | undo_1.dat | </span>
+<span class="quote1">&gt; CLUSTER_NODE=3;UNDO_BUFFER_SIZE=8388608 |</span>
+<span class="quote2">&gt; | lg_1               | undo_1.dat | </span>
+<span class="quote1">&gt; CLUSTER_NODE=2;UNDO_BUFFER_SIZE=8388608 |</span>
+<span class="quote2">&gt; | lg_1               | NULL       | UNDO_BUFFER_SIZE=8388608 </span>
+<span class="quote2">&gt; |</span>
+<span class="quote1">&gt; +--------------------+------------+-----------------------------------------+</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; どうぞよろしくおねがいします。</span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; 谷口&lt;norio.oiron@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt; </span>
+
+
+</pre>
+</div>
+<p class="button"><a href="14605.html">[前]</a><a href="14607.html">[次]</a><a href="../list/14601-14700.html">[番号順一覧]</a><a href="../thread/14601-14700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14523.html">  14523 2008-05-09 19:12 [oiron &lt;norio.oiron@x] mysqlclusterの最大カラム数について      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14524.html">  14524 2008-05-09 20:22 ┗[Satoshi Tatsuoka &lt;sa]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14525.html">  14525 2008-05-09 20:56 　┣[Mikiya Okuno &lt;okuno@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14526.html">  14526 2008-05-10 15:24 　┃┗[oiron &lt;norio.oiron@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14527.html">  14527 2008-05-10 16:49 　┣[oiron &lt;norio.oiron@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14531.html">  14531 2008-05-12 18:09 　┃┗[oiron &lt;norio.oiron@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14528.html">  14528 2008-05-10 16:58 　┗[oiron &lt;norio.oiron@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14529.html">  14529 2008-05-10 19:01 　　┣[Satoshi Tatsuoka &lt;sa]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14530.html">  14530 2008-05-11 21:49 　　┃┗[oiron &lt;norio.oiron@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14532.html">  14532 2008-05-12 19:52 　　┣[oiron &lt;norio.oiron@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14533.html">  14533 2008-05-12 23:34 　　┗[oiron &lt;norio.oiron@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14534.html">  14534 2008-05-13 09:37 　　　┗[Satoshi Tatsuoka &lt;sa]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14535.html">  14535 2008-05-13 11:24 　　　　┗[oiron &lt;norio.oiron@x]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14536.html">  14536 2008-05-14 09:50 　　　　　┣[Satoshi Tatsuoka &lt;sa]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14562.html">  14562 2008-05-19 19:22 　　　　　┃┗[oiron &lt;norio.oiron@x]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14564.html">  14564 2008-05-20 10:58 　　　　　┃　┗[Satoshi Tatsuoka &lt;sa]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14580.html">  14580 2008-05-25 15:55 　　　　　┃　　┗[oiron &lt;norio.oiron@x]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14602.html">  14602 2008-06-17 10:37 　　　　　┃　　　┗[Satoshi Tatsuoka &lt;sa]                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="14606.html">  14606 2008-06-26 01:11 　　　　　┗[&quot;YasushiInui&quot; &lt;yasus]                             </a></span>
+</pre>
+</body>
+</html>

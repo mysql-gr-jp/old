@@ -1,0 +1,52 @@
+From: Michael Widenius <monty@monty.pp.sci.fi>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Message-ID: <14460.58025.992220.202263@monty.pp.sci.fi>
+Date: Wed, 12 Jan 2000 22:23:05 +0200 (EET)
+To: announce@lists.mysql.com
+Subject: WARNING: Problem with MySQL and GRANT
+X-Mailer: VM 6.72 under 21.1 (patch 7) "Biscayne" XEmacs Lucid
+Reply-To: monty@tcx.se
+
+
+Hi!
+
+We recently found out that MySQL 3.22.x and MySQL 3.23.x has a bug in
+the GRANT handling;  Because of this bug anyone with GRANT privilege
+can change the password for anyone else (like root) and thus get
+access to any MySQL database.
+
+Note that by default the test user has grant privileges set and using this
+one can change the root password for root at localhost.  To be 'root'
+in MySQL you still need to be able to login to MySQL from localhost.
+
+We have posted a fix for this to the MySQL mailing list and it will be
+fixed in MySQL 3.22.30 that will be released later today or tomorrow
+morning.  We are also working on releasing 3.23.9, which includes the
+same fix, within a few days.
+
+For people that doesn't want to upgrade MySQL, you can always just
+remove the GRANT privilege for all users with the following command:
+
+shell> mysql -u root -ppassword mysql
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2 to server version: 3.23.9-alpha-debug
+
+Type 'help' for help.
+
+mysql> update user set grant_priv="N" where user <> "root";
+mysql> update db set grant_priv="N" where user != "root";
+
+Sorry for the trouble.
+
+Regards,
+Monty
+
+---------------------------------------------------------------------
+To request this thread, e-mail announce-thread44@lists.mysql.com
+To unsubscribe, e-mail the address shown in the
+List-Unsubscribe header of this message.
+For additional commands, e-mail: announce-help@lists.mysql.com
+
+

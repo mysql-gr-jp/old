@@ -1,0 +1,96 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13783</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13782.html">[前]</a><a href="13784.html">[次]</a><a href="../list/13701-13800.html">[番号順一覧]</a><a href="../thread/13701-13800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13783
+</p>
+<div class="header">
+<p>
+From: N.Toge &lt;N.Toge &lt;toge@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 11 Mar 2007 22:45:32 +0900 (JST)<br>
+Subject: [mysql 13783] Re: mysql.user の 4.1 --&gt; 5.0 更新<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+とみたさま、
+
+toge@kek です。
+
+<span class="quote1">&gt; 私は 4.1 から 5.0 にアップグレードしたことないので、正解は言えないので</span>
+<span class="quote1">&gt; すが、マニュアル通り mysql_upgrade または mysql_fix_privilege_table を</span>
+<span class="quote1">&gt; 実行したけどうまくいかなかった… ということなのでしょうか。</span>
+
+&quot;マニュアル通り&quot;の読解を私が正しくできているかどうか、若干疑問の余地あり
+ますけれども、
+
+- 4.1 でずっと運用してきたデータがある。
+- そこに、あらたに、5.0 をインストールした。で、
+- 4.1 のデータを全てそのまま温存し、これをそのまま使うという
+  data directory 設定状態で 5.0 の mysqld を起動した。
+- でも、その状態 では、mysql (5.0の )クライアントから mysqld にログイン
+  できない。(なんとなれば、mysql.user の仕様が拡張されてあることを
+  5.0 クライアントは前提にしているのに？、データにある mysql.user は
+  4.1 仕様のままだから、と思われる)
+- したがって、mysql_upgrade も mysql_upgrade_shell も
+  mysql_fix_privilege_table も root ログインのところで頓挫。よって
+  これでは論理的に移行不能。
+
+ということです。
+
+その後、本家の ML をサーチしましたら、
+
+<a href="http://forums.mysql.com/read.php?11">http://forums.mysql.com/read.php?11</a>,57057,57057#msg-57057
+<a href="http://forums.mysql.com/read.php?11">http://forums.mysql.com/read.php?11</a>,57057,57271#msg-57271
+
+を見付けました。
+
+それによると、4.1 の mysql.user を 5.0 で使い続けたければ、
+
+- まず、5.0 mysqld は最初 --skip-grant-tables で動かしなさい (4.1 --&gt;
+  5.0 で grant table の仕様が拡張されているところが問題だから、それをと
+  りあえず無視すれば接続 はできるんでそうせよ、と)、
+- その状態で root で(あれ、なんであれ) ログインしてmysql.user のテーブ
+  ル拡張をせよ、
+- そののち --skip-grant-table は除外して mysqld 再起動すれば良いですよ、
+
+といったことが報告されております。
+
+私の症例はこれに対応してる気配が濃厚です。ただし、まだ、自分のところで
+確認してません。
+
+また、dev.mysql.com の FAQ にも manual にも 4.1 --&gt; 5.0 移行の手順で具
+体的に --skip-grant-tables をつかって一旦起動して mysql.user を直すんで
+すよ、というようには あらわ には書いてないように思います。
+
+- Nobu Toge (KEK, Accelerator Lab)
+  email: toge at lcdev.kek.jp
+
+
+
+</pre>
+</div>
+<p class="button"><a href="13782.html">[前]</a><a href="13784.html">[次]</a><a href="../list/13701-13800.html">[番号順一覧]</a><a href="../thread/13701-13800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13781.html">  13781 2007-03-10 21:46 [N.Toge &lt;toge@xxxxxxx] mysql.user の 4.1 --&amp;gt; 5.0 更新       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13782.html">  13782 2007-03-11 22:04 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="13783.html">  13783 2007-03-11 22:45 ┃┗[N.Toge &lt;toge@xxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13784.html">  13784 2007-03-12 09:01 ┗[YuGo &lt;yu.gotou@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13785.html">  13785 2007-03-12 09:36 　┗[N.Toge &lt;toge@xxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13786.html">  13786 2007-03-12 09:58 　　┣[遠藤 俊裕 &lt;endo@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13787.html">  13787 2007-03-12 17:34 　　┗[YuGo &lt;yu.gotou@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13788.html">  13788 2007-03-12 18:06 　　　┗[N.Toge &lt;toge@xxxxxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13789.html">  13789 2007-03-12 18:23 　　　　┗[遠藤 俊裕 &lt;endo@xxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13790.html">  13790 2007-03-12 18:36 　　　　　┗[N.Toge &lt;toge@xxxxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13791.html">  13791 2007-03-12 18:39 　　　　　　┗[遠藤 俊裕 &lt;endo@xxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13792.html">  13792 2007-03-12 19:39 　　　　　　　┗[N.Toge &lt;toge@xxxxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13793.html">  13793 2007-03-13 23:00 　　　　　　　　┗[N.Toge &lt;toge@xxxxxxx]                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11287</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11286.html">[前]</a><a href="11288.html">[次]</a><a href="../list/11201-11300.html">[番号順一覧]</a><a href="../thread/11201-11300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11287
+</p>
+<div class="header">
+<p>
+From: Akira Kuroda &lt;Akira Kuroda &lt;akuroda@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 28 Mar 2005 20:56:43 +0900<br>
+Subject: [mysql 11287] Re: _[mysql_11190]_updat e文の_set句に集合関数co_untを使いたい<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+黒田と申します．
+
+ずいぶん前の話題ですが．．．
+
+
+
+On Fri, 18 Mar 2005 14:26:19 +0900, Manabu Tatesawa
+&lt;mabu@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; いつもお世話になっております。館澤と申します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; update文の set 句に集合関数countを使いたいのですが</span>
+<span class="quote1">&gt; どうすれば動作させることが出来るのか悩んでいます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 具体的には下のようなクエリーを考えています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 人名テーブル TName に</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   name      etc</span>
+<span class="quote1">&gt;   --------  ---------</span>
+<span class="quote1">&gt;   Satou     AAA</span>
+<span class="quote1">&gt;   Tanaka    BBB</span>
+<span class="quote1">&gt;   Satou     CCCC</span>
+<span class="quote1">&gt;   Suzuki    DD</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; が入っていて、</span>
+<span class="quote1">&gt; 同名の人数をカウントしていある人名サマリーテーブル TCount</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;   name     cnt</span>
+<span class="quote1">&gt;   -------  ---------</span>
+<span class="quote1">&gt;   Satou    2</span>
+<span class="quote1">&gt;   Suzuki   1</span>
+<span class="quote1">&gt;   Katou    0</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; を更新するクエリーを考えています。</span>
+<span class="quote1">&gt; ＃TCountに存在しない名前はカウントしなくて良いです</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; そこで下のようなクエリーを作ってみたのですが</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;    update TCount c, TName n</span>
+<span class="quote1">&gt;       set c.cnt = count(*)</span>
+<span class="quote1">&gt;     where c.name  = n.name </span>
+<span class="quote1">&gt;     group by n.name </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; &quot;ERROR 1064 : group by name付近に不具合あり&quot; という旨の</span>
+<span class="quote1">&gt; エラーが出て、動作しません。</span>
+
+
+4.1.x ではこういう SQL で更新できました．
+ update TCount c, (select name, count(*) as cnt from tname group by name) n
+     set c.cnt = n.cnt
+   where c.name  = n.name
+
+
+それ以前であれば 2段階に分けるしかないと思います．
+1. tname と tcount を join してマッチするレコードを tcount から delete
+2. tname と tcount を join して count を計算して tcount に insert
+
+
+--
+KURODA Akira (akuroda@xxxxxxxxxx)
+
+</pre>
+</div>
+<p class="button"><a href="11286.html">[前]</a><a href="11288.html">[次]</a><a href="../list/11201-11300.html">[番号順一覧]</a><a href="../thread/11201-11300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11190.html">  11190 2005-03-18 14:26 [Manabu Tatesawa &lt;mab] update文のset句に集合関数countを使いたい</a></span>
+<span class="current">-&gt;&nbsp;<a href="11287.html">  11287 2005-03-28 20:56 ┗[Akira Kuroda &lt;akurod] Re: _[mysql_11190]_updat e文の_set句に集合関数co_untを使いたい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11288.html">  11288 2005-03-28 21:42 　┗[Manabu Tatesawa &lt;mab] Re: _[mysql_11190]_updat  e文の_set句に集合関数countを使いたい</a></span>
+</pre>
+</body>
+</html>

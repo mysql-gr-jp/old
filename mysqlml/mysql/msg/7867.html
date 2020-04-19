@@ -1,0 +1,79 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7867</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7866.html">[前]</a><a href="7868.html">[次]</a><a href="../list/7801-7900.html">[番号順一覧]</a><a href="../thread/7801-7900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7867
+</p>
+<div class="header">
+<p>
+From: seiji takegata &lt;seiji takegata &lt;takegata@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 3 Jun 2003 02:39:31 +0900<br>
+Subject: [mysql 07867] connector/J3.0  で ResultSet を update しできない？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+ヴェルテックの竹形といいます。
+
+MySql+connector/JでResultSetをupdateしようとしています。OSはW2Kです。
+
+mysql-connector-java-2.0.14-bin.jarでは問題ないのですが、
+mysql-connector-java-3.0.8-stable-bin.jarに入れ替えると、updateRow()を呼んだ
+ところで例外が発生し、次のようなメッセージが表示ます。
+
+refreshRow() called on row that has been deleted or had primary key changed.
+
+該当の行は削除もしていませんし、プライマリキーも変更していません（のつもりです）。
+何がいけないのでしょう？
+
+ソースを貼っておきます。
+
+
+import java.sql.*;
+
+class RsUpdateTest{
+	public static void main(String[] args){
+		try {
+			Class.forName(&quot;com.mysql.jdbc.Driver&quot;); 
+			String connStr=&quot;jdbc:mysql://localhost/jamyto&quot;
+					+ &quot;?user=Mulder&amp;password=TrustNo1&quot;
+					+ &quot;&amp;useUnicode=true&amp;characterEncoding=Shift_JIS&quot;;
+			Connection conn =DriverManager.getConnection(connStr); 
+			Statement stmt = conn.createStatement(
+				ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+			String sqlcommand=&quot;SELECT * FROM person WHERE id=5&quot;;
+			ResultSet rs= stmt.executeQuery(sqlcommand);
+			rs.next();
+			rs.updateString(&quot;name&quot;,&quot;野口五郎&quot;);
+			rs.updateRow();
+			System.out.println(rs.getInt(&quot;id&quot;)+&quot;:&quot;+rs.getString(&quot;name&quot;));
+			rs.close();
+			stmt.close();
+			conn.close();
+		}
+		catch (SQLException e) {
+			System.out.println(&quot;データベースのエラーです。&quot;);
+			System.out.println(&quot;エラーメッセージ:&quot;+ e.getMessage());
+		}
+		catch (Exception e) {
+			e.printStackTrace ();
+		}
+	}
+}
+
+
+--
+seiji takegata
+takegata@xxxxxxxxxx
+
+</pre>
+</div>
+<p class="button"><a href="7866.html">[前]</a><a href="7868.html">[次]</a><a href="../list/7801-7900.html">[番号順一覧]</a><a href="../thread/7801-7900.html">[スレッド一覧]</a></p>
+</body>
+</html>

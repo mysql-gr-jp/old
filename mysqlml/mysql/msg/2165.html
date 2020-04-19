@@ -1,0 +1,207 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:2165</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="2164.html">[前]</a><a href="2166.html">[次]</a><a href="../list/2101-2200.html">[番号順一覧]</a><a href="../thread/2101-2200.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:2165
+</p>
+<div class="header">
+<p>
+From: &quot;N.Yoshida&quot; &lt;&quot;N.Yoshida&quot; &lt;yosh_no@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 05 Jun 2000 19:41:55 +0900<br>
+Subject: [mysql 02165] Re: mysql デーモンの負荷テストで不可解な現象<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+  吉田です。
+  コメントありがとうございます。
+
+<span class="quote1">&gt;たてやんっす</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;MySQL の　シェアードライブラリのダイナミックローディング用パスは　設定してありますか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;対応　1 </span>
+<span class="quote1">&gt;       /etc/ld.so.conf に</span>
+<span class="quote1">&gt;       libmysqlclient.so　があるパスを　設定したあと</span>
+<span class="quote1">&gt;       ldconfig を実行</span>
+<span class="quote1">&gt;       </span>
+<span class="quote1">&gt;       これをするとアプリケーションごとに設定する必要はなくなります</span>
+<span class="quote1">&gt;       </span>
+<span class="quote1">&gt;対応　２</span>
+<span class="quote1">&gt;      LD_RUN_PATH を設定する</span>
+<span class="quote1">&gt;      export LD_RUN_PATH=&quot;/usr/lib/mysql:/lib&quot;</span>
+<span class="quote1">&gt;     などと環境変数にいれてやる</span>
+<span class="quote1">&gt;     これだと　ユーザごとにログインするたびに設定するか</span>
+<span class="quote1">&gt;     起動するユーティリティを実行する前に設定が必要です</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;これで　解決できないでしょうか？</span>
+
+  解決できませんでした。すこし問題が違うように思っています。
+  Msql-Mysql-modulesはreadmeに記述の「既知の問題」のためlibmysqlclientを
+スタティックリンクして(次のように)インストールしています。
+
+-------------------------------------------------------
+Shell &gt; perl Makefile.PL --static --config ◆
+Which drivers do you want to install?
+
+    1)  MySQL only
+    2)  mSQL only (either of mSQL 1 or mSQL 2)
+    3)  MySQL and mSQL (either of mSQL 1 or mSQL 2)
+
+    4)  mSQL 1 and mSQL 2
+    5)  MySQL, mSQL 1 and mSQL 2
+
+Enter the appropriate number:  [3] 1
+
+
+Do you want to install the MysqlPerl emulation? You might keep your old
+Mysql module (to be distinguished from DBD::mysql!) if you are concerned
+about compatibility to existing applications! [n]
+Where is your MySQL installed? Please tell me the directory that
+contains the subdir 'include'. [/usr/local/mysql]
+Which database should I use for testing the MySQL drivers? [test]
+On which host is database test running (hostname, ip address
+or host:port) [localhost]
+User name for connecting to database test? [root]
+Password for connecting to database test? [undef]
+Creating files for MySQL ....................
+Checking if your kit is complete...
+Looks good
+Using DBI 1.13 installed in /usr/lib/perl5/site_perl/5.005/i586-linux/auto/DBI
+Writing Makefile for DBD::mysql
+Writing Makefile for Msql-Mysql-modules
+
+Shell &gt; make
+(略)
+Shell &gt; make test◆
+make[1]: Entering directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+make[1]: Leaving directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+make[1]: Entering directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+PERL_DL_NONLAZY=1 /usr/bin/perl -I../blib/arch -I../blib/lib -I/usr/lib/perl5/5.
+00503/i586-linux -I/usr/lib/perl5/5.00503 -e 'use Test::Harness qw(&amp;runtests $ve
+rbose); $verbose=0; runtests @ARGV;' t/*.t
+t/00base............install_driver(mysql) failed: Can't load '../blib/arch/auto/
+DBD/mysql/mysql.so' for module DBD::mysql: ../blib/arch/auto/DBD/mysql/mysql.so:
+◆undefined symbol: uncompress at /usr/lib/perl5/5.00503/i586-linux/DynaLoader.
+  ~~~~~~~~~~~~~~~~
+pm line 169.
+...............................
+Shell &gt; export LD_RUN_PATH=&quot;/usr/local/mysql/lib:lib&quot;;make test◆やってみました
+make[1]: Entering directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+make[1]: Leaving directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+make[1]: Entering directory `/usr1/src/Msql-Mysql-modules-1.2214/mysql'
+PERL_DL_NONLAZY=1 /usr/bin/perl -I../blib/arch -I../blib/lib -I/usr/lib/perl5/5.
+00503/i586-linux -I/usr/lib/perl5/5.00503 -e 'use Test::Harness qw(&amp;runtests $ve
+rbose); $verbose=0; runtests @ARGV;' t/*.t
+t/00base............install_driver(mysql) failed: Can't load '../blib/arch/auto/
+DBD/mysql/mysql.so' for module DBD::mysql: ../blib/arch/auto/DBD/mysql/mysql.so:
+◆undefined symbol: uncompress at /usr/lib/perl5/5.00503/i586-linux/DynaLoader.pm
+ line 169.
+-------------------------------------------------------
+
+  下にmsql-Mysql-modulesのreadmeを示しますが、1)の問題に酷似しています。し
+かしPerlもMySQLも同じコンパイラでコンパイルしているので違うかもしれません。
+2)の方は perl Makefile.PL --static --config でスタティックリンクにして対処し
+ております。
+
+---(参考Msql-Mysql-modules-1.2214のreadme)------------------------------------
+    翻訳が<a href="http://member.nifty.ne.jp/hippo2000/perltips/DBD/mysql.htm">http://member.nifty.ne.jp/hippo2000/perltips/DBD/mysql.htm</a>にあり
+
+KNOWN PROBLEMS
+    1.)     If the MySQL binaries are compiled with gcc or egcs (as the
+            precompiled binaries are), but your Perl is using
+            another compiler, it is likely that you receive an error
+            message like the following when running &quot;make test&quot;:
+
+              t/00base............install_driver(mysql) failed: Can't load
+              '../blib/arch/auto/DBD/mysql/mysql.so' for module DBD::mysql:
+              ../blib/arch/auto/DBD/mysql/mysql.so: ◆undefined symbol: _umoddi3
+              at /usr/local/perl-5.005/lib/5.005/i586-linux-thread/DynaLoader.pm
+              line 168.
+
+            This means, that your linker doesn't include libgcc.a.
+            You have the following options:
+
+    a)        Either recompile Perl or Mysql, it doesn't
+              matter which. The important thing is that
+              you use the same compiler for both. This is
+              definitely the recommended solution in the
+              long term.
+
+    b)        A simple workaround is to include libgcc.a
+              manually. Do a &quot;make clean&quot; and &quot;make&quot; and
+              in the output wait for a line like
+
+                LD_RUN_PATH=&quot;/usr/lib/mysql:/lib&quot; egcs -o
+                ../blib/arch/auto/DBD/mysql/mysql.so  -shared -L/usr/local/lib
+                dbdimp.o mysql.o -L/usr/lib/mysql -L/usr/lib/mysql -lmysqlclient
+                          -lm
+
+                Repeat the same line in the shell by adding
+
+                  -L/usr/lib/gcc-lib/i386-redhat-linux/gcc-2.7.2.3 -lgcc
+
+                where the directory is the location of
+                libgcc.a. The best choice for locating this
+                file is executing
+
+                  gcc --print-libgcc-file
+
+                or
+
+                  gcc -v
+
+    2.)     There are known problems with shared versions of
+            libmysqlclient, at least on some Linux boxes. If you
+            receive an error message similar to
+
+              install_driver(mysql) failed: Can't load
+              '/usr/lib/perl5/site_perl/i586-linux/auto/DBD/mysql/mysql.so'
+              for module DBD::mysql: ◆File not found at
+              /usr/lib/perl5/i586-linux/5.00404/DynaLoader.pm line 166
+
+            then this error message can be misleading: It's not
+            mysql.so that fails being loaded, but libmysqlclient.so!
+
+            As a workaround, recompile the Msql-Mysql-modules with
+
+              perl Makefile.PL --static --config ◆
+              make
+              make test
+              make install
+
+            This option forces linkage against the static
+            libmysqlclient.a.
+
+---(Msql-Mysql-modules-1.2214のreadme)------------------------------------
+
+
+-------------------------------------------------------------------------
+  吉田 伸次(N.Yoshida) E-mail:yosh_no@xxxxxxxxxx
+                       nifty :TCN00171@xxxxxxxxxx
+-------------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="2164.html">[前]</a><a href="2166.html">[次]</a><a href="../list/2101-2200.html">[番号順一覧]</a><a href="../thread/2101-2200.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="2153.html">   2153 2000-06-02 11:39 [&quot;N.Yoshida&quot; &lt;yosh_no] mysql デーモンの負荷テストで不可解な現象</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2154.html">   2154 2000-06-02 17:32 ┗[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2156.html">   2156 2000-06-02 20:12 　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2158.html">   2158 2000-06-02 22:43 　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2163.html">   2163 2000-06-05 14:58 　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2164.html">   2164 2000-06-05 16:14 　　　　┗[Seiji Tateyama &lt;tate]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="2165.html">   2165 2000-06-05 19:41 　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2166.html">   2166 2000-06-05 21:44 　　　　　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2188.html">   2188 2000-06-10 19:27 　　　　　　┃┗[&quot;N.Yoshida&quot; &lt;yosh_no]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2167.html">   2167 2000-06-06 01:42 　　　　　　┗[tateyan &lt;tateyan@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="2168.html">   2168 2000-06-06 10:22 　　　　　　　┗[&quot;N.Yoshida&quot; &lt;yosh_no]                         </a></span>
+</pre>
+</body>
+</html>

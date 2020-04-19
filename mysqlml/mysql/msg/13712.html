@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13712</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13711.html">[前]</a><a href="13713.html">[次]</a><a href="../list/13701-13800.html">[番号順一覧]</a><a href="../thread/13701-13800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13712
+</p>
+<div class="header">
+<p>
+From: &quot;hiraken&quot; &lt;&quot;hiraken&quot; &lt;hiraken@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 7 Feb 2007 03:18:08 +0900<br>
+Subject: [mysql 13712] オンラインバックアップデータのリカバリ時のエラーについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんばんは。はじめまして
+たかひらと申します。
+
+最近、OracleDBユーザから、MySQLユーザへ切り替わってきたものです。
+このMLは、過去ログも含め、非常に参考になる情報ばかりで重宝しております。
+
+さて現在、バージョン4.1.12 をRed Hat Linux ES4上で稼動させた、
+OLTP系のシステムの、バックアップ・リカバリ設計をしておりまして、
+以下の方法で、オンラインバックアップを行おうと考えています。
+
+【バックアップ手順】
+　1. flush tables with read lock;
+　2. flush logs;
+　3. ストレージのスナップショット
+　4. reset master;
+　5. unlock tables;
+　6. 3で取得したスナップショットをテープ等へバックアップ
+
+
+しかし、検証環境でリカバリ動作を確認したところ、データは戻し、MySQLを起動することができたものの、
+下記リカバリ手順の2.のタイミングで、/var/log/mysqld.logにエラーが出力されているのに気づきました。
+
+【リカバリ手順】
+　1.バックアップデータを戻す
+　2.ネットワーク接続なしでMySQLを起動
+　3.バイナリログからロールフォワードリカバリ-&gt;MySQLを停止
+　4.MySQLを通常起動
+
+=[リカバリ時のログ]=============================================================== 
+
+070206 15:10:45  mysqld started
+070206 15:10:45 [Warning] --innodb-safe-binlog is meaningful only if the 
+global sync_binlog variable
+is 1; now setting it to 1.
+070206 15:10:45  InnoDB: Database was not shut down normally!
+InnoDB: Starting crash recovery.
+InnoDB: Reading tablespace information from the .ibd files...
+InnoDB: Restoring possible half-written data pages from the doublewrite
+InnoDB: buffer...
+070206 15:10:45  InnoDB: Starting log scan based on checkpoint at
+InnoDB: log sequence number 0 44818.
+InnoDB: Doing recovery: scanned up to log sequence number 0 44904
+InnoDB: Last MySQL binlog file position 0 4, file name 
+/var/lib/mysql/binlog.000002
+070206 15:10:45  InnoDB: Flushing modified pages from the buffer pool...
+070206 15:10:45  InnoDB: Started; log sequence number 0 44904
+070206 15:10:45 [ERROR] After InnoDB crash recovery, checking if the binary 
+log
+'/var/lib/mysql/binlog.000002' contains rolled back transactions which must 
+be removed from it...
+/usr/libexec/mysqld: ready for connections.
+Version: '4.1.12-log'  socket: '/var/lib/mysql/mysql.sock'  port: 0  Source 
+distribution
+=[リカバリ時のログ]=============================================================== 
+
+
+
+[ERROR] After InnoDB crash recovery, checking if the binary log
+'/var/lib/mysql/binlog.000002' contains rolled back transactions which must 
+be removed from it...
+
+は、
+『InnoDBのクラッシュリカバリ後、binlog.000002がロールバックトランザクションを含むバイナリログならば、
+チェックしなさい。』
+という直訳で理解しましたが、binlog.000002自体が、
+バックアップ手順の2.で、flush logsを実行した時にできた、
+最新バイナリログですので、中身に処理は記載されておりません。
+従いましてこの場合、このメッセージを無視していいものかどうか、迷っております。 
+
+
+どなたか、同様のご経験をされた方がいらっしゃいましたら、何卒ご教授願いませんでしょうか。
+以上、よろしくお願い申し上げます。
+
+/ Takahira Ken 
+
+
+</pre>
+</div>
+<p class="button"><a href="13711.html">[前]</a><a href="13713.html">[次]</a><a href="../list/13701-13800.html">[番号順一覧]</a><a href="../thread/13701-13800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="13712.html">  13712 2007-02-07 03:18 [&quot;hiraken&quot; &lt;hiraken@x] オンラインバックアップデータのリカバリ時のエラーについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13713.html">  13713 2007-02-07 10:26 ┣[&lt;ska_king2005@xxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13714.html">  13714 2007-02-07 17:38 ┃┣[&lt;kaidnu2@xxxxxxxxxx&gt;] MySQL GUI-tool （ Linux 版）インストール方法</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13715.html">  13715 2007-02-07 22:02 ┃┃┗[舘山 聖司 &lt;tateyan@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13716.html">  13716 2007-02-07 22:30 ┃┃　┗[&lt;kaidnu2@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13717.html">  13717 2007-02-08 01:54 ┃┗[&quot;hiraken&quot; &lt;hiraken@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13718.html">  13718 2007-02-08 10:07 ┃　┗[&lt;ska_king2005@xxxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13719.html">  13719 2007-02-08 11:24 ┗[Yasufumi Kinoshita &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13720.html">  13720 2007-02-08 16:10 　┗[&lt;ska_king2005@xxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13721.html">  13721 2007-02-08 17:21 　　┗[Yasufumi Kinoshita &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13722.html">  13722 2007-02-09 01:33 　　　┗[&quot;hiraken&quot; &lt;hiraken@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13724.html">  13724 2007-02-14 02:05 　　　　┗[&quot;hiraken&quot; &lt;hiraken@x]                               </a></span>
+</pre>
+</body>
+</html>

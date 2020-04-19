@@ -1,0 +1,138 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:435</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="434.html">[前]</a><a href="436.html">[次]</a><a href="../list/401-500.html">[番号順一覧]</a><a href="../thread/401-500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:435
+</p>
+<div class="header">
+<p>
+From: Satoshi Koiwa &lt;Satoshi Koiwa &lt;koiwa@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 9 Dec 98 20:57:47 +0900<br>
+Subject: [mysql 435] Re:  CREATE TABLE 句についての質問<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+毎度私は民斗さんの反応の速さに仰天しております。
+
+<span class="quote1">&gt;MS ACEESS等にテーブルをリンクすると、文字列は左詰で表示されています。INT</span>
+<span class="quote1">&gt;だと右詰で表示されています。(NUMBER型は左詰です)</span>
+<span class="quote1">&gt;このことからNUMBER型は数値しか入らない文字列のことではないかと、推測して</span>
+<span class="quote1">&gt;おります。</span>
+
+MS ACCESSは、まぁ、よくわからんのでパス(はははは)。
+OracleのNUMBER型というのは確かに「数値しか入らない文字列」という扱いだと認
+識しています。そしてMySQLのDECIMAL型も同様に「CHAR項目のように振舞います」
+とマニュアルにあります。その意味ではOracleのNUMBER型にそのまんま対応するの
+はDECIMAL型だといっていいかもしれません。NUMERIC型というのもあるんですが…
+…。確かOracleでもDECIMAL型が使えたように思います。標準SQL(SQL92でしたっけ
+?)で定義されているんですよね、たぶん、DECIMAL型。
+私がOracleで扱っているのは事務処理システムなんで、浮動小数点だっ!!というよ
+うなものはなくって、小数が出てくるのは消費税計算とか平均とかを出すときくら
+いです。で、かつてInformixではINTEGER型を使っていたんですが、Oracleに移行し
+たときにどこかでNUMBER型が推奨されていたんでそのまんまNUMBER型にしちゃいま
+した。なんで推奨されていたんだろうかなぁ、すでに忘れています。
+まぁMySQLでいきなり大事な仕事をはじめることはないとは思うんですが、念の為に
+、数値の扱いはやっぱりDBエンジンごとに違っていたりするんで要注意だと思いま
+す。
+試しに0.999×0.999をやってみます。
+
+Oracleだと(開発環境なんでちょっと古い)
+
+=============================================
+Oracle8 Release 8.0.3.0.0 - Production
+With the Partitioning and Objects options
+PL/SQL Release 8.0.3.0.0 - Production
+に接続されました。
+SQL&gt; select 0.999 * 0.999 from dual;
+
+0.999*0.999
+-----------
+    .998001
+
+SQL&gt; create table test(wao decimal(3,3));
+
+表が作成されました。
+
+SQL&gt; insert into test values(0.999);
+
+1行が作成されました。
+
+SQL&gt; select wao * wao from test;
+
+   WAO*WAO
+----------
+   .998001
+
+SQL&gt; 
+=============================================
+
+となります。で、MySQLだと
+
+=============================================
+mysql&gt; select 0.999 * 0.999;
++---------------+
+<span class="quote1">| 0.999 * 0.999 |</span>
++---------------+
+<span class="quote1">|         0.998 |</span>
++---------------+
+1 row in set (0.00 sec)
+
+mysql&gt; create table test(wao decimal(3,3));
+Query OK, 0 rows affected (0.00 sec)
+
+mysql&gt; insert into test values(0.999);
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; select wao * wao from test;
++-----------+
+<span class="quote1">| wao * wao |</span>
++-----------+
+<span class="quote1">|     0.998 |</span>
++-----------+
+1 row in set (0.00 sec)
+
+mysql&gt;
+=============================================
+
+となります。
+
+#!/usr/bin/perl
+use Mysql;
+$dbh = Mysql-&gt;connect(&quot;localhost&quot;, &quot;shop_db&quot;, &quot;shop&quot;, &quot;shop&quot;);
+$sql = &quot;select wao * wao from test&quot;;
+$sth = $dbh-&gt;query($sql);
+$wao = $sth-&gt;fetchhash;
+print &quot;[$wao]\n&quot;;
+
+というのを作っても
+[0.998]
+というのが返ってきます。まぁこれは型の問題というよりは型から取り出したあと
+の処理の問題でしょう。元のシステムがOracleどっぷりだったりすると結構とまど
+うかも。
+ ちなみに私は最初「select 0.999 * 0.999」が「from dual」なしで動くってのに
+とてつもなく違和感がありました。慣れました。
+
+OracleからMySQLへの移行ですが、7.3とかでちょっと規模が大きいシステムだと
+CREATE TABLE文の最後にSTORAGE(INITIAL 5000K NEXT 1000K)とかPCTFREEだとか書
+いてあるでしょうから、そのままポンとはいかないかもしれませんね。
+あと、私の使っているMySQLは3.21.33bなんで、「ふつー」の方達が使われている新
+しい3.22系とは違うかもしれません。よくわかりません。
+
+</pre>
+</div>
+<p class="button"><a href="434.html">[前]</a><a href="436.html">[次]</a><a href="../list/401-500.html">[番号順一覧]</a><a href="../thread/401-500.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="435.html">    435 1998-12-09 20:57 [Satoshi Koiwa &lt;koiwa] Re:  CREATE TABLE 句についての質問      </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="436.html">    436 1998-12-09 22:04 ┣[Tamon Nomura &lt;tamon@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="438.html">    438 1998-12-10 09:29 ┗[民斗 &lt;tommy@xxxxxxxx]                                       </a></span>
+</pre>
+</body>
+</html>

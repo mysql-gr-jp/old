@@ -1,0 +1,436 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12772</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12771.html">[前]</a><a href="12773.html">[次]</a><a href="../list/12701-12800.html">[番号順一覧]</a><a href="../thread/12701-12800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12772
+</p>
+<div class="header">
+<p>
+From: Tetsuro IKEDA &lt;Tetsuro IKEDA &lt;tetsuro@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 17 Feb 2006 01:15:43 -0500<br>
+Subject: [mysql 12772] Re: Mysql　JDBC接続時のサイズ制限<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+池田＠自己レスです。
+
+ちゃんとコメント読め、という感じでした(^^;
+
+・UNIV_PAGE_SIZE には2の累乗を設定する
+・UNIV_PAGE_SIZE_SHIFT にはUNIV_PAGE_SIZEのその2の対数を設定する
+
+ということですね。
+
+つまりPageサイズには48KBのようなサイズは指定できないということですね。
+
+64KBの場合、
+
+UNIV_PAGE_SIZE = 8 * 8192
+UNIV_PAGE_SIZE_SHIFT = 16
+
+ということになるでしょうか。
+
+Tetsuro IKEDA wrote:
+<span class="quote1">&gt; 池田です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; InnoDBのPageサイズを変えるためには、ソースファイルを直接編集した後に、</span>
+<span class="quote1">&gt; コンパイルする必要があるようです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 【変更対象】</span>
+<span class="quote1">&gt; $MySQL/innobase/include/univ.i</span>
+<span class="quote1">&gt; ・UNIV_PAGE_SIZE</span>
+<span class="quote1">&gt; ・UNIV_PAGE_SIZE_SHIFT</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 【参考】</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/refman/4.1/en/innodb-restrictions.html">http://dev.mysql.com/doc/refman/4.1/en/innodb-restrictions.html</a></span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 例えばPageサイズを64KBにする場合、UNIV_PAGE_SIZEを&quot;8 * 8192&quot;に変えるのは</span>
+<span class="quote1">&gt; 良いとして、UNIV_PAGE_SIZE_SHIFTはどう変更するのがいいんでしょうかね。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 考え中・・・。もし分かったら教えてください(＾＾)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; kyou tech wrote:</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt;だいぶ解ったような気がします。丁寧なご説明に感動しました。</span>
+<span class="quote2">&gt;&gt;mysqlの醍醐味も感じ始めています。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;２．コンパイルオプションを指定してInnoDBのPageサイズをデフォルトの16KBか</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;ら、</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;　　もっと大きな値にする（最大で64KBまで指定可能）。</span>
+<span class="quote3">&gt;&gt;&gt;　　（64KBにすることで制限は8KBから32KBに緩和される。）</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;で試したいと思います。</span>
+<span class="quote2">&gt;&gt;ただ、configure --helpで見るとpage sizeのオプションがないようですが、</span>
+<span class="quote2">&gt;&gt;直接configureファイルを修正することになるでしょうか。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;From: Tetsuro IKEDA &lt;tetsuro@xxxxxxxxxx&gt;</span>
+<span class="quote3">&gt;&gt;&gt;Reply-To: ml@xxxxxxxxxx</span>
+<span class="quote3">&gt;&gt;&gt;To: ml@xxxxxxxxxx</span>
+<span class="quote3">&gt;&gt;&gt;Subject: <a href="12769.html">[mysql 12769]</a> Re: Mysql　JDBC接続時のサイズ制限</span>
+<span class="quote3">&gt;&gt;&gt;Date: Thu, 16 Feb 2006 22:04:00 -0500</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;池田＠Connector/Jチームにてインターン中です。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;まず確認したいのですが、使用しているストレージエンジンはInnoDBで宜しいで</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;しょうか？</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;さて、InnoDB前提で考えた場合、ちょっと説明が長くなりますが、以下私の予 </span>
+<span class="quote3">&gt;&gt;&gt;想で</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;す。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;【InnoDBにおける行サイズのデフォルトの最大値（約8000バイト)を超えたのが原</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;因】</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;InnoDBはテーブルのデータを格納する領域であるTable Spaceを、デフォルトでは</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;16KB</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;(これはコンパイル時に指定されます）のPage単位に分割して管理しており、</span>
+<span class="quote3">&gt;&gt;&gt;それぞれのPage内に各行を&quot;主キーでソートした状態&quot;で格納しています。</span>
+<span class="quote3">&gt;&gt;&gt;（InnoDBにおけるClustered Index）</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;これに関連して、InnoDBでは各行の最大長はPageサイズの半分以下であるこ </span>
+<span class="quote3">&gt;&gt;&gt;と、と</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;いう</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;制限があります。デフォルトのPageサイズ16KBにおいては、8KBがこれに当たりま</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;す。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;しかしInnoDBでは、InnoDBではTEXT（LONGTEXT）やBLOB（LONGBLOB）を使用する</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;と、</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;該当データをその行が可能されているPageの外に格納することができるため、</span>
+<span class="quote3">&gt;&gt;&gt;実際には最大4GBまでの行を格納することができます。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;ただし、例えば以下のDDLがあり、</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;CREATE TABLE t1 (c1 TEXT) TYPE=InnoDB;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;以下のDMLが実行されたとすると、</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;INSERT INTO t1 SET c1 = REPEAT('A', 10000);</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;行が格納されているPageにはカラムc1の先頭512バイトが格納され、</span>
+<span class="quote3">&gt;&gt;&gt;Page外に格納されるのは、残りの10000-512=9488バイトとなります。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;すなわち、この残りの9488バイトについては何も問題は無いのですが、</span>
+<span class="quote3">&gt;&gt;&gt;先頭512バイト分については行が格納されているPage内に格納されるため、</span>
+<span class="quote3">&gt;&gt;&gt;例えばこのc1のようなカラムが複数存在する場合には、Page内に合計で</span>
+<span class="quote3">&gt;&gt;&gt;格納されるデータサイズが8000バイトを超えてしまい、今回生じているような、</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;Got error 139 from table handler</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;というエラーがInnoDBから投げられてしまうということになります。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;例えば以下のようなDDLおよびDMLを実行してみると分かりやすいでしょう。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;mysql&gt; create table many_text(a text, b text, c text, d text, e text, f </span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;text, g</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;text, h text, i text, j text, k text, l text, m text, n text, o text, p </span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;text)</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;type=innodb;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;mysql&gt; insert into many_text set a = repeat('.', 512);</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;mysql&gt; update many_text set</span>
+<span class="quote3">&gt;&gt;&gt;b=a,c=a,d=a,e=a,f=e,g=a,h=a,i=a,j=a,k=a,l=a,m=a,n=a,o=a;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;mysql&gt; update many_text set</span>
+<span class="quote3">&gt;&gt;&gt;b=a,c=a,d=a,e=a,f=e,g=a,h=a,i=a,j=a,k=a,l=a,m=a,n=a,o=a,p=a;</span>
+<span class="quote3">&gt;&gt;&gt;ERROR 1030: Got error 139 from table handler</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;となると、今回の問題の回避方法ですが、以下の2つのどちらかではないかと </span>
+<span class="quote3">&gt;&gt;&gt;思われ</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;ます。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;１．DDLを変更して8000バイト以上のデータがPage内に入らないようにする。</span>
+<span class="quote3">&gt;&gt;&gt;　　例：テーブルを分割する、行を統合するなど</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;２．コンパイルオプションを指定してInnoDBのPageサイズをデフォルトの16KBか</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;ら、</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;　　もっと大きな値にする（最大で64KBまで指定可能）。</span>
+<span class="quote3">&gt;&gt;&gt;　　（64KBにすることで制限は8KBから32KBに緩和される。）</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;以上です。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;皆様、何か補足などありましたら宜しくお願いいたします。</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;kyou tech wrote:</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;池田さん</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;ご返事ありがとうございます。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;対象テーブルは130項目があって、50項目ぐらいはTEXT型です。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;中でfull size10000Byte項目が一個、5000Byte、3000Byte項目が若干ありま </span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;す。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;full sizeのレコード長は105KBぐらいです。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;もともとMysqlのTextの上限は65535Byteと認識していますから、</span>
+<span class="quote4">&gt;&gt;&gt;&gt;個々のフィールドの制限違反よりは、</span>
+<span class="quote4">&gt;&gt;&gt;&gt;Mysql(4.0.21)の行のサイズに制限があるような感じしています。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;本当にそうでしょうか。もしそうであれば、どこかの設定を修正するか（そう</span>
+<span class="quote4">&gt;&gt;&gt;&gt;願って</span>
+<span class="quote4">&gt;&gt;&gt;&gt;います）、</span>
+<span class="quote4">&gt;&gt;&gt;&gt;まさかテーブル分割することになるでしょうか。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;今回始めてMysqlを使うことで、無知な質問ばかりですみません。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;From: Tetsuro IKEDA &lt;tetsuro@xxxxxxxxxx&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;Reply-To: ml@xxxxxxxxxx</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;To: ml@xxxxxxxxxx</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;Subject: <a href="12767.html">[mysql 12767]</a> Re: Mysql　JDBC接続時のサイズ制限</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;Date: Thu, 16 Feb 2006 07:07:24 -0500</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;池田です。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;Connector/J（MySQL JDBC Type4 Driver)でStatementあるいはClient-Sideの</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;PreparedStatementを使用する場合の送信可能なクエリの最大長は2GBです。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;（普通はそれよりも先にJVMのHEAPサイズが事実上の制限になると思います）</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;Connector/Jに限らず、MySQLの全ての種類のクライアントは16MBを超える </span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;SQL文</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;に</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;ついては、複数のPacketに分割してサーバへ送信します。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;max_allowed_packetは20MBに設定しているということですので、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;これが原因ということも無いと思います。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|java.sql.SQLException: Got error 139 from table handler</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;こちらのエラーをPerrorで見るに、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;D:\mysql\mysql-4.0.26-win32\bin&gt;perror 139</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;MySQL error:  139 = Too big row</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;これはConnector/Jが作成したエラーではなく、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;サーバから&quot;Too big row&quot;というメッセージでエラーが返ってきたことを意味</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;してい</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;ます。</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;何か思い当たる節はありませんか？</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;kyou tech wrote:</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;質問内容曖昧ですみません。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;実は</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;画面上の各項目をfull sizeで入力して登録すると</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;下記のエラーが発生しています。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;各項目を小さいサイズで入力するとうまく登録できます。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;full sizeでのレコードの長さ：100KB</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;一応mysql server(4.0.21) の</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;max_allowed_packet</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;max_heap_table_sizeをそれぞれ20MBと32MBに調整したが、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;同じくエラーが出ていますので、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;jdbcのクエリーの長さに制限があるかと思っています。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;ご教授いただければ助かります。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|java.sql.SQLException: Got error 139 from table handler</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|       at </span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:2921)</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|       at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1570)</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|       at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:1665)</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|       at com.mysql.jdbc.Connection.execSQL(Connection.java:2978)</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|       at com.mysql.jdbc.Connection.execSQL(Connection.java:2902)</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|       at</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;com.mysql.jdbc.PreparedStatement.executeInternal(PreparedStatement.ja</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;va:930)</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|       at</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;com.mysql.jdbc.PreparedStatement.executeUpdate(PreparedStatement.java</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;:1159)</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|       at</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;com.mysql.jdbc.PreparedStatement.executeUpdate(PreparedStatement.java</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;:1076)</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|       at</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;com.mysql.jdbc.PreparedStatement.executeUpdate(PreparedStatement.java</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;:1061)</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;|       at</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;org.jboss.resource.adapter.jdbc.WrappedPreparedStatement.executeUpdat</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;e(Unknown Source)</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;|       at</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;com.sony.framework.util.sqltemplate2.UpdateSQLCommand.runStatement(Up</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;dateSQLCommand.java:65)</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;From: Tetsuro IKEDA &lt;tetsuro@xxxxxxxxxx&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;Reply-To: ml@xxxxxxxxxx</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;To: ml@xxxxxxxxxx</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;Subject: <a href="12765.html">[mysql 12765]</a> Re: Mysql　JDBC接続時のサイズ制限</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;Date: Thu, 16 Feb 2006 05:43:19 -0500</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;こんにちは。池田です。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;Mysql　JDBC接続時のサイズ制限(stateMentの長さ）がありますか。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;もしあれば、どうやって調整（設定）しますでしょうか。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;java.sql.Statementを使う場合にサーバに送信できるクエリの最大長に </span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;つい</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;て</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;の</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;ご質問でしょうか？　</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;質問の意図をもう少し詳しく教えてください。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;--</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;Tetsuro Ikeda, Intern Development &amp; Support</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;MySQL Inc, www.mysql.com</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;Office: +1-206-336-2030   Mobile: +1-206-661-4293</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;Are you MySQL certified?  www.mysql.com/certification</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;_________________________________________________________________</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;迷惑メールやウイルスへの対策も万全「MSN Hotmail」</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;<a href="http://promotion.msn.co.jp/hotmail/">http://promotion.msn.co.jp/hotmail/</a></span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;--</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;Tetsuro Ikeda, Intern Development &amp; Support</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;MySQL Inc, www.mysql.com</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;Office: +1-206-336-2030   Mobile: +1-206-661-4293</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;Are you MySQL certified?  www.mysql.com/certification</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt;_________________________________________________________________</span>
+<span class="quote4">&gt;&gt;&gt;&gt;パソコンでも携帯電話でも使える 「MSN Hotmail」</span>
+<span class="quote4">&gt;&gt;&gt;&gt;<a href="http://promotion.msn.co.jp/hotmail/">http://promotion.msn.co.jp/hotmail/</a></span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;-- </span>
+<span class="quote3">&gt;&gt;&gt;Tetsuro Ikeda, Intern Development &amp; Support</span>
+<span class="quote3">&gt;&gt;&gt;MySQL Inc, www.mysql.com</span>
+<span class="quote3">&gt;&gt;&gt;Office: +1-206-336-2030   Mobile: +1-206-661-4293</span>
+<span class="quote3">&gt;&gt;&gt;Are you MySQL certified?  www.mysql.com/certification</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;_________________________________________________________________</span>
+<span class="quote2">&gt;&gt;MSNショッピングでXbox360を早速チェック！ </span>
+<span class="quote2">&gt;&gt;<a href="http://shopping.msn.co.jp/softcontent/softcontent.aspx?scmId=593">http://shopping.msn.co.jp/softcontent/softcontent.aspx?scmId=593</a></span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+-- 
+Tetsuro Ikeda, Intern Development &amp; Support
+MySQL Inc, www.mysql.com
+Office: +1-206-336-2030   Mobile: +1-206-661-4293
+Are you MySQL certified?  www.mysql.com/certification
+
+</pre>
+</div>
+<p class="button"><a href="12771.html">[前]</a><a href="12773.html">[次]</a><a href="../list/12701-12800.html">[番号順一覧]</a><a href="../thread/12701-12800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12763.html">  12763 2006-02-16 13:49 [&quot;Matsunobu, Yoshinor] Re: MySQL のバックアップ・復元について  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12764.html">  12764 2006-02-16 17:24 ┣[&quot;kyou tech&quot; &lt;kyou_te] Mysql　JDBC接続時のサイズ制限         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12765.html">  12765 2006-02-16 19:43 ┃┗[Tetsuro IKEDA &lt;tetsu]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12766.html">  12766 2006-02-16 20:18 ┃　┗[&quot;kyou tech&quot; &lt;kyou_te]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12767.html">  12767 2006-02-16 21:07 ┃　　┗[Tetsuro IKEDA &lt;tetsu]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12768.html">  12768 2006-02-17 10:37 ┃　　　┗[&quot;kyou tech&quot; &lt;kyou_te]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12769.html">  12769 2006-02-17 12:04 ┃　　　　┗[Tetsuro IKEDA &lt;tetsu]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12770.html">  12770 2006-02-17 14:32 ┃　　　　　┗[&quot;kyou tech&quot; &lt;kyou_te]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12771.html">  12771 2006-02-17 15:02 ┃　　　　　　┗[Tetsuro IKEDA &lt;tetsu]                         </a></span>
+<span class="current">-&gt;&nbsp;<a href="12772.html">  12772 2006-02-17 15:15 ┃　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12773.html">  12773 2006-02-17 16:42 ┃　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12775.html">  12775 2006-02-18 16:10 ┃　　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12776.html">  12776 2006-02-19 21:08 ┃　　　　　　　　　　┗[&quot;kyou tech&quot; &lt;kyou_te]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12777.html">  12777 2006-02-20 04:06 ┃　　　　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12778.html">  12778 2006-02-20 06:43 ┃　　　　　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12779.html">  12779 2006-02-20 14:51 ┃　　　　　　　　　　　　　┗[&quot;kyou tech&quot; &lt;kyou_te]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12780.html">  12780 2006-02-20 15:01 ┃　　　　　　　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12781.html">  12781 2006-02-20 15:37 ┃　　　　　　　　　　　　　　　┗[&quot;kyou tech&quot; &lt;kyou_te]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12782.html">  12782 2006-02-20 15:45 ┃　　　　　　　　　　　　　　　　┗[Tetsuro IKEDA &lt;tetsu]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12774.html">  12774 2006-02-17 17:59 ┗[baya &lt;bayapbayap@xxx]                                       </a></span>
+</pre>
+</body>
+</html>

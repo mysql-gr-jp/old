@@ -1,0 +1,135 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9509</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9508.html">[前]</a><a href="9510.html">[次]</a><a href="../list/9501-9600.html">[番号順一覧]</a><a href="../thread/9501-9600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9509
+</p>
+<div class="header">
+<p>
+From: IWAMURO Motonori &lt;IWAMURO Motonori &lt;iwa@xxxxxxxxxx&gt;&gt;<br>
+Date: 1 Jun 2004 16:36:00 +0900<br>
+Subject: [mysql 09509] Re: 日本語対応上の問題点<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+岩室です。
+
+In message &quot;<a href="09502.html">[mysql 09502]</a> Re: 日本語対応上の問題点&quot;
+    on 04/06/01, SUGAWARA Hajime &lt;sugawara@xxxxxxxxxx&gt; writes:
+<span class="quote1">&gt; 　一番関係が深そうなのはここかなぁ。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; <a href="http://www2.xml.gr.jp/1ml_main.html?MLID=xmlmoji">http://www2.xml.gr.jp/1ml_main.html?MLID=xmlmoji</a></span>
+
+そうですねぇ。ただ、私自身の一番の関心は、CUI/CLI環境で生じる問題と、
+異種混在環境(Linux/Windows/Mac OS X)におけるデータ共有(ファイルサーバ
+やDBなど)の際に生じる問題の解決についてなので、XMLのMLだとちょっと微妙
+かなぁ、という感じがするのですが……。
+
+# とは言え、一度ポストしてみるのもいいかもしれない。
+
+<span class="quote1">&gt; ＃岩室さんが話されているようなことは、過去に何度も見かけた</span>
+<span class="quote1">&gt; ＃気がするので、きっとどこかでまとめられているでしょう。</span>
+
+Unicodeの諸問題についてはよく見かけるのですが(ブックマークにリンクがた
+くさん)、CUI/CLI環境における問題点については、私の知る限り久保田氏のペー
+ジ ( <a href="http://www.debian.or.jp/~kubota/">http://www.debian.or.jp/~kubota/</a> ) くらいしか知らないです。データ
+共有についても特に見かけないような……。
+
+
+In message &quot;<a href="09507.html">[mysql 09507]</a> Re: 日本語対応上の問題点&quot;
+    on 04/06/01, とみたまさひろ &lt;tommy@xxxxxxxxxx&gt; writes:
+<span class="quote1">&gt; # そういや UTF-8 を表示できる端末エミュレータは触ったことないな…。</span>
+
+最近のxtermはUTF-8に対応しています。既存のエンコーディングについては、
+luitというフィルタで変換することになっているようです。(上記の久保田氏
+のページ参照)
+
+# ちょっとだけ調べた範囲では、East Asian Width の Ambiguous な文字の幅
+# は1になるらしく、ロケールをja_JP.eucJPにしても場合によっては画面が崩
+# れるようです。(検証したわけではないので嘘書いてるかも)
+
+<span class="quote1">&gt; setlocale() で使えるロケール名とは違いますが、Solaris の iconv_ja(5) </span>
+<span class="quote1">&gt; を見ると、以下のようなコードセットが定義されてます。</span>
+&lt;略&gt;
+<span class="quote1">&gt; UTF-8</span>
+<span class="quote1">&gt; UTF-8-Java</span>
+<span class="quote1">&gt; UTF-8-ms932</span>
+
+うひょお、実装レベルで既にあるんですね、javaとmsは……(^^;
+
+# 私の環境は今時Solaris2.6なので、下二つは出てこないです。
+
+<span class="quote1">&gt; アプリと端末の両方が UTF-8 をそのまま扱えるなら問題ないんですよね。</span>
+
+いえ、たとえ100% pure UTF-8環境であっても問題ありまくりなのが、問題な
+わけで……。
+
+# その問題に関する情報を<a href="09501.html">[mysql 09501]</a>に書いたつもりだったんですが(^^;
+
+<span class="quote1">&gt; たとえば、Solaris では setterm -x XXXX というコマンドを実行すれば、端</span>
+<span class="quote1">&gt; 末のコードが XXXX であることを OS が認識してくれて、それ以降の端末の入</span>
+<span class="quote1">&gt; 出力は自動でコード変換してくれます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 例: LANG=ja_JP.eucJP で setterm -x SJIS とすると、端末からの入力は </span>
+<span class="quote1">&gt;     SJIS → EUC 変換され、端末への出力は EUC → SJIS 変換される</span>
+
+こんなのがあったんですね、知らなかった……。(Solarisユーザなのに^^;)
+私は、拙作の cocot ( <a href="http://iwa.ath.cx/software/cygwin/cocot.html">http://iwa.ath.cx/software/cygwin/cocot.html</a> ) と
+いうツールでコード変換かけてます。できることは setterm と同じ。
+
+# 何でしつこくこの問題を追求するかというと、cocotのUTF-8対応について、
+# 現在進行形で頭をかかえているからなのでした。表示も入力もできるんです
+# が、ASCII+JIS X 0208の範囲内の文字セットしか使ってないのに、
+# ja_JP.UTF-8だと画面が崩れたりファイルが正しく編集できなかったりして
+# 実用にならない……。
+-- 
+岩室元典 [E-Mail: vmi@xxxxxxxxxx / iwa@xxxxxxxxxx]
+「……雑でした」(「Fate/stay night」TYPE-MOON)
+
+</pre>
+</div>
+<p class="button"><a href="9508.html">[前]</a><a href="9510.html">[次]</a><a href="../list/9501-9600.html">[番号順一覧]</a><a href="../thread/9501-9600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9444.html">   9444 2004-05-27 12:11 [Hirofumi Fujiwara &lt;f] 日本語対応上の問題点                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9445.html">   9445 2004-05-27 12:28 ┣[seiji takegata &lt;take]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9450.html">   9450 2004-05-27 15:23 ┃┗[IWAMURO Motonori &lt;iw]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9458.html">   9458 2004-05-28 11:28 ┃　┗[Hirofumi Fujiwara &lt;f]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9459.html">   9459 2004-05-28 13:53 ┃　　┣[seiji takegata &lt;take]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9462.html">   9462 2004-05-28 15:38 ┃　　┃┗[IWAMURO Motonori &lt;iw]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9463.html">   9463 2004-05-28 15:57 ┃　　┣[IWAMURO Motonori &lt;iw]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9464.html">   9464 2004-05-28 16:14 ┃　　┃┗[&quot;Kim, Dong Kyu&quot; &lt;kim]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9466.html">   9466 2004-05-28 18:58 ┃　　┃　┗[深海水草 &lt;VYG01106@x]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9465.html">   9465 2004-05-28 18:58 ┃　　┗[深海水草 &lt;VYG01106@x]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9467.html">   9467 2004-05-28 19:32 ┃　　　┗[Hirofumi Fujiwara &lt;f]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9446.html">   9446 2004-05-27 12:36 ┣[SUGAWARA Hajime &lt;sug]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9447.html">   9447 2004-05-27 12:41 ┃┣[&quot;T.P.S.Nakagawa&quot; &lt;ya]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9448.html">   9448 2004-05-27 13:04 ┃┃┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9449.html">   9449 2004-05-27 13:10 ┃┃　┗[&quot;T.P.S.Nakagawa&quot; &lt;ya]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9455.html">   9455 2004-05-27 17:55 ┃┣[Hirofumi Fujiwara &lt;f]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9456.html">   9456 2004-05-27 22:48 ┃┃┗[SUGAWARA Hajime &lt;sug]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9469.html">   9469 2004-05-28 23:11 ┃┗[とみたまさひろ &lt;tomm]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9480.html">   9480 2004-05-31 11:19 ┃　┗[IWAMURO Motonori &lt;iw]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9483.html">   9483 2004-05-31 15:46 ┃　　┣[とみたまさひろ &lt;tomm]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9501.html">   9501 2004-06-01 11:52 ┃　　┃┗[IWAMURO Motonori &lt;iw]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9502.html">   9502 2004-06-01 12:12 ┃　　┃　┣[SUGAWARA Hajime &lt;sug]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="9509.html">   9509 2004-06-01 16:36 ┃　　┃　┃┗[IWAMURO Motonori &lt;iw]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9528.html">   9528 2004-06-03 18:30 ┃　　┃　┃　┗[とみたまさひろ &lt;tomm]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9507.html">   9507 2004-06-01 13:49 ┃　　┃　┗[とみたまさひろ &lt;tomm]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9488.html">   9488 2004-05-31 21:41 ┃　　┗[Hirofumi Fujiwara &lt;f]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9489.html">   9489 2004-05-31 22:10 ┃　　　┗[mohri &lt;mohri@xxxxxxx]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9491.html">   9491 2004-05-31 22:33 ┃　　　　┗[ML account &lt;ml@xxxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9492.html">   9492 2004-05-31 22:48 ┃　　　　　┣[mohri &lt;mohri@xxxxxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9493.html">   9493 2004-05-31 23:12 ┃　　　　　┃┗[ML account &lt;ml@xxxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9494.html">   9494 2004-05-31 23:26 ┃　　　　　┃　┗[mohri &lt;mohri@xxxxxxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9512.html">   9512 2004-06-01 17:45 ┃　　　　　┗[Hirofumi Fujiwara &lt;f]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9451.html">   9451 2004-05-27 15:44 ┗[UNO Shintaro &lt;uno@xx]                                       </a></span>
+</pre>
+</body>
+</html>

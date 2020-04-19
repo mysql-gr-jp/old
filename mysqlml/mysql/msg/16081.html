@@ -1,0 +1,174 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16081</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16080.html">[前]</a><a href="16082.html">[次]</a><a href="../list/16001-16100.html">[番号順一覧]</a><a href="../thread/16001-16100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16081
+</p>
+<div class="header">
+<p>
+From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 17 Jan 2014 23:11:06 +0900<br>
+Subject: [mysql 16081] Re: odbc接続について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんばんは、yoku0825といいます。
+
+<span class="quote1">&gt; Connnection Failed:[HY000][MySQL][ODBC 5.2(w)Driver] Connection using old(pre-4.1.1) authentication protocol refused(client option ‘secure_auth’ enabled)</span>
+
+MySQLのパスワードハッシュ形式は4.1で変更が入り、
+・4.0とそれ以前 .. 16桁ハッシュ
+・4.1とそれ以降 .. 41桁ハッシュ
+になっています。
+
+互換性の為にどちらのハッシュ形式でも認証が出来るようになってはいるんですが、最近のクライアント(この場合はConnector/ODBC)では16桁ハッシュでの認証を拒否するオプション(--secure-auth)がデフォルトでONになったようで、よくエラーメッセージの話を聞く気がします。
+
+そのユーザーのパスワードハッシュの桁数は、(PHPMyAdminなどでrootで接続して)SELECT user, host,
+password FROM mysql.user; などで確認できます。
+
+
+16桁ハッシュになっていた場合の解決法としては、
+1) Connector/ODBC上でsecure-auth= OFFにしてやる。
+　⇒&quot;Read options from
+my.cnf&quot;とかいうチェックボックスがあったのでこれをONにして、my.cnf(というかWindowsだとmy.iniのはずなんだけどなぁ。。)にsecure-auth=
+0 を書いてやれば食ってくれるかと思ったんですが、ダメだったとの情報あり（未確認）
+　⇒オススメはしませんが、Connector/ODBCのソースを書き換えてsecure-authのデフォルトを0にすり替えるという手もあります。
+
+2) 古いConnector/ODBCを使う。
+　⇒3.51.30ならsecure-auth= OFFがデフォルトのはずなので、回避できると思います。
+　⇒ <a href="http://downloads.mysql.com/archives/c-odbc/">http://downloads.mysql.com/archives/c-odbc/</a>
+
+3) MySQL Server上の該当ユーザーのパスワードを16桁ハッシュから41桁ハッシュに変更してやる。
+　⇒ただし、3.23(相当), 4.0(相当)のクライアントがそのMySQL
+Serverに接続できなくなりますので、接続する可能性のある全てのクライアントをチェックすることをオススメします。
+　⇒PHPMyAdminからrootでログインし、
+　　SET SESSION old_passwords= 0;
+　　SET PASSWORD FOR ユーザー名@'%'= PASSWORD('パスワード文字列');
+　⇒繰り返しますが、古すぎるクライアントはこれをやると(ODBCだろうがPHPだろうがPerlだろうが)一切接続できなくなるので十分ご注意ください。
+
+4) 41桁ハッシュを持つ新しいユーザーを作る。
+　⇒PHPMyAdminなどでrootログインし、
+　　SHOW GRANTS FOR ユーザー名@'%';
+　　SET SESSION old_passwords= 0;
+　　SHOW GRANTSの結果をコピペしてユーザー名をよしなに変更、IDENTIFIED BY
+'パスワード文字列'はコピペせずにパスワードを書いてあげてください。
+
+
+あたりでしょうか。
+
+
+手前味噌ですが、以前書いたこちらのメモが参考になるかも知れません（この時はレプリケーションスレーブでしたが）
+<a href="http://yoku0825.blogspot.jp/2013/05/mysql56mysql50ioerror-2049.html">http://yoku0825.blogspot.jp/2013/05/mysql56mysql50ioerror-2049.html</a>
+
+secure-authの動作的なところはこちらが参考になるかも（手前味噌その2）
+<a href="http://qiita.com/udzura/items/4e634606839998a18845">http://qiita.com/udzura/items/4e634606839998a18845</a>
+
+なお、ローカルマシンでは上手くいくというのは、
+・そのマシンにデータを入れ込んだ時に既に41桁ハッシュになっていた
+または
+・そのマシンのConnector/ODBCが十分古い
+のどちらかではないかなーと推測します。
+
+
+それでは。
+
+
+/* yoku0825 */
+
+2014年1月17日 22:07 Watanabe Tomoyuki &lt;WATANABE.TOMOYUKI.2@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; 渡辺です。お詫びして訂正します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 勘違いしておりました。申し訳ありません。</span>
+<span class="quote2">&gt;&gt;「Enable Cleartext Authentication」のチェックボックスがあります。</span>
+<span class="quote2">&gt;&gt;これにチェックを入れるとどうでしょうか？</span>
+<span class="quote1">&gt; この部分はこの件とは無関係ですので無視してください。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ただ、当該のエラーメッセージは古い暗号化形式であるがゆえ、というのは恐らく確かですので、</span>
+<span class="quote1">&gt; 以下のいずれかが有効かと思います。</span>
+<span class="quote1">&gt; （最近のドライバは新しい暗号化方式にしか対応していないものがあります）</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; １．パスワードを新しい暗号化方式に変える。</span>
+<span class="quote1">&gt; 　　接続できる端末で先述のSET PASSWORD構文によって変更</span>
+<span class="quote1">&gt; 　　ただし、極端に古いクライアントがあるとそこから接続できなくなる可能性があります。</span>
+<span class="quote1">&gt; 　　その場合は新しいODBCドライバを使う、などの対応が必要です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ２．別のユーザーを作る。</span>
+<span class="quote1">&gt; 　　接続できる端末で新しいユーザーを作り、同じ権限を付与します。</span>
+<span class="quote1">&gt; 　　接続できない端末からは新しいユーザーで接続させます。</span>
+<span class="quote1">&gt; 　　（新しく作った場合は新しい暗号化方式になります。）</span>
+<span class="quote1">&gt; 　　この場合は他の端末には影響しません。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 私の環境で試して有効だったのは以上です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よろしくお願いします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; -----Original Message-----</span>
+<span class="quote1">&gt; From: Watanabe Tomoyuki [mailto:WATANABE.TOMOYUKI.2@xxxxxxxxxx]</span>
+<span class="quote1">&gt; Sent: Friday, January 17, 2014 9:16 PM</span>
+<span class="quote1">&gt; To: ml@xxxxxxxxxx</span>
+<span class="quote1">&gt; Subject: <a href="16079.html">[mysql 16079]</a> RE: <a href="16076.html">[mysql 16076]</a> odbc接続について</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; お世話になります。渡辺です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ODBCドライバのバージョンが5.2.5以降であれば（最新版は5.2.6）</span>
+<span class="quote1">&gt; であれば、「Connector/ODBC」の設定画面に</span>
+<span class="quote1">&gt; 「Details」のボタンがあり、それを押したときに表示される</span>
+<span class="quote1">&gt; 「Connection」タブの中に</span>
+<span class="quote1">&gt; 「Enable Cleartext Authentication」のチェックボックスがあります。</span>
+<span class="quote1">&gt; これにチェックを入れるとどうでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; もしこれで回避できるようであれば、</span>
+<span class="quote1">&gt; サーバーに保存されているパスワードの暗号化方式が古い状態（MySQL4.0以前）である可能性があります。</span>
+<span class="quote1">&gt; 長く使い続けるのであれば暗号化方式を新しくしておくことをお勧めします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; (参考)</span>
+<span class="quote1">&gt; MySQL5.1 マニュアル 12.5.1.6. SET PASSWORD構文</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/refman/5.1/ja/set-password.html">http://dev.mysql.com/doc/refman/5.1/ja/set-password.html</a></span>
+<span class="quote1">&gt; (「注意」もお読みください。)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; よろしくお願いします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; -----Original Message-----</span>
+<span class="quote1">&gt; From: 旭日　太郎 [mailto:asahips@xxxxxxxxxx]</span>
+<span class="quote1">&gt; Sent: Friday, January 17, 2014 6:04 PM</span>
+<span class="quote1">&gt; To: ml@xxxxxxxxxx</span>
+<span class="quote1">&gt; Subject: <a href="16076.html">[mysql 16076]</a> odbc接続について</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; (中略)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Connnection Failed:[HY000][MySQL][ODBC 5.2(w)Driver] Connection using old(pre-4.1.1) authentication protocol refused(client option ‘secure_auth’ enabled)</span>
+<span class="quote1">&gt; というエラーメッセージが出て接続ができませんでした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; (中略)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ★：サーバのバージョン: 5.1.50 - Source distribution</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; (後略)</span>
+
+</pre>
+</div>
+<p class="button"><a href="16080.html">[前]</a><a href="16082.html">[次]</a><a href="../list/16001-16100.html">[番号順一覧]</a><a href="../thread/16001-16100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16076.html">@ 16076 2014-01-17 18:04 [&quot;旭日　太郎&quot; &lt;asahip] odbc接続について                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16079.html">  16079 2014-01-17 21:15 ┗[Watanabe Tomoyuki &lt;W] RE: [mysql 16076] odbc接続について    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16080.html">  16080 2014-01-17 22:07 　┗[Watanabe Tomoyuki &lt;W]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="16081.html">  16081 2014-01-17 23:11 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: odbc接続について              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16082.html">  16082 2014-01-18 01:35 　　　┗[Watanabe Tomoyuki &lt;W]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16086.html">  16086 2014-01-27 18:28 　　　　┗[朝日　太郎 &lt;asahips@]                               </a></span>
+</pre>
+</body>
+</html>

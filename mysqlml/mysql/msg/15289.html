@@ -1,0 +1,334 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15289</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15288.html">[前]</a><a href="15290.html">[次]</a><a href="../list/15201-15300.html">[番号順一覧]</a><a href="../thread/15201-15300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15289
+</p>
+<div class="header">
+<p>
+From: Mikiya Okuno &lt;Mikiya Okuno &lt;Mikiya.Okuno@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 22 Apr 2010 18:58:04 +0900<br>
+Subject: [mysql 15289] Re: ibdata1の初期値とメモリーの関係について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+関口さん、
+
+ログを見るとやはり多重起動していますね。
+起動の仕方がよくないのかも知れません。
+
+ここと
+<span class="quote1">&gt; mysqld_safe Starting mysqld daemon with databases from /mysql/var/</span>
+
+ここで
+<span class="quote1">&gt; InnoDB: Progress in MB:100422 18:09:28 mysqld_safe Starting mysqld</span>
+
+
+mysqldが起動してるのが分かります。
+
+起動方法はどのようにされていますか？
+-- 
+奥野 幹也 
+<a href="http://www.google.com/profiles/mikiya.okuno">http://www.google.com/profiles/mikiya.okuno</a> 
+<a href="http://nippondanji.blogspot.com/">http://nippondanji.blogspot.com/</a> 
+<a href="http://twitter.com/nippondanji">http://twitter.com/nippondanji</a>
+
+
+On 22/04/2010, at 6:29 PM, 関口一心 wrote:
+
+<span class="quote1">&gt; 奥野さん</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 返信有難う御座います。</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt; mysqld_safeもろともそれらを終了させてから、ふたたび起動を試みてください。</span>
+<span class="quote1">&gt; →ご指摘頂いた通りmysqlのプロセスをkillしました。</span>
+<span class="quote1">&gt; shell&gt; ps aux |grep mysqld</span>
+<span class="quote1">&gt; root     24935  0.0  0.0   4528  1220 pts/5    S    18:03   0:00</span>
+<span class="quote1">&gt; /bin/sh /usr/local/bin/mysqld_safe --datadir=/mysql/var</span>
+<span class="quote1">&gt; --skip-name-resolve --pid-file=/mysql/var/testdb.pid</span>
+<span class="quote1">&gt; mysql    25352  1.0  1.9 953780 80304 pts/5    Sl   18:04   0:01</span>
+<span class="quote1">&gt; /usr/local/libexec/mysqld --basedir=/mysql --datadir=/mysql/var</span>
+<span class="quote1">&gt; --user=mysql --skip-name-resolve --log-error=/mysql/var/testdb1.err</span>
+<span class="quote1">&gt; --pid-file=/mysql/var/testdb.pid --socket=/tmp/mysql.sock --port=3306</span>
+<span class="quote1">&gt; root     25785  0.0  0.0   3908   676 pts/5    S+   18:06   0:00 grep mysqld</span>
+<span class="quote1">&gt; shell&gt; kill 25352</span>
+<span class="quote1">&gt; shell&gt; ps aux |grep mysqld</span>
+<span class="quote1">&gt; root     25791  0.0  0.0   3912   680 pts/5    S+   18:06   0:00 grep mysqld</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; この後先程と同じ作業を行ったところ、やはりInnoDBが無効の状態で起動してしまいます・・・</span>
+<span class="quote1">&gt; エラーログに吐かれている内容は同じく、</span>
+<span class="quote1">&gt; ご指摘のInnoDB: Unable to lock ./ib_logfile0, error: 11</span>
+<span class="quote1">&gt; が存在します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysqld_safe Starting mysqld daemon with databases from /mysql/var/</span>
+<span class="quote1">&gt; [Warning] The syntax '--log_slow_queries' is deprecated and will be</span>
+<span class="quote1">&gt; removed in MySQL 7.0. Please use</span>
+<span class="quote1">&gt; '--slow_query_log'/'--slow_query_log_file' instead.</span>
+<span class="quote1">&gt; [Warning] No argument was provided to --log-bin, and --log-bin-index</span>
+<span class="quote1">&gt; was not used; so replication may break when this MySQL server acts as</span>
+<span class="quote1">&gt; a master and has his hostname changed!! Please use</span>
+<span class="quote1">&gt; '--log-bin=testdb-bin' to avoid this problem.</span>
+<span class="quote1">&gt; [ERROR] Function 'mecab' already exists</span>
+<span class="quote1">&gt; [ERROR] Couldn't load plugin named 'mecab' with soname 'libftmecab.so.0.0.0'.</span>
+<span class="quote1">&gt; InnoDB: The first specified data file /mysql/var/ibdata1 did not exist:</span>
+<span class="quote1">&gt; InnoDB: a new database to be created!</span>
+<span class="quote1">&gt; InnoDB: Setting file /mysql/var/ibdata1 size to 3072 MB</span>
+<span class="quote1">&gt; InnoDB: Database physically writes the file full: wait...</span>
+<span class="quote1">&gt; InnoDB: Progress in MB: 100 200 300 400 500 600 700 800 900 1000 1100</span>
+<span class="quote1">&gt; 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500</span>
+<span class="quote1">&gt; 2600 2700 2800 2900 3000</span>
+<span class="quote1">&gt; InnoDB: Log file ./ib_logfile0 did not exist: new to be created</span>
+<span class="quote1">&gt; InnoDB: Setting log file ./ib_logfile0 size to 256 MB</span>
+<span class="quote1">&gt; InnoDB: Database physically writes the file full: wait...</span>
+<span class="quote1">&gt; InnoDB: Progress in MB:100422 18:09:28 mysqld_safe Starting mysqld</span>
+<span class="quote1">&gt; daemon with databases from /mysql/var/</span>
+<span class="quote1">&gt; [Warning] The syntax '--log_slow_queries' is deprecated and will be</span>
+<span class="quote1">&gt; removed in MySQL 7.0. Please use</span>
+<span class="quote1">&gt; '--slow_query_log'/'--slow_query_log_file' instead.</span>
+<span class="quote1">&gt; [Warning] No argument was provided to --log-bin, and --log-bin-index</span>
+<span class="quote1">&gt; was not used; so replication may break when this MySQL server acts as</span>
+<span class="quote1">&gt; a master and has his hostname changed!! Please use</span>
+<span class="quote1">&gt; '--log-bin=testdb-bin' to avoid this problem.</span>
+<span class="quote1">&gt; [ERROR] Function 'mecab' already exists</span>
+<span class="quote1">&gt; [ERROR] Couldn't load plugin named 'mecab' with soname 'libftmecab.so.0.0.0'.</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; InnoDB: Unable to lock ./ib_logfile0, error: 11</span>
+<span class="quote1">&gt; InnoDB: Check that you do not already have another mysqld process</span>
+<span class="quote1">&gt; InnoDB: using the same InnoDB data or log files.</span>
+<span class="quote1">&gt; InnoDB: Error in opening ./ib_logfile0</span>
+<span class="quote1">&gt; [ERROR] Plugin 'InnoDB' init function returned error.</span>
+<span class="quote1">&gt; [ERROR] Plugin 'InnoDB' registration as a STORAGE ENGINE failed.</span>
+<span class="quote1">&gt; InnoDB: Log file ./ib_logfile1 did not exist: new to be created</span>
+<span class="quote1">&gt; InnoDB: Setting log file ./ib_logfile1 size to 256 MB</span>
+<span class="quote1">&gt; InnoDB: Database physically writes the file full: wait...</span>
+<span class="quote1">&gt; InnoDB: Progress in MB:100422 18:09:35 [Note] Event Scheduler: Loaded 0 events</span>
+<span class="quote1">&gt; [Note] /usr/local/libexec/mysqld: ready for connections.</span>
+<span class="quote1">&gt; Version: '5.1.35-log'  socket: '/tmp/mysql.sock'  port: 3306  Source</span>
+<span class="quote1">&gt; distribution</span>
+<span class="quote1">&gt; 200</span>
+<span class="quote1">&gt; InnoDB: Doublewrite buffer not found: creating new</span>
+<span class="quote1">&gt; InnoDB: Doublewrite buffer created</span>
+<span class="quote1">&gt; InnoDB: Creating foreign key constraint system tables</span>
+<span class="quote1">&gt; InnoDB: Foreign key constraint system tables created</span>
+<span class="quote1">&gt; InnoDB: Started; log sequence number 0 0</span>
+<span class="quote1">&gt; [ERROR] Can't start server: Bind on TCP/IP port: Address already in use</span>
+<span class="quote1">&gt; [ERROR] Do you already have another mysqld server running on port: 3306 ?</span>
+<span class="quote1">&gt; [ERROR] Aborting</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; InnoDB: Starting shutdown...</span>
+<span class="quote1">&gt; InnoDB: Shutdown completed; log sequence number 0 46410</span>
+<span class="quote1">&gt; [Note] /usr/local/libexec/mysqld: Shutdown complete</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysqld_safe mysqld from pid file /mysql/var/testdb.pid ended</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; すみません。宜しくお願い致します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 2010年4月22日17:52 Mikiya Okuno &lt;Mikiya.Okuno@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt;&gt; 関口さん、</span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; エラーログのご呈示ありがとうございます。</span>
+<span class="quote2">&gt;&gt; error: 11 が出ていますね。これはMySQLのインスタンスが複数上がってしまっている</span>
+<span class="quote2">&gt;&gt; ときに良く出るエラーです。「Can't start server: Bind on TCP/IP port:</span>
+<span class="quote2">&gt;&gt; Address already in use」というエラーも同様です。</span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; なので、他にインスタンスが既に起動していないかどうかをまずはご確認ください。</span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; shell&gt; pgrep mysqld</span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; mysqld_safeもろともそれらを終了させてから、ふたたび起動を試みてください。</span>
+<span class="quote2">&gt;&gt; mysqld_safeが終了しないと、mysqldが自動的に再起動してしまうからです。</span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; ではでは。</span>
+<span class="quote2">&gt;&gt; --</span>
+<span class="quote2">&gt;&gt; 奥野 幹也</span>
+<span class="quote2">&gt;&gt; <a href="http://www.google.com/profiles/mikiya.okuno">http://www.google.com/profiles/mikiya.okuno</a></span>
+<span class="quote2">&gt;&gt; <a href="http://nippondanji.blogspot.com/">http://nippondanji.blogspot.com/</a></span>
+<span class="quote2">&gt;&gt; <a href="http://twitter.com/nippondanji">http://twitter.com/nippondanji</a></span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; On 22/04/2010, at 5:37 PM, 関口一心 wrote:</span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote3">&gt;&gt;&gt; 奥野さん</span>
+<span class="quote3">&gt;&gt;&gt; </span>
+<span class="quote3">&gt;&gt;&gt; ご返信有難う御座います。</span>
+<span class="quote3">&gt;&gt;&gt; 不要の部分も御座いますが、InnoDBが有効にならずにmysqlが起動した時に吐かれているエラーログです。</span>
+<span class="quote3">&gt;&gt;&gt; </span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:24:23 mysqld_safe Starting mysqld daemon with databases from</span>
+<span class="quote3">&gt;&gt;&gt; /mysql/var</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:24:24 [Warning] The syntax '--log_slow_queries' is</span>
+<span class="quote3">&gt;&gt;&gt; deprecated and will be removed in MySQL 7.0. Please use</span>
+<span class="quote3">&gt;&gt;&gt; '--slow_query_log'/'--slow_query_log_file' instead.</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:24:24 [Warning] No argument was provided to --log-bin, and</span>
+<span class="quote3">&gt;&gt;&gt; --log-bin-index was not used; so replication may break when this MySQL</span>
+<span class="quote3">&gt;&gt;&gt; server acts as a master and has his hostname changed!! Please use</span>
+<span class="quote3">&gt;&gt;&gt; '--log-bin=maildb-bin' to avoid this problem.</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:24:24 [ERROR] Function 'mecab' already exists</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:24:24 [ERROR] Couldn't load plugin named 'mecab' with soname</span>
+<span class="quote3">&gt;&gt;&gt; 'libftmecab.so.0.0.0'.</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: The first specified data file /mysql/var/ibdata1 did not exist:</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: a new database to be created!</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:24:24  InnoDB: Setting file /mysql/var/ibdata1 size to 3072 MB</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Database physically writes the file full: wait...</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Progress in MB: 100 200 300 400 500 600 700 800 900 1000 1100</span>
+<span class="quote3">&gt;&gt;&gt; 1200 1300 1400 1500 1600 1700 1800 1900 2000 2100 2200 2300 2400 2500</span>
+<span class="quote3">&gt;&gt;&gt; 2600 2700 2800 2900 3000</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:14  InnoDB: Log file ./ib_logfile0 did not exist: new to be created</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Setting log file ./ib_logfile0 size to 256 MB</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Database physically writes the file full: wait...</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Progress in MB:100422 17:26:14 mysqld_safe Starting mysqld</span>
+<span class="quote3">&gt;&gt;&gt; daemon with databases from /mysql/var/</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:14 [Warning] The syntax '--log_slow_queries' is</span>
+<span class="quote3">&gt;&gt;&gt; deprecated and will be removed in MySQL 7.0. Please use</span>
+<span class="quote3">&gt;&gt;&gt; '--slow_query_log'/'--slow_query_log_file' instead.</span>
+<span class="quote3">&gt;&gt;&gt; 100100422 17:26:14 [Warning] No argument was provided to --log-bin,</span>
+<span class="quote3">&gt;&gt;&gt; and --log-bin-index was not used; so replication may break when this</span>
+<span class="quote3">&gt;&gt;&gt; MySQL server acts as a master and has his hostname changed!! Please</span>
+<span class="quote3">&gt;&gt;&gt; use '--log-bin=maildb-bin' to avoid this problem.</span>
+<span class="quote3">&gt;&gt;&gt; 200100422 17:26:14 [ERROR] Function 'mecab' already exists</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:14 [ERROR] Couldn't load plugin named 'mecab' with soname</span>
+<span class="quote3">&gt;&gt;&gt; 'libftmecab.so.0.0.0'.</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Unable to lock ./ib_logfile0, error: 11</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Check that you do not already have another mysqld process</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: using the same InnoDB data or log files.</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Error in opening ./ib_logfile0</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:22 [ERROR] Plugin 'InnoDB' init function returned error.</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:22 [ERROR] Plugin 'InnoDB' registration as a STORAGE ENGINE failed.</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:22  InnoDB: Log file ./ib_logfile1 did not exist: new to be created</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Setting log file ./ib_logfile1 size to 256 MB</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Database physically writes the file full: wait...</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Progress in MB:100422 17:26:22 [Note] Event Scheduler: Loaded 0 events</span>
+<span class="quote3">&gt;&gt;&gt; 100100422 17:26:22 [Note] /usr/local/libexec/mysqld: ready for connections.</span>
+<span class="quote3">&gt;&gt;&gt; Version: '5.1.35-log'  socket: '/tmp/mysql.sock'  port: 3306  Source</span>
+<span class="quote3">&gt;&gt;&gt; distribution</span>
+<span class="quote3">&gt;&gt;&gt; 200</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Doublewrite buffer not found: creating new</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Doublewrite buffer created</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Creating foreign key constraint system tables</span>
+<span class="quote3">&gt;&gt;&gt; InnoDB: Foreign key constraint system tables created</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:31  InnoDB: Started; log sequence number 0 0</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:31 [ERROR] Can't start server: Bind on TCP/IP port:</span>
+<span class="quote3">&gt;&gt;&gt; Address already in use</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:31 [ERROR] Do you already have another mysqld server</span>
+<span class="quote3">&gt;&gt;&gt; running on port: 3306 ?</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:31 [ERROR] Aborting</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:31  InnoDB: Starting shutdown...</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:33  InnoDB: Shutdown completed; log sequence number 0 46410</span>
+<span class="quote3">&gt;&gt;&gt; 100422 17:26:33 [Note] /usr/local/libexec/mysqld: Shutdown complete</span>
+<span class="quote3">&gt;&gt;&gt; </span>
+<span class="quote3">&gt;&gt;&gt; アドバイスを宜しくお願い致します。</span>
+<span class="quote3">&gt;&gt;&gt; </span>
+<span class="quote3">&gt;&gt;&gt; </span>
+<span class="quote3">&gt;&gt;&gt; 2010年4月22日17:11 Mikiya Okuno &lt;Mikiya.Okuno@xxxxxxxxxx&gt;:</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 関口さん、</span>
+<span class="quote4">&gt;&gt;&gt;&gt; </span>
+<span class="quote4">&gt;&gt;&gt;&gt; InnoDBが起動しない場合、その理由はエラーログに記述されています。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; なのでエラーログの内容を拝見させて頂かないと何とも言えません。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; もし宜しければ該当部分のログを見せて頂けますか？</span>
+<span class="quote4">&gt;&gt;&gt;&gt; </span>
+<span class="quote4">&gt;&gt;&gt;&gt; よろしくお願いします。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; --</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 奥野 幹也</span>
+<span class="quote4">&gt;&gt;&gt;&gt; <a href="http://www.google.com/profiles/mikiya.okuno">http://www.google.com/profiles/mikiya.okuno</a></span>
+<span class="quote4">&gt;&gt;&gt;&gt; <a href="http://nippondanji.blogspot.com/">http://nippondanji.blogspot.com/</a></span>
+<span class="quote4">&gt;&gt;&gt;&gt; <a href="http://twitter.com/nippondanji">http://twitter.com/nippondanji</a></span>
+<span class="quote4">&gt;&gt;&gt;&gt; </span>
+<span class="quote4">&gt;&gt;&gt;&gt; </span>
+<span class="quote4">&gt;&gt;&gt;&gt; On 22/04/2010, at 4:50 PM, 関口一心 wrote:</span>
+<span class="quote4">&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 平塚さん</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 関口です。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; アドバイス有難うございます。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 前任者が設定を行っていたmy.cnf だったのでその他の設定値を良く見ずに設定をしてしまったせいで、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; そもそも</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; innodb_buffer_pool + key_buffer + max_connections * (sort_buffer +</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; read_buffer + read_rnd_buffer) + max_connections * 2 MB</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; この値が2Gを大きく上回っていました。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; innodb_buffer_pool_size = 1536M</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; この値では当然のようにNGでした。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; アドバイスをきっかけに見直すことが出来ました。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 有難う御座います。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 上記作業後、疑問が生まれました。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; innodb_buffer_pool + key_buffer + max_connections * (sort_buffer +</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; read_buffer + read_rnd_buffer) + max_connections * 2 MB</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; この値を2G以内に抑え、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; innodb_data_file_path = ibdata1:3G:autoextend</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; にしてもInnoDBが有効にならない状態で起動してしまいます。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; この状態になるのは何故なのか？</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 私個人の疑問を晴らすために、皆様からのご回答をお待ちしています。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; 2010年4月22日12:27 HIRATSUKA Sadao &lt;hiratsuka.sadao@xxxxxxxxxx&gt;:</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; ひらつかです。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; On Thu, 22 Apr 2010 11:37:08 +0900</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; 関口一心 &lt;8888.saleen.s7@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt; 現在、linux、CentOS5.2（32ビット）、mysql5.1.35の構築を行っており、my.cnfの設定値で悩んでいます。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt; innodb_data_file_path = ibdata1:2G:autoextend</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt; innodb_buffer_pool_size = 1536M</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; 32ビット環境でinnodb_buffer_pool_size = 1536Mは厳しいと思います。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; innodb_data_file_pathは2Gのままで、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; innodb_data_file_path = ibdata1:2G:autoextend</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; innodb_buffer_pool_size = 512M</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; とするといかがでしょうか。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt; ibdata1の初期値と起動時に使用するメモリーは、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt;&gt; どの様な依存関係にあるのかアドバイスが頂ければと思い投稿しました。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; ソースを読んで確認したわけではないですが、</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; あまり関係ないと思います。</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; --</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; 平塚貞夫 hiratsuka.sadao@xxxxxxxxxx</span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote5">&gt;&gt;&gt;&gt;&gt; </span>
+<span class="quote4">&gt;&gt;&gt;&gt; </span>
+<span class="quote4">&gt;&gt;&gt;&gt; </span>
+<span class="quote4">&gt;&gt;&gt;&gt; </span>
+<span class="quote3">&gt;&gt;&gt; </span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote2">&gt;&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+</pre>
+</div>
+<p class="button"><a href="15288.html">[前]</a><a href="15290.html">[次]</a><a href="../list/15201-15300.html">[番号順一覧]</a><a href="../thread/15201-15300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="15273.html">  15273 2010-04-22 11:37 [関口一心 &lt;8888.salee] ibdata1の初期値とメモリーの関係について </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15277.html">  15277 2010-04-22 12:27 ┗[HIRATSUKA Sadao &lt;hir]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15282.html">  15282 2010-04-22 16:50 　┗[関口一心 &lt;8888.salee]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15283.html">  15283 2010-04-22 17:00 　　┣[Akio Imai &lt;suzuro204] Re: [mysql 15282] Re: ibdata1の初期値とメモリーの関係について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15285.html">  15285 2010-04-22 17:23 　　┃┗[関口一心 &lt;8888.salee] Re: ibdata1の初期値とメモリーの関係について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15284.html">  15284 2010-04-22 17:11 　　┗[Mikiya Okuno &lt;Mikiya]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15286.html">  15286 2010-04-22 17:37 　　　┗[関口一心 &lt;8888.salee]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15287.html">  15287 2010-04-22 17:52 　　　　┗[Mikiya Okuno &lt;Mikiya]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15288.html">  15288 2010-04-22 18:29 　　　　　┗[関口一心 &lt;8888.salee]                             </a></span>
+<span class="current">-&gt;&nbsp;<a href="15289.html">  15289 2010-04-22 18:58 　　　　　　┗[Mikiya Okuno &lt;Mikiya]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15290.html">  15290 2010-04-22 19:05 　　　　　　　┗[HIRATSUKA Sadao &lt;hir]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15291.html">  15291 2010-04-22 21:36 　　　　　　　　┗[Mikiya Okuno &lt;Mikiya]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15292.html">  15292 2010-04-23 18:12 　　　　　　　　　┗[関口一心 &lt;8888.salee]                     </a></span>
+</pre>
+</body>
+</html>

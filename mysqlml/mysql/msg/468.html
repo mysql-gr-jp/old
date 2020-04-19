@@ -1,0 +1,63 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:468</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="467.html">[前]</a><a href="469.html">[次]</a><a href="../list/401-500.html">[番号順一覧]</a><a href="../thread/401-500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:468
+</p>
+<div class="header">
+<p>
+From: Satoshi Koiwa &lt;Satoshi Koiwa &lt;koiwa@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 25 Dec 98 16:48:01 +0900<br>
+Subject: [mysql 468] Re: クロス集計の方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+ども、小岩です。吐き気はとれてきました。
+
+<span class="quote1">&gt;遠藤と申します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;早速質問で申し訳ございませんが、表題の通りクロス集計を</span>
+<span class="quote1">&gt;やってみたいと思っております。</span>
+<span class="quote1">&gt;出来るのでしょうか？</span>
+
+クロス集計ってなんでしたっけ。ACCESS用語のクロス集計だとすると、単純にはい
+かないんじゃないかなぁと思います。表計算のように縦横にするってのがめんどい
+。
+ 性別(sex)、年齢(age)、身長(height)の3項目を持つテーブル(report_card)があっ
+て、性別ごとの年齢ごとの平均身長を出したい場合はもちろん
+     select sex, age, avg(height) from report_card group by sex, age
+なんですが、これを縦横に表示するとなると考えてしまう。この場合ならば性別は
+2種類しかないんで、年齢(age)、男(male)、女(female)という項目を持つ結果格納
+用のテーブル(result)と同内容の一時テーブル(tmp)を作って、そこに格納していけ
+ば一応縦横にはなります。
+     insert into tmp select age, avg(height), NULL from report_card
+     where sex = '1';
+     insert into tmp select age, NULL, avg(height) from report_card
+     where sex = '2';
+     insert into result select age, max(male), max(female) from tmp
+     group by age;
+私にはこれくらいしか思いつかんです。副問い合わせが使えれば一時テーブルなし
+でもいけますか。
+もし性別のようにあらかじめ項目数がわかっていなければ、これはもうCでもPerlで
+もプログラムかまして項目数を得て必要項目数分の結果格納用テーブルを作って、
+ということになる、のかなぁ。
+
+いっそクライアント側にACCESS使ってそこで「クロス集計」やるってのじゃダメ?
+
+</pre>
+</div>
+<p class="button"><a href="467.html">[前]</a><a href="469.html">[次]</a><a href="../list/401-500.html">[番号順一覧]</a><a href="../thread/401-500.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="468.html">    468 1998-12-25 16:48 [Satoshi Koiwa &lt;koiwa] Re: クロス集計の方法                    </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="469.html">    469 1998-12-25 17:59 ┗[&lt;endo@xxxxxxxxxx&gt;   ]                                       </a></span>
+</pre>
+</body>
+</html>

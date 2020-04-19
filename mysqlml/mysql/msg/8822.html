@@ -1,0 +1,71 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8822</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8821.html">[前]</a><a href="8823.html">[次]</a><a href="../list/8801-8900.html">[番号順一覧]</a><a href="../thread/8801-8900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8822
+</p>
+<div class="header">
+<p>
+From: &quot;oka nobunobu&quot; &lt;&quot;oka nobunobu&quot; &lt;sanwaufj@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 19 Feb 2004 19:17:32 +0900<br>
+Subject: [mysql 08822] Re: C 言語でデータベースにラージオブジェクトを挿入する方法<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+MySQLメーリングリストのみなさま、はじめまして。
+無料でMySQLを利用させてもらっています。
+
+<span class="quote1">&gt; 現在C言語を使ってMySQLのデータベースにデータを登録するプログラムを作成</span>
+<span class="quote1">&gt; しているのですが、バイナリファイルをそのまま挿入・取り出しして使用する必要</span>
+
+<span class="quote1">&gt; があるため、BLOBのフィールドを作ってやったのですが、</span>
+
+CREATE TABLE tbl (
+    id   INTEGER,
+    bn   BLOB
+);
+
+char bin[4];
+bin[0] = 0x12;
+bin[1] = 0x18;
+bin[2] = 0x00;
+bin[3] = 0x6F;
+という4バイトを挿入したい場合
+
+INSERT INTO tbl VALUES(125, 0x1218006F);
+
+とすればいいです。
+取り出したい場合は
+
+mysql_query(mysqlhandle, &quot;SELECT bn FROM tbl WHERE id = 125&quot;)
+MYSQL_ROW row の
+row[0] が結果となります。（MYSQL_ROW の実態は char ** のこと）
+挿入したデータのサイズ分だけ row[0] にはいっています。MySQLが内部でメモリー
+確保してます。
+バイナリーデータの場合はサイズが重要なので、サイズフィールドをあらかじめ作っ
+たほうがいいです。
+サイズをSQLから知りたい場合は SELECT length(bn) FROM tbl などとします。
+
+<span class="quote1">&gt; あんまりC言語ではMySQLって使わないんでしょうか？</span>
+<span class="quote1">&gt; 見つけるページのほとんどはPHPやPerl、Rubyを使ってたりするんで…。</span>
+
+C言語オンリーでは使わないでしょう。
+Visual C++ とか Borland のやつでは使うかもしれません。
+
+_________________________________________________________________
+友達と24時間ホットライン「MSN メッセンジャー」、今すぐダウンロード！  
+<a href="http://messenger.msn.co.jp">http://messenger.msn.co.jp</a> 
+
+
+</pre>
+</div>
+<p class="button"><a href="8821.html">[前]</a><a href="8823.html">[次]</a><a href="../list/8801-8900.html">[番号順一覧]</a><a href="../thread/8801-8900.html">[スレッド一覧]</a></p>
+</body>
+</html>

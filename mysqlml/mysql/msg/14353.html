@@ -1,0 +1,120 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14353</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14352.html">[前]</a><a href="14354.html">[次]</a><a href="../list/14301-14400.html">[番号順一覧]</a><a href="../thread/14301-14400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14353
+</p>
+<div class="header">
+<p>
+From: Yasufumi Kinoshita &lt;Yasufumi Kinoshita &lt;kinoshita.yasufumi@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 24 Jan 2008 12:39:24 +0900<br>
+Subject: [mysql 14353] Re: InnoDBテーブルのテーブルスペース容量計算<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+木下と申します。。。
+
+私自身4.0以前は利用したことが無いので、正確な原因は分りませんが、
+Data_lengthが見積もりよりもかなり大きくなってしまう主な原因は、
+レコードを主キーに対してランダムな順番で挿入しているからだと思います。
+InnoDBにおける表の構造は主キーの索引構造になっていますので、
+ランダムな順番での挿入はフラグメンテーションが多発してしまい、
+Data_lengthは無用に大きくなってしまいます。
+また、挿入自体の性能も索引構造の更新やレコードの再配置なども伴うため、
+良くありません。
+
+ALTER TABLE test ENGINE=InnoDB;
+ANALYZE TABLE test;
+とデフラグすると、SHOW TABLE STATUSの結果が変わりませんか？
+
+
+（参考）
+www.mysqlperformanceblog.com/files/presentations/UC2007-Innodb-Performance-Optimization.pdf
+
+
+また、必要容量計算ですが、
+このように表自体が索引の構造なので、厳密に正確にサイズを見積もるのは難しいです。
+さらに管理作業のためにデータファイルの容量が余計に必要になります。
+例えばALTER TABLE(上記も該当)では表の作り直しが発生するので、少なくとも対象となる表が
+収まる程度の空き領域が必要です。
+
+
+Kinoshita wrote:
+<span class="quote1">&gt; MySQL MLの皆様</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 木下と申します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; MySQLを用いたシステム構築を行っているのですが、</span>
+<span class="quote1">&gt; DBを置くディスク容量を正確に把握する必要に迫られています。</span>
+<span class="quote1">&gt; 情報をお持ちの方おられたら教えていただけないでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 【質問】</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; MySQL4.0 の InnoDB テーブルのテーブルスペース容量計算は</span>
+<span class="quote1">&gt; どのように行うのでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; データ部に関して、各カラム型に必要な記憶容量からレコードサイズを</span>
+<span class="quote1">&gt; 計算しましたが、実際にデータを入れると、show table status で見た</span>
+<span class="quote1">&gt; Data_length は、計算値よりもかなり大きくなります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; また、インデックス部に関して、容量計算方法がドキュメントに見当たらず、</span>
+<span class="quote1">&gt; どのように行うものでしょうか？</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; テストの詳細を以下に記します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -------------ここから-------------</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ●環境</span>
+<span class="quote1">&gt;   OS    : RedHatEnterpriseLinux3.0 Update3</span>
+<span class="quote1">&gt;   MySQL : 4.0.17</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ●内容</span>
+<span class="quote1">&gt; 以下のようなテーブルを作成する</span>
+<span class="quote1">&gt; create table test (</span>
+<span class="quote1">&gt;         column1 varchar(20) BINARY NOT NULL,</span>
+<span class="quote1">&gt;         column2 varchar(16) NOT NULL,</span>
+<span class="quote1">&gt;         column3 int         NOT NULL,</span>
+<span class="quote1">&gt;         column4 varchar(15) NOT NULL,</span>
+<span class="quote1">&gt;         column5 int         NOT NULL,</span>
+<span class="quote1">&gt;         column6 int         NOT NULL,</span>
+<span class="quote1">&gt; PRIMARY KEY ( column1, column2, column3, column4 )) type=InnoDB;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; varcharのカラムが最大なデータを256万件登録</span>
+<span class="quote1">&gt; $ mysql testDB -e &quot;LOAD DATA INFILE 'data.csv' INTO TABLE</span>
+<span class="quote1">&gt; test fields terminated by ',' lines terminated by '\n';&quot;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; レコードサイズは 21+17+4+16+4+4 = 66</span>
+<span class="quote1">&gt; 容量は66 x 256万 = 168,960,000 と想定    …(A)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 実際のshow table statusの結果</span>
+<span class="quote1">&gt; Rows       Avg_row_length  Data_length</span>
+<span class="quote1">&gt; 2,544,922  98              251,658,240   …(B)</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; (A)に比べ(B)の値がかなり大きい。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt; S.Kinoshita</span>
+<span class="quote1">&gt; shige_chan@xxxxxxxxxx</span>
+<span class="quote1">&gt; </span>
+
+
+</pre>
+</div>
+<p class="button"><a href="14352.html">[前]</a><a href="14354.html">[次]</a><a href="../list/14301-14400.html">[番号順一覧]</a><a href="../thread/14301-14400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14352.html">  14352 2008-01-23 23:30 [Kinoshita &lt;QZT05560@] InnoDBテーブルのテーブルスペース容量計算</a></span>
+<span class="current">-&gt;&nbsp;<a href="14353.html">  14353 2008-01-24 12:39 ┗[Yasufumi Kinoshita &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14356.html">  14356 2008-01-26 01:42 　┗[Kinoshita &lt;QZT05560@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14359.html">  14359 2008-01-31 00:07 　　┗[IIDAYUICHI &lt;y_iida@x]                                   </a></span>
+</pre>
+</body>
+</html>

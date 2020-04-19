@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:14016</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="14015.html">[前]</a><a href="14017.html">[次]</a><a href="../list/14001-14100.html">[番号順一覧]</a><a href="../thread/14001-14100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:14016
+</p>
+<div class="header">
+<p>
+From: &quot;Takayuki Miura&quot; &lt;&quot;Takayuki Miura&quot; &lt;atamaitakunai@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 25 May 2007 20:35:14 +0900<br>
+Subject: [mysql 14016] Re: unsigned int  に関するクエリ結果<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+To：YuGoさま
+
+三浦です、アドバイスありがとうございます。
+
+今回実装したシステムの要件的に、エラーでけられるより
+都合がよかったので、MySQLの特技にあまえていました（笑）。
+
+<span class="quote1">&gt; 今のままで行くなら、</span>
+<span class="quote1">&gt; sql&gt;UPDATE SET id = CASE WHEN (id - 100) &lt; 0 THEN 0 ELSE (id - 100)　END ;</span>
+<span class="quote1">&gt; とかやってみてください。</span>
+
+上記ですが、WHEN id - 100 の判定がやはり、同じ問題にぶつかってしまうようです。
+WHEN id &lt; 100 に変更したら、OKでした。
+
+今回は、上記の方針で対応しようと思います。
+ありがとうございました。
+
+
+07/05/25 に YuGo&lt;yu.gotou@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; みうらどの。</span>
+<span class="quote1">&gt; こういうデータの範囲外の受け止めてしまうのは、MySQLの特技(ふとっぱら)か</span>
+<span class="quote1">&gt; も知れません。</span>
+<span class="quote1">&gt;でも、</span>
+<span class="quote1">&gt; sql&gt;SET sql_mode=STRICT_ALL_TABLES</span>
+<span class="quote1">&gt; したり、my.ini[mysqld]にsql_mode=STRICT_ALL_TABLESと書いたりすれば、</span>
+<span class="quote1">&gt; エラーでけってくれるようになっているようです。</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/refman/5.0/en/server-sql-mode.html">http://dev.mysql.com/doc/refman/5.0/en/server-sql-mode.html</a></span>
+<span class="quote1">&gt; 個人的には、こっちの方がまとものような気がしますが、みうらさんはどちらが</span>
+<span class="quote1">&gt; おこのみでしょうか。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 今のままで行くなら、</span>
+<span class="quote1">&gt; sql&gt;UPDATE SET id = CASE WHEN (id - 100) &lt; 0 THEN 0 ELSE (id - 100)　END ;</span>
+<span class="quote1">&gt; とかやってみてください。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt; &gt; いつも勉強させていただいてます。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; unsigned int に対するクエリの結果が予想と異なり</span>
+<span class="quote2">&gt; &gt; 原因が分からなかったので質問させていただきます。</span>
+<span class="quote2">&gt; &gt; ご教授いただければ幸いです。</span>
+<span class="quote2">&gt; &gt; よろしくお願いいたします。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ■MySQL</span>
+<span class="quote2">&gt; &gt; var.5.0.37</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ■テーブル定義</span>
+<span class="quote2">&gt; &gt; CREATE TABLE `test` (</span>
+<span class="quote2">&gt; &gt;  `id` INTEGER UNSIGNED NOT NULL DEFAULT 0,</span>
+<span class="quote2">&gt; &gt;  PRIMARY KEY(`id`)</span>
+<span class="quote2">&gt; &gt; )</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ■存在するレコード</span>
+<span class="quote2">&gt; &gt; id</span>
+<span class="quote2">&gt; &gt; ---------</span>
+<span class="quote2">&gt; &gt; 0</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ■問題のクエリ</span>
+<span class="quote2">&gt; &gt; update test set id = id - 100;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ■問題の結果</span>
+<span class="quote2">&gt; &gt; 「0」になると思いきや、「4294967295」になってしまった。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ※以下補足</span>
+<span class="quote2">&gt; &gt; 下記のクエリに関しては、予想通りの結果</span>
+<span class="quote2">&gt; &gt; ・クエリ</span>
+<span class="quote2">&gt; &gt; update test set id = -100;</span>
+<span class="quote2">&gt; &gt; ・結果</span>
+<span class="quote2">&gt; &gt; 0</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ・クエリ</span>
+<span class="quote2">&gt; &gt; update test set id = 100000000000;</span>
+<span class="quote2">&gt; &gt; ・結果</span>
+<span class="quote2">&gt; &gt; 4294967295</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="14015.html">[前]</a><a href="14017.html">[次]</a><a href="../list/14001-14100.html">[番号順一覧]</a><a href="../thread/14001-14100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="14011.html">  14011 2007-05-25 16:05 [&quot;Takayuki Miura&quot; &lt;at] unsigned int に関するクエリ結果         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14013.html">  14013 2007-05-25 18:42 ┣[N.Toge &lt;toge@xxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14015.html">  14015 2007-05-25 19:22 ┃┣[MURAKAMI Tomokazu &lt;t]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14017.html">  14017 2007-05-25 20:42 ┃┗[&quot;Takayuki Miura&quot; &lt;at]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="14014.html">  14014 2007-05-25 19:09 ┗[YuGo &lt;yu.gotou@xxxxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="14016.html">  14016 2007-05-25 20:35 　┗[&quot;Takayuki Miura&quot; &lt;at]                                     </a></span>
+</pre>
+</body>
+</html>

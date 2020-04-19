@@ -1,0 +1,235 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7484</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7483.html">[前]</a><a href="7485.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7484
+</p>
+<div class="header">
+<p>
+From: くろ たろう &lt;くろ たろう &lt;kuro_taro_aki@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 13 Apr 2003 09:42:10 +0900 (JST)<br>
+Subject: [mysql 07484] JAVA で MySQL- 更新処理ができません -<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はじめまして。くろたろうと申します。今回初めて参加させて
+いただきます。よろしくお願いいたします。
+
+（環境）
+・ＪＤＫ：J2SDK1.4.1
+・ＭＹＳＱＬ：mysql-4.0.1.2
+・JDBCドライバ：mysql-connector-java-3.0.6-stable
+
+(やろうとしていること）
+java.sql.ResultSetの更新系メソッドを用いてデータのinsert,update,delete
+を行いたい
+
+（問題点）
+まず、ResultSetのmoveToInsertRow()を用いると、以下の例外
+が発生します。
+com.mysql.jdbc.NotUpdatable: Result Set not updatable.This
+result set must
+come
+from a statement that was created with a result set type
+of
+ResultSet.CONCUR_UPD
+ATABLE, the query must select only one table, and must
+select all primary
+keys f
+rom that table. See the JDBC 2.1 API Specification,
+section 5.6 for more
+details
+
+しかし、ResultSet取得時には、下記のようにResultSet.CONCUR_UPDATABLE
+を指定して、書き込み可能な処理モードを設定しています。
+Statement stmt
+=con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATAB
+LE);
+
+そこで、以下の文をこの直後に実行して、ResultSetの処理モ
+ードを確認しました。
+ switch (rset.getConcurrency())
+    {
+      case ResultSet.CONCUR_UPDATABLE:
+        System.out.println (&quot;Result set concurrency:
+ResultSet.CONCUR_UPDATABLE&quot;);
+        break;
+      case ResultSet.CONCUR_READ_ONLY:
+        System.out.println (&quot;Result set concurrency:
+ResultSet.CONCUR_READ_ONLY&quot;);
+        break;
+      default:
+        System.out.println (&quot;Invalid type&quot;);
+        break;
+    }
+
+すると、結果は「READ_ONLY」であることが判明し、Connection.createStatement
+文で与えたCONCUR_UPDATABLEが設定されていないことが分かり
+ました。
+※ちなみに、直にinsert文を発行すれば問題なく実行されまし
+た。また、データベースへのアクセス権も確認しました。
+
+更新可能なResultSetを取得するには、どうすればよいでしょ
+うか？よろしくお願いします。
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+※↓以下に全ソースを掲載します。
+
+(InsertData.java)
+//InsertData.java
+
+import java.sql.*;
+import java.util.*;
+
+public class InsertData{
+ public InsertData(){
+  try{
+   //DBへの接続
+   Class.forName(&quot;com.mysql.jdbc.Driver&quot;).newInstance();
+   Connection con = DriverManager.getConnection(
+      
+&quot;jdbc:mysql://localhost/db1?useUnicode=true&amp;characterEncoding=SJIS&quot;,
+&quot;＊＊＊&quot;, &quot;＊＊＊&quot;);
+   //↓ここでConnectionにResultSet.CONCUR_UPDATABLEを指
+定してResultSetを取得
+しています。。
+   Statement stmt =
+con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATAB
+LE);
+   ResultSet rset = stmt.executeQuery(&quot;select * from
+master;&quot;);
+   //↓select文の内容を表示しています。
+   while(rset.next()){
+    System.out.println(rset.getInt(1) + &quot;:&quot; +
+rset.getDate(2) + &quot;:&quot; +
+rset.getInt(3) + &quot;:&quot; + rset.getInt(4) + &quot;:&quot; +
+rset.getFloat(5));
+   }
+   //↓ResultSetのモードを確認しています。
+   //結果は、ReadOnlyでした・・・
+   switch (rset.getConcurrency()){
+         case ResultSet.CONCUR_UPDATABLE:
+           System.out.println (&quot;Result set concurrency:
+ResultSet.CONCUR_UPDATABLE&quot;);
+           break;
+         case ResultSet.CONCUR_READ_ONLY:
+           System.out.println (&quot;Result set concurrency:
+ResultSet.CONCUR_READ_ONLY&quot;);
+           break;
+         default:
+           System.out.println (&quot;Invalid type&quot;);
+           break;
+   }
+   //insertDataメソッドでinsertを実行しています。
+   insertData(rset,7,new
+java.sql.Date(1000000),10,10,100.5f);
+   //Close the result set
+   rset.close();
+   //更新後の確認です。
+   rset = stmt.executeQuery(&quot;select * from master&quot;);
+   while(rset.next()){
+    System.out.println(rset.getInt(1) + &quot;:&quot; +
+rset.getDate(2) + &quot;:&quot; +
+rset.getInt(3) + &quot;:&quot; + rset.getInt(4) + &quot;:&quot; +
+rset.getFloat(5));
+   }
+   rset.close();
+   stmt.close();
+   con.close();
+  } catch (Exception e0) {
+   e0.printStackTrace();
+  }
+ }
+ //Method
+ public static void main(String[] args){
+  InsertData id = new InsertData();
+ }
+ //insertメソッド
+ public void insertData(ResultSet rset,int
+seq,java.sql.Date day,int
+raceSeq,int firstPrise,float odds){
+  try{
+   System.out.println(&quot;insert data&quot;);
+   //カーソルをinsert行に移動
+   //※ここで例外が発生しました。
+   rset.moveToInsertRow();
+   //値の追加
+   rset.updateInt(1,seq);
+   rset.updateDate(2,day);
+   rset.updateInt(3,raceSeq);
+   rset.updateInt(4,firstPrise);
+   rset.updateFloat(5,odds);
+   //insert処理の実行
+   rset.insertRow();
+  }catch(SQLException e1){
+   e1.printStackTrace();C:\demo\InsetDemo&gt;java InsertData
+
+  }
+ }
+}
+
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+※↓以下は実行時の画面です。
+
+C:\demo\InsetDemo&gt;java InsertData
+1:2002-09-08:1:2:2.7
+2:2002-09-08:3:3:5.6
+3:2002-09-08:6:3:6.6
+4:2002-09-08:7:4:8.0
+5:2002-09-09:1:1:5.7
+6:2002-09-09:2:3:3.3
+Result set concurrency: ResultSet.CONCUR_READ_ONLY
+insert data
+com.mysql.jdbc.NotUpdatable: Result Set not updatable.This
+result set must
+come
+from a statement that was created with a result set type
+of
+ResultSet.CONCUR_UPD
+ATABLE, the query must select only one table, and must
+select all primary
+keys f
+rom that table. See the JDBC 2.1 API Specification,
+section 5.6 for more
+details
+.
+        at
+com.mysql.jdbc.UpdatableResultSet.moveToInsertRow(UpdatableResultSet.
+java:495)
+        at InsertData.insertData(InsertData.java:59)
+        at InsertData.&lt;init&gt;(InsertData.java:34)
+        at InsertData.main(InsertData.java:51)
+1:2002-09-08:1:2:2.7
+2:2002-09-08:3:3:5.6
+3:2002-09-08:6:3:6.6
+4:2002-09-08:7:4:8.0
+5:2002-09-09:1:1:5.7
+6:2002-09-09:2:3:3.3
+
+C:\demo\InsetDemo&gt;
+
+
+__________________________________________________
+Do You Yahoo!?
+Yahoo! BB is Broadband by Yahoo!
+<a href="http://bb.yahoo.co.jp/">http://bb.yahoo.co.jp/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="7483.html">[前]</a><a href="7485.html">[次]</a><a href="../list/7401-7500.html">[番号順一覧]</a><a href="../thread/7401-7500.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="7484.html">   7484 2003-04-13 09:42 [くろ たろう &lt;kuro_ta] JAVA で MySQL- 更新処理ができません -   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7485.html">   7485 2003-04-13 10:23 ┗[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
+</pre>
+</body>
+</html>

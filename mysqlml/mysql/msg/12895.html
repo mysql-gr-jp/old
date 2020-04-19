@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12895</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12894.html">[前]</a><a href="12896.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12895
+</p>
+<div class="header">
+<p>
+From: &quot;Kenta Hashimoto&quot; &lt;&quot;Kenta Hashimoto&quot; &lt;kem@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 30 Mar 2006 20:24:59 +0900<br>
+Subject: [mysql 12895] Re: CentOS4 で、MySQL-4.1 をアップグレード<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+橋本です。
+
+その後、別のスレーブのMySQLも同様にアップグレードしようとしたところ、
+i386版とx86_64版のMySQLのrpmが入ってしまっていて、コンフリクトを
+起こしてアップグレードできないという事態になりました。
+
+yum remove mysql してから、rpm -Uvh MySQL-* をしたのですが、
+ここでさらに問題発生。
+
+yum remove mysqlすると、/etc/my.cnf が、/etc/my.cnf.rpmsave に
+変えられてしまうのですね。
+
+気づかずに、mysqlを起動したら、レプリケーションが動かずに、
+大慌てでした。
+
+mysqlを止めて、
+/etc/my.cnf に名前を変えて、
+念のために多くできてしまったrelay-bin.000 ファイルを消して、
+整合性を取るためにrelay-bin.index を編集して、
+mysqlを起動したら、無事に元通りの環境になりました。
+
+ご参考までに。
+
+06/03/30 に Kenta Hashimoto&lt;kem@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; 無事、アップグレードに成功しました！</span>
+<span class="quote1">&gt; ありがとうございました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; もともとのMySQLを停止せずに、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # rpm -Uvh MySQL-*</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; とやってしまったため、一回は失敗してしまってあせりましたが、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # rpm -ev MySQL-shared-standard-4.1.18-0.rhel4</span>
+<span class="quote1">&gt; MySQL-client-standard-4.1.18-0.rhel4</span>
+<span class="quote1">&gt; MySQL-standard-debuginfo-4.1.18-0.rhel4</span>
+<span class="quote1">&gt; MySQL-server-standard-4.1.18-0.rhel4</span>
+<span class="quote1">&gt; MySQL-test-standard-4.1.18-0.rhel4 MySQL-devel-standard-4.1.18-0.rhel4</span>
+<span class="quote1">&gt; mysql-bench-4.1.12-3.RHEL4.1.x86_64</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; と、一度すべて（+ mysql-bench )をアンインストールしてから、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # rpm -ivh MySQL-*</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; することにより、無事、インストールできました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; アップグレード前のユーザーのアカウントや、レプリケーションの状態も</span>
+<span class="quote1">&gt; 保たれたままで、一安心です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 06/03/30 に Kenta Hashimoto&lt;kem@xxxxxxxxxx&gt; さんは書きました:</span>
+<span class="quote2">&gt; &gt; もりきゅうさん、ありがとうございます。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; ！そうでしたか。</span>
+<span class="quote2">&gt; &gt; そんなに最初でつまずいていたとは。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 「AMD64 / Intel EM64T」というのを見て、ＡＭＤなら関係ないと、</span>
+<span class="quote2">&gt; &gt; 勝手に読み飛ばしてしまっていたようです。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 早速これから、試してみます。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; 06/03/30 に Kazuhiro Yoshida&lt;moriq@xxxxxxxxxx&gt; さんは書きました:</span>
+<span class="quote3">&gt; &gt; &gt; もりきゅうです。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt; Kenta Hashimoto wrote:</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ●64bit版のrpmを取ってきて、</span>
+<span class="quote4">&gt; &gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; MySQL-server-standard-4.1.18-0.rhel4.ia64.rpm</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote4">&gt; &gt; &gt; &gt; glibc.x86_64</span>
+<span class="quote3">&gt; &gt; &gt; とあるので、ia64でなくx86_64でないかと思います。</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote3">&gt; &gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="12894.html">[前]</a><a href="12896.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12890.html">  12890 2006-03-30 16:20 [&quot;Kenta Hashimoto&quot; &lt;k] CentOS4 で、MySQL-4.1 をアップグレード  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12891.html">  12891 2006-03-30 19:11 ┗[Kazuhiro Yoshida &lt;mo]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12893.html">  12893 2006-03-30 19:26 　┗[&quot;Kenta Hashimoto&quot; &lt;k]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12894.html">  12894 2006-03-30 19:52 　　┗[&quot;Kenta Hashimoto&quot; &lt;k]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="12895.html">  12895 2006-03-30 20:24 　　　┗[&quot;Kenta Hashimoto&quot; &lt;k]                                 </a></span>
+</pre>
+</body>
+</html>

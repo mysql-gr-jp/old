@@ -1,0 +1,127 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11040</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11039.html">[前]</a><a href="11041.html">[次]</a><a href="../list/11001-11100.html">[番号順一覧]</a><a href="../thread/11001-11100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11040
+</p>
+<div class="header">
+<p>
+From: &quot;Shiratani&quot; &lt;&quot;Shiratani&quot; &lt;m-shiratani@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 25 Feb 2005 10:58:43 +0900<br>
+Subject: [mysql 11040] Re: 接続エラー<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+たてやんっすさん返信ありがとうございます。
+
+お察しの通り、再起動の時は「/usr/local/mysql/share/mysql/mysql.server」を
+「/etc/rc.d/init.d/mysqld」にして自動起動できるようにしました。
+
+/etc/hosts　が　
+127.0.0.1 localhost.damain localhost
+192.168.10.10 test
+と設定していたのですが　127.0.0.1をコメントして
+# 127.0.0.1　　localhost.localdomain localhost
+192.168.10.10 localhost test
+
+と変更してＯＳの再起動を行ったところ
+一般ユーザーでは接続できるようになりました。
+
+ただ
+mysql&gt; use mysql
+mysql&gt; select * from user;
+で確認してみると、rootの情報が入ってなく
+# mysql -u　root -p　　で接続を試みるも
+ERROR 1045: Access denied for user: 'root@localhost' (Using password: YES)
+ではじかれます。
+# mysql -u root　で行っても
+ERROR 1045: Access denied for user: 'root@localhost' (Using password: NO)
+ではじかれます。
+
+mysqladmin shutdownはrootのユーザーがないためかはじかれてしまうので
+ＫＩＬＬコマンドでプロセスを落として自動起動設定をはずして
+ＯＳ再起動後、/usr/local/mysql/bin/mysqld_safe &amp;　で起動したのですが
+やはり root　でははじかれます。
+権限ALLの一般ユーザーで入って
+SHOW VARIABLESコマンドで確認したのですが、
+basedir                         | /usr/local/mysql/
+datadir                         | /usr/local/mysql/var/
+でした。
+
+よろしくお願いします。
+
+
+
+<span class="quote1">&gt; たてやんっす</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 接続できた時（パスワード設定した時）とエラーが出た時とで</span>
+<span class="quote1">&gt; 実行バイナリが違っていたりしませんか？</span>
+<span class="quote1">&gt; メッセージを見る限り</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 　　自分自身でコンパイル＆インストールしたあとmysqldを手動で起動してます</span>
+<span class="quote1">&gt; 　　</span>
+<span class="quote1">&gt; 　　このあと再起動した時は　自動起動に設定したのでしょうか？</span>
+<span class="quote1">&gt; 　　/etc/init.d/ にmysqlを起動できるように起動スクリプトを記述しましたか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 推測にいたった一つは</span>
+<span class="quote2">&gt; &gt; ユーザー権限は</span>
+<span class="quote2">&gt; &gt; # /usr/local/mysql/bin/mysql -u root</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; としていて　再起動後</span>
+<span class="quote1">&gt; [root@test mysql]# mysql -u root -p</span>
+<span class="quote1">&gt; としてますね？　　パスを通したとも考えられますが</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 一度現在のmysqld をシャットダウンして</span>
+<span class="quote1">&gt; （例 mysqladmin shutdown)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; その後で</span>
+<span class="quote1">&gt; /usr/local/mysql/bin/mysqld_safe &amp;</span>
+<span class="quote1">&gt; で起動してから、先に設定したパスワードで起動してみては</span>
+<span class="quote1">&gt; いかがでしょう？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; SHOW VARIABLES  like '%dir';</span>
+<span class="quote1">&gt; で　datadir の情報や basedir の情報を確認してみてください</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Shirataniさんの</span>
+<span class="quote1">&gt; 題名「<a href="11038.html">[mysql 11038]</a> 接続エラー」のメールからの引用です</span>
+<span class="quote2">&gt; &gt; 初めて投稿します。</span>
+<span class="quote2">&gt; &gt; Shirataniと申します。よろしくお願いします。</span>
+<span class="quote2">&gt; &gt; 環境は</span>
+<span class="quote2">&gt; &gt; OS:Redhat Linux 7.3</span>
+<span class="quote2">&gt; &gt; database:MySQL 4.0.23a</span>
+<span class="quote2">&gt; &gt; です。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; Mysqlをインストールしてユーザーの権限を作成して普通にアクセスできたので</span>
+す
+<span class="quote2">&gt; &gt; が、</span>
+<span class="quote2">&gt; &gt; マシンの再起動を行ったところ接続できなくなってしまいました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --</span>
+<span class="quote1">&gt;   彡彡从        たてやんっす</span>
+<span class="quote1">&gt;  d□/□-ｂ      &lt;tateyan@xxxxxxxxxx&gt;</span>
+<span class="quote1">&gt;  ヽ&quot;ー&quot;丿</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Key fingerprint = 5D56 8EA3 B9FE A721 4866  FB4A 0041 672C 08DD C33A</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="11039.html">[前]</a><a href="11041.html">[次]</a><a href="../list/11001-11100.html">[番号順一覧]</a><a href="../thread/11001-11100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11038.html">  11038 2005-02-24 19:46 [&quot;Shiratani&quot; &lt;m-shira] 接続エラー                              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11039.html">  11039 2005-02-24 21:41 ┗[tateyan &lt;tateyan@xxx]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="11040.html">  11040 2005-02-25 10:58 　┗[&quot;Shiratani&quot; &lt;m-shira]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11043.html">  11043 2005-02-25 23:27 　　┗[tateyan &lt;tateyan@xxx]                                   </a></span>
+</pre>
+</body>
+</html>

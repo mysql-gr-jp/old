@@ -1,0 +1,89 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3096</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="3095.html">[前]</a><a href="3097.html">[次]</a><a href="../list/3001-3100.html">[番号順一覧]</a><a href="../thread/3001-3100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3096
+</p>
+<div class="header">
+<p>
+From: tateyan &lt;tateyan &lt;tateyan@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 24 Jan 2001 23:38:31 +0900<br>
+Subject: [mysql 03096] レプリケーション<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+たてやんです
+
+今日は　MySQL のレプリケーション　機能にチャレンジしてみたんですが
+
+なぜか？？？　な現象　
+マスター側
+[mysqld]
+log-bin
+server-id=1
+
+
+スレーブ側
+ /etc/my.cnf
+に
+[mysqld]
+master-host=マスター側ホスト名
+master-user=ユーザ名
+master-password=パスワード
+server-id=2
+replicate-do-db=データベース名
+
+として 特定の　データベースのみ複製するということを
+してみたのですが
+
+クライアント側の　mysqld をスタートすると　クライアント側のエラー
+ログに　以下のように延々と...
+Slave thread: error connecting to master:Access denied for user:
+'0@localhost' (Using password: YES)(0), retry in 0 sec
+
+うーん　と悩みながら
+クライアント側で
+mysql データベース名
+を実行し、slave stop; を発行
+
+MySQLマニュアルとにらめっこしながら
+以下の
+CHANGE MASTER TO
+  MASTER_HOST='マスター側ホスト名',
+  MASTER_USER='ユーザ名',
+  MASTER_PASSWORD='パスワード',
+  MASTER_PORT=3306;
+
+を実行し、このあと slave start;
+を実行すると　　スレーブ側にレプリケーションが出来上がりました
+
+ログを見ると
+010124 23:21:14  Slave: reconnected to master 'ユーザ名@マスター側ホスト名:3306',replication
+resumed in log '
+
+うーん　my.cnf の書き方が悪いのかなぁ...
+
+マスター・スレーブ共mysql-3.23.32
+システムは　Linux　（Debian Woody ベース）　です(^^ゞ
+
+目的は達成したんだけど　しっくりこないなぁ...
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  彡彡从        たてやんっす
+ d□/□-ｂ      &lt;tateyan@xxxxxxxxxx&gt;
+ ヽ&quot;ー&quot;丿
+
+
+</pre>
+</div>
+<p class="button"><a href="3095.html">[前]</a><a href="3097.html">[次]</a><a href="../list/3001-3100.html">[番号順一覧]</a><a href="../thread/3001-3100.html">[スレッド一覧]</a></p>
+</body>
+</html>

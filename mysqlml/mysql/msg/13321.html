@@ -1,0 +1,91 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13321</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13320.html">[前]</a><a href="13322.html">[次]</a><a href="../list/13301-13400.html">[番号順一覧]</a><a href="../thread/13301-13400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13321
+</p>
+<div class="header">
+<p>
+From: takahashi tomonori &lt;takahashi tomonori &lt;takahashi_marquee@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 12 Sep 2006 20:55:44 +0900 (JST)<br>
+Subject: [mysql 13321] MySQL のインデックスについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちわ
+初めて投稿させていただきます。高橋と申します。
+天文分野で用いるDBにPostgreSQLを利用していましたが、MySQLを試してみようと
+勉強しています。
+そこで、インデックスの使いかたについてどうしてもわからないことが出てきた
+ので、質問させて下さい。
+
+MySQL5.0.22とMySQL5.0.24aを使用しています。
+
+create table mytable(key1 integer not null, key2 integer not null, cola
+integer not null, alpha float not null, delta float not null, colb integer
+not null, colc integer not null, cold integer not null, cole integer not
+null, colf integer not null, primary key(key1,key2));
+
+で作ったテーブルに、integer型で0〜始まるkey1、integer型で一つのkey1に対し0
+〜10まであるkey2、ランダムにfloat型で0〜360の値をとるalpha、-90〜90のdelta
+となるような行が1000万件あるテキストファイルを作成しload data infile文で
+挿入しました。
+
+<span class="quote1">| key1 | key2 | cola | alpha   | delta    | colb | colc</span>
+<span class="quote1">|    0 |    0　 |    1 　| 211.043 | -14.8086 |    0 |  151 |</span>
+<span class="quote1">|    0 |    1 　|    1 | 264.644 | -9.72423 |    0 |  147 |</span>
+<span class="quote1">|    0 |    2 　|    1 | 69.3209 |   48.815 |    0 |  109 |</span>
+<span class="quote1">|    0 |    3 　|    1 |  176.83 | -41.6814 |    0 |  143 |</span>
+<span class="quote1">|    0 |    4 　|    1 | 245.166 |  41.8217 |    0 |  240 |</span>
+<span class="quote1">|    0 |    5　 |    1 | 325.203 |  52.6365 |    0 |  187 |</span>
+<span class="quote1">|    0 |    6 　|    1 | 290.216 | -16.5764 |    0 |   17 |</span>
+<span class="quote1">|    0 |    7 　|　   1 | 130.119 |  26.2769 |    0 |  222 |</span>
+<span class="quote1">|    0 |    8 　|    1 | 160.449 |  -39.381 |    0 |   25 |</span>
+<span class="quote1">|    0 |    9 　|    1 | 47.0737 | -54.8082 |    0 |   12 |</span>
+<span class="quote1">|    1 |    0 　|    1 | 308.184 | -31.8384 |    0 |   18 |</span>
+<span class="quote1">|    1 |    1 　|    1 | 253.046 |  16.3762 |    0 |  253 |</span>
+
+　　　　　　　　　　　　mytableの一部
+
+
+これを
+select * from mytable where (alpha between 1.0 and 2.0) and (delta between
+1.0 and 2.0);
+という検索をします。この検索は問題ないのですが
+
+create index myindex on mytable(alpha,delta);
+
+でalpha、deltaについてインデックスを作成して同様の検索を行ったところ検索
+時間が10倍に増加しました。
+
+いろいろ調べましたが、mysqldのCPUがインデックスを作成しないときに比べて全
+然負荷がかかっていませんでした。
+似たようなデータにインデックスを作成しても、（例えば復合インデックスでは
+なく、alphaについてインデックスを作成し、alphaのみで検索）同様でした。
+explainで調べると、(id:1、select_type:SIMPLE、
+type:range、possiblekeys:alpha
+、 key:alpha、key_len:8、 ref:NULL、 rows:27426、 Extr a Using:Where)で問
+題はないと思います。
+もともとはFedora core4で行っていましたが、X Server、Windows XPでやっても
+同様の症状が出たので、やり方が悪いのだとは思いますが。
+
+ご教授のほど、よろしくお願いします。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="13320.html">[前]</a><a href="13322.html">[次]</a><a href="../list/13301-13400.html">[番号順一覧]</a><a href="../thread/13301-13400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="13321.html">  13321 2006-09-12 20:55 [takahashi tomonori &lt;] MySQL のインデックスについて            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13769.html">  13769 2007-02-24 04:19 ┗[&quot;Isamu Narimatsu&quot; &lt;w] show columns で NULL  カラムにNOが入る (5.0.27)</a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15038</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15037.html">[前]</a><a href="15039.html">[次]</a><a href="../list/15001-15100.html">[番号順一覧]</a><a href="../thread/15001-15100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15038
+</p>
+<div class="header">
+<p>
+From: 知司北島 &lt;知司北島 &lt;kitajimatomoji@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 21 Oct 2009 17:37:34 +0900<br>
+Subject: [mysql 15038] MySQL Cluster6.2のデータノード起動できません。Caused by error 2327: Memory allocation failure<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+MySQLフォーラムで、今私が遭遇しているのと同じトラブルについての投稿がありますが、
+そこでも未解決のままになっているトラブルについて。
+<a href="http://forums.mysql.com/read.php?25">http://forums.mysql.com/read.php?25</a>,259512
+
+MySQL Cluster6.2のデータノードを起動されます。
+ndbd --initial --ndb-mgmd-host=192.168.0.1 --ndb-connectstring=192.168.0.2
+
+すると、マネージメントサーバのコンソール(NDB_MGM)に、以下のようにエラーメッセージが表示され、
+起動に失敗します。
+Node 11: Forced node shutdown completed. Occured during startphase 0. Caused
+by error 2327: 'Memory allocation failure, please decrease some
+configuration parameters(Configuration error). Permanent error, external
+action needed'.
+
+メッセージを額面どおり受け止めるとメモリ確保に失敗しているようですが、このサーバのメインメモリは
+4GBあり、他の主だった(メモリを使う)アプリケーションは起動していません。
+
+
+config.ini
+の設定は、以下の通りです。
+
+[NDBD DEFAULT]
+NoOfReplicas=2
+DataMemory =2800M
+IndexMemory=800M
+TimeBetweenLocalCheckpoints=10
+TimeBetweenGlobalCheckpoints=1000
+
+[NDB_MGMD]
+Id=1
+hostname=192.168.0.1
+datadir=/var/lib/mysql-mgmt
+
+[NDBD]
+Id=11
+hostname=192.168.0.2
+datadir=/var/lib/mysql-cluster
+
+[NDBD]
+Id=12
+hostname=192.168.0.3
+datadir=/var/lib/mysql-cluster
+
+[MYSQLD]
+Id=21
+
+[MYSQLD]
+Id=22
+
+
+サーバの要件は以下のとおりです。
+# cat /etc/redhat-release
+CentOS release 5.3 (Final)
+
+# rpm -qa | grep MySQL
+MySQL-Cluster-gpl-storage-6.3.20-0.rhel5
+MySQL-Cluster-gpl-tools-6.3.20-0.rhel5
+MySQL-Cluster-gpl-server-6.3.20-0.rhel5
+MySQL-Cluster-gpl-management-6.3.20-0.rhel5
+MySQL-devel-community-5.1.31-0.rhel5
+MySQL-Cluster-gpl-client-6.3.20-0.rhel5
+
+# free -m
+             total       used       free     shared    buffers     cached
+Mem:          4051        582       3468          0        151        336
+-/+ buffers/cache:         95       3955
+Swap:         2000          0       2000
+
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="15038/0/index.html"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="15037.html">[前]</a><a href="15039.html">[次]</a><a href="../list/15001-15100.html">[番号順一覧]</a><a href="../thread/15001-15100.html">[スレッド一覧]</a></p>
+</body>
+</html>

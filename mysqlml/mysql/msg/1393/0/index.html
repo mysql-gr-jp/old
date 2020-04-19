@@ -1,0 +1,226 @@
+From: Michael Widenius <monty@monty.pp.sci.fi>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Date: Wed,  8 Dec 1999 14:03:54 +0200 (EET)
+To: Xavier.Leroy@inria.fr, drepper@cygnus.com
+cc: linux-threads@magenet.com, mysql@lists.mysql.com, grimmer@suse.de
+Subject: Critical bug in pthread_cond_timedwait that affects MySQL
+X-Mailer: VM 6.43 under 20.4 "Emerald" XEmacs  Lucid
+Message-ID: <14414.17554.825253.22099@monty.pp.sci.fi>
+Reply-To: monty@tcx.se
+
+
+Hi!
+
+First some system information:
+
+This is ona a Suse 6.2 distribution (the bug should however also be in all
+older linuxthread/glibc versions)
+
+((/tmp)) uname -a
+Linux monty 2.2.13 #3 SMP Fri Nov 19 15:12:50 EET 1999 i686 unknown
+((/tmp)) rpm -q libc
+libc-2.1.1-15
+
+I have spent the last week trying to find out why MySQL dies when
+using DELAYED INSERT on Linux.  After one week (!) of debugging, I found
+that the problem was that sometimes __libc_nanosleep() returned too
+fast.  This resulted it that a signal could be left pending and
+this in turn gave the thread in question direct access to the next
+locked mutex.  This resulted in that the mutex lock list got corrupted and
+we started to get weird crashes in MySQL :(
+(Note that one will get the same problem if a thread sends a wakeup
+signal to the sleeping thread just after the timeout expired)
+
+I have in MySQL 3.23.7 made a temporary patch that it will not use
+pthread_cond_timedwait() on Linux until this patch (or a similar one)
+is incorporated into glibc.  Note that this patch is not perfect, as
+it only solves the problem for programs that uses a different
+condition variable on all pthread_cond_timedwait() calls (like MySQL),
+but at least this is MUCH better than the previous behaveour....
+(I have described more about this problem in the patch)
+
+If you need more information about this, just mail me!
+
+Regards,
+Monty
+
+diff -c -r glibc-2.1/linuxthreads/condvar.c glibc-2.1-new/linuxthreads/condvar.c
+*** glibc-2.1/linuxthreads/condvar.c	Thu Oct 29 16:34:17 1998
+--- glibc-2.1-new/linuxthreads/condvar.c	Wed Dec  8 12:31:57 1999
+***************
+*** 43,48 ****
+--- 43,49 ----
+  {
+    volatile pthread_descr self = thread_self();
+  
++   ASSERT(self->p_nextwaiting == NULL);
+    __pthread_lock(&cond->__c_lock, self);
+    enqueue(&cond->__c_waiting, self);
+    __pthread_unlock(&cond->__c_lock);
+***************
+*** 56,63 ****
+--- 57,66 ----
+      __pthread_lock(&cond->__c_lock, self);
+      remove_from_queue(&cond->__c_waiting, self);
+      __pthread_unlock(&cond->__c_lock);
++     ASSERT(self->p_nextwaiting == NULL);
+      pthread_exit(PTHREAD_CANCELED);
+    }
++   ASSERT(self->p_nextwaiting == NULL);
+    return 0;
+  }
+  
+***************
+*** 113,123 ****
+--- 116,153 ----
+      pthread_mutex_lock(mutex);
+      pthread_exit(PTHREAD_CANCELED);
+    }
++ 
+    /* If not signaled: also remove ourselves and return an error code */
+    if (THREAD_GETMEM(self, p_signal) == 0) {
++ 
++     /* The below code will only work if the client is only using
++        this condition variable in one thread at a time.  The problem
++        is that another thread may already have sent us a
++        __pthread_sig_restart signal to abort the condition
++        or will send us the signal while we are manipulating
++        the cond->__c_waiting lock.
++        The only way to fix this is to have a special version
++        of __pthread_lock() that ensures that we really do
++        get the following lock.  As this will likely
++        require modification of the _pthread_descr_struct I
++        will leave this for the linuxthread maintainer.
++        For the moment, the signal check after the mutex, will
++        be enough to get MySQL to work (and any other program
++        that only used the condition variable at one place).
++     */
+      __pthread_lock(&cond->__c_lock, self);
+      remove_from_queue(&cond->__c_waiting, self);
+      __pthread_unlock(&cond->__c_lock);
++ 
++     /* Ensure that we don't have any pending signals when we leave this
++        function;  We may have a pending signal if if we got a timeout or if
++        libc_nanosleep() was aborted.
++     */
++     sigemptyset(&unblock);
++     sigaddset(&unblock, __pthread_sig_restart);
++     sigprocmask(SIG_UNBLOCK, &unblock, &initial_mask); /* Catch signals */
++     sigprocmask(SIG_SETMASK, &initial_mask, NULL);
++ 
+      pthread_mutex_lock(mutex);
+      return retsleep == 0 ? ETIMEDOUT : EINTR;
+    }
+diff -c -r glibc-2.1/linuxthreads/restart.h glibc-2.1-new/linuxthreads/restart.h
+*** glibc-2.1/linuxthreads/restart.h	Wed Jul 29 21:39:58 1998
+--- glibc-2.1-new/linuxthreads/restart.h	Wed Dec  8 01:47:39 1999
+***************
+*** 18,23 ****
+--- 18,24 ----
+  
+  static inline void restart(pthread_descr th)
+  {
++   ASSERT(th->p_nextwaiting == 0 && th->p_nextlock == 0);
+    kill(th->p_pid, __pthread_sig_restart);
+  }
+  
+diff -c -r glibc-2.1/linuxthreads/spinlock.c glibc-2.1-new/linuxthreads/spinlock.c
+*** glibc-2.1/linuxthreads/spinlock.c	Wed Dec  8 12:37:58 1999
+--- glibc-2.1-new/linuxthreads/spinlock.c	Wed Dec  8 01:56:20 1999
+***************
+*** 41,62 ****
+  {
+    long oldstatus, newstatus;
+  
+    do {
+      oldstatus = lock->__status;
+      if (oldstatus == 0) {
+        newstatus = 1;
+      } else {
+        if (self == NULL)
+  	self = thread_self();
+        newstatus = (long) self;
+      }
+      if (self != NULL) {
+-       ASSERT(self->p_nextlock == NULL);
+        THREAD_SETMEM(self, p_nextlock, (pthread_descr) oldstatus);
+      }
+    } while(! compare_and_swap(&lock->__status, oldstatus, newstatus,
+                               &lock->__spinlock));
+    if (oldstatus != 0) suspend(self);
+  }
+  
+  void internal_function __pthread_unlock(struct _pthread_fastlock * lock)
+--- 41,76 ----
+  {
+    long oldstatus, newstatus;
+  
++   /*
++     We must do the assertion of p_nextlock first as the compare_and_swap
++     may return false, in which case p_nextlock will contain oldstatus
++   */
++   if (self)
++   {
++     ASSERT(self->p_nextlock == NULL);
++   }
+    do {
+      oldstatus = lock->__status;
+      if (oldstatus == 0) {
+        newstatus = 1;
+      } else {
+        if (self == NULL)
++       {
+  	self = thread_self();
++ 	ASSERT(self->p_nextlock == NULL);
++       }
+        newstatus = (long) self;
+      }
+      if (self != NULL) {
+        THREAD_SETMEM(self, p_nextlock, (pthread_descr) oldstatus);
+      }
+    } while(! compare_and_swap(&lock->__status, oldstatus, newstatus,
+                               &lock->__spinlock));
+    if (oldstatus != 0) suspend(self);
++   if (self)
++   {
++     ASSERT(self->p_nextlock == NULL);
++   }
+  }
+  
+  void internal_function __pthread_unlock(struct _pthread_fastlock * lock)
+*** glibc-2.1/linuxthreads/ChangeLog	Tue May 25 10:22:48 1999
+--- glibc-2.1-new/linuxthreads/ChangeLog	Wed Dec  8 13:40:54 1999
+***************
+*** 1,3 ****
+--- 1,13 ----
++ 1999-12-08  Michael Widenius  <monty@monty.pp.sci.fi>
++ 
++ 	* condvar.c: Added ASSERT() commands to make it easier to find
++ 	  bugs in mutex/signal handling.
++ 	* condvar.c: Fixed a critical bug in pthread_cond_timedwait()
++ 	  which caused linuxthreads to free the wrong mutex() in some
++ 	  cases.
++ 	* restart.h:  Added ASSERT() command to help debug mutex() code.
++ 	* spinlock.c: Fixed a bug in ASSERT() checking in pthread_lock().
++ 
+  1999-05-23  Andreas Jaeger  <aj@arthur.rhein-neckar.de>
+  
+  	* man/pthread_cond_init.man: Correct example.
+
+---------------------------------------------------------------------
+Please check "http://www.mysql.com/Manual_chapter/manual_toc.html" before
+posting. To request this thread, e-mail mysql-thread20577@lists.mysql.com
+
+To unsubscribe, send a message to the address shown in the
+List-Unsubscribe header of this message. If you cannot see it,
+e-mail mysql-unsubscribe@lists.mysql.com instead.
+
+-- 
+ ~~ ~  takeshi@SoftAgency.co.jp
+ Soft Agency Co., Ltd. TEL +81-48-661-1527
+ PGP fingerprint = 45 5D 54 12 B4 55 77 7F  D4 52 66 EC 03 3F 1B E9
+ [ http://www.softagency.co.jp/mysql/ ]
+ [ MySQL ML: mysql-guide@ml.database.ne.jp ]
+

@@ -1,0 +1,113 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12864</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12863.html">[前]</a><a href="12865.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12864
+</p>
+<div class="header">
+<p>
+From: &quot;Kenta Hashimoto&quot; &lt;&quot;Kenta Hashimoto&quot; &lt;kem@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 15 Mar 2006 15:17:05 +0900<br>
+Subject: [mysql 12864] Re: 高負荷時の破損に関して<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+橋本です。
+
+思いつくものを書きます
+
+・delay_key_write=ALL になっている状態で、MySQLが再起動してしまっている
+　- delay_key_writeの状態は、「SHOW VARIABLES」 で見れます
+　- MySQLの起動時間は、「mysqladmin version -u ユーザ名 -p」 で見れます。
+
+　→ delay_key_write の設定を変えると安定するかも
+
+・特定のクエリを走らせると、テーブルが壊れる場合もあります
+
+　- たとえば、今、私が直面している問題として、「ササミ缶」という単語を
+　　INSERTしようとすると、壊れるテーブルがあるという問題があります。
+
+　→ MySQLのバージョンアップ？
+
+・データを大量にDELETEすると、壊れやすくなるようです。
+　→ DELETEの代わりに、不使用の行であるというフラグの列を作って使用する
+
+06/03/15 に F.Y&lt;fumi_sby@xxxxxxxxxx&gt; さんは書きました:
+<span class="quote1">&gt; ウチでやってる何台かのMySQLサーバはload averageが20くらいってのはしょっ</span>
+<span class="quote1">&gt; ちゅうで、別に壊れませんが。</span>
+<span class="quote1">&gt; I/Oの様子はとりあえずiostatで見れば?</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 能力の高くないCPUで負荷の高いファイルシステムを使っていた時におそらく「</span>
+<span class="quote1">&gt; 書き込みが間に合わない」状況になって抜群にload averageがあがってほぼフ</span>
+<span class="quote1">&gt; リーズ状態になり、素敵に*.MYIが壊れたりしたことがあり(3.23時代)。</span>
+<span class="quote1">&gt; 具体的にはPentium II (Deschutes) 400MHz、LVMで2基のHDDをまたいで作った1</span>
+<span class="quote1">&gt; 仮想パーテーションにJFS。確かReiserFSにしても同じで、たぶんLVMが重すぎ</span>
+<span class="quote1">&gt; 。Linuxは2.4.18系。</span>
+<span class="quote1">&gt; 壊れた時のload averageは150とかになってたような気がする。最近のEMT64も</span>
+<span class="quote1">&gt; のに2.6系だとload average 700とかになってもわりと平気よ(そういう設計に</span>
+<span class="quote1">&gt; する奴=わたしがおかしいのだが)。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; じじいの昔話が適用可能かどうかわからんけど、最近でも書き込みが間に合わ</span>
+<span class="quote1">&gt; なくてファイルが壊れるってのにはたまに遭遇します。最近だとボットネット</span>
+<span class="quote1">&gt; らしきところから激アタック受け中のapacheのログとか。最初はapache落ちな</span>
+<span class="quote1">&gt; いので気付かなくて、あとでアクセスログ分析しようとして青くなった。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --- ISHIDA Eri &lt;eri@xxxxxxxxxx&gt; からのメッセージ：</span>
+<span class="quote2">&gt; &gt; 返信ありがとうございます。</span>
+<span class="quote2">&gt; &gt; 石田絵理です。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt; |それ以外のログの部分が見たいです。</span>
+<span class="quote2">&gt; &gt; 実はそれ以外にログが出ないため，</span>
+<span class="quote2">&gt; &gt; 対処法がない状態です。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt; |CPU使用率</span>
+<span class="quote2">&gt; &gt; 恐らく100％近いと思われます。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote3">&gt; &gt; |IOの状態</span>
+<span class="quote2">&gt; &gt; アクセスも頻繁</span>
+<span class="quote2">&gt; &gt; Load Average 4から5と想定しています。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; やはりこのような状態で破損しないほうが，</span>
+<span class="quote2">&gt; &gt; おかしいのでしょうか。</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote2">&gt; &gt; --</span>
+<span class="quote2">&gt; &gt; ISHIDA Eri</span>
+<span class="quote2">&gt; &gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; --------------------------------------</span>
+<span class="quote1">&gt; TSUKAME EIKOU! KAGAYAKE EGAO!</span>
+<span class="quote1">&gt; Yahoo! JAPAN JPC OFFICIAL PARTNER INTERNET PORTAL SITE</span>
+<span class="quote1">&gt; <a href="http://pr.mail.yahoo.co.jp/wintergames/">http://pr.mail.yahoo.co.jp/wintergames/</a></span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<p class="button"><a href="12863.html">[前]</a><a href="12865.html">[次]</a><a href="../list/12801-12900.html">[番号順一覧]</a><a href="../thread/12801-12900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="12857.html">  12857 2006-03-15 11:00 [ISHIDA Eri &lt;eri@xxxx] 高負荷時の破損に関して                  </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12858.html">  12858 2006-03-15 11:37 ┗[&quot;Yukio Kinoshita&quot; &lt;i]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12859.html">  12859 2006-03-15 13:39 　┗[ISHIDA Eri &lt;eri@xxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12860.html">  12860 2006-03-15 14:23 　　┗[Takanori Jokura &lt;jo@]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12862.html">  12862 2006-03-15 14:53 　　　┗[ISHIDA Eri &lt;eri@xxxx]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12863.html">  12863 2006-03-15 15:06 　　　　┣[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                               </a></span>
+<span class="current">-&gt;&nbsp;<a href="12864.html">  12864 2006-03-15 15:17 　　　　┃┣[&quot;Kenta Hashimoto&quot; &lt;k]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12867.html">  12867 2006-03-15 16:16 　　　　┃┃┗[ISHIDA Eri &lt;eri@xxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12866.html">  12866 2006-03-15 16:13 　　　　┃┗[ISHIDA Eri &lt;eri@xxxx]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12868.html">  12868 2006-03-15 16:47 　　　　┃　┗[&quot;F.Y&quot; &lt;fumi_sby@xxxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12869.html">  12869 2006-03-16 22:41 　　　　┃　　┗[深海水草 &lt;VYG01106@x]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12865.html">  12865 2006-03-15 16:00 　　　　┗[MURAKAMI Tomokazu &lt;t]                               </a></span>
+</pre>
+</body>
+</html>

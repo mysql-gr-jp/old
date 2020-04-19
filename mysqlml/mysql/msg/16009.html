@@ -1,0 +1,180 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16009</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16008.html">[前]</a><a href="16010.html">[次]</a><a href="../list/16001-16100.html">[番号順一覧]</a><a href="../thread/16001-16100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16009
+</p>
+<div class="header">
+<p>
+From: Yasuo Ohgaki &lt;Yasuo Ohgaki &lt;yohgaki@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 31 Jul 2013 15:45:22 +0900<br>
+Subject: [mysql 16009] Re: [mysql 16007] 数百万件のload data infileの繰り返し中にmysqldがハング<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+大垣です。
+
+他の方が指摘されているようにメモリが足りないのかも知れませんが、
+本当にハングしているならmysqlをデバッグビルドしてgdbでアタッチ
+して調べると原因が分かると思います。
+
+--
+Yasuo Ohgaki
+yohgaki@xxxxxxxxxx
+
+
+2013/7/30 ayako hiroe &lt;roeaya03@xxxxxxxxxx&gt;
+
+<span class="quote1">&gt; お世話になります。</span>
+<span class="quote1">&gt; 広江彩子と申します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; サーバー移行のため数億件のレストアテストをしております。</span>
+<span class="quote1">&gt; ３００万件ずつのtab区切りプレインテキストのダンプを</span>
+<span class="quote1">&gt; バッチで何度もload infeを繰りかえしているうちmysqldが突然ハングします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ハングの具体的な現象は</span>
+<span class="quote1">&gt; ・load中のCPU使用率からすると突然それが下がる</span>
+<span class="quote1">&gt; ・mysql関連のコマンドがすべてハング（killするしかない）</span>
+<span class="quote1">&gt; ・mysqladmin shutdownもハング</span>
+<span class="quote1">&gt; ・mysqldのスクリプトを実行してもハング</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 上記のような状態になると結局killallなどするしかありません。</span>
+<span class="quote1">&gt; エラーログはハングの時点では何も吐いていません。</span>
+<span class="quote1">&gt; killallでmysqldのプロセスを停止するので、システムをリブートしてmysqld startするときに</span>
+<span class="quote1">&gt; リカバリ・ロールバックプロセスががんがん走るのをエラーログが吐いているようになります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; バッチをまわし始めるとだんだん使用メモリが増え、しばらくするとスワップが発生します。</span>
+<span class="quote1">&gt; それが原因かもわかりません。</span>
+<span class="quote1">&gt; innodb使用です。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 何かお気づきの方がおられましたら</span>
+<span class="quote1">&gt; ご教授いただけますと幸いです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; OS:</span>
+<span class="quote1">&gt; Linux CentOS release6.4</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQL：</span>
+<span class="quote1">&gt; MySQL 5.5.32 Remi</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ロケール：</span>
+<span class="quote1">&gt; utf8</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; my.cnf</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [mysqld]</span>
+<span class="quote1">&gt; innodb_file_per_table</span>
+<span class="quote1">&gt; back_log = 50</span>
+<span class="quote1">&gt; max_connections = 500</span>
+<span class="quote1">&gt; max_connect_errors = 10</span>
+<span class="quote1">&gt; table_open_cache = 2048</span>
+<span class="quote1">&gt; max_allowed_packet = 16M</span>
+<span class="quote1">&gt; binlog_cache_size = 1M</span>
+<span class="quote1">&gt; max_heap_table_size = 64M</span>
+<span class="quote1">&gt; read_buffer_size = 512M</span>
+<span class="quote1">&gt; read_rnd_buffer_size = 1M</span>
+<span class="quote1">&gt; ted per thread if sort is needed.</span>
+<span class="quote1">&gt; sort_buffer_size = 8M</span>
+<span class="quote1">&gt; join_buffer_size = 8M</span>
+<span class="quote1">&gt; thread_cache_size = 180</span>
+<span class="quote1">&gt; thread_concurrency = 8</span>
+<span class="quote1">&gt; query_cache_size = 64M</span>
+<span class="quote1">&gt; query_cache_limit = 2M</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ft_min_word_len = 4</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; default-storage-engine = InnoDB</span>
+<span class="quote1">&gt; thread_stack = 192K</span>
+<span class="quote1">&gt; transaction_isolation = REPEATABLE-READ</span>
+<span class="quote1">&gt; tmp_table_size = 64M</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; binlog_format=mixed</span>
+<span class="quote1">&gt; slow_query_log</span>
+<span class="quote1">&gt; log-error=/var/log/myerror.log</span>
+<span class="quote1">&gt; log-warnings=1</span>
+<span class="quote1">&gt; long_query_time = 120</span>
+<span class="quote1">&gt; key_buffer_size = 32M</span>
+<span class="quote1">&gt; bulk_insert_buffer_size = 64M</span>
+<span class="quote1">&gt; myisam_sort_buffer_size = 128M</span>
+<span class="quote1">&gt; myisam_max_sort_file_size = 10G</span>
+<span class="quote1">&gt; myisam_repair_threads = 1</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; myisam_recover</span>
+<span class="quote1">&gt; innodb_io_capacity=2000</span>
+<span class="quote1">&gt; innodb_additional_mem_pool_size = 16M</span>
+<span class="quote1">&gt; innodb_buffer_pool_size = 19G</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; innodb_data_file_path = ibdata1:10M:autoextend</span>
+<span class="quote1">&gt; innodb_write_io_threads = 8</span>
+<span class="quote1">&gt; innodb_read_io_threads = 8</span>
+<span class="quote1">&gt; innodb_thread_concurrency = 16</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; innodb_flush_log_at_trx_commit = 1</span>
+<span class="quote1">&gt; innodb_log_buffer_size = 8M</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; innodb_log_file_size = 1G</span>
+<span class="quote1">&gt; innodb_log_files_in_group = 3</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; innodb_max_dirty_pages_pct = 90</span>
+<span class="quote1">&gt; innodb_lock_wait_timeout = 120</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [mysqldump]</span>
+<span class="quote1">&gt; quick</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; max_allowed_packet = 16M</span>
+<span class="quote1">&gt; default-character-set=utf8</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [mysql]</span>
+<span class="quote1">&gt; no-auto-rehash</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # Only allow UPDATEs and DELETEs that use keys.</span>
+<span class="quote1">&gt; #safe-updates</span>
+<span class="quote1">&gt; default-character-set=utf8</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [myisamchk]</span>
+<span class="quote1">&gt; key_buffer_size = 512M</span>
+<span class="quote1">&gt; sort_buffer_size = 512M</span>
+<span class="quote1">&gt; read_buffer = 8M</span>
+<span class="quote1">&gt; write_buffer = 8M</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [mysqlhotcopy]</span>
+<span class="quote1">&gt; interactive-timeout</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; [mysqld_safe]</span>
+<span class="quote1">&gt; open-files-limit = 8192</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="16009/0/index.html"> [text/html]</a>
+</ul>
+</div>
+<p class="button"><a href="16008.html">[前]</a><a href="16010.html">[次]</a><a href="../list/16001-16100.html">[番号順一覧]</a><a href="../thread/16001-16100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16007.html">@ 16007 2013-07-30 14:25 [ayako hiroe &lt;roeaya0] 数百万件のload data  infileの繰り返し中にmysqldがハング</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16008.html">  16008 2013-07-31 15:37 ┣[&quot;yoku ts.&quot; &lt;yoku0825]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="16009.html">@ 16009 2013-07-31 15:45 ┗[Yasuo Ohgaki &lt;yohgak] Re: [mysql 16007] 数百万件のload data infileの繰り返し中にmysqldがハング</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16010.html">@ 16010 2013-07-31 16:52 　┗[ayako hiroe &lt;roeaya0] Re: 数百万件のload data  infileの繰り返し中にmysqldがハング</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16011.html">@ 16011 2013-07-31 19:20 　　┣[Yasuo Ohgaki &lt;yohgak] Re: [mysql 16010] Re: 数百万件のload data infileの繰り返し中にmysqldがハング</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16014.html">@ 16014 2013-08-01 02:23 　　┃┗[ayako hiroe &lt;roeaya0] Re: 数百万件のload data  infileの繰り返し中にmysqldがハング</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16015.html">@ 16015 2013-08-01 06:08 　　┃　┣[Yasuo Ohgaki &lt;yohgak] Re: [mysql 16014] Re: 数百万件のload data infileの繰り返し中にmysqldがハング</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16016.html">  16016 2013-08-02 22:58 　　┃　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16017.html">@ 16017 2013-08-03 14:47 　　┃　　┗[ayako hiroe &lt;roeaya0]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16012.html">  16012 2013-07-31 20:18 　　┗[&quot;yoku ts.&quot; &lt;yoku0825]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16013.html">@ 16013 2013-08-01 02:17 　　　┗[ayako hiroe &lt;roeaya0]                                 </a></span>
+</pre>
+</body>
+</html>

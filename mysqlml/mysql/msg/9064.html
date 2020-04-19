@@ -1,0 +1,67 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9064</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9063.html">[前]</a><a href="9065.html">[次]</a><a href="../list/9001-9100.html">[番号順一覧]</a><a href="../thread/9001-9100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9064
+</p>
+<div class="header">
+<p>
+From: &quot;UNO Shintaro&quot; &lt;&quot;UNO Shintaro&quot; &lt;uno@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 25 Mar 2004 01:52:10 +0900<br>
+Subject: [mysql 09064] Re: JOIN で結合すると遅くなります<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<span class="quote1">&gt; select count(*) as cnt from denpyou inner join denpyoumeisai</span>
+<span class="quote1">&gt; on denpyou.DenpyouNo = denpyuoumeisai.DenpyouNo</span>
+<span class="quote1">&gt; where T_Code = '123456' and KikakuBangou = 'ABCD-1234';</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; すると結果がでるまでに 8 min 4.27 sec</span>
+<span class="quote1">&gt; かかります。</span>
+<span class="quote1">&gt; これでは実用に耐えられないのですが、もっと早くすることはできますでしょうか？</span>
+
+
+1600万件のテーブルをMySQLで扱ったことがないので確かなことは
+言えないんですけど…
+explainで表示されたプランを見ると、まずdenpyoumeisaiを検索して、
+そこからdenpyoumeisaiの行数分denpyouを読みに行ってるようです。
+その順番を逆転させると改善する、かも。
+select straight_join ... と書くと、テーブル結合順序をfrom句での
+出現順に強制できます。
+
+select straight_join count(*) as cnt from denpyou inner join denpyoumeisai
+on denpyou.DenpyouNo = denpyuoumeisai.DenpyouNo
+where T_Code = '123456' and KikakuBangou = 'ABCD-1234';
+
+、、どうでしょうか？
+うまく行かなかったらごめんなさい。
+
+-- 
+UNO Shintaro, 宇野 信太郎
+mailto:uno@xxxxxxxxxx
+<a href="http://www.venus.dti.ne.jp/~uno/">http://www.venus.dti.ne.jp/~uno/</a>
+
+
+</pre>
+</div>
+<p class="button"><a href="9063.html">[前]</a><a href="9065.html">[次]</a><a href="../list/9001-9100.html">[番号順一覧]</a><a href="../thread/9001-9100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9052.html">   9052 2004-03-24 18:39 [&quot;藤田&quot; &lt;t-fujita@xxx] JOIN で結合すると遅くなります           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9054.html">   9054 2004-03-24 18:47 ┣[SUGAWARA Hajime &lt;sug]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9062.html">   9062 2004-03-25 00:33 ┃┗[&quot;藤田&quot; &lt;t-fujita@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9066.html">   9066 2004-03-25 08:14 ┃　┗[&quot;藤田&quot; &lt;t-fujita@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9067.html">   9067 2004-03-25 08:43 ┃　　┗[seiji takegata &lt;take]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9058.html">   9058 2004-03-24 20:00 ┣[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9061.html">   9061 2004-03-24 20:53 ┣[&quot;藤田&quot; &lt;t-fujita@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9065.html">   9065 2004-03-25 03:30 ┃┗[ML account &lt;ml@xxxxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="9064.html">   9064 2004-03-25 01:52 ┗[&quot;UNO Shintaro&quot; &lt;uno@]                                       </a></span>
+</pre>
+</body>
+</html>

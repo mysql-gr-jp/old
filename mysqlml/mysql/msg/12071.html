@@ -1,0 +1,821 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:12071</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="12070.html">[前]</a><a href="12072.html">[次]</a><a href="../list/12001-12100.html">[番号順一覧]</a><a href="../thread/12001-12100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:12071
+</p>
+<div class="header">
+<p>
+From: zen kishimoto &lt;zen kishimoto &lt;zen@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 03 Sep 2005 09:24:15 -0700<br>
+Subject: [mysql 12071] 階層化されたデータをMySQLで扱う　（Managing Hierarchical Data in  MySQL）　<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+<a href="http://dev.mysql.com/tech-resources/articles/hierarchical-data.html">http://dev.mysql.com/tech-resources/articles/hierarchical-data.html</a>
+（図はこのサイトを参照のこと）
+
+Mike Hillyer著
+
+初めに
+
+多くのユーザーは一回くらいはSQLデータベース内で、階層化したデータを
+扱ったことがあると思います。そのときはリレーショナル
+データベースは階層化したデータ用に開発されなかったと考えたと思います。
+リレーショナルデータベースのテーブルは階層化されておらず（XMLの
+ように）単に平たいリストです。階層化されたデータは親と子供の
+関係を持っており、リレーショナル　データベース
+のテーブルでは自然に表すことができません。
+
+ここでは、階層化されたデータとはそれぞれが１つの
+親をを持ちゼロかそれ以上の子供を持つデータの
+集まりをさします。(例外はルートで親がありません。）
+階層化されたデータは種種のデータベースのアプリで
+見かけることができます。例えば、フォーラムや
+メールリストのスレッド、組織表、コンテンツ管理のカテゴリ、
+や製品カテゴリなどです。ここでは、仮想の電機機器店
+からの製品階層を使用します。
+
+こういったカテゴリは他の例で引かれているのと
+同様な階層を形成します。この記事ではMySQLで扱う
+階層化されたデータの２つのモデルを検証します。まづは
+前からあるadjacency listモデルから始めます。
+
+Adjacency List モデル
+
+上での例のカテゴリは以下のテーブルに格納されます。 (フォローし易い
+ようにCREATEとINSERTの完全なステートメントを書き出します。）
+
+CREATE TABLE category(
+category_id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(20) NOT NULL,
+parent INT DEFAULT NULL);
+
+
+INSERT INTO category
+VALUES(1,'ELECTRONICS',NULL),(2,'TELEVISIONS',1),(3,'TUBE',2),
+(4,'LCD',2),(5,'PLASMA',2),(6,'PORTABLE ELECTRONICS',1),
+(7,'MP3 PLAYERS',6),(8,'FLASH',7),
+(9,'CD PLAYERS',6),(10,'2 WAY RADIOS',6);
+
+SELECT * FROM category ORDER BY category_id;
+
++-------------+----------------------+--------+
+<span class="quote1">| category_id | name | parent |</span>
++-------------+----------------------+--------+
+<span class="quote1">| 1 | ELECTRONICS | NULL |</span>
+<span class="quote1">| 2 | TELEVISIONS | 1 |</span>
+<span class="quote1">| 3 | TUBE | 2 |</span>
+<span class="quote1">| 4 | LCD | 2 |</span>
+<span class="quote1">| 5 | PLASMA | 2 |</span>
+<span class="quote1">| 6 | PORTABLE ELECTRONICS | 1 |</span>
+<span class="quote1">| 7 | MP3 PLAYERS | 6 |</span>
+<span class="quote1">| 8 | FLASH | 7 |</span>
+<span class="quote1">| 9 | CD PLAYERS | 6 |</span>
+<span class="quote1">| 10 | 2 WAY RADIOS | 6 |</span>
++-------------+----------------------+--------+
+10 rows in set (0.00 sec)
+
+adjacency list モデルではテーブルそれぞれのアイテム
+は親へのポインターを持っています。一番上の要素のポインター
+は何もさしていません。adjacency list モデルの利点は簡単な
+ことです。FLASH がmp3 playersの子供であることは一目
+瞭然です。そしてさらに、mp3 playersがportable
+electronicsの子供で、それがelectronicsの子供であることも。
+adjacency list モデルはクライアント側のコードで
+容易に扱うことができます。しかし、完全なSQLで扱う
+には問題になります。
+
+完全なツリーを取り出す
+
+最初に一番良くすることは全体のツリーを字下げを
+することで表示することです。一番良く使う方法は
+完全なSQLでself-joinを使用して行うことです。
+
+SELECT t1.name AS lev1, t2.name as lev2, t3.name as lev3,
+t4.name as lev4
+FROM category AS t1
+LEFT JOIN category AS t2 ON t2.parent = t1.category_id
+LEFT JOIN category AS t3 ON t3.parent = t2.category_id
+LEFT JOIN category AS t4 ON t4.parent = t3.category_id
+WHERE t1.name = 'ELECTRONICS';
+
++-------------+----------------------+--------------+-------+
+<span class="quote1">| lev1 | lev2 | lev3 | lev4 |</span>
++-------------+----------------------+--------------+-------+
+<span class="quote1">| ELECTRONICS | TELEVISIONS | TUBE | NULL |</span>
+<span class="quote1">| ELECTRONICS | TELEVISIONS | LCD | NULL |</span>
+<span class="quote1">| ELECTRONICS | TELEVISIONS | PLASMA | NULL |</span>
+<span class="quote1">| ELECTRONICS | PORTABLE ELECTRONICS | MP3 PLAYERS | FLASH |</span>
+<span class="quote1">| ELECTRONICS | PORTABLE ELECTRONICS | CD PLAYERS | NULL |</span>
+<span class="quote1">| ELECTRONICS | PORTABLE ELECTRONICS | 2 WAY RADIOS | NULL |</span>
++-------------+----------------------+--------------+-------+
+6 rows in set (0.00 sec)
+
+全てのリーフノードを発見する
+
+全てのリーフノードをLEFT JOIN クエリを
+使って全て見つけることができます。
+
+SELECT t1.name FROM
+category AS t1 LEFT JOIN category as t2
+ON t1.category_id = t2.parent
+WHERE t2.category_id IS NULL;
+
+
++--------------+
+<span class="quote1">| name |</span>
++--------------+
+<span class="quote1">| TUBE |</span>
+<span class="quote1">| LCD |</span>
+<span class="quote1">| PLASMA |</span>
+<span class="quote1">| FLASH |</span>
+<span class="quote1">| CD PLAYERS |</span>
+<span class="quote1">| 2 WAY RADIOS |</span>
++--------------+
+
+シングル・パスを見つける
+
+self-joinを使えば階層から完全なパスを見つけられます
+
+SELECT t1.name AS lev1, t2.name as lev2, t3.name as lev3, t4.name as lev4
+FROM category AS t1
+LEFT JOIN category AS t2 ON t2.parent = t1.category_id
+LEFT JOIN category AS t3 ON t3.parent = t2.category_id
+LEFT JOIN category AS t4 ON t4.parent = t3.category_id
+WHERE t1.name = 'ELECTRONICS' AND t4.name = 'FLASH';
+
++-------------+----------------------+-------------+-------+
+<span class="quote1">| lev1 | lev2 | lev3 | lev4 |</span>
++-------------+----------------------+-------------+-------+
+<span class="quote1">| ELECTRONICS | PORTABLE ELECTRONICS | MP3 PLAYERS | FLASH |</span>
++-------------+----------------------+-------------+-------+
+1 row in set (0.01 sec)
+
+このアプローチの最大の問題点は階層の全てのレベルに関して
+１つのself-joinがいることです。そのため、それぞれのレベル
+でjoinが複雑になるにつれて性能が落ちてきます。
+
+Adjacency Listモデルの限界
+
+完全なSQLでadjacency list モデルを使用するのはかなり困難です。
+カテゴリーの完全なパスを見つけられる前に、それがどの位置に
+あるのか知る必要があります。更に、ノードを除去する際に
+は細心の注意を払う必要があります。そうでないと、サブツリー
+が切り離されてしまいます。(portable electronics カテゴリーを
+除去するとその子供は全て切り離されてしまいます。）
+このような問題は幾分はクライアント側のコードやstored procedure
+で処理できます。プロシージャー言語ならば、ツリーの一番下から
+始めて上に向かって進みながら完全なツリーまたはシングル
+パスを表示できます。プロシージャ言語を使って、
+残りのノードが新しい親を指すことで、サブツリーを
+切り離さずにノードを除去できます。
+
+ネストしたセット・モデル
+
+この記事で焦点を当てたいのは異なったアプローチで、ネストしたセット・モデル
+と呼ばれるものです。ネストしたセット・モデルでは階層を
+新しい方向からみます。これはノードとそれを
+結ぶ線と見ずに、ネストしたコンテーナーと見ます。
+上の例をこれを使ってみて見ましょう。
+
+どうやって階層が維持されているかみましょう。親のカテゴリーが
+子供を包み込んでいます。この形式の階層を左と右の
+値でノードのネスティングを表してみましょう。
+
+CREATE TABLE nested_category (
+category_id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(20) NOT NULL,
+lft INT NOT NULL,
+rgt INT NOT NULL
+);
+
+
+INSERT INTO nested_category
+VALUES(1,'ELECTRONICS',1,20),(2,'TELEVISIONS',2,9),(3,'TUBE',3,4),
+(4,'LCD',5,6),(5,'PLASMA',7,8),(6,'PORTABLE ELECTRONICS',10,19),
+(7,'MP3 PLAYERS',11,14),(8,'FLASH',12,13),
+(9,'CD PLAYERS',15,16),(10,'2 WAY RADIOS',17,18);
+
+
+SELECT * FROM nested_category ORDER BY category_id;
+
+
++-------------+----------------------+-----+-----+
+<span class="quote1">| category_id | name | lft | rgt |</span>
++-------------+----------------------+-----+-----+
+<span class="quote1">| 1 | ELECTRONICS | 1 | 20 |</span>
+<span class="quote1">| 2 | TELEVISIONS | 2 | 9 |</span>
+<span class="quote1">| 3 | TUBE | 3 | 4 |</span>
+<span class="quote1">| 4 | LCD | 5 | 6 |</span>
+<span class="quote1">| 5 | PLASMA | 7 | 8 |</span>
+<span class="quote1">| 6 | PORTABLE ELECTRONICS | 10 | 19 |</span>
+<span class="quote1">| 7 | MP3 PLAYERS | 11 | 14 |</span>
+<span class="quote1">| 8 | FLASH | 12 | 13 |</span>
+<span class="quote1">| 9 | CD PLAYERS | 15 | 16 |</span>
+<span class="quote1">| 10 | 2 WAY RADIOS | 17 | 18 |</span>
++-------------+----------------------+-----+-----+
+
+leftとrightはMySQLではキーワードなので、lftとrgtを代わりに使います。
+参照：<a href="http://dev.mysql.com/doc/mysql/en/reserved-words.html">http://dev.mysql.com/doc/mysql/en/reserved-words.html</a>
+
+ではどうやって、左と右の値を決めるのでしょうか。
+外側のノードの一番左の側から始めて右へ進みます。
+典型的なツリーに適用してみましょう。
+
+ツリーに応用する際は、左から右へと動き、１つの層ごと
+に適用し、右側に番号を当てはめる前に、それぞれのノードの子供へ
+降りていきます。それから右へ進みます。このアプローチ
+は変形プリオーダーツリー横断アルゴリズムと呼ばれます。
+
+完全なツリーの取り出し
+
+完全なツリーをself-joinを使うことによって取り出すことが出来ます。
+これは親とノードを次のようにしてリンクします。ノードの
+lftの値が常に親のlftとrgtの値の間に来るようにします。
+
+SELECT node.name
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+AND parent.name = 'ELECTRONICS'
+ORDER BY node.lft;
+
+
++----------------------+
+<span class="quote1">| name |</span>
++----------------------+
+<span class="quote1">| ELECTRONICS |</span>
+<span class="quote1">| TELEVISIONS |</span>
+<span class="quote1">| TUBE |</span>
+<span class="quote1">| LCD |</span>
+<span class="quote1">| PLASMA |</span>
+<span class="quote1">| PORTABLE ELECTRONICS |</span>
+<span class="quote1">| MP3 PLAYERS |</span>
+<span class="quote1">| FLASH |</span>
+<span class="quote1">| CD PLAYERS |</span>
+<span class="quote1">| 2 WAY RADIOS |</span>
++----------------------+
+
+前出のadjacency listモデルの例とは異なり、クエリはツリーの
+深さに限らず良く動作します。BETWEENクローズではノード
+のrgtの値には拘りません。というのは、rgtの値は常に同じ親の
+lftの値の間にあるからです。
+
+全てのリーフノードを探す
+
+ネストセットモデルで、全てのリーフノードを探すのは adjacency listモデル
+で使われたLEFT JOIN メソッドよりも簡単です。nested_categoryテーブルを
+見ると、リーフノードのlftとrgtの値は続き番号です。
+リーフノードを発見するには、rgt = lft + 1の関係のある
+ノードを見つければ良いのです。
+
+SELECT name
+FROM nested_category
+WHERE rgt = lft + 1;
+
+
++--------------+
+<span class="quote1">| name |</span>
++--------------+
+<span class="quote1">| TUBE |</span>
+<span class="quote1">| LCD |</span>
+<span class="quote1">| PLASMA |</span>
+<span class="quote1">| FLASH |</span>
+<span class="quote1">| CD PLAYERS |</span>
+<span class="quote1">| 2 WAY RADIOS |</span>
++--------------+
+
+シングル・パスの表示
+
+ネストセットモデルでは複数のself-joinなしで
+シングルパスを取り出すことができます。
+
+SELECT parent.name
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+AND node.name = 'FLASH'
+ORDER BY node.lft;
+
++----------------------+
+<span class="quote1">| name |</span>
++----------------------+
+<span class="quote1">| ELECTRONICS |</span>
+<span class="quote1">| PORTABLE ELECTRONICS |</span>
+<span class="quote1">| MP3 PLAYERS |</span>
+<span class="quote1">| FLASH |</span>
++----------------------+
+
+ノードの深さを測る
+
+ツリー全体を取り出す方法を見てきました。しかし、ツリー
+のそれぞれのノードの深さも示したいとしたらどうしましょうか。
+それは階層のなかで、ノードが何処に位置しているかを
+探るためです。これには 全体のツリーを示す
+クエリにCOUNT functionとGROUP BY clause
+を追加します。
+
+SELECT node.name, (COUNT(parent.name) - 1) AS depth
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+GROUP BY node.name
+ORDER BY node.lft;
+
++----------------------+-------+
+<span class="quote1">| name | depth |</span>
++----------------------+-------+
+<span class="quote1">| ELECTRONICS | 0 |</span>
+<span class="quote1">| TELEVISIONS | 1 |</span>
+<span class="quote1">| TUBE | 2 |</span>
+<span class="quote1">| LCD | 2 |</span>
+<span class="quote1">| PLASMA | 2 |</span>
+<span class="quote1">| PORTABLE ELECTRONICS | 1 |</span>
+<span class="quote1">| MP3 PLAYERS | 2 |</span>
+<span class="quote1">| FLASH | 3 |</span>
+<span class="quote1">| CD PLAYERS | 2 |</span>
+<span class="quote1">| 2 WAY RADIOS | 2 |</span>
++----------------------+-------+
+
+CONCAT and REPEAT string関数を使い、深さの
+値に応じてカテゴリの名前をインデントします。
+
+SELECT CONCAT( REPEAT(' ', COUNT(parent.name) - 1), node.name) AS name
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+GROUP BY node.name
+ORDER BY node.lft;
+
++-----------------------+
+<span class="quote1">| name |</span>
++-----------------------+
+<span class="quote1">| ELECTRONICS |</span>
+<span class="quote1">| TELEVISIONS |</span>
+<span class="quote1">| TUBE |</span>
+<span class="quote1">| LCD |</span>
+<span class="quote1">| PLASMA |</span>
+<span class="quote1">| PORTABLE ELECTRONICS |</span>
+<span class="quote1">| MP3 PLAYERS |</span>
+<span class="quote1">| FLASH |</span>
+<span class="quote1">| CD PLAYERS |</span>
+<span class="quote1">| 2 WAY RADIOS |</span>
++-----------------------+
+
+もちろん、クライアント側のアプリでは階層の深さを直接
+提示するでしょうが。ウエブの開発者はツリーをループしながら、
+&lt;li&gt;&lt;/li&gt; と &lt;ul&gt;&lt;/ul&gt; のタグを深さが増えたり、減ったりする
+毎に、追加します。
+
+サブツリーの深さ
+
+サブツリーの深さの情報が必要となると、self-joinの中で
+ノードと親テーブルに限ることができなくなります。というのも
+そうすると結果がコラプトされるからです。代わりに３番目
+の self-joinを追加します、同時にサブクエリも加えて、サブツリー
+の新しいスタートのポイントからの深さを決定します。
+
+SELECT node.name, (COUNT(parent.name) - (sub_tree.depth + 1)) AS depth
+FROM nested_category AS node,
+nested_category AS parent,
+nested_category AS sub_parent,
+(
+SELECT node.name, (COUNT(parent.name) - 1) AS depth
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+AND node.name = 'PORTABLE ELECTRONICS'
+GROUP BY node.name
+ORDER BY node.lft
+)AS sub_tree
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
+AND sub_parent.name = sub_tree.name
+GROUP BY node.name
+ORDER BY node.lft;
+
+
++----------------------+-------+
+<span class="quote1">| name | depth |</span>
++----------------------+-------+
+<span class="quote1">| PORTABLE ELECTRONICS | 0 |</span>
+<span class="quote1">| MP3 PLAYERS | 1 |</span>
+<span class="quote1">| FLASH | 2 |</span>
+<span class="quote1">| CD PLAYERS | 1 |</span>
+<span class="quote1">| 2 WAY RADIOS | 1 |</span>
++----------------------+-------+
+
+この関数はどんなノードの名前とでも（ルートノードを含む）使用できます。
+深さの値は与えらたノードからの値です。
+
+ノードの直下にあるノードを検索
+
+ウエブで電機製品のカテゴリーを見せているとしましょう。
+ユーザがカテゴリーをクリックすると、そのカテゴリの製品を
+表示したいでしょう。またその直下のサブカテゴリーも表示
+したでしょうが、その下のサブカテゴリーを全ては
+表示したくないでしょう。そのためには、ノードと
+その直下のノードを表示する必要がありますが、それ以下
+は必要ありません。例えば、PORTABLE ELECTRONICSカテゴリー
+を示すとき、MP3 PLAYERS, CD PLAYERSと2 WAY RADIOS
+は示したいがFLASHは表示しない。
+
+これは前のクエリにHAVING clause を追加すれば簡単にできます。
+
+
+SELECT node.name, (COUNT(parent.name) - (sub_tree.depth + 1)) AS depth
+FROM nested_category AS node,
+nested_category AS parent,
+nested_category AS sub_parent,
+(
+SELECT node.name, (COUNT(parent.name) - 1) AS depth
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+AND node.name = 'PORTABLE ELECTRONICS'
+GROUP BY node.name
+ORDER BY node.lft
+)AS sub_tree
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+AND node.lft BETWEEN sub_parent.lft AND sub_parent.rgt
+AND sub_parent.name = sub_tree.name
+GROUP BY node.name
+HAVING depth &lt;= 1
+ORDER BY node.lft;
+
++----------------------+-------+
+<span class="quote1">| name | depth |</span>
++----------------------+-------+
+<span class="quote1">| PORTABLE ELECTRONICS | 0 |</span>
+<span class="quote1">| MP3 PLAYERS | 1 |</span>
+<span class="quote1">| CD PLAYERS | 1 |</span>
+<span class="quote1">| 2 WAY RADIOS | 1 |</span>
++----------------------+-------+
+
+親のノードを表示したくなければ、HAVING depth &lt;= 1 をHAVING depth = 1
+にすれば宜しい。
+
+ネストセットの中のAggregate Function
+
+aggregate functionをデモできる製品のテーブルを追加します。
+
+CREATE TABLE product(
+product_id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(40),
+category_id INT NOT NULL
+);
+
+
+INSERT INTO product(name, category_id) VALUES('20&quot; TV',3),('36&quot; TV',3),
+('Super-LCD 42&quot;',4),('Ultra-Plasma 62&quot;',5),('Value Plasma 38&quot;',5),
+('Power-MP3 5gb',7),('Super-Player 1gb',8),('Porta CD',9),('CD To go!',9),
+('Family Talk 360',10);
+
+SELECT * FROM product;
+
++------------+-------------------+-------------+
+<span class="quote1">| product_id | name | category_id |</span>
++------------+-------------------+-------------+
+<span class="quote1">| 1 | 20&quot; TV | 3 |</span>
+<span class="quote1">| 2 | 36&quot; TV | 3 |</span>
+<span class="quote1">| 3 | Super-LCD 42&quot; | 4 |</span>
+<span class="quote1">| 4 | Ultra-Plasma 62&quot; | 5 |</span>
+<span class="quote1">| 5 | Value Plasma 38&quot; | 5 |</span>
+<span class="quote1">| 6 | Power-MP3 128mb | 7 |</span>
+<span class="quote1">| 7 | Super-Shuffle 1gb | 8 |</span>
+<span class="quote1">| 8 | Porta CD | 9 |</span>
+<span class="quote1">| 9 | CD To go! | 9 |</span>
+<span class="quote1">| 10 | Family Talk 360 | 10 |</span>
++------------+-------------------+-------------+
+
+カテゴリーツリーを取り出すクエリを作成しましょう。また
+それぞれのカテゴリの製品の数も示します。
+
+SELECT parent.name, COUNT(product.name)
+FROM nested_category AS node ,
+nested_category AS parent,
+product
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+AND node.category_id = product.category_id
+GROUP BY parent.name
+ORDER BY node.lft;
+
+
++----------------------+---------------------+
+<span class="quote1">| name | COUNT(product.name) |</span>
++----------------------+---------------------+
+<span class="quote1">| ELECTRONICS | 10 |</span>
+<span class="quote1">| TELEVISIONS | 5 |</span>
+<span class="quote1">| TUBE | 2 |</span>
+<span class="quote1">| LCD | 1 |</span>
+<span class="quote1">| PLASMA | 2 |</span>
+<span class="quote1">| PORTABLE ELECTRONICS | 5 |</span>
+<span class="quote1">| MP3 PLAYERS | 2 |</span>
+<span class="quote1">| FLASH | 1 |</span>
+<span class="quote1">| CD PLAYERS | 2 |</span>
+<span class="quote1">| 2 WAY RADIOS | 1 |</span>
++----------------------+---------------------+
+
+これはCOUNTと GROUP BYを加えての典型的な全部のツリー用
+のクエリです。これは製品テーブルとWHERE clauseでのノードと
+製品テーブルのjoinへのレファレンスを伴います。これから
+分かるように、それぞれのカテゴリに関して数があります。
+サブカテゴリーの数は親のカテゴリーに反映されています。
+
+ノードの追加
+
+ツリーのクエリの方法を学ぶために、新たなノードを追加
+することでツリーをアップデートする方法をみてみましょう。
+ネストセットのダイアグラムをみましょう。
+
+TELEVISIONSと PORTABLE ELECTRONICSノードの間に新しい
+ノードを追加したいとしますと、新しいノードはlft
+とrgt の値は10 と11です。その右側にあるノードの
+全てはそのlft とrgtの値を２つ増加します。それから
+正しいlftとrgtの値で新しいノードを追加します。これはMySQL 5では
+stored procedureを使ってできますが、多分大分の
+ユーザはまだ4.1を使っていると思います。それでLOCK TABLES ステートメント
+でクエリを発します。
+
+LOCK TABLE nested_category WRITE;
+
+SELECT @myRight := rgt FROM nested_category
+WHERE name = 'TELEVISIONS';
+
+UPDATE nested_category SET rgt = rgt + 2 WHERE rgt &gt; @myRight;
+UPDATE nested_category SET lft = lft + 2 WHERE lft &gt; @myRight;
+
+INSERT INTO nested_category(name, lft, rgt) VALUES('GAME CONSOLES',
+@myRight + 1, @myRight + 2);
+
+UNLOCK TABLES;
+
+ツリー・クエリでネスティングをチェックできます。
+
+SELECT CONCAT( REPEAT( ' ', (COUNT(parent.name) - 1) ), node.name) AS name
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+GROUP BY node.name
+ORDER BY node.lft;
+
+
++-----------------------+
+<span class="quote1">| name |</span>
++-----------------------+
+<span class="quote1">| ELECTRONICS |</span>
+<span class="quote1">| TELEVISIONS |</span>
+<span class="quote1">| TUBE |</span>
+<span class="quote1">| LCD |</span>
+<span class="quote1">| PLASMA |</span>
+<span class="quote1">| GAME CONSOLES |</span>
+<span class="quote1">| PORTABLE ELECTRONICS |</span>
+<span class="quote1">| MP3 PLAYERS |</span>
+<span class="quote1">| FLASH |</span>
+<span class="quote1">| CD PLAYERS |</span>
+<span class="quote1">| 2 WAY RADIOS |</span>
++-----------------------+
+
+子供のないノードの子供としてノードを追加する場合は幾分プロシージャを
+変更する必要があります。2 WAY RADIOSノードの下に新しいFRS ノードを
+追加しましょう。
+
+LOCK TABLE nested_category WRITE;
+
+SELECT @myLeft := lft FROM nested_category
+
+WHERE name = '2 WAY RADIOS';
+
+UPDATE nested_category SET rgt = rgt + 2 WHERE rgt &gt; @myLeft;
+UPDATE nested_category SET lft = lft + 2 WHERE lft &gt; @myLeft;
+
+INSERT INTO nested_category(name, lft, rgt) VALUES('FRS', @myLeft + 1,
+@myLeft + 2);
+
+UNLOCK TABLES;
+
+この例では新しいノードの左側の番号の右の
+全てを拡張します。それから、左側の値の右にノードを置きます。
+見た通り、新しいノードはちゃんとネストしています。
+
+SELECT CONCAT( REPEAT( ' ', (COUNT(parent.name) - 1) ), node.name) AS name
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+GROUP BY node.name
+ORDER BY node.lft;
+
+
++-----------------------+
+<span class="quote1">| name |</span>
++-----------------------+
+<span class="quote1">| ELECTRONICS |</span>
+<span class="quote1">| TELEVISIONS |</span>
+<span class="quote1">| TUBE |</span>
+<span class="quote1">| LCD |</span>
+<span class="quote1">| PLASMA |</span>
+<span class="quote1">| GAME CONSOLES |</span>
+<span class="quote1">| PORTABLE ELECTRONICS |</span>
+<span class="quote1">| MP3 PLAYERS |</span>
+<span class="quote1">| FLASH |</span>
+<span class="quote1">| CD PLAYERS |</span>
+<span class="quote1">| 2 WAY RADIOS |</span>
+<span class="quote1">| FRS |</span>
++-----------------------+
+
+ノードの除去
+
+最後の基本的なタスクはノードの除去です。ノードを除去する
+際に必要なことは階層内のノードの位置によります。
+リーフノードを除去することは子供がいるノードを除去するよりも
+簡単です。当然その場合は切り離されてしまったノード
+の処理が必要ですから。
+
+リーフノードを除去する際は追加の反対で、ノードを除去して、
+そのノードの右にあるノードから幅分だけ減らします。
+
+LOCK TABLE nested_category WRITE;
+
+
+SELECT @myLeft := lft, @myRight := rgt, @myWidth := rgt - lft + 1
+FROM nested_category
+WHERE name = 'GAME CONSOLES';
+
+
+DELETE FROM nested_category WHERE lft BETWEEN @myLeft AND @myRight;
+
+
+UPDATE nested_category SET rgt = rgt - @myWidth WHERE rgt &gt; @myRight;
+UPDATE nested_category SET lft = lft - @myWidth WHERE lft &gt; @myRight;
+
+UNLOCK TABLES;
+
+もう一度、意図したツリー・クエリを実行して
+階層を乱さないでノードが本当に除去されたかを確認します。
+
+SELECT CONCAT( REPEAT( ' ', (COUNT(parent.name) - 1) ), node.name) AS name
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+GROUP BY node.name
+ORDER BY node.lft;
+
+
++-----------------------+
+<span class="quote1">| name |</span>
++-----------------------+
+<span class="quote1">| ELECTRONICS |</span>
+<span class="quote1">| TELEVISIONS |</span>
+<span class="quote1">| TUBE |</span>
+<span class="quote1">| LCD |</span>
+<span class="quote1">| PLASMA |</span>
+<span class="quote1">| PORTABLE ELECTRONICS |</span>
+<span class="quote1">| MP3 PLAYERS |</span>
+<span class="quote1">| FLASH |</span>
+<span class="quote1">| CD PLAYERS |</span>
+<span class="quote1">| 2 WAY RADIOS |</span>
+<span class="quote1">| FRS |</span>
++-----------------------+
+
+この方法はノードを除去して、その子供全て
+を除去するのに有効です。
+
+LOCK TABLE nested_category WRITE;
+
+
+SELECT @myLeft := lft, @myRight := rgt, @myWidth := rgt - lft + 1
+FROM nested_category
+WHERE name = 'MP3 PLAYERS';
+
+
+DELETE FROM nested_category WHERE lft BETWEEN @myLeft AND @myRight;
+
+
+UPDATE nested_category SET rgt = rgt - @myWidth WHERE rgt &gt; @myRight;
+UPDATE nested_category SET lft = lft - @myWidth WHERE lft &gt; @myRight;
+
+UNLOCK TABLES;
+
+もう一度、全てのサブツリーが除去できたかを確かめます。
+
+SELECT CONCAT( REPEAT( ' ', (COUNT(parent.name) - 1) ), node.name) AS name
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+GROUP BY node.name
+ORDER BY node.lft;
+
+
++-----------------------+
+<span class="quote1">| name |</span>
++-----------------------+
+<span class="quote1">| ELECTRONICS |</span>
+<span class="quote1">| TELEVISIONS |</span>
+<span class="quote1">| TUBE |</span>
+<span class="quote1">| LCD |</span>
+<span class="quote1">| PLASMA |</span>
+<span class="quote1">| PORTABLE ELECTRONICS |</span>
+<span class="quote1">| CD PLAYERS |</span>
+<span class="quote1">| 2 WAY RADIOS |</span>
+<span class="quote1">| FRS |</span>
++-----------------------+
+
+もう一方のシナリオでは子供ではなく親のノード
+を除去した場合です。ある場合には代わりがくるまで、
+プレースフォールダーの名前を変えるだけにするかも知れません。
+これは例えば、スーパーバイザーが首になったようなときです。他の
+場合は全ての子供を親があったレヴェルまで押し上げる必要
+があります。
+
+LOCK TABLE nested_category WRITE;
+
+
+SELECT @myLeft := lft, @myRight := rgt, @myWidth := rgt - lft + 1
+FROM nested_category
+WHERE name = 'PORTABLE ELECTRONICS';
+
+
+DELETE FROM nested_category WHERE lft = @myLeft;
+
+
+UPDATE nested_category SET rgt = rgt - 1, lft = lft - 1 WHERE lft
+BETWEEN @myLeft AND @myRight;
+UPDATE nested_category SET rgt = rgt - 2 WHERE rgt &gt; @myRight;
+UPDATE nested_category SET lft = lft - 2 WHERE lft &gt; @myRight;
+
+UNLOCK TABLES;
+
+この場合、ノードの右にあるエレメントの全てから２を引きます。
+(子供がなければ幅は２だからです。)またその子供のノードから
+１を引きます。(これは親の左の値がなくなったことによる
+ギャップを閉じるためです。). もう一度、エレメントが
+格上げされたことを確認します。
+
+SELECT CONCAT( REPEAT( ' ', (COUNT(parent.name) - 1) ), node.name) AS name
+FROM nested_category AS node,
+nested_category AS parent
+WHERE node.lft BETWEEN parent.lft AND parent.rgt
+GROUP BY node.name
+ORDER BY node.lft;
+
+
++---------------+
+<span class="quote1">| name |</span>
++---------------+
+<span class="quote1">| ELECTRONICS |</span>
+<span class="quote1">| TELEVISIONS |</span>
+<span class="quote1">| TUBE |</span>
+<span class="quote1">| LCD |</span>
+<span class="quote1">| PLASMA |</span>
+<span class="quote1">| CD PLAYERS |</span>
+<span class="quote1">| 2 WAY RADIOS |</span>
+<span class="quote1">| FRS |</span>
++---------------+
+
+他のシナリオでは除去したノードの子供の１つを前の親の
+位置にもってきて、その子供を前の親の兄弟の下の位置にもって
+きます。しかし、紙面の都合でそれはここでは述べません。
+
+最後に
+
+この情報が役立つものであったことを希望しますが、SQLでのネスト
+セットのコンセプトはもう１０年程度存在します、そして
+本やインターネットでたくさんの情報が存在します。私の
+考えではこの分野で一番よく書けているのは、Joe Celko著
+の「Trees and Hierarchies in SQL for Smarties」でJoe Celkoは
+SQLの専門家です。 Joe Celkoはネスト・モデルに関する
+権威です。そしてもっとも、多くの著書を残している著者です。Celkoの本は重要な
+ソースで、推薦します。本はこの記事でカバーしなかった高度なトピック
+をカバーします。またAdjacency ListとNested Setモデル以外の
+方法にも言及します。
+
+レファレンス・セクションでウエブのレファレンスをリストアップ
+しました。階層化されたデータの管理のリサーチ役立つを思います。
+この中にはMySQLのなかでネストされたセットを処理するPHPの
+ライブラリーなども含みます。現在adjacency listモデルを使用
+しているが、ネストセットモデルを試したい人は、この２つの
+モデル間での変換コードのサンプルは「Storing Hierarchical Data in a
+Database」
+のセクションにあります。
+
+-- 
+Zen Kishimoto                      www.ipdevices.com
+IP Devices, Inc.                   zen@xxxxxxxxxx
+2175 De La Cruz Blvd., Suite 10    (408) 567-9391
+Santa Clara, CA 95050              (801) 720-8847 (FAX)
+
+
+
+</pre>
+</div>
+<p class="button"><a href="12070.html">[前]</a><a href="12072.html">[次]</a><a href="../list/12001-12100.html">[番号順一覧]</a><a href="../thread/12001-12100.html">[スレッド一覧]</a></p>
+</body>
+</html>

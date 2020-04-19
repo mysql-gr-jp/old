@@ -1,0 +1,122 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11716</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11715.html">[前]</a><a href="11717.html">[次]</a><a href="../list/11701-11800.html">[番号順一覧]</a><a href="../thread/11701-11800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11716
+</p>
+<div class="header">
+<p>
+From: Kenta Hashimoto &lt;Kenta Hashimoto &lt;kem@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 07 Jul 2005 23:10:24 +0900<br>
+Subject: [mysql 11716] Re: 全文検索と他条件の組み合わせ<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+はしけむです。
+ありがとうございます。
+
+
+<span class="quote2">&gt;&gt;「じゃがいも の検索結果 8031件」というような表示</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ここが一番苦労する箇所になるでしょうね。</span>
+
+そうなんですよ。レコード数の表示も、頭を悩ませている部分の一つです。
+
+現在、とろうとしている解決策は、検索フレーズとレコード数を対応させた
+サマリテーブルを作ってしまうというものです。
+
+そして、サマリテーブルに無い検索フレーズで検索された場合に、
+はじめてSELECT COUNT を行い、
+サマリテーブルに、その検索フレーズの行を追加するという仕組みに
+しようかと考えています。
+
+
+<span class="quote1">&gt; LIMIT 0,10 で判定対象がインデックスデータだけなら 10 件目が見つかれば</span>
+<span class="quote1">&gt; そこで終了ですが、LIMIT 8000,10 ならどうなるでしょうか？</span>
+
+これは、「次へ≫」を押していっても、せいぜい20ページ以内の
+ユーザがほとんどだろうという前提で進めようと思っています。
+なので、LIMIT 200,10 程度が快速に動けば、問題ないです。
+
+
+<span class="quote1">&gt; 個人的には色々とごちゃごちゃ捏ね繰り回すくらいなら、</span>
+<span class="quote1">&gt; 1GBぐらいのメモリを積んで MySQL へのメモリ割り当てを増やす方法にも</span>
+<span class="quote1">&gt; 一票投票しておきます。</span>
+
+メモリは、2GB積んでいるので、インデックスは、メモリに乗るサイズに
+なるとは思います。
+それにしても、１日数十万回の検索が行われる予定なので、クエリの速度を
+ぎりぎりまで高めておく必要があり、試行錯誤を行っています。
+
+
+T.Sasaki wrote:
+<span class="quote1">&gt; 佐々木です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt;「じゃがいも の検索結果 8031件」というような表示</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ここが一番苦労する箇所になるでしょうね。</span>
+<span class="quote1">&gt; 全件数をカウントするにはインデックス全データに対する判定を完了させる</span>
+<span class="quote1">&gt; 必要があり、FULLTEXT インデックスのサイズが鍵になります。</span>
+<span class="quote1">&gt; もしインデックス領域が全てメモリ上に乗る、またはヒットするデータの</span>
+<span class="quote1">&gt; 範囲がインデックス上のごく一部分なら、はしけむさんのアイデアで</span>
+<span class="quote1">&gt; 上手く行く可能性も出てくるんじゃないかと思います。</span>
+<span class="quote1">&gt; Oracle なんかだと、事前にインデックスやテーブルをメモリ上へ展開して、</span>
+<span class="quote1">&gt; 検索速度を稼ぐチューニングをすることがあります。</span>
+<span class="quote1">&gt; MySQL で出来たかどうか、ちょっと知識不足で分かりませんが・・・。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt;&gt;1ページに10件ずつ表示して、「次へ≫」というリンクで、</span>
+<span class="quote2">&gt;&gt;次の10件が見れるようなページを作ろうとしています。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これも主キーのように１件分のインデックスデータサイズが小さければ</span>
+<span class="quote1">&gt; 楽なんですが、FULLTEXT インデックスみたいに大きいと厳しいような気がします。</span>
+<span class="quote1">&gt; LIMIT 句は実際にレコードを返す段階で処理されますから。</span>
+<span class="quote1">&gt; LIMIT 0,10 で判定対象がインデックスデータだけなら 10 件目が見つかれば</span>
+<span class="quote1">&gt; そこで終了ですが、LIMIT 8000,10 ならどうなるでしょうか？</span>
+<span class="quote1">&gt; 少なくとも LIMIT 0,10 と同じようには行かないと思います。</span>
+<span class="quote1">&gt; 主キーとか Oracle の ROWID (物理的な格納アドレス) みたいなのが相手なら</span>
+<span class="quote1">&gt; 色々な技が使えるでしょうけど・・・。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 個人的には色々とごちゃごちゃ捏ね繰り回すくらいなら、</span>
+<span class="quote1">&gt; 1GBぐらいのメモリを積んで MySQL へのメモリ割り当てを増やす方法にも</span>
+<span class="quote1">&gt; 一票投票しておきます。</span>
+
+</pre>
+</div>
+<p class="button"><a href="11715.html">[前]</a><a href="11717.html">[次]</a><a href="../list/11701-11800.html">[番号順一覧]</a><a href="../thread/11701-11800.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11693.html">  11693 2005-07-06 16:07 [Kenta Hashimoto &lt;kem] 全文検索と他条件の組み合わせ            </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11694.html">  11694 2005-07-07 00:55 ┣[UNO Shintaro &lt;uno@xx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11697.html">  11697 2005-07-07 09:58 ┗[&quot;T.Sasaki&quot; &lt;papasan2]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11706.html">  11706 2005-07-07 20:18 　┗[Kenta Hashimoto &lt;kem]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11707.html">  11707 2005-07-07 20:47 　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11712.html">  11712 2005-07-07 21:39 　　　┗[Kenta Hashimoto &lt;kem]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11713.html">  11713 2005-07-07 21:58 　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11714.html">  11714 2005-07-07 22:14 　　　　　┗[Kenta Hashimoto &lt;kem]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11715.html">  11715 2005-07-07 22:56 　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                           </a></span>
+<span class="current">-&gt;&nbsp;<a href="11716.html">  11716 2005-07-07 23:10 　　　　　　　┣[Kenta Hashimoto &lt;kem]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11717.html">  11717 2005-07-07 23:17 　　　　　　　┗[Kazuhiro Osawa &lt;ko@x]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11719.html">  11719 2005-07-08 00:14 　　　　　　　　┣[Kenta Hashimoto &lt;kem]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11720.html">  11720 2005-07-08 06:25 　　　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11734.html">  11734 2005-07-09 13:45 　　　　　　　　　┗[Kazuhiro Osawa &lt;ko@x]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11735.html">  11735 2005-07-09 20:31 　　　　　　　　　　┣[&quot;T.Sasaki&quot; &lt;papasan2]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11736.html">  11736 2005-07-12 15:33 　　　　　　　　　　┗[&quot;Naoi Masaaki&quot; &lt;naoi] MySQLでの最大項目数につきまして</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11737.html">  11737 2005-07-12 16:33 　　　　　　　　　　　┣[Tetsuro IKEDA &lt;ikdtt]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11739.html">  11739 2005-07-12 17:42 　　　　　　　　　　　┃┗[&quot;Naoi Masaaki&quot; &lt;naoi]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11738.html">  11738 2005-07-12 17:10 　　　　　　　　　　　┗[Hiroshi Moriyama &lt;mt]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11740.html">  11740 2005-07-12 17:47 　　　　　　　　　　　　┣[&quot;Naoi Masaaki&quot; &lt;naoi]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11742.html">  11742 2005-07-13 20:08 　　　　　　　　　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]               </a></span>
+</pre>
+</body>
+</html>

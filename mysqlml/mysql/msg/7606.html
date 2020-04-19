@@ -1,0 +1,74 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:7606</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="7605.html">[前]</a><a href="7607.html">[次]</a><a href="../list/7601-7700.html">[番号順一覧]</a><a href="../thread/7601-7700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:7606
+</p>
+<div class="header">
+<p>
+From: &quot;Takuro Suzuki&quot; &lt;&quot;Takuro Suzuki&quot; &lt;etsuzuki@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 28 Apr 2003 13:40:01 +0900<br>
+Subject: [mysql 07606] CREATE TABLE の時の CHECK<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+PHP4徹底攻略改訂版についているサンプルのSQL文を実行したところ、
+エラーになっていしまいました。
+
+テスト環境
+OS:Turbolinux 6.5 Server
+MySQL:3.23.56
+PHP4:4.2.3
+
+tenkiをTEXTからVARCHAR(6)にして、ondoとuryouのCHECKをはずすと、
+テーブルが作成できました。
+最後のGRANT分は、エラーになりますが。
+
+TEXTには、DEFAULTは、使用できないのでしょうか？
+このCHECK文は、どうしてエラーになるのでしょうか？
+
+サンプルのSQL文（ex6/otenki.sql）
+
+-- お天気日記テーブルの作成
+-- DROP TABLE otenki;
+CREATE TABLE otenki (
+ day DATE DEFAULT 'today' PRIMARY KEY, -- 日付(主キー)
+ tenki TEXT DEFAULT '晴れ', -- 天気(晴れ、曇...)
+ ondo INTEGER DEFAULT 25 CHECK(ondo IS NULL OR ONDO &gt; -50 AND ONDO &lt; 50), --
+温度
+ uryou INTEGER DEFAULT 0 CHECK(uryou IS NULL OR URYOU &gt;= 0), -- 雨量
+ CONSTRAINT otenki_check
+ CHECK(tenki IS NULL OR
+ (tenki = '晴れ' AND uryou = 0 OR tenki = '曇' OR tenki = '雨'))
+);
+
+INSERT INTO otenki VALUES('2000-8-1','晴れ',30,0);
+INSERT INTO otenki VALUES('2000-8-3','曇',27,10);
+INSERT INTO otenki VALUES('2000-8-10','雨',25,100);
+
+GRANT ALL on otenki to nobody;
+↑このGRANT文は、MySQLのルートユーザーでないとエラーになりますよね？
+
+--------------------------------
+(有)水戸コンピュータサービス
+鈴木卓朗
+
+TEL: 0294-52-8596
+
+
+</pre>
+</div>
+<p class="button"><a href="7605.html">[前]</a><a href="7607.html">[次]</a><a href="../list/7601-7700.html">[番号順一覧]</a><a href="../thread/7601-7700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="7606.html">   7606 2003-04-28 13:40 [&quot;Takuro Suzuki&quot; &lt;ets] CREATE TABLE の時の CHECK               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7618.html">   7618 2003-04-30 11:18 ┗[SUGAWARA Hajime &lt;sug]                                       </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:11809</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="11808.html">[前]</a><a href="11810.html">[次]</a><a href="../list/11801-11900.html">[番号順一覧]</a><a href="../thread/11801-11900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:11809
+</p>
+<div class="header">
+<p>
+From: &quot;T.Sasaki&quot; &lt;&quot;T.Sasaki&quot; &lt;papasan2000@xxxxxxxxxx&gt;&gt;<br>
+Date: 26 Jul 2005 23:52:35 +0900<br>
+Subject: [mysql 11809] Re: バックドア(BKDR_SHELLFUR.A)対策について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+佐々木です。
+
+<span class="quote1">&gt; いちいち個別に対応する必要は無い</span>
+
+その通りですね。
+抽象的な物言いになりますが、個人的には
+システムの構成要素全てに対して個別のリスクを考慮するのは大変ですから、
+基本的には何を表（管理できない範囲）に晒すかを定め、如何にその範囲を小さくするかが重要だと考えています。
+
+バッファオーバーフロー等のソフトウェア自身に属する脆弱性を除けば、
+サービスを提供するソフトウェアが利用するDBユーザに与えられる権限
+＝ SQL Injection で不正操作が可能な範囲といえるでしょう。
+ですから、データベース設計とプログラム設計を工夫して、
+ユーザインターフェイス処理には指定のデータベースに対する
+SELECT と INSERT 以外の権限を与えないようにすれば、SQL Injection が
+原因でトラブルが発生する可能性はかなり低くなると思います。
+
+その上で、表に晒した部分（HTTP プロトコル等）が原因で
+どのような事態が発生し得るかを予測し、絶えず通信状況を記録できる
+環境を整えておきます。
+これについて IDS や NIDS の利用はある程度有効なんですが、
+現実に存在するソフトウェアだと完璧なチェッカーとしての役割は
+果たしてくれそうにありません。
+（威嚇効果はありますけど）
+
+なので、一番重要なのはトラブルが発生する範囲と影響度を把握しておく
+こと、トラブルが発生したときに原因究明が出来る情報を事前に収集できる
+体制をつくること、この両者だと思われます・・・。
+
+上記を与えられたコストに見合う方法で如何に構築するかですね。
+複雑にするとセキュリティ以前に機器障害やソフトウェアの不具合で
+トラブルが発生しますから。:-)
+
+例えば MySQL なら一般クエリログやバイナリログを有効にしておけば
+SQL Injection が原因で発生したトラブルの原因究明に役立つのでは？
+
+
+&quot;Kiyotaka Doumae&quot; &lt;don@xxxxxxxxxx&gt; wrote:
+<span class="quote1">&gt; 堂前です</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; pix@xxxxxxxxxx wrote:</span>
+<span class="quote2">&gt; &gt; パラメータのチェックを厳密にし、不要な権限は割り当てない。というのがSQL</span>
+<span class="quote2">&gt; &gt; インジェクション攻撃に対する基本的な対策だと思いますが。保険としてさらに</span>
+<span class="quote2">&gt; &gt; 取れる事は無いのでしょうか。パラメータのチェックについても新しい手法が</span>
+<span class="quote2">&gt; &gt; 見つかる度に対応するのは保守が大変です。アンチウィルスソフトやＩＤＳで</span>
+<span class="quote2">&gt; &gt; SQLインジェクション攻撃自体を検出・防御することは可能なのでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; パラメータのチェックについては、特定の異常な文字列を検出するのではなく</span>
+<span class="quote1">&gt; て、「正しく無い文字列は受け付けない」「副作用を起こす可能性がある文字列</span>
+<span class="quote1">&gt; はエスケープする」というようにすれば、いちいち個別に対応する必要は無い、</span>
+<span class="quote1">&gt; はずです。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ちなみにこの手の問題に対して AntiVirus や IDS は無力です。</span>
+<span class="quote1">&gt; # full capture する IDS ならあとから記録を参照できたり、あるいは特定の攻</span>
+<span class="quote1">&gt; 撃に対する signature を持っていれば、それに限定してなら対応できるかもし</span>
+<span class="quote1">&gt; れませんが。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 世間には、この手の問題に対して「Webアプリケーション ファイアウォール」な</span>
+<span class="quote1">&gt; どというカテゴリの製品が存在します。</span>
+<span class="quote1">&gt; 各メーカー・ベンダからいろいろ出ていると思いますので、気になるようでした</span>
+<span class="quote1">&gt; ら懇意にされている販社にでも相談されてはいかがでしょうか。</span>
+<span class="quote1">&gt; # まあ、いろいろありますから</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; -- </span>
+<span class="quote1">&gt; DON (堂前清隆)</span>
+<span class="quote1">&gt; don@xxxxxxxxxx / <a href="http://www.don.am/~don/">http://www.don.am/~don/</a></span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+</pre>
+</div>
+<p class="button"><a href="11808.html">[前]</a><a href="11810.html">[次]</a><a href="../list/11801-11900.html">[番号順一覧]</a><a href="../thread/11801-11900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="11804.html">  11804 2005-07-26 10:02 [&quot;pix@xxxxxxxxxx&quot; &lt;pi] バックドア(BKDR_SHELLFUR.A)対策について </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11805.html">  11805 2005-07-26 10:21 ┗[&quot;Keiji Watanabe&quot; &lt;ke]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11807.html">  11807 2005-07-26 17:41 　┗[&quot;pix@xxxxxxxxxx&quot; &lt;pi]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11808.html">  11808 2005-07-26 18:20 　　┗[Kiyotaka Doumae &lt;don]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="11809.html">  11809 2005-07-26 23:52 　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="11810.html">  11810 2005-07-27 08:49 　　　　┗[&quot;T.Sasaki&quot; &lt;papasan2]                               </a></span>
+</pre>
+</body>
+</html>

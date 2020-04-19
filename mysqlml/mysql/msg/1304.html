@@ -1,0 +1,101 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:1304</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="1303.html">[前]</a><a href="1305.html">[次]</a><a href="../list/1301-1400.html">[番号順一覧]</a><a href="../thread/1301-1400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:1304
+</p>
+<div class="header">
+<p>
+From: &quot;Douglas MacDougall&quot; &lt;&quot;Douglas MacDougall&quot; &lt;mac@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 10 Nov 1999 12:00:57 +0900<br>
+Subject: [mysql 01304] RE:  % を使用したマッチについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+すいません、日本語あまりできないけど。。。
+このコードを見てください：
+<span class="quote1">&gt; perl</span>
+$test1='2\%';
+$test2='%2\%%';
+$statement0=&quot;select msg from sems where msg like '%2\%%'&quot;;
+$statement1=&quot;select msg from sems where msg like '%$test1%'&quot;;
+$statement2=&quot;select msg from sems where msg like '$test2'&quot;;
+
+print &quot;-----RESULTS-------\n&quot;;
+print &quot;1st: $statement0\n&quot;;
+print &quot;2nd: $statement1\n&quot;;
+print &quot;3rd: $statement2\n&quot;;
+-----RESULTS-------
+1st: select msg from sems where msg like '%2%%'
+2nd: select msg from sems where msg like '%2\%%'
+3rd: select msg from sems where msg like '%2\%%'
+
+それで、１ｓｔが
+select msg from sems where msg like '%2%'　と同じと考えていいです
+これは、2があるのデータと前文マッチする
+
+ｍｙｓｑｌで　&quot;\&quot;　ＳＥＬＥＣＴ　するときは&quot;\\&quot;使わないといけない。
+
+ＰＥＲＬも：
+$a='\%';    #  \%
+
+$b=&quot;\%&quot;;  #  %
+
+$test='%2\\%%';
+または
+$test=&quot;\%2\\\%\%&quot;;
+
+としてからOKなると思う。
+
+Douglas MacDougall.
+
+
+<span class="quote1">&gt;+------+</span>
+<span class="quote2">&gt;| msg  |</span>
+<span class="quote1">&gt;+------+</span>
+<span class="quote2">&gt;| 2\%  |</span>
+<span class="quote1">&gt;+------+</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;になります。　Perl を使用してワイルドカードを使用して 2\% にマッチさせよう</span>
+と
+<span class="quote1">&gt;して</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;$statement=&quot;select msg from sems where msg like '%2\%%'&quot;;</span>
+<span class="quote1">&gt;$sth=$dbh-&gt;prepare($statement);</span>
+<span class="quote1">&gt;$rv=$sth-&gt;execute;</span>
+<span class="quote1">&gt;print &quot;RV is $rv&quot;;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;としたら　RV is 1 となりました。次に</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;$test='2\%';</span>
+<span class="quote1">&gt;$statement=&quot;select msg from sems where msg like '%$test%'&quot;;</span>
+<span class="quote1">&gt;$sth=$dbh-&gt;prepare($statement);</span>
+<span class="quote1">&gt;$rv=$sth-&gt;execute;</span>
+<span class="quote1">&gt;print &quot;RV is $rv&quot;;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;としたら、　RV is 0E0 　となりました。次に</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;$test='%2\%%';</span>
+<span class="quote1">&gt;$statement=&quot;select msg from sems where msg like '$test'&quot;;</span>
+<span class="quote1">&gt;$sth=$dbh-&gt;prepare($statement);</span>
+<span class="quote1">&gt;$rv=$sth-&gt;execute;</span>
+<span class="quote1">&gt;print &quot;RV is $rv&quot;;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;としても　RV is 0E0 　となります。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;変数　$test の値はどのようにすれば良いのでしょうか？</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="1303.html">[前]</a><a href="1305.html">[次]</a><a href="../list/1301-1400.html">[番号順一覧]</a><a href="../thread/1301-1400.html">[スレッド一覧]</a></p>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16564</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16563.html">[前]</a><a href="16565.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16564
+</p>
+<div class="header">
+<p>
+From: 落合 司郎 &lt;落合 司郎 &lt;s.ochiai@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 7 Feb 2020 15:36:57 +0900<br>
+Subject: [mysql 16564] [mysql 16522] ...Re: [mysql 16517] コマンドLOAD DATA　MySQL 8.0で使えない？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+坂井様、yoku0825様
+
+お世話になります。同じ問題に対するほぼ一年ぶりの投稿です。
+
+MySQL 8.0で、また、LOAD DATA LOCAL INFILEが &quot;ERROR 1148 (42000)&quot; 
+で使えなくなりました。
+
+mysql80 125&gt; LOAD DATA LOCAL INFILE '/tmp/aaa' INTO TABLE t1;
+ERROR 1148 (42000): The used command is not allowed with this MySQL version
+
+昨年の2月に坂井様からご指導いただき、--local-infileの設定をONにし、一連の処理が終えることができました。その節はありがとうございました。
+しかし、その後、事情があってMySQL 8.0を再インストールしました。9月ころです。
+そして、つい最近、LOAD DATA LOCAL INFILEを使う機会があり、LOAD DATA LOCAL 
+INFILEを実行したところ、上記のエラーが出たので、--local-infileの設定の件を思い出し、root権限でsystem 
+Variablesのlocal_infile=OFFをONに変更して実行しましたが、やはり、同じエラーが出て、処理できません。
+
+紹介されたyoku0825さんのブログにある「コネクションに CLIENT_LOCAL_FILES 
+ケーパビリティーを設定」する方法が分かりません。
+どなたか、教えてください。
+<a href="https://yoku0825.blogspot.com/2018/07/">https://yoku0825.blogspot.com/2018/07/</a>
+
+＜上記ブログからの引用＞
+mysql コマンドラインクライアントであれば ―local-infile 
+オプションを有効にするとこのケーパビリティーのフラグが立つ。ただし接続しながら変えることはできないのでこっちは切断してから再接続する。
+
+実行環境：
+OS:Windows 8.0 64ビット
+MySQL:Ver.8.0.12　GPL版
+Workbench:Ver.6.3.9
+
+以下のことを試しています。
+
+１．local-infileの設定状況確認
+MySQL8.0コマンドクライアントをrootで立ち上げ、
+SHOW VARIABLES LIKE `%LOCAL%`;
+を実行した結果は、下記の1行のみで、値はONとなっていました。
+local_infile = ON
+
+なお、WorkbenchでのSHOW VARIABLES LIKE 
+`%LOCAL%`;による確認結果も同じでした。
+
+２．MySQL8.0コマンドクライアントのショートカットのリンク先情報の変更
+MySQL8.0コマンドクライアントのショートカットのリンク先情報は、以下のようになっていました。
+&quot;C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe&quot; 
+&quot;--defaults-file=C:\ProgramData\MySQL\MySQL Server 8.0\my.ini&quot; &quot;-uroot&quot; 
+&quot;-p&quot; &quot;--default-character-set=utf8mb4&quot;
+
+そこで、&quot;--local-infile=1&quot;を以下のように追加してからコマンドクライアントを立ち上げ、コマンドクライアントでLOAD 
+DATA LOCAL INFILEを実行したところ、動作しました。
+&quot;C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe&quot; 
+&quot;--defaults-file=C:\ProgramData\MySQL\MySQL Server 8.0\my.ini&quot; &quot;-uroot&quot; 
+&quot;-p&quot; &quot;--default-character-set=utf8mb4&quot; &quot;--local-infile=1&quot;
+
+しかし、コマンドクライアントをそのままの状態にして、WorkbenchでrootアカウントでLOAD 
+DATA LOCAL INFILEを実行したところ、同じエラーが出て動作しませんでした。
+コマンドクライアントでの作業はわずらわしいので、Workbenchで行える方法を探しています。
+
+３．Windowsのサービスの設定を確認
+MySQL8.0をWindowsのサービスとして動かしています。
+このサービスのプロパティの「実行ファイルのパス」は以下のようになっていました。
+ver 8.0\bin\mysqld.exe&quot; --defaults-file=&quot;C:\ProgramData\MySQL\MySQL 
+Server 8.0\my.ini&quot; MySQL80
+しかし、ここは表示されているのみで、内容を更新することはできませんでした。
+また、「ここでサービスを開始するときに適用する開始パラメータを指定してください。」の下にある入力欄はグレーアウトしていて入力できません。
+
+４．WorkbenchのConnection設定を変更して実行確認
+MySQL8.0を停止してから、WorkbenchのConnection／Advancedタブの“Others:”欄に、オプション&quot;--local-infile=1&quot;を追加し、
+MySQL8.0を起動し、接続確認し、LOAD DATA LOCAL 
+INFILEを実行しましたが、同じエラーになりました。
+なお、オプションの値として、以下のものを試しましたが、いずれも接続確認はSuccessfullyなのにLOAD 
+DATA LOCAL INFILEはエラーになりました。
+&quot;--local-infile=1&quot;
+&quot;-local-infile=1&quot;
+&quot;local-infile=1&quot;
+&quot;--local_infile=1&quot;
+&quot;-local_infile=1&quot;
+&quot;local_infile=1&quot;
+
+よろしくお願いいたします。
+
+On 2019/03/01 17:09, 落合 司郎 wrote:
+<span class="quote1">&gt; yoku0825様</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ありがとうございました。</span>
+<span class="quote1">&gt; ピンポイントのページを教えていただき、読ませていただきました。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; On 2019/03/01 16:51, yoku0825 wrote:</span>
+<span class="quote2">&gt;&gt; こんにちは、yoku0825といいます。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; きっとそこのことだと思います。</span>
+<span class="quote2">&gt;&gt; 坂井さんがおっしゃっているのはこの記事のことだと思います。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ----</span>
+<span class="quote2">&gt;&gt; 日々の覚書: MySQL 8.0でLOAD DATA LOCAL INFILEが &quot;ERROR 1148 (42000): </span>
+<span class="quote2">&gt;&gt; The used</span>
+<span class="quote2">&gt;&gt; command is not allowed with this MySQL version&quot; で失敗する時</span>
+<span class="quote2">&gt;&gt; <a href="https://yoku0825.blogspot.com/2018/07/mysql-80load-data-local-infile-error.html">https://yoku0825.blogspot.com/2018/07/mysql-80load-data-local-infile-error.html</a> </span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ----</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; yoku0825,</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 2019年3月1日(金) 14:02 落合 司郎 &lt;s.ochiai@xxxxxxxxxx&gt;:</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 坂井様</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; 「yoku0825さんのブログ」はここですか？</span>
+<span class="quote3">&gt;&gt;&gt; <a href="https://yoku0825.blogspot.com/">https://yoku0825.blogspot.com/</a></span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt; On 2019/03/01 12:04, SAKAI Kei wrote:</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 坂井です</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 　 そのエラーメッセージで検索すると、ズバリ、yoku0825さんのブログが </span>
+<span class="quote4">&gt;&gt;&gt;&gt; ひっか</span>
+<span class="quote4">&gt;&gt;&gt;&gt; かりますね。</span>
+<span class="quote4">&gt;&gt;&gt;&gt; 　 パラメタのデフォルト値が変わっているそうです。（--local-infile）</span>
+<span class="quote4">&gt;&gt;&gt;&gt;</span>
+<span class="quote3">&gt;&gt;&gt;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+
+
+</pre>
+</div>
+<p class="button"><a href="16563.html">[前]</a><a href="16565.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16517.html">  16517 2019-03-01 11:58 [落合 司郎 &lt;s.ochiai@] コマンドLOAD DATA　MySQL 8.0で使えない？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16518.html">@ 16518 2019-03-01 12:04 ┗[SAKAI Kei &lt;sakaik@xx] Re: [mysql 16517] コマンドLOAD DATA　MySQL 8.0で使えない？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16519.html">  16519 2019-03-01 13:51 　┣[落合 司郎 &lt;s.ochiai@] Re: [mysql 16518] Re: [mysql 16517] コマンドLOAD DATA　MySQL 8.0で使えない？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16520.html">  16520 2019-03-01 14:02 　┗[落合 司郎 &lt;s.ochiai@] Re: [mysql 16518] Re: [mysql 16517] コマンドLOAD DATA　MySQL 8.0で使えない？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16521.html">  16521 2019-03-01 16:51 　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16520] Re: [mysql 16518] Re: [mysql 16517] コマンドLOAD DATA　MySQL 8.0で使えない？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16522.html">  16522 2019-03-01 17:09 　　　┗[落合 司郎 &lt;s.ochiai@] Re: [mysql 16521] Re: [mysql 16520] Re: [mysql 16518] Re: [mysql 16517] コマンドLOAD DATA　MySQL 8.0で使えない？</a></span>
+<span class="current">-&gt;&nbsp;<a href="16564.html">  16564 2020-02-07 15:36 　　　　┗[落合 司郎 &lt;s.ochiai@] [mysql 16522] ...Re: [mysql 16517] コマンドLOAD DATA　MySQL 8.0で使えない？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16565.html">@ 16565 2020-02-07 17:11 　　　　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16564] [mysql 16522] ...Re: [mysql 16517] コマンドLOAD DATA　MySQL 8.0で使えない？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16566.html">  16566 2020-02-12 11:32 　　　　　　┗[落合 司郎 &lt;s.ochiai@] Re=3a =5bmysql 16565=5d Re=3a =5bmysql 16564=5d =5bmysql 16522] ...Re: [mysql 16517] コマンドLOAD DATA　MySQL 8.0で使えない？</a></span>
+</pre>
+</body>
+</html>

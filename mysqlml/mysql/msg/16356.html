@@ -1,0 +1,155 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16356</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16355.html">[前]</a><a href="16357.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16356
+</p>
+<div class="header">
+<p>
+From: ochiai &lt;ochiai &lt;s.ochiai@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 27 Jul 2016 11:19:09 +0900<br>
+Subject: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] =e4=b8e3a4のイベントに対して複数のSQLを実行するTRIGGERを定義したい<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+yoku0825さん、ありがとうございます。
+
+On 2016/07/22 12:31, yoku ts. wrote:
+
+<span class="quote1">&gt; こんにちは、yoku0825といいます。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; CREATE TRIGGERの文法は合っているような気がします。</span>
+<span class="quote1">&gt;</span>
+<span class="quote2">&gt;&gt; Error Code: 1235. This version of MySQL doesn't yet support 'multiple triggers with the same action time and event for one table'    0.016 sec</span>
+<span class="quote1">&gt; そのテーブルには既にAFTER UPDATEトリガーが設定されています。</span>
+<span class="quote1">&gt; それが予期したものでない（今設定されているAFTER UPDATEトリガーは何度かやっているうちに残っちゃった）ものであれば、</span>
+<span class="quote1">&gt; DROP TRIGGERで消してあげてください。</span>
+
+AFTER UPDATEトリガーをドロップしてから、show triggers;でドロップされてい 
+るのを確認し、
+CREATE TRIGGER し、show triggers;で定義されているのを確認しています。
+ですから、何度かやっているうちに残っちゃったという状況ではないでしょう。
+
+<span class="quote1">&gt; 現在設定されているAFTER UPDATEトリガーが消せないものの場合、</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 1) MySQL 5.7はAFTER UPDATEトリガーを複数セットできます</span>
+MySQL 5.6 リファレンスマニュアル/13.1.19 CREATE TRIGGER 構文 に以下のよ 
+うな記述がありますので、MySQL 5.6でもできるのかなと思ったのです。
+
+「trigger_body は、トリガーがアクティブ化されるときに実行されるステート 
+メントです。複数のステートメントを実行するには、BEGIN ... END 複合ステー 
+トメント構造構文を使用します。また、これにより、ストアドルーチン内で許可 
+されるのと同じステートメントを使用することもできます。セクショ ン13.6.1 
+「BEGIN ... END 複合ステートメント構文」を参照してください。一部のステー 
+トメントは、トリガー内では許可されません。セクションD.1「ストアドプログ 
+ラムの制約」を 参照してください。」
+<a href="http://dev.mysql.com/doc/refman/5.6/ja/create-trigger.html">http://dev.mysql.com/doc/refman/5.6/ja/create-trigger.html</a>
+
+ちなみに５．５のマニュアル（英文）も調べたところ、同じようなことが書いて 
+ありました。
+<a href="http://dev.mysql.com/doc/refman/5.5/en/create-trigger.html">http://dev.mysql.com/doc/refman/5.5/en/create-trigger.html</a>
+
+また、BEGIN ... ENDのENDに&quot;;&quot;ではなく、&quot;$$&quot;”を付けましたが同じエラーでした。
+
+5.7でできましたか？
+MySQLのバージョン以外の問題ということはないですか？
+例えば、unix版はできるが、windows版はできないとか。
+
+私がインストールしたMySQLは下記のインストーラーでインストールしたものです。
+mysql-installer-community-5.6.31.0.msi
+<span class="quote1">&gt; 2) 今あるAFTER UPDATEトリガーの中に新しいトリガーのステートメントを混ぜます</span>
+それができないのです。
+<span class="quote1">&gt; 3) 新しい方をBEFORE UPDATEトリガーで代用できないか検討します</span>
+根本的な解決ではなさそうです。
+<span class="quote1">&gt; のうちどれを選ぶことになるかと思います。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; yoku0825,</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 2016年7月22日 12:16 ochiai&lt;s.ochiai@xxxxxxxxxx&gt;:</span>
+<span class="quote2">&gt;&gt; MLの皆様、お世話になります。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; CREATE TRIGGERで困っています。</span>
+<span class="quote2">&gt;&gt; やりたいことは、親テーブルとその明細のテーブルがあり、明細テーブルのいず れかの行の値(data)を更新したら、更新のタイムスタンプを親 テーブルと子</span>
+<span class="quote2">&gt;&gt; テーブルのそれぞれに記録するということです。</span>
+<span class="quote2">&gt;&gt; よろしくお願いします。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したいのですが、う まくできません。</span>
+<span class="quote2">&gt;&gt; 調べてみたら、複数のサイトにCREATE TRIGGER文をDELIMITER句で挟めば複数の</span>
+<span class="quote2">&gt;&gt; SQL文を定義できる、と書いてありましたので、その通りにやりましたがうまく いきません。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; １）create triggerを delimiter $$　〜　$$ delimiter;でくくる</span>
+<span class="quote2">&gt;&gt; ２）複数のSQL文をBEGIN　〜　ENDでくくる</span>
+<span class="quote2">&gt;&gt; 参考にしたサイト：<a href="http://wikiwiki.jp/yonkoushi2/?MySQL%2Fdbonline%2Fview">http://wikiwiki.jp/yonkoushi2/?MySQL%2Fdbonline%2Fview</a></span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 以下のようにMySQL Workbench(6.3Community)のSQLエディターで下記のSQLを実</span>
+<span class="quote2">&gt;&gt; 行し、エラーなくトリガーが作成されますが、トリガーの対象とした テーブル の行を更新しようとすると下記のエラーが発生し、更新ができません。</span>
+<span class="quote2">&gt;&gt; なお、親テーブルと明細テーブルとの連携キーは parent_table.id=child_table.p_idです。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ＜トリガー作成＞</span>
+<span class="quote2">&gt;&gt; DELIMITER $$</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; CREATE DEFINER=`root`@`localhost` TRIGGER `child_table_AFTER_UPDATE` AFTER</span>
+<span class="quote2">&gt;&gt; UPDATE ON `child_table` FOR EACH ROW</span>
+<span class="quote2">&gt;&gt; BEGIN</span>
+<span class="quote2">&gt;&gt; update parent_table set lastupdtime = sysdate() where id = old.p_id;</span>
+<span class="quote2">&gt;&gt; update child_table set lastupdtime = sysdate() where new.data &lt;&gt; old.data;</span>
+<span class="quote2">&gt;&gt; END;</span>
+<span class="quote2">&gt;&gt; $$</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; DELIMITER ;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ＜エラーメッセージ＞</span>
+<span class="quote2">&gt;&gt; CREATE DEFINER=`root`@`localhost` TRIGGER `child_table_AFTER_UPDATE` AFTER</span>
+<span class="quote2">&gt;&gt; UPDATE ON `child_table` FOR EACH ROW</span>
+<span class="quote2">&gt;&gt; BEGIN</span>
+<span class="quote2">&gt;&gt; update parent_table set lastupdtime = sysdate() where id = old.p_id;</span>
+<span class="quote2">&gt;&gt; update child_table set lastupdtime = sysdate() where new.data = old.data;</span>
+<span class="quote2">&gt;&gt; END;</span>
+<span class="quote2">&gt;&gt; Error Code: 1235. This version of MySQL doesn't yet support 'multiple</span>
+<span class="quote2">&gt;&gt; triggers with the same action time and event for one table'    0.016 sec</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; ＜show triggers;のstatementの値＞</span>
+<span class="quote2">&gt;&gt; BEGIN</span>
+<span class="quote2">&gt;&gt; update parent_table set lastupdtime = sysdate() where id = old.p_id;</span>
+<span class="quote2">&gt;&gt; update child_table set lastupdtime = sysdate() where new.data = old.data;</span>
+<span class="quote2">&gt;&gt; END;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; エラーメッセージもshow triggersの結果もDELIMITERが反映されていません。</span>
+<span class="quote2">&gt;&gt; エラーメッセージに“This version of MySQL doesn't yet support 'multiple</span>
+<span class="quote2">&gt;&gt; triggers...”とあるので、5.6.31では対応していないということでしょうか？対 策あるいは対応しているバージョンを教えてください。</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; 当方の実行環境：</span>
+<span class="quote2">&gt;&gt; MySQL version:5.6.31-log MySQL Community Server(GPL)</span>
+<span class="quote2">&gt;&gt;        Compiled For: win32(AMD64)</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; MySQL Workbench(6.3Community)</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt; OS:Windows 7 Professional 32bit</span>
+<span class="quote2">&gt;&gt;</span>
+<span class="quote2">&gt;&gt;</span>
+
+
+
+</pre>
+</div>
+<p class="button"><a href="16355.html">[前]</a><a href="16357.html">[次]</a><a href="../list/16301-16400.html">[番号順一覧]</a><a href="../thread/16301-16400.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16354.html">  16354 2016-07-22 12:16 [ochiai &lt;s.ochiai@xxx] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16355.html">  16355 2016-07-22 12:31 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16354] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span class="current">-&gt;&nbsp;<a href="16356.html">  16356 2016-07-27 11:19 　┗[ochiai &lt;s.ochiai@xxx] Re: [mysql 16355] Re: [mysql 16354] =e4=b8e3a4のイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16357.html">  16357 2016-07-27 12:00 　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16358.html">  16358 2016-07-27 15:29 　　　┗[ochiai &lt;s.ochiai@xxx] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16359.html">  16359 2016-07-27 15:37 　　　　┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16358] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] 一つのイベントに対して複数のSQLを実行するTRIGGERを定義したい</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16360.html">  16360 2016-07-27 15:47 　　　　　┗[ochiai &lt;s.ochiai@xxx] Re: [mysql 16359] Re: [mysql 16358] Re: [mysql 16357] Re: [mysql 16356] Re: [mysql 16355] Re: [mysql 16354] =e4=b8つのイベントに対して複数のS</a></span>
+</pre>
+</body>
+</html>

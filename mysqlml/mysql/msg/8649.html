@@ -1,0 +1,100 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8649</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8648.html">[前]</a><a href="8650.html">[次]</a><a href="../list/8601-8700.html">[番号順一覧]</a><a href="../thread/8601-8700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8649
+</p>
+<div class="header">
+<p>
+From: Yasumitsu Ito &lt;Yasumitsu Ito &lt;y-ito@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 22 Jan 2004 15:22:21 +0900<br>
+Subject: [mysql 08649] Re: mysqld_multi を利用した複数のサーバーの起動について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+たけ様．
+最近使い始めたばかりの初心者ですが，
+分かる範囲でお答えさせてください．
+
+間違っていれば指摘をお願いします &gt; 識者の方
+
+Take &lt;office@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; ちなみに</span>
+<span class="quote2">&gt; &gt; $ mysql_install_db --basedir=/usr/local/mysql/data8</span>
+<span class="quote1">&gt; は</span>
+<span class="quote1">&gt; mysql_install_db --datadir=/usr/local/mysql/data8</span>
+<span class="quote1">&gt; の間違いですよね？basedirだとエラーでとおらなかったので。。</span>
+
+そうでした．すみません．手元に環境が無かったもので．
+
+<span class="quote1">&gt; いままで、MySQLサーバー１つの場合は</span>
+<span class="quote1">&gt; $ mysql.server start</span>
+<span class="quote1">&gt; で起動していたのですが、この場合はuserはmysqlで</span>
+<span class="quote1">&gt; 起動していますよね？</span>
+
+私の環境は 
+Vine2.6
+MySQL-4.0.15-*.rpm (本家からのFTP)
+です．
+
+/etc/init.d/mysql [start|stop] 
+
+にて起動，停止をしていますが，userはmysqlでした．
+
+<span class="quote1">&gt; また/etc/my.cnfで</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; <a href="1.html">[mysqld1]</a></span>
+<span class="quote1">&gt; socket     = /tmp/mysql.sock1</span>
+<span class="quote1">&gt; port       = 3311</span>
+<span class="quote1">&gt; pid-file   = /usr/local/mysql1/data/hostname.pid</span>
+<span class="quote1">&gt; datadir    = /usr/local/mysql1/data</span>
+<span class="quote1">&gt; user = mysql</span>
+<span class="quote1">&gt; としてrootで起動しようとしたのですが、やはりダメでした。</span>
+<span class="quote1">&gt; ここでのuserは起動するユーザーというわけではないんでしょうか？</span>
+
+
+正解かどうか自信がありませんが，，
+/etc/my.cnf ファイルに
+
+[mysqld_multi]
+user = mysql
+password = mysql_passwd
+
+<a href="1.html">[mysqld1]</a>
+user = mysql
+....
+<a href="7.html">[mysqld7]</a>
+user = mysql
+
+と記述し，ユーザ mysql にshutdown権限を与える．
+
+$ mysql -uroot -S /tmp/mysql.sock1 mysql
+mysql&gt; grant shutdown on *.* to mysql@localhost identified by 'mysql_passwd';
+...
+$ mysql -uroot -S /tmp/mysql.sock7 mysql
+mysql&gt; grant shutdown on *.* to mysql@localhost identified by 'mysql_passwd';
+
+これで，私の環境ではrootにて 
+mysqld_multi start | stop | report 
+ができるようになりました．
+
+
+</pre>
+</div>
+<p class="button"><a href="8648.html">[前]</a><a href="8650.html">[次]</a><a href="../list/8601-8700.html">[番号順一覧]</a><a href="../thread/8601-8700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="8644.html">   8644 2004-01-22 10:53 [Take &lt;office@xxxxxxx] mysqld_multi を利用した複数のサーバーの起動について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8645.html">   8645 2004-01-22 11:24 ┗[Yasumitsu Ito &lt;y-ito]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8648.html">   8648 2004-01-22 13:23 　┗[Take &lt;office@xxxxxxx]                                     </a></span>
+<span class="current">-&gt;&nbsp;<a href="8649.html">   8649 2004-01-22 15:22 　　┗[Yasumitsu Ito &lt;y-ito]                                   </a></span>
+</pre>
+</body>
+</html>

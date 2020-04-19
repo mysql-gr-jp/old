@@ -1,0 +1,124 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9238</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9237.html">[前]</a><a href="9239.html">[次]</a><a href="../list/9201-9300.html">[番号順一覧]</a><a href="../thread/9201-9300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9238
+</p>
+<div class="header">
+<p>
+From: Hirofumi Fujiwara &lt;Hirofumi Fujiwara &lt;fuji@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 20 Apr 2004 14:08:58 +0900 (JST)<br>
+Subject: [mysql 09238] Re: SJISの漢字の第2バイト<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+藤原です。
+
+<span class="quote1">&gt; Hirofumi Fujiwara &lt;fuji@xxxxxxxxxx&gt; wrote:</span>
+<span class="quote2">&gt;  | </span>
+<span class="quote3">&gt;  | &gt; mysql コマンドのオプションで --default-character-set=sjis をつければ良</span>
+<span class="quote3">&gt;  | &gt; いと思います。</span>
+<span class="quote2">&gt;  |   なるほど、確にオプションで sjis を指定すると、</span>
+<span class="quote2">&gt;  | 	mysql&gt; select '表';</span>
+<span class="quote2">&gt;  |   はちゃんと動作しますね。</span>
+<span class="quote2">&gt;  | </span>
+<span class="quote2">&gt;  |   起動後、</span>
+<span class="quote2">&gt;  | 	mysql&gt; set character set sjis;</span>
+<span class="quote2">&gt;  |   として、sjis を指定しても駄目ってことでしょうか。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ちょっとマニュアルを検索してみましたが、バージョン 4.1 系では</span>
+<span class="quote1">&gt; それまでと文字セットの考え方が違ってるみたいですね。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; オプションの default-character-set は「サーバの文字セット」で、</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/mysql/ja/Charset-server.html">http://dev.mysql.com/doc/mysql/ja/Charset-server.html</a></span>
+
+  サーバに対して指定したときは「サーバの文字セット」で、
+  クライアントに対して指定したときは「クライアントの文字セット」ですね。
+
+<span class="quote1">&gt; コマンドラインの SET CHARACTER SET は「接続の文字セット」だそうです。</span>
+<span class="quote1">&gt; <a href="http://dev.mysql.com/doc/mysql/ja/Charset-connection.html">http://dev.mysql.com/doc/mysql/ja/Charset-connection.html</a></span>
+
+show variables like 'character_set_connection';
+ 
+<span class="quote1">&gt; 4.1系を実際に使ってみたことが無いので、</span>
+<span class="quote1">&gt; 現段階でどこまで実装されているのかはわかりませんが、</span>
+<span class="quote1">&gt; サーバに放り込む文字がすべて S-JIS と決まっているなら</span>
+<span class="quote1">&gt; default-character-set で「サーバの文字セット」を指定しておく</span>
+<span class="quote1">&gt; というのがやはり適切なのではないでしょうか。</span>
+
+  すべてがSJISの世界のときには、サーバもクライアントもみんな 
+default-character-set = sjis をしておいた方が良いらしいですね。
+
+マニュアル の 4.7.1 データおよびソート用キャラクタセット
+の最後の方に、
+
+	[client]
+	default-character-set=character-set-name
+
+	しかし、通常は必要ありません。
+
+とありましたが、そうではないというか、SJISを使うときには必要みたいです
+ね。
+
+clientのコマンドライン中の文字列を解釈するとき、文字コードが分かってい
+ないとトラブルが出る筈なのですが、それは、default-character-setで指定
+できるけれど、他の方法
+	set character set sjis
+	set names sjis
+などでは駄目でした。
+
+----
+検証：
+
+mysql&gt; show variables like 'character\_%';
++--------------------------+-------+
+<span class="quote1">| Variable_name            | Value |</span>
++--------------------------+-------+
+<span class="quote1">| character_set_server     | sjis  |</span>
+<span class="quote1">| character_set_system     | utf8  |</span>
+<span class="quote1">| character_set_database   | sjis  |</span>
+<span class="quote1">| character_set_client     | sjis  |</span>
+<span class="quote1">| character_set_connection | sjis  |</span>
+<span class="quote1">| character_set_results    | sjis  |</span>
++--------------------------+-------+
+6 rows in set (0.00 sec)
+ 
+この状態でも、 '表' は正しく処理されませんが、
+クライアント起動時に --default-character-set=sjis または my.cnf
+のクライアント指定に default-character-set=sjis と書くことで、
+'表' は正常に動くようになりました。
+
+ということは、上の変数で示される状況とは別に、クライアントのコマンドラ
+インの解釈のときの文字コード設定が存在するのではないかと思いますが、い
+かがでしょうか？
+
+------------------------------------------------------------------
+株式会社 タイムインターメディア       藤原 博文 fuji@xxxxxxxxxx
+本社 160-0002 東京都新宿区坂町26-27 ＩＰＢビル    TEL 03-5362-9009
+URL  <a href="http://www.timedia.co.jp/">http://www.timedia.co.jp/</a>                    FAX 03-5362-9008
+地図 <a href="http://www.timedia.co.jp/company/map/">http://www.timedia.co.jp/company/map/</a>     新宿線曙橋駅徒歩5分
+------------------------------------------------------------------
+♪  Puzzle Japan  <a href="http://www.puzzle.jp/">http://www.puzzle.jp/</a>  毎日新作パズルで遊ぼう ♪
+------------------------------------------------------------------
+
+</pre>
+</div>
+<p class="button"><a href="9237.html">[前]</a><a href="9239.html">[次]</a><a href="../list/9201-9300.html">[番号順一覧]</a><a href="../thread/9201-9300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="9232.html">   9232 2004-04-19 22:04 [Hirofumi Fujiwara &lt;f] SJISの漢字の第2バイト                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9233.html">   9233 2004-04-20 07:43 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9235.html">   9235 2004-04-20 11:26 ┃┗[Hirofumi Fujiwara &lt;f]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9237.html">   9237 2004-04-20 12:14 ┃　┗[mohri &lt;mohri@xxxxxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="9238.html">   9238 2004-04-20 14:08 ┃　　┗[Hirofumi Fujiwara &lt;f]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9234.html">   9234 2004-04-20 09:20 ┗[きたぢま &lt;kitajima@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9236.html">   9236 2004-04-20 11:48 　┗[SUGAWARA Hajime &lt;sug]                                     </a></span>
+</pre>
+</body>
+</html>

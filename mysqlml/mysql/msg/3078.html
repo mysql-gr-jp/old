@@ -1,0 +1,125 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3078</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="3077.html">[前]</a><a href="3079.html">[次]</a><a href="../list/3001-3100.html">[番号順一覧]</a><a href="../thread/3001-3100.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3078
+</p>
+<div class="header">
+<p>
+From: Hiroyuki Sato &lt;Hiroyuki Sato &lt;hiro@xxxxxxxxxx&gt;&gt;<br>
+Date: Sat, 20 Jan 2001 16:54:04 +0900<br>
+Subject: [mysql 03078] Re: MySQL 3.23.31<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+神奈川大学の佐藤です。
+
+全く役に立たない気もするのですが...
+
+mysql-3.23.31をdb-3.2.3hと一緒にコンパイルするときに
+configureでひっかかるのを回避するパッチを作成しました。
+
+----- ここから ----- ここから ----- ここから ----- ここから -----
+
+*** aclocal.m4.org      Sat Jan 20 16:22:55 2001
+--- aclocal.m4  Sat Jan 20 16:23:08 2001
+***************
+*** 835,841 ****
+      bdb_version_ok=yes
+    # This is ugly, but about as good as it can get
+    elif test $db_major -eq 3 &amp;&amp; test $db_minor -eq 2 &amp;&amp; test $db_patch -eq 3 &amp;&amp;\
+!        grep 'DB_VERSION_STRING.*g: ' [$1] &gt; /dev/null
+    then
+      bdb_version_ok=yes
+    else
+--- 835,841 ----
+      bdb_version_ok=yes
+    # This is ugly, but about as good as it can get
+    elif test $db_major -eq 3 &amp;&amp; test $db_minor -eq 2 &amp;&amp; test $db_patch -eq 3 &amp;&amp;\
+!        grep 'DB_VERSION_STRING.*[[g-z]]: ' [$1] &gt; /dev/null
+    then
+      bdb_version_ok=yes
+    else
+----- ここまで ----- ここまで ----- ここまで ----- ここまで -----
+
+一応横着をして、db-3.2.3がg-zまで出ても大丈夫なようにしてあります。
+gとhだけに対応させたい場合は、上記の
+!        grep 'DB_VERSION_STRING.*[[g-z]]: ' [$1] &gt; /dev/null
+を
+!        grep 'DB_VERSION_STRING.*[[gh]]: ' [$1] &gt; /dev/null
+とすれば大丈夫です。
+
+上記をセーブして、(例えば、mysql.patch)として
+% cd mysql-3.23.31
+% patch -p0 &lt; mysql.patch
+% autoconf configure.in &gt; configure
+
+とすれば、db-3.2.3hと一緒にコンパイルできる。configureができます。
+
+一応mysql@xxxxxxxxxxにも送っておきました。
+(もうだれか、対応している気もしますが...)
+
+<span class="quote1">&gt; mysql-3.23.31をdb-3.2.3hと一緒にコンパイルするとき</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; mysql-3.23.31/の直下で</span>
+<span class="quote1">&gt; tar xvfz db=3.2.3h.tar.gz</span>
+<span class="quote1">&gt; を実行して、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ./configureすれば、BerkeleyDBはちゃんと認識してくれると</span>
+<span class="quote1">&gt; 書いてあるのですが、認識しませんでした。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これはconfigureで BerkeleyDB.3.2/include/db.h</span>
+<span class="quote1">&gt; を見ているからだと思うのですが、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 該当する場所にdb.hはありません。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; また、db-3.2.3hを別にbuid&amp;installしておいて、</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ./configure --with-charset=ujis</span>
+<span class="quote1">&gt;   --with-berkeley-db-includes=/usr/local/BerkeleyDB.3.2 \</span>
+<span class="quote1">&gt;   --with-berkeley-db-libs=/usr/local/BerkeleyDB.3.2</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; としても失敗します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; これは、configureがdb-3.2.3gを対象としている為のようです。</span>
+<span class="quote1">&gt; 私は</span>
+<span class="quote1">&gt;        grep 'DB_VERSION_STRING.*g: ' $inc/db.h &gt; /dev/null</span>
+<span class="quote1">&gt; という部分を</span>
+<span class="quote1">&gt;        grep 'DB_VERSION_STRING.*h: ' $inc/db.h &gt; /dev/null</span>
+<span class="quote1">&gt;                                 ^</span>
+<span class="quote1">&gt;                                ここ</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; に全部変更しました。これでうまくいきました。</span>
+<span class="quote1">&gt; </span>
+
+-- 
+Hiroyuki Sato.
+CCSO, Kanagawa University.
+Voice: +81-45-491-2572
+FAX: +81-45-491-2575
+
+</pre>
+</div>
+<p class="button"><a href="3077.html">[前]</a><a href="3079.html">[次]</a><a href="../list/3001-3100.html">[番号順一覧]</a><a href="../thread/3001-3100.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3061.html">   3061 2001-01-19 09:41 [Seiji Tateyama &lt;tate] MySQL 3.23.31                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3062.html">   3062 2001-01-19 14:26 ┣[&lt;ky@xxxxxxxxxx&gt;     ] PHP4 を使った検索ページを作りたい     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3066.html">   3066 2001-01-19 16:28 ┃┗[Akihiko Shinohara &lt;s]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3063.html">   3063 2001-01-19 15:04 ┗[Hiroyuki Sato &lt;hiro@]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3064.html">   3064 2001-01-19 15:08 　┣[Tatsuhiko Miyagawa &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3065.html">   3065 2001-01-19 15:17 　┃┗[Hiroyuki Sato &lt;hiro@]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="3078.html">   3078 2001-01-20 16:54 　┗[Hiroyuki Sato &lt;hiro@]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3086.html">   3086 2001-01-23 12:38 　　┗[Seiji Tateyama &lt;tate] MySQL 3.23.32( Re: MySQL 3.23.31) </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3089.html">   3089 2001-01-23 14:12 　　　┣[Hiroyuki Sato &lt;hiro@]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3091.html">   3091 2001-01-24 12:58 　　　┗[Seiji Tateyama &lt;tate] セキュリティホールのためバージョンアップお勧め</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3092.html">   3092 2001-01-24 13:10 　　　　┗[Seiji Tateyama &lt;tate]                               </a></span>
+</pre>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:15596</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="15595.html">[前]</a><a href="15597.html">[次]</a><a href="../list/15501-15600.html">[番号順一覧]</a><a href="../thread/15501-15600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:15596
+</p>
+<div class="header">
+<p>
+From: &lt;gotou1213@xxxxxxxxxx&gt;<br>
+Date: Thu, 26 May 2011 15:55:30 +0900<br>
+Subject: [mysql 15596] SELECT MAX 〜 FOR UPDATE  と INSERT  でデッドロック<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+後藤と申します。
+
+MySQLで次の通りにテーブルが存在しているときに
+
+  CREATE TABLE xx (id INT NOT NULL PRIMARY KEY);
+  INSERT INTO xx VALUES (1);
+
+下記の様に [A] と [B] のトランザクションを並列に実行したところ、
+
+  [A] BEGIN;
+  [B]	BEGIN;
+  [A] SELECT @a:=MAX(id) FROM xx FOR UPDATE;
+  [B]	SELECT @a:=MAX(id) FROM xx FOR UPDATE; /* ロック解放待ち */
+  [A] INSERT INTO xx VALUES(IFNULL(@a,0) + 1); /* デッドロック？ */
+
+[A]のINSERTで以下の通りエラーになりました。
+
+  ERROR 1213 (40001): Deadlock found when trying to get lock; try restarting transaction
+
+
+たまに発生するとかでは無くて、上の順番で実行すると百発百中で発生します。
+上記の様な方法で連番を生成する是非はともかくとして、
+デッドロックをしてしまう理由がわかりません。
+
+MySQLのバージョンは以下の通りです（CentOS 5.5のyumで入るバージョン）。
+  mysqld  Ver 5.0.77-log for redhat-linux-gnu on x86_64 (Source distribution)
+
+理由についてご存知の方がいらっしゃいましたら、
+ご教授いただければ幸いです。
+
+</pre>
+</div>
+<p class="button"><a href="15595.html">[前]</a><a href="15597.html">[次]</a><a href="../list/15501-15600.html">[番号順一覧]</a><a href="../thread/15501-15600.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="15596.html">  15596 2011-05-26 15:55 [&lt;gotou1213@xxxxxxxxx] SELECT MAX 〜 FOR UPDATE  と INSERT  でデッドロック</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15597.html">  15597 2011-05-26 17:38 ┗[KOJIMA Takanori &lt;tak]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15598.html">  15598 2011-05-26 20:19 　┗[&lt;gotou1213@xxxxxxxxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15599.html">  15599 2011-05-26 20:28 　　┗[&lt;gotou1213@xxxxxxxxx]                                   </a></span>
+</pre>
+</body>
+</html>

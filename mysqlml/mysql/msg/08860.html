@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:8860</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="8859.html">[前]</a><a href="8861.html">[次]</a><a href="../list/8801-8900.html">[番号順一覧]</a><a href="../thread/8801-8900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:8860
+</p>
+<div class="header">
+<p>
+From: 杉本誠 &lt;杉本誠 &lt;sugimoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 23 Feb 2004 10:34:25 +0900<br>
+Subject: [mysql 08860] mod_auth_mysql のパスワード暗号化について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+お世話になります。はじめて投稿します。
+すぎもとといいます。よろしくお願いします。
+
+早速ですが、ご教授いただければ幸いです。
+社内イントラで、mod_auth_mysqlを使用し、MySQL上で暗号化パスワードの利用を
+考えています。
+しかし、通常のテキストなら認証ＯＫなのですが、パスワードフィールドを暗号化する
+と認証できなくなってしまいます。
+環境は以下の通りです。
+ＯＳ：　　　　　WindowsNT4.0SP6a
+WebServer： Apache1.3.24
+MySQL　   ：3.23.55
+使用データベースとテーブル　authdb 、authtable
+
+●Apache　httpd.confのmod_auth_mysql関係部分抜粋
+LoadModule mysql_auth_module modules/mod_auth_mysql.so
+&lt;IfModule mod_auth_mysql.c&gt;
+    &lt;Location /restricted&gt;
+        AuthName &quot;MySQL Secured Place&quot;
+        AuthType Basic
+        require valid-user
+        AuthMySQLHost localhost
+        AuthMySQLDB authtdb
+        AuthMySQLUser apache
+        AuthMySQLPassword PaSsWorD
+        AuthMySQLUserTable authtable
+        AuthMySQLNameField username
+        AuthMySQLPasswordField password
+        AuthMySQLCryptedPasswords On
+    &lt;/Location&gt;
+&lt;/IfModule&gt;
+
+●認証対象のディレクトリの.htaccess
+AuthName &quot;このページはパスワード制限されています&quot;
+AuthType Basic
+require valid-user
+AuthMySQLHost localhost
+AuthMySQLDB authdb
+AuthMySQLUser apache
+AuthMySQLPassword PaSsWorD
+AuthMySQLUserTable authtable
+AuthMySQLNameField username
+AuthMySQLPasswordField password
+AuthMySQLCryptedPasswords On
+
+これら２つの設定は、mod_auth_mysqlの付属サンプルほぼそのままです。
+
+●authtableにユーザーを追加するＳＱＬ
+INSERT INTO authtable (username, password) VALUES('sugimoto', password('abcd'));
+
+password()関数で、確かに暗号化されますが、それを正しくBasic認証することが出来ません。
+password()を使用せずにBasic認証すると、ＯＫとなります。
+AuthMySQLCryptedPasswords Onで暗号化対応だと思うのですが、プレーンテキストで
+認証してしまいます。
+いろいろ調べて、暗号化がpassword()関数ではなく、encrypt()関数を使用するという記
+述に行き当たりましたが、WinNT用MySQLでは使用できないとの事でした。
+
+mod_auth_mysqlはバージョンによって、設定方法がかなり違うようで、試行錯誤しています。
+何かヒントでもいただければ幸いです。
+
+以上、よろしくお願いいたします。
+
+
+
+</pre>
+</div>
+<p class="button"><a href="8859.html">[前]</a><a href="8861.html">[次]</a><a href="../list/8801-8900.html">[番号順一覧]</a><a href="../thread/8801-8900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="8860.html">   8860 2004-02-23 10:34 [杉本誠 &lt;sugimoto@xxx] mod_auth_mysql のパスワード暗号化について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8862.html">   8862 2004-02-23 22:31 ┣[&quot;A.K.I.&quot; &lt;aki@xxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8865.html">   8865 2004-02-24 10:31 ┃┗[杉本誠 &lt;sugimoto@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8863.html">   8863 2004-02-23 23:04 ┗[tateyan &lt;tateyan@xxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8864.html">   8864 2004-02-23 23:35 　┣[tateyan &lt;tateyan@xxx]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8867.html">   8867 2004-02-24 11:06 　┃┗[杉本誠 &lt;sugimoto@xxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="8866.html">   8866 2004-02-24 10:43 　┗[杉本誠 &lt;sugimoto@xxx]                                     </a></span>
+</pre>
+</body>
+</html>

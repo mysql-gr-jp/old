@@ -1,0 +1,163 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:13802</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="13801.html">[前]</a><a href="13803.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:13802
+</p>
+<div class="header">
+<p>
+From: 深海水草 &lt;深海水草 &lt;VYG01106@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 15 Mar 2007 17:45:18 +0900<br>
+Subject: [mysql 13802] ［解決？〕 Re: Windows 側ツールから参照できないのはなぜ？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+皆さま、色々と有難うございます。
+
+長谷です。
+
+取り敢えず、試行錯誤の結果、一応動いたようなので報告します。
+
+google で検索してみて、GRANT 文を直接 IP アドレスで指定する
+方法がありました。それを参考に
+
+GRANT ALL PRIVILEGES ON *.* TO root@'192.168.3.0/255.255.255.0';
+
+をコマンドラインで実行したところ、MySQL Administrator でアク
+セスできるようになりました。
+
+これをやった結果、コマンドラインツールで確かめたところ、
+'192.168.3.0/255.255.255.0' という host が追加され、ユーザ
+'root' でアクセスできるようになったということでした。
+
+
+<span class="quote1">&gt; 白井さん、YuGoさん、かとうさん；</span>
+
+<span class="quote1">&gt; しつこいようですが、実験用かつ安全であることが確認されているLAN内での話です。</span>
+
+了解です。あくまで現在の環境は実験的なものなので、最終的には
+IPアドレスで制限するつもりです。
+
+<span class="quote1">&gt; RHELやCentOS、Debian、FreeBSDでは経験あるのですが、SUSEは無いので予</span>
+
+余談ですが、実は CentOS を使いたかったのです。ところが、10年
+前の SCSI RAID カードが認識しませんで...OpenSUSE ではドライバ
+が入っていたようで動いたものですから。
+
+<span class="quote1">&gt; ▼成功した環境</span>
+
+参考になりました。ウチの環境はルータ経由ではなく、同じハブ
+に繋いであるだけです。そのうちハブ−ハブ接続に変えるかも知れ
+ませんが...
+
+<span class="quote1">&gt; 1.ping で、サーバまで疎通することを確認</span>
+
+ＯＫでした。
+
+<span class="quote1">&gt; 2.ポートが空いていることを確認</span>
+<span class="quote1">&gt;  →クライアントからポートスキャンツールなどで3306の開放を確認</span>
+
+これは考え付きませんでした。
+これからはポートスキャンツールを用意しておきます。
+
+<span class="quote1">&gt;      →そもそもMySQLは立ち上がっているか？</span>
+
+これは SUSE 側でコマンドラインツールで確認しました。
+
+<span class="quote1">&gt;      →サーバ上でiptablesなどでフィルタリングされてないか？</span>
+<span class="quote1">&gt;      →hosts.allow hosts.denyなどの記述はOKか？-&gt; /etc あたりにある</span>
+
+この辺、どうもスキルが足りなくてすいません。
+xinetd 経由だと、どういう構造で動いているのかさっぱり理解で
+きてないのが現状です。勉強します。...
+
+<span class="quote1">&gt; 3.サーバ上で</span>
+<span class="quote1">&gt; GRANT ALL PRIVILEGES ON *.* TO root@'%' IDENTIFIED BY 'ABCdefG' WITH</span>
+<span class="quote1">&gt; GRANT OPTION;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; を実行します。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt;  かとう さんもかかれていますが、% = any hostという意味です。このSQL</span>
+<span class="quote1">&gt; 文を日本語にすると</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 　rootというユーザー(パスワードはABCdefG)にすべてのDB対して、全権限</span>
+<span class="quote1">&gt; を与えなさい。なおかつ接続元は全外部ホスト(つまり any host)。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ということです。</span>
+
+となると、コマンドラインツールで実行できるはずだと思うのですが、
+以前はエラーになってました。スペルミスだったかもしれませんが...
+ちゃんとエラー内容をメモしておくべきだったですね。
+今はユーザを 'root@%' とすると通ります。
+
+<span class="quote1">&gt; 4.MySQL Administratorで</span>
+<span class="quote1">&gt; ホストネーム 192.168.3.20</span>
+<span class="quote1">&gt; ポート       3306</span>
+<span class="quote1">&gt; ユーザ名     root</span>
+<span class="quote1">&gt; パスワード   ABCdefG</span>
+
+ここが違うのですが、何故かパスワード入れると駄目です。
+パスワードなしでは入れます。
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; rootでmysqlコマンドラインに入って</span>
+<span class="quote1">&gt; mysql&gt; use mysql;</span>
+<span class="quote1">&gt; mysel&gt; SELECT user,host FROM User;</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; の結果を見てみると何かヒントがあるかもしれません。</span>
+
+はい、やってみました。
+
+その結果、'192.168.3.0/255.255.255.0' という host のみ、
+パスワードが設定されていません。他のユーザはパスワード
+設定済みですが、上記の host にぶら下がっている別ユーザでは
+ユーザ／パスワードの組み合わせでは入れました。
+
+この root もパスワード設定しないと危ないですね。
+
+<span class="quote1">&gt; あと、エラーメッセージはそっくりそのまま省略せずに載せることをおすす</span>
+<span class="quote1">&gt; めします。</span>
+
+うっすいません...確かにそのとおりで。慌ててたもので。
+今度から気をつけます。
+
+
+<span class="quote1">&gt; 鈴木さん；</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ３のOLD_PASSWORDを試してから、他の原因を当たった方が良いとだけ申し上げて</span>
+<span class="quote1">&gt; おきます。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; googleと当ＭＬの過去ログにも例があったと思います。</span>
+
+ML の過去ログは見たような気がしましたが、探し方が悪かったの
+でしょう。気をつけてみてみます。
+
+-- 
+長谷 &lt;VYG01106@xxxxxxxxxx&gt;
+
+
+</pre>
+</div>
+<p class="button"><a href="13801.html">[前]</a><a href="13803.html">[次]</a><a href="../list/13801-13900.html">[番号順一覧]</a><a href="../thread/13801-13900.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="13794.html">  13794 2007-03-13 23:58 [深海水草 &lt;VYG01106@x] Windows 側ツールから参照できないのはなぜ？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13795.html">  13795 2007-03-14 00:51 ┣[moo_moo_boogie &lt;moo_]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13796.html">  13796 2007-03-14 11:18 ┗[Shintaro Shirai &lt;ytg]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13797.html">  13797 2007-03-15 13:05 　┗[深海水草 &lt;VYG01106@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13798.html">  13798 2007-03-15 13:46 　　┣[YuGo &lt;yu.gotou@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13799.html">  13799 2007-03-15 13:53 　　┣[moo_moo_boogie &lt;moo_]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13800.html">  13800 2007-03-15 13:53 　　┣[Tomohiro 'Tomo-p' KA]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13801.html">  13801 2007-03-15 14:30 　　┗[Shintaro Shirai &lt;ytg]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="13802.html">  13802 2007-03-15 17:45 　　　┗[深海水草 &lt;VYG01106@x] ［解決？〕 Re: Windows 側ツールから参照できないのはなぜ？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13803.html">  13803 2007-03-15 19:41 　　　　┗[moo_moo_boogie &lt;moo_]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13804.html">  13804 2007-03-15 21:31 　　　　　┗[深海水草 &lt;VYG01106@x]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13805.html">  13805 2007-03-15 23:27 　　　　　　┗[moo_moo_boogie &lt;moo_]                           </a></span>
+</pre>
+</body>
+</html>

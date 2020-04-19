@@ -1,0 +1,225 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:9640</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="9639.html">[前]</a><a href="9641.html">[次]</a><a href="../list/9601-9700.html">[番号順一覧]</a><a href="../thread/9601-9700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:9640
+</p>
+<div class="header">
+<p>
+From: &quot;Kageyama Takahiro&quot; &lt;&quot;Kageyama Takahiro&quot; &lt;kageyama329@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 14 Jun 2004 20:23:36 +0900<br>
+Subject: [mysql 09640] Insert 毎に接続・切断を繰り返すと不特定な場所でエラーが発生する。<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+
+初めまして、かげやまと申します。
+
+
+書き込みをする度に接続・切断という処理を繰り返し行うと、何回目かでエラーに
+なる問題が発生しました。毎回違う回数でエラーになります。
+どうしたら発生しないようでできますでしょうか？
+
+以下に、環境・再現方法・エラーメッセージの順番で説明します。
+
+
+・環境：WindowsXP HomeEdition
+        MySQL(4.0.15)
+        JDBC Driver(mysql-connector-java-3.0.7-stable-bin.jar)
+        両方とも同一 PC で稼動しています。
+
+
+・再現方法：以下の Test.java をコンパイルして、test.bat を実行します。
+            ドライバー・クラスファイル・バッチファイルは全て同一ディレクトリ
+に
+            置いてください。
+
+
+-------------------------------- test.bat 
+-------------------------------------
+
+java -classpath .;.\mysql-connector-java-3.0.7-stable-bin.jar Test
+
+-------------------------------- Test.java 
+------------------------------------
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Properties;
+
+class Test {
+  private static final String CREATE_QUERY = &quot;CREATE TABLE IF NOT EXISTS 
+test&quot;+
+                                             &quot; ( ip VARCHAR(255) PRIMARY 
+KEY)&quot;;
+  private static final String INSERT_QUERY=&quot;INSERT INTO test (ip) VALUES 
+(?);&quot;;
+  private static final String FLUSH_QUERY = &quot;FLUSH TABLES;&quot;;
+
+  public static void main(String[] args) {
+    try {
+      loadMysqlDriver();
+      createTable();
+      loop();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+  static void loadMysqlDriver() {
+    try {
+      Class.forName(&quot;com.mysql.jdbc.Driver&quot;);
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    }
+  }
+  static Connection getNewConnection() throws SQLException {
+    Properties info = new Properties();
+    info.setProperty(&quot;user&quot;, &quot;&quot;);
+    info.setProperty(&quot;password&quot;, &quot;&quot;);
+    info.setProperty(&quot;useUnicode&quot;, &quot;true&quot;);
+    info.setProperty(&quot;characterEncoding&quot;, &quot;shift_jis&quot;);
+    return DriverManager.getConnection(&quot;jdbc:mysql://localhost/test&quot;, 
+info);
+  }
+  static void createTable() throws SQLException {
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    try {
+      conn = getNewConnection();
+      pstmt = conn.prepareStatement(CREATE_QUERY);
+      pstmt.executeUpdate();
+    } finally {
+      if (pstmt != null) {
+        pstmt.close();
+      }
+      if (conn != null) {
+        conn.close();
+      }
+    }
+  }
+  static void loop() throws SQLException {
+    String COMMA = &quot;.&quot;;
+    for (int i = 0; i &lt; 256; i++) {
+      for (int j = 0; j &lt; 256; j++) {
+        for (int k = 0; k &lt; 256; k++) {
+          for (int l = 0; l &lt; 256; l++) {
+            StringBuffer buf = new StringBuffer();
+            buf.append(i).append(COMMA).append(j).append(COMMA);
+            buf.append(k).append(COMMA).append(l);
+            String ip = buf.toString();
+            System.out.println(&quot;ip = &quot; + ip);
+            insert(ip);
+          }
+          showStatus();
+        }
+      }
+    }
+  }
+  static void insert(String ip) throws SQLException {
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    try {
+      conn = getNewConnection();
+      pstmt = conn.prepareStatement(INSERT_QUERY);
+      pstmt.setString(1, ip);
+      pstmt.executeUpdate();
+    } finally {
+      if (pstmt != null) {
+        pstmt.close();
+      }
+      if (conn != null) {
+        conn.close();
+      }
+    }
+  }
+  static void showStatus() throws SQLException {
+    String TYPE = &quot;Threads_connected&quot;;
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    ResultSet result = null;
+    try {
+      conn = getNewConnection();
+      pstmt = conn.prepareStatement(&quot;show status;&quot;);
+      result = pstmt.executeQuery();
+      while (result.next()) {
+        String key = result.getString(1);
+        if (TYPE.equals(key)) {
+          System.out.println(&quot;接続数 = &quot; + result.getString(2));
+          break;
+        }
+      }
+    } finally {
+      if (result != null) {
+        result.close();
+      }
+      if (pstmt != null) {
+        pstmt.close();
+      }
+      if (conn != null) {
+        conn.close();
+      }
+    }
+  }
+}
+
+
+・エラーメッセージ
+
+ip = 0.0.0.0
+ip = 0.0.0.1
+ip = 0.0.0.2
+     ・
+     ・
+     ・
+     ・
+ip = 0.0.15.103
+ip = 0.0.15.104
+java.sql.SQLException: Unable to connect to any hosts due to exception: 
+java.net.BindException: Address already in use: connect
+        at com.mysql.jdbc.Connection.createNewIO(Connection.java:1592)
+        at com.mysql.jdbc.Connection.&lt;init&gt;(Connection.java:486)
+        at 
+com.mysql.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java
+:326)
+        at java.sql.DriverManager.getConnection(Unknown Source)
+        at java.sql.DriverManager.getConnection(Unknown Source)
+        at Test.getNewConnection(Test.java:37)
+        at Test.insert(Test.java:77)
+        at Test.loop(Test.java:66)
+        at Test.main(Test.java:19)
+
+
+以上です。
+
+_________________________________________________________________
+メッセンジャーで総額1億円プレゼント！ <a href="http://im.msn.co.jp/home.htm">http://im.msn.co.jp/home.htm</a> 
+
+
+</pre>
+</div>
+<p class="button"><a href="9639.html">[前]</a><a href="9641.html">[次]</a><a href="../list/9601-9700.html">[番号順一覧]</a><a href="../thread/9601-9700.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span class="current">-&gt;&nbsp;<a href="9640.html">   9640 2004-06-14 20:23 [&quot;Kageyama Takahiro&quot; ] Insert 毎に接続・切断を繰り返すと不特定な場所でエラーが発生する。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9641.html">   9641 2004-06-14 20:59 ┣[ML account &lt;ml@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9642.html">   9642 2004-06-14 21:31 ┣[&quot;Haruki Nakayama&quot; &lt;h]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9645.html">   9645 2004-06-15 10:24 ┃┗[Murayama Toshikiyo &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9643.html">   9643 2004-06-14 23:42 ┣[&lt;oouchi@xxxxxxxxxx&gt; ]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9644.html">   9644 2004-06-15 00:01 ┃┗[&lt;oouchi@xxxxxxxxxx&gt; ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9651.html">   9651 2004-06-15 18:21 ┗[&lt;yasuyuki@xxxxxxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9652.html">   9652 2004-06-15 19:00 　┣[&quot;HIROSE, Masaaki&quot; &lt;h]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9654.html">   9654 2004-06-15 19:29 　┃┗[ML account &lt;ml@xxxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9658.html">   9658 2004-06-16 01:47 　┃　┗[&quot;HIROSE, Masaaki&quot; &lt;h]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="9655.html">   9655 2004-06-15 19:42 　┗[seiji takegata &lt;take]                                     </a></span>
+</pre>
+</body>
+</html>

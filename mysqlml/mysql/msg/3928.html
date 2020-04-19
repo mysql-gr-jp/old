@@ -1,0 +1,152 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:3928</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="3927.html">[前]</a><a href="3929.html">[次]</a><a href="../list/3901-4000.html">[番号順一覧]</a><a href="../thread/3901-4000.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:3928
+</p>
+<div class="header">
+<p>
+From: tateyan &lt;tateyan &lt;tateyan@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 08 Jul 2001 21:58:29 +0900<br>
+Subject: [mysql 03928] Re: メール配信の工夫<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+たてやんっす
+
+moeruさんの
+題名「<a href="03924.html">[mysql 03924]</a> Re: メール配信の工夫」のメールからの引用です
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 2001/07/08 02:13:59 +0900にtateyan &lt;tateyan@xxxxxxxxxx&gt;さんに頂いた</span>
+<span class="quote1">&gt; 「<a href="03923.html">[mysql 03923]</a> Re: メール配信の工夫」への返事です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; モエルです。</span>
+<span class="quote1">&gt; </span>
+
+<span class="quote2">&gt; &gt;perl で書かれてる＆関数フックの解説などドキュメント化されているので</span>
+<span class="quote2">&gt; &gt;何でもありですね</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; ぼくには、難しかったので(^^;</span>
+<span class="quote1">&gt; なので、こういう対策をしてみたのです、</span>
+このへんになると　実際やってみないと　なんともいえないので
+がんばってFMLを解析してみて　というしか私には力量無いかも
+
+アイディアのみ＆無保証ですが
+cf の中に
+$DISTRIBUTE_FILTER_HOOK = q#
+  unless( $e{'Body'} =~ /Pass: 12345678\n/){
+     return 'from owner only';
+  } else {
+     //パスワードをボディから取る処理を入れる
+     $e{'Body'} =~s/Pass: 12345678\n//;
+  }
+#;
+として　メールを受け取った時のフィルタフックを利用するとか
+
+この場合メールボディの行のどこかに
+Pass: 12345678
+があった場合のみ　投稿可能となる　予定
+＃$e{'Body'} を検証していないので 先頭 ^ をつけてません
+＃   unless( $e{'Body'} =~ /^Pass: 12345678\n/){
+＃とできれば　確実かなぁ...
+
+もしかしたら $START_HOOK かも知れない...
+
+$START_HOOK = q#
+  unless( $e{'Body'} =~ /Pass: 12345678\n/){
+       $DO_NOTHING = 1;
+  } else {
+      //パスワードをボディから取る処理を入れる
+      $e{'Body'} =~s/Pass: 12345678\n//;
+  }
+#;
+
+<span class="quote2">&gt; &gt;インターネット上に投げるのですからほとんどは回線速度に掛かってきます</span>
+<span class="quote2">&gt; &gt;メモリとか気を使えば結構なパフォーマンスになるかも</span>
+<span class="quote2">&gt; &gt;あとはMTAのチューニング次第でしょう</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; qmailのチューニングのことを書いた情報って少なくないですか？</span>
+<span class="quote1">&gt; 本、一冊持っているのですが、それと公式ＷＥＢサイトくらいですよね？</span>
+<span class="quote1">&gt; チューニングのことって、大した項目無かったように思います(;_:)</span>
+qmail は　作者殿のポリシーゆえに　ほとんどの設定は
+デフォルトをソースに埋め込んでます
+だから　何でもパッチを当てないと...
+　メールヘッダのタイムスタンプ　+900 でさえも...
+
+作者殿は　チューニングも不要というスタンスではないでしょうか
+私は　設定をいじれるほうが好きなのでこの時点でqmail はパスに
+なってます
+周りのかたがたは努力してqmailに対していろんなパッチがありますよね
+
+実はmysql.gr.jp のメールもqmail ということで私にとってはちょいと
+勉強しないと？？？な状況だったりして(^^ゞ
+私は自分の周りのサーバは　sendmail から　postfix に乗り換えて
+幸せになってます（すべてをpostfixにするだけの労力は惜しんで
+やってませんけど）
+
+<span class="quote2">&gt; &gt;あとBCCで送るとしたらプロバイダのsmtpに任すという手もありますね</span>
+<span class="quote2">&gt; &gt;デフォルトリレーをプロバイダのsmtpにしちゃえば... ってありかな</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 現在、ＢＣＣで送る設定にしてしまってます。</span>
+<span class="quote1">&gt; よく分からないのですが、ＦＯＲ{}で回転するよりはましですよね？</span>
+<span class="quote1">&gt; とにかく、ＨＤＤを長持ちさせたいのです（笑）</span>
+この辺は難しいですよね
+回転したり止まったりするのが長持ちするのか
+回転しっぱなしのほうが長持ちするのか
+まぁ　データ入れたり出したりということがヘッドの往復生じるから
+寿命が短くなると思ってしまうのもあると思いますが...
+
+<span class="quote1">&gt; えと、今、ＯＣＮエコノミーで自前サーバを使ってます。</span>
+<span class="quote1">&gt; これって、smtpを上位プロバイダーのを使うって事でしょうか？</span>
+<span class="quote1">&gt; もしかしたら使えるような気もします。。</span>
+<span class="quote1">&gt; でも、しらないうちにプロバイダーの運営ポリシーを変更される場合があるんですよ。。</span>
+それは　仕方ないですよね　自前のものでない以上...
+
+=================
+  彡彡从        たてやんっす
+ d□/□-ｂ      &lt;tateyan@xxxxxxxxxx&gt;
+ ヽ&quot;ー&quot;丿
+
+
+</pre>
+</div>
+<p class="button"><a href="3927.html">[前]</a><a href="3929.html">[次]</a><a href="../list/3901-4000.html">[番号順一覧]</a><a href="../thread/3901-4000.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="3879.html">   3879 2001-07-03 23:57 [&lt;moeru@xxxxxxxxxx&gt;  ] メール配信の工夫                        </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3882.html">   3882 2001-07-04 10:48 ┗[Akihiko Shinohara &lt;s]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3886.html">   3886 2001-07-04 14:47 　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3887.html">   3887 2001-07-04 14:55 　　┣[&lt;shima@xxxxxxxxxx&gt;  ]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3889.html">   3889 2001-07-04 16:43 　　┗[Akihiko Shinohara &lt;s]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3890.html">   3890 2001-07-04 18:06 　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3893.html">   3893 2001-07-05 00:01 　　　　┗[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3895.html">   3895 2001-07-05 00:29 　　　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3896.html">   3896 2001-07-05 01:09 　　　　　　┗[tateyan &lt;tateyan@xxx]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3915.html">   3915 2001-07-06 04:31 　　　　　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3916.html">   3916 2001-07-06 14:21 　　　　　　　　┣[&quot;Ryo.Isozaki&quot; &lt;Ryo.I] 外部 Key              </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3917.html">   3917 2001-07-06 15:02 　　　　　　　　┃┗[Akihiko Shinohara &lt;s]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3919.html">   3919 2001-07-06 15:25 　　　　　　　　┃　┗[&quot;Ryo.Isozaki&quot; &lt;Ryo.I]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3923.html">   3923 2001-07-08 02:13 　　　　　　　　┗[tateyan &lt;tateyan@xxx]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3924.html">   3924 2001-07-08 20:06 　　　　　　　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3926.html">   3926 2001-07-08 20:26 　　　　　　　　　　┣[shigetoshi hirano &lt;s]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3933.html">   3933 2001-07-09 16:39 　　　　　　　　　　┃┗[&lt;moeru@xxxxxxxxxx&gt;  ]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3935.html">   3935 2001-07-09 17:55 　　　　　　　　　　┃　┣[Akihiko Shinohara &lt;s]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3938.html">   3938 2001-07-09 19:27 　　　　　　　　　　┃　┃┗[&lt;moeru@xxxxxxxxxx&gt;  ]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3936.html">   3936 2001-07-09 19:12 　　　　　　　　　　┃　┗[Seiji Tateyama &lt;tate]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3927.html">   3927 2001-07-08 20:39 　　　　　　　　　　┣[とみたまさひろ &lt;tomm]                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="3928.html">   3928 2001-07-08 21:58 　　　　　　　　　　┣[tateyan &lt;tateyan@xxx]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3934.html">   3934 2001-07-09 17:33 　　　　　　　　　　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3937.html">   3937 2001-07-09 19:22 　　　　　　　　　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3943.html">   3943 2001-07-10 10:06 　　　　　　　　　　　　┣[&quot;Y. Tsutsui&quot; &lt;tutui@]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3944.html">   3944 2001-07-10 10:10 　　　　　　　　　　　　┗[Tatsuhiko Miyagawa &lt;]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3945.html">   3945 2001-07-10 10:18 　　　　　　　　　　　　　┗[&quot;Y. Tsutsui&quot; &lt;tutui@]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="3958.html">   3958 2001-07-10 19:10 　　　　　　　　　　　　　　┗[&lt;moeru@xxxxxxxxxx&gt;  ]           </a></span>
+</pre>
+</body>
+</html>

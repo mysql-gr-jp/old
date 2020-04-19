@@ -1,0 +1,107 @@
+<html>
+<head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16284</title>
+<link rel=stylesheet type="text/css" href="../../../css/w3ml.css.html">
+</head>
+<body>
+<p class="button"><a href="16283.html">[前]</a><a href="16285.html">[次]</a><a href="../list/16201-16300.html">[番号順一覧]</a><a href="../thread/16201-16300.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16284
+</p>
+<div class="header">
+<p>
+From: &quot;yoku ts.&quot; &lt;&quot;yoku ts.&quot; &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Mon, 9 Nov 2015 12:42:54 +0900<br>
+Subject: [mysql 16284] Re: [mysql 16281] JDBCドライバの rewriteBatchedStatements を利用されていますか？<br>
+
+</p>
+</div>
+<div class="body">
+<pre>
+こんにちは、yoku0825といいます。
+
+職場で2人ほどJavaな人に聞いてみました。ひとりは存在を知らなかった。。
+
+* とあるバカでかいファイルをパースしてMySQLに入れるバッチでtrueにしてる
+* 確かに速いんだけど大量のオブジェクトを生成しては破棄しているので、必然的にGCの頻度は高い
+  * 実行環境に合わせてVMパラメータ調整しないと、GCにCPU食われて重たくなった挙句にOutOfMemoryError吐いて死ぬとかありそう
+* 手元では徐々にヒープ食っていくけど xGBで大丈夫そう（←チューニングしたらしい）
+
+だそうで。
+
+
+DBの観点から考えると、
+* OLTPなトラフィックだと、そんなにバルクインサートする機会がないんじゃないかなぁ
+* LAST_INSERT_ID関数を使ってると挙動が変わるだろうなぁ
+* MyISAMさんだとクラッシュした時中途半端に書いて大変そう…なのは1行でも一緒かなぁ
+とか思いました！
+
+( ´-｀).oO(Java使いさん少ないのかな…
+
+
+yoku0825
+
+
+2015年10月30日 23:20 kubo &lt;dbflute@xxxxxxxxxx&gt;:
+<span class="quote1">&gt; 久保(jflute)と申します。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 勇気を出して ML に投げてみました。</span>
+<span class="quote1">&gt; (でも以前 READ COMMITTED の件で投げたことあります)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; Java寄りの話になってしまいますが…</span>
+<span class="quote1">&gt; MySQLのJDBCドライバだとバッチ登録(executeBatch())が、</span>
+<span class="quote1">&gt; 実質ただのループでのinsertになると認識しています。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; MySQL の PreparedStatement#executeBatch()</span>
+<span class="quote1">&gt; (java.sql ではなく com.mysql.jdbc の方、強気な名前...)</span>
+<span class="quote1">&gt; を見ると、executeBatchSerially() に到達して、</span>
+<span class="quote1">&gt; for文の中で executeUpdate() を呼んでいます(ぐるぐる系!?)。</span>
+<span class="quote1">&gt; JavaDoc を読んでも、</span>
+<span class="quote1">&gt; &quot;... by executing them one-by-one&quot;</span>
+<span class="quote1">&gt; とかっこよく綴られていてわけもなく納得しそうでした。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ですが、MySQL の JDBC ドライバの設定で、</span>
+<span class="quote1">&gt; rewriteBatchedStatements を true にすれば、</span>
+<span class="quote1">&gt; Serially ではなく、executeBatchedInserts() が呼ばれ、</span>
+<span class="quote1">&gt; insert文が multi insert 方式にリライトされて、</span>
+<span class="quote1">&gt; 速くなるという話があります。</span>
+<span class="quote1">&gt; 実際、簡単な検証をしてみると速くなります</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 「おっ、じゃあこれいいじゃん！速くなるじゃん、</span>
+<span class="quote1">&gt; いっつも true にしてればいいんじゃないの!?」</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; と単純に思うわけですが、ただ自分の周りの現場だと、</span>
+<span class="quote1">&gt; テストデータの登録とかではそのオプションは使いますが、</span>
+<span class="quote1">&gt; 実際の本番サービスでは使っていないという話を多く聞きます。</span>
+<span class="quote1">&gt; 色々と話を聞いてみると、要は、</span>
+<span class="quote1">&gt; 「使ってるってのあんま聞いたことないし、</span>
+<span class="quote1">&gt; デフォルトの挙動ではないので、なんとなく不安」</span>
+<span class="quote1">&gt; と...</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ということで、</span>
+<span class="quote1">&gt; 実際に本番運用のアプリのJDBC設定で、</span>
+<span class="quote1">&gt; 「いっつも rewriteBatchedStatements は true にしてるよ」</span>
+<span class="quote1">&gt; って方っていらっしゃいますでしょうか？</span>
+<span class="quote1">&gt; 逆に使わない理由があって、いざってとき以外は使わないぜっ、とか。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; また、これってJavaじゃなく他の言語でも同じ話なのでしょうかね...</span>
+<span class="quote1">&gt; (バッチ効かないのJDBCだけとかだったらちょっとショック)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; ってなところ、何か思い付くことあれば、</span>
+<span class="quote1">&gt; お気軽にコメント頂けると嬉しいです。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # もちろん、もし「よーし、使うぞ」ってなっても、</span>
+<span class="quote1">&gt; # しっかり自分たちで検証した上でやりますんで(^^</span>
+
+</pre>
+</div>
+<p class="button"><a href="16283.html">[前]</a><a href="16285.html">[次]</a><a href="../list/16201-16300.html">[番号順一覧]</a><a href="../thread/16201-16300.html">[スレッド一覧]</a></p>
+<pre class="list">
+<span>&nbsp;&nbsp;&nbsp;<a href="16281.html">  16281 2015-10-30 23:20 [kubo &lt;dbflute@xxxxxx] JDBCドライバの rewriteBatchedStatements を利用されていますか？</a></span>
+<span class="current">-&gt;&nbsp;<a href="16284.html">  16284 2015-11-09 12:42 ┗[&quot;yoku ts.&quot; &lt;yoku0825] Re: [mysql 16281] JDBCドライバの rewriteBatchedStatements を利用されていますか？</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16285.html">  16285 2015-11-10 13:59 　┗[kubo &lt;dbflute@xxxxxx] Re: [mysql 16284] Re: [mysql 16281] JDBCドライバの rewriteBatchedStatements を利用されていますか？</a></span>
+</pre>
+</body>
+</html>
