@@ -1,0 +1,107 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16674</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16673.html">[前]</a><a href="16675.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16674
+</p>
+<div class="header">
+<p>
+From: Horimoto Yasuhiro &lt;Horimoto Yasuhiro &lt;horimoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 30 Sep 2021 16:28:24 +0900 (JST)<br>
+Subject: [mysql 16674] [ANN] Mroonga 11.07<br>
+
+</p>
+</div>
+<div class="body">
+<pre>こんにちは。Mroongaプロジェクトの堀本です。
+
+Mroonga 11.07をリリースしました！
+
+リリースアナウンス:
+   <a href="https://mroonga.org/ja/blog/2021/09/29/mroonga-11.07.html">https://mroonga.org/ja/blog/2021/09/29/mroonga-11.07.html</a>
+
+MroongaはMySQLで日本語全文検索を実現するストレージエンジンです。高速で
+あることや位置情報検索をサポートしていることなどが特徴です。詳細につい
+はドキュメントをご覧ください。
+
+  * Mroongaの特徴 ― Mroonga v11.07 documentation
+    <a href="https://mroonga.org/ja/docs/characteristic.html#what-is-mroonga">https://mroonga.org/ja/docs/characteristic.html#what-is-mroonga</a>
+
+変更点:
+   <a href="https://mroonga.org/ja/docs/news.html#release-11.07">https://mroonga.org/ja/docs/news.html#release-11.07</a>
+
+### 改良
+
+* [Ubuntu] Ubuntu 20.04 (Focal Fossa) の MySQL 8.0 をサポートしました。
+
+  * MySQL 8.0 のパッケージには以下の制限があります。
+
+    * [ラッパーモード] ラッパーモードは未対応です。
+
+    * [ストレージモード] ストレージモードでは、以下の機能が未対応です。
+
+      * 最適化関連の機能
+
+* [mroonga_snippet_html()] ノーマライザーのカスタマイズに対応しました。
+
+  * この機能によって、以下のように mroonga_smippet_html() でカスタマイズしたノーマライザーを使えます。
+
+    CREATE TABLE terms (
+      term VARCHAR(64) NOT NULL PRIMARY KEY
+    ) COMMENT='normalizer "NormalizerNFKC130(''unify_kana'', true)"'
+      DEFAULT CHARSET=utf8mb4
+      COLLATE=utf8mb4_unicode_ci;
+
+    SELECT mroonga_snippet_html('これはMroonga（ムルンガ）です。',
+                                'terms' as lexicon_name,
+                                'むるんが') as snippet;
+
+    snippet
+    &lt;div class="snippet"&gt;これはMroonga（&lt;span class="keyword"&gt;ムルンガ&lt;/span&gt;）です。&lt;/div&gt;
+
+* ベクターカラムの値をバイナリーではなくテキストとして出力できるようにしました。
+
+  * この機能によって、ベクターカラムの値をダンプするのに、 mysqldump を使えます。
+
+* 存在しないテーブルを削除した際に、 .mrn ファイルを作らないようにしました。
+
+* ベクターの要素に対して Wプラグマを使えるようにしました。
+
+  * この機能によって、ベクターの要素に重みをセットできますが、この場合、Mroongaは指定したセクションのみ検索します。
+    通常のマルチカラムインデックスでは、Mroongaは指定していないセクションもデフォルトの重みで検索します。
+
+### 修正
+
+* WHERE句に "WHERE primary_key IN ("")" と指定した際にMroongaが誤ったレコードを返すことがある問題を修正しました。
+
+  * 例えば、以下ようなケースでMroongaが誤ったレコードを返すことがあります。
+
+    CREATE TABLE ids (
+      id varchar(7) PRIMARY KEY,
+      parent_id varchar(7)
+    )ENGINE=Mroonga DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    INSERT INTO ids VALUES("abcdefg", "");
+    INSERT INTO ids VALUES("hijklmn", "");
+    INSERT INTO ids VALUES("opqrstu", "hijklmn");
+
+    SELECT * FROM ids WHERE id IN (SELECT parent_id FROM ids);
+    +---------+-----------+
+    | id      | parent_id |
+    +---------+-----------+
+    | abcdefg |           |
+    | hijklmn |           |
+    +---------+-----------+
+    2 rows in set (0.00 sec)
+
+
+</pre>
+</div>
+<p class="button"><a href="16673.html">[前]</a><a href="16675.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+
+
+</body></html>

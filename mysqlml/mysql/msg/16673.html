@@ -1,0 +1,124 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16673</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16672.html">[前]</a><a href="16674.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16673
+</p>
+<div class="header">
+<p>
+From: 岡善博 &lt;岡善博 &lt;zenpaku@xxxxxxxxxx&gt;&gt;<br>
+Date: Sun, 26 Sep 2021 20:20:39 +0900<br>
+Subject: [mysql 16673] Re: [mysql 16672] Re: [mysql 16671] Re: [mysql 16668] Re: [mysql 16667] Re: [mysql 16666] Re: [mysql 16665] Re: [mysql 16664] Re: [mysql 16663] Re: frmとibdのみのデータからデータベースの復旧方法について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>岡善博＠中札内です。
+実は、いつの間にか、zenpakudbが壊れてしまったので、再構築すます。
+昼間の時間で、頭がスッキリしている時に行いますね。
+かなり時間が時間が掛かると思います。
+
+一部レスを書いておきます。
+
+    &gt; 自宅サーバでWordPressを立ち上げていて、不覚にもデータベースのバックアップ
+    &gt; 取らずにＯＳをFreeBSD 11.3Rp13から12.2Rp7に上げてしまいました。
+
+    &gt; wordpressを構築した時は、MySQL5.6でした。
+
+    OSをバージョンアップした時点でのMySQLはいくつでしたか？
+以前も書きましたが、WordPressを構築した時は、MySQL5.6で昨年だったか？phpやMySQLを
+バージョンアップして、MySQL5.7にして、ずっと動いていました。
+    (その時点のMySQLと合わせたバージョンにするのが望ましいと思っています。
+     ibdファイルだけ無理矢理インポートするようなイレギュラーなケースなので、
+     リリースシリーズをまたいだ(たとえば、5.6と5.7)状態で
+     それが無理矢理できるようなものなのかわかりません)
+
+
+    &gt; ただ、DISCARD TABLESPACEを実行後、ibdは、消えていませんでしたが、念のため
+
+    これも何かおかしいです。パスが間違っているか正しくibdファイルをつかめていない気がします。
+
+
+
+    綺麗に以下のように再実行できますか？
+    FreeBSDのレイアウトは知らないので、Linux - Generalを使って /usr/local/mysql
+    の下にもろもろがある状態のコマンド例です。適宜読み替えてください。
+    ----
+コマンドは、/usr/local/bin/に有ります。
+-rwxr-xr-x  1 root  wheel  3923608  8月 26 17:11 /usr/local/bin/mysql*
+-rwxr-xr-x  1 root  wheel     5174  8月 26 17:07 /usr/local/bin/mysql_config*
+-rwxr-xr-x  1 root  wheel  3618984  8月 26 17:11
+/usr/local/bin/mysql_config_editor*
+-rwxr-xr-x  1 root  wheel  5243608  8月 26 18:21
+/usr/local/bin/mysql_install_db*
+-rwxr-xr-x  1 root  wheel  3621384  8月 26 18:21 /usr/local/bin/mysql_plugin*
+-rwxr-xr-x  1 root  wheel  3822320  8月 26 18:21
+/usr/local/bin/mysql_secure_installation*
+-rwxr-xr-x  1 root  wheel  3655328  8月 26 17:11
+/usr/local/bin/mysql_ssl_rsa_setup*
+-rwxr-xr-x  1 root  wheel  3573640  8月 26 18:21
+/usr/local/bin/mysql_tzinfo_to_sql*
+-rwxr-xr-x  1 root  wheel  4453656  8月 26 18:21
+/usr/local/bin/mysql_upgrade*
+-rwxr-xr-x  1 root  wheel  3813112  8月 26 17:11 /usr/local/bin/mysqladmin*
+-rwxr-xr-x  1 root  wheel  4063680  8月 26 17:11 /usr/local/bin/mysqlbinlog*
+-rwxr-xr-x  1 root  wheel  3827728  8月 26 17:11 /usr/local/bin/mysqlcheck*
+-rwxr-xr-x  1 root  wheel    27022  8月 26 17:12 /usr/local/bin/mysqld_multi*
+-rwxr-xr-x  1 root  wheel    27868  8月 26 17:12 /usr/local/bin/mysqld_safe*
+-rwxr-xr-x  1 root  wheel  3895288  8月 26 17:11 /usr/local/bin/mysqldump*
+-rwxr-xr-x  1 root  wheel     7850  8月 26 17:12
+/usr/local/bin/mysqldumpslow*
+-rwxr-xr-x  1 root  wheel  3808216  8月 26 17:11 /usr/local/bin/mysqlimport*
+-rwxr-xr-x  1 root  wheel  4199256  8月 26 17:11 /usr/local/bin/mysqlpump*
+-rwxr-xr-x  1 root  wheel  3807960  8月 26 17:11 /usr/local/bin/mysqlshow*
+-rwxr-xr-x  1 root  wheel  3826416  8月 26 17:11 /usr/local/bin/mysqlslap*
+-rwxr-xr-x  1 root  wheel  4131120  8月 26 18:21 /usr/local/bin/mysqltest*
+-rwxr-xr-x  1 root  wheel  4494592  8月 26 18:21 /usr/local/bin/mysqlxtest*
+
+mysqldumpslowのコマンドを使ったら、dump時のコネクションが切れるのが、対応
+出来たのかも知れません。
+
+    /usr/local/mysql/bin/mysqladmin shutdown ###
+    MySQLを止めます。他にコマンドがあるようならこれでなくてかまいません
+通常は、/usr/local/etc/rc.d/mysql-server stop で行います。
+    rm -r /usr/local/mysql/data              ### 一度中身をきれいにします
+rm -r /var/db/mysql ですね。
+
+    /usr/local/mysql/bin/mysqld --initialize-insecure --user=mysql
+    --datadir=/usr/local/mysql/data ### データディレクトリを初期化します
+    /usr/local/mysql/bin/mysqld --daemonize  ###
+    MySQLを起動します。他にコマンドがあるようならこれでなくてかまいません
+/usr/local/etc/rc.d/mysql-server start で行います。
+
+結果は、また、送らせて頂きます。
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="16673/0/index.html"> [text/html]</a>
+</li></ul>
+</div>
+<p class="button"><a href="16672.html">[前]</a><a href="16674.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="16662.html">@ 16662 2021-09-24 10:36 [岡善博 &lt;zenpaku@xxxx] Re: [mysql 16660] Re: [mysql 16659] Re: [mysql 16657] Re: [mysql 16656] frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16663.html">  16663 2021-09-24 11:58 ┗[Takahiro Kambe &lt;taca] Re: frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16664.html">  16664 2021-09-24 13:01 　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16663] Re: frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16665.html">@ 16665 2021-09-24 14:04 　　┗[岡善博 &lt;zenpaku@xxxx] Re: [mysql 16664] Re: [mysql 16663] Re: frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16666.html">  16666 2021-09-24 14:20 　　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16665] Re: [mysql 16664] Re: [mysql 16663] Re: frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16667.html">@ 16667 2021-09-24 20:08 　　　　┗[岡善博 &lt;zenpaku@xxxx] Re: [mysql 16666] Re: [mysql 16665] Re: [mysql 16664] Re: [mysql 16663] Re: frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16668.html">  16668 2021-09-24 23:26 　　　　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16667] Re: [mysql 16666] Re: [mysql 16665] Re: [mysql 16664] Re: [mysql 16663] Re: frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16669.html">@ 16669 2021-09-25 01:16 　　　　　　┣[岡善博 &lt;zenpaku@xxxx] Re: [mysql 16668] Re: [mysql 16667] Re: [mysql 16666] Re: [mysql 16665] Re: [mysql 16664] Re: [mysql 16663] Re: frmとibdのみのデータからデ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16670.html">  16670 2021-09-25 01:34 　　　　　　┗[岡善博 &lt;zenpaku@xxxx] Re: [mysql 16668] Re: [mysql 16667] Re: [mysql 16666] Re: [mysql 16665] Re: [mysql 16664] Re: [mysql 16663] Re: frmとibdのみのデータからデ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16671.html">@ 16671 2021-09-25 21:51 　　　　　　　┗[岡善博 &lt;zenpaku@xxxx]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16672.html">  16672 2021-09-26 17:37 　　　　　　　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16671] Re: [mysql 16668] Re: [mysql 16667] Re: [mysql 16666] Re: [mysql 16665] Re: [mysql 16664] Re: [mysql 16663] Re</a></span>
+<span class="current">-&gt;&nbsp;<a href="16673.html">@ 16673 2021-09-26 20:20 　　　　　　　　　┗[岡善博 &lt;zenpaku@xxxx] Re: [mysql 16672] Re: [mysql 16671] Re: [mysql 16668] Re: [mysql 16667] Re: [mysql 16666] Re: [mysql 16665] Re: [mysql 16664] Re</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16676.html">@ 16676 2021-10-05 16:20 　　　　　　　　　　┗[岡善博 &lt;zenpaku@xxxx]                   </a></span>
+</pre>
+
+
+</body></html>

@@ -1,0 +1,852 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16624</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16623.html">[前]</a><a href="16625.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16624
+</p>
+<div class="header">
+<p>
+From: 内村健司 &lt;内村健司 &lt;uchimura.kenji@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 23 Dec 2020 08:41:41 +0900<br>
+Subject: [mysql 16624] Re: 準同期レプリケーションの非同期切り替について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>おはようございます。
+
+
+<span class="quote1">&gt; バイナリログのoriginal_commit_timestampやexec_timeから出せたりしないかなと思いましたがダメでした。
+</span>
+<span class="quote1">&gt; あたかも、タイムアウト待ちが存在しなかったかのようにCOMMITを叩いた時刻をコミット時刻としてバイナリログ上では扱っているようです。
+</span>
+
+
+本日、バイナリログでCommitの時間を確認しようと思ってましたが、先を越されたようですね。。。さすがです。
+
+
+<span class="quote2">&gt; &gt; オープンソースではベンダーに聞かずとも自分でも調べる手法があるんだというのが新しいなと思った次第でした。
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; オープンソース沼にハマる機会があったら是非またいらしてくださいｗ
+</span>
+<span class="quote1">&gt; ハマる機会がなくてもいつでもどうぞ！
+</span>
+
+
+オープンソース沼って、、、笑
+
+今年初めて、Tomcat、R、MySQL、Zabbix、JobArrangerのオープンソース沼を経験しました。
+
+構築段階ではネットで色々と情報ができてくるからいいなーと思ってましたが、
+構築し、評価段階になると情報がなくて、グーグル先生に訊いても中国語の記事しか出てこないので、
+オープンソース沼の恐ろしさが分かって気ました。
+
+これから徐々に慣れていこうと思います。
+
+また、問い合わせさせてもらうことがあるかもしれませんので、その際もどうぞよろしくお願いいたします。
+
+内村
+
+
+On Wed, 23 Dec 2020 00:51:25 +0900
+yoku0825 &lt;yoku0825@xxxxxxxxxx&gt; wrote:
+
+<span class="quote1">&gt; こんばんはこんばんは。
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; なるほど、「準同期レプリカが倒れた時に巻き込まれたクエリの影響調査」だったのですね。
+</span>
+<span class="quote1">&gt; 普段気にしたことがなかったので勉強になりますm(＿ ＿)m
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; バイナリログのoriginal_commit_timestampやexec_timeから出せたりしないかなと思いましたがダメでした。
+</span>
+<span class="quote1">&gt; あたかも、タイムアウト待ちが存在しなかったかのようにCOMMITを叩いた時刻をコミット時刻としてバイナリログ上では扱っているようです。
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 閾値次第ですがスローログなら(平常状態でCOMMITで記録されるのは稀なので)COMMITに時間がかかっているところを探せるかな？ とは思いましたが、
+</span>
+<span class="quote1">&gt; 完全さを求めるとこれも閾値に引っ掛からなければアウトなので調べられませんね（そして過去に戻って閾値を設定することもできない）
+</span>
+<span class="quote1">&gt; 不明で済むなら済ませたいところですね…！
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 褒めていただいたついでに調べてみましたが、Rpl_semi_sync_master_tx_wait_time
+</span>
+<span class="quote1">&gt; はご賢察の通り「yes_tx」の時にだけカウントアップされるようです。
+</span>
+<span class="quote1">&gt; 準同期モードの受け渡しに成功 (wait_result != 0が偽)し、かつwait_time &gt; 0の時にインクリメントされていました。
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; - <a href="https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L789-L814">https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L789-L814</a>
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 将来に備えて深追いの準備をするならperformance_schemaかなと思いましたが、どうもイマイチっぽいです(yes_txとno_txが混ざって計上されてしまう…)
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; ---
+</span>
+<span class="quote1">&gt; master [localhost] {msandbox} (performance_schema) &gt; SELECT * FROM
+</span>
+<span class="quote1">&gt; setup_instruments;
+</span>
+<span class="quote2">&gt; | wait/synch/mutex/semisync/LOCK_binlog_
+</span>
+<span class="quote2">&gt;           | NO      | NO    |                   |          0 | NULL
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote2">&gt; |
+</span>
+<span class="quote2">&gt; | wait/synch/mutex/semisync/Ack_receiver::m_mutex
+</span>
+<span class="quote2">&gt;           | NO      | NO    |                   |          0 | NULL
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote2">&gt; |
+</span>
+<span class="quote2">&gt; | wait/synch/cond/semisync/COND_binlog_send_
+</span>
+<span class="quote2">&gt;           | NO      | NO    |                   |          0 | NULL
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote2">&gt; |
+</span>
+<span class="quote2">&gt; | wait/synch/cond/semisync/Ack_receiver::m_cond
+</span>
+<span class="quote2">&gt;           | NO      | NO    |                   |          0 | NULL
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote2">&gt; |
+</span>
+<span class="quote2">&gt; | stage/semisync/Waiting for semi-sync ACK from slave
+</span>
+<span class="quote2">&gt;           | NO      | NO    |                   |          0 | NULL
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote2">&gt; |
+</span>
+<span class="quote2">&gt; | stage/semisync/Waiting for semi-sync slave connection
+</span>
+<span class="quote2">&gt;           | NO      | NO    |                   |          0 | NULL
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote2">&gt; |
+</span>
+<span class="quote2">&gt; | stage/semisync/Reading semi-sync ACK from slave
+</span>
+<span class="quote2">&gt;           | NO      | NO    |                   |          0 | NULL
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote2">&gt; |
+</span>
+<span class="quote2">&gt; | memory/semisync/TranxNodeAllocator::block
+</span>
+<span class="quote2">&gt;           | YES     | NULL  |                   |          0 | NULL
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote2">&gt; |
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; master [localhost] {msandbox} (performance_schema) &gt; UPDATE
+</span>
+<span class="quote1">&gt; setup_instruments SET enabled = 'Yes', timed = 'Yes' WHERE name LIKE
+</span>
+<span class="quote1">&gt; 'stage/semisync%';
+</span>
+<span class="quote1">&gt; Query OK, 3 rows affected (0.00 sec)
+</span>
+<span class="quote1">&gt; Rows matched: 3  Changed: 3  Warnings: 0
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; ---
+</span>
+<span class="quote1">&gt; ## 1回、semisyncをタイムアウトさせた
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; master [localhost] {msandbox} (performance_schema) &gt; SELECT * FROM
+</span>
+<span class="quote1">&gt; events_stages_summary_global_by_event_name WHERE event_name LIKE
+</span>
+<span class="quote1">&gt; 'stage/semisync%';
+</span>
+<span class="quote1">&gt; +-------------------------------------------------------+------------+----------------+----------------+----------------+----------------+
+</span>
+<span class="quote2">&gt; | EVENT_NAME                                            | COUNT_STAR |
+</span>
+<span class="quote1">&gt; SUM_TIMER_WAIT | MIN_TIMER_WAIT | AVG_TIMER_WAIT | MAX_TIMER_WAIT |
+</span>
+<span class="quote1">&gt; +-------------------------------------------------------+------------+----------------+----------------+----------------+----------------+
+</span>
+<span class="quote2">&gt; | stage/semisync/Waiting for semi-sync ACK from slave   |          1 |
+</span>
+<span class="quote1">&gt; 10000203558000 | 10000203558000 | 10000203558000 | 10000203558000 |
+</span>
+<span class="quote2">&gt; | stage/semisync/Waiting for semi-sync slave connection |          0 |
+</span>
+<span class="quote1">&gt;              0 |              0 |              0 |              0 |
+</span>
+<span class="quote2">&gt; | stage/semisync/Reading semi-sync ACK from slave       |          0 |
+</span>
+<span class="quote1">&gt;              0 |              0 |              0 |              0 |
+</span>
+<span class="quote1">&gt; +-------------------------------------------------------+------------+----------------+----------------+----------------+----------------+
+</span>
+<span class="quote1">&gt; 3 rows in set (0.00 sec)
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; ## Asyncにフォールバックした状態でもう1クエリー実行
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; master [localhost] {msandbox} (performance_schema) &gt; SELECT * FROM
+</span>
+<span class="quote1">&gt; events_stages_summary_global_by_event_name WHERE event_name LIKE
+</span>
+<span class="quote1">&gt; 'stage/semisync%';
+</span>
+<span class="quote1">&gt; +-------------------------------------------------------+------------+----------------+----------------+----------------+----------------+
+</span>
+<span class="quote2">&gt; | EVENT_NAME                                            | COUNT_STAR |
+</span>
+<span class="quote1">&gt; SUM_TIMER_WAIT | MIN_TIMER_WAIT | AVG_TIMER_WAIT | MAX_TIMER_WAIT |
+</span>
+<span class="quote1">&gt; +-------------------------------------------------------+------------+----------------+----------------+----------------+----------------+
+</span>
+<span class="quote2">&gt; | stage/semisync/Waiting for semi-sync ACK from slave   |          2 |
+</span>
+<span class="quote1">&gt; 10000205078000 |        1520000 |  5000102539000 | 10000203558000 |
+</span>
+<span class="quote1">&gt;     &lt;-- no_txのぶんも計上されてしまっている
+</span>
+<span class="quote2">&gt; | stage/semisync/Waiting for semi-sync slave connection |          0 |
+</span>
+<span class="quote1">&gt;              0 |              0 |              0 |              0 |
+</span>
+<span class="quote2">&gt; | stage/semisync/Reading semi-sync ACK from slave       |          0 |
+</span>
+<span class="quote1">&gt;              0 |              0 |              0 |              0 |
+</span>
+<span class="quote1">&gt; +-------------------------------------------------------+------------+----------------+----------------+----------------+----------------+
+</span>
+<span class="quote1">&gt; 3 rows in set (0.00 sec)
+</span>
+<span class="quote1">&gt; ---
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; うーん、いまいちですね…。
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote2">&gt; &gt; オープンソースではベンダーに聞かずとも自分でも調べる手法があるんだというのが新しいなと思った次第でした。
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; オープンソース沼にハマる機会があったら是非またいらしてくださいｗ
+</span>
+<span class="quote1">&gt; ハマる機会がなくてもいつでもどうぞ！
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; yoku0825,
+</span>
+<span class="quote1">&gt; 
+</span>
+<span class="quote1">&gt; 2020年12月22日(火) 22:15 内村健司 &lt;uchimura.kenji@xxxxxxxxxx&gt;:
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; こんばんは。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; yoku0825さん、ご指摘ありがとうございます。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 再度整理してみたのですが、 yoku0825さんの想定通りになっているようです。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; －－－－－－－－－－－－－－－－－－－－－－－－－－
+</span>
+<span class="quote2">&gt; &gt; 【マスターエラーログ】
+</span>
+<span class="quote2">&gt; &gt; 2020-12-14T12:32:59.742804+09:00 71325 [Warning] [MY-011153] [Server] Timeout waiting for reply of binlog (file: binlog.000685, pos: 696205307), semi-sync up to file binlog.000685, position 696204814.
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 【マスターのレプリケーションステータスは1分おきにZabbixにて採取】
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 「tx_wait_time]
+</span>
+<span class="quote2">&gt; &gt; 12:31:15～12:32:15の間に884,978マイクロ秒,
+</span>
+<span class="quote2">&gt; &gt; 12:32:15～12:33:15の間に  2,640マイクロ秒,
+</span>
+<span class="quote2">&gt; &gt; 12:33:15～12:34:15の間に274,577マイクロ秒計上された。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 「yes_tx」
+</span>
+<span class="quote2">&gt; &gt; 12:31:19～12:32:19の間に363回,
+</span>
+<span class="quote2">&gt; &gt; 12:32:19～12:33:19の間に1回,
+</span>
+<span class="quote2">&gt; &gt; 12:33:19～12:34:19の間に113回計上された。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 「no_tx」
+</span>
+<span class="quote2">&gt; &gt; 12:31:12～12:32:12の間に0回、
+</span>
+<span class="quote2">&gt; &gt; 12:32:12～12:33:12の間に115回
+</span>
+<span class="quote2">&gt; &gt; 12:33:12～12:34:12の間に0回計上された。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 「tx_waits」
+</span>
+<span class="quote2">&gt; &gt; 12:31:16～12:32:16の間に363回,
+</span>
+<span class="quote2">&gt; &gt; 12:32:16～12:33:16の間に1回,
+</span>
+<span class="quote2">&gt; &gt; 12:32:16～12:34:16の間に113回計上された
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 【参考：マニュアルより抜粋】
+</span>
+<span class="quote2">&gt; &gt; Rpl_semi_sync_master_tx_wait_time
+</span>
+<span class="quote2">&gt; &gt; マスターがトランザクションを待機する合計時間 (マイクロ秒)。
+</span>
+<span class="quote2">&gt; &gt; The total time in microseconds the source waited for transactions.
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; Rpl_semi_sync_master_yes_tx
+</span>
+<span class="quote2">&gt; &gt; スレーブによって正しく認証されたコミットの数。
+</span>
+<span class="quote2">&gt; &gt; The number of commits that were acknowledged successfully by a replica.
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; Rpl_semi_sync_master_no_tx
+</span>
+<span class="quote2">&gt; &gt; スレーブによって正しく認証されなかったコミット数。
+</span>
+<span class="quote2">&gt; &gt; The number of commits that were not acknowledged successfullyby a replica.
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; Rpl_semi_sync_master_tx_waits
+</span>
+<span class="quote2">&gt; &gt; マスターがトランザクションを待機した合計回数。
+</span>
+<span class="quote2">&gt; &gt; The total number of times the source waited for transactions.
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; －－－－－－－－－－－－－－－－－－－－－－－－－－
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; あるトランザクションがタイムアウトし、準同期が非同期に切り替わった後、
+</span>
+<span class="quote2">&gt; &gt; 「no_tx」がカウントアップしたのは間違いなさそうです。
+</span>
+<span class="quote2">&gt; &gt; その後準同期モードに戻ってます。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; マスターエラーログのメッセージは気づいていたのですが、
+</span>
+<span class="quote2">&gt; &gt; 10秒待って非同期になったのであれば、12:31:15～12:32:15の間の「tx_wait_time」が
+</span>
+<span class="quote2">&gt; &gt; 10秒以上計上されるはずと考えてしまったのが、誤りでした。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 「tx_wait_time」は準同期のトランザクションのみの時間がカウントアップされるなら納得いきます。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 今回の私のミッションは準同期でレプリケーション(AFTER_SYNC)し、タイムアウトを10秒にしたので、
+</span>
+<span class="quote2">&gt; &gt; 「実際どれくらいのトランザクションの時間なのかを明らかにする」でした。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 「tx_wait_time」と「tx_waits」でおおよその1分間の移動平均時間を求めることはできますが、
+</span>
+<span class="quote2">&gt; &gt; (集計期間の最大1分平均は0.23秒でした)
+</span>
+<span class="quote2">&gt; &gt; 非同期分のトランザクションの時間は分からないでしょうから、答えが出せないですね。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 非同期になった「no_tx」回数分のトランザクションの時間は不明というしきりにしようと思います。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 今回、原因を調査するためにはソースをチェックするだというのが、私的にはすごく衝撃的でした。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 今までパッケージの仕様はパッケージベンダーに聞くしかないと思っていた節がありましたが、
+</span>
+<span class="quote2">&gt; &gt; オープンソースではベンダーに聞かずとも自分でも調べる手法があるんだというのが新しいなと思った次第でした。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; yoku0825さん色々とありがとうございました。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 内村
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; On Tue, 22 Dec 2020 18:27:43 +0900
+</span>
+<span class="quote2">&gt; &gt; yoku0825 &lt;yoku0825@xxxxxxxxxx&gt; wrote:
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; こんばんは。
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; タイムアウトの設定は実際には10秒だったのですね。ありがとうございます。
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; 少し調べてみましたが、 Rpl_semi_sync_master_no_tx
+</span>
+<span class="quote3">&gt; &gt; &gt; は「マスターからレプリカに準同期モードで渡さなかった(渡せなかった)トランザクション」があった時にカウントアップされました。
+</span>
+<span class="quote3">&gt; &gt; &gt; これは「準同期モードでタイムアウトした当のトランザクション」もカウントアップされますし、非同期モードにフォールバック中にコミットされたトランザクションの時もカウントアップされました。
+</span>
+<span class="quote3">&gt; &gt; &gt; （レプリカ側からエラーが返っているわけではなく、マスター側から見た時に「準同期モードでないコミットをした」という視点です）
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; 逆に、準同期モードで渡せたトランザクションは Rpl_semi_sync_master_yes_txがカウントアップされます。
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; というわけで、「1つのACKが何らかの理由でタイムアウトした」ならば準同期モードに復帰するまでの間に来た新たなトランザクションは全て非同期モードで処理されるので、
+</span>
+<span class="quote3">&gt; &gt; &gt; Rpl_semi_sync_master_no_tx がカウントアップされるのは観測され得ます。
+</span>
+<span class="quote3">&gt; &gt; &gt; ただしこのカウントアップとRpl_semi_sync_master_statusのOFFに直接の因果関係は無く、どちらも「準同期レプリケーションが失敗した」結果として「Rpl_semi_sync_master_no_txがカウントアップされ、Rpl_semi_sync_master_statusはOFFになった」という形ではないでしょうか。
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; おそらく、準同期レプリケーションが失敗した理由そのものはエラーログに出ていると思います。
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; 2020-12-22T08:40:21.644649Z 14 [Warning] [MY-011153] [Server] Timeout
+</span>
+<span class="quote3">&gt; &gt; &gt; waiting for reply of binlog (file: mysql-bin.000001, pos: 4952),
+</span>
+<span class="quote3">&gt; &gt; &gt; semi-sync up to file , position 0.
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; yoku0825,
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; 2020年12月21日(月) 14:45 内村健司 &lt;uchimura.kenji@xxxxxxxxxx&gt;:
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; yoku0825さん、はじめまして。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ご連絡ありがとうございます。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; ・rpl_semi_sync_master_timeout=1000(10秒)
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; rpl_semi_sync_master_timeout=1000 は1秒です。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; メールの書き間違いか、10秒(デフォルトはこちら)と1秒を取り間違えているかが気になります。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; なお、semisyncプラグインは「一度タイムアウトするとAsyncにフォールバックする」ので、
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 最初の1秒または10秒待たされた以降はタイムアウトを待たずにAsyncレプリケーションでレプリカに流れます。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 「rpl_semi_sync_master_timeout」については「10000」(10秒)でした。ゼロを一つ少なかったです。すいません。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; Rpl_semi_sync_master_no_tx
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; これがカウントアップされそうなあたりをちょっと見てみましたが、binlog_order_commitとかslave_preserve_commit_orderとか関係あるのかないのかなコードが出てきます。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 心当たりはありますか？
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; <a href="https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L701-L718">https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L701-L718</a>
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; これについては心当たりはありません。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 設定したパラメータにもなかったような気がします。。。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; スレーブからエラーを返した来た際も非同期への切り替えが行われるように見えます。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; どんなエラーでしょうか…？ (リレーログの書き込みに失敗したとしても、明確なエラー応答はせずに黙ってACKを返さないものだと思っていました)
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; エラーは「Rpl_semi_sync_master_no_tx」がカウントアップされたことを言っておりました。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 「Rpl_semi_sync_master_status」がOFFになった原因を調べていたら、
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 「Rpl_semi_sync_master_no_tx」の値が増加した時間帯に「Rpl_semi_sync_master_status」が「OFF」になっていた為、
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 相関があるのかなと思った次第です。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 「Rpl_semi_sync_master_status」が「OFF」になった時間帯はアプリケーションが1秒当たり100件以上のインサート文発行している時間帯でしたので、
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; そいつが原因で「Rpl_semi_sync_master_no_tx」がカウントアップされ、「Rpl_semi_sync_master_status」がOFFになったのでは？？と想定しております。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 以上です。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; On Mon, 21 Dec 2020 13:29:11 +0900
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; yoku0825 &lt;yoku0825@xxxxxxxxxx&gt; wrote:
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; こんにちは、yoku0825といいます。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 先に伺っておきたいのですが、
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; ・rpl_semi_sync_master_timeout=1000(10秒)
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; rpl_semi_sync_master_timeout=1000 は1秒です。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; メールの書き間違いか、10秒(デフォルトはこちら)と1秒を取り間違えているかが気になります。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; なお、semisyncプラグインは「一度タイムアウトするとAsyncにフォールバックする」ので、
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 最初の1秒または10秒待たされた以降はタイムアウトを待たずにAsyncレプリケーションでレプリカに流れます。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; Rpl_semi_sync_master_no_tx
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; これがカウントアップされそうなあたりをちょっと見てみましたが、binlog_order_commitとかslave_preserve_commit_orderとか関係あるのかないのかなコードが出てきます。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 心当たりはありますか？
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; <a href="https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L701-L718">https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L701-L718</a>
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; スレーブからエラーを返した来た際も非同期への切り替えが行われるように見えます。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; どんなエラーでしょうか…？ (リレーログの書き込みに失敗したとしても、明確なエラー応答はせずに黙ってACKを返さないものだと思っていました)
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; エラーを返すとしたらマスターのエラーログとかに残るのですかね（SQLスレッドは準同期レプリケーションに関わっていないので、SQLスレッドのエラーは関係ありません）
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; yoku0825,
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; 2020年12月21日(月) 11:45 内村健司 &lt;uchimura.kenji@xxxxxxxxxx&gt;:
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 情報書き漏れました。すいません。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; mysql のバージョンは8.0.19の無償版です。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; OSはrhel7.7です。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 以上、よろしくお願いします。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; 2020/12/21 11:28、内村健司 &lt;uchimura.kenji@xxxxxxxxxx&gt;のメール:
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; こんにちは。内村と申します。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 初めて投稿させていただきます。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 準同期レプリケーションの非同期切り替えについてご教授ください。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 現在、ロスレスの準同期でレプリケーションを構築しており、
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 「Rpl_semi_sync_master_status」をZabbixで監視(ON以外になったら、警告)する運用にしております。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; レプリケーションは以下の設定です。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; ・rpl_semi_sync_master_timeout=1000(10秒)
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; ・rpl_semi_sync_master_wait_point=AFTER_SYNC
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; マスター側のAPLでデータ更新量が少ないコミット処理を多数連続で発行した場合、
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 「Rpl_semi_sync_master_no_tx」の値が増加し、
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; そのタイミングで「Rpl_semi_sync_master_status」がOFFになっております。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 準同期から非同期への切り替えはマスターがスレーブにバイナリデータを転送し、
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 10秒返答がなかった場合のみ行われると考えていたのですが、
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; スレーブからエラーを返した来た際も非同期への切り替えが行われるように見えます。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 「Rpl_semi_sync_master_no_tx」の値が増加したら、「Rpl_semi_sync_master_status」が「OFF」になる。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; は動作として正しいのでしょうか。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 準同期から非同期への切り替え契機は以下のパターンであってますでしょうか。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; ・スレーブから応答がない場合
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; ・スレーブから応答エラーと返信が返ってきた場合　★
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; また、その他の条件でも非同期切り替えが発生するのでしょうか。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; ご存じの方がいらっしゃら、コメント・ご教授頂けると幸いです。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 以上、よろしくお願いいたします。
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; ∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; 内村健司
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; インタービレッジ株式会社
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt;
+</span>
+<span class="quote5">&gt; &gt; &gt; &gt; &gt; &gt; &gt; ∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="16623.html">[前]</a><a href="16625.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="16617.html">  16617 2020-12-21 11:28 [内村健司 &lt;uchimura.k] 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16618.html">  16618 2020-12-21 11:45 ┗[内村健司 &lt;uchimura.k] Re: [mysql 16617] 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16619.html">  16619 2020-12-21 13:29 　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16618] Re: [mysql 16617] 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16620.html">  16620 2020-12-21 14:45 　　┗[内村健司 &lt;uchimura.k] Re: 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16621.html">  16621 2020-12-22 18:27 　　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16620] Re: 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16622.html">  16622 2020-12-22 22:15 　　　　┗[内村健司 &lt;uchimura.k] Re: 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16623.html">  16623 2020-12-23 00:51 　　　　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16622] Re: 準同期レプリケーションの非同期切り替について</a></span>
+<span class="current">-&gt;&nbsp;<a href="16624.html">  16624 2020-12-23 08:41 　　　　　　┗[内村健司 &lt;uchimura.k] Re: 準同期レプリケーションの非同期切り替について</a></span>
+</pre>
+
+
+</body></html>

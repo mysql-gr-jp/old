@@ -1,8 +1,7 @@
-<html>
-<head>
+<html><head>
 <meta http-equiv="Content-Style-Type" context="text/css">
 <title>mysql:4866</title>
-<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
 <p class="button"><a href="4865.html">[前]</a><a href="4867.html">[次]</a><a href="../list/4801-4900.html">[番号順一覧]</a><a href="../thread/4801-4900.html">[スレッド一覧]</a></p>
@@ -11,15 +10,14 @@ mysql:4866
 </p>
 <div class="header">
 <p>
-From: &quot;gosikaku&quot; &lt;&quot;gosikaku&quot; &lt;gosikaku@xxxxxxxxxx&gt;&gt;<br>
+From: "gosikaku" &lt;"gosikaku" &lt;gosikaku@xxxxxxxxxx&gt;&gt;<br>
 Date: Sun, 6 Jan 2002 18:01:29 +0900<br>
 Subject: [mysql 04866] SELECT が実行できない<br>
 
 </p>
 </div>
 <div class="body">
-<pre>
-宏です。
+<pre>宏です。
 
 MySQLとPerlで掲示板を作成しているのですが、エラーメッセージが表示され上手く
 いきません。
@@ -45,20 +43,20 @@ hitokoto       tinytext              いいえ
 ###設定###
 #モジュール＆ライブラリの指定
 use DBI;
-require &quot;cgi-lib.pl&quot;;
-require &quot;jcode.pl&quot;;
+require "cgi-lib.pl";
+require "jcode.pl";
 
 #KB数で最高データ値を記入
 $MaxData = 600;
 
 #利用するMySQLデータベースの名前を記入
-$MySQLDataBase = &quot;keiziban&quot;;
+$MySQLDataBase = "keiziban";
 
 #MySQLユーザー名を記入
-$MySQLUserName = &quot;root&quot;;
+$MySQLUserName = "root";
 
 #MySQLパスワードを記入
-$MySQLPassword = &quot;aaaaa&quot;;
+$MySQLPassword = "aaaaa";
 
 #サーバーに時差がある場合は時差をプラスする
 $TimeDiff = 0;
@@ -74,15 +72,15 @@ $TimeDiff = 0;
 
 #新規投稿ここから
 if($cgi_data{'mode'} eq 'new'){
-&amp;Error(&quot;コメントが入力されていません。&quot;) unless $cgi_data{'komento'};
+&amp;Error("コメントが入力されていません。") unless $cgi_data{'komento'};
 
-$dbh = DBI -&gt; connect (&quot;DBI:mysql:$MySQLDataBase:localhost&quot;, $MySQLUserName,
-$MySQLPassword) or &amp;Error(&quot;データベースへアクセスできません。&quot;);
+$dbh = DBI -&gt; connect ("DBI:mysql:$MySQLDataBase:localhost", $MySQLUserName,
+$MySQLPassword) or &amp;Error("データベースへアクセスできません。");
 
     $komento = $cgi_data{'komento'};
-    &amp;jcode'convert(*komento,&quot;sjis&quot;);
+    &amp;jcode'convert(*komento,"sjis");
     $hitokoto = $cgi_data{'hitokoto'};
-    &amp;jcode'convert(*syumi,&quot;sjis&quot;);
+    &amp;jcode'convert(*syumi,"sjis");
 
 #日本語コードに問題が出ないようにする
     $komento = quotemeta($komento);
@@ -92,17 +90,17 @@ $MySQLPassword) or &amp;Error(&quot;データベースへアクセスできま�
 
     $sth = $dbh-&gt;prepare( qq{ INSERT INTO bbs1
                               VALUES(NULL, DATE_ADD(NOW(), INTERVAL
-$TimeDiff HOUR),&quot;$komento&quot;, &quot;$hitokoto&quot;)});
+$TimeDiff HOUR),"$komento", "$hitokoto")});
 
     $sth -&gt; execute()
-        or &amp;Error(&quot;MySQL INSERT コマンドを実行できません。$DBI::err
-($DBI::errstr)&quot;);
+        or &amp;Error("MySQL INSERT コマンドを実行できません。$DBI::err
+($DBI::errstr)");
 
     $sth -&gt; finish();
 
     unlink($cgi_sfn{'file'});
 
-    print &quot;Location: ./upbbs.cgi\n\n&quot;;
+    print "Location: ./upbbs.cgi\n\n";
     exit;
 
   }#新規投稿ここまで
@@ -110,31 +108,31 @@ $TimeDiff HOUR),&quot;$komento&quot;, &quot;$hitokoto&quot;)});
   #投稿削除ここから
   if($cgi_data{'mode'} eq 'del'){
 
-    &amp;Error(&quot;パスワードが一致しません。&quot;) if($cgi_data{'password'} ne
+    &amp;Error("パスワードが一致しません。") if($cgi_data{'password'} ne
 $MySQLPassword);
 
     $num = $cgi_data{'delnum'};
 
      if($num == 0){
-     print &quot;Location: ./upbbs.cgi\n\n&quot;;
+     print "Location: ./upbbs.cgi\n\n";
      exit;
      }
 
-    $dbh = DBI -&gt; connect (&quot;DBI:mysql:$MySQLDataBase:localhost&quot;,
+    $dbh = DBI -&gt; connect ("DBI:mysql:$MySQLDataBase:localhost",
 $MySQLUserName, $MySQLPassword)
-      or &amp;Error2(&quot;データベースへアクセスできません。&quot;);
+      or &amp;Error2("データベースへアクセスできません。");
 
     $sth = $dbh-&gt;prepare( qq{ DELETE FROM bbs1
                               WHERE bangou = $bangou
                             });
 
     $sth -&gt; execute()
-        or &amp;Error2(&quot;MySQLコマンド DELETE を実行できません。&quot;);
+        or &amp;Error2("MySQLコマンド DELETE を実行できません。");
 
     $sth -&gt; finish();
     $dbh -&gt; disconnect();
 
-    print &quot;Location: ./upbbs.cgi\n\n&quot;;
+    print "Location: ./upbbs.cgi\n\n";
 
     exit;
 
@@ -145,19 +143,19 @@ $MySQLUserName, $MySQLPassword)
    $StartView = $cgi_data{'startview'};
    $EndView = $cgi_data{'endview'};
   }else{
-   $StartView = &quot;0&quot;;
-   $EndView = &quot;10&quot;;
+   $StartView = "0";
+   $EndView = "10";
   }
 
-  $dbh = DBI -&gt; connect (&quot;DBI:mysql:$MySQLDataBase:localhost&quot;,
+  $dbh = DBI -&gt; connect ("DBI:mysql:$MySQLDataBase:localhost",
 $MySQLUserName, $MySQLPassword)
-      or &amp;Error(&quot;データベースへアクセスできません。&quot;);
+      or &amp;Error("データベースへアクセスできません。");
 
   $sth = $dbh-&gt;prepare( qq{ SELECT bangou FROM bbs1 ORDER BY bangou DESC
 LIMIT 1 });
 
   $sth -&gt; execute()
-      or &amp;Error(&quot;MySQLコマンド SELECT を実行できません。1&quot;);
+      or &amp;Error("MySQLコマンド SELECT を実行できません。1");
 
   $MaxNumber = $sth -&gt; fetchrow_array();
 
@@ -166,30 +164,30 @@ LIMIT 1 });
                             LIMIT $StartView,10 });
 
   $sth2 -&gt; execute()
-      or &amp;Error(&quot;MySQLコマンド SELECT を実行できません。2&quot;);
+      or &amp;Error("MySQLコマンド SELECT を実行できません。2");
 
   while (@ary = $sth2 -&gt; fetchrow_array()){
   $CurrentData .= &lt;&lt;__CURRENTDATA_EOF__;
 
- &lt;P&gt;&lt;TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH=&quot;600&quot;&gt;
- &lt;TR&gt;&lt;TD BGCOLOR=&quot;#000000&quot;&gt;
+ &lt;P&gt;&lt;TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH="600"&gt;
+ &lt;TR&gt;&lt;TD BGCOLOR="#000000"&gt;
 
   &lt;TABLE WIDTH=100% BORDER=0 CELLSPACING=1 CELLPADDING=4&gt;
    &lt;TR&gt;
-    &lt;TD BGCOLOR=&quot;#000000&quot; COLSPAN=&quot;2&quot;&gt;&lt;FONT COLOR=&quot;#FFFFFF&quot;&gt;&lt;B&gt;掲示板
+    &lt;TD BGCOLOR="#000000" COLSPAN="2"&gt;&lt;FONT COLOR="#FFFFFF"&gt;&lt;B&gt;掲示板
 &lt;/B&gt;&lt;/FONT&gt;&lt;/TD&gt;
    &lt;/TR&gt;
    &lt;TR&gt;
-    &lt;TD BGCOLOR=&quot;#FFCC00&quot; WIDTH=&quot;200&quot; ALIGN= &quot;RIGHT&quot;&gt;日付&lt;/TD&gt;
-    &lt;TD BGCOLOR=&quot;#FFFFFF&quot;&gt; $ary[1]&lt;/TD&gt;
+    &lt;TD BGCOLOR="#FFCC00" WIDTH="200" ALIGN= "RIGHT"&gt;日付&lt;/TD&gt;
+    &lt;TD BGCOLOR="#FFFFFF"&gt; $ary[1]&lt;/TD&gt;
    &lt;/TR&gt;
    &lt;TR&gt;
-    &lt;TD BGCOLOR=&quot;#FFCC00&quot; WIDTH=&quot;200&quot; ALIGN= &quot;RIGHT&quot;&gt;コメント&lt;/TD&gt;
-    &lt;TD BGCOLOR=&quot;#FFFFFF&quot;&gt; $ary[2]&lt;/TD&gt;
+    &lt;TD BGCOLOR="#FFCC00" WIDTH="200" ALIGN= "RIGHT"&gt;コメント&lt;/TD&gt;
+    &lt;TD BGCOLOR="#FFFFFF"&gt; $ary[2]&lt;/TD&gt;
    &lt;/TR&gt;
    &lt;TR&gt;
-    &lt;TD BGCOLOR=&quot;#FFCC00&quot; WIDTH=&quot;200&quot; ALIGN= &quot;RIGHT&quot;&gt;一言&lt;/TD&gt;
-    &lt;TD BGCOLOR=&quot;#FFFFFF&quot;&gt; $ary[3]&lt;/TD&gt;
+    &lt;TD BGCOLOR="#FFCC00" WIDTH="200" ALIGN= "RIGHT"&gt;一言&lt;/TD&gt;
+    &lt;TD BGCOLOR="#FFFFFF"&gt; $ary[3]&lt;/TD&gt;
    &lt;/TR&gt;
   &lt;/TABLE&gt;
 
@@ -209,58 +207,58 @@ __CURRENTDATA_EOF__
   $PreviousStartView = $StartView - 10;
   $PreviousEndView = $EndView - 10;
   if($MaxNumber &lt;= 10){
-  $NextView = &quot;&quot;;
-  $PreviousView = &quot;&quot;;
+  $NextView = "";
+  $PreviousView = "";
   }
 
   if($MaxNumber &gt; 10){
     if($EndView &lt; $MaxNumber){
     $NextView = qq(&lt;a
-href=&quot;./upbbs.cgi?startview=$NextStartView&amp;endview=$NextEndView&quot;&gt;古い10件を
+href="./upbbs.cgi?startview=$NextStartView&amp;endview=$NextEndView"&gt;古い10件を
 表\示＞＞&lt;/a&gt;);
     }
     if($StartView != 0){
     $PreviousView = qq(&lt;a
-href=&quot;./upbbs.cgi?startview=$PreviousStartView&amp;endview=$PreviousEndView&quot;&gt;
+href="./upbbs.cgi?startview=$PreviousStartView&amp;endview=$PreviousEndView"&gt;
 ＜＜新しい10件を表\示＞＞&lt;/a&gt;);
     }
   }
 
-print &quot;Content-type: text/html\; charset=shift_jis\n\n&quot;;
-print&lt;&lt;&quot;__HTML__&quot;;
+print "Content-type: text/html\; charset=shift_jis\n\n";
+print&lt;&lt;"__HTML__";
 &lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;[掲示板]&lt;/TITLE&gt;&lt;HEAD&gt;
-&lt;BODY BGCOLOR=&quot;gray&quot; TEXT=&quot;#000000&quot; LINK=&quot;#000000&quot; VLINK=&quot;#000000&quot;&gt;
+&lt;BODY BGCOLOR="gray" TEXT="#000000" LINK="#000000" VLINK="#000000"&gt;
 &lt;CENTER&gt;
-&lt;IMG SRC=&quot;bbs.gif&quot; WIDTH=&quot;468&quot; HIEGHT=&quot;60&quot;&gt;&lt;P&gt;
-&lt;HR WIDTH=&quot;600&quot; SIZE=&quot;0&quot; COLOR=&quot;#000000&quot;&gt;
-&lt;A HREF=&quot;<a href="http://www.aaa.com/">http://www.aaa.com/</a>&quot;&gt;トップページへ戻る&lt;/A&gt;
-&lt;HR WIDTH=&quot;600&quot; SIZE=&quot;0&quot; COLOR=&quot;#000000&quot;&gt;
-&lt;TABLE BORDER=0 CELLSPACING=0 CELLPADDING=4 WIDTH=&quot;600&quot;&gt;
- &lt;form method=&quot;post&quot; enctype=&quot;multipart/form-data&quot; action=&quot;upbbs.cgi&quot;&gt;
- &lt;input type=&quot;hidden&quot; name=&quot;mode&quot; value=&quot;new&quot;&gt;
+&lt;IMG SRC="bbs.gif" WIDTH="468" HIEGHT="60"&gt;&lt;P&gt;
+&lt;HR WIDTH="600" SIZE="0" COLOR="#000000"&gt;
+&lt;A HREF="<a href="http://www.aaa.com/">http://www.aaa.com/</a>"&gt;トップページへ戻る&lt;/A&gt;
+&lt;HR WIDTH="600" SIZE="0" COLOR="#000000"&gt;
+&lt;TABLE BORDER=0 CELLSPACING=0 CELLPADDING=4 WIDTH="600"&gt;
+ &lt;form method="post" enctype="multipart/form-data" action="upbbs.cgi"&gt;
+ &lt;input type="hidden" name="mode" value="new"&gt;
  &lt;TR&gt;
-  &lt;TD WIDTH=&quot;180&quot; ALIGN= &quot;RIGHT&quot; VALIGN=&quot;TOP&quot;&gt;◆&lt;B&gt;コメント:&lt;/B&gt;&lt;/TD&gt;
-  &lt;TD&gt;&lt;TEXTAREA COLS=&quot;50&quot; ROWS=&quot;2&quot; NAME=&quot;&quot;&gt;&lt;/TEXTAREA&gt;&lt;/TD&gt;
+  &lt;TD WIDTH="180" ALIGN= "RIGHT" VALIGN="TOP"&gt;◆&lt;B&gt;コメント:&lt;/B&gt;&lt;/TD&gt;
+  &lt;TD&gt;&lt;TEXTAREA COLS="50" ROWS="2" NAME=""&gt;&lt;/TEXTAREA&gt;&lt;/TD&gt;
  &lt;/TR&gt;
  &lt;TR&gt;
-  &lt;TD WIDTH=&quot;180&quot; ALIGN= &quot;RIGHT&quot;&gt;◆&lt;B&gt;趣味:&lt;/B&gt;&lt;/TD&gt;
-  &lt;TD&gt;&lt;INPUT TYPE=&quot;TEXT&quot; NAME=&quot;syumi &quot; SIZE=&quot;10&quot;&gt;&lt;/TD&gt;
+  &lt;TD WIDTH="180" ALIGN= "RIGHT"&gt;◆&lt;B&gt;趣味:&lt;/B&gt;&lt;/TD&gt;
+  &lt;TD&gt;&lt;INPUT TYPE="TEXT" NAME="syumi " SIZE="10"&gt;&lt;/TD&gt;
  &lt;/TR&gt;
  &lt;/form&gt;
 &lt;/TABLE&gt;
 
 $CurrentData
 
-&lt;P&gt;&lt;TABLE BORDER=0 CELLSPACING=0 CELLPADDING=4 WIDTH=&quot;600&quot;&gt;
-&lt;TR&gt;&lt;TD ALIGN=&quot;LEFT&quot;&gt;$PreviousView&lt;/TD&gt;&lt;TD ALIGN=&quot;RIGHT&quot;&gt;$NextView&lt;/TD&gt;&lt;/TR&gt;
+&lt;P&gt;&lt;TABLE BORDER=0 CELLSPACING=0 CELLPADDING=4 WIDTH="600"&gt;
+&lt;TR&gt;&lt;TD ALIGN="LEFT"&gt;$PreviousView&lt;/TD&gt;&lt;TD ALIGN="RIGHT"&gt;$NextView&lt;/TD&gt;&lt;/TR&gt;
 &lt;/TABLE&gt;
-&lt;HR WIDTH=&quot;600&quot; SIZE=&quot;0&quot; COLOR=&quot;#000000&quot;&gt;
-&lt;TABLE BORDER=0 CELLSPACING=0 CELLPADDING=4 WIDTH=&quot;600&quot;&gt;
-&lt;FORM METHOD=&quot;POST&quot; ACTION=&quot;upbbs.cgi&quot;&gt;
-&lt;INPUT TYPE=&quot;HIDDEN&quot; NAME=&quot;mode&quot; VALUE=&quot;del&quot;&gt;
-&lt;TR&gt;&lt;TD ALIGN=&quot;RIGHT&quot;&gt;●投稿番号:&lt;INPUT TYPE=&quot;TEXT&quot; NAME=&quot;delnum&quot; SIZE=&quot;3&quot;&gt;
-&amp;nbsp;●パスワード:&lt;INPUT TYPE=&quot;PASSWORD&quot; NAME=&quot;password&quot; SIZE=&quot;10&quot;&gt;
-&amp;nbsp;&lt;INPUT TYPE=&quot;SUBMIT&quot; VALUE=&quot;記事削除 (管理者用)&quot;&gt;&lt;/TD&gt;
+&lt;HR WIDTH="600" SIZE="0" COLOR="#000000"&gt;
+&lt;TABLE BORDER=0 CELLSPACING=0 CELLPADDING=4 WIDTH="600"&gt;
+&lt;FORM METHOD="POST" ACTION="upbbs.cgi"&gt;
+&lt;INPUT TYPE="HIDDEN" NAME="mode" VALUE="del"&gt;
+&lt;TR&gt;&lt;TD ALIGN="RIGHT"&gt;●投稿番号:&lt;INPUT TYPE="TEXT" NAME="delnum" SIZE="3"&gt;
+&amp;nbsp;●パスワード:&lt;INPUT TYPE="PASSWORD" NAME="password" SIZE="10"&gt;
+&amp;nbsp;&lt;INPUT TYPE="SUBMIT" VALUE="記事削除 (管理者用)"&gt;&lt;/TD&gt;
 &lt;/FORM&gt;&lt;/TR&gt;&lt;/TABLE&gt;
 &lt;/CENTER&gt;
 &lt;/BODY&gt;&lt;/HTML&gt;
@@ -269,19 +267,19 @@ __HTML__
 exit;
 
 sub Error {
- print &quot;Content-type: text/html\; charset=shift_jis\n\n&quot;;
+ print "Content-type: text/html\; charset=shift_jis\n\n";
  print&lt;&lt;__ERROR__;
  &lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;ERROR!!&lt;/TITLE&gt;&lt;/HEAD&gt;
- &lt;BODY BGCOLOR=&quot;gray&quot;&gt;
+ &lt;BODY BGCOLOR="gray"&gt;
  &lt;CENTER&gt;
- &lt;FONT COLOR=&quot;RED&quot;&gt;
+ &lt;FONT COLOR="RED"&gt;
  &lt;P&gt;&lt;BR&gt;
- &lt;HR SIZE=&quot;0&quot; COLOR=&quot;#000000&quot;&gt;
+ &lt;HR SIZE="0" COLOR="#000000"&gt;
  &lt;P&gt;
  &lt;B&gt;$_[0]&lt;BR&gt;&lt;BR&gt;
  ブラウザの戻るボタンで戻ってやり直ししてください。
  &lt;P&gt;
- &lt;HR SIZE=&quot;0&quot; COLOR=&quot;#000000&quot;&gt;
+ &lt;HR SIZE="0" COLOR="#000000"&gt;
  &lt;/FONT&gt;
  &lt;/BODY&gt;&lt;/HTML&gt;
 __ERROR__
@@ -296,7 +294,7 @@ __ERROR__
                             LIMIT $StartView,10 });
 
   $sth2 -&gt; execute()
-      or &amp;Error(&quot;MySQLコマンド SELECT を実行できません。2&quot;);
+      or &amp;Error("MySQLコマンド SELECT を実行できません。2");
 
 の部分のSELECTが上手く実行できないようでブラウザには、
 「MySQLコマンド SELECT を実行できません。2」
@@ -309,11 +307,11 @@ __ERROR__
 </pre>
 </div>
 <p class="button"><a href="4865.html">[前]</a><a href="4867.html">[次]</a><a href="../list/4801-4900.html">[番号順一覧]</a><a href="../thread/4801-4900.html">[スレッド一覧]</a></p>
-<pre class="list">
-<span class="current">-&gt;&nbsp;<a href="4866.html">   4866 2002-01-06 18:01 [&quot;gosikaku&quot; &lt;gosikaku] SELECT が実行できない                   </a></span>
+<pre class="list"><span class="current">-&gt;&nbsp;<a href="4866.html">   4866 2002-01-06 18:01 ["gosikaku" &lt;gosikaku] SELECT が実行できない                   </a></span>
 <span>&nbsp;&nbsp;&nbsp;<a href="4867.html">   4867 2002-01-06 18:28 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
 <span>&nbsp;&nbsp;&nbsp;<a href="4868.html">   4868 2002-01-06 20:38 ┗[楠吉彦 &lt;moredebu@xxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="4869.html">   4869 2002-01-07 00:56 　┗[&quot;gosikaku&quot; &lt;gosikaku] Re: SELECT が実行できない【解決】   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="4869.html">   4869 2002-01-07 00:56 　┗["gosikaku" &lt;gosikaku] Re: SELECT が実行できない【解決】   </a></span>
 </pre>
-</body>
-</html>
+
+
+</body></html>

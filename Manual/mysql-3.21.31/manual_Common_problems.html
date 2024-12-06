@@ -1,135 +1,135 @@
-  <HTML>
-  <HEAD>
+<html><head>
   <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
      from manual.texi on 20 June 1998 -->
 
-  <TITLE>MySQL Reference Manual for version 3.21.31. - MySQL でのよくあるいくつかの問題の解決</TITLE>
-  </HEAD>
-  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
-Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Problems.html">previous</A>, <A HREF="manual_Clients.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
-<P><HR><P>
+  <title>MySQL Reference Manual for version 3.21.31. - MySQL でのよくあるいくつかの問題の解決</title>
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000" link="#101090" vlink="#7030B0">
+Go to the <a href="manual_Introduction.html">first</a>, <a href="manual_Problems.html">previous</a>, <a href="manual_Clients.html">next</a>, <a href="manual_Concept_Index.html">last</a> section, <a href="manual_toc.html">table of contents</a>.
+<p></p><hr><p>
 
 
-<H1><A NAME="Common problems" HREF="manual_toc.html#Common problems"><STRONG>MySQL</STRONG> でのよくあるいくつかの問題の解決</A></H1>
+</p><h1><a name="Common problems" href="manual_toc.html#Common problems"><strong>MySQL</strong> でのよくあるいくつかの問題の解決</a></h1>
 
-<P>
-<A NAME="IDX300"></A>
+<p>
+<a name="IDX300"></a>
 
-</P>
+</p>
 
 
-<H2><A NAME="Replication" HREF="manual_toc.html#Replication">データベースの複製</A></H2>
+<h2><a name="Replication" href="manual_toc.html#Replication">データベースの複製</a></h2>
 
-<P>
+<p>
 データベースを複製する最も一般的な方法は、更新ログを使用することです。
- 「<A HREF="manual_Server.html#Update log">更新ログ</A>」節参照 。これは、あるデータベースがマスター(主)として動作して
+ 「<a href="manual_Server.html#Update log">更新ログ</a>」節参照 。これは、あるデータベースがマスター(主)として動作して
 (全てのデータ変更がここで行われます)、一つ以上の他のものがスレーブ(従)と
 して動作することを要求します。スレーブを更新するには 
-<CODE>mysql &#60; update_log</CODE> を実行します。
+<code>mysql &lt; update_log</code> を実行します。
 
-</P>
-<P>
+</p>
+<p>
 削除を行わないのであれば、タイムスタンプを使用できます。
 
-</P>
-<P>
+</p>
+<p>
 更新ログ(削除のため)とタイムスタンプ(両側で)の両方を使用する2つの方法の
 更新システムを作ることができます。しかしこの場合は、同じデータが両側で変
 更された時に、あなたが衝突を操作できなければなりません。あなたはおそらく
 何が更新されたかを決定するのを助けるために、古いバージョンを保持したいで
 しょう。
 
-</P>
-<P>
+</p>
+<p>
 この場合の複製は SQL ステートメントで行われるため、データベースを更新す
 るステートメント中で次の関数は使ってはいけません。これらは他の 
-<STRONG>MySQL</STRONG> サーバでは異なる値を返すからです:
+<strong>MySQL</strong> サーバでは異なる値を返すからです:
 
-</P>
+</p>
 
-<UL>
-<LI>DATABASE()
+<ul>
+<li>DATABASE()
 
-<LI>GET_LOCK() and RELEASE_LOCK().
+</li><li>GET_LOCK() and RELEASE_LOCK().
 
-<LI>RAND()
+</li><li>RAND()
 
-<LI>USER(), SYSTEM_USER() or SESSION_USER().
+</li><li>USER(), SYSTEM_USER() or SESSION_USER().
 
-<LI>VERSION()
+</li><li>VERSION()
 
-</UL>
+</li></ul>
 
-<P>
+<p>
 全ての時刻関数は、必要な場合にミラーにタイムスタンプを送るようにして、安
 全に使用できます。LAST_INSERT_ID() も安全に使用できます。
 
-</P>
-<P>
-<A NAME="IDX301"></A>
+</p>
+<p>
+<a name="IDX301"></a>
 
 
-<H2><A NAME="Backup" HREF="manual_toc.html#Backup">データベースのバックアップ</A></H2>
+</p><h2><a name="Backup" href="manual_toc.html#Backup">データベースのバックアップ</a></h2>
 
-<P>
-<STRONG>MySQL</STRONG> テーブルはファイルとして格納されるため、バックアップを行
-うのは簡単です。矛盾のないバックアップを得るためには、<CODE>LOCK TABLES</CODE> 
-を関連するテーブルで行ってください。 「<A HREF="manual_Syntax.html#Lock tables"><CODE>LOCK TABLES</CODE> 構文</A>」節参照 。読み込みロックだ
+<p>
+<strong>MySQL</strong> テーブルはファイルとして格納されるため、バックアップを行
+うのは簡単です。矛盾のないバックアップを得るためには、<code>LOCK TABLES</code> 
+を関連するテーブルで行ってください。 「<a href="manual_Syntax.html#Lock tables"><code>LOCK TABLES</code> 構文</a>」節参照 。読み込みロックだ
 けが必要なので、そのテーブルでデータベースディレクトリのファイルのコピー
 が行われている間も、他のスレッドはクエリを継続できます。もしくは、SQL レ
-ベルのバックアップを行いたいのであれば、<CODE>SELECT INTO OUTFILE</CODE> を使
+ベルのバックアップを行いたいのであれば、<code>SELECT INTO OUTFILE</code> を使
 用できます。
 
-</P>
-<P>
-他の方法は <CODE>mysqldump</CODE> プログラムを使用することです。
+</p>
+<p>
+他の方法は <code>mysqldump</code> プログラムを使用することです。
 
-</P>
+</p>
 
-<UL>
+<ul>
 データベースの完全なバックアップを行うには、
-<CODE>mysqldump --tab=some-dir --lock-tables --quick </CODE> または、サーバが
+<code>mysqldump --tab=some-dir --lock-tables --quick </code> または、サーバが
 何も更新していない時に、単に全てのテーブルファイル(.frm, .ISM, .ISD)をコ
 ピーします。
-<LI>
+<li>
 
-<CODE>mysqld</CODE> を <CODE>--log-update</CODE> で起動します。
-<LI>
+<code>mysqld</code> を <code>--log-update</code> で起動します。
+</li><li>
 
 'hostname.#' という名前のログファイルが得られます。# は reload 毎に増加
 する数値です。
-</UL>
+</li></ul>
 
-<P>
-何かをリストアしなければならない時 (<CODE>isamchk -r</CODE> が全てのデータをリ
+<p>
+何かをリストアしなければならない時 (<code>isamchk -r</code> が全てのデータをリ
 ストアできない場合。99.9% の場合は可能です):
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 オリジナルの mysqldump バックアップをリストアします。
-<LI>
+</li><li>
 
 ls -1 -t -r hostname.* | xargs cat | mysql 
-</UL>
+</li></ul>
 
-<P>
+<p>
 最後のコマンドの ls は、全てのログファイルを正しい順で得るために行われま
 す。
 
-</P>
-<P>
-<CODE>select * into outfile from table</CODE> での選択的バックアップと 
-<CODE>LOAD DATA FROM INFILE 'file_name' REPLACE ...</CODE> でのリストアを行う
-こともできます。重複レコードを避けるためには、テーブル内に <CODE>PRIMARY
-KEY</CODE> が必要です。<CODE>REPLACE</CODE> は、'重複インデックス' 衝突があった場合、
+</p>
+<p>
+<code>select * into outfile from table</code> での選択的バックアップと 
+<code>LOAD DATA FROM INFILE 'file_name' REPLACE ...</code> でのリストアを行う
+こともできます。重複レコードを避けるためには、テーブル内に <code>PRIMARY
+KEY</code> が必要です。<code>REPLACE</code> は、'重複インデックス' 衝突があった場合、
 新しいレコードを挿入する時に古いレコードが新しいものに置き換えられること
 を意味します。
 
-</P>
-<P><HR><P>
-Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Problems.html">previous</A>, <A HREF="manual_Clients.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
- </BODY>
- </HTML>
+</p>
+<p></p><hr><p>
+Go to the <a href="manual_Introduction.html">first</a>, <a href="manual_Problems.html">previous</a>, <a href="manual_Clients.html">next</a>, <a href="manual_Concept_Index.html">last</a> section, <a href="manual_toc.html">table of contents</a>.
+ 
+ 
+</p></body></html>

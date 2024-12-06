@@ -1,0 +1,340 @@
+<html><head></head><body>#####################
+Knoppix 3.4 以上のカスタマイズ
+2005-01-21
+#####################
+
+===================
+必要な物、事前準備
+===================
+
+-------------------
+Linux Kernel config
+-------------------
+Linux カーネルは、
+
+CONFIG_ZLIB_INFLATE=y
+CONFIG_ZLIB_DEFLATE=y
+
+であること。
+これを有効にするには、ZLIB を要求するような機能をYにする。
+例えば、
+
+CONFIG_JFFS2_FS (Journalling Flash File System v2 (JFFS2) support)
+CONFIG_CRAMFS (Compressed ROM file system support)
+CONFIG_CRYPTO_DEFLATE
+CONFIG_PPP_DEFLATE (PPP Deflate compression)
+
+-------------------
+cloop
+-------------------
+cloop 2 以上。
+
+http://http1.debian.or.jp/debian/pool/main/c/cloop/
+
+cloop はコンパイルしてモジュールをインストールする
+
+
+
+
+===========================
+作業directory
+===========================
+
+/home/knoppix/cd0/   Knoppix の CD イメージの中身
+/home/knoppix/cd1/   圧縮された KNOPPIX ファイルを展開した中身 (Knoppixの/になる)
+/cdrom/              CD image のマウント先
+
+にするとする。
+
+
+
+イメージ図
+   CD image file
++-----------------+
+| KNOPPIX/KNOPPIX |   -&gt; /home/knoppix/cd0/
++---------- ∥ ---+
+            ∨
+  +--------------------+
+  | cloop 圧縮ファイル |
+  +--------------------+
+            ∥  伸長
+            ∨
+  +------- ISO イメージファイル --------------+
+  | bin/ boot/ dev/ etc/ lib/ sbin/ usr/ var/ |   -&gt; /home/knoppix/cd1/
+  +-------------------------------------------+
+
+
+
+
+
+===========================
+オリジナルの Knoppix の取得
+===========================
+    * iso イメージをダウンロードする
+    * mount -o loop=/dev/loop0 [ダウンロードしたイメージファイル] [マウントポイント]
+    * CD の中身を作業ディレクトリにコピーする
+ 例:
+
+ mount -o loop=/dev/loop0 knoppix20030222.iso /cdrom
+ cp -a /cdrom/* /home/knoppix/cd0/
+ umount /cdrom
+
+
+
+
+===========================
+Knoppix の圧縮ファイルの展開
+===========================
+    * Knoppix の CD の中の、KNOPPIX/KNOPPIX ファイルは、cloop を使って圧縮されている。
+    * 展開された KNOPPIX/KNOPPIX ファイルは、iso イメージファイル。
+    * 展開を行うには、
+
+ extract_compressed_fs KNOPPIX/KNOPPIX &gt; [展開後のファイルを指定]
+
+    * 展開されたファイルは、mount コマンドでマウントできる
+
+ mount -o loop=/dev/loop1 [展開後のファイルを指定] [マウントポイント]
+
+ 例:
+
+ cd /home/knoppix/cd0/
+ extract_compressed_fs KNOPPIX/KNOPPIX &gt; /home/knoppix/bigimg
+ mount -o loop=/dev/loop0 /home/knoppix/bigimg /cdrom
+ cp -a /cdrom/* /home/knoppix/cd1/
+ umount /cdrom
+
+
+
+
+===========================
+Knoppix のカスタマイズ
+===========================
+    * 上記で展開した KNOPPIX をマウントし、それをどこかにコピー
+    * コピーしたディレクトリに chroot して、作業。
+
+ 例:
+
+ chroot /home/knoppix/cd1/ /bin/sh
+ (作業する)
+
+ (もし network上のマシンにアクセスしたければ、
+  元の /etc/resolv.conf をリネームし、あたらしく /etc/resolv.conf を書く
+ )
+
+ (もし /proc を必要とするようなことがあれば
+  mount -t proc proc /proc を実行する
+ )
+
+ (dselect, apt-get, aptitude 等を使ってソフトをインストールしてもよい)
+
+ (作業が終了したら、chroot している状態で、
+  umount /proc
+  /etc/resolv.conf を元に戻す
+  /var/tmp/ , /var/log/ , /var/cache/apt/archives/ , /var/run/ の下の不要ファイルを消す
+ )
+
+ ( /etc/modules.conf ファイルのタイムスタンプが カーネルのモジュールよりも新しいと、起動時にワーニングがいっぱい出てうっとおしい。
+  touch コマンドで /etc/modules.conf ファイルの日にちをカーネルより古い日に変更しておく
+ )
+
+ (余分な /etc/rcS.d/ , /etc/rc5.d/ 以下のファイルを消す。)
+
+ chroot を抜ける。
+
+
+----------------
+不要なファイル参考
+----------------
+/etc/rcS.d/ 以下は、
+  最低、S00knoppix-autoconfig だけがあればいい。他はカスタマイズで必要なら入れておけばよい
+
+/etc/rc5.d/ 以下は、
+  Knoppix 標準では何もないはず。カスタマイズで必要なら入れておけばよい
+
+/var/tmp/ 以下はいらない
+
+/root/ 以下に、chrootでの作業中になにかファイルができているかもしれない。これも要らない
+
+/var/log/ 以下のファイルは、size を 0 にしておけばよい。
+
+/var/cache/apt/archives/ 以下の .deb ファイルは不要
+
+/var/lib/dpkg/ 以下の -old ファイルは不要
+
+容量が大きければさらに、
+  /var/lib/apt/lists/ 以下の、パッケージリストを消す
+
+
+---------------
+消しスクリプト
+---------------
+#!/bin/sh
+#chroot した状態で作業するなら、$TOP を空にすれば良い
+#chroot を抜けた、本体のシステムで実行するなら、$TOP にフルパスを必ずセット
+TOP="/home/knoppix/cd1"
+
+cd $TOP/var/tmp/
+   rm -r * .[a-zA-Z0-9]*
+
+cd $TOP/var/cache/apt/archives/
+#   rm  *.deb  partial/*.deb
+   find $TOP/var/cache/apt/archives/ ! -type d -a ! -name lock -print -exec rm {} \;
+
+cd $TOP/var/lib/apt/lists
+#   rm  *_Release *_Packages
+    find $TOP/var/lib/apt/lists/ ! -type d -a ! -name lock -print -exec rm {} \;
+
+cd $TOP/var/lib/dpkg
+   rm  *-old
+
+cd $TOP/var/log
+   rm  aptitude
+   find $TOP/var/log/ ! -type d -print -exec cp /dev/null {} \;
+
+cd $TOP/root
+   rm -r .aptitude .mc/history .w3m
+
+
+#find $TOP/var/cache/man -name index.db -exec rm {} \;
+
+#rm $TOP/var/lib/aptitude/pkgstates
+
+
+
+===========================
+KNOPPIX/KNOPPIX ファイルを作る
+===========================
+
+    * 上記で作業したディレクトリ以下を、iso イメージにする。
+    * iso イメージを以下のようにして圧縮
+      create_compressed_fs [新しいisoイメージファイル] 65536 &gt; [knoppixのトップ]/KNOPPIX/KNOPPIX
+
+ 例：
+
+ mkisofs -R -l -V 'KNOPPIX iso9660 filesystem' -hide-rr-moved -v  -o  /home/knoppix/newbigimg  /home/knoppix/cd1
+ create_compressed_fs /home/knoppix/newbigimg 65536 &gt; /home/knoppix/cd0/KNOPPIX/KNOPPIX
+
+
+
+===========================
+KNOPPIX CD-ROM を作る
+===========================
+
+ 例:
+ cd /home/knoppix/cd0/
+ mkisofs -v -R -J -no-emul-boot -boot-load-size 4 -boot-info-table -b boot/isolinux/isolinux.bin -c boot/isolinux/boot.cat -hide-rr-moved  -o /home/knoppix/cdimg  /home/knoppix/cd0
+
+
+# 例(KNOPPIX 3.3までは、3.4 とは boot に使用している仕組みが違うので、以下のように引数が変わる):
+# cd /home/knoppix/cd0/
+# mkisofs -v -R -J -b KNOPPIX/boot-ja.img -c KNOPPIX/boot.cat  -o /home/knoppix/cdimg  /home/knoppix/cd0
+
+
+
+===========================
+テスト
+===========================
+VMWare とか Virtual PC 等のエミュレーターで動かしてテストするのが早くて無駄がない
+
+
+
+
+
+
+
+===========================
+カスタマイズに必要な Knoppix のたち上げの仕組み 基本知識
+===========================
+展開された / の起動は、通常、以下のようになる
+
+/etc/inittab
+     ↓
+/etc/init.d/rcS
+     ↓
+/etc/rcS.d/S*
+      /etc/init.d/knoppix-autoconfig
+     ↓
+/etc/rc5.d/S*
+     ↓
+/etc/init.d/xsession
+     /etc/X11/xinit/xinitrc (単に/etc/X11/Xsessionへのラッパー)
+     /etc/X11/Xsession      (/etc/X11/Xsession.d/以下のスクリプトを順次読み込む)
+     /etc/X11/Xsession.d/*
+
+---------------------------------------------
+/etc/init.d/knoppix-autoconfig のしていること
+---------------------------------------------
+knoppix CD たち上げ時に与えられた引数を見て、各種変数をセット
+
+mount /
+
+hostname の指定
+
+モジュールのロード
+
+言語、キーボード配列の指定
+ウインドウマネージャーの指定を $DESKTOP に入れる
+
+/etc/sysconfig/ 以下のファイルの作成
+
+$LANGUAGE の値により、以下の値を変える。
+  $COUNTRY
+  $LANG
+  $LANGUAGE
+  $KEYTABLE
+  $XKEYBOARD
+  $KDEKEYBOARD
+  $CHARSET
+  $KDEKEYBOARDS
+  $TZ
+  $XMODIFIERS
+
+
+もし、myconf= で設定ファイルが保存されているなら、保存先を mount して、保存先の knoppix.sh を実行し、config.tbz を展開
+
+
+input method サーバーの起動
+portmap の起動
+
+他のデーモンの起動(もし必要なら)
+
+
+ここでセットされた変数の値を、その後のスクリプトも使う(/etc/sysconfig/を読むなどして知る)ので注意。
+
+
+---------------------------------------------
+/etc/init.d/xsession のしていること
+---------------------------------------------
+X サーバー起動
+
+/etc/X11/xinit/xinitrc 実行
+  /etc/X11/xinit/xinitrc は実際は /etc/X11/Xsession を呼んでいるにすぎない
+
+/etc/X11/Xsession は /etc/X11/Xsession.d/ 以下のスクリプトを呼んでいる
+
+
+---------------------------------------------
+/etc/X11/Xsession.d/* のしていること
+---------------------------------------------
+X サーバーが立ち上がり、ウィンドウマネージャーを立ち上げたりするのは、実際は /etc/X11/Xsession.d/ 以下のスクリプト。
+
+30xfree86-common_xresources
+  ここで ~/.Xresource を読んでいる
+
+31xinput
+  ここで FEP をたち上げ。
+
+45xsession
+  もし起動時に myconf= を使わずに knoppix を立ち上げた場合、/etc/skel/ や /usr/share/knoppix/profile/ 以下のファイルを、~knoppix/ にコピーする。
+  ウィンドウマネージャー起動。
+  startkde スクリプトがコピーされて変更されて、この 45xsession ファイルに埋め込まれている。
+
+もし標準の knoppix の Xresource を変更したい場合は、
+/etc/X11/Xresources/ 以下に、リソースファイルを書いておけばよい。
+
+もし window manager を増やしたければ、パッケージを入れて、45xsession を変更すればよい。
+
+もし 標準の Input Method を変えたければ、/etc/init.d/knoppix-autoconfig と、/etc/X11/Xresources/ と 31xinput を変えればよい。
+
+
+</body></html>

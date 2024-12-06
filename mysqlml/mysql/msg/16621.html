@@ -1,0 +1,342 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16621</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16620.html">[前]</a><a href="16622.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16621
+</p>
+<div class="header">
+<p>
+From: yoku0825 &lt;yoku0825 &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 22 Dec 2020 18:27:43 +0900<br>
+Subject: [mysql 16621] Re: [mysql 16620] Re: 準同期レプリケーションの非同期切り替について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>こんばんは。
+
+タイムアウトの設定は実際には10秒だったのですね。ありがとうございます。
+
+少し調べてみましたが、 Rpl_semi_sync_master_no_tx
+は「マスターからレプリカに準同期モードで渡さなかった(渡せなかった)トランザクション」があった時にカウントアップされました。
+これは「準同期モードでタイムアウトした当のトランザクション」もカウントアップされますし、非同期モードにフォールバック中にコミットされたトランザクションの時もカウントアップされました。
+（レプリカ側からエラーが返っているわけではなく、マスター側から見た時に「準同期モードでないコミットをした」という視点です）
+
+逆に、準同期モードで渡せたトランザクションは Rpl_semi_sync_master_yes_txがカウントアップされます。
+
+というわけで、「1つのACKが何らかの理由でタイムアウトした」ならば準同期モードに復帰するまでの間に来た新たなトランザクションは全て非同期モードで処理されるので、
+Rpl_semi_sync_master_no_tx がカウントアップされるのは観測され得ます。
+ただしこのカウントアップとRpl_semi_sync_master_statusのOFFに直接の因果関係は無く、どちらも「準同期レプリケーションが失敗した」結果として「Rpl_semi_sync_master_no_txがカウントアップされ、Rpl_semi_sync_master_statusはOFFになった」という形ではないでしょうか。
+
+おそらく、準同期レプリケーションが失敗した理由そのものはエラーログに出ていると思います。
+
+2020-12-22T08:40:21.644649Z 14 [Warning] [MY-011153] [Server] Timeout
+waiting for reply of binlog (file: mysql-bin.000001, pos: 4952),
+semi-sync up to file , position 0.
+
+
+yoku0825,
+
+
+
+
+
+2020年12月21日(月) 14:45 内村健司 &lt;uchimura.kenji@xxxxxxxxxx&gt;:
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; yoku0825さん、はじめまして。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; ご連絡ありがとうございます。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; ・rpl_semi_sync_master_timeout=1000(10秒)
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; rpl_semi_sync_master_timeout=1000 は1秒です。
+</span>
+<span class="quote2">&gt; &gt; メールの書き間違いか、10秒(デフォルトはこちら)と1秒を取り間違えているかが気になります。
+</span>
+<span class="quote2">&gt; &gt; なお、semisyncプラグインは「一度タイムアウトするとAsyncにフォールバックする」ので、
+</span>
+<span class="quote2">&gt; &gt; 最初の1秒または10秒待たされた以降はタイムアウトを待たずにAsyncレプリケーションでレプリカに流れます。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 「rpl_semi_sync_master_timeout」については「10000」(10秒)でした。ゼロを一つ少なかったです。すいません。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; Rpl_semi_sync_master_no_tx
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; これがカウントアップされそうなあたりをちょっと見てみましたが、binlog_order_commitとかslave_preserve_commit_orderとか関係あるのかないのかなコードが出てきます。
+</span>
+<span class="quote2">&gt; &gt; 心当たりはありますか？
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; <a href="https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L701-L718">https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L701-L718</a>
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; これについては心当たりはありません。
+</span>
+<span class="quote1">&gt; 設定したパラメータにもなかったような気がします。。。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; スレーブからエラーを返した来た際も非同期への切り替えが行われるように見えます。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; どんなエラーでしょうか…？ (リレーログの書き込みに失敗したとしても、明確なエラー応答はせずに黙ってACKを返さないものだと思っていました)
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; エラーは「Rpl_semi_sync_master_no_tx」がカウントアップされたことを言っておりました。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 「Rpl_semi_sync_master_status」がOFFになった原因を調べていたら、
+</span>
+<span class="quote1">&gt; 「Rpl_semi_sync_master_no_tx」の値が増加した時間帯に「Rpl_semi_sync_master_status」が「OFF」になっていた為、
+</span>
+<span class="quote1">&gt; 相関があるのかなと思った次第です。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 「Rpl_semi_sync_master_status」が「OFF」になった時間帯はアプリケーションが1秒当たり100件以上のインサート文発行している時間帯でしたので、
+</span>
+<span class="quote1">&gt; そいつが原因で「Rpl_semi_sync_master_no_tx」がカウントアップされ、「Rpl_semi_sync_master_status」がOFFになったのでは？？と想定しております。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 以上です。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; On Mon, 21 Dec 2020 13:29:11 +0900
+</span>
+<span class="quote1">&gt; yoku0825 &lt;yoku0825@xxxxxxxxxx&gt; wrote:
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote2">&gt; &gt; こんにちは、yoku0825といいます。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 先に伺っておきたいのですが、
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; ・rpl_semi_sync_master_timeout=1000(10秒)
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; rpl_semi_sync_master_timeout=1000 は1秒です。
+</span>
+<span class="quote2">&gt; &gt; メールの書き間違いか、10秒(デフォルトはこちら)と1秒を取り間違えているかが気になります。
+</span>
+<span class="quote2">&gt; &gt; なお、semisyncプラグインは「一度タイムアウトするとAsyncにフォールバックする」ので、
+</span>
+<span class="quote2">&gt; &gt; 最初の1秒または10秒待たされた以降はタイムアウトを待たずにAsyncレプリケーションでレプリカに流れます。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; Rpl_semi_sync_master_no_tx
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; これがカウントアップされそうなあたりをちょっと見てみましたが、binlog_order_commitとかslave_preserve_commit_orderとか関係あるのかないのかなコードが出てきます。
+</span>
+<span class="quote2">&gt; &gt; 心当たりはありますか？
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; <a href="https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L701-L718">https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L701-L718</a>
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; スレーブからエラーを返した来た際も非同期への切り替えが行われるように見えます。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; どんなエラーでしょうか…？ (リレーログの書き込みに失敗したとしても、明確なエラー応答はせずに黙ってACKを返さないものだと思っていました)
+</span>
+<span class="quote2">&gt; &gt; エラーを返すとしたらマスターのエラーログとかに残るのですかね（SQLスレッドは準同期レプリケーションに関わっていないので、SQLスレッドのエラーは関係ありません）
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; yoku0825,
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 2020年12月21日(月) 11:45 内村健司 &lt;uchimura.kenji@xxxxxxxxxx&gt;:
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; 情報書き漏れました。すいません。
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; mysql のバージョンは8.0.19の無償版です。
+</span>
+<span class="quote3">&gt; &gt; &gt; OSはrhel7.7です。
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; 以上、よろしくお願いします。
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote3">&gt; &gt; &gt; 2020/12/21 11:28、内村健司 &lt;uchimura.kenji@xxxxxxxxxx&gt;のメール:
+</span>
+<span class="quote3">&gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; こんにちは。内村と申します。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 初めて投稿させていただきます。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 準同期レプリケーションの非同期切り替えについてご教授ください。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 現在、ロスレスの準同期でレプリケーションを構築しており、
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 「Rpl_semi_sync_master_status」をZabbixで監視(ON以外になったら、警告)する運用にしております。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; レプリケーションは以下の設定です。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ・rpl_semi_sync_master_timeout=1000(10秒)
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ・rpl_semi_sync_master_wait_point=AFTER_SYNC
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; マスター側のAPLでデータ更新量が少ないコミット処理を多数連続で発行した場合、
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 「Rpl_semi_sync_master_no_tx」の値が増加し、
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; そのタイミングで「Rpl_semi_sync_master_status」がOFFになっております。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 準同期から非同期への切り替えはマスターがスレーブにバイナリデータを転送し、
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 10秒返答がなかった場合のみ行われると考えていたのですが、
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; スレーブからエラーを返した来た際も非同期への切り替えが行われるように見えます。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 「Rpl_semi_sync_master_no_tx」の値が増加したら、「Rpl_semi_sync_master_status」が「OFF」になる。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; は動作として正しいのでしょうか。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 準同期から非同期への切り替え契機は以下のパターンであってますでしょうか。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ・スレーブから応答がない場合
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ・スレーブから応答エラーと返信が返ってきた場合　★
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; また、その他の条件でも非同期切り替えが発生するのでしょうか。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ご存じの方がいらっしゃら、コメント・ご教授頂けると幸いです。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 以上、よろしくお願いいたします。
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; 内村健司
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; インタービレッジ株式会社
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt;
+</span>
+<span class="quote4">&gt; &gt; &gt; &gt; ∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+</span>
+
+</pre>
+</div>
+<p class="button"><a href="16620.html">[前]</a><a href="16622.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="16617.html">  16617 2020-12-21 11:28 [内村健司 &lt;uchimura.k] 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16618.html">  16618 2020-12-21 11:45 ┗[内村健司 &lt;uchimura.k] Re: [mysql 16617] 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16619.html">  16619 2020-12-21 13:29 　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16618] Re: [mysql 16617] 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16620.html">  16620 2020-12-21 14:45 　　┗[内村健司 &lt;uchimura.k] Re: 準同期レプリケーションの非同期切り替について</a></span>
+<span class="current">-&gt;&nbsp;<a href="16621.html">  16621 2020-12-22 18:27 　　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16620] Re: 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16622.html">  16622 2020-12-22 22:15 　　　　┗[内村健司 &lt;uchimura.k] Re: 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16623.html">  16623 2020-12-23 00:51 　　　　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16622] Re: 準同期レプリケーションの非同期切り替について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16624.html">  16624 2020-12-23 08:41 　　　　　　┗[内村健司 &lt;uchimura.k] Re: 準同期レプリケーションの非同期切り替について</a></span>
+</pre>
+
+
+</body></html>

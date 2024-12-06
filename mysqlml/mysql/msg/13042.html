@@ -1,11 +1,10 @@
-<html>
-<head>
+<html><head>
 <meta http-equiv="Content-Style-Type" context="text/css">
 <title>mysql:13042</title>
-<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="13041.html">[��]</a><a href="13043.html">[��]</a><a href="../list/13001-13100.html">[�ֹ�����]</a><a href="../thread/13001-13100.html">[����åɰ���]</a></p>
+<p class="button"><a href="13041.html">[前]</a><a href="13043.html">[次]</a><a href="../list/13001-13100.html">[番号順一覧]</a><a href="../thread/13001-13100.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:13042
 </p>
@@ -13,53 +12,52 @@ mysql:13042
 <p>
 From: &lt;ska_king2005@xxxxxxxxxx&gt;<br>
 Date: Fri, 2 Jun 2006 00:01:25 +0900 (JST)<br>
-Subject: [mysql 13042] Re: �� InnoDB �ۥե饰���Ȥ�����Ū���Τ���ˡ�ˤĤ���<br>
+Subject: [mysql 13042] Re: 【 InnoDB 】フラグメントを定量的に知る方法について<br>
 
 </p>
 </div>
 <div class="body">
 <pre>
+ska king です。
 
-ska king �Ǥ���
+あくまで推測ですが、結果から言うと「InnoDBのフラグメンテーション状況を定量的に知る方法はないので、後述する方法で定期的にInnoDBの最適化を行う」しかないのかなと思います。
+定期的というのは、日々のトランザクション数に応じて1ヶ月/3ヶ月/6ヶ月単位で行えばよいと思います。
 
-�����ޤǿ�¬�Ǥ�������̤�������ȡ�InnoDB�Υե饰���ơ���������������Ū���Τ���ˡ�Ϥʤ��Τǡ���Ҥ�����ˡ�����Ū��InnoDB�κ�Ŭ����Ԥ��פ����ʤ��Τ��ʤȻפ��ޤ���
-���Ū�Ȥ����Τϡ������Υȥ�󥶥��������˱�����1����/3����/6����ñ�̤ǹԤ��Ф褤�Ȼפ��ޤ���
+以下は、質問に対しての回答です。ほとんど推測ですが。
 
-�ʲ��ϡ�������Ф��Ƥβ����Ǥ����ۤȤ�ɿ�¬�Ǥ�����
+・1について
+InnoDBのフラグメント状況を定量的に知る方法は無いと思われます。
+もしかしたら、「show innodb status」や「show status」コマンド
+にヒントらしきものがあるのかもしれませんが、英語はさっぱりなもので。。。
 
-��1�ˤĤ���
-InnoDB�Υե饰���Ⱦ���������Ū���Τ���ˡ��̵���Ȼפ��ޤ���
-�⤷�������顢��show innodb status�פ��show status�ץ��ޥ��
-�˥ҥ�Ȥ餷����Τ�����Τ��⤷��ޤ��󤬡��Ѹ�Ϥ��äѤ�ʤ�Τǡ�����
+・2について
+mysqlcheckコマンドはMyISAM型やBDB型のテーブルに対しての最適化で、InnoDB型に
+対しては使用できなかった気がします。
+推測ですが、内部的には「ANALYZE TABLE」や「OPTIMIZE TABLE」を呼んでいるのかもしれません。
+MyISAM型であれば、このコマンドでインデックスのソートや統計情報を最新にするので、
+検索効率等をアップさせることができます。
 
-��2�ˤĤ���
-mysqlcheck���ޥ�ɤ�MyISAM����BDB���Υơ��֥���Ф��Ƥκ�Ŭ���ǡ�InnoDB����
-�Ф��Ƥϻ��ѤǤ��ʤ��ä��������ޤ���
-��¬�Ǥ���������Ū�ˤϡ�ANALYZE TABLE�פ��OPTIMIZE TABLE�פ�Ƥ�Ǥ���Τ��⤷��ޤ���
-MyISAM���Ǥ���С����Υ��ޥ�ɤǥ���ǥå����Υ����Ȥ����׾����ǿ��ˤ���Τǡ�
-������Ψ���򥢥åפ����뤳�Ȥ��Ǥ��ޤ���
+InnoDBのフラグメンテーションの最適化であれば次の二通りがあります。
 
-InnoDB�Υե饰���ơ������κ�Ŭ���Ǥ���м������̤꤬����ޤ���
+① mysqldumpコマンドでテーブルを再構築する方法
+② ALTER TABLE文でテーブル文を再構築する方法。
 
-�� mysqldump���ޥ�ɤǥơ��֥��ƹ��ۤ�����ˡ
-�� ALTER TABLEʸ�ǥơ��֥�ʸ��ƹ��ۤ�����ˡ��
+上記の二通りで、InnoDBデータファイル内のインデックス領域とデータ領域を最適化することができるはずです。
+いずれの方法も、MySQLリファレンスマニュアルの「7.5.13.3. InnoDB テーブルのデフラグメント化」に記述されていますので、参照することをお勧めします。また、試す前には必ずバックアップを取得してください。
+但し、InnoDBデータファイルサイズが小さくなるわけではないので注意して下さい。
 
-�嵭�����̤�ǡ�InnoDB�ǡ����ե�������Υ���ǥå����ΰ�ȥǡ����ΰ���Ŭ�����뤳�Ȥ��Ǥ���Ϥ��Ǥ���
-���������ˡ�⡢MySQL��ե���󥹥ޥ˥奢��Ρ�7.5.13.3. InnoDB �ơ��֥�Υǥե饰���Ȳ��פ˵��Ҥ���Ƥ��ޤ��Τǡ����Ȥ��뤳�Ȥ򤪴��ᤷ�ޤ����ޤ�������ˤ�ɬ���Хå����åפ�������Ƥ���������
-â����InnoDB�ǡ����ե����륵�������������ʤ�櫓�ǤϤʤ��Τ����դ��Ʋ�������
+以下は、全くの未検証方法で、運用段階でどのような弊害が発生するかわからないので、実行する場合は十分に検証して下さい。
 
-�ʲ��ϡ�������̤������ˡ�ǡ������ʳ��ǤɤΤ褦��������ȯ�����뤫�狼��ʤ��Τǡ��¹Ԥ�����Ͻ�ʬ�˸��ڤ��Ʋ�������
+① 設定ファイルの[mysqld]セクションに「innodb_file_per_table」オプションを記述する。
+② 定期的にmysqldumpを使用してテーブル単位に最適化を行う。
 
-�� ����ե������[mysqld]���������ˡ�innodb_file_per_table�ץ��ץ����򵭽Ҥ��롣
-�� ���Ū��mysqldump����Ѥ��ƥơ��֥�ñ�̤˺�Ŭ����Ԥ���
+①によって、InnoDBのテーブル単位に「テーブル名.ibd」というファイルが作成されます。
+このファイルは、MyISAMテーブルを作成した時に生成される「MYD（データファイル）」「MYI（インデックスファイル）」を合わせたようなファイルです。
+なので、「一つのInnoDBデータファイルの肥大化を防ぐことができ、テーブル単位で最適化できる」のではないかと思っています。
+ただOSの制限によって、一つのInnoDBデータファイルが肥大化するのを防ぎたいだけであれば、「innodb_data_file_path」の指定で十分だと思います。
 
-���ˤ�äơ�InnoDB�Υơ��֥�ñ�̤ˡ֥ơ��֥�̾.ibd�פȤ����ե����뤬��������ޤ���
-���Υե�����ϡ�MyISAM�ơ��֥�����������������������MYD�ʥǡ����ե�����ˡס�MYI�ʥ���ǥå����ե�����ˡפ��碌���褦�ʥե�����Ǥ���
-�ʤΤǡ��ְ�Ĥ�InnoDB�ǡ����ե���������粽���ɤ����Ȥ��Ǥ����ơ��֥�ñ�̤Ǻ�Ŭ���Ǥ���פΤǤϤʤ����ȻפäƤ��ޤ���
-����OS�����¤ˤ�äơ���Ĥ�InnoDB�ǡ����ե����뤬���粽����Τ��ɤ����������Ǥ���С���innodb_data_file_path�פλ���ǽ�ʬ���Ȼפ��ޤ���
-
-�ʾ�Ǥ���Ĺʸ�ˤʤäƿ���������ޤ���
-ͭ���Ԥ������ĥå��ߤ���������ꤤ�������ޤ�������
+以上です。長文になって申し訳ありません。
+有識者の方々ツッコミよろしくお願いいたします。。。
 
 
 
@@ -71,16 +69,16 @@ Let's start Yahoo! Auction  -  Free Campaign Now!
 </pre>
 </div>
 <div class="attach">
-<h3 class="attachtitle">ź�եե�����</h3>
+<h3 class="attachtitle">添付ファイル</h3>
 <ul>
 <li><a href="13042/0/index.html"> [text/html]</a>
-</ul>
+</li></ul>
 </div>
-<p class="button"><a href="13041.html">[��]</a><a href="13043.html">[��]</a><a href="../list/13001-13100.html">[�ֹ�����]</a><a href="../thread/13001-13100.html">[����åɰ���]</a></p>
-<pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="13036.html">  13036 2006-05-30 19:57 [�ײ������� &lt;hisaoka@] ��InnoDB�ۥե饰���Ȥ�����Ū���Τ���ˡ�ˤĤ���</a></span>
-<span class="current">-&gt;&nbsp;<a href="13042.html">@ 13042 2006-06-02 00:01 ��[&lt;ska_king2005@xxxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="13080.html">@ 13080 2006-06-06 09:21 ����[�ײ������� &lt;hisaoka@]                                     </a></span>
+<p class="button"><a href="13041.html">[前]</a><a href="13043.html">[次]</a><a href="../list/13001-13100.html">[番号順一覧]</a><a href="../thread/13001-13100.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="13036.html">  13036 2006-05-30 19:57 [久岡　秀司 &lt;hisaoka@] 【InnoDB】フラグメントを定量的に知る方法について</a></span>
+<span class="current">-&gt;&nbsp;<a href="13042.html">@ 13042 2006-06-02 00:01 ┗[&lt;ska_king2005@xxxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="13080.html">@ 13080 2006-06-06 09:21 　┗[久岡　秀司 &lt;hisaoka@]                                     </a></span>
 </pre>
-</body>
-</html>
+
+
+</body></html>

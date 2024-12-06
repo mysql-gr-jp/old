@@ -1,0 +1,33 @@
+<html><head></head><body><div dir="ltr">岡善博＠中札内です。<br><div>mysqldは、落ちていませんでした。</div><div><br></div>mysqldumpのオプションを増やして、実行したら、<br>mysqldump --single-transaction --no-tablespaces --set-gtid-purged=OFF \<br>-u zenpakudb -p zenpakudb &gt; /home/oka/BACKUP/mysqldump_zenpakudb.dump<br>下記のエラーが出ました。<br>mysqldump: Couldn't execute 'show create table `wp_commentmeta`':\<br><div>Tablespace is missing for table `zenpakudb`.`wp_commentmeta`. (1812)</div><div><br></div>ここでwp_commentmetaの作り直しを行いました。<br>#cp -a /var/db/mysql20210920/zenpakudb.NEW/wp_commentmeta.ibd . <br>alter table wp_commentmeta DISCARD TABLESPACE;<br>alter table wp_commentmeta IMPORT TABLESPACE;<br><br>再度バックアップを実行。<br>mysqldump --single-transaction --no-tablespaces --set-gtid-purged=OFF \<br>-u zenpakudb -p zenpakudb &gt; /home/oka/BACKUP/mysqldump_zenpakudb.dump<br>を実行したら、前のエラーが消え、次のエラーが出ました。<br>mysqldump: Couldn't execute 'show create table `wp_options`':\<br>Tablespace is missing for table `zenpakudb`.`wp_options`. (1812) <br><div><br></div><div>次は、wp_optionsの作り直し。</div>♯cp -a /var/db/mysql20210920/zenpakudb.NEW/wp_options.ibd . <br>alter table wp_options DISCARD TABLESPACE;<br>alter table wp_options DISCARD TABLESPACE;<br><br>再度dumpを実行。<br>mysqldump: Couldn't execute 'show create table `wp_commentmeta`':\<br>Tablespace is missing for table `zenpakudb`.`wp_commentmeta`. (1812)<br>下記のエラーに成りました。<br>mysqldump: Couldn't execute 'show table status like 'wp\_options'':\<br>Lost connection to MySQL server during query (2013)<br>ここで力尽きました。<br></div><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">2021年9月24日(金) 13:03 yoku0825 &lt;<a href="mailto:yoku0825@mysql.gr.jp">yoku0825@mysql.gr.jp</a>&gt;:<br></div><blockquote class="gmail_quote" style="margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex">yoku0825です。<br>
+<br>
+MySQL 5.7.31とそれ以降では、mysqldump(のデフォルトのオプション)にはPROCESS権限が必要になりました。<br>
+ジェネラルテーブルスペースを使っていなければ（そしてたぶん使っていなさそう）、mysqldumpのオプションに<br>
+`--no-tablespaces` をつけると良いかも知れません。<br>
+<br>
+<a href="https://dev.mysql.com/doc/relnotes/mysql/5.7/en/news-5-7-31.html#mysqld-5-7-31-security" rel="noreferrer" target="_blank">https://dev.mysql.com/doc/relnotes/mysql/5.7/en/news-5-7-31.html#mysqld-5-7-31-security</a><br>
+<br>
+しかし、エラーになったあと2013のエラーが出ているのが気になります。mysqld落っこちたような気がしますね。<br>
+mysqldのエラーログを見て、落ちていないかどうか見てあげてください。<br>
+もし落ちていたようなら、innodb_force_recoveryを上げながら少しずつ試す必要があるような気がします。<br>
+<a href="https://dev.mysql.com/doc/refman/5.7/en/forcing-innodb-recovery.html" rel="noreferrer" target="_blank">https://dev.mysql.com/doc/refman/5.7/en/forcing-innodb-recovery.html</a><br>
+<br>
+<br>
+yoku0825,<br>
+<br>
+2021年9月24日(金) 11:59 Takahiro Kambe &lt;<a href="mailto:taca@back-street.net" target="_blank">taca@back-street.net</a>&gt;:<br>
+&gt;<br>
+&gt; こんにちは。<br>
+&gt;<br>
+&gt; In message &lt;<a href="mailto:CAHxEFg692ELWxC3TuTeaGuTmA%2BKPYx6ZXU3ye4EckesXV8OxNQ@mail.gmail.com" target="_blank">CAHxEFg692ELWxC3TuTeaGuTmA+KPYx6ZXU3ye4EckesXV8OxNQ@mail.gmail.com</a>&gt;<br>
+&gt;    on Fri, 24 Sep 2021 10:36:20 +0900,<br>
+&gt;    岡善博 &lt;<a href="mailto:zenpaku@gmail.com" target="_blank">zenpaku@gmail.com</a>&gt; wrote:<br>
+&gt; &gt; mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS \<br>
+&gt; &gt; privilege(s) for this operation' when trying to dump tablespaces<br>
+&gt; この部分についてはmysqldumpをしようとしているユーザーに権限が足らない<br>
+&gt; のだと思います。<br>
+&gt;<br>
+&gt; --<br>
+&gt; 神戸 隆博 / Takahiro Kambe<br>
+&gt;<br>
+</blockquote></div>
+</body></html>

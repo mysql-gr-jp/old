@@ -1,31 +1,30 @@
-  <HTML>
-  <HEAD>
+<html><head>
   <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
      from manual.ja.texi on 20 July 2001 -->
 
-  <TITLE>MySQL Reference Manual for version 3.23.38. - 11  Replication in MySQL</TITLE>
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
-  </HEAD>
-  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Server.html">previous</A>, <A HREF="manual.ja_Fulltext_Search.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
-<P><HR><P>
+  <title>MySQL Reference Manual for version 3.23.38. - 11  Replication in MySQL</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000" link="#101090" vlink="#7030B0">
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Server.html">previous</a>, <a href="manual.ja_Fulltext_Search.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+<p></p><hr><p>
 
 
-<H1><A NAME="Replication" HREF="manual.ja_toc.html#Replication">11  Replication in MySQL</A></H1>
+</p><h1><a name="Replication" href="manual.ja_toc.html#Replication">11  Replication in MySQL</a></h1>
 
-<P>
-This chapter describes the various replication features in <STRONG>MySQL</STRONG>.
+<p>
+This chapter describes the various replication features in <strong>MySQL</strong>.
 It serves as a reference to the options available with replication.
 You will be introduced to replication and learn how to implement it.  
 Towards the end, there are some frequently asked questions and descriptions 
 of problems and how to solve them.
 
-</P>
+</p>
 
 
-<H2><A NAME="Replication_Intro" HREF="manual.ja_toc.html#Replication_Intro">11.1  Introduction</A></H2>
+<h2><a name="Replication_Intro" href="manual.ja_toc.html#Replication_Intro">11.1  Introduction</a></h2>
 
-<P>
+<p>
 One way replication can be used is to increase both robustness and
 speed. For robustness you can have two systems and can switch to the backup if
 you have problems with the master. The extra speed is achieved by
@@ -33,318 +32,312 @@ sending a part of the non-updating queries to the replica server. Of
 course this only works if non-updating queries dominate, but that is the
 normal case.
 
-</P>
-<P>
-バージョン 3.23.15 から、<STRONG>MySQL</STRONG> はワンウェイ・レプリケーションを
+</p>
+<p>
+バージョン 3.23.15 から、<strong>MySQL</strong> はワンウェイ・レプリケーションを
 サポートしました。 
 1つのサーバーがマスターの役をつとめ，もう一方は、スレーブの役をつとめます。
 1つのサーバーはマスターとして動くことも、他に対するスレーブとして動作することも可能です。
-マスターサーバーは update のバイナリログを保持しています( 「<A HREF="manual.ja_Log_files.html#Binary_log">23.4  The Binary Log</A>」節参照.)。
+マスターサーバーは update のバイナリログを保持しています( 「<a href="manual.ja_Log_files.html#Binary_log">23.4  The Binary Log</a>」節参照.)。
 また、インデックスファイルは、バイナリログのローテーションの切り出し記録を残すために保持されます。
 The slave, upon connecting, informs the master where it
 left off since the last successfully propagated update, catches up on
 the updates, and then blocks and waits for the master to notify it of
 the new updates.
 
-</P>
-<P>
+</p>
+<p>
 もしデータベースの複製を行なうなら、このデータベースに対する全ての更新は
 マスター上で行なわなくてはならないことに注意！
 
-</P>
-<P>
+</p>
+<p>
 古いバージョンでは、単純な複製に 更新ログファイルを使用します。
- 「<A HREF="manual.ja_Common_problems.html#Log_Replication">22.1  更新ログを使用したデータベースの複製</A>」節参照.
+ 「<a href="manual.ja_Common_problems.html#Log_Replication">22.1  更新ログを使用したデータベースの複製</a>」節参照.
 
-</P>
-<P>
+</p>
+<p>
 Another benefit of using replication is that one can get live backups of
 the system by doing a backup on a slave instead of doing it on the
-master.  「<A HREF="manual.ja_Common_problems.html#Backup">22.2  データベースのバックアップ</A>」節参照.
+master.  「<a href="manual.ja_Common_problems.html#Backup">22.2  データベースのバックアップ</a>」節参照.
 
-</P>
-<P>
-<A NAME="IDX1141"></A>
+</p>
+<p>
+<a name="IDX1141"></a>
 
 
-<H2><A NAME="Replication_Implementation" HREF="manual.ja_toc.html#Replication_Implementation">11.2  Replication Implementation Overview</A></H2>
+</p><h2><a name="Replication_Implementation" href="manual.ja_toc.html#Replication_Implementation">11.2  Replication Implementation Overview</a></h2>
 
-<P>
-<STRONG>MySQL</STRONG> のレプリケーションは、データベースの全ての変更(update, delete, etc)を
+<p>
+<strong>MySQL</strong> のレプリケーションは、データベースの全ての変更(update, delete, etc)を
 サーバーでのバイナリログに保持し、スレーブサーバーはマスターサーバーの
 バイナリログから保存されているクエリを読みだし、データのコピーのために
 同じクエリを実行します。
 
-</P>
-<P>
-It is <STRONG>very important</STRONG> to realize that the binary log is simply a
+</p>
+<p>
+It is <strong>very important</strong> to realize that the binary log is simply a
 record starting from a fixed point in time (the moment you enable binary
 logging).
 マスター上でバイナリログを有効にしたその時に、
 いかなるスレーブサーバーもマスターからの全てのデータのコピーが必要です。
 スレーブのデータがマスターに存在するデータと違う状態でスレーブを起動したならば、
-<STRONG>バイナリログが開始されたときに</STRONG>、スレーブは失敗するでしょう。
+<strong>バイナリログが開始されたときに</strong>、スレーブは失敗するでしょう。
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> の将来のバージョン(4.0)では、新しいスレーブサーバーのために、
+</p>
+<p>
+<strong>MySQL</strong> の将来のバージョン(4.0)では、新しいスレーブサーバーのために、
 (できる限り、)データのスナップショットを不要にするつもりでいます。
 ロックをしなくても live backyup を通してスレーブをセットアップできるように。
 しかし現時点では、スナップショットを取る間は、マスターを
 read lock を使って全ての書き込みから保護したり、
 シャットダウンしたりする必要があります。
 
-</P>
-<P>
+</p>
+<p>
 一旦スレーブが適切に構成され、実行していれば、スレーブは単にマスターに接続して、
 更新が処理されるのを待つでしょう。
 もしマスターがなくなったり、または、スレーブがマスターとの接続性を失えば、
-スレーブは再接続できるまで <CODE>master-connect-retry</CODE> 秒毎に接続を試み、
+スレーブは再接続できるまで <code>master-connect-retry</code> 秒毎に接続を試み、
 そして、更新の監視を再開します。
 
-</P>
-<P>
+</p>
+<p>
 Each slave keeps track of where it left off. The master server has no
 knowledge of how many slaves there are or which ones are up-to-date at
 any given time.
 
-</P>
-<P>
+</p>
+<p>
 The next section explains the master/slave setup process in more detail.
 
-</P>
+</p>
 
 
-<H2><A NAME="Replication_HOWTO" HREF="manual.ja_toc.html#Replication_HOWTO">11.3  HOWTO</A></H2>
+<h2><a name="Replication_HOWTO" href="manual.ja_toc.html#Replication_HOWTO">11.3  HOWTO</a></h2>
 
-<P>
+<p>
 Below is a quick description of how to set up complete replication on
-your current <STRONG>MySQL</STRONG> server. It assumes you want to replicate all
+your current <strong>MySQL</strong> server. It assumes you want to replicate all
 your databases and have not configured replication before. You will need
 to shutdown your master server briefly to complete the steps outlined
 below.
 
-</P>
+</p>
 
-<OL>
-<LI>
+<ol>
+<li>
 
-マスターとスレーブに、最新の <STRONG>MySQL</STRONG> (同じバージョン) をインストールします。
+マスターとスレーブに、最新の <strong>MySQL</strong> (同じバージョン) をインストールします。
 
 バージョン 3.23.29 以上を使用すること。
 これより前のバージョンでは、バイナリログのフォーマットが違い、また、新しい
 バージョンで直っているバグも含まれます。
 最新のバージョンで確かめるまでは、バグレポートを送らないでください。
 
-<LI>
+</li><li>
 
 マスター上に、レプリケーション用の特別なユーザーを登録します。
-このユーザーには <CODE>FILE</CODE> 権限が必要です。全てのスレーブからこのユーザーで
+このユーザーには <code>FILE</code> 権限が必要です。全てのスレーブからこのユーザーで
 接続できるようにします。
 もしユーザーがレプリケーションのみ(推奨)を行なうなら、
 他の権限は与える必要は有りません。
 
-例えば、<CODE>repl</CODE> という名前のユーザー(マスターにアクセス可能なユーザー)を
+例えば、<code>repl</code> という名前のユーザー(マスターにアクセス可能なユーザー)を
 作成するには、次のようにします：
 
 
-<PRE>
-GRANT FILE ON *.* TO repl@"%" IDENTIFIED BY '&#60;password&#62;';
-</PRE>
+<pre>GRANT FILE ON *.* TO repl@"%" IDENTIFIED BY '&lt;password&gt;';
+</pre>
 
-<LI>
+</li><li>
 
-マスター上の <STRONG>MySQL</STRONG> を停止。
+マスター上の <strong>MySQL</strong> を停止。
 
 
-<PRE>
-mysqladmin -u root -p&#60;password&#62; shutdown
-</PRE>
+<pre>mysqladmin -u root -p&lt;password&gt; shutdown
+</pre>
 
-<LI>
+</li><li>
 
 マスターサーバーにある全てのデータのスナップショットを取る。
 
-(Unixでは) もっとも簡単な方法は <STRONG>tar</STRONG> を使用してデータディレクトリの
+(Unixでは) もっとも簡単な方法は <strong>tar</strong> を使用してデータディレクトリの
 アーカーブを作成することです。
 The exact data
 directory location depends on your installation.
 
 
-<PRE>
-tar -cvf /tmp/mysql-snapshot.tar /path/to/data-dir
-</PRE>
+<pre>tar -cvf /tmp/mysql-snapshot.tar /path/to/data-dir
+</pre>
 
 Windows users can use WinZip or similar software to create an archive of
 the data directory.
 
-<LI>
+</li><li>
 
-マスターの <CODE>my.cnf</CODE> ファイル中の <CODE>[mysqld]</CODE> セクションに、
-<CODE>log-bin</CODE> と <CODE>server-id=unique number</CODE> を加えます。
+マスターの <code>my.cnf</code> ファイル中の <code>[mysqld]</code> セクションに、
+<code>log-bin</code> と <code>server-id=unique number</code> を加えます。
 ここで指定するマスターの id 番号とスレーブの id 番号は違うものでなくてはなりません。
-Think of <CODE>server-id</CODE> as something similar
+Think of <code>server-id</code> as something similar
 to the IP address - it uniquely identifies the server instance in the
 community of replication partners.
 
 
-<PRE>
-[mysqld]
+<pre>[mysqld]
 log-bin
 server-id=1
-</PRE>
+</pre>
 
-<LI>
+</li><li>
 
-Restart <STRONG>MySQL</STRONG> on the master.
+Restart <strong>MySQL</strong> on the master.
 
-<LI>
+</li><li>
 
-スレーブの <CODE>my.cnf</CODE> ファイルに、次を追加します：
+スレーブの <code>my.cnf</code> ファイルに、次を追加します：
 
 
-<PRE>
-master-host=&#60;hostname of the master&#62;
-master-user=&#60;replication user name&#62;
-master-password=&#60;replication user password&#62;
-master-port=&#60;TCP/IP port for master&#62;
-server-id=&#60;some unique number between 2 and 2^32-1&#62;
-</PRE>
+<pre>master-host=&lt;hostname of the master&gt;
+master-user=&lt;replication user name&gt;
+master-password=&lt;replication user password&gt;
+master-port=&lt;TCP/IP port for master&gt;
+server-id=&lt;some unique number between 2 and 2^32-1&gt;
+</pre>
 
-replacing the values in &#60;&#62; with what is relevant to your system.
+replacing the values in &lt;&gt; with what is relevant to your system.
 
-<CODE>server-id</CODE> には、サーバーそれぞれで違う番号にしなくてはなりません。
+<code>server-id</code> には、サーバーそれぞれで違う番号にしなくてはなりません。
 (同じ複製のグループ内で)。
-もし server-id を指定しなければ、 <CODE>master-host</CODE> が無い場合には 1 に
+もし server-id を指定しなければ、 <code>master-host</code> が無い場合には 1 に
 なり、それ以外の場合には 2 に自動的になります。
-マスターで <CODE>server-id</CODE> の記入漏れがあった場合、
+マスターで <code>server-id</code> の記入漏れがあった場合、
 マスターはスレーブからの接続を拒否します。
 スレーブ上での記入漏れの場合には、スレーブはマスターへの接続を拒否します。
-Thus, omitting <CODE>server-id</CODE> is only good for backup with a
+Thus, omitting <code>server-id</code> is only good for backup with a
 binary log.
 
-<LI>
+</li><li>
 
 スレーブのデータディレクトリにデータのスナップショットをコピーします。
 ファイルとディレクトリのユーザーとパーミッションは確実に正しいものに
-してください。 これらのファイルに対して、 <STRONG>MySQL</STRONG> を実行している
+してください。 これらのファイルに対して、 <strong>MySQL</strong> を実行している
 アカウントで、読み書きできるようにする必要があります。
 
-<LI>スレーブの再起動。
+</li><li>スレーブの再起動。
 
-</OL>
+</li></ol>
 
-<P>
+<p>
 上記を行なった後、スレーブはマスターに接続し、スナップショット以後の
 更新をキャッチするはずです。
 
-</P>
-<P>
-もしスレーブに <CODE>server-id</CODE> をセットし忘れた場合、エラーログファイルに
+</p>
+<p>
+もしスレーブに <code>server-id</code> をセットし忘れた場合、エラーログファイルに
 次のようなエラーが出るでしょう：
 
-</P>
+</p>
 
-<PRE>
-Warning: one should set server_id to a non-0 value if master_host is set.
+<pre>Warning: one should set server_id to a non-0 value if master_host is set.
 The server will not act as a slave.
-</PRE>
+</pre>
 
-<P>
+<p>
 もしマスターにセットし忘れたなら、スレーブはマスターに接続できません。
 
-</P>
-<P>
+</p>
+<p>
 もし何かの理由でスレーブが複製できなかったなら、スレーブ上のエラーログ
 ファイルに、エラーメッセージが出るでしょう。
 
-</P>
-<P>
+</p>
+<p>
 一度スレーブがレプリケーションを始めたなら、
 エラーログファイルと同じディレクトリに
-<CODE>master.info</CODE> ファイルを見ることができます。
-<CODE>master.info</CODE> ファイルはスレーブに使用され、
+<code>master.info</code> ファイルを見ることができます。
+<code>master.info</code> ファイルはスレーブに使用され、
 これは、マスターのバイナリログのいくつまで処理したかを保持しています。
-このファイルを消したり編集したりしては <STRONG>いけません</STRONG>。
+このファイルを消したり編集したりしては <strong>いけません</strong>。
 (あなたがやろうとしていることが確実に分かるまでは)。
 そういうやむを得ない場合には、
-<CODE>CHANGE MASTER TO</CODE> コマンドの使用の方が良いです。
+<code>CHANGE MASTER TO</code> コマンドの使用の方が良いです。
 
-</P>
+</p>
 
-<P>
-<A NAME="IDX1142"></A>
-<A NAME="IDX1143"></A>
-<A NAME="IDX1144"></A>
+<p>
+<a name="IDX1142"></a>
+<a name="IDX1143"></a>
+<a name="IDX1144"></a>
 
 
-<H2><A NAME="Replication_Features" HREF="manual.ja_toc.html#Replication_Features">11.4  Replication Features and known problems</A></H2>
+</p><h2><a name="Replication_Features" href="manual.ja_toc.html#Replication_Features">11.4  Replication Features and known problems</a></h2>
 
-<P>
+<p>
 Below is an explanation of what is supported and what is not:
 
-</P>
+</p>
 
 
-<UL>
-<LI>
+<ul>
+<li>
 
-レプリケーションは <CODE>AUTO_INCREMENT</CODE>,
-<CODE>LAST_INSERT_ID</CODE>, <CODE>TIMESTAMP</CODE> 値を正しく扱います。
+レプリケーションは <code>AUTO_INCREMENT</code>,
+<code>LAST_INSERT_ID</code>, <code>TIMESTAMP</code> 値を正しく扱います。
 
-<LI>
+</li><li>
 
-更新中の <CODE>RAND()</CODE> はうまく複製できません。
-<CODE>RAND(some_non_rand_expr)</CODE> を更新には使用します。
-例えば、<CODE>UNIX_TIMESTAMP()</CODE> を <CODE>RAND()</CODE>　の引数に使用するとか。
+更新中の <code>RAND()</code> はうまく複製できません。
+<code>RAND(some_non_rand_expr)</code> を更新には使用します。
+例えば、<code>UNIX_TIMESTAMP()</code> を <code>RAND()</code>　の引数に使用するとか。
 
-<LI>
+</li><li>
 
-<CODE>LOAD DATA INFILE</CODE> will be handled properly as long as the file
+<code>LOAD DATA INFILE</code> will be handled properly as long as the file
 still resides on the master server at the time of update
-propagation. <CODE>LOAD LOCAL DATA INFILE</CODE> will be skipped.
+propagation. <code>LOAD LOCAL DATA INFILE</code> will be skipped.
 
-<LI>
+</li><li>
 
 ユーザー変数を使用したクエリは、(まだ) replication-safe ではありません。
 
-<LI>
+</li><li>
 
-<CODE>FLUSH</CODE> コマンドはバイナリログに記録されません。
+<code>FLUSH</code> コマンドはバイナリログに記録されません。
 もちろん、スレーブに複製されません。
-これは <CODE>FLUSH</CODE> が通常は何もデータを変更しないからです。
-しかし、仮に <CODE>MySQL</CODE> の権限データベースを複製していて、
-<CODE>GRANT</CODE> 文ではなくて直接 <CODE>MySQL</CODE> 権限テーブルを変更した場合には、
-権限を反映させるために、スレーブ上で <CODE>FLUSH PRIVILEGES</CODE> を行なわなくては
+これは <code>FLUSH</code> が通常は何もデータを変更しないからです。
+しかし、仮に <code>MySQL</code> の権限データベースを複製していて、
+<code>GRANT</code> 文ではなくて直接 <code>MySQL</code> 権限テーブルを変更した場合には、
+権限を反映させるために、スレーブ上で <code>FLUSH PRIVILEGES</code> を行なわなくては
 なりません。
 
-<LI>
+</li><li>
 
 Temporary tables starting in 3.23.29 are replicated properly with the
 exception of the case when you shut down slave server ( not just slave thread),
 you have some temporary tables open, and the are used in subsequent updates.
-To deal with this problem, to shut down the slave, do <CODE>SLAVE STOP</CODE>, then
-check <CODE>Slave_open_temp_tables</CODE> variable to see if it is 0, then issue
-<CODE>mysqladmin shutdown</CODE>. If the number is not 0, restart the slave thread
-with <CODE>SLAVE START</CODE> and see
+To deal with this problem, to shut down the slave, do <code>SLAVE STOP</code>, then
+check <code>Slave_open_temp_tables</code> variable to see if it is 0, then issue
+<code>mysqladmin shutdown</code>. If the number is not 0, restart the slave thread
+with <code>SLAVE START</code> and see
 if you have better luck next time. There will be a cleaner solution, but it
 has to wait until version 4.0.
 In earlier versions temporary tables are not being replicated properly - we
-recommend that you either upgrade, or execute <CODE>SET SQL_LOG_BIN=0</CODE> on
+recommend that you either upgrade, or execute <code>SET SQL_LOG_BIN=0</code> on
 your clients before all queries with temp tables.
 
-<LI>
+</li><li>
 
-<STRONG>MySQL</STRONG> は 1 つのマスターと複数のスレーブの構成のみをサポートします。
+<strong>MySQL</strong> は 1 つのマスターと複数のスレーブの構成のみをサポートします。
 We will in 4.x
 add a voting algorithm to automatically change master if something goes
 wrong with the current master. We will also introduce 'agent' processes
 to help doing load balancing by sending select queries to different
 slaves.
 
-<LI>
+</li><li>
 
-バージョン 3.23.26 から、<CODE>log-slave-updates</CODE> を有効にすることで、
+バージョン 3.23.26 から、<code>log-slave-updates</code> を有効にすることで、
 マスターとスレーブの関係を輪っか状にすることが可能です。
 
 しかし、多くのクエリは、この種のセットアップでは正しく動作しません。
@@ -354,9 +347,8 @@ slaves.
 これは以下のようなセットアップを意味します：
 
 
-<PRE>
-A -&#62; B -&#62; C -&#62; A
-</PRE>
+<pre>A -&gt; B -&gt; C -&gt; A
+</pre>
 
 このセットアップはテーブル間での更新に何も衝突が無い場合にのみ、動作します。
 仮に A と C でデータを insert するとき、C にinsertするレコードのキーと
@@ -367,346 +359,345 @@ if the order in which the updates are applied matters.
 Note that the log format has changed in Version 3.23.26 so that
 pre-3.23.26 slaves will not be able to read it.
 
-<LI>
+</li><li>
 
 もしスレーブ上でクエリがエラーになると、スレーブのスレッドは停止され、
- <CODE>.err</CODE> ファイルにメッセージが現われます。
+ <code>.err</code> ファイルにメッセージが現われます。
 この場合、スレーブを手動で接続し、エラーの原因を修正し(例えば、テーブルが無いとか)、
-その後、 <CODE>SLAVE START</CODE> SQLコマンドを実行します
+その後、 <code>SLAVE START</code> SQLコマンドを実行します
 (このコマンドはバージョン 3.23.16 以上から)。
 バージョン 3.23.15 までは、サーバーを再起動しなくてはなりません。
 
-<LI>
+</li><li>
 
 If connection to the master is lost, the slave will retry immediately,
-and then in case of failure every <CODE>master-connect-retry</CODE> (default
+and then in case of failure every <code>master-connect-retry</code> (default
 60) seconds. Because of this, it is safe to shut down the master, and
 then restart it after a while. The slave will also be able to deal with
 network connectivity outages.
 
-<LI>
+</li><li>
 
 Shutting down the slave (cleanly) is also safe, as it keeps track of
 where it left off.  Unclean shutdowns might produce problems, especially
 if disk cache was not synced before the system died. Your system fault
 tolerance will be greatly increased if you have a good UPS.
 
-<LI>
+</li><li>
 
 If the master is listening on a non-standard port, you will also need to
-specify this with <CODE>master-port</CODE> parameter in <CODE>my.cnf</CODE> .
+specify this with <code>master-port</code> parameter in <code>my.cnf</code> .
 
-<LI>
+</li><li>
 
 In Version 3.23.15, all of the tables and databases will be
 replicated. Starting in Version 3.23.16, you can restrict replication to
-a set of databases with <CODE>replicate-do-db</CODE> directives in
-<CODE>my.cnf</CODE> or just exclude a set of databases with
-<CODE>replicate-ignore-db</CODE>. Note that up until Version 3.23.23, there was a bug
-that did not properly deal with <CODE>LOAD DATA INFILE</CODE> if you did it in
+a set of databases with <code>replicate-do-db</code> directives in
+<code>my.cnf</code> or just exclude a set of databases with
+<code>replicate-ignore-db</code>. Note that up until Version 3.23.23, there was a bug
+that did not properly deal with <code>LOAD DATA INFILE</code> if you did it in
 a database that was excluded from replication.
 
-<LI>
+</li><li>
 
-Starting in Version 3.23.16, <CODE>SET SQL_LOG_BIN = 0</CODE> will turn off
-replication (binary) logging on the master, and <CODE>SET SQL_LOG_BIN =
-1</CODE> will turn in back on - you must have the process privilege to do
+Starting in Version 3.23.16, <code>SET SQL_LOG_BIN = 0</code> will turn off
+replication (binary) logging on the master, and <code>SET SQL_LOG_BIN =
+1</code> will turn in back on - you must have the process privilege to do
 this.
 
-<LI>
+</li><li>
 
 バージョン 3.23.19 から、何かがおかしくなって、残っている複製をクリーンナップして、
 まったくの最初から開始したいときのために、
- <CODE>FLUSH MASTER</CODE> と <CODE>FLUSH SLAVE</CODE> コマンドが用意されました。
+ <code>FLUSH MASTER</code> と <code>FLUSH SLAVE</code> コマンドが用意されました。
 バージョン 3.23.26 から、これらの名前を
-<CODE>RESET MASTER</CODE> と <CODE>RESET SLAVE</CODE> に変更しました。
-互換性のために、古い <CODE>FLUSH</CODE> もまだ動作します。
+<code>RESET MASTER</code> と <code>RESET SLAVE</code> に変更しました。
+互換性のために、古い <code>FLUSH</code> もまだ動作します。
 （訳注： このコマンドは、bin log を 001 からに強制してしまうため、
 場合によっては複製をおかしくすることも有る。使用には注意。）
 
-<LI>
+</li><li>
 
-Starting in Version 3.23.21, you can use <CODE>LOAD TABLE FROM MASTER</CODE> for
+Starting in Version 3.23.21, you can use <code>LOAD TABLE FROM MASTER</code> for
 network backup and to set up replication initially. We have recently
 received a number of bug reports concerning it that we are investigating, so
 we recommend that you use it only in testing until we make it more stable.
 
-<LI>
+</li><li>
 
 Starting in Version 3.23.23, you can change masters and adjust log position
-with <CODE>CHANGE MASTER TO</CODE>.
+with <code>CHANGE MASTER TO</code>.
 
-<LI>
+</li><li>
 
 Starting in Version 3.23.23, you tell the master that updates in certain
-databases should not be logged to the binary log with <CODE>binlog-ignore-db</CODE>.
+databases should not be logged to the binary log with <code>binlog-ignore-db</code>.
 
-<LI>
+</li><li>
 
-Starting in Version 3.23.26, you can use <CODE>replicate-rewrite-db</CODE> to tell
+Starting in Version 3.23.26, you can use <code>replicate-rewrite-db</code> to tell
 the slave to apply updates from one database on the master to the one
 with a different name on the slave.
 
-<LI>
+</li><li>
 
 バージョン 3.23.28 から、
 スレーブが実行している最中に、
-古いログを取り去るために、 <CODE>PURGE MASTER LOGS TO 'log-name'</CODE> が使用できます。
-</UL>
+古いログを取り去るために、 <code>PURGE MASTER LOGS TO 'log-name'</code> が使用できます。
+</li></ul>
 
 
 
-<H2><A NAME="Replication_Options" HREF="manual.ja_toc.html#Replication_Options">11.5  Replication Options in my.cnf</A></H2>
+<h2><a name="Replication_Options" href="manual.ja_toc.html#Replication_Options">11.5  Replication Options in my.cnf</a></h2>
 
-<P>
-レプリケーションを使用する場合は、我々は  <STRONG>MySQL</STRONG> Version 3.23.30 以降を
+<p>
+レプリケーションを使用する場合は、我々は  <strong>MySQL</strong> Version 3.23.30 以降を
 推奨します。
 これより古いバージョンでも動きますが、古い物はバグがあったり機能が無かったりします。
 
-</P>
-<P>
-マスターとスレーブの両方に、 <CODE>server-id</CODE> オプションが必要です。
+</p>
+<p>
+マスターとスレーブの両方に、 <code>server-id</code> オプションが必要です。
 これは一意のレプリケーションid をセットします。
 マスター、スレーブそれぞれのために、一意な値を、1 から 2^32-1 までの間から
 選ばねばなりません。
-Example: <CODE>server-id=3</CODE>
+Example: <code>server-id=3</code>
 
-</P>
-<P>
-The following table has the options you can use for the <STRONG>MASTER</STRONG>:
+</p>
+<p>
+The following table has the options you can use for the <strong>MASTER</strong>:
 
-</P>
-<TABLE BORDER WIDTH="100%" NOSAVE >
+</p>
+<table border="" width="100%" nosave="">
 
-<TR><TD><STRONG>Option</STRONG> </TD><TD> <STRONG>Description</STRONG>
-</TR NOSAVE>
-<TR><TD><CODE>log-bin=filename</CODE> </TD><TD>
+<tbody><tr><td><strong>Option</strong> </td><td> <strong>Description</strong>
+</td></tr>
+<tr><td><code>log-bin=filename</code> </td><td>
 Write to a binary update log to the specified location. Note that if you
 give it a parameter with an extension
-(for example, <CODE>log-bin=/mysql/logs/replication.log</CODE> ) versions up to 3.23.24
-will not work right during replication if you do <CODE>FLUSH LOGS</CODE> . The
+(for example, <code>log-bin=/mysql/logs/replication.log</code> ) versions up to 3.23.24
+will not work right during replication if you do <code>FLUSH LOGS</code> . The
 problem is fixed in Version 3.23.25. If you are using this kind of log name,
-<CODE>FLUSH LOGS</CODE> will be ignored on binlog. To clear the log, run
-<CODE>FLUSH MASTER</CODE>, and do not forget to run <CODE>FLUSH SLAVE</CODE> on all
-slaves. In Version 3.23.26 and in later versions you should use <CODE>RESET MASTER</CODE>
-and <CODE>RESET SLAVE</CODE>
+<code>FLUSH LOGS</code> will be ignored on binlog. To clear the log, run
+<code>FLUSH MASTER</code>, and do not forget to run <code>FLUSH SLAVE</code> on all
+slaves. In Version 3.23.26 and in later versions you should use <code>RESET MASTER</code>
+and <code>RESET SLAVE</code>
 
-</TR NOSAVE>
-<TR><TD><CODE>log-bin-index=filename</CODE> </TD><TD>
-Because the user could issue the <CODE>FLUSH LOGS</CODE> command, we need to
+</td></tr>
+<tr><td><code>log-bin-index=filename</code> </td><td>
+Because the user could issue the <code>FLUSH LOGS</code> command, we need to
 know which log is currently active and which ones have been rotated out
 and in what sequence. 
 この情報はバイナリログindexファイルに記述されます。
 デフォルトでは `hostname`.index というファイルになります。
 違う名前にしたい場合に、このオプションを使用します。
-(Example: <CODE>log-bin-index=db.index</CODE>)
+(Example: <code>log-bin-index=db.index</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>sql-bin-update-same</CODE> </TD><TD>
-If set, setting <CODE>SQL_LOG_BIN</CODE> to a value will automatically set
-<CODE>SQL_LOG_UPDATE</CODE> to the same value and vice versa.
+</td></tr>
+<tr><td><code>sql-bin-update-same</code> </td><td>
+If set, setting <code>SQL_LOG_BIN</code> to a value will automatically set
+<code>SQL_LOG_UPDATE</code> to the same value and vice versa.
 
-</TR NOSAVE>
-<TR><TD><CODE>binlog-do-db=database_name</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>binlog-do-db=database_name</code> </td><td>
 Tells the master it should log updates for the specified database, and
 exclude all others not explicitly mentioned.
-(Example: <CODE>binlog-do-db=some_database</CODE>)
+(Example: <code>binlog-do-db=some_database</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>binlog-ignore-db=database_name</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>binlog-ignore-db=database_name</code> </td><td>
 Tells the master that updates to the given database should not be logged
-to the binary log (Example: <CODE>binlog-ignore-db=some_database</CODE>)
-</TR>
-</TABLE>
+to the binary log (Example: <code>binlog-ignore-db=some_database</code>)
+</td></tr>
+</tbody></table>
 
-<P>
-The following table has the options you can use for the <STRONG>SLAVE</STRONG>:
+<p>
+The following table has the options you can use for the <strong>SLAVE</strong>:
 
-</P>
-<TABLE BORDER WIDTH="100%" NOSAVE >
+</p>
+<table border="" width="100%" nosave="">
 
-<TR><TD><STRONG>Option</STRONG> </TD><TD> <STRONG>Description</STRONG>
-</TR NOSAVE>
-<TR><TD><CODE>master-host=host</CODE> </TD><TD>
+<tbody><tr><td><strong>Option</strong> </td><td> <strong>Description</strong>
+</td></tr>
+<tr><td><code>master-host=host</code> </td><td>
 Master hostname or IP address for replication. If not set, the slave
 thread will not be started.
-(Example: <CODE>master-host=db-master.mycompany.com</CODE>)
+(Example: <code>master-host=db-master.mycompany.com</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>master-user=username</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>master-user=username</code> </td><td>
 The user the slave thread will us for authentication when connecting to
-the master. The user must have <CODE>FILE</CODE> privilege. If the master user
-is not set, user <CODE>test</CODE> is assumed.  (Example:
-<CODE>master-user=scott</CODE>)
+the master. The user must have <code>FILE</code> privilege. If the master user
+is not set, user <code>test</code> is assumed.  (Example:
+<code>master-user=scott</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>master-password=password</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>master-password=password</code> </td><td>
 The password the slave thread will authenticate with when connecting to
 the master. If not set, an empty password is assumed. (Example:
-<CODE>master-password=tiger</CODE>)
+<code>master-password=tiger</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>master-port=portnumber</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>master-port=portnumber</code> </td><td>
 The port the master is listening on. If not set, the compiled setting of
-<CODE>MYSQL_PORT</CODE> is assumed. If you have not tinkered with
-<CODE>configure</CODE> options, this should be 3306.  (Example:
-<CODE>master-port=3306</CODE>)
+<code>MYSQL_PORT</code> is assumed. If you have not tinkered with
+<code>configure</code> options, this should be 3306.  (Example:
+<code>master-port=3306</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>master-connect-retry=seconds</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>master-connect-retry=seconds</code> </td><td>
 The number of seconds the slave thread will sleep before retrying to
 connect to the master in case the master goes down or the connection is
-lost.  Default is 60.  (Example: <CODE>master-connect-retry=60</CODE>)
+lost.  Default is 60.  (Example: <code>master-connect-retry=60</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>master-info-file=filename</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>master-info-file=filename</code> </td><td>
 The location of the file that remembers where we left off on the master
 during the replication process. The default is master.info in the data
 directory.  Sasha: The only reason I see for ever changing the default
 is the desire to be rebelious.  (Example:
-<CODE>master-info-file=master.info</CODE>)
+<code>master-info-file=master.info</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>replicate-do-table=db_name.table_name</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>replicate-do-table=db_name.table_name</code> </td><td>
 Tells the slave thread to restrict replication to the specified database.
 To specify more than one table, use the directive multiple times,
 once for each table. .
-(Example: <CODE>replicate-do-table=some_db.some_table</CODE>)
+(Example: <code>replicate-do-table=some_db.some_table</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>replicate-ignore-table=db_name.table_name</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>replicate-ignore-table=db_name.table_name</code> </td><td>
 Tells the slave thread to not replicate to the specified table. To
 specify more than one table to ignore, use the directive multiple
 times, once for each table.(Example:
-<CODE>replicate-ignore-table=db_name.some_table</CODE>)
+<code>replicate-ignore-table=db_name.some_table</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>replicate-wild-do-table=db_name.table_name</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>replicate-wild-do-table=db_name.table_name</code> </td><td>
 Tells the slave thread to restrict replication to the tables that match the
 specified wildcard pattern. .
 To specify more than one table, use the directive multiple times,
 once for each table. .
-(Example: <CODE>replicate-do-table=foo%.bar%</CODE> will replicate only updates
+(Example: <code>replicate-do-table=foo%.bar%</code> will replicate only updates
 to tables in all databases that start with foo and whose table names
 start with bar)
 
-</TR NOSAVE>
-<TR><TD><CODE>replicate-wild-ignore-table=db_name.table_name</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>replicate-wild-ignore-table=db_name.table_name</code> </td><td>
 Tells the slave thread to not replicate to the tables that match the given
 wild card pattern. To
 specify more than one table to ignore, use the directive multiple
 times, once for each table.(Example:
-<CODE>replicate-ignore-table=foo%.bar%</CODE> - will not upates to tables in all databases that start with foo and whose table names
+<code>replicate-ignore-table=foo%.bar%</code> - will not upates to tables in all databases that start with foo and whose table names
 start with bar)
 
-</TR NOSAVE>
-<TR><TD><CODE>replicate-ignore-db=database_name</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>replicate-ignore-db=database_name</code> </td><td>
 Tells the slave thread to not replicate to the specified database. To
 specify more than one database to ignore, use the directive multiple
 times, once for each database. This option will not work if you use cross
 database updates. If you need cross database updates to work, make sure
 you have 3.23.28 or later, and use
-<CODE>replicate-wild-ignore-table=db_name.%</CODE>(Example:
-<CODE>replicate-ignore-db=some_db</CODE>)
+<code>replicate-wild-ignore-table=db_name.%</code>(Example:
+<code>replicate-ignore-db=some_db</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>replicate-do-db=database_name</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>replicate-do-db=database_name</code> </td><td>
 Tells the slave thread to restrict replication to the specified database.
 To specify more than one database, use the directive multiple times,
 once for each database. Note that this will only work if you do not use
-cross-database queries such as <CODE>UPDATE some_db.some_table SET
-foo='bar'</CODE> while having selected a different or no database. If you need
+cross-database queries such as <code>UPDATE some_db.some_table SET
+foo='bar'</code> while having selected a different or no database. If you need
 cross database updates to work, make sure
 you have 3.23.28 or later, and use
-<CODE>replicate-wild-do-table=db_name.%</CODE>
-(Example: <CODE>replicate-do-db=some_db</CODE>)
+<code>replicate-wild-do-table=db_name.%</code>
+(Example: <code>replicate-do-db=some_db</code>)
 
-</TR NOSAVE>
-<TR><TD><CODE>log-slave-updates</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>log-slave-updates</code> </td><td>
 スレーブスレッドからの更新をバイナリログに記録するように、スレーブに告げます。
 デフォルトは Off です・
 もしスレーブのデイジーチェーン(daisy-chain)を考えているならば、
 これを on にする必要があります。
 
-</TR NOSAVE>
-<TR><TD><CODE>replicate-rewrite-db=from_name-&#62;to_name</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>replicate-rewrite-db=from_name-&gt;to_name</code> </td><td>
 Updates to a database with a different name than the original (Example:
-<CODE>replicate-rewrite-db=master_db_name-&#62;slave_db_name</CODE>
+<code>replicate-rewrite-db=master_db_name-&gt;slave_db_name</code>
 
-</TR NOSAVE>
-<TR><TD><CODE>skip-slave-start</CODE> </TD><TD>
+</td></tr>
+<tr><td><code>skip-slave-start</code> </td><td>
 Tells the slave server not to start the slave on the startup.  The user
-can start it later with <CODE>SLAVE START</CODE>.
-</TR>
-</TABLE>
+can start it later with <code>SLAVE START</code>.
+</td></tr>
+</tbody></table>
 
-<P>
-<A NAME="IDX1145"></A>
-<A NAME="IDX1146"></A>
-<A NAME="IDX1147"></A>
+<p>
+<a name="IDX1145"></a>
+<a name="IDX1146"></a>
+<a name="IDX1147"></a>
 
 
-<H2><A NAME="Replication_SQL" HREF="manual.ja_toc.html#Replication_SQL">11.6  SQL Commands Related to Replication</A></H2>
+</p><h2><a name="Replication_SQL" href="manual.ja_toc.html#Replication_SQL">11.6  SQL Commands Related to Replication</a></h2>
 
-<P>
+<p>
 Replication can be controlled through the SQL interface. Below is the
 summary of commands:
 
-</P>
-<TABLE BORDER WIDTH="100%" NOSAVE >
-<TR><TD><STRONG>Command</STRONG> </TD><TD> <STRONG>Description</STRONG>
+</p>
+<table border="" width="100%" nosave="">
+<tbody><tr><td><strong>Command</strong> </td><td> <strong>Description</strong>
 
-</TR NOSAVE>
-<TR><TD><CODE>SLAVE START</CODE>
- </TD><TD> Starts the slave thread. (Slave)
+</td></tr>
+<tr><td><code>SLAVE START</code>
+ </td><td> Starts the slave thread. (Slave)
 
-</TR NOSAVE>
-<TR><TD><CODE>SLAVE STOP</CODE>
- </TD><TD> Stops the slave thread. (Slave)
+</td></tr>
+<tr><td><code>SLAVE STOP</code>
+ </td><td> Stops the slave thread. (Slave)
 
-</TR NOSAVE>
-<TR><TD><CODE>SET SQL_LOG_BIN=0</CODE>
- </TD><TD> Disables update logging if the user has process privilege.
+</td></tr>
+<tr><td><code>SET SQL_LOG_BIN=0</code>
+ </td><td> Disables update logging if the user has process privilege.
  Ignored otherwise. (Master)
 
-</TR NOSAVE>
-<TR><TD><CODE>SET SQL_LOG_BIN=1</CODE>
- </TD><TD> Re-enables update logging if the user has process privilege.
+</td></tr>
+<tr><td><code>SET SQL_LOG_BIN=1</code>
+ </td><td> Re-enables update logging if the user has process privilege.
  Ignored otherwise. (Master)
 
-</TR NOSAVE>
-<TR><TD><CODE>SET SQL_SLAVE_SKIP_COUNTER=n</CODE>
- </TD><TD> Skip the next <CODE>n</CODE> events from the master. Only valid when
+</td></tr>
+<tr><td><code>SET SQL_SLAVE_SKIP_COUNTER=n</code>
+ </td><td> Skip the next <code>n</code> events from the master. Only valid when
 the slave thread is not running, otherwise, gives an error. Useful for
 recovering from replication glitches.
 
-</TR NOSAVE>
-<TR><TD><CODE>RESET MASTER</CODE>
- </TD><TD> Deletes all binary logs listed in the index file, resetting the binlog
-index file to be empty. In pre-3.23.26 versions, <CODE>FLUSH MASTER</CODE> (Master)
+</td></tr>
+<tr><td><code>RESET MASTER</code>
+ </td><td> Deletes all binary logs listed in the index file, resetting the binlog
+index file to be empty. In pre-3.23.26 versions, <code>FLUSH MASTER</code> (Master)
 
-</TR NOSAVE>
-<TR><TD><CODE>RESET SLAVE</CODE>
- </TD><TD> Makes the slave forget its replication position in the master
+</td></tr>
+<tr><td><code>RESET SLAVE</code>
+ </td><td> Makes the slave forget its replication position in the master
 logs. In pre 3.23.26 versions the command was called
-<CODE>FLUSH SLAVE</CODE>(Slave)
+<code>FLUSH SLAVE</code>(Slave)
 
-</TR NOSAVE>
-<TR><TD><CODE>LOAD TABLE tblname FROM MASTER</CODE>
- </TD><TD> Downloads a copy of the table from master to the slave. (Slave)
+</td></tr>
+<tr><td><code>LOAD TABLE tblname FROM MASTER</code>
+ </td><td> Downloads a copy of the table from master to the slave. (Slave)
 
-</TR NOSAVE>
-<TR><TD><CODE>CHANGE MASTER TO master_def_list</CODE>
- </TD><TD> Changes the master parameters to the values specified in
-<CODE>master_def_list</CODE> and restarts the slave thread. <CODE>master_def_list</CODE>
-is a comma-separated list of <CODE>master_def</CODE> where <CODE>master_def</CODE> is
-one of the following: <CODE>MASTER_HOST</CODE>, <CODE>MASTER_USER</CODE>,
-<CODE>MASTER_PASSWORD</CODE>, <CODE>MASTER_PORT</CODE>, <CODE>MASTER_CONNECT_RETRY</CODE>,
-<CODE>MASTER_LOG_FILE</CODE>, <CODE>MASTER_LOG_POS</CODE>. Example:
+</td></tr>
+<tr><td><code>CHANGE MASTER TO master_def_list</code>
+ </td><td> Changes the master parameters to the values specified in
+<code>master_def_list</code> and restarts the slave thread. <code>master_def_list</code>
+is a comma-separated list of <code>master_def</code> where <code>master_def</code> is
+one of the following: <code>MASTER_HOST</code>, <code>MASTER_USER</code>,
+<code>MASTER_PASSWORD</code>, <code>MASTER_PORT</code>, <code>MASTER_CONNECT_RETRY</code>,
+<code>MASTER_LOG_FILE</code>, <code>MASTER_LOG_POS</code>. Example:
 
 
-<PRE>
-
+<pre>
 CHANGE MASTER TO
   MASTER_HOST='master2.mycompany.com',
   MASTER_USER='replication',
@@ -715,7 +706,7 @@ CHANGE MASTER TO
   MASTER_LOG_FILE='master2-bin.001',
   MASTER_LOG_POS=4;
 
-</PRE>
+</pre>
 
 You only need to specify the values that need to be changed. The values that
 you omit will stay the same with the exception of when you change the host or
@@ -724,21 +715,21 @@ a different host or a different port, the master is different. Therefore, the
 old values of log and position are not applicable anymore, and will
 automatically be reset to an empty string and 0, respectively (the start
 values). Note that if you restart the slave, it will remember its last master.
-If this is not desirable, you should delete the <TT>`master.info'</TT> file before
-restarting, and the slave will read its master from <CODE>my.cnf</CODE> or the
+If this is not desirable, you should delete the <tt>`master.info'</tt> file before
+restarting, and the slave will read its master from <code>my.cnf</code> or the
 command line. (Slave)
 
-</TR NOSAVE>
-<TR><TD><CODE>SHOW MASTER STATUS</CODE> </TD><TD> Provides status information on the binlog of the master. (Master)
+</td></tr>
+<tr><td><code>SHOW MASTER STATUS</code> </td><td> Provides status information on the binlog of the master. (Master)
 
-</TR NOSAVE>
-<TR><TD><CODE>SHOW SLAVE STATUS</CODE> </TD><TD> Provides status information on essential parameters of the slave thread. (Slave)
-</TR NOSAVE>
-<TR><TD><CODE>SHOW MASTER LOGS</CODE> </TD><TD> Only available starting in Version 3.23.28. Lists the binary logs on the master. You should use this command prior to <CODE>PURGE MASTER LOGS TO</CODE> to find out how far you should go.
+</td></tr>
+<tr><td><code>SHOW SLAVE STATUS</code> </td><td> Provides status information on essential parameters of the slave thread. (Slave)
+</td></tr>
+<tr><td><code>SHOW MASTER LOGS</code> </td><td> Only available starting in Version 3.23.28. Lists the binary logs on the master. You should use this command prior to <code>PURGE MASTER LOGS TO</code> to find out how far you should go.
 
-</TR NOSAVE>
-<TR><TD><CODE>PURGE MASTER LOGS TO 'logname'</CODE>
- </TD><TD> バージョン 3.23.28 からの機能。
+</td></tr>
+<tr><td><code>PURGE MASTER LOGS TO 'logname'</code>
+ </td><td> バージョン 3.23.28 からの機能。
 index ファイルに書かれているログファイルのうち、
 指定されたログよりも前のログファイルを全て消します。
 index ファイルのリストからもエントリを消します。
@@ -746,9 +737,8 @@ index ファイルのリストからもエントリを消します。
 例えば：
 
 
-<PRE>
-PURGE MASTER LOGS TO 'mysql-bin.010'
-</PRE>
+<pre>PURGE MASTER LOGS TO 'mysql-bin.010'
+</pre>
 
 （訳注： このコマンドの場合、mysql-bin.001 ～ mysql-bin.009 までの
 ファイルは消され、mysql.index ファイルの中身は、mysql-bin.010 のみ、
@@ -761,72 +751,72 @@ the logs it wants to read, the slave will be unable to replicate once it
 comes up.  The command is safe to run while slaves are replicating - you
 do not need to stop them.
 
-You must first check all the slaves with <CODE>SHOW SLAVE STATUS</CODE> to
+You must first check all the slaves with <code>SHOW SLAVE STATUS</code> to
 see which log they are on, then do a listing of the logs on the
-master with <CODE>SHOW MASTER LOGS</CODE>, find the earliest log among all
+master with <code>SHOW MASTER LOGS</code>, find the earliest log among all
 the slaves (if all the slaves are up to date, this will be the
 last log on the list), backup all the logs you are about to delete
 (optional) and purge up to the target log.
 
-</TR>
-</TABLE>
+</td></tr>
+</tbody></table>
 
 
 
-<H2><A NAME="Replication_FAQ" HREF="manual.ja_toc.html#Replication_FAQ">11.7  Replication FAQ</A></H2>
+<h2><a name="Replication_FAQ" href="manual.ja_toc.html#Replication_FAQ">11.7  Replication FAQ</a></h2>
 
-<P>
-<A NAME="IDX1148"></A>
-<STRONG>Q</STRONG>: Why do I sometimes see more than one <CODE>Binlog_Dump</CODE> thread on
+<p>
+<a name="IDX1148"></a>
+<strong>Q</strong>: Why do I sometimes see more than one <code>Binlog_Dump</code> thread on
 the master after I have restarted the slave?
 
-</P>
-<P>
-<STRONG>A</STRONG>: <CODE>Binlog_Dump</CODE> is a continuous process that is handled by the
+</p>
+<p>
+<strong>A</strong>: <code>Binlog_Dump</code> is a continuous process that is handled by the
 server in the following way:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 Catch up on the updates.
-<LI>
+</li><li>
 
-Once there are no more updates left, go into <CODE>pthread_cond_wait()</CODE>,
+Once there are no more updates left, go into <code>pthread_cond_wait()</code>,
 from which we can be awakened either by an update or a kill.
-<LI>
+</li><li>
 
 On wake up, check the reason. If we are not supposed to die, continue
-the <CODE>Binlog_dump</CODE> loop.
-<LI>
+the <code>Binlog_dump</code> loop.
+</li><li>
 
 If there is some fatal error, such as detecting a dead client,
 terminate the loop.
-</UL>
+</li></ul>
 
-<P>
+<p>
 So if the slave thread stops on the slave, the corresponding
-<CODE>Binlog_Dump</CODE> thread on the master will not notice it until after
+<code>Binlog_Dump</code> thread on the master will not notice it until after
 at least one update to the master (or a kill), which is needed to wake
-it up from <CODE>pthread_cond_wait()</CODE>.  In the meantime, the slave
+it up from <code>pthread_cond_wait()</code>.  In the meantime, the slave
 could have opened another connection, which resulted in another
-<CODE>Binlog_Dump</CODE> thread.
+<code>Binlog_Dump</code> thread.
 
-</P>
-<P>
+</p>
+<p>
 The above problem should not be present in Version 3.23.26 and later
-versions.  In Version 3.23.26 we added <CODE>server-id</CODE> to each
+versions.  In Version 3.23.26 we added <code>server-id</code> to each
 replication server, and now all the old zombie threads are killed on the
 master when a new replication thread connects from the same slave
 
-</P>
-<P>
-<STRONG>Q</STRONG>: replication log をどうやってローテートするの?
+</p>
+<p>
+<strong>Q</strong>: replication log をどうやってローテートするの?
 
-</P>
-<P>
-<STRONG>A</STRONG>: バージョン 3.23.28 からでは、<CODE>PURGE MASTER LOGS TO</CODE> コマンド
+</p>
+<p>
+<strong>A</strong>: バージョン 3.23.28 からでは、<code>PURGE MASTER LOGS TO</code> コマンド
 を使用するべきです。 実行前には、どのログが消せれるか確認し、場合によっては
 バックアップを取っておきます。
 In earlier versions the process is much more
@@ -835,37 +825,37 @@ the case that you plan to re-use log names. You will need to stop the
 slave threads, edit the binary log index file, delete all the old logs,
 restart the master, start slave threads, and then remove the old log files.
 
-</P>
+</p>
 
-<P>
-<STRONG>Q</STRONG>: How do I upgrade on a hot replication setup?
+<p>
+<strong>Q</strong>: How do I upgrade on a hot replication setup?
 
-</P>
-<P>
-<STRONG>A</STRONG>: If you are upgrading  pre-3.23.26 versions, you should just
-lock the master tables, let the slave catch up, then run <CODE>FLUSH
-MASTER</CODE> on the master, and <CODE>FLUSH SLAVE</CODE> on the slave to reset the
+</p>
+<p>
+<strong>A</strong>: If you are upgrading  pre-3.23.26 versions, you should just
+lock the master tables, let the slave catch up, then run <code>FLUSH
+MASTER</code> on the master, and <code>FLUSH SLAVE</code> on the slave to reset the
 logs, then restart new versions of the master and the slave. Note that
 the slave can stay down for some time - since the master is logging
 all the updates, the slave will be able to catch up once it is up and
 can connect.
 
-</P>
-<P>
+</p>
+<p>
 After 3.23.26, we have locked the replication protocol for modifications, so
 you can upgrade masters and slave on the fly to a newer 3.23 version and you
-can have different versions of <STRONG>MySQL</STRONG> running on the slave and the
+can have different versions of <strong>MySQL</strong> running on the slave and the
 master, as long as they are both newer than 3.23.26. 
 
-</P>
-<P>
-<A NAME="IDX1149"></A>
-<STRONG>Q</STRONG>: What issues should I be aware of when setting up two-way
+</p>
+<p>
+<a name="IDX1149"></a>
+<strong>Q</strong>: What issues should I be aware of when setting up two-way
 replication?
 
-</P>
-<P>
-<STRONG>A</STRONG>: <STRONG>MySQL</STRONG> replication currently does not support any
+</p>
+<p>
+<strong>A</strong>: <strong>MySQL</strong> replication currently does not support any
 locking protocol between master and slave to guarantee the atomicity of
 a distributed (cross-server) update. In in other words, it is possible
 for client A to make an update to  co-master 1, and in the meantime,
@@ -879,9 +869,9 @@ two-way replication relationship, unless you are sure that you updates
 can safely happen in any order, or unless you take care of mis-ordered
 updates somehow in the client code.
 
-</P>
+</p>
 
-<P>
+<p>
 You must also realize that two-way replication actually does not improve
 performance very much, if at all, as far as updates are concerned. Both
 servers need to do the same amount of updates each, as you would have
@@ -890,31 +880,31 @@ lock contention, because the updates originating on another server will
 be serialized in one slave thread. This benefit, though, might be
 offset by network delays.
 
-</P>
-<P>
-<A NAME="IDX1150"></A>
-<A NAME="IDX1151"></A>
-<STRONG>Q</STRONG>: How can I use replication to improve performance of my system?
+</p>
+<p>
+<a name="IDX1150"></a>
+<a name="IDX1151"></a>
+<strong>Q</strong>: How can I use replication to improve performance of my system?
 
-</P>
-<P>
-<STRONG>A</STRONG>: You should set up one server as the master, and direct all
+</p>
+<p>
+<strong>A</strong>: You should set up one server as the master, and direct all
 writes to it, and configure as many slaves as you have the money and
 rackspace for, distributing the reads among the master and the slaves.
-You can also start the slaves with <CODE>--skip-bdb</CODE>,
-<CODE>--low-priority-updates</CODE> and <CODE>--delay-key-write-for-all-tables</CODE>
+You can also start the slaves with <code>--skip-bdb</code>,
+<code>--low-priority-updates</code> and <code>--delay-key-write-for-all-tables</code>
 to get speed improvements for the slave.  In this case the slave will
-use non-transactional <CODE>MyISAM</CODE> tables instead of <CODE>BDB</CODE> tables
+use non-transactional <code>MyISAM</code> tables instead of <code>BDB</code> tables
 to get more speed.
 
-</P>
-<P>
-<STRONG>Q</STRONG>: What should I do to prepare my client code to use
+</p>
+<p>
+<strong>Q</strong>: What should I do to prepare my client code to use
 performance-enhancing replication?
 
-</P>
-<P>
-<STRONG>A</STRONG>:
+</p>
+<p>
+<strong>A</strong>:
 If the part of your code that is responsible for database access has
 been properly abstracted/modularized, converting it to run with the
 replicated setup should be very smooth and easy - just change the
@@ -926,29 +916,29 @@ to it clean up.
  You should start by creating a wrapper library
 /module with the following functions:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-<CODE>safe_writer_connect()</CODE>
-<LI>
+<code>safe_writer_connect()</code>
+</li><li>
 
-<CODE>safe_reader_connect()</CODE>
-<LI>
+<code>safe_reader_connect()</code>
+</li><li>
 
-<CODE>safe_reader_query()</CODE>
-<LI>
+<code>safe_reader_query()</code>
+</li><li>
 
-<CODE>safe_writer_query()</CODE>
-</UL>
+<code>safe_writer_query()</code>
+</li></ul>
 
-<P>
-<CODE>safe_</CODE> means that the function will take care of handling all
+<p>
+<code>safe_</code> means that the function will take care of handling all
 the error conditions.
 
-</P>
-<P>
+</p>
+<p>
 You should then convert your client code to use the wrapper library.
 It may be a painful and scary process at first, but it will pay off in
 the long run. All applications that follow the above pattern will be
@@ -958,48 +948,48 @@ options will be trivial. You will just need to modify one or two
 functions, for example, to log how long each query took, or which
 query, among your many thousands, gave you an error. If you have written a lot of code already,
 you may want to automate the conversion task by using Monty's
-<CODE>replace</CODE> utility, which comes with the standard distribution of
-<STRONG>MySQL</STRONG>, or just write your own Perl script. Hopefully, your
+<code>replace</code> utility, which comes with the standard distribution of
+<strong>MySQL</strong>, or just write your own Perl script. Hopefully, your
 code follows some recognizable pattern. If not, then you are probably
 better off re-writing it anyway, or at least going through and manually
 beating it into a pattern.
 
-</P>
-<P>
+</p>
+<p>
 Note that, of course, you can use different names for the
 functions. What is important is having unified interface for connecting
 for reads, connecting for writes, doing a read, and doing a write.
 
-</P>
+</p>
 
-<P>
-<STRONG>Q</STRONG>: When and how much can <STRONG>MySQL</STRONG> replication improve the performance
+<p>
+<strong>Q</strong>: When and how much can <strong>MySQL</strong> replication improve the performance
 of my system?
 
-</P>
-<P>
-<STRONG>A</STRONG>: <STRONG>MySQL</STRONG> replication is most beneficial for a system
+</p>
+<p>
+<strong>A</strong>: <strong>MySQL</strong> replication is most beneficial for a system
 with frequent reads and not so frequent writes. In theory, by using a
 one master/many slaves setup you can scale by adding more slaves until
 you either run out of network bandwidth, or your update
 load grows to the point
 that the master cannot handle it.
 
-</P>
-<P>
+</p>
+<p>
 In order to determine how many slaves you can get before the added
 benefits begin to level out, and how much you can improve performance
 of your site, you need to know your query patterns, and empirically
  (by benchmarking) determine the relationship between the throughput
-on reads (reads per second, or <CODE>max_reads</CODE>) and on writes
-<CODE>max_writes</CODE>) on a typical master and a typical slave. The
+on reads (reads per second, or <code>max_reads</code>) and on writes
+<code>max_writes</code>) on a typical master and a typical slave. The
 example below will show you a rather simplified calculation of what you
 can get with replication for our imagined system.
 
-</P>
-<P>
+</p>
+<p>
 Let's say our system load consists of 10% writes and 90% reads, and we
-have determined that <CODE>max_reads</CODE> = 1200 - 2 * <CODE>max_writes</CODE>,
+have determined that <code>max_reads</code> = 1200 - 2 * <code>max_writes</code>,
 or in other words, our system can do 1200 reads per second with no
 writes, our average write is twice as slow as average read,
 and the relationship is
@@ -1007,50 +997,50 @@ linear. Let us suppose that our master and slave are of the same
 capacity, and we have N slaves and 1 master. Then we have for each
 server (master or slave):
 
-</P>
-<P>
-<CODE>reads = 1200 - 2 * writes</CODE> (from bencmarks)
+</p>
+<p>
+<code>reads = 1200 - 2 * writes</code> (from bencmarks)
 
-</P>
-<P>
-<CODE>reads = 9* writes / (N + 1) </CODE> (reads split, but writes go
+</p>
+<p>
+<code>reads = 9* writes / (N + 1) </code> (reads split, but writes go
 to all servers)
 
-</P>
-<P>
-<CODE>9*writes/(N+1) + 2 * writes = 1200</CODE>
+</p>
+<p>
+<code>9*writes/(N+1) + 2 * writes = 1200</code>
 
-</P>
-<P>
-<CODE>writes = 1200/(2 + 9/(N+1)</CODE>
+</p>
+<p>
+<code>writes = 1200/(2 + 9/(N+1)</code>
 
-</P>
-<P>
+</p>
+<p>
 So if N = 0, which means we have no replication, our system can handle
 1200/11, about 109 writes per second (which means we will have 9 times
 as many reads due to the nature of our application).
 
-</P>
-<P>
+</p>
+<p>
 If N = 1, we can get up to 184 writes per second.
 
-</P>
-<P>
+</p>
+<p>
 If N = 8, we get up to 400.
 
-</P>
-<P>
+</p>
+<p>
 If N = 17, 480 writes.
 
-</P>
-<P>
+</p>
+<p>
 Eventually as N approaches infinity (and our budget negative infinity),
 we can get very close to 600 writes per second, increasing system
 throughput about 5.5 times. However, with only 8 servers, we increased
 it almost 4 times already.
 
-</P>
-<P>
+</p>
+<p>
 Note that our computations assumed infinite network bandwidth, and
 neglected several other factors that could turn out to be significant on
 your system. In many cases, you may not be able to make a computation
@@ -1059,94 +1049,94 @@ on your system if you add N replication slaves. However, answering the
 following questions should help you decided whether and how much, if at
 all, the replication will improve the performance of your system:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 What is the read/write ratio on your system?
-<LI>
+</li><li>
 
 How much more write load can one server handle if you reduce the reads?
-<LI>
+</li><li>
 
 How many slaves do you have bandwidth for on your network?
-</UL>
+</li></ul>
 
-<P>
-<STRONG>Q</STRONG>: How can I use replication to provide redundancy/high
+<p>
+<strong>Q</strong>: How can I use replication to provide redundancy/high
 availability?
 
-</P>
-<P>
-<STRONG>A</STRONG>: With the currently available features, you would have to
+</p>
+<p>
+<strong>A</strong>: With the currently available features, you would have to
 set up a master and a slave (or several slaves), and write a script
 that will monitor the
 master to see if it is up, and instruct your applications and
 the slaves of the master change in case of failure. Some suggestions:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-To tell a slave to change the master use the <CODE>CHANGE MASTER TO</CODE> command.
-<LI>
+To tell a slave to change the master use the <code>CHANGE MASTER TO</code> command.
+</li><li>
 
 A good way to keep your applications informed where the master is by
-having a dynamic DNS entry for the master. With <STRONG>bind</STRONG> you can
-use <CODE>nsupdate</CODE> to dynamically update your DNS.
-<LI>
+having a dynamic DNS entry for the master. With <strong>bind</strong> you can
+use <code>nsupdate</code> to dynamically update your DNS.
+</li><li>
 
-You should run your slaves with the <CODE>log-bin</CODE> option and without
-<CODE>log-slave-updates</CODE>. This way the slave will be ready to become a
-master as soon as you issue <CODE>STOP SLAVE</CODE>; <CODE>RESET MASTER</CODE>, and
-<CODE>CHANGE MASTER TO</CODE> on the other slaves. It will also help you catch
+You should run your slaves with the <code>log-bin</code> option and without
+<code>log-slave-updates</code>. This way the slave will be ready to become a
+master as soon as you issue <code>STOP SLAVE</code>; <code>RESET MASTER</code>, and
+<code>CHANGE MASTER TO</code> on the other slaves. It will also help you catch
 spurious updates that may happen because of misconfiguration of the
 slave (ideally, you want to configure access rights so that no client
 can update the slave, except for the slave thread) combined with the
 bugs in your client programs (they should never update the slave
 directly).
 
-</UL>
+</li></ul>
 
-<P>
+<p>
 We are currently working on integrating an automatic master election
-system into <STRONG>MySQL</STRONG>, but until it is ready, you will have to
+system into <strong>MySQL</strong>, but until it is ready, you will have to
 create your own monitoring tools.
 
-</P>
+</p>
 
 
-<H2><A NAME="Replication_Problems" HREF="manual.ja_toc.html#Replication_Problems">11.8  Troubleshooting Replication</A></H2>
+<h2><a name="Replication_Problems" href="manual.ja_toc.html#Replication_Problems">11.8  Troubleshooting Replication</a></h2>
 
-<P>
+<p>
 If you have followed the instructions, and your replication setup is not
 working, first eliminate the user error factor by checking the following:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-Is the master logging to the binary log? Check with <CODE>SHOW MASTER STATUS</CODE>.
-If it is, <CODE>Position</CODE> will be non-zero. If not, verify that you have
-given the master <CODE>log-bin</CODE> option and have set <CODE>server-id</CODE>.
-<LI>
+Is the master logging to the binary log? Check with <code>SHOW MASTER STATUS</code>.
+If it is, <code>Position</code> will be non-zero. If not, verify that you have
+given the master <code>log-bin</code> option and have set <code>server-id</code>.
+</li><li>
 
-Is the slave running? Check with <CODE>SHOW SLAVE STATUS</CODE>. The answer is found
-in <CODE>Slave_running</CODE> column. If not, verify slave options and check the
+Is the slave running? Check with <code>SHOW SLAVE STATUS</code>. The answer is found
+in <code>Slave_running</code> column. If not, verify slave options and check the
 error log for messages.
-<LI>
+</li><li>
 
 If the slave is running, did it establish connection with the master? Do
-<CODE>SHOW PROCESSLIST</CODE>, find the thread with <CODE>system user</CODE> value in
-<CODE>User</CODE> column and <CODE>none</CODE> in the <CODE>Host</CODE> column, and check the
-<CODE>State</CODE> column. If it says <CODE>connecting to master</CODE>, verify the
+<code>SHOW PROCESSLIST</code>, find the thread with <code>system user</code> value in
+<code>User</code> column and <code>none</code> in the <code>Host</code> column, and check the
+<code>State</code> column. If it says <code>connecting to master</code>, verify the
 privileges for the replication user on the master, master host name, your
 DNS setup, whether the master is actually running, whether it is reachable
 from the slave, and if all that seems ok, read the error logs.
-<LI>
+</li><li>
 
 If the slave was running, but then stopped, look at SHOW SLAVE STATUS
 output and check the error logs. It usually
@@ -1154,135 +1144,135 @@ happens when some query that succeeded on the master fails on the slave. This
 should never happen if you have taken a proper snapshot of the master, and
 never modify the data on the slave outside of the slave thread. If it does,
 it is a bug, read below on how to report it.
-<LI>
+</li><li>
 
 If a query on that succeeded on the master refuses to run on the slave, and
 a full database resync ( the proper thing to do ) does not seem feasible,
 try the following:
 
-<UL>
-<LI>
+<ul>
+<li>
 
 First see if there is some stray record in the way. Understand how it got
-there, then delete it and run <CODE>SLAVE START</CODE>
-<LI>
+there, then delete it and run <code>SLAVE START</code>
+</li><li>
 
 If the above does not work or does not apply, try to understand if it would
 be safe to make the update manually ( if needed) and then ignore the next
 query from the master.
-<LI>
+</li><li>
 
 If you have decided you can skip the next query, do
-<CODE>SET SQL_SLAVE_SKIP_COUNTER=1; SLAVE START;</CODE> to skip a query that
+<code>SET SQL_SLAVE_SKIP_COUNTER=1; SLAVE START;</code> to skip a query that
 does not use auto_increment, last_insert_id or timestamp, or
-<CODE>SET SQL_SLAVE_SKIP_COUNTER=2; SLAVE START;</CODE> otherwise
-<LI>
+<code>SET SQL_SLAVE_SKIP_COUNTER=2; SLAVE START;</code> otherwise
+</li><li>
 
 If you are sure the slave started out perfectly in sync with the master,
 and no one has updated  the tables involved outside of slave thread,
 report the bug, so
 you will not have to do the above tricks again.
-</UL>
+</li></ul>
 
-<LI>
+</li><li>
 
 Make sure you are not running into an old bug by upgrading to the most recent
 version.
-<LI>
+</li><li>
 
 If all else fails, read the error logs. If they are big,
-<CODE>grep -i slave /path/to/your-log.err</CODE> on the slave. There is no
+<code>grep -i slave /path/to/your-log.err</code> on the slave. There is no
 generic pattern to search for on the master, as the only errors it logs
 are general system errors - if it can, it will send the error to the slave
 when things go wrong.
-</UL>
+</li></ul>
 
-<P>
+<p>
 When you have determined that there is no user error involved, and replication
 still either does not work at all or is unstable, it is time to start working
 on a bug report. We need to get as much info as possible from you to be able
 to track down the bug. Please do spend some time and effort preparing a good
 bug report. Ideally, we would like to have a test case in the format found in
-<CODE>mysql-test/t/rpl*</CODE> directory of the source tree. If you submit a test
+<code>mysql-test/t/rpl*</code> directory of the source tree. If you submit a test
 case like that, you can expect a patch within a day or two in most cases,
 although, of course, you mileage may vary depending on a number of factors.
 
-</P>
-<P>
+</p>
+<p>
 Second best option is a just program with easily configurable connection
 arguments for the master and the slave that will demonstrate the problem on our
 systems. You can write one in Perl or in C, depending on which language you
 know better.
 
-</P>
-<P>
+</p>
+<p>
 If you have one of the above ways to demonstrate the bug, use
-<CODE>mysqlbug</CODE> to prepare a bug report and send it to
-<a HREF="mailto:bugs@lists.mysql.com">bugs@lists.mysql.com</a>. If you have a phantom - a problem that
+<code>mysqlbug</code> to prepare a bug report and send it to
+<a href="mailto:bugs@lists.mysql.com">bugs@lists.mysql.com</a>. If you have a phantom - a problem that
 does occur but you cannot duplicate "at will":
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 Verify that there is no user error involved. For example, if you update the
 slave outside of the slave thread, the data will be out of sync, and you can
 have unique key violations on updates, in which case the slave thread will
 stop and wait for you to clean up the tables manually to bring them in sync.
-<LI>
+</li><li>
 
-Run slave with <CODE>log-slave-updates</CODE> and <CODE>log-bin</CODE> - this will keep
+Run slave with <code>log-slave-updates</code> and <code>log-bin</code> - this will keep
 a log of all updates on the slave.
-<LI>
+</li><li>
 
 Save all evidence before resetting the replication. If we have no or only
 sketchy information, it would take us a while to track down the problem. The
 evidence you should collect is:
 
-<UL>
-<LI>
+<ul>
+<li>
 
 All binary logs on the master
-<LI>
+</li><li>
 
 All binary log on the slave
-<LI>
+</li><li>
 
-The output of <CODE>SHOW MASTER STATUS</CODE> on the master at the time
+The output of <code>SHOW MASTER STATUS</code> on the master at the time
 you have discovered the problem
-<LI>
+</li><li>
 
-The output of <CODE>SHOW SLAVE STATUS</CODE> on the master at the time
+The output of <code>SHOW SLAVE STATUS</code> on the master at the time
 you have discovered the problem
-<LI>
+</li><li>
 
 Error logs on the master and on the slave
-</UL>
+</li></ul>
 
-<LI>
+</li><li>
 
-Use <CODE>mysqlbinlog</CODE> to examine the binary logs. The following should
+Use <code>mysqlbinlog</code> to examine the binary logs. The following should
 be helpful
 to find the trouble query, for example:
 
-<PRE>
-mysqlbinlog -j pos_from_slave_status /path/to/log_from_slave_status | head
-</PRE>
+<pre>mysqlbinlog -j pos_from_slave_status /path/to/log_from_slave_status | head
+</pre>
 
-</UL>
+</li></ul>
 
-<P>
+<p>
 Once you have collected the evidence on the phantom problem, try hard to
 isolate it into a separate test case first. Then report the problem to
-<a HREF="mailto:bugs@lists.mysql.com">bugs@lists.mysql.com</a> with as much info as possible.
+<a href="mailto:bugs@lists.mysql.com">bugs@lists.mysql.com</a> with as much info as possible.
 
-</P>
-<P>
-<A NAME="IDX1152"></A>
-<A NAME="IDX1153"></A>
-<A NAME="IDX1154"></A>
-<P><HR><P>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Server.html">previous</A>, <A HREF="manual.ja_Fulltext_Search.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
- </BODY>
- </HTML>
+</p>
+<p>
+<a name="IDX1152"></a>
+<a name="IDX1153"></a>
+<a name="IDX1154"></a>
+</p><p></p><hr><p>
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Server.html">previous</a>, <a href="manual.ja_Fulltext_Search.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+ 
+ 
+</p></body></html>

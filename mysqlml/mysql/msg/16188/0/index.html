@@ -1,4 +1,4 @@
-<div dir="ltr">志澤さん<div>こんにちは、yoku0825といいます。</div><div><br></div><div>サンプルコードありがとうございます。</div><div><br></div><div>サンプルの中では<span style="font-size:14px">testFullPath_Out(UNC記法)と</span></div><div><span style="font-size:14px">testFullPathI_IN(ローカルファイル)がありますが、</span></div><div>実際にはCIFS経由でやっていたりしますか？</div><div>（であれば、実際にファイルが作成されるタイミングはホストしているサーバー側に隠蔽されるので、</div><div>　そういうことが起きても不思議がないかなあと思いつつ）</div><div><br></div><div>&gt;<span style="font-size:14px">　→INTO OUTFILEは、対象がなくともファイルを生成するので、</span></div><span style="font-size:14px">&gt; 　　出現するまでWhileで待ってからFile.</span><span style="font-size:14px">Deleteを行う。等</span><div><div>INTO OUTFILEの内部動作は、<br></div><div>1. まずファイルが作られる</div><div>2. 行をフェッチする</div><div>3. フェッチした行はバッファにためられる</div><div>4. どこかのタイミングでバッファをfdにフラッシュ</div><div>となっていたので、</div><div>ファイルの出現タイミングが2.～4.のどこかにズレているのだとしたら、</div><div>それはFSかOSかそのへんに欺かれているんじゃないかなぁと思います。</div><div><br></div><div>Console.WriteLineのあたりか、</div><div>System.IO.File.Existsの *直前* あたりに</div><div>sync()に相当する何かを押し込めると幸せになれるんじゃないかと期待しています。。</div><div><br></div><div><br></div><div>yoku0825,</div><div><br></div></div></div><div class="gmail_extra"><br><div class="gmail_quote">2014年12月15日 15:57 志澤 敦 <span dir="ltr">&lt;<a href="mailto:atsushi.shizawa@seikodo.co.jp" target="_blank">atsushi.shizawa@seikodo.co.jp</a>&gt;</span>:<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+<html><head></head><body><div dir="ltr">志澤さん<div>こんにちは、yoku0825といいます。</div><div><br></div><div>サンプルコードありがとうございます。</div><div><br></div><div>サンプルの中では<span style="font-size:14px">testFullPath_Out(UNC記法)と</span></div><div><span style="font-size:14px">testFullPathI_IN(ローカルファイル)がありますが、</span></div><div>実際にはCIFS経由でやっていたりしますか？</div><div>（であれば、実際にファイルが作成されるタイミングはホストしているサーバー側に隠蔽されるので、</div><div>　そういうことが起きても不思議がないかなあと思いつつ）</div><div><br></div><div>&gt;<span style="font-size:14px">　→INTO OUTFILEは、対象がなくともファイルを生成するので、</span></div><span style="font-size:14px">&gt; 　　出現するまでWhileで待ってからFile.</span><span style="font-size:14px">Deleteを行う。等</span><div><div>INTO OUTFILEの内部動作は、<br></div><div>1. まずファイルが作られる</div><div>2. 行をフェッチする</div><div>3. フェッチした行はバッファにためられる</div><div>4. どこかのタイミングでバッファをfdにフラッシュ</div><div>となっていたので、</div><div>ファイルの出現タイミングが2.～4.のどこかにズレているのだとしたら、</div><div>それはFSかOSかそのへんに欺かれているんじゃないかなぁと思います。</div><div><br></div><div>Console.WriteLineのあたりか、</div><div>System.IO.File.Existsの *直前* あたりに</div><div>sync()に相当する何かを押し込めると幸せになれるんじゃないかと期待しています。。</div><div><br></div><div><br></div><div>yoku0825,</div><div><br></div></div></div><div class="gmail_extra"><br><div class="gmail_quote">2014年12月15日 15:57 志澤 敦 <span dir="ltr">&lt;<a href="mailto:atsushi.shizawa@seikodo.co.jp" target="_blank">atsushi.shizawa@seikodo.co.jp</a>&gt;</span>:<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
   
     
   
@@ -29,26 +29,26 @@
     <br>
      private void test_ctrl()<br>
      {<br>
-     string host = &quot;host_name&quot;;<br>
-     string user = &quot;userID&quot;;<br>
-     string pass = &quot;password&quot;;<br>
-     string schema = &quot;mysql&quot;;<br>
-     string conString = &quot;SERVER=&quot; + host + &quot;;&quot;<br>
-     + &quot;DATABASE=&quot; + schema + &quot;;&quot;<br>
-     + &quot;UID=&quot; + user + &quot;;&quot;<br>
-     + &quot;PASSWORD=&quot; + pass + &quot;;&quot;;<br>
+     string host = "host_name";<br>
+     string user = "userID";<br>
+     string pass = "password";<br>
+     string schema = "mysql";<br>
+     string conString = "SERVER=" + host + ";"<br>
+     + "DATABASE=" + schema + ";"<br>
+     + "UID=" + user + ";"<br>
+     + "PASSWORD=" + pass + ";";<br>
      MySqlConnection myConnect = new
     MySqlConnection(conString);<br>
      myConnect.Open();<br>
     <br>
-     string testDir = @&quot;\\&quot; + host + @&quot;\TEST\&quot;;<br>
-     string testFileName = &quot;test.tsv&quot;;<br>
+     string testDir = @"\\" + host + @"\TEST\";<br>
+     string testFileName = "test.tsv";<br>
      string testFullPath_Out =
     System.IO.Path.Combine(testDir, testFileName);<br>
-     string testFullPathI_IN = @&quot;D:\\TEST\\&quot; + testFileName;<br>
-     string SQL = @&quot;SELECT * FROM mysql.db LIMIT 1&quot;<br>
-          + &quot; INTO OUTFILE &#39;&quot; + testFullPathI_IN + @&quot;&#39;
-    FIELDS TERMINATED BY &#39;\t&#39; LINES TERMINATED BY &#39;\r\n&#39;&quot;;<br>
+     string testFullPathI_IN = @"D:\\TEST\\" + testFileName;<br>
+     string SQL = @"SELECT * FROM mysql.db LIMIT 1"<br>
+          + " INTO OUTFILE '" + testFullPathI_IN + @"'
+    FIELDS TERMINATED BY '\t' LINES TERMINATED BY '\r\n'";<br>
      for (int i = 0; i &lt; 1000; i++)<br>
      {<br>
      if (System.IO.File.Exists(testFullPath_Out))<br>
@@ -71,7 +71,7 @@
      }<br>
      Console.WriteLine(i.ToString());<br>
      }<br>
-     MessageBox.Show(&quot;正常終了&quot;);<br>
+     MessageBox.Show("正常終了");<br>
      myConnect.Close();<br>
      myConnect.Dispose();<div><div class="h5"><br>
      }<br>
@@ -166,3 +166,4 @@
   </div></div></div>
 
 </blockquote></div></div>
+</body></html>

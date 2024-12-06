@@ -1,0 +1,280 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16582</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16581.html">[前]</a><a href="16583.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16582
+</p>
+<div class="header">
+<p>
+From: "SAKAI, Kei" &lt;"SAKAI, Kei" &lt;sakaik@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 28 Apr 2020 19:18:36 +0900<br>
+Subject: [mysql 16582] Re: [mysql 16581] もっといいSQL文はないか<br>
+
+</p>
+</div>
+<div class="body">
+<pre>坂井です。
+
+　久光さん、こんにちは。
+こんな感じでどうですか。
+
+
+■動作確認要テーブルとデータ：
+CREATE TABLE YOKI (ID INTEGER, ZAI VARCHAR(10), IRO VARCHAR(10));
+INSERT INTO YOKI VALUES (1, 'PET', '黒'),(2, 'PET', '無色透明'),
+(3, 'ガラス', '無色透明'),(4, 'ガラス', '黄色透明'),(5, '塩ビ', '白');
+
+CREATE TABLE NAIYO (YOKI_ID INTEGER, BUTU VARCHAR(20));
+INSERT INTO NAIYO VALUES (1, 'りんご'),(2, 'りんご'),(3, 'りんご'),(4,
+'りんご'),(2, 'みかん'),(4, 'みかん'),(5, 'みかん'),(1, '梨'),(2, '梨'),(4, '梨');
+
+
+■やり方の一例：
+
+SELECT y.ID, y.ZAI, y.IRO, COUNT(*)
+  FROM YOKI y LEFT OUTER JOIN NAIYO n ON (y.ID=n.YOKI_ID)
+ WHERE  n.BUTU IN ('りんご', '梨')
+   AND  y.IRO IN ('無色透明')
+  GROUP BY y.ID, y.ZAI, y.IRO
+  HAVING COUNT(*) = 2;
+
+■「やり方の一例」の考え方の解説：
+
+  まず、容器テーブルとブツテーブルを結合します。容器テーブルの右側にブツをくっつける、というイメージですね。
+
+SELECT y.ID, y.ZAI, y.IRO, n.BUTU
+  FROM YOKI y LEFT OUTER JOIN NAIYO n ON (y.ID=n.YOKI_ID)
+ ORDER BY y.ID;
++------+-----------+--------------+-----------+
+<span class="quote1">| ID   | ZAI       | IRO          | BUTU      |
+</span>
++------+-----------+--------------+-----------+
+<span class="quote1">|    1 | PET       | 黒           | りんご    |
+</span>
+<span class="quote1">|    1 | PET       | 黒           | 梨        |
+</span>
+<span class="quote1">|    2 | PET       | 無色透明     | りんご    |
+</span>
+<span class="quote1">|    2 | PET       | 無色透明     | みかん    |
+</span>
+<span class="quote1">|    2 | PET       | 無色透明     | 梨        |
+</span>
+<span class="quote1">|    3 | ガラス    | 無色透明     | りんご    |
+</span>
+<span class="quote1">|    4 | ガラス    | 黄色透明     | りんご    |
+</span>
+<span class="quote1">|    4 | ガラス    | 黄色透明     | みかん    |
+</span>
+<span class="quote1">|    4 | ガラス    | 黄色透明     | 梨        |
+</span>
+<span class="quote1">|    5 | 塩ビ      | 白           | みかん    |
+</span>
++------+-----------+--------------+-----------+
+
+
+  で、その中で欲しい条件に合致する行だけを抽出します。
+ここでは、「りんご」の行と「梨」の行が欲しいので、WHERE条件に書きます。
+（IRO条件も追加したければ、AND/OR駆使して指定すれば良いです。今回の最終目的のためには AND  y.IRO IN ('無色透明')
+という条件を追加すれば良いです）
+
+
+SELECT y.ID, y.ZAI, y.IRO, n.BUTU
+  FROM YOKI y LEFT OUTER JOIN NAIYO n ON (y.ID=n.YOKI_ID)
+ WHERE  n.BUTU IN ('りんご', '梨')
+ ORDER BY y.ID;
++------+-----------+--------------+-----------+
+<span class="quote1">| ID   | ZAI       | IRO          | BUTU      |
+</span>
++------+-----------+--------------+-----------+
+<span class="quote1">|    1 | PET       | 黒           | りんご    |
+</span>
+<span class="quote1">|    1 | PET       | 黒           | 梨        |
+</span>
+<span class="quote1">|    2 | PET       | 無色透明     | りんご    |
+</span>
+<span class="quote1">|    2 | PET       | 無色透明     | みかん    |
+</span>
+<span class="quote1">|    2 | PET       | 無色透明     | 梨        |
+</span>
+<span class="quote1">|    3 | ガラス    | 無色透明     | りんご    |
+</span>
+<span class="quote1">|    4 | ガラス    | 黄色透明     | りんご    |
+</span>
+<span class="quote1">|    4 | ガラス    | 黄色透明     | 梨        |
+</span>
++------+-----------+--------------+-----------+
+
+
+  これを、IDごとにグルーピングして、「りんご」「梨」の両方を含む、つまりその数が2であるものを得れば良いのです。
+（実際には、ID, ZAI, IRO は一体なので、この3つをGROUP BYに（私なら）指定します）
+
+　数で絞る前の結果は、こんな感じ。
+
+SELECT y.ID, y.ZAI, y.IRO, COUNT(*)
+  FROM YOKI y LEFT OUTER JOIN NAIYO n ON (y.ID=n.YOKI_ID)
+ WHERE  n.BUTU IN ('りんご', '梨')
+ GROUP BY y.ID, y.ZAI, y.IRO;
++------+-----------+--------------+----------+
+<span class="quote1">| ID   | ZAI       | IRO          | COUNT(*) |
+</span>
++------+-----------+--------------+----------+
+<span class="quote1">|    1 | PET       | 黒           |        2 |
+</span>
+<span class="quote1">|    2 | PET       | 無色透明     |        2 |
+</span>
+<span class="quote1">|    3 | ガラス    | 無色透明     |        1 |
+</span>
+<span class="quote1">|    4 | ガラス    | 黄色透明     |        2 |
+</span>
++------+-----------+--------------+----------+
+
+ここから COUNT(*) の数で絞るのは、(WHEREではなく) HAVING を使います。
+(今は容器の色の条件を指定していないので、ID=1,2,4 が該当しますが、WHERE条件で容器条件を「無色透明」と指定していれば、2 のみが残りますね）
+
+
+
+■要件を伝える大切さ
+
+<span class="quote1">&gt; 「りんごと梨の両方が入っている無色透明の容器」のような
+</span>
+
+  と書かれている「のような」の部分が、とても曖昧です。
+
+・必ず2種類のものを指定するのか、3種類以上固定なのか、3種類以上可変なのか
+・3種類以上の場合「その全てが含まれる」という条件にしたいのか、「それらの中で複数が含まれている」ものを欲しいのか
+・そもそも2種を例にしているけど、実際には20とか30とか指定するんじゃないか
+・指定する条件は ブツ(複数)と容器色だけなのだろうか
+
+  などなど、読み手の想像力が試されます。
+  曖昧な要件だと、一旦の回答を差し上げたあとで「いや、実は条件が少し違って・・・」と後出しすることになり、お互いに掛けた手間の割には、なかなかゴールにたどり着けないというアンハッピーな状態になることが多いですね。
+
+（ええ、実際、面白そうなテーマだったので、あれこれ妄想を働かせました(笑）。キライじゃないんですけど、「で、正解の要件は何だったの？」と気になります）
+
+
+2020年4月28日(火) 18:18 Hisamitsu Issei &lt;DS1I-HSMT@xxxxxxxxxx&gt;:
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 久光と申します
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; phpからMySQLに検索をかけているスクリプトの一部に強引なやりかたのせいもあって検索に時間がかかっている部分があります。
+</span>
+<span class="quote1">&gt; とりあえず動いてはいるのですが、
+</span>
+<span class="quote1">&gt; もっとスマートで高速に検索できるSQLの書き方があるのではないかと相談させていただきます。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; (1)容器に関する情報をまとめたテーブル
+</span>
+<span class="quote1">&gt; (2)容器の中に入っている物品の名前を記録したテーブル
+</span>
+<span class="quote1">&gt; が存在したとします。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 容器テーブル
+</span>
+<span class="quote1">&gt; ＝＝＝＝＝＝＝＝＝
+</span>
+<span class="quote1">&gt; 容器ID　材質　色
+</span>
+<span class="quote1">&gt; ＝＝＝＝＝＝＝＝＝
+</span>
+<span class="quote1">&gt; 1 PET 黒
+</span>
+<span class="quote1">&gt; 2 PET 無色透明
+</span>
+<span class="quote1">&gt; 3 ガラス 無色透明
+</span>
+<span class="quote1">&gt; 4 ガラス 黄色透明
+</span>
+<span class="quote1">&gt; 5 塩ビ 白
+</span>
+<span class="quote1">&gt; ＝＝＝＝＝＝＝＝＝
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 内容物テーブル
+</span>
+<span class="quote1">&gt; ＝＝＝＝＝＝＝＝
+</span>
+<span class="quote1">&gt; 容器ID　内容物名
+</span>
+<span class="quote1">&gt; ＝＝＝＝＝＝＝＝
+</span>
+<span class="quote1">&gt; 1 りんご
+</span>
+<span class="quote1">&gt; 2 りんご
+</span>
+<span class="quote1">&gt; 3 りんご
+</span>
+<span class="quote1">&gt; 4 りんご
+</span>
+<span class="quote1">&gt; 2 みかん
+</span>
+<span class="quote1">&gt; 4 みかん
+</span>
+<span class="quote1">&gt; 5 みかん
+</span>
+<span class="quote1">&gt; 1 梨
+</span>
+<span class="quote1">&gt; 2 梨
+</span>
+<span class="quote1">&gt; 4 梨
+</span>
+<span class="quote1">&gt; ＝＝＝＝＝＝＝＝
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 実際には、上記の容器テーブルに相当する実際のテーブルは７万行ほどあり、内容物テーブルに相当する実際のテーブルは１５０万行ほどあるデータです。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; SQLの書き方に悩んでいるのは、
+</span>
+<span class="quote1">&gt; 「りんごと梨の両方が入っている無色透明の容器」のような、複数の内容物を全て含む該当容器を探すときです。
+</span>
+<span class="quote1">&gt; 現在は、phpのfor文でいったん
+</span>
+<span class="quote1">&gt; SELECT `容器ID` FROM `内容物` WHERE `内容物名` = 'りんご'
+</span>
+<span class="quote1">&gt; SELECT `容器ID` FROM `内容物` WHERE `内容物名` = '梨'
+</span>
+<span class="quote1">&gt; と検索を繰り返して、得られた結果を整理して該当する容器IDを配列にまとめた上で、最後に
+</span>
+<span class="quote1">&gt; SELECT * FROM `容器` WHERE `色` = '無色透明' AND ( `容器ID`=2 OR `容器ID`=4 ... )
+</span>
+<span class="quote1">&gt; というように 容器テーブル を検索する方法をとってます。
+</span>
+<span class="quote1">&gt; 条件によっては( `容器ID`=2 OR `容器ID`=4 ... ) の部分が数千から数万もの数になることもあり、
+</span>
+<span class="quote1">&gt; inner joinやleft joinなどの結合やUNIONなどなにかもっとスマートに高速に検索できるSQLの書き方があるんじゃないかと思うのですが
+</span>
+<span class="quote1">&gt; どうでしょうか。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 「りんごまたは梨」のor検索なら容器テーブルと内容物テーブルをleft joinして容器IDでgroup byすればいいと思うのですが
+</span>
+<span class="quote1">&gt; 「りんごと梨」のand検索となると、どうしていいのかわからなくなってます。
+</span>
+<span class="quote1">&gt;
+</span>
+
+</pre>
+</div>
+<p class="button"><a href="16581.html">[前]</a><a href="16583.html">[次]</a><a href="../list/16501-16600.html">[番号順一覧]</a><a href="../thread/16501-16600.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="16581.html">  16581 2020-04-28 18:18 [&lt;DS1I-HSMT@xxxxxxxxx] $B$b$C$H$$$$(BSQL$BJ8$O$J$$$+(B     </a></span>
+<span class="current">-&gt;&nbsp;<a href="16582.html">  16582 2020-04-28 19:18 ┗["SAKAI, Kei" &lt;sakaik] Re: [mysql 16581] もっといいSQL文はないか</a></span>
+</pre>
+
+
+</body></html>

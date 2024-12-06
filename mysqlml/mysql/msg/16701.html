@@ -1,0 +1,82 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16701</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16700.html">[前]</a><a href="16702.html">[次]</a><a href="../list/16701-16800.html">[番号順一覧]</a><a href="../thread/16701-16800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16701
+</p>
+<div class="header">
+<p>
+From: yoku0825 &lt;yoku0825 &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 10 Aug 2022 11:12:23 +0900<br>
+Subject: [mysql 16701] Re: [mysql 16700] INSERT SELECT でのテーブル別名の使い方<br>
+
+</p>
+</div>
+<div class="body">
+<pre>yoku0825といいます。
+
+INSERT INTO .. SELECT .. の構文は以下のように定義されており、
+
+13078           INSERT_SYM                   /* #1 */   // INSERT
+13079           insert_lock_option           /* #2 */    // 今回なし
+13080           opt_ignore                   /* #3 */        // 今回なし
+13081           opt_INTO                     /* #4 */        // INTO
+13082           table_ident                  /* #5 */      // tableA
+13083           opt_use_partition            /* #6 */     // 今回なし
+13084           insert_from_constructor      /* #7 */   // (id, ....)
+13085           opt_values_reference         /* #8 */  // SELECT IFNULL ...
+
+<a href="https://github.com/mysql/mysql-server/blob/mysql-8.0.30/sql/sql_yacc.yy#L13077-L13133">https://github.com/mysql/mysql-server/blob/mysql-8.0.30/sql/sql_yacc.yy#L13077-L13133</a>
+
+
+ご賢察の通りINSERT + tableA + (id, ..) と SELECT部分は別のものとして取り扱われるので、
+INSERTのlistの方で明示しなくても大丈夫なようです。
+
+
+yoku0825,
+
+2022年8月10日(水) 10:52 ds1i-hsmt &lt;ds1i-hsmt@xxxxxxxxxx&gt;:
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 久光と申します
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; テーブル名tableAのカラム名id（UNSIGNED INT）の欠番を埋めながらレコードを追加するSQL文として
+</span>
+<span class="quote1">&gt; 下記を考えました。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; INSERT INTO `tableA` (`id`, ・・・) SELECT IFNULL((`id` + 1), 1) AS `minID`,  ・・・ FROM `tableA` AS t1 WHERE NOT EXISTS (SELECT * FROM `tableA` AS t2 WHERE (t1.id + 1) = t2.id) LIMIT 1
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 問題なく動作しているようなので一安心しているのですが
+</span>
+<span class="quote1">&gt; INSERT INTO `tableA` AS t0 (t0.id, ・・・)
+</span>
+<span class="quote1">&gt; のように最初のテーブルに別名をつけずに動作しているのが気になっています。
+</span>
+<span class="quote1">&gt; INSERT ....SELECT...だと SELECT内の記述がINSERTに影響しないから問題ないのか
+</span>
+<span class="quote1">&gt; 問題あるのにわたしが気づいてない（動作しているようにみえている）のか
+</span>
+<span class="quote1">&gt; どうなんでしょうか。
+</span>
+<span class="quote1">&gt;
+</span>
+
+</pre>
+</div>
+<p class="button"><a href="16700.html">[前]</a><a href="16702.html">[次]</a><a href="../list/16701-16800.html">[番号順一覧]</a><a href="../thread/16701-16800.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="16700.html">@ 16700 2022-08-10 10:52 [ds1i-hsmt &lt;ds1i-hsmt] INSERT SELECT でのテーブル別名の使い方  </a></span>
+<span class="current">-&gt;&nbsp;<a href="16701.html">  16701 2022-08-10 11:12 ┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16700] INSERT SELECT でのテーブル別名の使い方</a></span>
+</pre>
+
+
+</body></html>

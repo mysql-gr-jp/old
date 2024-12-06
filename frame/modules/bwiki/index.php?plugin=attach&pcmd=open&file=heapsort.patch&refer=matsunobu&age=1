@@ -1,0 +1,935 @@
+--- orig/sql/mysql_priv.h	2009-06-18 19:21:44.000000000 +0900
++++ new/sql/mysql_priv.h	2009-08-24 07:57:26.000000000 +0900
+@@ -2119,6 +2119,11 @@ int set_handler_table_locks(THD *thd, TA
+ bool lock_table_names(THD *thd, TABLE_LIST *table_list);
+ void unlock_table_names(THD *thd);
+ 
++/* filesort.cc */
++uint sortlength(THD *thd, SORT_FIELD *sortorder, uint s_length,
++                bool *multi_byte_charset);
++bool check_heapsort_cond(ulong sort_length, ha_rows max_rows, 
++                         ha_rows table_records, ulong sortbuf_size);
+ 
+ /* old unireg functions */
+ 
+
+--- orig/sql/sql_select.cc	2009-06-18 19:21:46.000000000 +0900
++++ new/sql/sql_select.cc	2009-08-24 09:17:26.000000000 +0900
+@@ -269,6 +269,7 @@ TABLE *create_duplicate_weedout_tmp_tabl
+ 
+ Item_equal *find_item_equal(COND_EQUAL *cond_equal, Field *field,
+                             bool *inherited_fl);
++static bool check_heapsort_cond(THD *thd, JOIN *join, TABLE *table);
+ 
+ 
+ /**
+@@ -21291,6 +21292,42 @@ void JOIN::clear()
+   }
+ }
+ 
++
++/* Doing Top-N in-memory heapsort if the following conditions are met.
++  1. LIMIT clause is used (max_rows should be smaller than records)
++  2. All N sort keys fit within sort buffer (less than half)
++  3. max_rows is much smaller than records (less than half)
++*/
++bool check_heapsort_cond(ulong sort_length, ha_rows max_rows, 
++                         ha_rows table_records, ulong sortbuf_size)
++{
++  if (sort_length * max_rows * 2 < sortbuf_size && 
++      table_records > max_rows * 2 )
++    return true;
++  else
++    return false;
++}
++
++
++static bool check_heapsort_cond(THD *thd, JOIN *join, TABLE *table)
++{
++  bool multi_byte_charset;
++  uint length=0;
++  for (ORDER *ord= join->order; ord; ord= ord->next)
++    length++;
++  join->sortorder= 
++  make_unireg_sortorder(join->order, &length, join->sortorder); 
++
++  ulong sort_length= sortlength(thd, join->sortorder, length, &multi_byte_charset);
++  ha_rows max_rows= join->select_limit;
++  ha_rows records= table->file->estimate_rows_upper_bound();
++  ulong memavl= thd->variables.sortbuff_size;
++  if (check_heapsort_cond(sort_length, max_rows, records, memavl))
++    return true;
++  else
++    return false;
++}
++
+ /**
+   EXPLAIN handling.
+ 
+@@ -21736,7 +21773,10 @@ void select_describe(JOIN *join, bool ne
+         if (need_order)
+         {
+           need_order=0;
+-          extra.append(STRING_WITH_LEN("; Using filesort"));
++          if (check_heapsort_cond(thd, join, table))
++            extra.append(STRING_WITH_LEN("; Using top-N in-memory sort"));
++          else
++            extra.append(STRING_WITH_LEN("; Using filesort"));
+         }
+         if (distinct & test_all_bits(used_tables,thd->used_tables))
+           extra.append(STRING_WITH_LEN("; Distinct"));
+
+--- orig/sql/filesort.cc	2009-06-18 19:21:44.000000000 +0900
++++ new/sql/filesort.cc	2009-08-24 09:19:34.000000000 +0900
+@@ -45,7 +45,7 @@ static uchar *read_buffpek_from_file(IO_
+                                      uchar *buf);
+ static ha_rows find_all_keys(SORTPARAM *param,SQL_SELECT *select,
+ 			     uchar * *sort_keys, IO_CACHE *buffer_file,
+-			     IO_CACHE *tempfile,IO_CACHE *indexfile);
++			     IO_CACHE *tempfile,IO_CACHE *indexfile, bool heapsort);
+ static int write_keys(SORTPARAM *param,uchar * *sort_keys,
+ 		      uint count, IO_CACHE *buffer_file, IO_CACHE *tempfile);
+ static void make_sortkey(SORTPARAM *param,uchar *to, uchar *ref_pos);
+@@ -57,12 +57,14 @@ static int merge_index(SORTPARAM *param,
+ static bool save_index(SORTPARAM *param,uchar **sort_keys, uint count, 
+                        FILESORT_INFO *table_sort);
+ static uint suffix_length(ulong string_length);
+-static uint sortlength(THD *thd, SORT_FIELD *sortorder, uint s_length,
+-		       bool *multi_byte_charset);
+ static SORT_ADDON_FIELD *get_addon_fields(THD *thd, Field **ptabfield,
+                                           uint sortlength, uint *plength);
+ static void unpack_addon_fields(struct st_sort_addon_field *addon_field,
+                                 uchar *buff);
++static void heap_queue_insert(uchar ** queue, ha_rows queue_size, 
++                              uchar* current_key, uint sort_length);
++static void heap_queue_poll_insert(uchar ** queue, ha_rows queue_size, 
++                                   uchar* current_key, uint sort_length);
+ /**
+   Sort a table.
+   Creates a set of pointers that can be used to read the rows
+@@ -104,6 +106,7 @@ ha_rows filesort(THD *thd, TABLE *table,
+                  bool sort_positions, ha_rows *examined_rows)
+ {
+   int error;
++  bool heapsort=false;
+   ulong memavl, min_sort_memory;
+   uint maxbuffer;
+   BUFFPEK *buffpek;
+@@ -147,8 +150,29 @@ ha_rows filesort(THD *thd, TABLE *table,
+   param.ref_length= table->file->ref_length;
+   param.addon_field= 0;
+   param.addon_length= 0;
++
++  param.max_rows= max_rows;
++  {
++    records= table->file->estimate_rows_upper_bound();
++    memavl= thd->variables.sortbuff_size;
++
++    if (check_heapsort_cond(param.sort_length, param.max_rows,
++        records, memavl))
++      heapsort= true;
++
++    /*
++      If number of records is not known, use as much of sort buffer 
++      as possible. 
++    */
++    if (records == HA_POS_ERROR)
++      records--;  // we use 'records+1' below.
++    selected_records_file= 0;
++  }
++
+   if (!(table->file->ha_table_flags() & HA_FAST_KEY_READ) &&
+-      !table->fulltext_searched && !sort_positions)
++      !table->fulltext_searched && !sort_positions && !heapsort)
+   {
+     /* 
+       Get the descriptors of all fields whose values are appended 
+@@ -180,7 +204,6 @@ ha_rows filesort(THD *thd, TABLE *table,
+     param.sort_length+= param.ref_length;
+   }
+   param.rec_length= param.sort_length+param.addon_length;
+-  param.max_rows= max_rows;
+ 
+   if (select && select->quick)
+   {
+@@ -199,22 +222,13 @@ ha_rows filesort(THD *thd, TABLE *table,
+   }
+   else
+ #endif
+-  {
+-    records= table->file->estimate_rows_upper_bound();
+-    /*
+-      If number of records is not known, use as much of sort buffer 
+-      as possible. 
+-    */
+-    if (records == HA_POS_ERROR)
+-      records--;  // we use 'records+1' below.
+-    selected_records_file= 0;
+-  }
++
+ 
+   if (multi_byte_charset &&
+       !(param.tmp_buffer= (char*) my_malloc(param.sort_length,MYF(MY_WME))))
+     goto err;
+ 
+-  memavl= thd->variables.sortbuff_size;
++
+   min_sort_memory= max(MIN_SORT_MEMORY, param.sort_length*MERGEBUFF2);
+   while (memavl >= min_sort_memory)
+   {
+@@ -243,7 +257,7 @@ ha_rows filesort(THD *thd, TABLE *table,
+   param.sort_form= table;
+   param.end=(param.local_sortorder=sortorder)+s_length;
+   if ((records=find_all_keys(&param,select,sort_keys, &buffpek_pointers,
+-			     &tempfile, selected_records_file)) ==
++			     &tempfile, selected_records_file, heapsort)) ==
+       HA_POS_ERROR)
+     goto err;
+   maxbuffer= (uint) (my_b_tell(&buffpek_pointers)/sizeof(*buffpek));
+@@ -466,6 +480,55 @@ static void dbug_print_record(TABLE *tab
+ }
+ #endif 
+ 
++
++/* Shift-up */
++static void heap_queue_insert(uchar ** queue, ha_rows queue_size, 
++                              uchar* current_key, uint sort_length)
++{
++  ha_rows j= queue_size;
++  qsort2_cmp cmp= get_ptr_compare(sort_length);
++  while (j > 0) 
++  {
++    ha_rows  i= (j - 1) >> 1; 
++    if (cmp((void*)&sort_length, &current_key, queue+i) <= 0)
++      break;
++    memcpy(queue[j],queue[i], sort_length);
++    j= i;
++  }
++  memcpy(queue[j], current_key, sort_length);
++}
++
++
++/* Shift-down */ 
++static void heap_queue_poll_insert(uchar ** queue, ha_rows queue_size, 
++                                   uchar* current_key, uint sort_length)
++{
++  ha_rows n= queue_size;
++  qsort2_cmp cmp= get_ptr_compare(sort_length);
++
++  if (cmp((void*)&sort_length, &current_key, queue+0) >= 0)
++    return;
++
++  memcpy(queue[0], current_key, sort_length);
++  ha_rows i= 0;
++
++  for (;;)
++  {
++    ha_rows  j = 2 * i + 1;
++    if (j >= n)
++      break;
++    if (j + 1 < n &&
++        cmp((void*)&sort_length,queue+j, queue+j+1) < 0 )
++      j++;
++    if (cmp((void*)&sort_length, &current_key, queue+j) >= 0)
++      break;
++    memcpy(queue[i], queue[j], sort_length);
++    i= j;
++  }
++  memcpy(queue[i], current_key, sort_length);
++}
++
++
+ /**
+   Search after sort_keys and write them into tempfile.
+   All produced sequences are guaranteed to be non-empty.
+@@ -506,7 +569,7 @@ static void dbug_print_record(TABLE *tab
+ static ha_rows find_all_keys(SORTPARAM *param, SQL_SELECT *select,
+ 			     uchar **sort_keys,
+ 			     IO_CACHE *buffpek_pointers,
+-			     IO_CACHE *tempfile, IO_CACHE *indexfile)
++			     IO_CACHE *tempfile, IO_CACHE *indexfile, bool heapsort)
+ {
+   int error,flag,quick_select;
+   uint idx,indexpos,ref_length;
+@@ -522,6 +585,12 @@ static ha_rows find_all_keys(SORTPARAM *
+                      (select ? select->quick ? "ranges" : "where":
+                       "every row")));
+ 
++  uint heap_queue_size=0;
++  ha_rows heap_queue_limit= param->max_rows;
++  uchar* current_key= NULL;
++  if (heapsort)
++    current_key= (uchar*)my_malloc(param->sort_length, MYF(MY_WME));
++
+   idx=indexpos=0;
+   error=quick_select=0;
+   sort_form=param->sort_form;
+@@ -611,14 +680,34 @@ static ha_rows find_all_keys(SORTPARAM *
+       param->examined_rows++;
+     if (error == 0 && (!select || select->skip_record() == 0))
+     {
+-      if (idx == param->keys)
++      if (idx == param->keys && !heapsort)
+       {
+-	if (write_keys(param,sort_keys,idx,buffpek_pointers,tempfile))
+-	  DBUG_RETURN(HA_POS_ERROR);
+-	idx=0;
+-	indexpos++;
++        if (write_keys(param,sort_keys,idx,buffpek_pointers,tempfile))
++          DBUG_RETURN(HA_POS_ERROR);
++        idx=0;
++        indexpos++;
++      }
++
++      if (!heapsort)
++        make_sortkey(param,sort_keys[idx++],ref_pos);
++      else
++      {
++        make_sortkey(param,current_key,ref_pos);
++
++        /* Adding an entry to the heap */
++        if (heap_queue_size < heap_queue_limit)
++        {
++          heap_queue_insert(sort_keys, heap_queue_size, current_key, 
++                            param->sort_length);
++          heap_queue_size++;
++        } 
++        else
++        {
++          /* Heap size is full, so exchanging with the smallest (largest) one */
++          heap_queue_poll_insert(sort_keys, heap_queue_size, current_key, 
++                                 param->sort_length);
++        }
+       }
+-      make_sortkey(param,sort_keys[idx++],ref_pos);
+     }
+     else
+       file->unlock_row();
+@@ -633,6 +722,11 @@ static ha_rows find_all_keys(SORTPARAM *
+       file->ha_rnd_end();
+   }
+ 
++  if (heapsort){
++    idx= heap_queue_size;
++    my_free((uchar*) current_key,MYF(0));
++  }
++
+   if (thd->is_error())
+     DBUG_RETURN(HA_POS_ERROR);
+   
+@@ -1437,7 +1531,7 @@ static uint suffix_length(ulong string_l
+     Total length of sort buffer in bytes
+ */
+ 
+-static uint
++uint
+ sortlength(THD *thd, SORT_FIELD *sortorder, uint s_length,
+            bool *multi_byte_charset)
+ {
+
+--- orig/mysql-test/t/heapsort.test	1970-01-01 09:00:00.000000000 +0900
++++ new/mysql-test/t/heapsort.test	2009-08-24 08:46:28.000000000 +0900
+@@ -0,0 +1,101 @@
++create table t2 (c1 int, c2 int default 0, c3 varchar(10) default 'abc', c4 int default 1 );
++insert into t2 values(1,10,'a',100),(2,20,'b',200),(3,30,'c',300),(4,40,'d',400),(5,50,'e',500),(6,60,'f',600),(7,70,'g',700),(8,80,'h',800),(9,90,'i',900),(10,100,'j',1000);
++
++# integer sort
++explain select * from t2 order by c1 limit 5; 
++explain select * from t2 order by c1 limit 15; 
++select * from t2 order by c1 limit 5; 
++select * from t2 order by c1 desc limit 5; 
++select * from t2 order by c1 limit 2, 4; 
++
++# string sort
++explain select * from t2 order by c3 limit 5; 
++explain select * from t2 order by c3 limit 15; 
++select * from t2 order by c3 limit 5; 
++select * from t2 order by c3 desc limit 5; 
++select * from t2 order by c3 limit 2, 4; 
++
++truncate table t2;
++insert into t2 values(50,10,'a',100),(40,20,'b',200),(100,30,'c',300),(90,40,'d',400),(10,50,'e',500),(20,60,'f',600),(70,70,'g',700),(80,80,'h',800),(30,90,'i',900),(60,100,'j',1000);
++# unordered integer sort
++select * from t2 order by c1 limit 5; 
++select * from t2 order by c1 desc limit 5; 
++select * from t2 order by c1 limit 2, 4; 
++
++select * from t2 order by c1 limit 10; 
++select * from t2 order by c1 limit 100; 
++select * from t2 order by c1 limit 2, 4; 
++
++select * from t2 order by c1;
++
++drop table t2;
++
++create table s1 (c1 int, c2 int, c3 int, c4 varchar(100) , c5 datetime, primary key(c1));
++
++delimiter //;
++create procedure sp1(IN count INTEGER)
++BEGIN
++ DECLARE done INTEGER DEFAULT 0;
++ DECLARE i INTEGER DEFAULT 1;
++ WHILE done != 1 DO
++ insert into s1 values (i, count-i, i%1000, "abcdefghij", "2009-01-01 11:11:11");
++  SET i = i + 1;
++  IF i > count THEN
++   SET done = 1;
++  END IF;
++ END WHILE;
++END;
++//
++delimiter ;//
++
++call sp1(100000);
++drop procedure sp1;
++
++
++select * from s1 order by c1 limit 0, 10; 
++select * from s1 order by c1 limit 100, 10; 
++select * from s1 order by c1 limit 1000, 10; 
++select * from s1 order by c1 limit 10000, 10; 
++select * from s1 order by c1 limit 100000, 10; 
++
++
++select * from s1 order by c2 limit 0, 10; 
++select * from s1 order by c2 limit 100, 10; 
++select * from s1 order by c2 limit 1000, 10; 
++select * from s1 order by c2 limit 10000, 10; 
++select * from s1 order by c2 limit 100000, 10; 
++
++
++select * from s1 order by c1 desc limit 0, 10; 
++select * from s1 order by c1 desc limit 100, 10; 
++select * from s1 order by c1 desc limit 1000, 10; 
++select * from s1 order by c1 desc limit 10000, 10; 
++select * from s1 order by c1 desc limit 100000, 10; 
++
++select * from s1 order by c2 desc limit 0, 10; 
++select * from s1 order by c2 desc limit 100, 10; 
++select * from s1 order by c2 desc limit 1000, 10; 
++select * from s1 order by c2 desc limit 10000, 10; 
++select * from s1 order by c2 desc limit 100000, 10; 
++
++select * from s1 order by c3,c2 limit 0, 10; 
++select * from s1 order by c3,c2 limit 100, 10; 
++select * from s1 order by c3,c2 limit 1000, 10; 
++select * from s1 order by c3,c2 limit 10000, 10; 
++select * from s1 order by c3,c2 limit 100000, 10; 
++
++select * from s1 order by c3,c1 desc limit 0, 10; 
++select * from s1 order by c3,c1 desc limit 100, 10; 
++select * from s1 order by c3,c1 desc limit 1000, 10; 
++select * from s1 order by c3,c1 desc limit 10000, 10; 
++select * from s1 order by c3,c1 desc limit 100000, 10; 
++
++select a.* from s1 a, (select c1, c3 from s1 order by c3,c1 limit 0, 10) b where a.c1 = b.c1;
++select a.* from s1 a, (select c1, c3 from s1 order by c3,c1 limit 100, 10) b where a.c1 = b.c1;
++select a.* from s1 a, (select c1, c3 from s1 order by c3,c1 limit 1000, 10) b where a.c1 = b.c1;
++select a.* from s1 a, (select c1, c3 from s1 order by c3,c1 limit 10000, 10) b where a.c1 = b.c1;
++select a.* from s1 a, (select c1, c3 from s1 order by c3,c1 limit 100000, 10) b where a.c1 = b.c1;
++
++select * from s1 order by c1 desc, c2, c3 limit 0, 10; 
++
++drop table s1;
+
+--- orig/mysql-test/r/heapsort.result	1970-01-01 09:00:00.000000000 +0900
++++ new/mysql-test/r/heapsort.result	2009-08-24 08:48:15.000000000 +0900
+@@ -0,0 +1,498 @@
++create table t2 (c1 int, c2 int default 0, c3 varchar(10) default 'abc', c4 int default 1 );
++insert into t2 values(1,10,'a',100),(2,20,'b',200),(3,30,'c',300),(4,40,'d',400),(5,50,'e',500),(6,60,'f',600),(7,70,'g',700),(8,80,'h',800),(9,90,'i',900),(10,100,'j',1000);
++explain select * from t2 order by c1 limit 5;
++id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
++1	SIMPLE	t2	ALL	NULL	NULL	NULL	NULL	10	Using top-N in-memory sort
++explain select * from t2 order by c1 limit 15;
++id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
++1	SIMPLE	t2	ALL	NULL	NULL	NULL	NULL	10	Using filesort
++select * from t2 order by c1 limit 5;
++c1	c2	c3	c4
++1	10	a	100
++2	20	b	200
++3	30	c	300
++4	40	d	400
++5	50	e	500
++select * from t2 order by c1 desc limit 5;
++c1	c2	c3	c4
++10	100	j	1000
++9	90	i	900
++8	80	h	800
++7	70	g	700
++6	60	f	600
++select * from t2 order by c1 limit 2, 4;
++c1	c2	c3	c4
++3	30	c	300
++4	40	d	400
++5	50	e	500
++6	60	f	600
++explain select * from t2 order by c3 limit 5;
++id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
++1	SIMPLE	t2	ALL	NULL	NULL	NULL	NULL	10	Using top-N in-memory sort
++explain select * from t2 order by c3 limit 15;
++id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
++1	SIMPLE	t2	ALL	NULL	NULL	NULL	NULL	10	Using filesort
++select * from t2 order by c3 limit 5;
++c1	c2	c3	c4
++1	10	a	100
++2	20	b	200
++3	30	c	300
++4	40	d	400
++5	50	e	500
++select * from t2 order by c3 desc limit 5;
++c1	c2	c3	c4
++10	100	j	1000
++9	90	i	900
++8	80	h	800
++7	70	g	700
++6	60	f	600
++select * from t2 order by c3 limit 2, 4;
++c1	c2	c3	c4
++3	30	c	300
++4	40	d	400
++5	50	e	500
++6	60	f	600
++truncate table t2;
++insert into t2 values(50,10,'a',100),(40,20,'b',200),(100,30,'c',300),(90,40,'d',400),(10,50,'e',500),(20,60,'f',600),(70,70,'g',700),(80,80,'h',800),(30,90,'i',900),(60,100,'j',1000);
++select * from t2 order by c1 limit 5;
++c1	c2	c3	c4
++10	50	e	500
++20	60	f	600
++30	90	i	900
++40	20	b	200
++50	10	a	100
++select * from t2 order by c1 desc limit 5;
++c1	c2	c3	c4
++100	30	c	300
++90	40	d	400
++80	80	h	800
++70	70	g	700
++60	100	j	1000
++select * from t2 order by c1 limit 2, 4;
++c1	c2	c3	c4
++30	90	i	900
++40	20	b	200
++50	10	a	100
++60	100	j	1000
++select * from t2 order by c1 limit 10;
++c1	c2	c3	c4
++10	50	e	500
++20	60	f	600
++30	90	i	900
++40	20	b	200
++50	10	a	100
++60	100	j	1000
++70	70	g	700
++80	80	h	800
++90	40	d	400
++100	30	c	300
++select * from t2 order by c1 limit 100;
++c1	c2	c3	c4
++10	50	e	500
++20	60	f	600
++30	90	i	900
++40	20	b	200
++50	10	a	100
++60	100	j	1000
++70	70	g	700
++80	80	h	800
++90	40	d	400
++100	30	c	300
++select * from t2 order by c1 limit 2, 4;
++c1	c2	c3	c4
++30	90	i	900
++40	20	b	200
++50	10	a	100
++60	100	j	1000
++select * from t2 order by c1;
++c1	c2	c3	c4
++10	50	e	500
++20	60	f	600
++30	90	i	900
++40	20	b	200
++50	10	a	100
++60	100	j	1000
++70	70	g	700
++80	80	h	800
++90	40	d	400
++100	30	c	300
++drop table t2;
++create table s1 (c1 int, c2 int, c3 int, c4 varchar(100) , c5 datetime, primary key(c1));
++create procedure sp1(IN count INTEGER)
++BEGIN
++DECLARE done INTEGER DEFAULT 0;
++DECLARE i INTEGER DEFAULT 1;
++WHILE done != 1 DO
++insert into s1 values (i, count-i, i%1000, "abcdefghij", "2009-01-01 11:11:11");
++SET i = i + 1;
++IF i > count THEN
++SET done = 1;
++END IF;
++END WHILE;
++END;
++//
++call sp1(100000);
++drop procedure sp1;
++select * from s1 order by c1 limit 0, 10;
++c1	c2	c3	c4	c5
++1	99999	1	abcdefghij	2009-01-01 11:11:11
++2	99998	2	abcdefghij	2009-01-01 11:11:11
++3	99997	3	abcdefghij	2009-01-01 11:11:11
++4	99996	4	abcdefghij	2009-01-01 11:11:11
++5	99995	5	abcdefghij	2009-01-01 11:11:11
++6	99994	6	abcdefghij	2009-01-01 11:11:11
++7	99993	7	abcdefghij	2009-01-01 11:11:11
++8	99992	8	abcdefghij	2009-01-01 11:11:11
++9	99991	9	abcdefghij	2009-01-01 11:11:11
++10	99990	10	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c1 limit 100, 10;
++c1	c2	c3	c4	c5
++101	99899	101	abcdefghij	2009-01-01 11:11:11
++102	99898	102	abcdefghij	2009-01-01 11:11:11
++103	99897	103	abcdefghij	2009-01-01 11:11:11
++104	99896	104	abcdefghij	2009-01-01 11:11:11
++105	99895	105	abcdefghij	2009-01-01 11:11:11
++106	99894	106	abcdefghij	2009-01-01 11:11:11
++107	99893	107	abcdefghij	2009-01-01 11:11:11
++108	99892	108	abcdefghij	2009-01-01 11:11:11
++109	99891	109	abcdefghij	2009-01-01 11:11:11
++110	99890	110	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c1 limit 1000, 10;
++c1	c2	c3	c4	c5
++1001	98999	1	abcdefghij	2009-01-01 11:11:11
++1002	98998	2	abcdefghij	2009-01-01 11:11:11
++1003	98997	3	abcdefghij	2009-01-01 11:11:11
++1004	98996	4	abcdefghij	2009-01-01 11:11:11
++1005	98995	5	abcdefghij	2009-01-01 11:11:11
++1006	98994	6	abcdefghij	2009-01-01 11:11:11
++1007	98993	7	abcdefghij	2009-01-01 11:11:11
++1008	98992	8	abcdefghij	2009-01-01 11:11:11
++1009	98991	9	abcdefghij	2009-01-01 11:11:11
++1010	98990	10	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c1 limit 10000, 10;
++c1	c2	c3	c4	c5
++10001	89999	1	abcdefghij	2009-01-01 11:11:11
++10002	89998	2	abcdefghij	2009-01-01 11:11:11
++10003	89997	3	abcdefghij	2009-01-01 11:11:11
++10004	89996	4	abcdefghij	2009-01-01 11:11:11
++10005	89995	5	abcdefghij	2009-01-01 11:11:11
++10006	89994	6	abcdefghij	2009-01-01 11:11:11
++10007	89993	7	abcdefghij	2009-01-01 11:11:11
++10008	89992	8	abcdefghij	2009-01-01 11:11:11
++10009	89991	9	abcdefghij	2009-01-01 11:11:11
++10010	89990	10	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c1 limit 100000, 10;
++c1	c2	c3	c4	c5
++select * from s1 order by c2 limit 0, 10;
++c1	c2	c3	c4	c5
++100000	0	0	abcdefghij	2009-01-01 11:11:11
++99999	1	999	abcdefghij	2009-01-01 11:11:11
++99998	2	998	abcdefghij	2009-01-01 11:11:11
++99997	3	997	abcdefghij	2009-01-01 11:11:11
++99996	4	996	abcdefghij	2009-01-01 11:11:11
++99995	5	995	abcdefghij	2009-01-01 11:11:11
++99994	6	994	abcdefghij	2009-01-01 11:11:11
++99993	7	993	abcdefghij	2009-01-01 11:11:11
++99992	8	992	abcdefghij	2009-01-01 11:11:11
++99991	9	991	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c2 limit 100, 10;
++c1	c2	c3	c4	c5
++99900	100	900	abcdefghij	2009-01-01 11:11:11
++99899	101	899	abcdefghij	2009-01-01 11:11:11
++99898	102	898	abcdefghij	2009-01-01 11:11:11
++99897	103	897	abcdefghij	2009-01-01 11:11:11
++99896	104	896	abcdefghij	2009-01-01 11:11:11
++99895	105	895	abcdefghij	2009-01-01 11:11:11
++99894	106	894	abcdefghij	2009-01-01 11:11:11
++99893	107	893	abcdefghij	2009-01-01 11:11:11
++99892	108	892	abcdefghij	2009-01-01 11:11:11
++99891	109	891	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c2 limit 1000, 10;
++c1	c2	c3	c4	c5
++99000	1000	0	abcdefghij	2009-01-01 11:11:11
++98999	1001	999	abcdefghij	2009-01-01 11:11:11
++98998	1002	998	abcdefghij	2009-01-01 11:11:11
++98997	1003	997	abcdefghij	2009-01-01 11:11:11
++98996	1004	996	abcdefghij	2009-01-01 11:11:11
++98995	1005	995	abcdefghij	2009-01-01 11:11:11
++98994	1006	994	abcdefghij	2009-01-01 11:11:11
++98993	1007	993	abcdefghij	2009-01-01 11:11:11
++98992	1008	992	abcdefghij	2009-01-01 11:11:11
++98991	1009	991	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c2 limit 10000, 10;
++c1	c2	c3	c4	c5
++90000	10000	0	abcdefghij	2009-01-01 11:11:11
++89999	10001	999	abcdefghij	2009-01-01 11:11:11
++89998	10002	998	abcdefghij	2009-01-01 11:11:11
++89997	10003	997	abcdefghij	2009-01-01 11:11:11
++89996	10004	996	abcdefghij	2009-01-01 11:11:11
++89995	10005	995	abcdefghij	2009-01-01 11:11:11
++89994	10006	994	abcdefghij	2009-01-01 11:11:11
++89993	10007	993	abcdefghij	2009-01-01 11:11:11
++89992	10008	992	abcdefghij	2009-01-01 11:11:11
++89991	10009	991	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c2 limit 100000, 10;
++c1	c2	c3	c4	c5
++select * from s1 order by c1 desc limit 0, 10;
++c1	c2	c3	c4	c5
++100000	0	0	abcdefghij	2009-01-01 11:11:11
++99999	1	999	abcdefghij	2009-01-01 11:11:11
++99998	2	998	abcdefghij	2009-01-01 11:11:11
++99997	3	997	abcdefghij	2009-01-01 11:11:11
++99996	4	996	abcdefghij	2009-01-01 11:11:11
++99995	5	995	abcdefghij	2009-01-01 11:11:11
++99994	6	994	abcdefghij	2009-01-01 11:11:11
++99993	7	993	abcdefghij	2009-01-01 11:11:11
++99992	8	992	abcdefghij	2009-01-01 11:11:11
++99991	9	991	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c1 desc limit 100, 10;
++c1	c2	c3	c4	c5
++99900	100	900	abcdefghij	2009-01-01 11:11:11
++99899	101	899	abcdefghij	2009-01-01 11:11:11
++99898	102	898	abcdefghij	2009-01-01 11:11:11
++99897	103	897	abcdefghij	2009-01-01 11:11:11
++99896	104	896	abcdefghij	2009-01-01 11:11:11
++99895	105	895	abcdefghij	2009-01-01 11:11:11
++99894	106	894	abcdefghij	2009-01-01 11:11:11
++99893	107	893	abcdefghij	2009-01-01 11:11:11
++99892	108	892	abcdefghij	2009-01-01 11:11:11
++99891	109	891	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c1 desc limit 1000, 10;
++c1	c2	c3	c4	c5
++99000	1000	0	abcdefghij	2009-01-01 11:11:11
++98999	1001	999	abcdefghij	2009-01-01 11:11:11
++98998	1002	998	abcdefghij	2009-01-01 11:11:11
++98997	1003	997	abcdefghij	2009-01-01 11:11:11
++98996	1004	996	abcdefghij	2009-01-01 11:11:11
++98995	1005	995	abcdefghij	2009-01-01 11:11:11
++98994	1006	994	abcdefghij	2009-01-01 11:11:11
++98993	1007	993	abcdefghij	2009-01-01 11:11:11
++98992	1008	992	abcdefghij	2009-01-01 11:11:11
++98991	1009	991	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c1 desc limit 10000, 10;
++c1	c2	c3	c4	c5
++90000	10000	0	abcdefghij	2009-01-01 11:11:11
++89999	10001	999	abcdefghij	2009-01-01 11:11:11
++89998	10002	998	abcdefghij	2009-01-01 11:11:11
++89997	10003	997	abcdefghij	2009-01-01 11:11:11
++89996	10004	996	abcdefghij	2009-01-01 11:11:11
++89995	10005	995	abcdefghij	2009-01-01 11:11:11
++89994	10006	994	abcdefghij	2009-01-01 11:11:11
++89993	10007	993	abcdefghij	2009-01-01 11:11:11
++89992	10008	992	abcdefghij	2009-01-01 11:11:11
++89991	10009	991	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c1 desc limit 100000, 10;
++c1	c2	c3	c4	c5
++select * from s1 order by c2 desc limit 0, 10;
++c1	c2	c3	c4	c5
++1	99999	1	abcdefghij	2009-01-01 11:11:11
++2	99998	2	abcdefghij	2009-01-01 11:11:11
++3	99997	3	abcdefghij	2009-01-01 11:11:11
++4	99996	4	abcdefghij	2009-01-01 11:11:11
++5	99995	5	abcdefghij	2009-01-01 11:11:11
++6	99994	6	abcdefghij	2009-01-01 11:11:11
++7	99993	7	abcdefghij	2009-01-01 11:11:11
++8	99992	8	abcdefghij	2009-01-01 11:11:11
++9	99991	9	abcdefghij	2009-01-01 11:11:11
++10	99990	10	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c2 desc limit 100, 10;
++c1	c2	c3	c4	c5
++101	99899	101	abcdefghij	2009-01-01 11:11:11
++102	99898	102	abcdefghij	2009-01-01 11:11:11
++103	99897	103	abcdefghij	2009-01-01 11:11:11
++104	99896	104	abcdefghij	2009-01-01 11:11:11
++105	99895	105	abcdefghij	2009-01-01 11:11:11
++106	99894	106	abcdefghij	2009-01-01 11:11:11
++107	99893	107	abcdefghij	2009-01-01 11:11:11
++108	99892	108	abcdefghij	2009-01-01 11:11:11
++109	99891	109	abcdefghij	2009-01-01 11:11:11
++110	99890	110	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c2 desc limit 1000, 10;
++c1	c2	c3	c4	c5
++1001	98999	1	abcdefghij	2009-01-01 11:11:11
++1002	98998	2	abcdefghij	2009-01-01 11:11:11
++1003	98997	3	abcdefghij	2009-01-01 11:11:11
++1004	98996	4	abcdefghij	2009-01-01 11:11:11
++1005	98995	5	abcdefghij	2009-01-01 11:11:11
++1006	98994	6	abcdefghij	2009-01-01 11:11:11
++1007	98993	7	abcdefghij	2009-01-01 11:11:11
++1008	98992	8	abcdefghij	2009-01-01 11:11:11
++1009	98991	9	abcdefghij	2009-01-01 11:11:11
++1010	98990	10	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c2 desc limit 10000, 10;
++c1	c2	c3	c4	c5
++10001	89999	1	abcdefghij	2009-01-01 11:11:11
++10002	89998	2	abcdefghij	2009-01-01 11:11:11
++10003	89997	3	abcdefghij	2009-01-01 11:11:11
++10004	89996	4	abcdefghij	2009-01-01 11:11:11
++10005	89995	5	abcdefghij	2009-01-01 11:11:11
++10006	89994	6	abcdefghij	2009-01-01 11:11:11
++10007	89993	7	abcdefghij	2009-01-01 11:11:11
++10008	89992	8	abcdefghij	2009-01-01 11:11:11
++10009	89991	9	abcdefghij	2009-01-01 11:11:11
++10010	89990	10	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c2 desc limit 100000, 10;
++c1	c2	c3	c4	c5
++select * from s1 order by c3,c2 limit 0, 10;
++c1	c2	c3	c4	c5
++100000	0	0	abcdefghij	2009-01-01 11:11:11
++99000	1000	0	abcdefghij	2009-01-01 11:11:11
++98000	2000	0	abcdefghij	2009-01-01 11:11:11
++97000	3000	0	abcdefghij	2009-01-01 11:11:11
++96000	4000	0	abcdefghij	2009-01-01 11:11:11
++95000	5000	0	abcdefghij	2009-01-01 11:11:11
++94000	6000	0	abcdefghij	2009-01-01 11:11:11
++93000	7000	0	abcdefghij	2009-01-01 11:11:11
++92000	8000	0	abcdefghij	2009-01-01 11:11:11
++91000	9000	0	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c3,c2 limit 100, 10;
++c1	c2	c3	c4	c5
++99001	999	1	abcdefghij	2009-01-01 11:11:11
++98001	1999	1	abcdefghij	2009-01-01 11:11:11
++97001	2999	1	abcdefghij	2009-01-01 11:11:11
++96001	3999	1	abcdefghij	2009-01-01 11:11:11
++95001	4999	1	abcdefghij	2009-01-01 11:11:11
++94001	5999	1	abcdefghij	2009-01-01 11:11:11
++93001	6999	1	abcdefghij	2009-01-01 11:11:11
++92001	7999	1	abcdefghij	2009-01-01 11:11:11
++91001	8999	1	abcdefghij	2009-01-01 11:11:11
++90001	9999	1	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c3,c2 limit 1000, 10;
++c1	c2	c3	c4	c5
++99010	990	10	abcdefghij	2009-01-01 11:11:11
++98010	1990	10	abcdefghij	2009-01-01 11:11:11
++97010	2990	10	abcdefghij	2009-01-01 11:11:11
++96010	3990	10	abcdefghij	2009-01-01 11:11:11
++95010	4990	10	abcdefghij	2009-01-01 11:11:11
++94010	5990	10	abcdefghij	2009-01-01 11:11:11
++93010	6990	10	abcdefghij	2009-01-01 11:11:11
++92010	7990	10	abcdefghij	2009-01-01 11:11:11
++91010	8990	10	abcdefghij	2009-01-01 11:11:11
++90010	9990	10	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c3,c2 limit 10000, 10;
++c1	c2	c3	c4	c5
++99100	900	100	abcdefghij	2009-01-01 11:11:11
++98100	1900	100	abcdefghij	2009-01-01 11:11:11
++97100	2900	100	abcdefghij	2009-01-01 11:11:11
++96100	3900	100	abcdefghij	2009-01-01 11:11:11
++95100	4900	100	abcdefghij	2009-01-01 11:11:11
++94100	5900	100	abcdefghij	2009-01-01 11:11:11
++93100	6900	100	abcdefghij	2009-01-01 11:11:11
++92100	7900	100	abcdefghij	2009-01-01 11:11:11
++91100	8900	100	abcdefghij	2009-01-01 11:11:11
++90100	9900	100	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c3,c2 limit 100000, 10;
++c1	c2	c3	c4	c5
++select * from s1 order by c3,c1 desc limit 0, 10;
++c1	c2	c3	c4	c5
++100000	0	0	abcdefghij	2009-01-01 11:11:11
++99000	1000	0	abcdefghij	2009-01-01 11:11:11
++98000	2000	0	abcdefghij	2009-01-01 11:11:11
++97000	3000	0	abcdefghij	2009-01-01 11:11:11
++96000	4000	0	abcdefghij	2009-01-01 11:11:11
++95000	5000	0	abcdefghij	2009-01-01 11:11:11
++94000	6000	0	abcdefghij	2009-01-01 11:11:11
++93000	7000	0	abcdefghij	2009-01-01 11:11:11
++92000	8000	0	abcdefghij	2009-01-01 11:11:11
++91000	9000	0	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c3,c1 desc limit 100, 10;
++c1	c2	c3	c4	c5
++99001	999	1	abcdefghij	2009-01-01 11:11:11
++98001	1999	1	abcdefghij	2009-01-01 11:11:11
++97001	2999	1	abcdefghij	2009-01-01 11:11:11
++96001	3999	1	abcdefghij	2009-01-01 11:11:11
++95001	4999	1	abcdefghij	2009-01-01 11:11:11
++94001	5999	1	abcdefghij	2009-01-01 11:11:11
++93001	6999	1	abcdefghij	2009-01-01 11:11:11
++92001	7999	1	abcdefghij	2009-01-01 11:11:11
++91001	8999	1	abcdefghij	2009-01-01 11:11:11
++90001	9999	1	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c3,c1 desc limit 1000, 10;
++c1	c2	c3	c4	c5
++99010	990	10	abcdefghij	2009-01-01 11:11:11
++98010	1990	10	abcdefghij	2009-01-01 11:11:11
++97010	2990	10	abcdefghij	2009-01-01 11:11:11
++96010	3990	10	abcdefghij	2009-01-01 11:11:11
++95010	4990	10	abcdefghij	2009-01-01 11:11:11
++94010	5990	10	abcdefghij	2009-01-01 11:11:11
++93010	6990	10	abcdefghij	2009-01-01 11:11:11
++92010	7990	10	abcdefghij	2009-01-01 11:11:11
++91010	8990	10	abcdefghij	2009-01-01 11:11:11
++90010	9990	10	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c3,c1 desc limit 10000, 10;
++c1	c2	c3	c4	c5
++99100	900	100	abcdefghij	2009-01-01 11:11:11
++98100	1900	100	abcdefghij	2009-01-01 11:11:11
++97100	2900	100	abcdefghij	2009-01-01 11:11:11
++96100	3900	100	abcdefghij	2009-01-01 11:11:11
++95100	4900	100	abcdefghij	2009-01-01 11:11:11
++94100	5900	100	abcdefghij	2009-01-01 11:11:11
++93100	6900	100	abcdefghij	2009-01-01 11:11:11
++92100	7900	100	abcdefghij	2009-01-01 11:11:11
++91100	8900	100	abcdefghij	2009-01-01 11:11:11
++90100	9900	100	abcdefghij	2009-01-01 11:11:11
++select * from s1 order by c3,c1 desc limit 100000, 10;
++c1	c2	c3	c4	c5
++select a.* from s1 a, (select c1, c3 from s1 order by c3,c1 limit 0, 10) b where a.c1 = b.c1;
++c1	c2	c3	c4	c5
++1000	99000	0	abcdefghij	2009-01-01 11:11:11
++2000	98000	0	abcdefghij	2009-01-01 11:11:11
++3000	97000	0	abcdefghij	2009-01-01 11:11:11
++4000	96000	0	abcdefghij	2009-01-01 11:11:11
++5000	95000	0	abcdefghij	2009-01-01 11:11:11
++6000	94000	0	abcdefghij	2009-01-01 11:11:11
++7000	93000	0	abcdefghij	2009-01-01 11:11:11
++8000	92000	0	abcdefghij	2009-01-01 11:11:11
++9000	91000	0	abcdefghij	2009-01-01 11:11:11
++10000	90000	0	abcdefghij	2009-01-01 11:11:11
++select a.* from s1 a, (select c1, c3 from s1 order by c3,c1 limit 100, 10) b where a.c1 = b.c1;
++c1	c2	c3	c4	c5
++1	99999	1	abcdefghij	2009-01-01 11:11:11
++1001	98999	1	abcdefghij	2009-01-01 11:11:11
++2001	97999	1	abcdefghij	2009-01-01 11:11:11
++3001	96999	1	abcdefghij	2009-01-01 11:11:11
++4001	95999	1	abcdefghij	2009-01-01 11:11:11
++5001	94999	1	abcdefghij	2009-01-01 11:11:11
++6001	93999	1	abcdefghij	2009-01-01 11:11:11
++7001	92999	1	abcdefghij	2009-01-01 11:11:11
++8001	91999	1	abcdefghij	2009-01-01 11:11:11
++9001	90999	1	abcdefghij	2009-01-01 11:11:11
++select a.* from s1 a, (select c1, c3 from s1 order by c3,c1 limit 1000, 10) b where a.c1 = b.c1;
++c1	c2	c3	c4	c5
++10	99990	10	abcdefghij	2009-01-01 11:11:11
++1010	98990	10	abcdefghij	2009-01-01 11:11:11
++2010	97990	10	abcdefghij	2009-01-01 11:11:11
++3010	96990	10	abcdefghij	2009-01-01 11:11:11
++4010	95990	10	abcdefghij	2009-01-01 11:11:11
++5010	94990	10	abcdefghij	2009-01-01 11:11:11
++6010	93990	10	abcdefghij	2009-01-01 11:11:11
++7010	92990	10	abcdefghij	2009-01-01 11:11:11
++8010	91990	10	abcdefghij	2009-01-01 11:11:11
++9010	90990	10	abcdefghij	2009-01-01 11:11:11
++select a.* from s1 a, (select c1, c3 from s1 order by c3,c1 limit 10000, 10) b where a.c1 = b.c1;
++c1	c2	c3	c4	c5
++100	99900	100	abcdefghij	2009-01-01 11:11:11
++1100	98900	100	abcdefghij	2009-01-01 11:11:11
++2100	97900	100	abcdefghij	2009-01-01 11:11:11
++3100	96900	100	abcdefghij	2009-01-01 11:11:11
++4100	95900	100	abcdefghij	2009-01-01 11:11:11
++5100	94900	100	abcdefghij	2009-01-01 11:11:11
++6100	93900	100	abcdefghij	2009-01-01 11:11:11
++7100	92900	100	abcdefghij	2009-01-01 11:11:11
++8100	91900	100	abcdefghij	2009-01-01 11:11:11
++9100	90900	100	abcdefghij	2009-01-01 11:11:11
++select a.* from s1 a, (select c1, c3 from s1 order by c3,c1 limit 100000, 10) b where a.c1 = b.c1;
++c1	c2	c3	c4	c5
++select * from s1 order by c1 desc, c2, c3 limit 0, 10;
++c1	c2	c3	c4	c5
++100000	0	0	abcdefghij	2009-01-01 11:11:11
++99999	1	999	abcdefghij	2009-01-01 11:11:11
++99998	2	998	abcdefghij	2009-01-01 11:11:11
++99997	3	997	abcdefghij	2009-01-01 11:11:11
++99996	4	996	abcdefghij	2009-01-01 11:11:11
++99995	5	995	abcdefghij	2009-01-01 11:11:11
++99994	6	994	abcdefghij	2009-01-01 11:11:11
++99993	7	993	abcdefghij	2009-01-01 11:11:11
++99992	8	992	abcdefghij	2009-01-01 11:11:11
++99991	9	991	abcdefghij	2009-01-01 11:11:11
++drop table s1;

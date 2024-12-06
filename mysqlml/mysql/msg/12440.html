@@ -1,11 +1,10 @@
-<html>
-<head>
+<html><head>
 <meta http-equiv="Content-Style-Type" context="text/css">
 <title>mysql:12440</title>
-<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="12439.html">[��]</a><a href="12441.html">[��]</a><a href="../list/12401-12500.html">[�ֹ�����]</a><a href="../thread/12401-12500.html">[����åɰ���]</a></p>
+<p class="button"><a href="12439.html">[前]</a><a href="12441.html">[次]</a><a href="../list/12401-12500.html">[番号順一覧]</a><a href="../thread/12401-12500.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:12440
 </p>
@@ -13,204 +12,203 @@ mysql:12440
 <p>
 From: MORIYAMA Masayuki &lt;MORIYAMA Masayuki &lt;msyk@xxxxxxxxxx&gt;&gt;<br>
 Date: Sat, 12 Nov 2005 11:48:27 +0900<br>
-Subject: [mysql 12440] Re: MySQL ���ܸ������Ǥ��Ф��۵ޥ��ղ� -�ޤȤᡡ��c��������<br>
+Subject: [mysql 12440] Re: MySQL 日本語問題吐き出し緊急オフ会 -まとめ　【c案整理】<br>
 
 </p>
 </div>
 <div class="body">
-<pre>
-�����Ǥ���
+<pre>森山です。
 
-��MySQL���Τθߴ������ݤĤ٤����פȤ������������Ǥ���
+「MySQL自体の互換性を保つべき。」という点、賛成です。
 
-�������Ѵ������Τ��İ����뤿��ˡ�MySQL 5.0.15 �� ctype-sjis.c��
-ctype-ujis.c ��Ĵ�٤Ƥߤޤ�����
+現状の変換を正確に把握するために、MySQL 5.0.15 の ctype-sjis.c、
+ctype-ujis.c を調べてみました。
 
-sjis��ujis �Ȥ�ˡ��٥�����ʸ���ϴޤޤ�Ƥ��ʤ�����˽�ʣ��沽������
-�Ϥʤ�������Ǥ���С��饦��ɥȥ�åפ��ݾڤ����Ϥ��Ǥ�����MySQL �μ�
-���Ǥϡ��������ʤ�ʸ��������ޤ���
+sjis、ujis ともに、ベンダ定義文字は含まれていないために重複符号化の問題
+はなく、本来であれば、ラウンドトリップが保証されるはずですが、MySQL の実
+装では、元に戻らない文字があります。
 
 sjis-&gt;ucs2-&gt;sjis
-  5C(\)-&gt;005C REVERSE SOLIDUS-&gt;815F(��)
+  5C(\)-&gt;005C REVERSE SOLIDUS-&gt;815F(＼)
 
 ujis-&gt;ucs2-&gt;ujis
-  A1C0(��)-&gt;005C REVERSE SOLIDUS-&gt;5C(\)
+  A1C0(＼)-&gt;005C REVERSE SOLIDUS-&gt;5C(\)
 
-����� MySQL �λ��ͤȹͤ��ơ�����Ȥ⡢�ߴ�������ݤ���Τ�������Ȥ���
-���ȹͤ��ƽ�������Τ�����ꤹ��ɬ�פ�����ޤ���
-����Ȥϰۤʤ�ʸ�����Ѵ�����Ƥ��ޤ��Ȥ������Ȥǡ�RBDMS �Ȥ��Ƥ����꤬��
-��ΤǤϤʤ��Ǥ��礦��?
+これを MySQL の仕様と考えて、今後とも、互換性を確保するのか、それとも不
+具合と考えて修正するのかを決定する必要があります。
+本来とは異なる文字に変換されてしまうということで、RBDMS としても問題があ
+るのではないでしょうか?
 
-����������ιͤ�����ʣ�����ꡢ
-(1) 0x00��0x7F �� US-ASCII �Ȥ��롣
-  (1)-a JIS X 0208 YEN SIGN �� U+00A5 �ȥޥåԥ󥰤���
-(2) 0x00��0x7F �� JIS X 0201 ��ƥ�ʸ���Ȥ���
+修正する場合の考え方は複数あり、
+(1) 0x00～0x7F を US-ASCII とする。
+  (1)-a JIS X 0208 YEN SIGN を U+00A5 とマッピングする
+(2) 0x00～0x7F を JIS X 0201 ラテン文字とする
 
 On Fri, 11 Nov 2005 19:54:38 +0900
 Yasufumi Kinoshita &lt;kinoshita.yasufumi@xxxxxxxxxx&gt; wrote:
 
-<span class="quote1">&gt; ���ιͤ���</span>
-<span class="quote1">&gt; ��MySQL���Τθߴ������ݤĤ٤���</span>
+<span class="quote1">&gt; ＜私の考え＞</span>
+<span class="quote1">&gt; ・MySQL自体の互換性を保つべき。</span>
 
-���Ȥθߴ����Ͻ��פǤ��͡�
+過去との互換性は重要ですね。
 
-<span class="quote1">&gt; ��¾��RDBMS�Ȥ��Ѵ��ߴ�����Ż뤷������</span>
+<span class="quote1">&gt; ・他のRDBMSとの変換互換性を重視したい。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ��ǰ�ʤ���ʸ���Ѵ��Ρ�ɸ��פϥ��եȥ������μ����������ȹͤ��Ƥ��ޤ���</span>
-<span class="quote1">&gt; Java�������ˤ�Java�������Ρֻ��¾�ɸ��פ���</span>
-<span class="quote1">&gt; RDBMS�ˤ�RDBMS�������ǤΡֻ��¾�ɸ��פ�����ΤǤϤȻפ��ޤ���</span>
+<span class="quote1">&gt; 残念ながら文字変換の「標準」はソフトウェアの種類だけあると考えています。</span>
+<span class="quote1">&gt; Javaの世界にはJavaの世界の「事実上標準」が、</span>
+<span class="quote1">&gt; RDBMSにはRDBMSの世界での「事実上標準」があるのではと思います。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ¾��RDBMS(���ѡ��ե꡼��鷺)�Ǥ⼫�Ȥθߴ������ݤĻ���ǰ��ٷ�᤿�Ѵ�§��</span>
-<span class="quote1">&gt; �Ѥ��뤳�Ȥ��Ǥ������ܺ٤ˤĤ��Ƥ��ȼ�����ʬ�⤢������Ǥ���</span>
-<span class="quote1">&gt; �Ȥ����櫓��RDBMS��˥Х�Х����ʬ�⤢�뤫�⤷��ޤ��󤬡�</span>
-<span class="quote1">&gt; ���̤�����ʬ�ϤǤ��������������RDBMS�֤ǤΥǡ����Τ����ΤȤ������ݡ�</span>
-<span class="quote1">&gt; �ޤ���RDBMSƱ�ΤǤΰܹ��ư������᤿����</span>
+<span class="quote1">&gt; 他のRDBMS(商用、フリー問わず)でも自身の互換性を保つ事情で一度決めた変換則は</span>
+<span class="quote1">&gt; 変えることができず、詳細については独自の部分もある状況です。</span>
+<span class="quote1">&gt; というわけでRDBMS毎にバラバラな部分もあるかもしれませんが、</span>
+<span class="quote1">&gt; 共通する部分はできるだけ取り入れてRDBMS間でのデータのやり取りのときの面倒、</span>
+<span class="quote1">&gt; またはRDBMS同士での移行容易性を高めたい。</span>
 
-MySQL 5.0.15 �� strings/{ctype-sjis.c,ctype-ujis.c} �򸫤Ƥߤ�ȡ�MySQL
-ñ�Τǹͤ������ˤǤ⡢�������ΤȤ�ʤ��������Ԥ��Ƥ���褦�Ǥ���
+MySQL 5.0.15 の strings/{ctype-sjis.c,ctype-ujis.c} を見てみると、MySQL
+単体で考えた場合にでも、整合性のとれない実装が行われているようです。
 
-�Ѵ�ɽ����������ˡ��Ѵ�ɽ�λȤ����������𤷤Ƥ���褦�Ǥ���
+変換表の問題以前に、変換表の使いかたが混乱しているようです。
 
 
 
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ȥ����櫓�ǡ��Ȥꤢ����Oracle��PostgreSQL�ǹԤ��Ƥ����Ѵ�§�Ⱥ�ʬ���ä����</span>
-<span class="quote1">&gt; �򸵤ˡ�c)�ơפ�������Ƥ��ޤ���</span>
+<span class="quote1">&gt; というわけで、とりあえずOracle、PostgreSQLで行われている変換則と差分を取ったもの</span>
+<span class="quote1">&gt; を元に「c)案」を作成しています。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ������¾�λ���ι�θ��</span>
+<span class="quote1">&gt; ・その他の事情の考慮。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ������MySQL�Υ������ѹ����Ƥ��ӥ塼��������ܿͤǤϤʤ��ΤǤϤʤ��Ǥ��礦����</span>
-<span class="quote1">&gt; �����Ƨ�ޤ��ơ��ɲ��ѹ��Υ롼�롦�ؼ��ϤǤ������ʬ����פ������褤�ȹͤ��ޤ���</span>
+<span class="quote1">&gt; 現状、MySQLのソース変更内容をレビューするは日本人ではないのではないでしょうか？</span>
+<span class="quote1">&gt; それを踏まえて、追加変更のルール・指示はできるだけ分かり易い方がよいと考えます。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �㿹������Υ᡼��ؤΥ쥹��</span>
+<span class="quote1">&gt; ＜森山さんのメールへのレス＞</span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt; &gt; ��������sjis��ujis �˴ؤ��Ƥϡ��ʤ�٤�ɸ�൬�ʤˤ��������ĤĤ� UCS ��ͳ</span>
-<span class="quote2">&gt; &gt; �� sjis&lt;-&gt;ujis �Ѵ���¸�����¾�Υ��եȤȤ�ߴ������Ȥ��褦�ˡ�Java</span>
-<span class="quote2">&gt; &gt; �� SJIS��EUC_JP �ȸߴ��ˤ���Τ������ΤȤ����Ǥ������ʤΤǤϤʤ����ȹͤ�</span>
-<span class="quote2">&gt; &gt; �Ƥ��ޤ���</span>
+<span class="quote2">&gt; &gt; しかし、sjis、ujis に関しては、なるべく標準規格にしたがいつつも UCS 経由</span>
+<span class="quote2">&gt; &gt; の sjis&lt;-&gt;ujis 変換を実現し、他のソフトとも互換性がとれるように、Java</span>
+<span class="quote2">&gt; &gt; の SJIS、EUC_JP と互換にするのが、今のところ最も妥当なのではないかと考え</span>
+<span class="quote2">&gt; &gt; ています。</span>
 <span class="quote2">&gt; &gt;</span>
-<span class="quote2">&gt; &gt; sjis��ujis �ϼ����Ѵ�ɽ��Ȥ��Ȥ��������̣���ޤ���</span>
+<span class="quote2">&gt; &gt; sjis、ujis は次の変換表を使うという事を意味します。</span>
 <span class="quote2">&gt; &gt;</span>
-<span class="quote2">&gt; &gt; JIS-Unicode�֤��Ѵ�ɽ������ˤĤ���</span>
+<span class="quote2">&gt; &gt; JIS-Unicode間の変換表の選択について</span>
 <span class="quote2">&gt; &gt; <a href="http://hp.vector.co.jp/authors/VA010341/unicode/">http://hp.vector.co.jp/authors/VA010341/unicode/</a></span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���ͻ����Ǥ������������ָ����Ѵ���������Ƥ��Ƥ��ʤ��ä�ʸ������פǤ���</span>
-<span class="quote1">&gt; �����Ԥ��Ƥ�����Ѵ�§�Ȱ㤦ʸ����������ˡ�</span>
-<span class="quote1">&gt; ����������뤿��ˤϸߴ����˴ؤ��ƿ��Ť˸�Ƥ����ɬ�פ�����ΤǤϤʤ��Ǥ��礦����</span>
-<span class="quote1">&gt; �ʤΤǸ�����sjis��ujis���Ѵ��Ͼ嵭�Ѵ�ɽ�Ȱ㤦�Ѵ���Ԥ���ʬ�����ʤ��Ȥ⤢��Τǡ�</span>
-<span class="quote1">&gt; ��sjis��ujis �ϼ����Ѵ�ɽ��Ȥ��Ȥ��������̣���ޤ�����</span>
-<span class="quote1">&gt; �Ȥϸ����ʤ��Ȼפ��ޤ���</span>
+<span class="quote1">&gt; 概ね賛成です。しかし、「現状変換が割り当てられていなかった文字限定」です。</span>
+<span class="quote1">&gt; 現状行われているの変換則と違う文字がある場合に、</span>
+<span class="quote1">&gt; それを修正するためには互換性に関して慎重に検討する必要があるのではないでしょうか？</span>
+<span class="quote1">&gt; なので現状のsjis、ujisの変換は上記変換表と違う変換を行う部分が少なくともあるので、</span>
+<span class="quote1">&gt; 「sjis、ujis は次の変換表を使うという事を意味します。」</span>
+<span class="quote1">&gt; とは言えないと思います。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; (����)</span>
-<span class="quote1">&gt; 0x815C(sjis) ���� U+2015(ucs2)</span>
-<span class="quote1">&gt; 0xA1BD(ujis) ���� U+2015(ucs2)</span>
-<span class="quote1">&gt; �����ϸ�����JIS���ʤǤ�ʸ��̾�ΤȤϰۤʤä��Ѵ��򤷤Ƥ��ޤ�����</span>
-<span class="quote1">&gt; Oracle��PostgreSQL�ʤ�¾��RDBMS�Ǥ⤳���Ѵ������ܤˤʤäƤ��ꡢ</span>
-<span class="quote1">&gt; �ä�PostgreSQL��MySQL�Ǥ� U+2014(Em Dash) ��JIS�ϤΥ����ɤؤ��Ѵ��Ϥ��줺�ä��Ƥ��ޤ��ޤ���</span>
-<span class="quote1">&gt; �ʢ��Τǡ�c)�ơפˤ�����ʤ���Ф����ޤ����^^;��</span>
+<span class="quote1">&gt; (一例)</span>
+<span class="quote1">&gt; 0x815C(sjis) ←→ U+2015(ucs2)</span>
+<span class="quote1">&gt; 0xA1BD(ujis) ←→ U+2015(ucs2)</span>
+<span class="quote1">&gt; これらは現状のJIS規格での文字名称とは異なった変換をしていますが、</span>
+<span class="quote1">&gt; Oracle、PostgreSQLなど他のRDBMSでもこの変換が基本になっており、</span>
+<span class="quote1">&gt; 特にPostgreSQL、MySQLでは U+2014(Em Dash) はJIS系のコードへの変換はされず消えてしまいます。</span>
+<span class="quote1">&gt; （※ので「c)案」には入れなければいけませんね^^;）</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote3">&gt; &gt; &gt;����ucs2 �� ujis</span>
-<span class="quote3">&gt; &gt; &gt;     007E �� 7E</span>
-<span class="quote3">&gt; &gt; &gt;     301C �� A1C1</span>
-<span class="quote3">&gt; &gt; &gt;     FF5E �� 3F(&quot;?&quot;) ��c)�� �Ǥ� A1C1 �ˤʤ�</span>
+<span class="quote3">&gt; &gt; &gt;４．ucs2 → ujis</span>
+<span class="quote3">&gt; &gt; &gt;     007E → 7E</span>
+<span class="quote3">&gt; &gt; &gt;     301C → A1C1</span>
+<span class="quote3">&gt; &gt; &gt;     FF5E → 3F("?") ※c)案 では A1C1 になる</span>
 <span class="quote2">&gt; &gt;</span>
-<span class="quote2">&gt; &gt; MySQL �����Ǵ��뤹������Ǥ���С���ͳ�˷��Ƥ⹽��ʤ��Ȼפ��ޤ�����</span>
-<span class="quote2">&gt; &gt; ujis �� Java �� EUC_JP �ȸߴ��ˤ����硢�嵭�� c)�Ƥ��Ѵ��ϥޥ����Ǥ���</span>
+<span class="quote2">&gt; &gt; MySQL だけで完結する問題であれば、自由に決めても構わないと思いますが、</span>
+<span class="quote2">&gt; &gt; ujis を Java の EUC_JP と互換にする場合、上記の c)案の変換はマズイです。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ����ϻ�Υߥ��Ǥ�������������ޤ���</span>
-<span class="quote1">&gt; �����ϰ㤤�ޤ�����Oracle�Ȥθߴ�����ͤ���0xFF5E(ucs2) �� 8FA2B7(ujis)</span>
-<span class="quote1">&gt; �Ȥ���٤��Ǥ��͡�</span>
-<span class="quote1">&gt; </span>
-<span class="quote1">&gt; </span>
-<span class="quote1">&gt; </span>
-<span class="quote2">&gt; &gt; MySQL �� sjis��ujis �ϡ�Unicode ���󥽡������ब���ۤ��Ƥ����Ѵ�ɽ��Ȥ�</span>
-<span class="quote2">&gt; &gt; �Ƥ���Ȼפ��ޤ����������Ѵ�ɽ�ϡ�JIS X 0201 ��ƥ�ʸ���Ȥ��ȹ礻�ξ�</span>
-<span class="quote2">&gt; &gt; ����Ѵ�ɽ�ǡ��ʤ�����JIS���ʤȤϴ����˰��פ��ʤ��Τǡ�����򤽤Τޤ޻�</span>
-<span class="quote2">&gt; &gt; ���ȡ����Ѥˤʤ�ޤ��󤷡�JIS���ʤȤ�ۤʤ��ΤˤʤäƤ��ޤ��ޤ���</span>
-<span class="quote1">&gt; </span>
-<span class="quote1">&gt; ��ľ������Ū�˺����Ŧ���Ƥ������������Ѥδ��򼨤���ʤ���С�</span>
-<span class="quote1">&gt; �ּ��Ѥˤʤ�ʤ��פμ´����狼��ޤ���^^;</span>
-<span class="quote1">&gt; ���Unicode ���󥽡���������Ѵ�ɽ�Ȥޤ���Ӥ������Ȥ�̵���Τ�ʬ����ޤ��󤬡�</span>
-<span class="quote1">&gt; ���ʤ��Ȥ�(sjis��ujis)��UCS2�ؤ��Ѵ��ϡ�Ĵ�٤��ϰϤǤ�</span>
-<span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����ե�JIS�Ǥ� NEC�ü�/NEC����IBM��ĥ/IBM��ĥ/�����ΰ� �ʤɤ�JIS���ʳ�ʸ�����������ɤ�̵��</span>
-<span class="quote1">&gt; ���֡������ѥХå�����å��夬 U+005C ���б��դ�����</span>
-<span class="quote1">&gt; ��(EUC�Ǥ��ߤޤ���) A1C0��A1C1��A1C2��A1DD��A1F1��A1F2��A2CC��8FA2B7��8FA2C3 �ˤ�����ʸ��</span>
-<span class="quote1">&gt; ���Υޥåԥ󥰤ΰ㤤</span>
-<span class="quote1">&gt; �����ä� A1F1��A1F2��A2CC (�񡢡򡢢�) �� U+00A2��U+00A3��U+00AC ��Ⱦ�ѡˤ��Ѵ�����Τ�</span>
-<span class="quote1">&gt;     sjis��ujis�Τߤ���ħ��</span>
-<span class="quote1">&gt; </span>
-<span class="quote1">&gt; �嵭�ʳ���¾��RDBMS��Oracle��PostgreSQL�ˤȤκ���̵���褦�Ǥ���</span>
-<span class="quote1">&gt; �Τ��ˡ֡��פ���\�פȤ��˲����Ƥ��ޤ���ǽ���Ϥ����ΤΡ�</span>
-<span class="quote1">&gt; �����ޤǤǵ����ˤʤä������ʸ��(tilde��)�ʳ����礭�������뤳�Ȥ�̵��</span>
-<span class="quote1">&gt; �嵭ʸ������Ѥ��ʤ��ͤˤȤäƤϵ��Ť��ʤ����٤κ������Τ�ޤ���</span>
+<span class="quote1">&gt; これは私のミスです。申し訳ありません。</span>
+<span class="quote1">&gt; 観点は違いますが、Oracleとの互換性も考え、0xFF5E(ucs2) → 8FA2B7(ujis)</span>
+<span class="quote1">&gt; とするべきですね。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote2">&gt; &gt; ���餿��ơ��ޤȤ�ޤ��ȡ�����Ū���Ѵ��ϡ�cp932��eucjpms �Ǽ¸�����</span>
-<span class="quote2">&gt; &gt; sjis��ujis ��ɸ�൬�ʤ˽��褦��¤꽾���褦�ˤ���Ȥ������ˤʤ�ޤ���</span>
+<span class="quote2">&gt; &gt; MySQL の sjis、ujis は、Unicode コンソーシアムが配布していた変換表を使っ</span>
+<span class="quote2">&gt; &gt; ていると思われますが、あの変換表は、JIS X 0201 ラテン文字との組合せの場</span>
+<span class="quote2">&gt; &gt; 合の変換表で、なおかつJIS規格とは完全に一致しないので、あれをそのまま使</span>
+<span class="quote2">&gt; &gt; うと、実用になりませんし、JIS規格とも異なるものになってしまいます。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; sjis��ujis�θ����Ͽ������󤬸�����Ȥ����Ρ�ɸ�൬�ʡפȤϰ㤦�Ѵ��򤹤뤳��</span>
-<span class="quote1">&gt; ��ʬ����ޤ�������������̵�����ѹ�����ΤǤϤʤ���</span>
-<span class="quote1">&gt; ������Ǽ������ʸ�������ɥ��åȤ��ɲä����ۤ��������ΤǤϤʤ��Ǥ��礦����</span>
-<span class="quote1">&gt; MySQL�Υ������򸫤�ȡ�UCS�ؤ��Ѵ��ơ��֥롢UCS������Ѵ��ơ��֥��</span>
-<span class="quote1">&gt; strings/ctype-[�����ɥ��å�̾].c</span>
-<span class="quote1">&gt; ����ˤ���ޤ���</span>
-<span class="quote1">&gt; �ɤ����Ƥ��̤��Ѵ�§��ɬ�פǤ���С������餷��ctype-xxxx.c��������ơ�</span>
-<span class="quote1">&gt; �֤��Υ����ɥ��åȤ��ɲä��Ƥ���������</span>
-<span class="quote1">&gt; �Ȥ�����˾��Ф����ۤ�������¸�ؤαƶ��⾯�ʤ����ä��ᤤ�Ȼפ��ޤ���</span>
-<span class="quote1">&gt; �������Ǥ��礦��</span>
-<span class="quote1">&gt; �ʥ桼���������˾�Ȥ��Ƥʤ�к��Ѥ���䤹���褦�ʵ��⡦����</span>
+<span class="quote1">&gt; 正直、具体的に差を指摘していただき、実用の基準を示されなければ、</span>
+<span class="quote1">&gt; 「実用にならない」の実感がわかりません^^;</span>
+<span class="quote1">&gt; 私はUnicode コンソーシアムの変換表とまだ比較したことが無いので分かりませんが、</span>
+<span class="quote1">&gt; 少なくとも(sjis、ujis)のUCS2への変換は、調べた範囲では</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ��ιͤ��Ϥ����ޤǡָ����ݻ����Ĥ�ʸ���ä���������뤳�ȡפǤ���</span>
+<span class="quote1">&gt; ・シフトJISでの NEC特殊/NEC選定IBM拡張/IBM拡張/外字領域 などのJIS規格外文字句点コードは無視</span>
+<span class="quote1">&gt; ・「／」全角バックスラッシュが U+005C と対応付けられる</span>
+<span class="quote1">&gt; ・(EUCですみませんが) A1C0、A1C1、A1C2、A1DD、A1F1、A1F2、A2CC、8FA2B7、8FA2C3 にあたる文字</span>
+<span class="quote1">&gt; 　のマッピングの違い</span>
+<span class="quote1">&gt; 　※特に A1F1、A1F2、A2CC (￠、￡、￢) を U+00A2、U+00A3、U+00AC （半角）に変換するのは</span>
+<span class="quote1">&gt;     sjis、ujisのみの特徴。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 上記以外、他のRDBMS（Oracle、PostgreSQL）との差は無いようです。</span>
+<span class="quote1">&gt; 確かに「／」が「\」とかに化けてしまう可能性はあるものの、</span>
+<span class="quote1">&gt; ここまでで議論になった特定の文字(tilde系)以外は大きく化けることは無く</span>
+<span class="quote1">&gt; 上記文字を使用しない人にとっては気づかない程度の差かも知れません。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; ���ʤ�Ĺʸ�ˤʤäƤ��ޤ��ޤ�������</span>
-<span class="quote1">&gt; ��c)�� Unicode -&gt; JIS��ʸ�������ɤؤ��Ѵ���</span>
-<span class="quote1">&gt; ��⤦�������������ޤ���</span>
+<span class="quote1">&gt; </span>
+<span class="quote2">&gt; &gt; あらためて、まとめますと、実用的な変換は、cp932、eucjpms で実現し、</span>
+<span class="quote2">&gt; &gt; sjis、ujis は標準規格に出来うる限り従うようにするという事になります。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; sjis、ujisの現状は森山さんが言われるところの「標準規格」とは違う変換をすること</span>
+<span class="quote1">&gt; が分かりましたが、これらを無理に変更するのではなく、</span>
+<span class="quote1">&gt; 新たに納得する文字コードセットを追加したほうがいいのではないでしょうか？</span>
+<span class="quote1">&gt; MySQLのソースを見ると、UCSへの変換テーブル、UCSからの変換テーブルは</span>
+<span class="quote1">&gt; strings/ctype-[コードセット名].c</span>
+<span class="quote1">&gt; の中にあります。</span>
+<span class="quote1">&gt; どうしても別の変換則が必要であれば、あたらしいctype-xxxx.cを作成して、</span>
+<span class="quote1">&gt; 「このコードセットを追加してください」</span>
+<span class="quote1">&gt; という要望を出したほうが、既存への影響も少なく、話が早いと思います。</span>
+<span class="quote1">&gt; いかがでしょう？</span>
+<span class="quote1">&gt; （ユーザー会の要望としてならば採用されやすいような気も・・）</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; 私の考えはあくまで「現状維持しつつ文字消えを改善すること」です。</span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; </span>
+<span class="quote1">&gt; かなり長文になってしまいましたが、</span>
+<span class="quote1">&gt; ＜c)案 Unicode -&gt; JIS系文字コードへの変換＞</span>
+<span class="quote1">&gt; をもういちど整理します。</span>
 <span class="quote1">&gt; -------------------------------------------------------------------------------</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �������ܥ롼��</span>
+<span class="quote1">&gt; １．基本ルール</span>
 <span class="quote1">&gt; <a href="http://dev.mysql.com/doc/refman/4.1/ja/charset-cp932.html">http://dev.mysql.com/doc/refman/4.1/ja/charset-cp932.html</a></span>
-<span class="quote1">&gt; �β���ɽ��Unicode������Ѵ��褬������Ƥ��Ƥ��ʤ�(&quot;3F&quot;)</span>
-<span class="quote1">&gt; ʸ���ˤĤ��ơ�¾�Υ���饯�������åȤǳ�����Ƥ��Ƥ�����</span>
-<span class="quote1">&gt; �ˤĤ��Ƥ�Ʊ���ʸ���������Ƥ롣</span>
-<span class="quote1">&gt; ujis��eucjpms�Ǥ�Ʊ��ʸ���ˤĤ���Ʊ�ͤˤ��롣</span>
+<span class="quote1">&gt; の下の表のUnicodeからの変換先が割り当てられていない("3F")</span>
+<span class="quote1">&gt; 文字について、他のキャラクターセットで割り当てられているもの</span>
+<span class="quote1">&gt; については同一の文字を割り当てる。</span>
+<span class="quote1">&gt; ujis、eucjpmsでも同じ文字について同様にする。</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����嵭���㳰</span>
-<span class="quote1">&gt; FF5E(ucs2) �� 8FA2B7(ujis)</span>
+<span class="quote1">&gt; ２．上記の例外</span>
+<span class="quote1">&gt; FF5E(ucs2) → 8FA2B7(ujis)</span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �����ɲ�</span>
+<span class="quote1">&gt; ３．追加</span>
 <span class="quote1">&gt; ucs2                   | sjis  | cp932</span>
 <span class="quote1">&gt; -----------------------+-------+-------</span>
-<span class="quote1">&gt; 00A5 (Ⱦ�ѤΡ)      | 3F    | 3F    ��ξ���Ȥ� 5C �ˤ���</span>
-<span class="quote1">&gt; 2014 &quot;Em Dash&quot;         | 3F    | 3F    ��ξ���Ȥ� 815C �ˤ���</span>
+<span class="quote1">&gt; 00A5 (半角の￥※)      | 3F    | 3F    ←両方とも 5C にする</span>
+<span class="quote1">&gt; 2014 "Em Dash"         | 3F    | 3F    ←両方とも 815C にする</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; ucs2                   | ujis                | eucjpms</span>
 <span class="quote1">&gt; -----------------------+---------------------+---------</span>
-<span class="quote1">&gt; 00A5 (Ⱦ�ѤΡ)      | 8E5C5C�ʲ����ޤ�����| 3F     ��ξ���Ȥ� 5C �ˤ���</span>
-<span class="quote1">&gt; 00A6 (Ⱦ�Ѥ���)        | 8FA2C3              | 3F     ���ܥ롼���</span>
-<span class="quote1">&gt; FFE4 (���Ѥ���)        | 3F                  | 8FA2C3 ���ܥ롼���</span>
-<span class="quote1">&gt; 2014 &quot;Em Dash&quot;         | 3F                  | 3F     ��ξ���Ȥ� A1BD �ˤ���</span>
+<span class="quote1">&gt; 00A5 (半角の￥※)      | 8E5C5C（化けました）| 3F     ←両方とも 5C にする</span>
+<span class="quote1">&gt; 00A6 (半角の￤)        | 8FA2C3              | 3F     基本ルールで</span>
+<span class="quote1">&gt; FFE4 (全角の￤)        | 3F                  | 8FA2C3 基本ルールで</span>
+<span class="quote1">&gt; 2014 "Em Dash"         | 3F                  | 3F     ←両方とも A1BD にする</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; --------------------------------------------------------------------------------</span>
-<span class="quote1">&gt; ���������פǤ��礦����</span>
-<span class="quote1">&gt; ɽ��ˡ���Ф�Ф�Ǥ����ʤ�����</span>
+<span class="quote1">&gt; これで大丈夫でしょうか？</span>
+<span class="quote1">&gt; 表記法がばらばらでごめんなさい。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �Ǹ��¼�夵����Ƥ���Ƥ���褦�ˡ����å�������</span>
-<span class="quote1">&gt; Ʊ�����󥳡��ǥ��󥰴֡��ޤ��ϣʣɣӷϤ�ʸ��������Ʊ�ΤǤ�</span>
-<span class="quote1">&gt; ��ư�Ѵ���Х��ѥ�����ʶ�����������ư����ˡ�����ä��ۤ����������Ȼ��פ��ޤ���</span>
+<span class="quote1">&gt; 最後に村上さんが提案されているように、セッション毎に</span>
+<span class="quote1">&gt; 同じエンコーディング間、またはＪＩＳ系の文字コード同士での</span>
+<span class="quote1">&gt; 自動変換をバイパスする（句点コード不動）方法があったほうが便利だと私も思います。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
-<span class="quote1">&gt; �ʾ塢���ʤ��Ĺʸ���餤�����ޤ�����</span>
+<span class="quote1">&gt; 以上、かなりの長文失礼いたしました。</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; -- </span>
-<span class="quote1">&gt; �ڲ�  ��ʸ</span>
+<span class="quote1">&gt; 木下  靖文</span>
 <span class="quote1">&gt; </span>
 <span class="quote1">&gt; e-mail: kinoshita.yasufumi@xxxxxxxxxx</span>
 <span class="quote1">&gt; </span>
@@ -218,71 +216,71 @@ MySQL 5.0.15 �� strings/{ctype-sjis.c,ctype-ujis.c} �򸫤Ƥߤ�ȡ�MySQL
 
 
 -- 
-������Ƿ (MORIYAMA Masayuki)
+森山将之 (MORIYAMA Masayuki)
 e-mail: msyk@xxxxxxxxxx
 blog: <a href="http://msyk.at.webry.info/">http://msyk.at.webry.info/</a>
 
 
 </pre>
 </div>
-<p class="button"><a href="12439.html">[��]</a><a href="12441.html">[��]</a><a href="../list/12401-12500.html">[�ֹ�����]</a><a href="../thread/12401-12500.html">[����åɰ���]</a></p>
-<pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="12372.html">  12372 2005-11-07 18:16 [&quot;Shuichi Tamagawa&quot; &lt;] MySQL ���ܸ������Ǥ��Ф��۵ޥ��ղ� -  �ޤȤ�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12373.html">  12373 2005-11-07 20:17 ��[Yasufumi Kinoshita &lt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12374.html">  12374 2005-11-07 21:21 ����[&quot;Shuichi Tamagawa&quot; &lt;]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12391.html">  12391 2005-11-08 15:59 ������[Yasufumi Kinoshita &lt;]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12400.html">  12400 2005-11-08 20:50 ��������[&quot;Shuichi Tamagawa&quot; &lt;]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12402.html">  12402 2005-11-08 21:14 ����������[Hirofumi Fujiwara &lt;f]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12412.html">  12412 2005-11-09 10:21 ������������[Hiro Yoshioka &lt;hyosh]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12413.html">  12413 2005-11-09 10:28 ��������������[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12414.html">  12414 2005-11-09 10:38 ����������������[Hiro Yoshioka &lt;hyosh]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12415.html">  12415 2005-11-09 11:56 ������������������[&lt;takeshi@xxxxxxxxxx&gt;]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12416.html">  12416 2005-11-09 18:43 ��������������������[Hiro Yoshioka &lt;hyosh]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12428.html">  12428 2005-11-10 14:12 ����������������������[&lt;takeshi@xxxxxxxxxx&gt;]                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12520.html">  12520 2005-11-30 10:49 ������������[Tetsuro IKEDA &lt;tetsu]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12525.html">  12525 2005-12-01 13:26 ��������������[Hirofumi Fujiwara &lt;f]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12598.html">  12598 2005-12-21 08:20 ������������[Tetsuro IKEDA &lt;tetsu] �᥿�ǡ�����2�Х����ܤ�`(60)�δ�������Ѥ�������Զ��η�</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12599.html">  12599 2005-12-21 12:43 ��������������[Hirofumi Fujiwara &lt;f]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12377.html">  12377 2005-11-07 23:55 ��[Tadashi Jokagi &lt;ml@x]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12399.html">  12399 2005-11-08 20:43 ����[&quot;Shuichi Tamagawa&quot; &lt;]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12378.html">  12378 2005-11-08 00:11 ��[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12380.html">  12380 2005-11-08 09:27 ����[&quot;Shuichi Tamagawa&quot; &lt;]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12381.html">  12381 2005-11-08 09:36 ������[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12403.html">  12403 2005-11-08 21:22 ��������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12405.html">  12405 2005-11-08 21:42 ����������[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12397.html">  12397 2005-11-08 20:29 ����[&quot;Shuichi Tamagawa&quot; &lt;]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12401.html">  12401 2005-11-08 21:11 ������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12404.html">  12404 2005-11-08 21:27 ��������[Hirofumi Fujiwara &lt;f]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12406.html">  12406 2005-11-08 21:52 ��������[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12417.html">  12417 2005-11-09 19:46 ����������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12418.html">  12418 2005-11-09 20:15 ������������[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12419.html">  12419 2005-11-10 11:13 ��������������[Yasufumi Kinoshita &lt;]                           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12425.html">  12425 2005-11-10 13:21 ����������������[&lt;takeshi@xxxxxxxxxx&gt;]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12429.html">  12429 2005-11-10 14:47 ����������������[MORIYAMA Masayuki &lt;m]                         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12432.html">  12432 2005-11-10 20:15 ������������������[Yasufumi Kinoshita &lt;]                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12433.html">  12433 2005-11-11 00:37 ��������������������[MORIYAMA Masayuki &lt;m]                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12435.html">  12435 2005-11-11 19:54 ����������������������[Yasufumi Kinoshita &lt;] Re: MySQL ���ܸ������Ǥ��Ф��۵ޥ��ղ� -�ޤȤᡡ��c��������</a></span>
-<span class="current">-&gt;&nbsp;<a href="12440.html">  12440 2005-11-12 11:48 ������������������������[MORIYAMA Masayuki &lt;m]                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12441.html">  12441 2005-11-12 12:52 ��������������������������[MORIYAMA Masayuki &lt;m]               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12442.html">  12442 2005-11-13 14:06 ������������������������[MORIYAMA Masayuki &lt;m]                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12452.html">  12452 2005-11-14 11:20 ��������������������������[MORIYAMA Masayuki &lt;m]               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12453.html">  12453 2005-11-14 12:51 ����������������������������[&quot;Shuichi Tamagawa&quot; &lt;]             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12462.html">  12462 2005-11-16 11:18 ������������������������������[MORIYAMA Masayuki &lt;m]           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12464.html">  12464 2005-11-16 15:05 ��������������������������������[&quot;Shuichi Tamagawa&quot; &lt;]         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12454.html">  12454 2005-11-14 15:27 ����������������������������[Yasufumi Kinoshita &lt;] Re: MySQL ���ܸ������Ǥ��Ф��۵ޥ��ղ� -�ޤȤᡡ��c�������۳��ͤΤ��ո��򤪴ꤤ���ޤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12461.html">  12461 2005-11-16 03:10 ������������������������������[MORIYAMA Masayuki &lt;m]           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12463.html">  12463 2005-11-16 15:00 ������������������������������[&quot;Shuichi Tamagawa&quot; &lt;]           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12466.html">  12466 2005-11-17 11:34 ��������������������������������[Yasufumi Kinoshita &lt;]         </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12468.html">  12468 2005-11-17 15:46 ����������������������������������[&quot;Shuichi Tamagawa&quot; &lt;]       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12470.html">  12470 2005-11-17 16:36 ������������������������������������[Yasufumi Kinoshita &lt;]     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12473.html">  12473 2005-11-17 17:48 ��������������������������������������[&quot;Shuichi Tamagawa&quot; &lt;]   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12448.html">  12448 2005-11-14 09:14 ������������������������[&quot;Shuichi Tamagawa&quot; &lt;]                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12426.html">  12426 2005-11-10 13:57 ����������[&quot;Shuichi Tamagawa&quot; &lt;]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12427.html">  12427 2005-11-10 14:02 ������������[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12411.html">  12411 2005-11-09 09:15 ��������[&quot;Shuichi Tamagawa&quot; &lt;]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12475.html">  12475 2005-11-18 09:48 ��[&quot;Shuichi Tamagawa&quot; &lt;]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12476.html">  12476 2005-11-18 09:54 ����[&quot;Ryuichiro Munechika]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="12613.html">  12613 2005-12-28 16:59 ����[&quot;Shuichi Tamagawa&quot; &lt;]                                     </a></span>
+<p class="button"><a href="12439.html">[前]</a><a href="12441.html">[次]</a><a href="../list/12401-12500.html">[番号順一覧]</a><a href="../thread/12401-12500.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="12372.html">  12372 2005-11-07 18:16 ["Shuichi Tamagawa" &lt;] MySQL 日本語問題吐き出し緊急オフ会 -  まとめ</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12373.html">  12373 2005-11-07 20:17 ┣[Yasufumi Kinoshita &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12374.html">  12374 2005-11-07 21:21 ┃┗["Shuichi Tamagawa" &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12391.html">  12391 2005-11-08 15:59 ┃　┗[Yasufumi Kinoshita &lt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12400.html">  12400 2005-11-08 20:50 ┃　　┗["Shuichi Tamagawa" &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12402.html">  12402 2005-11-08 21:14 ┃　　　┗[Hirofumi Fujiwara &lt;f]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12412.html">  12412 2005-11-09 10:21 ┃　　　　┣[Hiro Yoshioka &lt;hyosh]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12413.html">  12413 2005-11-09 10:28 ┃　　　　┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12414.html">  12414 2005-11-09 10:38 ┃　　　　┃　┗[Hiro Yoshioka &lt;hyosh]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12415.html">  12415 2005-11-09 11:56 ┃　　　　┃　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12416.html">  12416 2005-11-09 18:43 ┃　　　　┃　　　┗[Hiro Yoshioka &lt;hyosh]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12428.html">  12428 2005-11-10 14:12 ┃　　　　┃　　　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12520.html">  12520 2005-11-30 10:49 ┃　　　　┣[Tetsuro IKEDA &lt;tetsu]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12525.html">  12525 2005-12-01 13:26 ┃　　　　┃┗[Hirofumi Fujiwara &lt;f]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12598.html">  12598 2005-12-21 08:20 ┃　　　　┗[Tetsuro IKEDA &lt;tetsu] メタデータに2バイト目が`(60)の漢字を使用する場合の不具合の件</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12599.html">  12599 2005-12-21 12:43 ┃　　　　　┗[Hirofumi Fujiwara &lt;f]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12377.html">  12377 2005-11-07 23:55 ┣[Tadashi Jokagi &lt;ml@x]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12399.html">  12399 2005-11-08 20:43 ┃┗["Shuichi Tamagawa" &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12378.html">  12378 2005-11-08 00:11 ┣[&lt;takeshi@xxxxxxxxxx&gt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12380.html">  12380 2005-11-08 09:27 ┃┣["Shuichi Tamagawa" &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12381.html">  12381 2005-11-08 09:36 ┃┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12403.html">  12403 2005-11-08 21:22 ┃┃　┗[とみたまさひろ &lt;tomm]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12405.html">  12405 2005-11-08 21:42 ┃┃　　┗[&lt;takeshi@xxxxxxxxxx&gt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12397.html">  12397 2005-11-08 20:29 ┃┗["Shuichi Tamagawa" &lt;]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12401.html">  12401 2005-11-08 21:11 ┃　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12404.html">  12404 2005-11-08 21:27 ┃　　┣[Hirofumi Fujiwara &lt;f]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12406.html">  12406 2005-11-08 21:52 ┃　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12417.html">  12417 2005-11-09 19:46 ┃　　┃┣[とみたまさひろ &lt;tomm]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12418.html">  12418 2005-11-09 20:15 ┃　　┃┃┗[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12419.html">  12419 2005-11-10 11:13 ┃　　┃┃　┗[Yasufumi Kinoshita &lt;]                           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12425.html">  12425 2005-11-10 13:21 ┃　　┃┃　　┣[&lt;takeshi@xxxxxxxxxx&gt;]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12429.html">  12429 2005-11-10 14:47 ┃　　┃┃　　┗[MORIYAMA Masayuki &lt;m]                         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12432.html">  12432 2005-11-10 20:15 ┃　　┃┃　　　┗[Yasufumi Kinoshita &lt;]                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12433.html">  12433 2005-11-11 00:37 ┃　　┃┃　　　　┗[MORIYAMA Masayuki &lt;m]                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12435.html">  12435 2005-11-11 19:54 ┃　　┃┃　　　　　┗[Yasufumi Kinoshita &lt;] Re: MySQL 日本語問題吐き出し緊急オフ会 -まとめ　【c案整理】</a></span>
+<span class="current">-&gt;&nbsp;<a href="12440.html">  12440 2005-11-12 11:48 ┃　　┃┃　　　　　　┣[MORIYAMA Masayuki &lt;m]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12441.html">  12441 2005-11-12 12:52 ┃　　┃┃　　　　　　┃┗[MORIYAMA Masayuki &lt;m]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12442.html">  12442 2005-11-13 14:06 ┃　　┃┃　　　　　　┣[MORIYAMA Masayuki &lt;m]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12452.html">  12452 2005-11-14 11:20 ┃　　┃┃　　　　　　┃┗[MORIYAMA Masayuki &lt;m]               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12453.html">  12453 2005-11-14 12:51 ┃　　┃┃　　　　　　┃　┣["Shuichi Tamagawa" &lt;]             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12462.html">  12462 2005-11-16 11:18 ┃　　┃┃　　　　　　┃　┃┗[MORIYAMA Masayuki &lt;m]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12464.html">  12464 2005-11-16 15:05 ┃　　┃┃　　　　　　┃　┃　┗["Shuichi Tamagawa" &lt;]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12454.html">  12454 2005-11-14 15:27 ┃　　┃┃　　　　　　┃　┗[Yasufumi Kinoshita &lt;] Re: MySQL 日本語問題吐き出し緊急オフ会 -まとめ　【c案整理】皆様のご意見をお願いします。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12461.html">  12461 2005-11-16 03:10 ┃　　┃┃　　　　　　┃　　┣[MORIYAMA Masayuki &lt;m]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12463.html">  12463 2005-11-16 15:00 ┃　　┃┃　　　　　　┃　　┗["Shuichi Tamagawa" &lt;]           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12466.html">  12466 2005-11-17 11:34 ┃　　┃┃　　　　　　┃　　　┗[Yasufumi Kinoshita &lt;]         </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12468.html">  12468 2005-11-17 15:46 ┃　　┃┃　　　　　　┃　　　　┗["Shuichi Tamagawa" &lt;]       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12470.html">  12470 2005-11-17 16:36 ┃　　┃┃　　　　　　┃　　　　　┗[Yasufumi Kinoshita &lt;]     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12473.html">  12473 2005-11-17 17:48 ┃　　┃┃　　　　　　┃　　　　　　┗["Shuichi Tamagawa" &lt;]   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12448.html">  12448 2005-11-14 09:14 ┃　　┃┃　　　　　　┗["Shuichi Tamagawa" &lt;]                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12426.html">  12426 2005-11-10 13:57 ┃　　┃┗["Shuichi Tamagawa" &lt;]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12427.html">  12427 2005-11-10 14:02 ┃　　┃　┗[&lt;takeshi@xxxxxxxxxx&gt;]                             </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12411.html">  12411 2005-11-09 09:15 ┃　　┗["Shuichi Tamagawa" &lt;]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12475.html">  12475 2005-11-18 09:48 ┗["Shuichi Tamagawa" &lt;]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12476.html">  12476 2005-11-18 09:54 　┣["Ryuichiro Munechika]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="12613.html">  12613 2005-12-28 16:59 　┗["Shuichi Tamagawa" &lt;]                                     </a></span>
 </pre>
-</body>
-</html>
+
+
+</body></html>

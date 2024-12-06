@@ -1,0 +1,194 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16660</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16659.html">[前]</a><a href="16661.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16660
+</p>
+<div class="header">
+<p>
+From: yoku0825 &lt;yoku0825 &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 23 Sep 2021 21:34:25 +0900<br>
+Subject: [mysql 16660] Re: [mysql 16659] Re: [mysql 16657] Re: [mysql 16656] frmとibdのみのデータからデータベースの復旧方法について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>yoku0825です。
+2通目のお返事が見やすくてありがたいです。
+
+ALTER TABLE .. ROW_FORMAT = COMPACT が成功しないテーブルのエラー、
+"Invalid default value for 'comment_date'" でググってみたらこんなのが出てきました。
+
+<a href="https://7me.nobiki.com/2020/01/31/mysql-timestamp-invalid-default-value-0000-00-00/">https://7me.nobiki.com/2020/01/31/mysql-timestamp-invalid-default-value-0000-00-00/</a>
+
+
+SET GLOBAL explicit_defaults_for_timestamp = ON;
+-- 一度mysqlコマンドラインクライアントを終了して再接続
+
+ALTER TABLE .. ROW_FORMAT = COMPACT;
+ALTER TABLE .. DISCARD TABLESPACE;
+-- copy ibd files via shell
+ALTER TABLE .. IMPORT TABLESPACE;
+
+ではどうでしょうか？
+
+yoku0825,
+
+2021年9月23日(木) 21:12 岡善博 &lt;zenpaku@xxxxxxxxxx&gt;:
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 岡善博＠中札内です。</span>
+<span class="quote1">&gt; テーブルに依って成功する場合と失敗する場合がありますね。</span>
+<span class="quote1">&gt; それを判りやすくしました。</span>
+<span class="quote1">&gt; alter table XXXXXX ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; が成功すると、XXXXXX.ibdが消えているので、コピーしました。</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; 失敗する部分に何かアドバイスは、無いでしょうか？</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; cp -a /var/db/mysql20210920/zenpakudb.NEW/*.ibd .</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_commentmeta</span>
+<span class="quote1">&gt; alter table wp_commentmeta ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; cp -a /var/db/mysql20210920/zenpakudb.NEW/wp_commentmeta.ibd .</span>
+<span class="quote1">&gt; alter table wp_commentmeta  DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_commentmeta IMPORT TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_comments</span>
+<span class="quote1">&gt; alter table wp_comments ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; ERROR 1067 (42000): Invalid default value for 'comment_date'</span>
+<span class="quote1">&gt; alter table wp_comments DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_comments IMPORT TABLESPACE;</span>
+<span class="quote1">&gt; ERROR 1808 (HY000): Schema mismatch (Table has ROW_TYPE_DYNAMIC \</span>
+<span class="quote1">&gt; row format, .ibd file has ROW_TYPE_COMPACT row format.)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_ktaisession</span>
+<span class="quote1">&gt; alter table wp_ktaisession ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; ERROR 1067 (42000): Invalid default value for 'expires'</span>
+<span class="quote1">&gt; alter table wp_ktaisession DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_ktaisession IMPORT TABLESPACE;</span>
+<span class="quote1">&gt; ERROR 1808 (HY000): Schema mismatch (Table has ROW_TYPE_DYNAMIC \</span>
+<span class="quote1">&gt; row format, .ibd file has ROW_TYPE_COMPACT row format.)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_links</span>
+<span class="quote1">&gt; alter table wp_links ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; ERROR 1067 (42000): Invalid default value for 'link_updated'</span>
+<span class="quote1">&gt; alter table wp_links DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_links IMPORT TABLESPACE;</span>
+<span class="quote1">&gt; ERROR 1808 (HY000): Schema mismatch (Table has ROW_TYPE_DYNAMIC \</span>
+<span class="quote1">&gt; row format, .ibd file has ROW_TYPE_COMPACT row format.)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_options</span>
+<span class="quote1">&gt; alter table wp_options ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; cp -a /var/db/mysql20210920/zenpakudb.NEW/wp_options.ibd .</span>
+<span class="quote1">&gt; alter table wp_options DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_options DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_postmeta</span>
+<span class="quote1">&gt; alter table wp_postmeta ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; cp -a /var/db/mysql20210920/zenpakudb.NEW/wp_postmeta.ibd .</span>
+<span class="quote1">&gt; alter table wp_postmeta DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_options IMPORT TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_posts</span>
+<span class="quote1">&gt; alter table wp_posts ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; ERROR 1067 (42000): Invalid default value for 'post_date'</span>
+<span class="quote1">&gt; alter table wp_posts DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_posts IMPORT TABLESPACE;</span>
+<span class="quote1">&gt; ERROR 1808 (HY000): Schema mismatch (Table has ROW_TYPE_DYNAMIC \</span>
+<span class="quote1">&gt; row format, .ibd file has ROW_TYPE_COMPACT row format.)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_term_relationships</span>
+<span class="quote1">&gt; alter table wp_term_relationships ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; cp -a /var/db/mysql20210920/zenpakudb.NEW/*.ibd .</span>
+<span class="quote1">&gt; alter table wp_term_relationships DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_term_relationships IMPORT TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_term_taxonomy</span>
+<span class="quote1">&gt; alter table wp_term_taxonomy ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; cp -a /var/db/mysql20210920/zenpakudb.NEW/wp_term_taxonomy.ibd .</span>
+<span class="quote1">&gt; alter table wp_term_taxonomy DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_term_taxonomy IMPORT TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_termmeta</span>
+<span class="quote1">&gt; alter table wp_termmeta ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; cp -a /var/db/mysql20210920/zenpakudb.NEW/wp_termmeta.ibd .</span>
+<span class="quote1">&gt; alter table wp_termmeta DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_termmeta IMPORT TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_terms</span>
+<span class="quote1">&gt; alter table wp_terms ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; cp -a /var/db/mysql20210920/zenpakudb.NEW/wp_terms.ibd .</span>
+<span class="quote1">&gt; alter table wp_terms DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_terms IMPORT TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_usermeta</span>
+<span class="quote1">&gt; alter table wp_usermeta  ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; cp -a /var/db/mysql20210920/zenpakudb.NEW/wp_usermeta.ibd .</span>
+<span class="quote1">&gt; alter table wp_usermeta DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_usermeta IMPORT TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_users</span>
+<span class="quote1">&gt; alter table wp_users ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; ERROR 1067 (42000): Invalid default value for 'user_registered'</span>
+<span class="quote1">&gt; alter table wp_users DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_users IMPORT TABLESPACE;</span>
+<span class="quote1">&gt; ERROR 1808 (HY000): Schema mismatch (Table has ROW_TYPE_DYNAMIC \</span>
+<span class="quote1">&gt; row format, .ibd file has ROW_TYPE_COMPACT row format.)</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; # wp_wpmm_subscribers</span>
+<span class="quote1">&gt; alter table wp_wpmm_subscribers ROW_FORMAT= COMPACT;</span>
+<span class="quote1">&gt; cp -a /var/db/mysql20210920/zenpakudb.NEW/wp_wpmm_subscribers.ibd .</span>
+<span class="quote1">&gt; alter table wp_wpmm_subscribers DISCARD TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt; alter table wp_wpmm_subscribers IMPORT TABLESPACE;</span>
+<span class="quote1">&gt;</span>
+<span class="quote1">&gt;</span>
+
+
+</pre>
+</div>
+<p class="button"><a href="16659.html">[前]</a><a href="16661.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="16656.html">@ 16656 2021-09-23 10:43 [岡善博 &lt;zenpaku@xxxx] frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16657.html">  16657 2021-09-23 14:28 ┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16656] frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16658.html">@ 16658 2021-09-23 18:21 　┗[岡善博 &lt;zenpaku@xxxx] Re: [mysql 16657] Re: [mysql 16656] frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16659.html">@ 16659 2021-09-23 21:11 　　┗[岡善博 &lt;zenpaku@xxxx]                                   </a></span>
+<span class="current">-&gt;&nbsp;<a href="16660.html">  16660 2021-09-23 21:34 　　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16659] Re: [mysql 16657] Re: [mysql 16656] frmとibdのみのデータからデータベースの復旧方法について</a></span>
+</pre>
+
+
+</body></html>

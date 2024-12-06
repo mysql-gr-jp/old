@@ -1,0 +1,188 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16612</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16611.html">[前]</a><a href="16613.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16612
+</p>
+<div class="header">
+<p>
+From: "SAKAI, Kei" &lt;"SAKAI, Kei" &lt;sakaik@xxxxxxxxxx&gt;&gt;<br>
+Date: Wed, 25 Nov 2020 08:01:38 +0900<br>
+Subject: [mysql 16612] Re: [mysql 16610] Re: [mysql 16609] ReceiveHeader: Net packets out of order: received[1],wxception[0]のエラーについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>坂井です
+
+
+ちょうどタイミング良く 8.0 マニュアルの、8.0.23での変更（予定）点を眺めていたのですが、
+この、ホスト情報をクリアする FLUSH HOST文、8.0.23から deplicated になるんですね。代わりに、p_s の
+host_cacheテーブルをtruncateしてね、とのことです。
+
+
+
+
+2020年11月24日(火) 14:28 yoku0825 &lt;yoku0825@xxxxxxxxxx&gt;:
+
+<span class="quote1">&gt; こんにちは、yoku0825といいます。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 最近のMariaDBはMySQLと動作が微妙に違ったりするので自信はありませんが、
+</span>
+<span class="quote1">&gt; 症状を聞く限りこれのような気がします。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; MySQL :: MySQL 5.6 リファレンスマニュアル :: B.5.2.6 ホスト 'host_name' は拒否されました
+</span>
+<span class="quote1">&gt; <a href="https://dev.mysql.com/doc/refman/5.6/ja/blocked-host.html">https://dev.mysql.com/doc/refman/5.6/ja/blocked-host.html</a>
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; ("blocked because of many connection errors" でGoogle検索すると他にもいろいろ出てきます)
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; これはエラーパケットの中に埋め込まれているメッセージなので、
+</span>
+<span class="quote1">&gt; MariaDB側のエラーログなどには吐かない気がします（少なくともMySQLは吐かなさそう）
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; お使いのアプリケーションの中で、例外を全部出力させると見えるかも知れません。
+</span>
+<span class="quote1">&gt; （あるいは、再現中にそのPCからmysqlコマンドラインクライアントからアクセスしようとすれば確実に見えると思います）
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; yoku0825,
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 2020年11月23日(月) 19:29 Jyoji Irisa &lt;ml@xxxxxxxxxx&gt;:
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; はじめまして入佐と申します
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 初めて投稿いたします。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; ネットを検索しても解決しなかったので、こちらに投稿させてもらいます。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 現在サーバーに MariaDB 10.5.6 をインストールしてシステムテストを行っている
+</span>
+<span class="quote2">&gt; &gt; のですが、複数台の端末で接続しにいっておりまして（現在７台）、１分に１度デ
+</span>
+<span class="quote2">&gt; &gt; ータベースに繋いで更新処理を行う、などの処理を行っております。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; その際、何かのきっかけで１台（または２台）以下のメッセージが表示され接続で
+</span>
+<span class="quote2">&gt; &gt; きなくなります。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; ReceiveHeader: Net packets out of order: received[1],wxception[0]
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; ※テスト的にケーブルを抜いてサーバーに接続できない状況を作ったりしてます。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; これ現象以後、その端末からは接続が不可能になり、PCを再起動しても同じ症状
+</span>
+<span class="quote2">&gt; &gt; がでます。で、最終的にデータベースのサービスを再起動するまでこの症状が出
+</span>
+<span class="quote2">&gt; &gt; 続けます。
+</span>
+<span class="quote2">&gt; &gt; ということはサーバー側で何らかの情報を持っていて、この端末からは接続を受け
+</span>
+<span class="quote2">&gt; &gt; 付けない、ということをしているかと思うのですが、なかなか現象がつかみきれず
+</span>
+<span class="quote2">&gt; &gt; 困っております。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; どなたかご存知の方、アドバイスを頂けないでしょうか？
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 環境は以下の通り
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; サーバー： WindowsServer 2019
+</span>
+<span class="quote2">&gt; &gt; データベース：MariaDB 10.5.6
+</span>
+<span class="quote2">&gt; &gt; クライアント：Windows10
+</span>
+<span class="quote2">&gt; &gt; 接続方法１： ODBC MariaDB ODBC Connecter）を使ってアプリからアクセス
+</span>
+<span class="quote2">&gt; &gt; 接続方法２： A5M2 というツールを使ってMySQLのネイティブ接続
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 過去にXAMPPの中に同梱されているMYSQL（MariaDB）は使って、そちらは
+</span>
+<span class="quote2">&gt; &gt; 特にこのような問題は出ておりません。
+</span>
+<span class="quote2">&gt; &gt; ちなみに過去のバージョンを調べると MariDB 10.1.xx でした。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; 以上よろしくお願いします。
+</span>
+<span class="quote2">&gt; &gt;
+</span>
+<span class="quote2">&gt; &gt; --
+</span>
+<span class="quote2">&gt; &gt; --
+</span>
+<span class="quote2">&gt; &gt; ■■■  カベル株式会社 入佐 城司
+</span>
+<span class="quote2">&gt; &gt; ■■□  Tel: 06-6263-7237 Mobile: 090-4276-6606
+</span>
+<span class="quote2">&gt; &gt; ■□□  Mail: irisa@xxxxxxxxxx  Web: <a href="http://www.kabel.jp/">http://www.kabel.jp/</a>
+</span>
+<span class="quote2">&gt; &gt; ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+
+</pre>
+</div>
+<div class="attach">
+<h3 class="attachtitle">添付ファイル</h3>
+<ul>
+<li><a href="16612/0/index.html"> [text/html]</a>
+</li></ul>
+</div>
+<p class="button"><a href="16611.html">[前]</a><a href="16613.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="16609.html">  16609 2020-11-23 19:27 [Jyoji Irisa &lt;ml@xxxx] ReceiveHeader: Net packets out of order: received[1],wxception[0]のエラーについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16610.html">  16610 2020-11-24 14:28 ┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16609] ReceiveHeader: Net packets out of order: received[1],wxception[0]のエラーについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16611.html">  16611 2020-11-24 22:23 　┣[Jyoji Irisa &lt;ml@xxxx] Re: [mysql 16610] Re: [mysql 16609] ReceiveHeader: Net packets out of order: received[1],wxception[0]のエラーについて</a></span>
+<span class="current">-&gt;&nbsp;<a href="16612.html">@ 16612 2020-11-25 08:01 　┗["SAKAI, Kei" &lt;sakaik] Re: [mysql 16610] Re: [mysql 16609] ReceiveHeader: Net packets out of order: received[1],wxception[0]のエラーについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16613.html">@ 16613 2020-11-25 10:38 　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16612] Re: [mysql 16610] Re: [mysql 16609] ReceiveHeader: Net packets out of order: received[1],wxception[0]のエラーについて</a></span>
+</pre>
+
+
+</body></html>

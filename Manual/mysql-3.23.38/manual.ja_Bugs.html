@@ -1,164 +1,159 @@
-  <HTML>
-  <HEAD>
+<html><head>
   <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
      from manual.ja.texi on 20 July 2001 -->
 
-  <TITLE>MySQL Reference Manual for version 3.23.38. - G  MySQL での既知のエラーと欠けているデザイン</TITLE>
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
-  </HEAD>
-  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_News.html">previous</A>, <A HREF="manual.ja_TODO.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
-<P><HR><P>
+  <title>MySQL Reference Manual for version 3.23.38. - G  MySQL での既知のエラーと欠けているデザイン</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000" link="#101090" vlink="#7030B0">
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_News.html">previous</a>, <a href="manual.ja_TODO.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+<p></p><hr><p>
 
 
-<H1><A NAME="Bugs" HREF="manual.ja_toc.html#Bugs">G  MySQL での既知のエラーと欠けているデザイン</A></H1>
+</p><h1><a name="Bugs" href="manual.ja_toc.html#Bugs">G  MySQL での既知のエラーと欠けているデザイン</a></h1>
 
-<P>
+<p>
 The following problems are known and have a very high priority to get
 fixed:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-<CODE>ANALYZE TABLE</CODE> on a BDB table may in some case make the table
-unusable until one has restarted <CODE>mysqld</CODE>.  When this happens you will
-see errors like the following in the <STRONG>MySQL</STRONG> error file:
+<code>ANALYZE TABLE</code> on a BDB table may in some case make the table
+unusable until one has restarted <code>mysqld</code>.  When this happens you will
+see errors like the following in the <strong>MySQL</strong> error file:
 
 
-<PRE>
-001207 22:07:56  bdb:  log_flush: LSN past current end-of-log
-</PRE>
+<pre>001207 22:07:56  bdb:  log_flush: LSN past current end-of-log
+</pre>
 
-<LI>
+</li><li>
 
-Don't execute <CODE>ALTER TABLE</CODE> on a <CODE>BDB</CODE> table on which you are
+Don't execute <code>ALTER TABLE</code> on a <code>BDB</code> table on which you are
 running not completed multi-statement transactions. (The transaction
 will probably be ignored).
 
-<LI>
+</li><li>
 
-Doing a <CODE>LOCK TABLE ..</CODE> and <CODE>FLUSH TABLES ..</CODE> doesn't
+Doing a <code>LOCK TABLE ..</code> and <code>FLUSH TABLES ..</code> doesn't
 guarantee that there isn't a half-finished transaction in progress on the
 table.
 
-<LI>
+</li><li>
 
 BDB tables are a bit slow to open from this. If you have many BDB tables
-in a database, it will take a long time to use the <CODE>mysql</CODE> client
-on the database if you are not using the <CODE>-A</CODE> option or if you are
-using <CODE>rehash</CODE>. This is especially notable when you have a big table
+in a database, it will take a long time to use the <code>mysql</code> client
+on the database if you are not using the <code>-A</code> option or if you are
+using <code>rehash</code>. This is especially notable when you have a big table
 cache.
 
-<LI>
+</li><li>
 
-Th current replication protocol cannot deal with <CODE>LOAD DATA INFILE</CODE>
+Th current replication protocol cannot deal with <code>LOAD DATA INFILE</code>
 and line terminator characters of more than 1 character.
-</UL>
+</li></ul>
 
-<P>
+<p>
 The following problems are known and will be fixed in due time:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-<CODE>mysqldump</CODE> on a <CODE>MERGE</CODE> table doesn't include the current
+<code>mysqldump</code> on a <code>MERGE</code> table doesn't include the current
 mapped tables.
-<LI>
+</li><li>
 
-For the moment <CODE>MATCH</CODE> only works with <CODE>SELECT</CODE> statements.
-<LI>
+For the moment <code>MATCH</code> only works with <code>SELECT</code> statements.
+</li><li>
 
-When using <CODE>SET CHARACTER SET</CODE>, one can't use translated
+When using <code>SET CHARACTER SET</code>, one can't use translated
 characters in database, table and column names.
-<LI>
+</li><li>
 
-<CODE>DELETE FROM merge_table</CODE> used without a <CODE>WHERE</CODE>
+<code>DELETE FROM merge_table</code> used without a <code>WHERE</code>
 will only clear the mapping for the table, not delete everything in the
 mapped tables
-<LI>
+</li><li>
 
 MIT-pthread を使用するとき、他のディレクトリでビルド出来ません。
 これは MIT-pthread の変更を要求するため、我々は、これを修正しそうにないです。
-<LI>
+</li><li>
 
-<CODE>BLOB</CODE> values can't ``reliably'' be used in <CODE>GROUP BY</CODE> or
-<CODE>ORDER BY</CODE> or <CODE>DISTINCT</CODE>. 
-これらの場合、 <CODE>BLOB</CODE> の比較の際には最初の <CODE>max_sort_length</CODE> バイト
+<code>BLOB</code> values can't ``reliably'' be used in <code>GROUP BY</code> or
+<code>ORDER BY</code> or <code>DISTINCT</code>. 
+これらの場合、 <code>BLOB</code> の比較の際には最初の <code>max_sort_length</code> バイト
 （デフォルト1024）だけが使用されます。
-これは <CODE>mysqld</CODE> の <CODE>-O max_sort_length</CODE> オプションで変更可能です。
+これは <code>mysqld</code> の <code>-O max_sort_length</code> オプションで変更可能です。
 A workaround for most cases is to use a substring:
-<CODE>SELECT DISTINCT LEFT(blob,2048) FROM tbl_name</CODE>.
-<LI>
+<code>SELECT DISTINCT LEFT(blob,2048) FROM tbl_name</code>.
+</li><li>
 
-Calculation is done with <CODE>BIGINT</CODE> or <CODE>DOUBLE</CODE> (both are
+Calculation is done with <code>BIGINT</code> or <code>DOUBLE</code> (both are
 normally 64 bits long). It depends on the function which precision one
-gets. The general rule is that bit functions are done with <CODE>BIGINT</CODE>
-precision, <CODE>IF</CODE>, and <CODE>ELT()</CODE> with <CODE>BIGINT</CODE> or <CODE>DOUBLE</CODE>
-precision and the rest with <CODE>DOUBLE</CODE> precision.  One should try to
+gets. The general rule is that bit functions are done with <code>BIGINT</code>
+precision, <code>IF</code>, and <code>ELT()</code> with <code>BIGINT</code> or <code>DOUBLE</code>
+precision and the rest with <code>DOUBLE</code> precision.  One should try to
 avoid using bigger unsigned long long values than 63 bits
 (9223372036854775807) for anything else than bit fields!
-<LI>
+</li><li>
 
-全ての文字型のフィールド、<CODE>BLOB</CODE> と <CODE>TEXT</CODE> はのぞいて、は、
+全ての文字型のフィールド、<code>BLOB</code> と <code>TEXT</code> はのぞいて、は、
 検索されるときに最後についているスペースを自動で取り除きます。
- <CODE>CHAR</CODE> 型ではこれは OK で、この特徴は ANSI SQL92 に従っていると見なされるでしょう。
-<STRONG>MySQL</STRONG> のバグは、 <CODE>VARCHAR</CODE> でも同様に行ってしまうことです。
-<LI>
+ <code>CHAR</code> 型ではこれは OK で、この特徴は ANSI SQL92 に従っていると見なされるでしょう。
+<strong>MySQL</strong> のバグは、 <code>VARCHAR</code> でも同様に行ってしまうことです。
+</li><li>
 
-一つのテーブルに <CODE>ENUM</CODE> と <CODE>SET</CODE> フィールドは 255 までしか持てません。
-<LI>
+一つのテーブルに <code>ENUM</code> と <code>SET</code> フィールドは 255 までしか持てません。
+</li><li>
 
-<CODE>safe_mysqld</CODE> re-directs all messages from <CODE>mysqld</CODE> to the
-<CODE>mysqld</CODE> log.  One problem with this is that if you execute
-<CODE>mysqladmin refresh</CODE> to close and reopen the log,
-<CODE>stdout</CODE> and <CODE>stderr</CODE> are still redirected to the old log.
-If you use <CODE>--log</CODE> extensively, you should edit <CODE>safe_mysqld</CODE> to
-log to <TT>`'hostname'.err'</TT> instead of <TT>`'hostname'.log'</TT> so you can
+<code>safe_mysqld</code> re-directs all messages from <code>mysqld</code> to the
+<code>mysqld</code> log.  One problem with this is that if you execute
+<code>mysqladmin refresh</code> to close and reopen the log,
+<code>stdout</code> and <code>stderr</code> are still redirected to the old log.
+If you use <code>--log</code> extensively, you should edit <code>safe_mysqld</code> to
+log to <tt>`'hostname'.err'</tt> instead of <tt>`'hostname'.log'</tt> so you can
 easily reclaim the space for the old log by deleting the old one and
-executing <CODE>mysqladmin refresh</CODE>.
-<LI>
+executing <code>mysqladmin refresh</code>.
+</li><li>
 
-In the <CODE>UPDATE</CODE> statement, columns are updated from left to right.
+In the <code>UPDATE</code> statement, columns are updated from left to right.
 If you refer to an updated column, you will get the updated value instead of the
 original value. For example:
 
-<PRE>
-mysql&#62; UPDATE tbl_name SET KEY=KEY+1,KEY=KEY+1;
-</PRE>
+<pre>mysql&gt; UPDATE tbl_name SET KEY=KEY+1,KEY=KEY+1;
+</pre>
 
-will update <CODE>KEY</CODE> with <CODE>2</CODE> instead of with <CODE>1</CODE>.
-<LI>
+will update <code>KEY</code> with <code>2</code> instead of with <code>1</code>.
+</li><li>
 
 You can't use temporary tables more than once in the same query.
 For example, the following doesn't work.
 
 
-<PRE>
-select * from temporary_table, temporary_table as t2;
-</PRE>
+<pre>select * from temporary_table, temporary_table as t2;
+</pre>
 
-<LI>
+</li><li>
 
-<CODE>RENAME</CODE> doesn't work with <CODE>TEMPORARY</CODE> tables.
+<code>RENAME</code> doesn't work with <code>TEMPORARY</code> tables.
 
-<LI>
+</li><li>
 
-The optimizer may handle <CODE>DISTINCT</CODE> differently if you are using
+The optimizer may handle <code>DISTINCT</code> differently if you are using
 'hidden' columns in a join or not.  In a join, hidden columns are
 counted as part of the result (even if they are not shown) while in
-normal queries hidden columns doesn't participate in the <CODE>DISTINCT</CODE>
+normal queries hidden columns doesn't participate in the <code>DISTINCT</code>
 comparison.  We will probably change this in the future to never compare
-the hidden columns when executing <CODE>DISTINCT</CODE>
+the hidden columns when executing <code>DISTINCT</code>
 
 An example of this is:
 
 
-<PRE>
-SELECT DISTINCT mp3id FROM band_downloads WHERE userid = 9 ORDER BY id
+<pre>SELECT DISTINCT mp3id FROM band_downloads WHERE userid = 9 ORDER BY id
 DESC;
 
 and
@@ -166,141 +161,140 @@ and
 SELECT DISTINCT band_downloads.mp3id, FROM band_downloads,band_mp3
 WHERE band_downloads.userid = 9 AND band_mp3.id = band_downloads.mp3id
 ORDER BY band_downloads.id DESC;
-</PRE>
+</pre>
 
-In the second case you may in <STRONG>MySQL</STRONG> 3.23.x get two identical rows
+In the second case you may in <strong>MySQL</strong> 3.23.x get two identical rows
 in the result set (because the hidden 'id' column may differ).
 
 Note that the this only happens for queries where you don't have the
 ORDER BY columns in the result, something that is you are not allowed
 to do in ANSI SQL.
 
-<LI>
+</li><li>
 
-Because <STRONG>MySQL</STRONG> allows you to work with table types that doesn't
-support transactions (and thus can't <CODE>rollback</CODE> data) some things
-behaves a little different in <STRONG>MySQL</STRONG> than in other SQL servers:
-(This is just to ensure that <STRONG>MySQL</STRONG> never need to do a rollback
+Because <strong>MySQL</strong> allows you to work with table types that doesn't
+support transactions (and thus can't <code>rollback</code> data) some things
+behaves a little different in <strong>MySQL</strong> than in other SQL servers:
+(This is just to ensure that <strong>MySQL</strong> never need to do a rollback
 for a SQL command).  This may be a little awkward at times as column
-Because <STRONG>MySQL</STRONG> allows you to work with table types that don't
-support transactions, and thus can't <CODE>rollback</CODE> data, some things
-behave a little differently in <STRONG>MySQL</STRONG> than in other SQL servers.
-This is just to ensure that <STRONG>MySQL</STRONG> never need to do a rollback
+Because <strong>MySQL</strong> allows you to work with table types that don't
+support transactions, and thus can't <code>rollback</code> data, some things
+behave a little differently in <strong>MySQL</strong> than in other SQL servers.
+This is just to ensure that <strong>MySQL</strong> never need to do a rollback
 for a SQL command.  This may be a little akward at times as column
 values must be checked in the application, but this will actually give
-you a nice speed increase as it allows <STRONG>MySQL</STRONG> to do some
+you a nice speed increase as it allows <strong>MySQL</strong> to do some
 optimizations that otherwise would be very hard to do.
 
-If you set a column to a wrong value, <STRONG>MySQL</STRONG> will, instead of doing
-a rollback, store the <CODE>best possible value</CODE> in the column:
+If you set a column to a wrong value, <strong>MySQL</strong> will, instead of doing
+a rollback, store the <code>best possible value</code> in the column:
 
 
-<UL>
-<LI>
+<ul>
+<li>
 
 If you try to store a value outside the range in a numerical column,
-<STRONG>MySQL</STRONG> will instead store the smallest or biggest possible value in
+<strong>MySQL</strong> will instead store the smallest or biggest possible value in
 the column.
-<LI>
+</li><li>
 
 If you try to store a string that doesn't start with a number into a
-numerical column, <STRONG>MySQL</STRONG> will store 0 into it.
-<LI>
+numerical column, <strong>MySQL</strong> will store 0 into it.
+</li><li>
 
-If you try to store <CODE>NULL</CODE> into a column that doesn't take
-<CODE>NULL</CODE> values, <STRONG>MySQL</STRONG> will store 0 or <CODE>''</CODE> (empty
+If you try to store <code>NULL</code> into a column that doesn't take
+<code>NULL</code> values, <strong>MySQL</strong> will store 0 or <code>''</code> (empty
 string) in it instead. (This behavior can, however, be changed with the
 -DDONT_USE_DEFAULT_FIELDS compile option).
-<LI>
+</li><li>
 
-<STRONG>MySQL</STRONG> allows you to store some wrong date values into
-<CODE>DATE</CODE> and <CODE>DATETIME</CODE> columns. (Like 2000-02-31 or 2000-02-00).
-If the date is totally wrong, <STRONG>MySQL</STRONG> will store the special
+<strong>MySQL</strong> allows you to store some wrong date values into
+<code>DATE</code> and <code>DATETIME</code> columns. (Like 2000-02-31 or 2000-02-00).
+If the date is totally wrong, <strong>MySQL</strong> will store the special
 0000-00-00 date value in the column.
-<LI>
+</li><li>
 
-If you set an <CODE>enum</CODE> to an unsupported value, it will be set to
+If you set an <code>enum</code> to an unsupported value, it will be set to
 the error value 'empty string', with numeric value 0.
-</UL>
+</li></ul>
 
-<LI>
+</li><li>
 
-If you execute a <CODE>PROCEDURE</CODE> on a query that returns an empty set,
-in some cases the <CODE>PROCEDURE</CODE> will not transform the columns.
-<LI>
+If you execute a <code>PROCEDURE</code> on a query that returns an empty set,
+in some cases the <code>PROCEDURE</code> will not transform the columns.
+</li><li>
 
-Creation of a table of type <CODE>MERGE</CODE> doesn't check if the underlying
+Creation of a table of type <code>MERGE</code> doesn't check if the underlying
 tables are of compatible types.
-<LI>
+</li><li>
 
-<STRONG>MySQL</STRONG> can't yet handle <CODE>NaN</CODE>, <CODE>-Inf</CODE> and <CODE>Inf</CODE>
+<strong>MySQL</strong> can't yet handle <code>NaN</code>, <code>-Inf</code> and <code>Inf</code>
 values in double. Using these will cause problems when trying to export
-and import data. We should as an intermediate solution change <CODE>NaN</CODE> to
-<CODE>NULL</CODE> (if possible) and <CODE>-Inf</CODE> and <CODE>Inf</CODE> to the
-Minimum respective maximum possible <CODE>double</CODE> value.
-</UL>
+and import data. We should as an intermediate solution change <code>NaN</code> to
+<code>NULL</code> (if possible) and <code>-Inf</code> and <code>Inf</code> to the
+Minimum respective maximum possible <code>double</code> value.
+</li></ul>
 
-<P>
-The following are known bugs in earlier versions of <STRONG>MySQL</STRONG>:
+<p>
+The following are known bugs in earlier versions of <strong>MySQL</strong>:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-You can get a hung thread if you do a <CODE>DROP TABLE</CODE> on a table that is
-one among many tables that is locked with <CODE>LOCK TABLES</CODE>.
+You can get a hung thread if you do a <code>DROP TABLE</code> on a table that is
+one among many tables that is locked with <code>LOCK TABLES</code>.
 
-<LI>
+</li><li>
 
 In the following case you can get a core dump:
 
-<OL>
-<LI>
+<ol>
+<li>
 
 Delayed insert handler has pending inserts to a table.
-<LI>
+</li><li>
 
-<CODE>LOCK table</CODE> with <CODE>WRITE</CODE>
-<LI>
+<code>LOCK table</code> with <code>WRITE</code>
+</li><li>
 
-<CODE>FLUSH TABLES</CODE>
-</OL>
+<code>FLUSH TABLES</code>
+</li></ol>
 
-<LI>
+</li><li>
 
-Before <STRONG>MySQL</STRONG> Version 3.23.2 an <CODE>UPDATE</CODE> that updated a key with
-a <CODE>WHERE</CODE> on the same key may have failed because the key was used to
+Before <strong>MySQL</strong> Version 3.23.2 an <code>UPDATE</code> that updated a key with
+a <code>WHERE</code> on the same key may have failed because the key was used to
 search for records and the same row may have been found multiple times:
 
 
-<PRE>
-UPDATE tbl_name SET KEY=KEY+1 WHERE KEY &#62; 100;
-</PRE>
+<pre>UPDATE tbl_name SET KEY=KEY+1 WHERE KEY &gt; 100;
+</pre>
 
 A workaround is to use:
 
 
-<PRE>
-mysql&#62; UPDATE tbl_name SET KEY=KEY+1 WHERE KEY+0 &#62; 100;
-</PRE>
+<pre>mysql&gt; UPDATE tbl_name SET KEY=KEY+1 WHERE KEY+0 &gt; 100;
+</pre>
 
-This will work because <STRONG>MySQL</STRONG> will not use index on expressions in
-the <CODE>WHERE</CODE> clause.
-<LI>
+This will work because <strong>MySQL</strong> will not use index on expressions in
+the <code>WHERE</code> clause.
+</li><li>
 
-<STRONG>MySQL</STRONG> バージョン 3.23 より前では、全ての数値型で、少数部分が削られてしまいます。
+<strong>MySQL</strong> バージョン 3.23 より前では、全ての数値型で、少数部分が削られてしまいます。
 これは、そのフィールドが何桁の小数部を持つか、定義しなければならなかった、と
 いうことです。 全ての結果は10進の数で正しく返ってきました。
-</UL>
+</li></ul>
 
-<P>
+<p>
 For platform-specific bugs, see the sections about compiling and porting.
 
-</P>
-<P>
-<A NAME="IDX1806"></A>
-<P><HR><P>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_News.html">previous</A>, <A HREF="manual.ja_TODO.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
- </BODY>
- </HTML>
+</p>
+<p>
+<a name="IDX1806"></a>
+</p><p></p><hr><p>
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_News.html">previous</a>, <a href="manual.ja_TODO.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+ 
+ 
+</p></body></html>

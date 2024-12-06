@@ -1,266 +1,266 @@
-<HTML><HEAD></HEAD>
-<BODY dir=ltr>
-<DIV dir=ltr>
-<DIV style="FONT-FAMILY: 'Calibri'; COLOR: #000000; FONT-SIZE: 12pt">
-<DIV>既存データを運用中のサーバーAと新規にMySQLをインストールしたサーバーBとで、</DIV>
-<DIV>運用中のサーバーAをマスターに、新規のサーバーBをスレーブにしたレプリケーションを行おうとしていますが、うまくできません。</DIV>
-<DIV>どなたか、教えてください。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>スレーブ上でマスター情報登録するCHANGE MASTER TOコマンドを実行すると、</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>ERROR 1201 (HY000): Could not initialize master info structures; more error 
-messages can be found in the MySQL error log</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>となって、レプリケーションが有効になりません。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>なお、サーバーAはマスターとして動いているようです。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>現在の環境と実行した結果は以下の通りです。（長文です）</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>＜作業環境＞</DIV>
-<DIV>１．サーバーA：マスターの環境</DIV>
-<DIV>　　OS：Windows 7 Professional SP1(32bit)</DIV>
-<DIV>　　PC：DELL Vostro(Intel Core 2 Duo,CPU E7500 2.93GHz) RAM 2.00GB</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>　　MySQLサーバ：バージョン5.5.25</DIV>
-<DIV>　　（mysql-5.5.25-win32.msi）</DIV>
-<DIV>　　Workbench：バージョン5.2.39CE Revision 8757</DIV>
-<DIV>　　（mysql-workbench-gpl-5.2.39-win32.msi）</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; コンフィグレーション</DIV>
-<DIV>　　Configuration File: C:\Program Files\MySQL\MySQL Server 5.5\my.ini</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; ＜iniファイルの内容＞</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; basedir="C:/Program Files/MySQL/MySQL Server 5.5/"</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; datadir="C:/ProgramData/MySQL/MySQL Server 
-5.5/Data/"</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>２．サーバーB：スレーブの環境</DIV>
-<DIV>　　サーバマシンと同じ構成のPC</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; コンフィグレーション</DIV>
-<DIV>　　Configuration File: C:\ProgramData\MySQL\MySQL Server 
-5.5\data\my.ini</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; ＜iniファイルの内容＞</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; basedir="C:/Program Files/MySQL/MySQL Server 5.5/"</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; datadir="C:/ProgramData/MySQL/MySQL Server 
-5.5/Data/"</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>＜行った手順＞</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>０．（マスター）（スレーブ）　MySQL起動</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>１．（マスター）レプリケーション専用ユーザの登録</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>１-1．マスター上のMySQLに、スレーブからアクセスするレプリケーション用ユーザー（repli）を登録。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>Workbench/Admin/Users and Privileges/</DIV>
-<DIV>　　Server Access Management/Administrative 
-Rolesタブで　ReplicationAdmin権限を設定</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; Schema Privileges/ ですべてのスキーマに対してすべての権限を設定</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>１-2．（スレーブ）スレーブから1-1.で作成したアカウントでマスターへの接続確認</DIV>
-<DIV>Workbench/New Connectionで</DIV>
-<DIV>　　Hostname = マスターのIPアドレス</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; Port&nbsp;&nbsp;&nbsp;&nbsp; = 3306</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; Username = repli</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; Password = １-1．でrepliに対して設定したパスワード</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; Default Schema = Nullのまま</DIV>
-<DIV>として「Test Connection」ボタンを押したところ、</DIV>
-<DIV>　　「Connection parameters are correct.」</DIV>
-<DIV>となり接続成功。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>２．（マスター）コンフィギュレーション設定</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>２-1．マスター上のMySQLを停止</DIV>
-<DIV>マスターのレプリケーション設定を行うためにマスター上のMySQLを停止</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>２-2．マスターのmy.iniファイル編集（WorkBench使用）</DIV>
-<DIV>[mysqld]</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; log-bin = mysql-bin</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; binlog-format = MIXED</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; general-log</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; auto_increment_increment = 1</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; server-id = 4</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; log-error = log-error</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; show-slave-auth-info</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; auto_increment_offset = 1</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; general_log_file = host_name.log</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; sync_binlog = 1</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; log-bin-index = </DIV>
-<DIV>&nbsp;</DIV>
-<DIV>iniファイルが設定どおり更新されているか確認した。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>３．（スレーブ）コンフィギュレーション設定</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>３-1．スレーブ上のMySQLを停止</DIV>
-<DIV>スレーブの設定を行うためにスレーブ上のMySQLを停止</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>３-2．スレーブのmy.iniファイル編集（WorkBench使用）</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>[mysqld]</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; sync_binlog = 1</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; server-id = 6</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; log-slave-updates</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; slave-load-tmpdir = /tmp</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; report-host = Slave_Toshijoho</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; report-port = 3306</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; skip-slave-start</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>General slaveセクションで</DIV>
-<DIV>skip-slave-start　をチェックし、スレーブサーバを起動したとき、自動でスレーブが起動しないようにした。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>なお、下記のマスターの情報はWorkbenchで設定する場所がないので、my.iniファイルの[mysqld]セクションに追加した。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>master-host='123.456.789.101'（マスターのIPアドレス）</DIV>
-<DIV>master-user='repli'（マスターに登録したレプリケーション用ユーザー名）</DIV>
-<DIV>master-password='password'（マスターに登録したレプリケーション用ユーザーのパスワード）</DIV>
-<DIV>master-port=3306</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>４．（マスター）レプリケーション情報の取得</DIV>
-<DIV>マスターで、以下の処理を行う。マスターのMySQLは停止中</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>４-1．マスターのMySQLを起動</DIV>
-<DIV>停止中のMySQLを起動。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>４-2．データのフラッシュ</DIV>
-<DIV>mysql&gt; FLUSH TABLES WITH READ LOCK;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>４-2.マスターレプリケーション情報の取得</DIV>
-<DIV>mysql&gt; SHOW MASTER STATUS;</DIV>
-<DIV>File:&nbsp;&nbsp;&nbsp;&nbsp; mysql-bin.000004</DIV>
-<DIV>Position: 597</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>５．（マスター）マスター上のデータをアーカイブ</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>コマンドプロンプトでmysqldumpを実行</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>C:\......&gt;mysqldump --host="localhost"</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; --user="root" </DIV>
-<DIV>&nbsp;&nbsp;&nbsp; --password="????" </DIV>
-<DIV>&nbsp;&nbsp;&nbsp; --all-database --lock-all-tables </DIV>
-<DIV>&nbsp;&nbsp;&nbsp; &gt; dbdump.db</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>アーカイブが完了したら、ロックを解除する。</DIV>
-<DIV>mysql&gt; UNLOCK TABLES;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>６．（スレーブ）スレーブにマスターのデータをインポート</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>６-1.スレーブサーバーのMySQLを起動</DIV>
-<DIV>--skip-slaveオプションを使用してレプリケーションをスキップし、スレーブを立ち上げる。</DIV>
-<DIV>（my.iniファイルにskip-slave-startオプションを設定済み）</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>６-2.インポート</DIV>
-<DIV>mysqldumpで作成したマスターのダンプファイルをコマンドプロンプトでインポートする。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>C:\......&gt;mysql --user="root" --password="???" &lt; dbdump.db</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>７．（スレーブ）マスター情報登録</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>mysql&gt; STOP SLAVE;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>mysql&gt; CHANGE MASTER TO</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; MASTER_HOST = '123.456.789.101',　（マスターのIPアドレス）</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; MASTER_PORT=3306,</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; MASTER_USER = 'repli',　（マスターに登録したレプリケーション用ユーザー名）</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; MASTER_PASSWORD = 
-'password'（マスターに登録したユーザrepliのパスワード）,</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; MASTER_LOG_FILE = 'mysql-bin.000004',</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; MASTER_LOG_POS = 107;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>ここで、下記のエラーが発生。</DIV>
-<DIV>ERROR 1201 (HY000): Could not initialize master info structures; more error 
-messages can be found in the MySQL error log</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>８．（スレーブ）スレーブ起動</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>mysql&gt; START SLAVE;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>7．がうまくいっていないので、ここでもERROR 1201 (HY000)がでて、スレーブは起動しません。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>９．（マスター）マスターの確認</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>mysql&gt; show master status\G　　エラーなし　1行リターン</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; File: 
-mysql-bin.000004</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Position: 597</DIV>
-<DIV>&nbsp;&nbsp;&nbsp; Binlog_Do_DB: </DIV>
-<DIV>Binlog_Ignore_DB: </DIV>
-<DIV>&nbsp;</DIV>
-<DIV>10．（スレーブ）スレーブの確認</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>スレーブの状態を確認したところ、下記のようになっていて、動いていないようです。</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>mysql&gt; show slave status\G</DIV>
-<DIV>*************************** 1. row ***************************</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Slave_IO_State: </DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Master_Host: 123.456.789.101</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Master_User: repli</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Master_Port: 3306</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Connect_Retry: 60</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Master_Log_File: mysql-bin.000004</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Read_Master_Log_Pos: 
-107</DIV>
-<DIV>.......</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Slave_IO_Running: No</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Slave_SQL_Running: No</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Replicate_Do_DB: </DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Replicate_Ignore_DB: 
-</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Replicate_Do_Table: </DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Replicate_Ignore_Table: </DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Replicate_Wild_Do_Table: </DIV>
-<DIV>&nbsp; Replicate_Wild_Ignore_Table: </DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Last_Errno: 0</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Last_Error: </DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Skip_Counter: 0</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Exec_Master_Log_Pos: 
-107</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Relay_Log_Space: 0</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Until_Condition: None</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Until_Log_File: </DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Until_Log_Pos: 0</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Seconds_Behind_Master: 
-NULL</DIV>
-<DIV>Master_SSL_Verify_Server_Cert: No</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Last_IO_Errno: 0</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Last_IO_Error: </DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Last_SQL_Errno: 0</DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Last_SQL_Error: </DIV>
-<DIV>&nbsp; Replicate_Ignore_Server_Ids: </DIV>
-<DIV>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Master_Server_Id: 0</DIV>
-<DIV>1 row in set (0.00 sec)</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>&nbsp;</DIV>
-<DIV>なお、CHANGE MASTER TOでのエラーメッセージにある”MySQL error 
-log”を見る方法も教えていただけましたら、幸いです。</DIV><FONT 
-face="ＭＳ Ｐゴシック">大変長文となりましたが、ぜひ解決方法を教えてください。</FONT><BR></DIV></DIV></BODY></HTML>
+<html><head></head>
+<body dir="ltr">
+<div dir="ltr">
+<div style="FONT-FAMILY: 'Calibri'; COLOR: #000000; FONT-SIZE: 12pt">
+<div>既存データを運用中のサーバーAと新規にMySQLをインストールしたサーバーBとで、</div>
+<div>運用中のサーバーAをマスターに、新規のサーバーBをスレーブにしたレプリケーションを行おうとしていますが、うまくできません。</div>
+<div>どなたか、教えてください。</div>
+<div>&nbsp;</div>
+<div>スレーブ上でマスター情報登録するCHANGE MASTER TOコマンドを実行すると、</div>
+<div>&nbsp;</div>
+<div>ERROR 1201 (HY000): Could not initialize master info structures; more error 
+messages can be found in the MySQL error log</div>
+<div>&nbsp;</div>
+<div>となって、レプリケーションが有効になりません。</div>
+<div>&nbsp;</div>
+<div>なお、サーバーAはマスターとして動いているようです。</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>現在の環境と実行した結果は以下の通りです。（長文です）</div>
+<div>&nbsp;</div>
+<div>＜作業環境＞</div>
+<div>１．サーバーA：マスターの環境</div>
+<div>　　OS：Windows 7 Professional SP1(32bit)</div>
+<div>　　PC：DELL Vostro(Intel Core 2 Duo,CPU E7500 2.93GHz) RAM 2.00GB</div>
+<div>&nbsp;</div>
+<div>　　MySQLサーバ：バージョン5.5.25</div>
+<div>　　（mysql-5.5.25-win32.msi）</div>
+<div>　　Workbench：バージョン5.2.39CE Revision 8757</div>
+<div>　　（mysql-workbench-gpl-5.2.39-win32.msi）</div>
+<div>&nbsp;</div>
+<div>&nbsp;&nbsp;&nbsp; コンフィグレーション</div>
+<div>　　Configuration File: C:\Program Files\MySQL\MySQL Server 5.5\my.ini</div>
+<div>&nbsp;&nbsp;&nbsp; ＜iniファイルの内容＞</div>
+<div>&nbsp;&nbsp;&nbsp; basedir="C:/Program Files/MySQL/MySQL Server 5.5/"</div>
+<div>&nbsp;&nbsp;&nbsp; datadir="C:/ProgramData/MySQL/MySQL Server 
+5.5/Data/"</div>
+<div>&nbsp;</div>
+<div>２．サーバーB：スレーブの環境</div>
+<div>　　サーバマシンと同じ構成のPC</div>
+<div>&nbsp;</div>
+<div>&nbsp;&nbsp;&nbsp; コンフィグレーション</div>
+<div>　　Configuration File: C:\ProgramData\MySQL\MySQL Server 
+5.5\data\my.ini</div>
+<div>&nbsp;&nbsp;&nbsp; ＜iniファイルの内容＞</div>
+<div>&nbsp;&nbsp;&nbsp; basedir="C:/Program Files/MySQL/MySQL Server 5.5/"</div>
+<div>&nbsp;&nbsp;&nbsp; datadir="C:/ProgramData/MySQL/MySQL Server 
+5.5/Data/"</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>＜行った手順＞</div>
+<div>&nbsp;</div>
+<div>０．（マスター）（スレーブ）　MySQL起動</div>
+<div>&nbsp;</div>
+<div>１．（マスター）レプリケーション専用ユーザの登録</div>
+<div>&nbsp;</div>
+<div>１-1．マスター上のMySQLに、スレーブからアクセスするレプリケーション用ユーザー（repli）を登録。</div>
+<div>&nbsp;</div>
+<div>Workbench/Admin/Users and Privileges/</div>
+<div>　　Server Access Management/Administrative 
+Rolesタブで　ReplicationAdmin権限を設定</div>
+<div>&nbsp;&nbsp;&nbsp; Schema Privileges/ ですべてのスキーマに対してすべての権限を設定</div>
+<div>&nbsp;</div>
+<div>１-2．（スレーブ）スレーブから1-1.で作成したアカウントでマスターへの接続確認</div>
+<div>Workbench/New Connectionで</div>
+<div>　　Hostname = マスターのIPアドレス</div>
+<div>&nbsp;&nbsp;&nbsp; Port&nbsp;&nbsp;&nbsp;&nbsp; = 3306</div>
+<div>&nbsp;&nbsp;&nbsp; Username = repli</div>
+<div>&nbsp;&nbsp;&nbsp; Password = １-1．でrepliに対して設定したパスワード</div>
+<div>&nbsp;&nbsp;&nbsp; Default Schema = Nullのまま</div>
+<div>として「Test Connection」ボタンを押したところ、</div>
+<div>　　「Connection parameters are correct.」</div>
+<div>となり接続成功。</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>２．（マスター）コンフィギュレーション設定</div>
+<div>&nbsp;</div>
+<div>２-1．マスター上のMySQLを停止</div>
+<div>マスターのレプリケーション設定を行うためにマスター上のMySQLを停止</div>
+<div>&nbsp;</div>
+<div>２-2．マスターのmy.iniファイル編集（WorkBench使用）</div>
+<div>[mysqld]</div>
+<div>&nbsp;&nbsp;&nbsp; log-bin = mysql-bin</div>
+<div>&nbsp;&nbsp;&nbsp; binlog-format = MIXED</div>
+<div>&nbsp;&nbsp;&nbsp; general-log</div>
+<div>&nbsp;&nbsp;&nbsp; auto_increment_increment = 1</div>
+<div>&nbsp;&nbsp;&nbsp; server-id = 4</div>
+<div>&nbsp;&nbsp;&nbsp; log-error = log-error</div>
+<div>&nbsp;&nbsp;&nbsp; show-slave-auth-info</div>
+<div>&nbsp;&nbsp;&nbsp; auto_increment_offset = 1</div>
+<div>&nbsp;&nbsp;&nbsp; general_log_file = host_name.log</div>
+<div>&nbsp;&nbsp;&nbsp; sync_binlog = 1</div>
+<div>&nbsp;&nbsp;&nbsp; log-bin-index = </div>
+<div>&nbsp;</div>
+<div>iniファイルが設定どおり更新されているか確認した。</div>
+<div>&nbsp;</div>
+<div>３．（スレーブ）コンフィギュレーション設定</div>
+<div>&nbsp;</div>
+<div>３-1．スレーブ上のMySQLを停止</div>
+<div>スレーブの設定を行うためにスレーブ上のMySQLを停止</div>
+<div>&nbsp;</div>
+<div>３-2．スレーブのmy.iniファイル編集（WorkBench使用）</div>
+<div>&nbsp;</div>
+<div>[mysqld]</div>
+<div>&nbsp;&nbsp;&nbsp; sync_binlog = 1</div>
+<div>&nbsp;&nbsp;&nbsp; server-id = 6</div>
+<div>&nbsp;&nbsp;&nbsp; log-slave-updates</div>
+<div>&nbsp;&nbsp;&nbsp; slave-load-tmpdir = /tmp</div>
+<div>&nbsp;&nbsp;&nbsp; report-host = Slave_Toshijoho</div>
+<div>&nbsp;&nbsp;&nbsp; report-port = 3306</div>
+<div>&nbsp;&nbsp;&nbsp; skip-slave-start</div>
+<div>&nbsp;</div>
+<div>General slaveセクションで</div>
+<div>skip-slave-start　をチェックし、スレーブサーバを起動したとき、自動でスレーブが起動しないようにした。</div>
+<div>&nbsp;</div>
+<div>なお、下記のマスターの情報はWorkbenchで設定する場所がないので、my.iniファイルの[mysqld]セクションに追加した。</div>
+<div>&nbsp;</div>
+<div>master-host='123.456.789.101'（マスターのIPアドレス）</div>
+<div>master-user='repli'（マスターに登録したレプリケーション用ユーザー名）</div>
+<div>master-password='password'（マスターに登録したレプリケーション用ユーザーのパスワード）</div>
+<div>master-port=3306</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>４．（マスター）レプリケーション情報の取得</div>
+<div>マスターで、以下の処理を行う。マスターのMySQLは停止中</div>
+<div>&nbsp;</div>
+<div>４-1．マスターのMySQLを起動</div>
+<div>停止中のMySQLを起動。</div>
+<div>&nbsp;</div>
+<div>４-2．データのフラッシュ</div>
+<div>mysql&gt; FLUSH TABLES WITH READ LOCK;</div>
+<div>&nbsp;</div>
+<div>４-2.マスターレプリケーション情報の取得</div>
+<div>mysql&gt; SHOW MASTER STATUS;</div>
+<div>File:&nbsp;&nbsp;&nbsp;&nbsp; mysql-bin.000004</div>
+<div>Position: 597</div>
+<div>&nbsp;</div>
+<div>５．（マスター）マスター上のデータをアーカイブ</div>
+<div>&nbsp;</div>
+<div>コマンドプロンプトでmysqldumpを実行</div>
+<div>&nbsp;</div>
+<div>C:\......&gt;mysqldump --host="localhost"</div>
+<div>&nbsp;&nbsp;&nbsp; --user="root" </div>
+<div>&nbsp;&nbsp;&nbsp; --password="????" </div>
+<div>&nbsp;&nbsp;&nbsp; --all-database --lock-all-tables </div>
+<div>&nbsp;&nbsp;&nbsp; &gt; dbdump.db</div>
+<div>&nbsp;</div>
+<div>アーカイブが完了したら、ロックを解除する。</div>
+<div>mysql&gt; UNLOCK TABLES;</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>６．（スレーブ）スレーブにマスターのデータをインポート</div>
+<div>&nbsp;</div>
+<div>６-1.スレーブサーバーのMySQLを起動</div>
+<div>--skip-slaveオプションを使用してレプリケーションをスキップし、スレーブを立ち上げる。</div>
+<div>（my.iniファイルにskip-slave-startオプションを設定済み）</div>
+<div>&nbsp;</div>
+<div>６-2.インポート</div>
+<div>mysqldumpで作成したマスターのダンプファイルをコマンドプロンプトでインポートする。</div>
+<div>&nbsp;</div>
+<div>C:\......&gt;mysql --user="root" --password="???" &lt; dbdump.db</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>７．（スレーブ）マスター情報登録</div>
+<div>&nbsp;</div>
+<div>mysql&gt; STOP SLAVE;</div>
+<div>&nbsp;</div>
+<div>mysql&gt; CHANGE MASTER TO</div>
+<div>&nbsp;&nbsp;&nbsp; MASTER_HOST = '123.456.789.101',　（マスターのIPアドレス）</div>
+<div>&nbsp;&nbsp;&nbsp; MASTER_PORT=3306,</div>
+<div>&nbsp;&nbsp;&nbsp; MASTER_USER = 'repli',　（マスターに登録したレプリケーション用ユーザー名）</div>
+<div>&nbsp;&nbsp;&nbsp; MASTER_PASSWORD = 
+'password'（マスターに登録したユーザrepliのパスワード）,</div>
+<div>&nbsp;&nbsp;&nbsp; MASTER_LOG_FILE = 'mysql-bin.000004',</div>
+<div>&nbsp;&nbsp;&nbsp; MASTER_LOG_POS = 107;</div>
+<div>&nbsp;</div>
+<div>ここで、下記のエラーが発生。</div>
+<div>ERROR 1201 (HY000): Could not initialize master info structures; more error 
+messages can be found in the MySQL error log</div>
+<div>&nbsp;</div>
+<div>８．（スレーブ）スレーブ起動</div>
+<div>&nbsp;</div>
+<div>mysql&gt; START SLAVE;</div>
+<div>&nbsp;</div>
+<div>7．がうまくいっていないので、ここでもERROR 1201 (HY000)がでて、スレーブは起動しません。</div>
+<div>&nbsp;</div>
+<div>９．（マスター）マスターの確認</div>
+<div>&nbsp;</div>
+<div>mysql&gt; show master status\G　　エラーなし　1行リターン</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; File: 
+mysql-bin.000004</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Position: 597</div>
+<div>&nbsp;&nbsp;&nbsp; Binlog_Do_DB: </div>
+<div>Binlog_Ignore_DB: </div>
+<div>&nbsp;</div>
+<div>10．（スレーブ）スレーブの確認</div>
+<div>&nbsp;</div>
+<div>スレーブの状態を確認したところ、下記のようになっていて、動いていないようです。</div>
+<div>&nbsp;</div>
+<div>mysql&gt; show slave status\G</div>
+<div>*************************** 1. row ***************************</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Slave_IO_State: </div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Master_Host: 123.456.789.101</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Master_User: repli</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Master_Port: 3306</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Connect_Retry: 60</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Master_Log_File: mysql-bin.000004</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Read_Master_Log_Pos: 
+107</div>
+<div>.......</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Slave_IO_Running: No</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Slave_SQL_Running: No</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Replicate_Do_DB: </div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Replicate_Ignore_DB: 
+</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Replicate_Do_Table: </div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Replicate_Ignore_Table: </div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Replicate_Wild_Do_Table: </div>
+<div>&nbsp; Replicate_Wild_Ignore_Table: </div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Last_Errno: 0</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Last_Error: </div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Skip_Counter: 0</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Exec_Master_Log_Pos: 
+107</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Relay_Log_Space: 0</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Until_Condition: None</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Until_Log_File: </div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Until_Log_Pos: 0</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Seconds_Behind_Master: 
+NULL</div>
+<div>Master_SSL_Verify_Server_Cert: No</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Last_IO_Errno: 0</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Last_IO_Error: </div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Last_SQL_Errno: 0</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Last_SQL_Error: </div>
+<div>&nbsp; Replicate_Ignore_Server_Ids: </div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Master_Server_Id: 0</div>
+<div>1 row in set (0.00 sec)</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>なお、CHANGE MASTER TOでのエラーメッセージにある”MySQL error 
+log”を見る方法も教えていただけましたら、幸いです。</div><font face="ＭＳ Ｐゴシック">大変長文となりましたが、ぜひ解決方法を教えてください。</font><br></div></div>
 
+</body></html>

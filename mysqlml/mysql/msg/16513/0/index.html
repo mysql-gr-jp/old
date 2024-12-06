@@ -1,22 +1,22 @@
-<div dir="auto">坂井です。<div dir="auto"><br></div><div dir="auto">　POLYGON 関数、そのように線の断片を与えると結合してくれるようなものではなく（そういう関数もほしいのですが＝LineMerge()みたいに＝まだ見あたらないですね）、</div><div dir="auto">閉じた LineString 、つまり、単なるポリゴンの縁取り部分の線を、中身の詰まったPOLYGON にしてくれるものだと思います。</div><div dir="auto"><br></div><div dir="auto">なので、</div><div dir="auto">　SELECT ST_AsText(</div><div dir="auto">    POLYGON(</div><div dir="auto">      ST_LineFromText(&#39;LINESTRING(1 1, 1 5, 5 5, 5 1, 1 1)&#39;),</div><div dir="auto">      ST_LineFromText(&#39;LINESTRING(2 2, 3 3, 3 2, 2 2)&#39;)</div><div dir="auto">    )</div><div dir="auto">  );</div><div dir="auto"><br></div><div dir="auto">のようにして使います。</div><div dir="auto">第2引数以下は、WKTのPOLYGONの書き方と同様、くり抜く部分かと思います。</div><div dir="auto"><br></div><div dir="auto">　＠変数が使えないのは、渡辺さんもかかれているとおり、何故ですかね。。使えても良さそうな場所でもあり、若干バグ報告な香りもしますが、他の皆さんからの情報も伺いたいところです。</div><div dir="auto"><br></div><div dir="auto"><br></div><div dir="auto"><br></div></div><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">2019年2月18日(月) 11:47 落合 司郎 &lt;<a href="mailto:s.ochiai@taiyokakuchi.co.jp">s.ochiai@taiyokakuchi.co.jp</a>&gt;:<br></div><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">お世話になります。<br>
+<html><head></head><body><div dir="auto">坂井です。<div dir="auto"><br></div><div dir="auto">　POLYGON 関数、そのように線の断片を与えると結合してくれるようなものではなく（そういう関数もほしいのですが＝LineMerge()みたいに＝まだ見あたらないですね）、</div><div dir="auto">閉じた LineString 、つまり、単なるポリゴンの縁取り部分の線を、中身の詰まったPOLYGON にしてくれるものだと思います。</div><div dir="auto"><br></div><div dir="auto">なので、</div><div dir="auto">　SELECT ST_AsText(</div><div dir="auto">    POLYGON(</div><div dir="auto">      ST_LineFromText('LINESTRING(1 1, 1 5, 5 5, 5 1, 1 1)'),</div><div dir="auto">      ST_LineFromText('LINESTRING(2 2, 3 3, 3 2, 2 2)')</div><div dir="auto">    )</div><div dir="auto">  );</div><div dir="auto"><br></div><div dir="auto">のようにして使います。</div><div dir="auto">第2引数以下は、WKTのPOLYGONの書き方と同様、くり抜く部分かと思います。</div><div dir="auto"><br></div><div dir="auto">　＠変数が使えないのは、渡辺さんもかかれているとおり、何故ですかね。。使えても良さそうな場所でもあり、若干バグ報告な香りもしますが、他の皆さんからの情報も伺いたいところです。</div><div dir="auto"><br></div><div dir="auto"><br></div><div dir="auto"><br></div></div><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">2019年2月18日(月) 11:47 落合 司郎 &lt;<a href="mailto:s.ochiai@taiyokakuchi.co.jp">s.ochiai@taiyokakuchi.co.jp</a>&gt;:<br></div><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">お世話になります。<br>
 <br>
 関数Polygon(ls1,ls2,...)を以下のように試してみましたが、以下のエラーが出てポリゴンを作れません。<br>
 MySQL ver5.7とver8.0の二つで試しましたが、結果は同じでした。<br>
-ちなみに、Polygon(ls1,ls2,...)の引数として渡したパラメータの型を確認しましたが、全て&#39;LINESTRING&#39;となっています。<br>
+ちなみに、Polygon(ls1,ls2,...)の引数として渡したパラメータの型を確認しましたが、全て'LINESTRING'となっています。<br>
 何がいけないのか、教えてください。<br>
 <br>
-Error Code: 1367. Illegal non geometric &#39;(@`ls1`)&#39; value found during <br>
+Error Code: 1367. Illegal non geometric '(@`ls1`)' value found during <br>
 parsing<br>
 <br>
 実行したスクリプト<br>
 SET<br>
-@ls1 = ST_LineFromText(&#39;linestring(4010 5009,4015 5005)&#39;),<br>
-@ls2 = ST_LineFromText(&#39;linestring(4015 5005,4018 5010)&#39;),<br>
-@ls3 = ST_LineFromText(&#39;linestring(4018 5010,4012 5010)&#39;),<br>
-@ls4 = ST_LineFromText(&#39;linestring(4012 5010,4018 5013)&#39;),<br>
-@ls5 = ST_LineFromText(&#39;linestring(4018 5013,3995 5013)&#39;),<br>
-@ls6 = ST_LineFromText(&#39;linestring(3995 5013,3995 5000)&#39;),<br>
-@ls7 = ST_LineFromText(&#39;linestring(3995 5000,4010 5009)&#39;);<br>
+@ls1 = ST_LineFromText('linestring(4010 5009,4015 5005)'),<br>
+@ls2 = ST_LineFromText('linestring(4015 5005,4018 5010)'),<br>
+@ls3 = ST_LineFromText('linestring(4018 5010,4012 5010)'),<br>
+@ls4 = ST_LineFromText('linestring(4012 5010,4018 5013)'),<br>
+@ls5 = ST_LineFromText('linestring(4018 5013,3995 5013)'),<br>
+@ls6 = ST_LineFromText('linestring(3995 5013,3995 5000)'),<br>
+@ls7 = ST_LineFromText('linestring(3995 5000,4010 5009)');<br>
 select <br>
 ST_GeometryType(@ls1),ST_GeometryType(@ls2),ST_GeometryType(@ls3),ST_GeometryType(@ls4),ST_GeometryType(@ls5),ST_GeometryType(@ls6),ST_GeometryType(@ls7);<br>
 select ST_AsText(@ls1);<br>
@@ -29,3 +29,4 @@ MySQL:Ver.5.7.18-log<br>
 Workbench:Ver.6.3.9<br>
 <br>
 </blockquote></div>
+</body></html>

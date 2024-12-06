@@ -1,11 +1,10 @@
-<html>
-<head>
+<html><head>
 <meta http-equiv="Content-Style-Type" context="text/css">
 <title>mysql:6722</title>
-<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="6721.html">[��]</a><a href="6723.html">[��]</a><a href="../list/6701-6800.html">[�ֹ�����]</a><a href="../thread/6701-6800.html">[����åɰ���]</a></p>
+<p class="button"><a href="6721.html">[前]</a><a href="6723.html">[次]</a><a href="../list/6701-6800.html">[番号順一覧]</a><a href="../thread/6701-6800.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:6722
 </p>
@@ -13,40 +12,39 @@ mysql:6722
 <p>
 From: (sumino) &lt;&lt;sumino@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 17 Dec 2002 18:32:57 +0900<br>
-Subject: [mysql 06722] ���ե� JIS ��ʸ������<br>
+Subject: [mysql 06722] シフト JIS の文字化け<br>
 
 </p>
 </div>
 <div class="body">
-<pre>
-Win2000��� Java + MySQL�Υ��ץꥱ��������������Ƥ���ΤǤ�����
-JDBC Type4 �ɥ饤�Ф���Ѥ���INSERT�����Ȥ���ʸ���������Ƥ��ޤ��ޤ���
-�����ˡ��¸�Τ����϶����Ƥ���������
+<pre>Win2000上で Java + MySQLのアプリケーションを作成しているのですが、
+JDBC Type4 ドライバを使用してINSERTしたときに文字化けしてしまいます。
+解決方法をご存知の方は教えてください。
 
-�������ע�����?��
-�������������ע���?????�פȤʤäƤ��ޤ��ޤ���
+「濱﨑」→「濱?」
+「ⅰⅱⅲⅳⅴ」→「?????」となってしまいます。
 
-���Ѥ���JDBC�ɥ饤��
+使用したJDBCドライバ
     gweMysqlJDBC_extra4
     gweMysqlJDBC_extra3    gwe.sql.gweMysqlDriver
     mysql-connector-java-2.0.14
     mysql-connector-java-3.0.2-beta    org.gjt.mm.mysql.Driver
 
-sun��JDBC Type1 �ɥ饤�� sun.jdbc.odbc.JdbcOdbcDriver ���ȡ����ޤ������ޤ���
-JDBC�ɥ饤�Ф���Ѥ����ˡ����ޥ�ɤ���ľ�����Ϥ�������ʸ���������뤳�Ȥ�
-����INSERT�Ǥ��ޤ���
-SELECT�Ϥ��ޤ������ޤ���
+sunのJDBC Type1 ドライバ sun.jdbc.odbc.JdbcOdbcDriver だと、うまくいきます。
+JDBCドライバを使用せずに、コマンドから直接入力した場合も文字化けすることな
+く、INSERTできます。
+SELECTはうまくいきます。
 
-��������ɽ�פ�ʸ���������ޤ��󡣡ʲ��˲��٤�����ˤʤä���\������ǤϤʤ�
-�Ȼפ��ޤ�����
+ただ、「表」は文字化けしません。（過去に何度も話題になった「\」問題ではない
+と思います。）
 
-���ѴĶ�
+使用環境
     windows 2000 pro sp3
     mysql 3.23.51-nt
-    ��������ۥ��Ȥǻ��Ѥ��Ƥ��ޤ���
+    ローカルホストで使用しています。
     j2sdk1.4.0_01
 
-�ʲ�����ץ륽����
+以下サンプルソース
     1 import java.sql.*;
     2
     3 public class JDBCBatch{
@@ -54,32 +52,32 @@ SELECT�Ϥ��ޤ������ޤ���
     5   Connection con = null;
     6   Statement stmt = null;
     7   String dburl =
-&quot;jdbc:mysql://localhost:3306/TestDB?useUnicode=true&amp;characterEncoding=SJIS&quot;;
+"jdbc:mysql://localhost:3306/TestDB?useUnicode=true&amp;characterEncoding=SJIS";
     8
     9   try {
-   10    // �ɥ饤�Х��饹�������
-   11 //   Class.forName(&quot;com.mysql.jdbc.Driver&quot;);
-   12 //   Class.forName(&quot;gwe.sql.gweMysqlDriver&quot;);
-   13    Class.forName(&quot;org.gjt.mm.mysql.Driver&quot;);
-   14 //   Class.forName(&quot;sun.jdbc.odbc.JdbcOdbcDriver&quot;);
+   10    // ドライバクラスをロード
+   11 //   Class.forName("com.mysql.jdbc.Driver");
+   12 //   Class.forName("gwe.sql.gweMysqlDriver");
+   13    Class.forName("org.gjt.mm.mysql.Driver");
+   14 //   Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
    15
-   16    // �ǡ����١�������³
-   17 //   con = DriverManager.getConnection(&quot;jdbc:odbc:TestDB&quot;, &quot;&quot;, &quot;&quot;);
-   18    con = DriverManager.getConnection(dburl,&quot;root&quot;,&quot;masterkey&quot;);
-   19    // ���ơ��ȥ��ȥ��֥������Ȥ�����
+   16    // データベースへ接続
+   17 //   con = DriverManager.getConnection("jdbc:odbc:TestDB", "", "");
+   18    con = DriverManager.getConnection(dburl,"root","masterkey");
+   19    // ステートメントオブジェクトを生成
    20    stmt = con.createStatement();
    21
-   22    /**������**/
-   23    stmt.addBatch(&quot;INSERT INTO Test (No,̾��) VALUES('00004','��������
-��')&quot;);
+   22    /**処理１**/
+   23    stmt.addBatch("INSERT INTO Test (No,名前) VALUES('00004','ⅰⅱⅲⅳ
+﨑')");
    24
-   25    // �Хå���¹Ԥ��ޤ�
+   25    // バッチを実行します
    26    stmt.executeBatch();
    27
    28   } catch (Exception e) {
    29    e.printStackTrace();
    30   } finally {
-   31    // �ǡ����١����ؤ���³�򥯥��������ޤ�
+   31    // データベースへの接続をクローズします
    32    try {
    33     if (stmt!=null) {
    34      stmt.close();
@@ -103,12 +101,12 @@ SELECT�Ϥ��ޤ������ޤ���
 
 </pre>
 </div>
-<p class="button"><a href="6721.html">[��]</a><a href="6723.html">[��]</a><a href="../list/6701-6800.html">[�ֹ�����]</a><a href="../thread/6701-6800.html">[����åɰ���]</a></p>
-<pre class="list">
-<span class="current">-&gt;&nbsp;<a href="6722.html">   6722 2002-12-17 18:32 [&lt;sumino@xxxxxxxxxx&gt; ] ���ե� JIS ��ʸ������                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6723.html">   6723 2002-12-17 22:56 ��[&quot;��&quot; &lt;sora_iro@xxxxx]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6724.html">   6724 2002-12-17 23:16 ��[&quot;TAKAHASHI, Tomohiro]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="6725.html">   6725 2002-12-18 11:21 ����[&lt;sumino@xxxxxxxxxx&gt; ]                                     </a></span>
+<p class="button"><a href="6721.html">[前]</a><a href="6723.html">[次]</a><a href="../list/6701-6800.html">[番号順一覧]</a><a href="../thread/6701-6800.html">[スレッド一覧]</a></p>
+<pre class="list"><span class="current">-&gt;&nbsp;<a href="6722.html">   6722 2002-12-17 18:32 [&lt;sumino@xxxxxxxxxx&gt; ] シフト JIS の文字化け                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6723.html">   6723 2002-12-17 22:56 ┣["城" &lt;sora_iro@xxxxx]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6724.html">   6724 2002-12-17 23:16 ┗["TAKAHASHI, Tomohiro]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="6725.html">   6725 2002-12-18 11:21 　┗[&lt;sumino@xxxxxxxxxx&gt; ]                                     </a></span>
 </pre>
-</body>
-</html>
+
+
+</body></html>

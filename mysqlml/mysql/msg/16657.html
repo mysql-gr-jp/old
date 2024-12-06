@@ -1,0 +1,205 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16657</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16656.html">[前]</a><a href="16658.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16657
+</p>
+<div class="header">
+<p>
+From: yoku0825 &lt;yoku0825 &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 23 Sep 2021 14:28:31 +0900<br>
+Subject: [mysql 16657] Re: [mysql 16656] frmとibdのみのデータからデータベースの復旧方法について<br>
+
+</p>
+</div>
+<div class="body">
+<pre>yoku0825といいます。
+
+
+<span class="quote1">&gt; ERROR 1808 (HY000): Schema mismatch (Table has ROW_TYPE_DYNAMIC row　\
+</span>
+<span class="quote1">&gt;  format, .ibd file has ROW_TYPE_COMPACT row format.)
+</span>
+
+.frmファイルではROW_FORMAT= DYNAMIC,
+.ibdファイルではROW_FORMAT=COMPACT が指定されていることに起因しています。
+
+<a href="https://dev.mysql.com/doc/refman/5.6/ja/innodb-row-format-dynamic.html">https://dev.mysql.com/doc/refman/5.6/ja/innodb-row-format-dynamic.html</a>
+
+MySQL 5.6とそれ以前では、CREATE TABLEにROW_FORMATを指定しなかった場合はCOMPACTで作成されました。
+(その時代に最初にテーブルが作られて、その後5.7へのバージョンアップをされたのではないかなと推測します。
+ バージョンアップの時のmysql_upgradeではこの値は変更されません)
+MySQL 5.7とそれ以降は、同じく指定しなかった場合はDYNAMICで作成されます。
+
+なので、
+
+<span class="quote1">&gt; 2020.12.12に作ったバックアップで復元させて、復元出来た事確認して、
+</span>
+
+の時点で(DISCARDの前に)
+
+ALTER TABLE .. ROW_FORMAT= COMPACT;
+
+をすべてのテーブルに打って回ってください。
+そのあとに、ALTER TABLE .. DISCARD TABLESPACE, ibdファイルコピー, ALTER TABLE ..
+IMPORT TABLESPACE でどうでしょうか？
+
+
+yoku0825,
+
+
+
+ちなみに、
+
+<span class="quote1">&gt; MySQL 5.6を別なマシンにセットして、試してみましたが、こちらでは、DISCARD TABLESPACの
+</span>
+
+もとのibdファイルが5.7のものであれば、そうなります。MySQLは後方互換性(5.6の.ibdファイルを5.7で開く)はありますが、
+前方互換性(5.7の.ibdファイルを5.6で開く)はサポートしていないからです！
+
+2021年9月23日(木) 10:44 岡善博 &lt;zenpaku@xxxxxxxxxx&gt;:
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 初めまして、昨夜「MySQL徹底入門」でこのMLを知って、登録させて頂いた
+</span>
+<span class="quote1">&gt; 北海道十勝に住む岡 善博と云う者です。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 自宅サーバでWordPressを立ち上げていて、不覚にもデータベースのバックアップ
+</span>
+<span class="quote1">&gt; 取らずにＯＳをFreeBSD 11.3Rp13から12.2Rp7に上げてしまいました。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 作っていたデータベース(zenpakudb)の*.frmと*.ibdが有る状態です。
+</span>
+<span class="quote1">&gt; これらからデータベースの復旧をしたいのです。
+</span>
+<span class="quote1">&gt; それらのファイルは、これです。
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql        65         4月 21  2017 db.opt
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      3033       4月 21  2017 wp_commentmeta.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql   9437184    9月 14 21:43 wp_commentmeta.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      6679     12月 12  2020 wp_comments.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql   9437184   9月 14 21:43 wp_comments.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      3197      4月 24  2017 wp_ktaisession.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql     98304    4月 24  2017 wp_ktaisession.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      8102      4月 21  2017 wp_links.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql    114688    4月 21  2017 wp_links.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      2854     4月 21  2020 wp_options.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql   9437184   9月 18 01:42 wp_options.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      3030      4月 21  2017 wp_postmeta.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql  14680064  9月 16 20:23 wp_postmeta.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      7211       4月 21  2017 wp_posts.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql  14680064  9月 16 20:23 wp_posts.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      1496      4月 21  2017 wp_term_relationships.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql    212992    9月 16 20:22 wp_term_relationships.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      2209     4月 21  2017 wp_term_taxonomy.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql    131072    9月 16 20:23 wp_term_taxonomy.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      3030     4月 21  2017 wp_termmeta.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql    131072    4月 21  2017 wp_termmeta.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      3592     4月 21  2017 wp_terms.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql    131072    8月 15 09:03 wp_terms.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      3031     4月 21  2017 wp_usermeta.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql    131072    9月 16 19:49 wp_usermeta.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      6962     4月 21  2017 wp_users.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql    147456   4月 21  2017 wp_users.ibd
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql      1144     4月 24  2017 wp_wpmm_subscribers.frm
+</span>
+<span class="quote1">&gt; -rw-rw----  1 mysql  mysql     98304   4月 24  2017 wp_wpmm_subscribers.ibd
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; Webを検索して、
+</span>
+<span class="quote1">&gt; <a href="https://4to.pics/article/post/122">https://4to.pics/article/post/122</a>
+</span>
+<span class="quote1">&gt; のページを見つけ、これだ～と思って、やってみました。
+</span>
+<span class="quote1">&gt; mysql57-server-5.7.35を入れて、ユーザを作り、データベースを作りました。
+</span>
+<span class="quote1">&gt; 2020.12.12に作ったバックアップで復元させて、復元出来た事確認して、
+</span>
+<span class="quote1">&gt; *.frm,*.ibdをコピーして、Webで見つけた手順を試みました。
+</span>
+<span class="quote1">&gt; そのままでは、mysqldが起動出来ないので、ib_logfile0,1を消して起動させました。
+</span>
+<span class="quote1">&gt; use zenpakudb;
+</span>
+<span class="quote1">&gt; show tables; でちゃんと表示され、show table status;では、NULLが表示されたので、
+</span>
+<span class="quote1">&gt; alter table wp_commentmeta DISCARD TABLESPACE;　などを実行し、成功。
+</span>
+<span class="quote1">&gt; alter table wp_commentmeta IMPORT TABLESPACE; 　を実行すると、
+</span>
+<span class="quote1">&gt; ERROR 1808 (HY000): Schema mismatch (Table has ROW_TYPE_DYNAMIC row　\
+</span>
+<span class="quote1">&gt;  format, .ibd file has ROW_TYPE_COMPACT row format.)
+</span>
+<span class="quote1">&gt; のエラーが出てしまいます。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; MySQL 5.6を別なマシンにセットして、試してみましたが、こちらでは、DISCARD TABLESPACの
+</span>
+<span class="quote1">&gt; 段階でもエラーが出てしまいます。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; ここで、力尽き、*.frmと*.ibdからでデータベース復旧にアドバイスを頂けたら嬉しいです。
+</span>
+<span class="quote1">&gt; *.frmと*.ibdからの復旧は、不可能と云うのであれば、2020.12.12でデータでWordPressの
+</span>
+<span class="quote1">&gt; 復旧させるのですが、半年以上の写真は、残っているので、何とかデータベースを復旧させたい
+</span>
+<span class="quote1">&gt; のです。宜しくお願いします。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+
+</pre>
+</div>
+<p class="button"><a href="16656.html">[前]</a><a href="16658.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="16656.html">@ 16656 2021-09-23 10:43 [岡善博 &lt;zenpaku@xxxx] frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span class="current">-&gt;&nbsp;<a href="16657.html">  16657 2021-09-23 14:28 ┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16656] frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16658.html">@ 16658 2021-09-23 18:21 　┗[岡善博 &lt;zenpaku@xxxx] Re: [mysql 16657] Re: [mysql 16656] frmとibdのみのデータからデータベースの復旧方法について</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16659.html">@ 16659 2021-09-23 21:11 　　┗[岡善博 &lt;zenpaku@xxxx]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16660.html">  16660 2021-09-23 21:34 　　　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16659] Re: [mysql 16657] Re: [mysql 16656] frmとibdのみのデータからデータベースの復旧方法について</a></span>
+</pre>
+
+
+</body></html>

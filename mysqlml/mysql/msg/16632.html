@@ -1,0 +1,142 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16632</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16631.html">[前]</a><a href="16633.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16632
+</p>
+<div class="header">
+<p>
+From: yoku0825 &lt;yoku0825 &lt;yoku0825@xxxxxxxxxx&gt;&gt;<br>
+Date: Thu, 28 Jan 2021 18:43:10 +0900<br>
+Subject: [mysql 16632] Re: [mysql 16631] 「Semi-sync master failed on net_flush() before waiting for slave reply」のメッセージについて<br>
+
+</p>
+</div>
+<div class="body">
+<pre>内村さん
+沼の中からコンニチハ、yoku0825です。
+
+おっしゃっているエラーはER_SEMISYNC_MASTER_FAILED_ON_NET_FLUSHという名前で定義されています（おっ、1万番台のエラーコードですね）
+
+$ grep "Semi-sync master failed on" include/mysqld_ername.h
+{ "ER_SEMISYNC_MASTER_FAILED_ON_NET_FLUSH", 11161, "Semi-sync master
+failed on net_flush() before waiting for slave reply.","HY000", "",
+2470 },
+
+タグジャンプして探してみると、↓のコードが引っ掛かりました。
+
+```
+  if (net_flush(net)) {
+    LogErr(ERROR_LEVEL, ER_SEMISYNC_MASTER_FAILED_ON_NET_FLUSH);
+    goto l_end;
+  }
+```
+
+- <a href="https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L1107-L1113">https://github.com/mysql/mysql-server/blob/mysql-8.0.19/plugin/semisync/semisync_master.cc#L1107-L1113</a>
+
+ここから先は長いので割愛しますが、net_flushが失敗するのは compress_packetに失敗した時かsend(2)に失敗した時です。
+
+net_flush -&gt; net_write_packet -&gt; compress_packet
+                              -&gt; net_write_raw_loop -&gt; vio_write -&gt;
+mysql_socket_send -&gt; send(2)
+
+というわけで、
+
+1. その時間にマシンのリソースはサチっていませんでしたか？
+  - NICのエラーカウンタとかも見ると良いかも知れません
+  - NICがサチるよりはCPUがサチる方がよく起こる気がします
+    - ストレージに引きずられてCPUが埋まってサチることもあるので俯瞰的に見るのが良いと思います
+
+2. --slave_compressed_protocol に心当たりはありますか？
+  - 8.0.4で直ったと言ってはいますが、別種のバグが埋まっているのかも知れません
+    - <a href="https://bugs.mysql.com/bug.php?id=86230">https://bugs.mysql.com/bug.php?id=86230</a>
+  - もし心当たりがあるようならON/OFFを切り替えてみてください
+
+あたりでどうでしょうか！
+
+
+yoku0825,
+
+2021年1月27日(水) 14:37 内村健司 &lt;uchimura.kenji@xxxxxxxxxx&gt;:
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; お世話になります。
+</span>
+<span class="quote1">&gt; インタービレッジ内村と申します。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 本番環境において、
+</span>
+<span class="quote1">&gt; 表題のメッセージが出力し、原因を解析する必要があるのですが、
+</span>
+<span class="quote1">&gt; グーグル先生に聞いても有益な回答が得られませんでした。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; ご存じの方がいらっしゃいましたら、助言頂けますと幸いです。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 表題のメッセージがマスター側のMySQLのエラーログに出力されました。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; ＜知りたいこと＞
+</span>
+<span class="quote1">&gt; ・どういったときに本メッセージが出力されるか。
+</span>
+<span class="quote1">&gt; ・原因は何か(原因追及の手がかりなども大歓迎です)
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 【環境】
+</span>
+<span class="quote1">&gt; ・OSはマスター/スレーブともにRHEL7.7。
+</span>
+<span class="quote1">&gt; ・マスター/スレーブともにMySQL8.0.19。
+</span>
+<span class="quote1">&gt; ・準同期設定済み
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 【参考】
+</span>
+<span class="quote1">&gt; <a href="https://bugs.mysql.com/bug.php?id=88578">https://bugs.mysql.com/bug.php?id=88578</a>
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; 以上、よろしくお願いいたします。
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt;
+</span>
+<span class="quote1">&gt; ∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+</span>
+<span class="quote1">&gt; 内村健司
+</span>
+<span class="quote1">&gt; インタービレッジ株式会社
+</span>
+<span class="quote1">&gt; <a href="http://www.intervillage.co.jp">http://www.intervillage.co.jp</a>
+</span>
+<span class="quote1">&gt; ∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞∞
+</span>
+
+</pre>
+</div>
+<p class="button"><a href="16631.html">[前]</a><a href="16633.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="16627.html">@ 16627 2021-01-25 17:31 [Yoshiaki Yamasaki &lt;y] [告知] 2/2(火) HeatWaveの検証報告セミナー</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16631.html">  16631 2021-01-27 14:37 ┗[内村健司 &lt;uchimura.k] 「Semi-sync master failed on net_flush() before waiting for slave reply」のメッセージについて</a></span>
+<span class="current">-&gt;&nbsp;<a href="16632.html">  16632 2021-01-28 18:43 　┗[yoku0825 &lt;yoku0825@x] Re: [mysql 16631] 「Semi-sync master failed on net_flush() before waiting for slave reply」のメッセージについて</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="16633.html">  16633 2021-01-28 21:15 　　┗[内村健司 &lt;uchimura.k] RE: [mysql 16632] Re: [mysql 16631] 「Semi-sync master failed on net_flush() before waiting for slave reply」のメッセージについて</a></span>
+</pre>
+
+
+</body></html>

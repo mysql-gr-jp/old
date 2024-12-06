@@ -1,0 +1,127 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16708</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16707.html">[前]</a><a href="16709.html">[次]</a><a href="../list/16701-16800.html">[番号順一覧]</a><a href="../thread/16701-16800.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16708
+</p>
+<div class="header">
+<p>
+From: Horimoto Yasuhiro &lt;Horimoto Yasuhiro &lt;horimoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Fri, 02 Dec 2022 14:19:03 +0900 (JST)<br>
+Subject: [mysql 16708] [ANN] Mroonga 12.10<br>
+
+</p>
+</div>
+<div class="body">
+<pre>こんにちは。Mroongaプロジェクトの堀本です。
+
+Mroonga 12.10をリリースしました！
+
+リリースアナウンス:
+   <a href="https://mroonga.org/ja/blog/2022/11/29/mroonga-12.10.html">https://mroonga.org/ja/blog/2022/11/29/mroonga-12.10.html</a>
+
+MroongaはMySQLで日本語全文検索を実現するストレージエンジンです。高速で
+あることや位置情報検索をサポートしていることなどが特徴です。詳細につい
+はドキュメントをご覧ください。
+
+  * Mroongaの特徴 ― Mroonga v12.10 documentation
+    <a href="https://mroonga.org/ja/docs/characteristic.html#what-is-mroonga">https://mroonga.org/ja/docs/characteristic.html#what-is-mroonga</a>
+
+変更点:
+   <a href="https://mroonga.org/ja/docs/news.html#release-12.10">https://mroonga.org/ja/docs/news.html#release-12.10</a>
+
+さて、今回の主な変更点は次のとおりです。
+
+### 改良
+
+* [CentOS], [AlmaLinux] MariaDB 10.3.37、10.4.27、10.5.18、10.6.11、10.7.7、10.8.6、10.9.4をサポートしました。
+
+* [CentOS], [AlmaLinux] Percona Server 8.0.30-22をサポートしました。
+
+* [CentOS] Percona Server 5.7.40-43をサポートしました。
+
+* [Windows] MariaDB 10.7、10.8、10.9をサポートしました。
+
+* [Windows] 32bitバージョンのサポートをやめました。
+
+  最近のMariaDBは32bitのWindowsでビルドできず、32bit向けの公式パッケージも存在しないためです。
+
+* [mroonga_highlight_html] 新しいパラメータ open_tag と close_tag を追加しました。
+
+  ハイライトに使うタグを open_tag と close_tag で指定できるようになりました。
+
+  今までは固定で &lt;span class=\"keyword\"&gt;...&lt;/span&gt; というタグを使用しており、 class の変更や、別のタグが指定できず不便でした。
+  今回からタグを指定できるようになったので、 &lt;mark&gt;...&lt;/mark&gt; などのハイライト用のタグも使えるようになって便利になりました。
+
+    SELECT mroonga_highlight_html('Mroonga is the Groonga based storage engine.', 'groonga',
+                                  '&lt;mark&gt;' AS open_tag, '&lt;/mark&gt;' AS close_tag) AS highlighted;   
+    -- +-----------------------------------------------------------+
+    -- | highlighted                                               |
+    -- +-----------------------------------------------------------+
+    -- | Mroonga is the &lt;mark&gt;Groonga&lt;/mark&gt; based storage engine. |
+    -- +-----------------------------------------------------------+
+
+  詳細は <a href="https://mroonga.org/ja/docs/reference/udf/mroonga_highlight_html.html">https://mroonga.org/ja/docs/reference/udf/mroonga_highlight_html.html</a> を参照してください。
+
+* 参照カウントモードをサポートしました。
+
+  この機能によりメモリー使用量を一定量に保つことができますが、パフォーマンスが悪化します。
+  そのため、メモリー不足の場合には、この機能を使用する前に、メモリーを増強することを検討してください。
+
+  参照カウントモードは MySQLの table_open_cache(<a href="https://dev.mysql.com/doc/refman/8.0/ja/server-system-variables.html#sysvar_table_open_cache">https://dev.mysql.com/doc/refman/8.0/ja/server-system-variables.html#sysvar_table_open_cache</a>) とともに使用します。
+
+  MySQLは table_open_cache で指定した個数のテーブルをキャッシュしておくことができます。
+  キャッシュされているテーブルはまだ使用中なので、Groongaのオブジェクトも解放されません。
+
+  table_open_cache で指定した個数よりも多いテーブルが開かれたとき、使用頻度が低いテーブルが閉じられます。
+  参照カウントモードが有効なとき、そのタイミングでGroongaのオブジェクトも閉じられます。
+
+  このようにして参照カウントモードではメモリー使用量を一定に保っています。
+
+  実際に使用する際には、ステータス変数の Open_tables(<a href="https://dev.mysql.com/doc/refman/8.0/ja/server-status-variables.html#statvar_Open_tables">https://dev.mysql.com/doc/refman/8.0/ja/server-status-variables.html#statvar_Open_tables</a>) の値とメモリー使用量を見ながら table_open_cache の値を調整することで、
+  メモリー使用量とパフォーマンスのバランスを調整する必要があります。
+  なぜなら、この機能はメモリー使用量を一定に保ちますが、その分パフォーマンスが悪化するためです。
+
+  Open_tables の確認方法は以下の通りです。
+
+    SHOW GLOBAL STATUS LIKE 'Open_tables';
+    -- +---------------+-------+
+    -- | Variable_name | Value |
+    -- +---------------+-------+
+    -- | Open_tables   | 643   |
+    -- +---------------+-------+
+
+  通常は Open_tables より table_open_cache を大きくして常に使っているすべてテーブルをキャッシュします。
+  しかし、メモリーに余裕がない環境では一部の使用頻度の低いテーブルをキャッシュから落として解放することでメモリー使用量を削減します。
+  使用頻度の低いテーブルをキャッシュから落とすには Open_tables より table_open_cache を小さくします。
+  table_open_cache を小さくすればするほど、より多くのテーブルがキャッシュから落ちます。
+  その分メモリー使用量は減りますが、テーブルの開き直しが必要になるためパフォーマンスは悪化します。
+  table_open_cache を小さくすればするほど、パフォーマンスが悪化するので、小さくするのはメモリー使用量が許容範囲内に収まる程度までにしておきます。
+
+  参照カウントモードを有効にするには、my.cnfに以下の値を設定します。
+
+    loose-mroonga-enable-reference-count = ON
+
+
+  注: MySQL起動後に変数で指定しても参照カウントモードは有効になりません。my.cnfで指定してください。
+
+    SET GLOBAL mroonga_enable_reference_count = ON
+
+### 修正
+
+* Windows版のMroongaに groonga-normalizer-mysql をバンドルしていなかった問題を修正しました。
+
+  Mroonga 12.09 にて groonga-normalizer-mysql をバンドルするよう修正したとアナウンスしましたが、修正されていませんでした。
+
+以上です！
+
+</pre>
+</div>
+<p class="button"><a href="16707.html">[前]</a><a href="16709.html">[次]</a><a href="../list/16701-16800.html">[番号順一覧]</a><a href="../thread/16701-16800.html">[スレッド一覧]</a></p>
+
+
+</body></html>

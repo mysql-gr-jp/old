@@ -1,89 +1,87 @@
-<html>
-<head>
+<html><head>
 <meta http-equiv="Content-Style-Type" context="text/css">
 <title>mysql:7609</title>
-<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="7608.html">[��]</a><a href="7610.html">[��]</a><a href="../list/7601-7700.html">[�ֹ�����]</a><a href="../thread/7601-7700.html">[����åɰ���]</a></p>
+<p class="button"><a href="7608.html">[前]</a><a href="7610.html">[次]</a><a href="../list/7601-7700.html">[番号順一覧]</a><a href="../thread/7601-7700.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:7609
 </p>
 <div class="header">
 <p>
-From: &quot;Takeda&quot; &lt;&quot;Takeda&quot; &lt;hide-yan@xxxxxxxxxx&gt;&gt;<br>
+From: "Takeda" &lt;"Takeda" &lt;hide-yan@xxxxxxxxxx&gt;&gt;<br>
 Date: Tue, 29 Apr 2003 21:58:04 +0900<br>
-Subject: [mysql 07609] Re: load ʸ�Ǥ� load  ������԰���<br>
+Subject: [mysql 07609] Re: load 文での load  件数の不一致<br>
 
 </p>
 </div>
 <div class="body">
-<pre>
-���ĤǤ���
-�Ȥߤ���
-��®���������꤬�Ȥ��������ޤ���
-���ɥХ���ĺ���ޤ����褦��CSV�ե�����ȥ����ɷ�̤���٤Ƥߤޤ�����
+<pre>武田です。
+とみた様
+早速ご回答ありがとうございます。
+アドバイス頂きましたようにCSVファイルとロード結果を比べてみました。
 
-<span class="quote2">&gt; &gt; ���礦��Ⱦʬ�ˤʤäƤ��ޤ������Ǥ�����������ʬ����ޤ���</span>
+<span class="quote2">&gt; &gt; ちょうど半分になってしまう状況ですが、原因が分かりません。</span>
 <span class="quote1">&gt;</span>
-<span class="quote1">&gt; MySQL �˥����ɤ��줿�쥳���ɤȡ������ɤ���ʤ��ä��쥳���ɤ˲����㤤��</span>
-<span class="quote1">&gt; �ʤ�����٤ƤߤƤϤɤ��Ǥ��礦����</span>
+<span class="quote1">&gt; MySQL にロードされたレコードと、ロードされなかったレコードに何か違いが</span>
+<span class="quote1">&gt; ないか比べてみてはどうでしょうか。</span>
 <span class="quote1">&gt;</span>
 
-��16630�쥳���ɤ�CSV�ե������load��¹Ԥ����ݤη��
+①16630レコードのCSVファイルのloadを実行した際の結果
 load data infile 'file.csv'
 into table table
 fields terminated by ','
-enclosed by '&quot;'
+enclosed by '"'
 ignore 1 lines;
 Query OK, 8315 rows affected (7.69 sec)
 Records: 8315  Deleted: 0  Skipped: 0  Warnings: 8315
 
-��select column_last from table where id='E001';���μ¹Է��
+②select column_last from table where id='E001';　の実行結果
 +---------------------------+
 <span class="quote1">| column_last                  |</span>
 +---------------------------+
-<span class="quote1">| ������&quot;</span>
-&quot;E001 |
+<span class="quote1">| あいう"</span>
+"E001 |
 +---------------------------+
 1 row in set (1.49 sec)
 
-��ãӣ֥ե������
-�����ܤΣ�����(id)��&quot;E001&quot;,����,�����ܤκǽ���(column_last)��&quot;������&quot;
-�����ܤ�1����(id)��&quot;E002&quot;,����
+＜ＣＳＶファイル＞
+１行目の１列目(id)＝"E001",～～,１行目の最終列(column_last)＝"あいう"
+２行目の1列目(id)＝"E002",～～
 
-����¬
-����CSV�ե�����κǽ��󤬼¤ϥ���ޤǶ��ڤ��Ƥ��ʤ�����ˣ����ܤ�
-�����ܤΥ���ޤޤǤ򣱹Ԥ�ǧ������load�����ãӣ֣��Ԥ򣱹ԤȤ��Ƽ�����Ǥ�
-�ޤ���
-��̤Ȥ���load��������礦��Ⱦʬ�ˤʤäƤ���褦�ʵ������Ƥ��ޤ���
+●推測
+このCSVファイルの最終列が実はカンマで区切られていないために２行目の
+１列目のカンマまでを１行と認識してloadし、ＣＳＶ２行を１行として取り込んでし
+まい、
+結果としてload件数がちょうど半分になっているような気がしています。
 
-����Warnings: 8315�ȤʤäƤ���Τϡ�CSV�����ܤΣ����ܰʹߤ��������������
-���ʤ���������쥳���ɤ�Warning��ȯ�������Ȥ������Ȥ����򤷤Ƥ褤�Ǥ��礦
-����
+①でWarnings: 8315となっているのは、CSV２行目の２列目以降が正しく取り込めて
+いないために全レコードにWarningが発生したということと理解してよいでしょう
+か。
 
-�����ޤǤϤʤ�Ȥʤ�����Ǥ��ޤ���������ɤɤ�����Ф�������ʬ����ޤ���
-lines terminated by �����ɲä���Ф褤�褦�ʵ��⤷�ޤ������Խ�üʸ����
-���ˤ���Τ�Ŭ���Ǥ��礦����
-������������̤˳�����ե�����ʤΤ����̤ʤ�ΤǤϤʤ��Ȼפä�
-���ޤ��������ե�����ˤ�äưۤʤ��ΤʤΤǤ��礦����
+ここまではなんとなく理解できましたが、結局どうすればいいかが分かりません。
+lines terminated by 　を追加すればよいような気もしますが、行終端文字は
+何にするのが適当でしょうか。
+エクセルで普通に開けるファイルなので特別なものではないと思って
+いましたが、ファイルによって異なるものなのでしょうか。
 
-�ʤ��ʤ��פ��褦�ˤ����ʤ���ΤǤ��͡�����
+なかなか思うようにいかないものですね。。。
 
-�ʾ塢�ɤ�������������ꤤ�פ��ޤ���
+以上、どうぞよろしくお願い致します。
 
 
 </pre>
 </div>
-<p class="button"><a href="7608.html">[��]</a><a href="7610.html">[��]</a><a href="../list/7601-7700.html">[�ֹ�����]</a><a href="../thread/7601-7700.html">[����åɰ���]</a></p>
-<pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="7607.html">   7607 2003-04-29 12:27 [&quot;Takeda&quot; &lt;hide-yan@x] load ʸ�Ǥ� load ������԰���           </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7608.html">   7608 2003-04-29 19:17 ��[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                       </a></span>
-<span class="current">-&gt;&nbsp;<a href="7609.html">   7609 2003-04-29 21:58 ����[&quot;Takeda&quot; &lt;hide-yan@x]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7610.html">   7610 2003-04-29 22:10 ������[&quot;Takeda&quot; &lt;hide-yan@x]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7615.html">   7615 2003-04-30 00:13 ������[�Ȥߤ��ޤ��Ҥ� &lt;tomm]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7617.html">   7617 2003-04-30 10:21 ��[&quot;MORII,Tadashige&quot; &lt;m]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="7626.html">   7626 2003-04-30 23:32 ����[&quot;Takeda&quot; &lt;hide-yan@x]                                     </a></span>
+<p class="button"><a href="7608.html">[前]</a><a href="7610.html">[次]</a><a href="../list/7601-7700.html">[番号順一覧]</a><a href="../thread/7601-7700.html">[スレッド一覧]</a></p>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="7607.html">   7607 2003-04-29 12:27 ["Takeda" &lt;hide-yan@x] load 文での load 件数の不一致           </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7608.html">   7608 2003-04-29 19:17 ┣[とみたまさひろ &lt;tomm]                                       </a></span>
+<span class="current">-&gt;&nbsp;<a href="7609.html">   7609 2003-04-29 21:58 ┃┗["Takeda" &lt;hide-yan@x]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7610.html">   7610 2003-04-29 22:10 ┃　┣["Takeda" &lt;hide-yan@x]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7615.html">   7615 2003-04-30 00:13 ┃　┗[とみたまさひろ &lt;tomm]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7617.html">   7617 2003-04-30 10:21 ┗["MORII,Tadashige" &lt;m]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="7626.html">   7626 2003-04-30 23:32 　┗["Takeda" &lt;hide-yan@x]                                     </a></span>
 </pre>
-</body>
-</html>
+
+
+</body></html>

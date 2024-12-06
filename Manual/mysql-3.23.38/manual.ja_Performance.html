@@ -1,48 +1,47 @@
-  <HTML>
-  <HEAD>
+<html><head>
   <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
      from manual.ja.texi on 20 July 2001 -->
 
-  <TITLE>MySQL Reference Manual for version 3.23.38. - 13  MySQL の最大性能をひきだすには</TITLE>
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
-  </HEAD>
-  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Fulltext_Search.html">previous</A>, <A HREF="manual.ja_MySQL_Benchmarks.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
-<P><HR><P>
+  <title>MySQL Reference Manual for version 3.23.38. - 13  MySQL の最大性能をひきだすには</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000" link="#101090" vlink="#7030B0">
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Fulltext_Search.html">previous</a>, <a href="manual.ja_MySQL_Benchmarks.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+<p></p><hr><p>
 
 
-<H1><A NAME="Performance" HREF="manual.ja_toc.html#Performance">13  MySQL の最大性能をひきだすには</A></H1>
+</p><h1><a name="Performance" href="manual.ja_toc.html#Performance">13  MySQL の最大性能をひきだすには</a></h1>
 
-<P>
+<p>
 Optimization is a complicated task because it ultimately requires
 understanding of the whole system. While it may be possible to do some
 local optimizations with small knowledge of your system/application, the
 more optimal you want your system to become the more you will have to
 know about it.
 
-</P>
-<P>
+</p>
+<p>
 So this chapter will try to explain and give some examples of different
-ways to optimize <STRONG>MySQL</STRONG>. But remember that there are always some
+ways to optimize <strong>MySQL</strong>. But remember that there are always some
 (increasingly harder) additional ways to make the system even faster.
 
-</P>
+</p>
 
 
 
-<H2><A NAME="Optimize_Basics" HREF="manual.ja_toc.html#Optimize_Basics">13.1  最適化 概要</A></H2>
+<h2><a name="Optimize_Basics" href="manual.ja_toc.html#Optimize_Basics">13.1  最適化 概要</a></h2>
 
-<P>
+<p>
 システムを速くするための最も重要な部分は、もちろん基礎的な設計です。
 You also need to know what kinds of things your system will be
 doing, and what your bottlenecks are.
 
-</P>
-<P>
+</p>
+<p>
 主なボトルネックは：
 
-<UL>
-<LI>Disk シーク ：
+</p><ul>
+<li>Disk シーク ：
 
 一片のデータを見つけるためには、ディスクに時間がかかります。
 1999年の最新型のディスクでは、このための平均時間は、10msよりも通常より小さいです。
@@ -50,43 +49,43 @@ doing, and what your bottlenecks are.
 この時間は、一つのテーブルであるならば、データの増加と共にディスクアクセスの時間が
 少しずつ増加することになり、とても最適化するのは難しくなっていきます。
 これを最適化する方法は、データを 1個以上のディスクに分散する事です。
-<LI>Disk reading/writing
+</li><li>Disk reading/writing
 
 When the disk is at the correct position we need to read the data. With
 modern disks in 1999, one disk delivers something like 10-20Mb/s. This
 is easier to optimize than seeks because you can read in parallel from
 multiple disks.
-<LI>CPU cycles ：
+</li><li>CPU cycles ：
 
 データをメイン・メモリーの中に入れた(または既にメモリに存在している)場合に、
 結果を得るためには、それを処理する必要があります。
 メモリー容量よりも小さなテーブルを持っている場合、これは、制限の要因となります。
 小さいテーブルでは、スピードは、通常問題にはなりません。
-<LI>Memory bandwidth ：
+</li><li>Memory bandwidth ：
 
 CPU がキャッシュに収まらないようなデータを要求した場合、メイン・メモリー
 のバンド幅はボトルネックになります。
 これはほとんどのシステムで分かりにくいボトルネックとなりますが、
 誰かはそれを知っているべきです。
-</UL>
+</li></ul>
 
-<P>
-<A NAME="IDX1157"></A>
-<A NAME="IDX1158"></A>
-<A NAME="IDX1159"></A>
+<p>
+<a name="IDX1157"></a>
+<a name="IDX1158"></a>
+<a name="IDX1159"></a>
 
 
-<H2><A NAME="System" HREF="manual.ja_toc.html#System">13.2  システム、コンパイル時、スタートパラメターのチューニング</A></H2>
+</p><h2><a name="System" href="manual.ja_toc.html#System">13.2  システム、コンパイル時、スタートパラメターのチューニング</a></h2>
 
-<P>
+<p>
 We start with the system level things since some of these decisions have
 to be made very early. In other cases a fast look at this part may
 suffice because it not that important for the big gains. However, it is always
 nice to have a feeling about how much one could gain by changing things
 at this level.
 
-</P>
-<P>
+</p>
+<p>
 使うべき OS はとても重要です！ 複数の CPU を持つマシンでは、
 Solaris (なぜなら、Solaris のスレッドはとても素晴らしく動作するから)、
 あるいは、Linux ( kernel 2.2 は良い SMP をサポートしているから) を
@@ -97,188 +96,188 @@ If you have a desperate need for files bigger
 than 2G on Linux-intel 32 bit, you should get the LFS patch for the ext2
 file system.
 
-</P>
-<P>
-Because we have not run <STRONG>MySQL</STRONG> in production on that many platforms, we
+</p>
+<p>
+Because we have not run <strong>MySQL</strong> in production on that many platforms, we
 advice you to test your intended platform before choosing it, if possible.
 
-</P>
-<P>
-<A NAME="IDX1160"></A>
+</p>
+<p>
+<a name="IDX1160"></a>
 Other tips:
 
-<UL>
-<LI>
+</p><ul>
+<li>
 
 充分 RAM があるならば、全ての swap を外してもよいでしょう。
 いくつかのシステムでは、たとえメモリーが空いていても、
 swap を使用する場合があります。
 
-<LI>
+</li><li>
 
-外部のロックを避けるため、<CODE>--skip-locking</CODE> <STRONG>MySQL</STRONG> オプション
+外部のロックを避けるため、<code>--skip-locking</code> <strong>MySQL</strong> オプション
 を使用します。 
-Note that this will not impact <STRONG>MySQL</STRONG>'s functionality as
+Note that this will not impact <strong>MySQL</strong>'s functionality as
 long as you only run one server.
-<CODE>myisamchk</CODE> を実行する前に、サーバーを止めることを忘れないでください。
+<code>myisamchk</code> を実行する前に、サーバーを止めることを忘れないでください。
 On some system
 this switch is mandatory because the external locking does not work in any
 case.
 
-MIT-pthread でコンパイルする時は <CODE>--skip-locking</CODE> がデフォルトです。
-これは全てのプラットフォームで MIT-pthread が <CODE>flock()</CODE> を完全にサポートし
+MIT-pthread でコンパイルする時は <code>--skip-locking</code> がデフォルトです。
+これは全てのプラットフォームで MIT-pthread が <code>flock()</code> を完全にサポートし
 ていないためです。
 It's also on default for Linux
 as Linux file locking are not yet safe.
 
-<CODE>--skip-locking</CODE> が使用できないただ一つの状態は、
-もしあなたが複数の <STRONG>MySQL</STRONG> <EM>サーバー</EM> (クライアントではない) を
+<code>--skip-locking</code> が使用できないただ一つの状態は、
+もしあなたが複数の <strong>MySQL</strong> <em>サーバー</em> (クライアントではない) を
 同じデータに対して走らせている場合です。
 Or run
-<CODE>myisamchk</CODE> on the table without first flushing and locking the
-<CODE>mysqld</CODE> server tables first.
+<code>myisamchk</code> on the table without first flushing and locking the
+<code>mysqld</code> server tables first.
 
-たとえ <CODE>--skip-locking</CODE> を使用していても、
-<CODE>LOCK TABLES</CODE>/<CODE>UNLOCK TABLES</CODE> の使用は可能です。
-</UL>
+たとえ <code>--skip-locking</code> を使用していても、
+<code>LOCK TABLES</code>/<code>UNLOCK TABLES</code> の使用は可能です。
+</li></ul>
 
 
 
-<H3><A NAME="Compile_and_link_options" HREF="manual.ja_toc.html#Compile_and_link_options">13.2.1  MySQL の速度に影響するコンパイルとリンク方法</A></H3>
+<h3><a name="Compile_and_link_options" href="manual.ja_toc.html#Compile_and_link_options">13.2.1  MySQL の速度に影響するコンパイルとリンク方法</a></h3>
 
-<P>
-次のテストの多くは Linux 上で <STRONG>MySQL</STRONG> ベンチマークで行われました。
+<p>
+次のテストの多くは Linux 上で <strong>MySQL</strong> ベンチマークで行われました。
 しかし、これらは他の OS についてもいくつかの指標を与えます。 
 
-</P>
-<P>
-<A NAME="IDX1161"></A>
-<A NAME="IDX1162"></A>
-<A NAME="IDX1163"></A>
-<A NAME="IDX1164"></A>
+</p>
+<p>
+<a name="IDX1161"></a>
+<a name="IDX1162"></a>
+<a name="IDX1163"></a>
+<a name="IDX1164"></a>
 
-</P>
-<P>
-<CODE>-static</CODE> でのリンク時に最速の実行形式を得ます。
+</p>
+<p>
+<code>-static</code> でのリンク時に最速の実行形式を得ます。
 
-</P>
-<P>
-Linux では、<CODE>pgcc</CODE> と <CODE>-O3</CODE> でコンパイルした時に最速のコードを得られます。
-このオプションで <TT>`sql_yacc.cc'</TT> をコンパイルすると、<CODE>gcc/pgcc</CODE> は
+</p>
+<p>
+Linux では、<code>pgcc</code> と <code>-O3</code> でコンパイルした時に最速のコードを得られます。
+このオプションで <tt>`sql_yacc.cc'</tt> をコンパイルすると、<code>gcc/pgcc</code> は
 全ての関数をインラインにするために多くのメモリを必要とするので、200M のメモリが必要です。
-<CODE>libstdc++</CODE> ライブラリの増加を避けるためには、
-<STRONG>MySQL</STRONG> の configure 時に <CODE>CXX=gcc</CODE> も設定すべきです。 
-Note that with some versions of <CODE>pgcc</CODE>,
+<code>libstdc++</code> ライブラリの増加を避けるためには、
+<strong>MySQL</strong> の configure 時に <code>CXX=gcc</code> も設定すべきです。 
+Note that with some versions of <code>pgcc</code>,
 the resulting code will only run on true Pentium processors, even if you
 use the compiler option that you want the resulting code to be working on
 all x586 type processors (like AMD).
 
-</P>
-<P>
+</p>
+<p>
 より良いコンパイラー、そしてコンパイラーのオプションは、10-30% の
 速度の向上をもたらします。 これはあなた自身が MySQL をコンパイルする
 時に重要なことです！
 
-</P>
-<P>
+</p>
+<p>
 我々は Cygnus CodeFusion と Fujitsu コンパイラーでもテストしましたが、
-<STRONG>MySQL</STRONG> を最適化オプションでコンパイルするには、
+<strong>MySQL</strong> を最適化オプションでコンパイルするには、
 どちらもまだ完全なバグ・フリーではありませんでした。
 
-</P>
-<P>
-When you compile <STRONG>MySQL</STRONG> you should only include support for the
-character sets that you are going to use. (Option <CODE>--with-charset=xxx</CODE>).
-The standard <STRONG>MySQL</STRONG> binary distributions are compiled with support
+</p>
+<p>
+When you compile <strong>MySQL</strong> you should only include support for the
+character sets that you are going to use. (Option <code>--with-charset=xxx</code>).
+The standard <strong>MySQL</strong> binary distributions are compiled with support
 for all character sets.
   
 Here is a list of some mesurements that we have done:
 
-<UL>
-<LI>
+</p><ul>
+<li>
 
-<CODE>pgcc</CODE> を使用して <CODE>-O6</CODE> で全てをコンパイルすると、
-<CODE>gcc</CODE> 2.95.2 では、
-<CODE>mysqld</CODE> サーバーは 1% 速くなります。 
+<code>pgcc</code> を使用して <code>-O6</code> で全てをコンパイルすると、
+<code>gcc</code> 2.95.2 では、
+<code>mysqld</code> サーバーは 1% 速くなります。 
 
-<LI>
+</li><li>
 
-動的リンク(<CODE>-static</CODE>) 無し)の場合、結果は 13% 遅くなります。
-Note that you still can use a dynamic linked <STRONG>MySQL</STRONG>
+動的リンク(<code>-static</code>) 無し)の場合、結果は 13% 遅くなります。
+Note that you still can use a dynamic linked <strong>MySQL</strong>
 library. It is only the server that is critical for performance.
 
-<LI>
+</li><li>
 
-If you strip your <CODE>mysqld</CODE> binary with <CODE>strip libexec/mysqld</CODE>,
+If you strip your <code>mysqld</code> binary with <code>strip libexec/mysqld</code>,
 the resulting binary can be up to 4 % faster.
 
-<LI>
+</li><li>
 
 (localhost への接続に) Unix ソケットの代わりに TCP/IP を使用すると、結果は 7.5% 遅くなります。 
-(<CODE>localhost</CODE> へ接続する場合、<STRONG>MySQL</STRONG> はデフォルトではソケット
+(<code>localhost</code> へ接続する場合、<strong>MySQL</strong> はデフォルトではソケット
 を使用します)。
 
-<LI>
+</li><li>
 
 If you connect using TCP/IP from another computer over a 100M Ethernet,
 things will be 8-11 % slower.
 
-<LI>
+</li><li>
 
-<CODE>--with-debug=full</CODE> でコンパイルすると、ほとんどのクエリで 20% 遅くな
-りますが、いくつかのクエリは実質的にはもっと長くなります(<STRONG>MySQL</STRONG> ベ
+<code>--with-debug=full</code> でコンパイルすると、ほとんどのクエリで 20% 遅くな
+りますが、いくつかのクエリは実質的にはもっと長くなります(<strong>MySQL</strong> ベ
 ンチマークでは 35% 遅くなりました)。
-<CODE>--with-debug</CODE> を使用すると、15% だけ遅くなります。
-By starting a <CODE>mysqld</CODE> version compiled with <CODE>--with-debug=full</CODE>
-with <CODE>--skip-safemalloc</CODE> the end result should be close to when
-configuring with <CODE>--with-debug</CODE>.
+<code>--with-debug</code> を使用すると、15% だけ遅くなります。
+By starting a <code>mysqld</code> version compiled with <code>--with-debug=full</code>
+with <code>--skip-safemalloc</code> the end result should be close to when
+configuring with <code>--with-debug</code>.
 
-<LI>
+</li><li>
 
-SPARCstation 20 では、<CODE>gcc</CODE> 2.95.2 は Sun Pro C++ 4.2 より 5% 速くなります。
+SPARCstation 20 では、<code>gcc</code> 2.95.2 は Sun Pro C++ 4.2 より 5% 速くなります。
 
-<LI>
+</li><li>
 
-UltraSPARC で <CODE>gcc</CODE> 2.95.2 でオプション <CODE>-mcpu=v8
--Wa,-xarch=v8plusa</CODE> をつけてコンパイルすると 4% 良い性能が得られます。
+UltraSPARC で <code>gcc</code> 2.95.2 でオプション <code>-mcpu=v8
+-Wa,-xarch=v8plusa</code> をつけてコンパイルすると 4% 良い性能が得られます。
 
-<LI>
+</li><li>
 
 シングルプロセッサの Solaris 2.5.1 では、MIT-pthreads は Solaris ネイティブスレッドより 8-12% 遅くなります。
 With more load/CPUs the difference should
 get bigger.
 
-<LI>
+</li><li>
 
-<CODE>--log-bin</CODE> での実行は <STRONG>MySQL</STRONG> を 1% 遅くします。
+<code>--log-bin</code> での実行は <strong>MySQL</strong> を 1% 遅くします。
 
-<LI>
+</li><li>
 
 Compiling on Linux-x86 using gcc without frame pointers
-<CODE>-fomit-frame-pointer</CODE> or <CODE>-fomit-frame-pointer -ffixed-ebp</CODE>
-<CODE>mysqld</CODE> 1-4% faster.
-</UL>
+<code>-fomit-frame-pointer</code> or <code>-fomit-frame-pointer -ffixed-ebp</code>
+<code>mysqld</code> 1-4% faster.
+</li></ul>
 
-<P>
-The <STRONG>MySQL</STRONG>-Linux distribution provided by <STRONG>MySQL AB</STRONG> used
-to be compiled with <CODE>pgcc</CODE>, but we had to go back to regular gcc
-because of a bug in <CODE>pgcc</CODE> that would generate the code that does
+<p>
+The <strong>MySQL</strong>-Linux distribution provided by <strong>MySQL AB</strong> used
+to be compiled with <code>pgcc</code>, but we had to go back to regular gcc
+because of a bug in <code>pgcc</code> that would generate the code that does
 not run on AMD. We will continue using gcc until that bug is resolved.
 In the meantime, if you have a non-AMD machine, you can get a faster
-binary by compiling with <CODE>pgcc</CODE>.  The standard <STRONG>MySQL</STRONG>
+binary by compiling with <code>pgcc</code>.  The standard <strong>MySQL</strong>
 Linux binary is linked statically to get it faster and more portable.
 
-</P>
-<P>
-<A NAME="IDX1165"></A>
-<A NAME="IDX1166"></A>
+</p>
+<p>
+<a name="IDX1165"></a>
+<a name="IDX1166"></a>
 
 
-<H3><A NAME="Disk_issues" HREF="manual.ja_toc.html#Disk_issues">13.2.2  Disk の問題</A></H3>
+</p><h3><a name="Disk_issues" href="manual.ja_toc.html#Disk_issues">13.2.2  Disk の問題</a></h3>
 
 
-<UL>
-<LI>
+<ul>
+<li>
 
 前に述べたディスクシークが大きなボトルネックです。 この問題は、データが効果的に
 キャッシングが不可能になるほど、大きくなり始めるときに、だんだん明白になってきます。
@@ -287,37 +286,37 @@ where you access data more or less randomly, you can count on that you
 will need at least one disk seek to read and a couple of disk seeks to
 write things. この問題を少なくするには、diskシーク時間の少ないディスクを
 使用します。
-<LI>
+</li><li>
 
 利用できるディスクスピンドルの数を増やします(それによってディスクシーク
 のオーバーヘッドは縮小します)。
 これは違うディスクにシンボリックリンクをはったり、ストライピングを行うことで
 可能です。
-<DL COMPACT>
+<dl compact="">
 
-<DT><STRONG>symbolic link の使用</STRONG>
-<DD>
+<dt><strong>symbolic link の使用</strong>
+</dt><dd>
 これは通常のデータディレクトリから、違うディスクへ、
 インデックスやデータファイルをシンボリック・リンクすることです。
 これは シーク と リード を速くします。 (もしそのディスクが
-他に使用されていなければ).  「<A HREF="manual.ja_Performance.html#Symbolic_links">13.2.2.1  データベースとテーブルにシンボリックリンクを使用する</A>」節参照.
-<A NAME="IDX1167"></A>
-<DT><STRONG>Striping</STRONG>
-<DD>
+他に使用されていなければ).  「<a href="manual.ja_Performance.html#Symbolic_links">13.2.2.1  データベースとテーブルにシンボリックリンクを使用する</a>」節参照.
+<a name="IDX1167"></a>
+</dd><dt><strong>Striping</strong>
+</dt><dd>
 ストライピングは、複数のディスクに対して、まずデータの最初のブロックを
 1番目の disk に書き、2番目のブロックを2つ目のdiskに書き、順次 N 番目
 (N は disk の数) まで順に書いていきます。 これは、もしデータがストライプの
 サイズよりも小さければ、よりよいパフォーマンスを得ることが出来ます。
 ストライピングは、OS や ストライプのサイズにとても依存していることに注意してください。
 そのため、あなたのアプリケーションのベンチマークがストライプサイズによって
-変わるでしょう。  「<A HREF="manual.ja_Performance.html#Benchmarks">13.7  Using Your Own Benchmarks</A>」節参照.
+変わるでしょう。  「<a href="manual.ja_Performance.html#Benchmarks">13.7  Using Your Own Benchmarks</a>」節参照.
 
-ストライピングのスピードの違いは、<STRONG>とても</STRONG> パラメターに依存しています。
+ストライピングのスピードの違いは、<strong>とても</strong> パラメターに依存しています。
 Depending on how you set the striping parameters and
 number of disks you may get a difference in orders of magnitude. Note that
 you have to choose to optimize for random or sequential access.
-</DL>
-<LI>
+</dd></dl>
+</li><li>
 
 信頼性のため、あなたは RAID 0+1 (striping + mirroring) を使用したいと
 思うかもしれません。 しかしこれは N 個のドライブのデータを収めるのに
@@ -325,143 +324,137 @@ you have to choose to optimize for random or sequential access.
 これはもし資金があるならば一番よい方法でしょう！ しかし、能率的にそれを
 取り扱うために、ボリューム・マネージメント・ソフトウェアに投資する必要が
 あってもよいです。
-<LI>
+</li><li>
 
 A good option is to have semi-important data (that can be regenerated)
 on RAID 0 disk while storing really important data (like host information
 and logs) on a RAID 0+1 or RAID N disk. RAID N can be a problem if you
 have many writes because of the time to update the parity bits.
-<LI>
+</li><li>
 
 データベースに使用しているファイルシステムの mount パラメターを変更しても
 良いでしょう。 一つの簡単な方法としては、noatime オプションでファイルシステムを
 マウントします。 これは inode にある最後にアクセスした時間の更新を
 スキップします。 これでいくらか ディスクシークを避けることができるでしょう。
-<LI>
+</li><li>
 
 On Linux, you can get much more performance (up to 100 % under load is
 not uncommon) by using hdpram to configure your disk's interface!  The
-following should be quite good hdparm options for <STRONG>MySQL</STRONG> (and
+following should be quite good hdparm options for <strong>MySQL</strong> (and
 probably many other applications):
 
-<PRE>
-hdparm -m 16 -d 1
+<pre>hdparm -m 16 -d 1
 
-</PRE>
+</pre>
 
 Note that the performance/reliability when using the above depends on
 your hardware, so we strongly suggest that you test your system
-thoroughly after using <CODE>hdparm</CODE>!  Please consult the <CODE>hdparm</CODE>
-man page for more information!  If <CODE>hdparm</CODE> is not used wisely,
+thoroughly after using <code>hdparm</code>!  Please consult the <code>hdparm</code>
+man page for more information!  If <code>hdparm</code> is not used wisely,
 filesystem corruption may result.  Backup everything before experimenting!
-<LI>
+</li><li>
 
 On many operating systems you can mount the disks with the 'async' flag to set the file
 system to be updated asynchronously.  If your computer is reasonable stable,
 this should give you more performance without sacrificing too much reliability.
 (This flag is on by default on Linux.)
-<LI>
+</li><li>
 
 If you don't need to know when a file was last accessed (which is not
 really useful on a database server), you can mount your file systems
 with the noatime flag.
-</UL>
+</li></ul>
 
-<P>
-<A NAME="IDX1168"></A>
-<A NAME="IDX1169"></A>
-<A NAME="IDX1170"></A>
-<A NAME="IDX1171"></A>
+<p>
+<a name="IDX1168"></a>
+<a name="IDX1169"></a>
+<a name="IDX1170"></a>
+<a name="IDX1171"></a>
 
 
-<H4><A NAME="Symbolic_links" HREF="manual.ja_toc.html#Symbolic_links">13.2.2.1  データベースとテーブルにシンボリックリンクを使用する</A></H4>
+</p><h4><a name="Symbolic_links" href="manual.ja_toc.html#Symbolic_links">13.2.2.1  データベースとテーブルにシンボリックリンクを使用する</a></h4>
 
-<P>
+<p>
 テーブルとデータベースのファイルを MySQL のデータベースディレクトリーから
 違う場所に移動し、 それに対してシンボリックリンクを張ることができます。
 これは例えばディスク容量が少なくなって、データベースを移動したい場合にそうしたくなるでしょう。 
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> が、テーブルがシンボリックリンクであることに気づいた場合、
+</p>
+<p>
+<strong>MySQL</strong> が、テーブルがシンボリックリンクであることに気づいた場合、
 symlink を解析し、代わりにその実体のテーブルを使用します。
-これは <CODE>realpath()</CODE> コールをサポートする全てのシステムで働きます（少
-なくとも Linux と Solaris は <CODE>realpath()</CODE> をサポートします！）。
-<CODE>realpath()</CODE> をサポー トしないシステム上では、symlink とテーブルを
+これは <code>realpath()</code> コールをサポートする全てのシステムで働きます（少
+なくとも Linux と Solaris は <code>realpath()</code> をサポートします！）。
+<code>realpath()</code> をサポー トしないシステム上では、symlink とテーブルを
 同時に使用すべきでありません！ テーブルはテーブルの更新後に矛盾する事になるでしょう。 
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> はデフォルトではデータベース同士のリンクをサポートしません。
+</p>
+<p>
+<strong>MySQL</strong> はデフォルトではデータベース同士のリンクをサポートしません。
 が、データベース間のシンボリックリンクを作成しない限り、これは正常に働くでしょう。
-<STRONG>MySQL</STRONG> データディレクトリに <CODE>db1</CODE> データベースがあるとして、
-仮に <CODE>db2</CODE> を <CODE>db1</CODE> のシンボリックリンクにしたとします: 
+<strong>MySQL</strong> データディレクトリに <code>db1</code> データベースがあるとして、
+仮に <code>db2</code> を <code>db1</code> のシンボリックリンクにしたとします: 
 
-</P>
+</p>
 
-<PRE>
-shell&#62; cd /path/to/datadir
-shell&#62; ln -s db1 db2
-</PRE>
+<pre>shell&gt; cd /path/to/datadir
+shell&gt; ln -s db1 db2
+</pre>
 
-<P>
-すると、<CODE>db1</CODE> 中の <CODE>tbl_a</CODE> テーブルは <CODE>db2</CODE> の  <CODE>tbl_a</CODE> テーブルとして見えます。
-もしあるスレッドが <CODE>db1.tbl_a</CODE> を更新し、他のスレッドが <CODE>db2.tbl_a</CODE> を
+<p>
+すると、<code>db1</code> 中の <code>tbl_a</code> テーブルは <code>db2</code> の  <code>tbl_a</code> テーブルとして見えます。
+もしあるスレッドが <code>db1.tbl_a</code> を更新し、他のスレッドが <code>db2.tbl_a</code> を
 更新した場合、 問題が発生します。 
 
-</P>
-<P>
-こういった使用をどうしてもしたい場合、<TT>`mysys/mf_format.c'</TT> を以下のように変更します: 
+</p>
+<p>
+こういった使用をどうしてもしたい場合、<tt>`mysys/mf_format.c'</tt> を以下のように変更します: 
 
-</P>
+</p>
 
-<PRE>
-if (flag &#38; 32 || (!lstat(to,&#38;stat_buff) &#38;& S_ISLNK(stat_buff.st_mode)))
-</PRE>
+<pre>if (flag &amp; 32 || (!lstat(to,&amp;stat_buff) &amp;&amp; S_ISLNK(stat_buff.st_mode)))
+</pre>
 
-<P>
+<p>
 to
 
-</P>
+</p>
 
-<PRE>
-if (1)
-</PRE>
+<pre>if (1)
+</pre>
 
-<P>
+<p>
 On Windows you can use internal symbolic links to directories by compiling
-<STRONG>MySQL</STRONG> with <CODE>-DUSE_SYMDIR</CODE>. This allows you to put different
-databases on different disks.  「<A HREF="manual.ja_Installing.html#Windows_symbolic_links">4.13.6  Windows において、異なるディスクをまたがるようにデータを分割する</A>」節参照.
+<strong>MySQL</strong> with <code>-DUSE_SYMDIR</code>. This allows you to put different
+databases on different disks.  「<a href="manual.ja_Installing.html#Windows_symbolic_links">4.13.6  Windows において、異なるディスクをまたがるようにデータを分割する</a>」節参照.
 
-</P>
-<P>
-<A NAME="IDX1172"></A>
-<A NAME="IDX1173"></A>
-<A NAME="IDX1174"></A>
-<A NAME="IDX1175"></A>
+</p>
+<p>
+<a name="IDX1172"></a>
+<a name="IDX1173"></a>
+<a name="IDX1174"></a>
+<a name="IDX1175"></a>
 
 
-<H3><A NAME="Server_parameters" HREF="manual.ja_toc.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</A></H3>
+</p><h3><a name="Server_parameters" href="manual.ja_toc.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</a></h3>
 
-<P>
-<CODE>mysqld</CODE> サーバーが使用している現在のバッファサイズを次で得ることができます:
+<p>
+<code>mysqld</code> サーバーが使用している現在のバッファサイズを次で得ることができます:
 
-</P>
+</p>
 
-<PRE>
-shell&#62; mysqld --help
-</PRE>
+<pre>shell&gt; mysqld --help
+</pre>
 
-<P>
-<A NAME="IDX1176"></A>
-<A NAME="IDX1177"></A>
-この結果、全ての <CODE>mysqld</CODE> オプションと次のようなコンフィグ可能変数のリスト
+<p>
+<a name="IDX1176"></a>
+<a name="IDX1177"></a>
+この結果、全ての <code>mysqld</code> オプションと次のようなコンフィグ可能変数のリスト
 を得られます。出力結果にはデフォルト値が含まれ、以下のように表示されます:
 
-</P>
+</p>
 
-<PRE>
-Possible variables for option --set-variable (-O) are:
+<pre>Possible variables for option --set-variable (-O) are:
 back_log              current value: 5
 bdb_cache_size        current value: 1048540
 binlog_cache_size     current_value: 32768
@@ -499,124 +492,118 @@ thread_concurrency    current value: 10
 tmp_table_size        current value: 1048576
 thread_stack          current value: 131072
 wait_timeout          current value: 28800
-</PRE>
+</pre>
 
-<P>
-もし <CODE>mysqld</CODE> サーバーを走らせているなら、以下のコマンドでも変数の値を見ることができます:
+<p>
+もし <code>mysqld</code> サーバーを走らせているなら、以下のコマンドでも変数の値を見ることができます:
 
-</P>
+</p>
 
-<PRE>
-shell&#62; mysqladmin variables
-</PRE>
+<pre>shell&gt; mysqladmin variables
+</pre>
 
-<P>
-<CODE>SHOW VARIABLES</CODE> のすべての変数の説明はこちら →  「<A HREF="manual.ja_Reference.html#SHOW_VARIABLES">7.28.4  <CODE>SHOW VARIABLES</CODE></A>」節参照.
+<p>
+<code>SHOW VARIABLES</code> のすべての変数の説明はこちら →  「<a href="manual.ja_Reference.html#SHOW_VARIABLES">7.28.4  <code>SHOW VARIABLES</code></a>」節参照.
 
-</P>
-<P>
-稼働中のサーバーの統計情報は <CODE>SHOW STATUS</CODE> で参照できます.  「<A HREF="manual.ja_Reference.html#SHOW_STATUS">7.28.3  <CODE>SHOW STATUS</CODE></A>」節参照.
+</p>
+<p>
+稼働中のサーバーの統計情報は <code>SHOW STATUS</code> で参照できます.  「<a href="manual.ja_Reference.html#SHOW_STATUS">7.28.3  <code>SHOW STATUS</code></a>」節参照.
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> はとてもスケーラブルなアルゴリズムを使用します。そのため
-通常はとても少ないメモリで動作します。しかし <STRONG>MySQL</STRONG> に多くのメモリを与えれば、
+</p>
+<p>
+<strong>MySQL</strong> はとてもスケーラブルなアルゴリズムを使用します。そのため
+通常はとても少ないメモリで動作します。しかし <strong>MySQL</strong> に多くのメモリを与えれば、
 より良い性能を得ることができます。
 
-</P>
-<P>
-When tuning a <STRONG>MySQL</STRONG> server, the two most important variables to use
-are <CODE>key_buffer_size</CODE> and <CODE>table_cache</CODE>.  You should first feel
+</p>
+<p>
+When tuning a <strong>MySQL</strong> server, the two most important variables to use
+are <code>key_buffer_size</code> and <code>table_cache</code>.  You should first feel
 confident that you have these right before trying to change any of the
 other variables.
 
-</P>
-<P>
-多くのメモリ(&#62;=256M)と多くのテーブルを持っていて、適度のクライアント数で最大性能を得た
+</p>
+<p>
+多くのメモリ(&gt;=256M)と多くのテーブルを持っていて、適度のクライアント数で最大性能を得た
 い場合、次のようなものを使用します:
 
-</P>
+</p>
 
-<PRE>
-shell&#62; safe_mysqld -O key_buffer=64M -O table_cache=256 \
-           -O sort_buffer=4M -O record_buffer=1M &#38;
-</PRE>
+<pre>shell&gt; safe_mysqld -O key_buffer=64M -O table_cache=256 \
+           -O sort_buffer=4M -O record_buffer=1M &amp;
+</pre>
 
-<P>
+<p>
 If you have only 128M and only a few tables, but you still do a lot of
 sorting, you can use something like:
 
-</P>
+</p>
 
-<PRE>
-shell&#62; safe_mysqld -O key_buffer=16M -O sort_buffer=1M
-</PRE>
+<pre>shell&gt; safe_mysqld -O key_buffer=16M -O sort_buffer=1M
+</pre>
 
-<P>
+<p>
 多くの接続で少ないメモリしかない場合、次のようなものを使用します:
 
-</P>
+</p>
 
-<PRE>
-shell&#62; safe_mysqld -O key_buffer=512k -O sort_buffer=100k \
-           -O record_buffer=100k &#38;
-</PRE>
+<pre>shell&gt; safe_mysqld -O key_buffer=512k -O sort_buffer=100k \
+           -O record_buffer=100k &amp;
+</pre>
 
-<P>
+<p>
 or even:
 
-</P>
+</p>
 
-<PRE>
-shell&#62; safe_mysqld -O key_buffer=512k -O sort_buffer=16k \
-           -O table_cache=32 -O record_buffer=8k -O net_buffer=1K &#38;
-</PRE>
+<pre>shell&gt; safe_mysqld -O key_buffer=512k -O sort_buffer=16k \
+           -O table_cache=32 -O record_buffer=8k -O net_buffer=1K &amp;
+</pre>
 
-<P>
-When you have installed <STRONG>MySQL</STRONG>, the <TT>`support-files'</TT> directory will
-contain some different <CODE>my.cnf</CODE> example files, <TT>`my-huge.cnf'</TT>,
-<TT>`my-large.cnf'</TT>, <TT>`my-medium.cnf'</TT>, and <TT>`my-small.cnf'</TT>, you can
+<p>
+When you have installed <strong>MySQL</strong>, the <tt>`support-files'</tt> directory will
+contain some different <code>my.cnf</code> example files, <tt>`my-huge.cnf'</tt>,
+<tt>`my-large.cnf'</tt>, <tt>`my-medium.cnf'</tt>, and <tt>`my-small.cnf'</tt>, you can
 use as a base to optimize your system.
 
-</P>
-<P>
-もしとても多くの接続があり、<CODE>mysqld</CODE> が各接続に対して少ないメモリーで
+</p>
+<p>
+もしとても多くの接続があり、<code>mysqld</code> が各接続に対して少ないメモリーで
 動作するように設定されていれば、スワップの読み書きによるパフォーマンスの低下がおきます。
-もちろん十分なメモリーがあれば、全ての接続にたいして <CODE>mysqld</CODE> のパフォーマンス良くなります。
+もちろん十分なメモリーがあれば、全ての接続にたいして <code>mysqld</code> のパフォーマンス良くなります。
 
-</P>
-<P>
-<CODE>mysqld</CODE> へのオプションを変更する場合、そのサーバのインスタンスにだけに
+</p>
+<p>
+<code>mysqld</code> へのオプションを変更する場合、そのサーバのインスタンスにだけに
 有効であることに注意して下さい。
 
-</P>
-<P>
+</p>
+<p>
 パラメータ変更の効果を見るには、このようにします:
 
-</P>
+</p>
 
-<PRE>
-shell&#62; mysqld -O key_buffer=32m --help
-</PRE>
+<pre>shell&gt; mysqld -O key_buffer=32m --help
+</pre>
 
-<P>
-<CODE>--help</CODE> オプションは最後につけてください。
+<p>
+<code>--help</code> オプションは最後につけてください。
 その他のオプションを --help の後につけると、そのオプションは反映されません。
 
-</P>
-<P>
-<A NAME="IDX1178"></A>
-<A NAME="IDX1179"></A>
-<A NAME="IDX1180"></A>
-<A NAME="IDX1181"></A>
-<A NAME="IDX1182"></A>
-<A NAME="IDX1183"></A>
+</p>
+<p>
+<a name="IDX1178"></a>
+<a name="IDX1179"></a>
+<a name="IDX1180"></a>
+<a name="IDX1181"></a>
+<a name="IDX1182"></a>
+<a name="IDX1183"></a>
 
 
-<H3><A NAME="Table_cache" HREF="manual.ja_toc.html#Table_cache">13.2.4  <STRONG>MySQL</STRONG> はどのようにテーブルのオープン &#38; クローズを行なうか？</A></H3>
+</p><h3><a name="Table_cache" href="manual.ja_toc.html#Table_cache">13.2.4  <strong>MySQL</strong> はどのようにテーブルのオープン &amp; クローズを行なうか？</a></h3>
 
-<P>
-<CODE>table_cache</CODE> , <CODE>max_connections</CODE> , <CODE>max_tmp_tables</CODE> は
+<p>
+<code>table_cache</code> , <code>max_connections</code> , <code>max_tmp_tables</code> は
 サーバーが開いた状態にしておく事が出来るファイルの最大数に影響します。
 もしこれらの変数のうちの一つ、あるいは複数を増加させるなら、
 あなたのオペレーティング・システムの、1 プロセスあたりに開かれる
@@ -625,563 +612,561 @@ shell&#62; mysqld -O key_buffer=32m --help
 これをどうやって行うかは、あなたの使用している OS のドキュメントを見てください。
 制限値の変更方法は、システムによってまちまちだからです。
 
-</P>
-<P>
-<CODE>table_cache</CODE> は <CODE>max_connections</CODE> に関連します。
-例えば 200 のコネクションを同時に開けるなら、少なくとも <CODE>200 * n</CODE> の
-テーブル・キャッシュが必要です。 ここで <CODE>n</CODE> は join におけるテーブルの
+</p>
+<p>
+<code>table_cache</code> は <code>max_connections</code> に関連します。
+例えば 200 のコネクションを同時に開けるなら、少なくとも <code>200 * n</code> の
+テーブル・キャッシュが必要です。 ここで <code>n</code> は join におけるテーブルの
 最大数です。
 
-</P>
-<P>
-オープンテーブルのキャッシュは最大で <CODE>table_cache</CODE> まで大きくなります(デ
-フォルトは 64, <CODE>mysqld</CODE> のオプション <CODE>-O table_cache=#</CODE> で変更可能)。
+</p>
+<p>
+オープンテーブルのキャッシュは最大で <code>table_cache</code> まで大きくなります(デ
+フォルトは 64, <code>mysqld</code> のオプション <code>-O table_cache=#</code> で変更可能)。
 キャッシュが一杯になって、他のスレッドがテーブルのオープンを試みた時、
-または <CODE>mysqladmin refresh</CODE> <CODE>mysqladmin flush-tables</CODE>
+または <code>mysqladmin refresh</code> <code>mysqladmin flush-tables</code>
 を使用した場合を除いて、テーブルはクローズされません。
 
-</P>
-<P>
+</p>
+<p>
 キャッシュがいっぱいになった場合、サーバーは以下の処置を取って
 キャッシュを使用できるように配置します：
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 現在使われていないテーブルが解放されます。もっとも使用されていないテーブルからから順に。
 
-<LI>
+</li><li>
 
 もしキャッシュが一杯でテーブルを解放することが出来ず、さらに新しいテーブルの
 オープン要求がある場合、キャッシュは一時的な拡張を必要とします。
 
-<LI>
+</li><li>
 
 もしそのキャッシュが一時拡張に配置されていて、かつ、テーブルが使用状態から
 未使用状態に移行した場合、そのテーブルは閉じられ、キャッシュから解放されます。
-</UL>
+</li></ul>
 
-<P>
+<p>
 テーブルは各同時アクセスに (再び) オープンされます。これは、同じテーブルで2つのスレッ
-ドが実行されている場合、または同じクエリで(<CODE>AS</CODE> で)テーブルを2回アクセス
+ドが実行されている場合、または同じクエリで(<code>AS</code> で)テーブルを2回アクセス
 する場合、テーブルは2回オープンする必要があることを意味します。最初のテーブルのオー
 プンは2つのファイル記述子を使用し、続くテーブルの各使用は1つだけのファイル記述
 子を使用します。
 
-</P>
+</p>
 
-<P>
+<p>
 You can check if your table cache is too small by checking the mysqld
-variable <CODE>opened_tables</CODE>.  If this is quite big, even if you
-haven't done a lot of <CODE>FLUSH TABLES</CODE>, you should increase your table
-cache.  「<A HREF="manual.ja_Reference.html#SHOW_STATUS">7.28.3  <CODE>SHOW STATUS</CODE></A>」節参照.
+variable <code>opened_tables</code>.  If this is quite big, even if you
+haven't done a lot of <code>FLUSH TABLES</code>, you should increase your table
+cache.  「<a href="manual.ja_Reference.html#SHOW_STATUS">7.28.3  <code>SHOW STATUS</code></a>」節参照.
 
-</P>
-<P>
-<A NAME="IDX1184"></A>
+</p>
+<p>
+<a name="IDX1184"></a>
 
 
-<H3><A NAME="Creating_many_tables" HREF="manual.ja_toc.html#Creating_many_tables">13.2.5  Drawbacks of creating large numbers of tables in the same database</A></H3>
+</p><h3><a name="Creating_many_tables" href="manual.ja_toc.html#Creating_many_tables">13.2.5  Drawbacks of creating large numbers of tables in the same database</a></h3>
 
-<P>
+<p>
 もしたくさんのファイルが一つのディレクトリにある場合、オープン、クローズ、
-create 操作は遅くなるでしょう。 もし <CODE>SELECT</CODE> 文を多くのテーブルに対し
+create 操作は遅くなるでしょう。 もし <code>SELECT</code> 文を多くのテーブルに対し
 実行した場合、テーブルキャッシュが一杯ならば、このオーバーヘッドは多くなるでしょう。
 なぜなら、それぞれのテーブルにつきオープンし、クローズしなくてはならないからです。
 このオーバーヘッドを緩和するには、テーブルキャッシュを大きくします。
 
-</P>
-<P>
-<A NAME="IDX1185"></A>
-<A NAME="IDX1186"></A>
+</p>
+<p>
+<a name="IDX1185"></a>
+<a name="IDX1186"></a>
 
 
-<H3><A NAME="Open_tables" HREF="manual.ja_toc.html#Open_tables">13.2.6  何故そんなに多くのテーブルをオープンするのか？</A></H3>
+</p><h3><a name="Open_tables" href="manual.ja_toc.html#Open_tables">13.2.6  何故そんなに多くのテーブルをオープンするのか？</a></h3>
 
-<P>
-<CODE>mysqladmin status</CODE> を実行すると、次のようなものが得られます:
+<p>
+<code>mysqladmin status</code> を実行すると、次のようなものが得られます:
 
-</P>
+</p>
 
-<PRE>
-Uptime: 426 Running threads: 1 Questions: 11082 Reloads: 1 Open tables: 12
-</PRE>
+<pre>Uptime: 426 Running threads: 1 Questions: 11082 Reloads: 1 Open tables: 12
+</pre>
 
-<P>
+<p>
 確かにたった6個しかテーブルがないのに、このような結果が出るので少々戸惑われるかもしれません。
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> はマルチスレッドなので、同じテーブルで一度に多くのクエリを持て
+</p>
+<p>
+<strong>MySQL</strong> はマルチスレッドなので、同じテーブルで一度に多くのクエリを持て
 ます。同じファイル上で異なる状態を持つ2つのスレッドで、問題を最小化する
 ため、同時に動作する各スレッドのためテーブルを再びオープンします。これはいくつ
 かのメモリとデータファイルについての一つの拡張ファイル記述子を使用します。
 インデックスファイル記述子は全てのスレッド間で共有されます。
 
-</P>
+</p>
 
-<P>
-<A NAME="IDX1187"></A>
+<p>
+<a name="IDX1187"></a>
 
 
-<H3><A NAME="Memory_use" HREF="manual.ja_toc.html#Memory_use">13.2.7  MySQL はどのようにメモリを使用するのか？</A></H3>
+</p><h3><a name="Memory_use" href="manual.ja_toc.html#Memory_use">13.2.7  MySQL はどのようにメモリを使用するのか？</a></h3>
 
-<P>
-以下に <CODE>mysqld</CODE> サーバーがどのようにメモリーを使用するか、いくつか示します。
+<p>
+以下に <code>mysqld</code> サーバーがどのようにメモリーを使用するか、いくつか示します。
 サーバーに与える変数名は、サーバーのメモリーの使用方に関連した名前となっています:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-キーバッファ (変数 <CODE>key_buffer</CODE>) は全てのスレッドで共有され、
+キーバッファ (変数 <code>key_buffer</code>) は全てのスレッドで共有され、
 残りは必要時に割り当てられます。
- 「<A HREF="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</A>」節参照.
+ 「<a href="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</a>」節参照.
 
-<LI>
+</li><li>
 
 各接続はいくつかのスレッド空間を使用します；
-スタック (64K, 変数 <CODE>thread_stack</CODE>), 接続バッファ(variable
-<CODE>net_buffer_length</CODE>), 結果バッファ(variable
-<CODE>net_buffer_length</CODE>)。接続バッファと結果バッファは必要となった時、
-動的に最大 <CODE>max_allowed_packet</CODE> まで増えます。
+スタック (64K, 変数 <code>thread_stack</code>), 接続バッファ(variable
+<code>net_buffer_length</code>), 結果バッファ(variable
+<code>net_buffer_length</code>)。接続バッファと結果バッファは必要となった時、
+動的に最大 <code>max_allowed_packet</code> まで増えます。
 クエリが走っている時、そのクエリの文字のコピーが割り当てられます。
 
-<LI>
+</li><li>
 
 全てのスレッドは同じベースメモリを共有します。
 
-<LI>
+</li><li>
 
 圧縮された ISAM / MyISAM だけが、memory mapped されます。
 これは 4GB の 32bit メモリ空間は多くの大きなテーブルを扱うには小さいためです。
 64bit アドレス空間を持つシステムがより普及すれば、我々は mmemory mapping を通常にサポートします。
 
-<LI>
+</li><li>
 
 テーブルを越えて順次スキャンを行なう各要求は、読み込みバッファを割り当てます
 (変数 record_buffer)
 
-<LI>
+</li><li>
 
 全ての結合は1パスで行なわれ、多くの結合は一時テーブルを使用せずに行なわ
 れます。多くの一時テーブルはメモリベース(HEAP)のテーブルです。大きなレコー
-ドサイズ (= 全フィールド長の合計) を持つ一時テーブルまたは、<CODE>BLOB</CODE> を含む
+ドサイズ (= 全フィールド長の合計) を持つ一時テーブルまたは、<code>BLOB</code> を含む
 テーブルはディスク上に置かれます。
 
-<STRONG>MySQL</STRONG> バージョン 3.23.2 以前での問題は、HEAP テーブルが 
-<CODE>tmp_table_size</CODE> のサイズを越えると、エラー <CODE>The table tbl_name is full</CODE>
+<strong>MySQL</strong> バージョン 3.23.2 以前での問題は、HEAP テーブルが 
+<code>tmp_table_size</code> のサイズを越えると、エラー <code>The table tbl_name is full</code>
 が出ることです。将来我々は、必要時にメモリ (HEAP) テーブルをディスクベー
 ス (NISAM) テーブルに自動的に変更することにより、これを修正します。この
-問題を回避するため、<CODE>mysqld</CODE> への <CODE>tmp_table_size</CODE> オプションま
-たはクライアント側で SQL オプション <CODE>SQL_BIG_TABLES</CODE> で増加できます。
- 「<A HREF="manual.ja_Reference.html#SET_OPTION">7.33  <CODE>SET</CODE> 構文</A>」節参照.
-<STRONG>MySQL</STRONG> バージョン 3.20 では、一時テーブルの最大サイズは 
-<CODE>recordbuffer*16</CODE> でした。そのため、このバージョンを使用していると、
-<CODE>recordbuffer</CODE> を追加する必要があります。 <CODE>mysqld</CODE> を <CODE>--big-tables</CODE> で
+問題を回避するため、<code>mysqld</code> への <code>tmp_table_size</code> オプションま
+たはクライアント側で SQL オプション <code>SQL_BIG_TABLES</code> で増加できます。
+ 「<a href="manual.ja_Reference.html#SET_OPTION">7.33  <code>SET</code> 構文</a>」節参照.
+<strong>MySQL</strong> バージョン 3.20 では、一時テーブルの最大サイズは 
+<code>recordbuffer*16</code> でした。そのため、このバージョンを使用していると、
+<code>recordbuffer</code> を追加する必要があります。 <code>mysqld</code> を <code>--big-tables</code> で
 開始することで、常に一時テーブルをディスク上に格納できます。しかしこれは
 多くの複雑なクエリの速度に影響します。
 
-<LI>
+</li><li>
 
 ほとんどのリクエストは、0-2個の一時ファイルとわずかなソートバッファへの割り当てを行います。
- 「<A HREF="manual.ja_Problems.html#Temporary_files">21.6  <STRONG>MySQL</STRONG> が一時ファイルを格納する場所</A>」節参照.
+ 「<a href="manual.ja_Problems.html#Temporary_files">21.6  <strong>MySQL</strong> が一時ファイルを格納する場所</a>」節参照.
 
-<LI>
+</li><li>
 
 変形と演算時に使用されるほとんど全てのメモリはローカルメモリストア内で行
 なわれます。小さな項目に必要とされるメモリオーバーヘッドはなく、通常の遅
 いメモリ割り当て/解放が回避されます。メモリは予期しない大きな文字列にだ
-け割り当てられます(これは <CODE>malloc()</CODE> と <CODE>free()</CODE> で行なわれます)。
+け割り当てられます(これは <code>malloc()</code> と <code>free()</code> で行なわれます)。
 
-<LI>
+</li><li>
 
 各インデックスファイルは一度オープンされ、データファイルは各同時実行スレッ
 ド毎に一度オープンされます。各同時スレッドには、テーブル構造、各フィールドの構造そし
-て <CODE>3 * n</CODE> のサイズのバッファが割り当てられます。
-( <CODE>n</CODE> は <CODE>BLOB</CODE> 型のフィールドの長さを含めない、一レコードの最大長です )
-<CODE>BLOB</CODE> は 5 から 8 バイト + <CODE>BLOB</CODE> データの長さを使用します。
-The <CODE>ISAM</CODE>/<CODE>MyISAM</CODE> table handlers will use one extra row
+て <code>3 * n</code> のサイズのバッファが割り当てられます。
+( <code>n</code> は <code>BLOB</code> 型のフィールドの長さを含めない、一レコードの最大長です )
+<code>BLOB</code> は 5 から 8 バイト + <code>BLOB</code> データの長さを使用します。
+The <code>ISAM</code>/<code>MyISAM</code> table handlers will use one extra row
 buffer for internal usage.
 
-<LI>
+</li><li>
 
-<CODE>BLOB</CODE> を持つ各テーブルでは、より大きな <CODE>BLOB</CODE> の読み込みでバッファ
+<code>BLOB</code> を持つ各テーブルでは、より大きな <code>BLOB</code> の読み込みでバッファ
 は動的に拡大されます。テーブルのスキャンをする場合、割り当てられたバッファは最
-も大きい <CODE>BLOB</CODE> と同じ大きさになります。
+も大きい <code>BLOB</code> と同じ大きさになります。
 
-<LI>
+</li><li>
 
 全ての使用されているテーブルのテーブルハンドラーはキャッシュ内に保存され、
 FIFO として管理されます。
 通常、キャッシュは 64 個のテーブルです。テーブルが 2 つの実行しているス
 レッドで同時に使用される場合、キャッシュ内にテーブルの 2 つのエントリが
 あります。
- 「<A HREF="manual.ja_Performance.html#Table_cache">13.2.4  <STRONG>MySQL</STRONG> はどのようにテーブルのオープン &#38; クローズを行なうか？</A>」節参照.
+ 「<a href="manual.ja_Performance.html#Table_cache">13.2.4  <strong>MySQL</strong> はどのようにテーブルのオープン &amp; クローズを行なうか？</a>」節参照.
 
-<LI>
+</li><li>
 
-<CODE>mysqladmin flush-tables</CODE> は使用されていない全てのテーブルをクローズし、
+<code>mysqladmin flush-tables</code> は使用されていない全てのテーブルをクローズし、
 使用されている全てのテーブルを、実行中スレッドが終った時にクローズするよ
 うにマークします。これは多くの使用メモリを解放するのに有効です。全てのロ
 グファイルもクローズと再オープンされます。
-</UL>
+</li></ul>
 
-<P>
-<STRONG>mysqld</STRONG> 実行時、<CODE>ps</CODE> や他のプログラムは、それが多くのメモリ
+<p>
+<strong>mysqld</strong> 実行時、<code>ps</code> や他のプログラムは、それが多くのメモリ
 を使用していると報告するでしょう。これは異なったメモリアドレス上のスレッ
 ドスタックによって発生します。例えば、Solaris ps はスタック間の未使用メ
 モリを使用メモリとして計算します。'swap -s' で有効なスワップをチェックす
 ることでこれを確かめられます。我々は市販のメモリリーク検出プログラムで 
-<CODE>mysqld</CODE> をテストしました。そのため、メモリリークは全くありません。
+<code>mysqld</code> をテストしました。そのため、メモリリークは全くありません。
 
-</P>
-<P>
-<A NAME="IDX1188"></A>
-<A NAME="IDX1189"></A>
-<A NAME="IDX1190"></A>
+</p>
+<p>
+<a name="IDX1188"></a>
+<a name="IDX1189"></a>
+<a name="IDX1190"></a>
 
 
-<H3><A NAME="Internal_locking" HREF="manual.ja_toc.html#Internal_locking">13.2.8  <STRONG>MySQL</STRONG> はどのようにテーブルをロックするか</A></H3>
+</p><h3><a name="Internal_locking" href="manual.ja_toc.html#Internal_locking">13.2.8  <strong>MySQL</strong> はどのようにテーブルをロックするか</a></h3>
 
-<P>
+<p>
 You can find a discussion about different locking methods in the appendix.
- 「<A HREF="manual.ja_Porting.html#Locking_methods">I.4  Locking methods</A>」節参照.
+ 「<a href="manual.ja_Porting.html#Locking_methods">I.4  Locking methods</a>」節参照.
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> の全てのロックはデッドロックフリーです。これは、常にクエ
+</p>
+<p>
+<strong>MySQL</strong> の全てのロックはデッドロックフリーです。これは、常にクエ
 リ開始時に一度ロックを必要とする全てを要求し、常に同じ順でテーブルをロッ
 クすることで管理されます。
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> が使用する <CODE>WRITE</CODE> ロックは次のように働きます:
+</p>
+<p>
+<strong>MySQL</strong> が使用する <code>WRITE</code> ロックは次のように働きます:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 テーブル上にロックがない場合 write ロックを置きます。
-<LI>
+</li><li>
 
 そうでなければ write ロックキューにロックを置きます。
-</UL>
+</li></ul>
 
-<P>
-<STRONG>MySQL</STRONG> の <CODE>READ</CODE> ロックは次のように動きます:
+<p>
+<strong>MySQL</strong> の <code>READ</code> ロックは次のように動きます:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 テーブル上に write ロックがない場合 read ロックを置きます。
-<LI>
+</li><li>
 
 そうでなければ read ロックキューにロックを置きます。
-</UL>
+</li></ul>
 
-<P>
+<p>
 ロックが解放されたとき、最初に write ロックキュー内のスレッドに、その後 
 read ロックキュー内のスレッドにロックを与えます。
 
-</P>
-<P>
-これは、同じテーブルで多くの更新をする場合、<CODE>SELECT</CODE> 構文は 
+</p>
+<p>
+これは、同じテーブルで多くの更新をする場合、<code>SELECT</code> 構文は 
 update がなくなるまで待たされることを意味します。
 
-</P>
-<P>
-同じテーブルで多くの <CODE>INSERT</CODE> と多くの <CODE>SELECT</CODE> を行う場合、これを解決するに
+</p>
+<p>
+同じテーブルで多くの <code>INSERT</code> と多くの <code>SELECT</code> を行う場合、これを解決するに
 は、他のテーブルに行を挿入して、たまに、その一時テーブルから全てのレコー
 ドをもう一方のテーブルに update します。
 
-</P>
-<P>
+</p>
+<p>
 これは次のコードで行えます:
 
-<PRE>
-mysql&#62; LOCK TABLES real_table WRITE, insert_table WRITE;
-mysql&#62; insert into real_table select * from insert_table;
-mysql&#62; TRUNCATE TABLE insert_table;
-mysql&#62; UNLOCK TABLES;
-</PRE>
+</p><pre>mysql&gt; LOCK TABLES real_table WRITE, insert_table WRITE;
+mysql&gt; insert into real_table select * from insert_table;
+mysql&gt; TRUNCATE TABLE insert_table;
+mysql&gt; UNLOCK TABLES;
+</pre>
 
-<P>
-You can use the <CODE>LOW_PRIORITY</CODE> options with <CODE>INSERT</CODE>,
-<CODE>UPDATE</CODE> or <CODE>DELETE</CODE> or <CODE>HIGH_PRIORITY</CODE> with
-<CODE>SELECT</CODE> if you want to prioritize retrieval in some specific
-cases.  You can also start <CODE>mysqld</CODE> with <CODE>--low-priority-updates</CODE>
+<p>
+You can use the <code>LOW_PRIORITY</code> options with <code>INSERT</code>,
+<code>UPDATE</code> or <code>DELETE</code> or <code>HIGH_PRIORITY</code> with
+<code>SELECT</code> if you want to prioritize retrieval in some specific
+cases.  You can also start <code>mysqld</code> with <code>--low-priority-updates</code>
 to get the same behaveour.
 
-</P>
-<P>
-Using <CODE>SQL_BUFFER_RESULT</CODE> can also help making table locks shorter.
- 「<A HREF="manual.ja_Reference.html#SELECT">7.19  <CODE>SELECT</CODE>構文</A>」節参照.
+</p>
+<p>
+Using <code>SQL_BUFFER_RESULT</code> can also help making table locks shorter.
+ 「<a href="manual.ja_Reference.html#SELECT">7.19  <code>SELECT</code>構文</a>」節参照.
 
-</P>
-<P>
-一つのキューだけを使用するように <TT>`mysys/thr_lock.c'</TT> 内のロックコードを変更
+</p>
+<p>
+一つのキューだけを使用するように <tt>`mysys/thr_lock.c'</tt> 内のロックコードを変更
 することもできます。この場合、いくつかのアプリケーションのために、
 write ロックは read ロックと同じ優先順位にします。
 
-</P>
-<P>
-<A NAME="IDX1191"></A>
+</p>
+<p>
+<a name="IDX1191"></a>
 
 
-<H3><A NAME="Table_locking" HREF="manual.ja_toc.html#Table_locking">13.2.9  テーブル・ロッキングの問題</A></H3>
+</p><h3><a name="Table_locking" href="manual.ja_toc.html#Table_locking">13.2.9  テーブル・ロッキングの問題</a></h3>
 
-<P>
-<STRONG>MySQL</STRONG> のテーブル・ロッキングのコードはデッドロック・フリーです。
+<p>
+<strong>MySQL</strong> のテーブル・ロッキングのコードはデッドロック・フリーです。
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> はとても速いロックスピードを得るために、
+</p>
+<p>
+<strong>MySQL</strong> はとても速いロックスピードを得るために、
 (レコードのロックやフィールドのロックの代わりに) テーブルのロックを使用します。
 大きなテーブルには、 テーブルのロックはレコードのロックよりはるかに良いですが、
 いくつかの落とし穴があります。
 
-</P>
-<P>
-For <CODE>BDB</CODE> and <CODE>InnoDB</CODE> tables, <STRONG>MySQL</STRONG> only uses table
-locking if you explicitely lock the table with <CODE>LOCK TABLES</CODE> or
+</p>
+<p>
+For <code>BDB</code> and <code>InnoDB</code> tables, <strong>MySQL</strong> only uses table
+locking if you explicitely lock the table with <code>LOCK TABLES</code> or
 execute a command that will modify every row in the table, like
-<CODE>ALTER TABLE</CODE>.  For these table types we recommend you to not use
-<CODE>LOCK TABLES</CODE> at all.
+<code>ALTER TABLE</code>.  For these table types we recommend you to not use
+<code>LOCK TABLES</code> at all.
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> バージョン 3.23.7 以上では、
-あるスレッドが <CODE>MyISAM</CODE> テーブルを読んでいる最中に、
+</p>
+<p>
+<strong>MySQL</strong> バージョン 3.23.7 以上では、
+あるスレッドが <code>MyISAM</code> テーブルを読んでいる最中に、
 同じテーブルにレコードを挿入する事ができます。
 Note that currently this only works if there are no holes after
 deleted rows in the table at the time the insert is made. When all holes
 has been filled with new data, concurrent inserts will automaticly be
 enabled again.
 
-</P>
-<P>
+</p>
+<p>
 テーブルのロックはたくさんのスレッドが同時にあるテーブルから読み出すのを可能にしますが、
 もしあるスレッドがあるテーブルに対し書込み要求を出す場合、
 それはまず最初に排他的なアクセスを得なければなりません.
 その更新の間、更新が完了するまで、この特定のテーブルにアクセスしようとする
 他の全てのスレッドが待たされることになります。
 
-</P>
-<P>
-通常データベースの更新は <CODE>SELECT</CODE> よりも重要とされるため、
+</p>
+<p>
+通常データベースの更新は <code>SELECT</code> よりも重要とされるため、
 テーブルを更新する全てのスレッドが、テーブルから情報を検索するスレッドよりも
 高い優先順位を持ちます。 これは ある特定のテーブルに対して、多くの重いクエリが発行され
 た場合に、 更新が不完全に終わらないことを確実にするためです。
 (You can change this by using
 LOW_PRIORITY with the statement that does the update or
-<CODE>HIGH_PRIORITY</CODE> with the <CODE>SELECT</CODE> statement.)
+<code>HIGH_PRIORITY</code> with the <code>SELECT</code> statement.)
 
-</P>
-<P>
-<STRONG>MySQL バージョン 3.23.7</STRONG> から、<CODE>max_write_lock_count</CODE> 変数が使用できます。
+</p>
+<p>
+<strong>MySQL バージョン 3.23.7</strong> から、<code>max_write_lock_count</code> 変数が使用できます。
 これは、一つのテーブルに対して、指定された回数だけ INSERT が行われた後に、
-<CODE>SELECT</CODE> を発行するようにします。
+<code>SELECT</code> を発行するようにします。
 
-</P>
-<P>
+</p>
+<p>
 テーブルロッキングは以下の場合にはあまり良くありません：
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-あるクライアントが実行に長い時間のかかる <CODE>SELECT</CODE> を発行。
-<LI>
+あるクライアントが実行に長い時間のかかる <code>SELECT</code> を発行。
+</li><li>
 
-その後に、他のクライアントが、使用されているテーブルに対し <CODE>UPDATE</CODE> を発行；
-このクライアントは先の <CODE>SELECT</CODE> が完了するまで待ちます
-<LI>
+その後に、他のクライアントが、使用されているテーブルに対し <code>UPDATE</code> を発行；
+このクライアントは先の <code>SELECT</code> が完了するまで待ちます
+</li><li>
 
-さらに他のクライアントが同じテーブルに対して <CODE>SELECT</CODE> 構文を発行；
-<CODE>UPDATE</CODE> は <CODE>SELECT</CODE> よりも高い優先度を持つので、
-この <CODE>SELECT</CODE> は先の <CODE>UPDATE</CODE> が完了するまで待ちます。
-これは一番最初の <CODE>SELECT</CODE> が 終了するまで待たされます！
-<LI>
+さらに他のクライアントが同じテーブルに対して <code>SELECT</code> 構文を発行；
+<code>UPDATE</code> は <code>SELECT</code> よりも高い優先度を持つので、
+この <code>SELECT</code> は先の <code>UPDATE</code> が完了するまで待ちます。
+これは一番最初の <code>SELECT</code> が 終了するまで待たされます！
+</li><li>
 
-A thread is waiting for something like <CODE>full disk</CODE>, in which case all
+A thread is waiting for something like <code>full disk</code>, in which case all
 threads that wants to access the problem table will also be put in a waiting
 state until more disk space is made available.
-</UL>
+</li></ul>
 
-<P>
+<p>
 この問題のいくつかの可能な解決は以下の通りです：
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-<CODE>SELECT</CODE> 構文を速く実行できるように試みます； これを行うにあたり、
+<code>SELECT</code> 構文を速く実行できるように試みます； これを行うにあたり、
 いくつかのサマリーテーブルを作成しなければならないかもしれません.
 
-<LI>
+</li><li>
 
-<CODE>mysqld</CODE> を <CODE>--low-priority-updates</CODE> オプションで起動。
-これは全てのあるテーブルを更新する構文に対して、 <CODE>SELECT</CODE> 構文よりも
-低い優先度を与えます。 この場合、前述のシナリオ中の最後の <CODE>SELECT</CODE> 構文は
-<CODE>INSERT</CODE> 構文が完了する前に実行されます。
+<code>mysqld</code> を <code>--low-priority-updates</code> オプションで起動。
+これは全てのあるテーブルを更新する構文に対して、 <code>SELECT</code> 構文よりも
+低い優先度を与えます。 この場合、前述のシナリオ中の最後の <code>SELECT</code> 構文は
+<code>INSERT</code> 構文が完了する前に実行されます。
 
-<LI>
+</li><li>
 
-<CODE>LOW_PRIORITY</CODE> 属性指定を用いて、 <CODE>INSERT</CODE>,<CODE>UPDATE</CODE>,<CODE>DELETE</CODE> 構文
+<code>LOW_PRIORITY</code> 属性指定を用いて、 <code>INSERT</code>,<code>UPDATE</code>,<code>DELETE</code> 構文
 に低い優先度を与えることも出来ます。
 
-<LI>
+</li><li>
 
-Start <CODE>mysqld</CODE> with a low value for <STRONG>max_write_lock_count</STRONG> to give
-<CODE>READ</CODE> locks after a certain number of <CODE>WRITE</CODE> locks.
+Start <code>mysqld</code> with a low value for <strong>max_write_lock_count</strong> to give
+<code>READ</code> locks after a certain number of <code>WRITE</code> locks.
 
-<LI>
+</li><li>
 
-SQL コマンドの <CODE>SET SQL_LOW_PRIORITY_UPDATES=1</CODE> を使用して、
+SQL コマンドの <code>SET SQL_LOW_PRIORITY_UPDATES=1</code> を使用して、
 ある特定のスレッドからの全ての更新を、低い優先度に指定する事ができます。
- 「<A HREF="manual.ja_Reference.html#SET_OPTION">7.33  <CODE>SET</CODE> 構文</A>」節参照.
+ 「<a href="manual.ja_Reference.html#SET_OPTION">7.33  <code>SET</code> 構文</a>」節参照.
 
-<LI>
+</li><li>
 
-<CODE>HIGH_PRIORITY</CODE> 属性を用いて、特定の <CODE>SELECT</CODE> がとても重要であると
-指定することが可能です。.  「<A HREF="manual.ja_Reference.html#SELECT">7.19  <CODE>SELECT</CODE>構文</A>」節参照.
+<code>HIGH_PRIORITY</code> 属性を用いて、特定の <code>SELECT</code> がとても重要であると
+指定することが可能です。.  「<a href="manual.ja_Reference.html#SELECT">7.19  <code>SELECT</code>構文</a>」節参照.
 
-<LI>
+</li><li>
 
-もし <CODE>INSERT</CODE> と <CODE>SELECT</CODE> をあわせて使用した場合に問題が起きた場合、
-新しい <CODE>MyISAM</CODE> テーブルに切り替えます。 これは <CODE>SELECT</CODE>
-と <CODE>INSERT</CODE> を同時に行えます。
+もし <code>INSERT</code> と <code>SELECT</code> をあわせて使用した場合に問題が起きた場合、
+新しい <code>MyISAM</code> テーブルに切り替えます。 これは <code>SELECT</code>
+と <code>INSERT</code> を同時に行えます。
 
-<LI>
+</li><li>
 
-もし <CODE>INSERT</CODE> と <CODE>SELECT</CODE> 構文を主に混在させるのなら、
-<CODE>INSERT</CODE> の <CODE>DELAYED</CODE> 属性指定はこの問題を解決させるでしょう。
- 「<A HREF="manual.ja_Reference.html#INSERT">7.21  <CODE>INSERT</CODE>構文</A>」節参照.
+もし <code>INSERT</code> と <code>SELECT</code> 構文を主に混在させるのなら、
+<code>INSERT</code> の <code>DELAYED</code> 属性指定はこの問題を解決させるでしょう。
+ 「<a href="manual.ja_Reference.html#INSERT">7.21  <code>INSERT</code>構文</a>」節参照.
 
-<LI>
+</li><li>
 
-もし <CODE>SELECT</CODE> と <CODE>DELETE</CODE> で問題があるなら、
-<CODE>DELETE</CODE> の <CODE>LIMIT</CODE> オプションが助けになるでしょう。
-  「<A HREF="manual.ja_Reference.html#DELETE">7.17  <CODE>DELETE</CODE>構文</A>」節参照.
-</UL>
+もし <code>SELECT</code> と <code>DELETE</code> で問題があるなら、
+<code>DELETE</code> の <code>LIMIT</code> オプションが助けになるでしょう。
+  「<a href="manual.ja_Reference.html#DELETE">7.17  <code>DELETE</code>構文</a>」節参照.
+</li></ul>
 
-<P>
-<A NAME="IDX1192"></A>
-<A NAME="IDX1193"></A>
+<p>
+<a name="IDX1192"></a>
+<a name="IDX1193"></a>
 
 
-<H3><A NAME="DNS" HREF="manual.ja_toc.html#DNS">13.2.10  How MySQL uses DNS</A></H3>
+</p><h3><a name="DNS" href="manual.ja_toc.html#DNS">13.2.10  How MySQL uses DNS</a></h3>
 
-<P>
-When a new thread connects to <CODE>mysqld</CODE>, <CODE>mysqld</CODE> will span a
+<p>
+When a new thread connects to <code>mysqld</code>, <code>mysqld</code> will span a
 new thread to handle the request.  This thread will first check if the
 hostname is in the hostname cache. If not the thread will call
-<CODE>gethostbyaddr_r()</CODE> and <CODE>gethostbyname_r()</CODE> to resolve the
+<code>gethostbyaddr_r()</code> and <code>gethostbyname_r()</code> to resolve the
 hostname.
 
-</P>
-<P>
+</p>
+<p>
 If the operating system doesn't support the above thread-safe calls, the
-thread will lock a mutex and call <CODE>gethostbyaddr()</CODE> and
-<CODE>gethostbyname()</CODE> instead. Note that in this case no other thread
+thread will lock a mutex and call <code>gethostbyaddr()</code> and
+<code>gethostbyname()</code> instead. Note that in this case no other thread
 can resolve other hostnames that is not in the hostname cache until the
 first thread is ready.
 
-</P>
-<P>
-You can disable DNS host lookup by starting <CODE>mysqld</CODE> with
-<CODE>--skip-name-resolve</CODE>.  In this case you can however only use IP
-names in the <STRONG>MySQL</STRONG> privilege tables.
+</p>
+<p>
+You can disable DNS host lookup by starting <code>mysqld</code> with
+<code>--skip-name-resolve</code>.  In this case you can however only use IP
+names in the <strong>MySQL</strong> privilege tables.
 
-</P>
-<P>
+</p>
+<p>
 If you have a very slow DNS and many hosts, you can get more performance by
-either disabling DNS lookop with <CODE>--skip-name-resolve</CODE> or by
-increasing the <CODE>HOST_CACHE_SIZE</CODE> define (default: 128) and recompile
-<CODE>mysqld</CODE>.
+either disabling DNS lookop with <code>--skip-name-resolve</code> or by
+increasing the <code>HOST_CACHE_SIZE</code> define (default: 128) and recompile
+<code>mysqld</code>.
 
-</P>
-<P>
-You can disable the hostname cache with <CODE>--skip-host-cache</CODE>. You
-can clear the hostname cache with <CODE>FLUSH HOSTS</CODE> or <CODE>mysqladmin
-flush-hosts</CODE>.
+</p>
+<p>
+You can disable the hostname cache with <code>--skip-host-cache</code>. You
+can clear the hostname cache with <code>FLUSH HOSTS</code> or <code>mysqladmin
+flush-hosts</code>.
 
-</P>
-<P>
-If you don't want to allow connections over <CODE>TCP/IP</CODE>, you can do this
-by starting mysqld with <CODE>--skip-networking</CODE>.
+</p>
+<p>
+If you don't want to allow connections over <code>TCP/IP</code>, you can do this
+by starting mysqld with <code>--skip-networking</code>.
 
-</P>
-<P>
-<A NAME="IDX1194"></A>
-<A NAME="IDX1195"></A>
-<A NAME="IDX1196"></A>
-<A NAME="IDX1197"></A>
-<A NAME="IDX1198"></A>
+</p>
+<p>
+<a name="IDX1194"></a>
+<a name="IDX1195"></a>
+<a name="IDX1196"></a>
+<a name="IDX1197"></a>
+<a name="IDX1198"></a>
 
 
-<H2><A NAME="Data_size" HREF="manual.ja_toc.html#Data_size">13.3  可能な限りデータを小さくする</A></H2>
+</p><h2><a name="Data_size" href="manual.ja_toc.html#Data_size">13.3  可能な限りデータを小さくする</a></h2>
 
-<P>
+<p>
 One of the most basic optimization is to get your data (and indexes) to
 take as little space on the disk (and in memory) as possible. This can
 give huge improvements because disk reads are faster and normally less
 main memory will be used. Indexing also takes less resources if
 done on smaller columns.
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> supports a lot of different table types and row formats.
+</p>
+<p>
+<strong>MySQL</strong> supports a lot of different table types and row formats.
 Choosing the right table format may give you a big performance gain.
- 「<A HREF="manual.ja_Table_types.html#Table_types">8  MySQL Table types</A>」節参照.
+ 「<a href="manual.ja_Table_types.html#Table_types">8  MySQL Table types</a>」節参照.
 
-</P>
-<P>
+</p>
+<p>
 以下に挙げるテクニックを使用すれば、テーブルでのパフォーマンスの向上、
 保存領域の縮小化が可能でしょう：
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-可能ならば、一番小さな型を使用します。 <STRONG>MySQL</STRONG> は
+可能ならば、一番小さな型を使用します。 <strong>MySQL</strong> は
 ディスクとメモリーを節約する多くの型を持っています。
-<LI>
+</li><li>
 
 より小さな整数型を可能ならば使用します。 例えば、
-<CODE>MEDIUMINT</CODE> は <CODE>INT</CODE> より良いでしょう。
-<LI>
+<code>MEDIUMINT</code> は <code>INT</code> より良いでしょう。
+</li><li>
 
-可能ならフィールドを <CODE>NOT NULL</CODE> に定義してください。これは全てをより速くし、
+可能ならフィールドを <code>NOT NULL</code> に定義してください。これは全てをより速くし、
 各フィールド毎に1ビットを節約します。
 Note that if you really need
-<CODE>NULL</CODE> in your application you should definitely use it. Just avoid
+<code>NULL</code> in your application you should definitely use it. Just avoid
 haveing it on all columns by default.
-<LI>
+</li><li>
 
-可変長のフィールド (<CODE>VARCHAR</CODE>, <CODE>TEXT</CODE>, <CODE>BLOB</CODE>) を持たない場合は、
+可変長のフィールド (<code>VARCHAR</code>, <code>TEXT</code>, <code>BLOB</code>) を持たない場合は、
 固定サイズレコード形式が使用されます。
 これはかなり速いです。しかしあいにくいくらかの領域を浪費します。
- 「<A HREF="manual.ja_Table_types.html#MyISAM_table_formats">8.1.2  MyISAM Table Formats</A>」節参照.
-<LI>
+ 「<a href="manual.ja_Table_types.html#MyISAM_table_formats">8.1.2  MyISAM Table Formats</a>」節参照.
+</li><li>
 
 それぞれのテーブルは可能な限り短いプライマリ・インデックスを持つべきです。
 これは１レコードを一意にし、効率的にします。
-<LI>
+</li><li>
 
 それぞれのテーブルについて、どのテーブルの形式を使用するかを
-決めます。  「<A HREF="manual.ja_Table_types.html#Table_types">8  MySQL Table types</A>」節参照.
-<LI>
+決めます。  「<a href="manual.ja_Table_types.html#Table_types">8  MySQL Table types</a>」節参照.
+</li><li>
 
 本当に必要な物にだけインデックスを作成します。
 インデックスは検索には良いですが、より速く保存したい場合には良くありません。
@@ -1191,853 +1176,832 @@ haveing it on all columns by default.
 If you are
 ALWAYS using many columns, you should use the column with more duplicates
 first to get better compression of the index.
-<LI>
+</li><li>
 
 もしインデックスが頭からの何文字かで一意性を持っているなら、この部分にだけ
-インデックスを張る方が良いでしょう。 <STRONG>MySQL</STRONG> は文字列フィールドの
+インデックスを張る方が良いでしょう。 <strong>MySQL</strong> は文字列フィールドの
 一部分に対してのインデックスをサポートします。
 短いインデックスは、ディスクスペースを節約するだけでなく、
 インデックスのキャッシュに収まりやすくなることにより、ディスク・シークも少なくなるので、
-速くなります。  「<A HREF="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</A>」節参照.
-<LI>
+速くなります。  「<a href="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</a>」節参照.
+</li><li>
 
 いくつかの状況下で、とてもよく走査されるテーブルを２つに分割することは、
 利益になることがあります。
 This is especially true if it is a dynamic
 format table and it is possible to use a smaller static format table that
 can be used to find the relevant rows when scanning the table.
-</UL>
+</li></ul>
 
-<P>
-<A NAME="IDX1199"></A>
+<p>
+<a name="IDX1199"></a>
 
 
-<H2><A NAME="MySQL_indexes" HREF="manual.ja_toc.html#MySQL_indexes">13.4  MySQL はどのようにインデックスを使用するか？</A></H2>
+</p><h2><a name="MySQL_indexes" href="manual.ja_toc.html#MySQL_indexes">13.4  MySQL はどのようにインデックスを使用するか？</a></h2>
 
-<P>
+<p>
 Indexes are used to find rows with a specific value of one column
 fast. 
-インデックスがない場合、<STRONG>MySQL</STRONG> は、そのレコードが見つかるまで、
+インデックスがない場合、<strong>MySQL</strong> は、そのレコードが見つかるまで、
 最初のレコードからテーブルをなめていきます。 大きなテーブルでは多くの
 手間がかかります。 もし問い合わせの中にインデックスを持ったフィールドが
-ある場合、<STRONG>MySQL</STRONG> は全てのデータをみることなく、データの途中の位置を速く
+ある場合、<strong>MySQL</strong> は全てのデータをみることなく、データの途中の位置を速く
 得ることができます。 もしあるテーブルが1000レコード持っていたとすると、
 順番に頭からなめていくことに比べて、これは少なくとも100倍速いことに
 なります。 Note that is you need to access almost all 1000
 rows it is faster to read sequentially because we then avoid disk seeks.
 
-</P>
-<P>
-全ての <STRONG>MySQL</STRONG> インデックス, <CODE>PRIMARY</CODE>, <CODE>UNIQUE</CODE> そして <CODE>INDEX()</CODE> 
+</p>
+<p>
+全ての <strong>MySQL</strong> インデックス, <code>PRIMARY</code>, <code>UNIQUE</code> そして <code>INDEX()</code> 
 は B tree に格納されます。文字列は自動的に始めと終りの空白が圧縮されます。
- 「<A HREF="manual.ja_Reference.html#CREATE_INDEX">7.36  <CODE>CREATE INDEX</CODE> 構文</A>」節参照.
+ 「<a href="manual.ja_Reference.html#CREATE_INDEX">7.36  <code>CREATE INDEX</code> 構文</a>」節参照.
 
-</P>
-<P>
+</p>
+<p>
 Indexes are used to:
 
-<UL>
-<LI>
+</p><ul>
+<li>
 
-<CODE>WHERE</CODE>節にマッチした行の素早い検索
+<code>WHERE</code>節にマッチした行の素早い検索
 
-<LI>
+</li><li>
 
 join を実行したときの他のテーブルからの行の検索
 
-<LI>
+</li><li>
 
-与えられたフィールドの <CODE>MAX()</CODE> や <CODE>MIN()</CODE> 値の割り出し
+与えられたフィールドの <code>MAX()</code> や <code>MIN()</code> 値の割り出し
 This is optimized by a preprocessor that checks if you are
-using <CODE>WHERE</CODE> key_part_# = constant on all key parts &#60; N.  In this case
-<STRONG>MySQL</STRONG> will do a single key lookup and replace the <CODE>MIN()</CODE>
+using <code>WHERE</code> key_part_# = constant on all key parts &lt; N.  In this case
+<strong>MySQL</strong> will do a single key lookup and replace the <code>MIN()</code>
 expression with a constant.  If all expressions are replaced with
 constants, the query will return at once:
 
 
-<PRE>
-SELECT MIN(key_part2),MAX(key_part2) FROM table_name where key_part1=10
-</PRE>
+<pre>SELECT MIN(key_part2),MAX(key_part2) FROM table_name where key_part1=10
+</pre>
 
-<LI>
+</li><li>
 
 テーブルをソートかグループ化する場合で、ソート(グループ化)が一番左(接頭部)の
-キーを使用して行われる場合(例えば <CODE>ORDER BY key_part_1,key_part_2 </CODE>)。
-もし <CODE>DESC</CODE> 指定があれば、全てのキーは逆順に読まれます。
+キーを使用して行われる場合(例えば <code>ORDER BY key_part_1,key_part_2 </code>)。
+もし <code>DESC</code> 指定があれば、全てのキーは逆順に読まれます。
 
-The index can also be used even if the <CODE>ORDER BY</CODE> doesn't match the index
+The index can also be used even if the <code>ORDER BY</code> doesn't match the index
 exactly, as long as all the unused index parts and all the extra
-are <CODE>ORDER BY</CODE> columns are constants in the <CODE>WHERE</CODE> clause. The
-following queries will use the index to resolve the <CODE>ORDER BY</CODE> part:
+are <code>ORDER BY</code> columns are constants in the <code>WHERE</code> clause. The
+following queries will use the index to resolve the <code>ORDER BY</code> part:
 
 
-<PRE>
-SELECT * FROM foo ORDER BY key_part1,key_part2,key_part3;
+<pre>SELECT * FROM foo ORDER BY key_part1,key_part2,key_part3;
 SELECT * FROM foo WHERE column=constant ORDER BY column, key_part1;
 SELECT * FROM foo WHERE key_part1=const GROUP BY key_part2;
-</PRE>
+</pre>
 
-<LI>
+</li><li>
 
 データファイルを参照することなく値を検索する場合。
 もし使用する全てのフィールドが数値でかつ、一番左から(接頭部から)キーを形成する場合、
 値はインデックスツリーから検索され、これはとても速くなります。
 
 
-<PRE>
-SELECT key_part3 FROM table_name WHERE key_part1=1
-</PRE>
+<pre>SELECT key_part3 FROM table_name WHERE key_part1=1
+</pre>
 
-</UL>
+</li></ul>
 
-<P>
-以下のような <CODE>SELECT</CODE> 文を発行したとします：
+<p>
+以下のような <code>SELECT</code> 文を発行したとします：
 
-</P>
+</p>
 
-<PRE>
-mysql&#62; SELECT * FROM tbl_name WHERE col1=val1 AND col2=val2;
-</PRE>
+<pre>mysql&gt; SELECT * FROM tbl_name WHERE col1=val1 AND col2=val2;
+</pre>
 
-<P>
-もし <CODE>col1</CODE> と <CODE>col2</CODE> に複数フィールドインデックスが定義されている場合、
+<p>
+もし <code>col1</code> と <code>col2</code> に複数フィールドインデックスが定義されている場合、
 すぐに思ったとおりの結果が得られます。
 If separate single-column
-indexes exist on <CODE>col1</CODE> and <CODE>col2</CODE>, the optimizer tries to
+indexes exist on <code>col1</code> and <code>col2</code>, the optimizer tries to
 find the most restrictive index by deciding which index will find fewer
 rows and using that index to fetch the rows.
 
-</P>
-<P>
-<A NAME="IDX1200"></A>
-<A NAME="IDX1201"></A>
+</p>
+<p>
+<a name="IDX1200"></a>
+<a name="IDX1201"></a>
 もしテーブルが複数フィールドインデックスを持つなら、インデックスの接頭部一番左の部分
 がレコードを見つけるための最適化に使用されます。例えば、3つのフィールド
- <CODE>(col1,col2,col3)</CODE> に対して一つのインデックスを持っていたとします。
-すると、これは <CODE>(col1)</CODE>, <CODE>(col1,col2)</CODE> ,
-<CODE>(col1,col2,col3)</CODE> でインデックスがサーチされます。
+ <code>(col1,col2,col3)</code> に対して一つのインデックスを持っていたとします。
+すると、これは <code>(col1)</code>, <code>(col1,col2)</code> ,
+<code>(col1,col2,col3)</code> でインデックスがサーチされます。
 
-</P>
-<P>
+</p>
+<p>
 もし一番左に指定しているフィールドがインデックスを作成していないなら、
-<STRONG>MySQL</STRONG> は部分的なインデックスを使用しません。
+<strong>MySQL</strong> は部分的なインデックスを使用しません。
 
-</P>
-<P>
-以下のような <CODE>SELECT</CODE> 文を発行したとします：
+</p>
+<p>
+以下のような <code>SELECT</code> 文を発行したとします：
 
-</P>
+</p>
 
-<PRE>
-mysql&#62; SELECT * FROM tbl_name WHERE col1=val1;
-mysql&#62; SELECT * FROM tbl_name WHERE col2=val2;
-mysql&#62; SELECT * FROM tbl_name WHERE col2=val2 AND col3=val3;
-</PRE>
+<pre>mysql&gt; SELECT * FROM tbl_name WHERE col1=val1;
+mysql&gt; SELECT * FROM tbl_name WHERE col2=val2;
+mysql&gt; SELECT * FROM tbl_name WHERE col2=val2 AND col3=val3;
+</pre>
 
-<P>
-もしインデックスが <CODE>(col1,col2,col3)</CODE> にあるならば、
+<p>
+もしインデックスが <code>(col1,col2,col3)</code> にあるならば、
 上に示した最初のクエリだけがインデックスを使用します。二番目三番目のクエリは
 インデックスを持つフィールドを発動しますが、
-<CODE>(col2)</CODE> と <CODE>(col2,col3)</CODE> は、<CODE>(col1,col2,col3)</CODE> の
+<code>(col2)</code> と <code>(col2,col3)</code> は、<code>(col1,col2,col3)</code> の
 接頭部一番左に指定されていません。
 
-</P>
-<P>
-<A NAME="IDX1202"></A>
-<A NAME="IDX1203"></A>
-<A NAME="IDX1204"></A>
-<A NAME="IDX1205"></A>
-<STRONG>MySQL</STRONG> は、もし  <CODE>LIKE</CODE> がワイルドカードから始まっていなくて、
+</p>
+<p>
+<a name="IDX1202"></a>
+<a name="IDX1203"></a>
+<a name="IDX1204"></a>
+<a name="IDX1205"></a>
+<strong>MySQL</strong> は、もし  <code>LIKE</code> がワイルドカードから始まっていなくて、
 ある種固定された文字で始まっているなら、
-<CODE>LIKE</CODE> の評価にインデックスを使用します。
-例えば、以下の <CODE>SELECT</CODE> 文はインデックスを使用します:
+<code>LIKE</code> の評価にインデックスを使用します。
+例えば、以下の <code>SELECT</code> 文はインデックスを使用します:
 
-</P>
+</p>
 
-<PRE>
-mysql&#62; select * from tbl_name where key_col LIKE "Patrick%";
-mysql&#62; select * from tbl_name where key_col LIKE "Pat%_ck%";
-</PRE>
+<pre>mysql&gt; select * from tbl_name where key_col LIKE "Patrick%";
+mysql&gt; select * from tbl_name where key_col LIKE "Pat%_ck%";
+</pre>
 
-<P>
-一つ目の文は、<CODE>"Patrick" &#60;= key_col &#60; "Patricl"</CODE> となるレコードだけ、考慮されます。
-二つ目の文は、<CODE>"Pat" &#60;= key_col &#60; "Pau"</CODE> となるレコードだけ、考慮されます。
+<p>
+一つ目の文は、<code>"Patrick" &lt;= key_col &lt; "Patricl"</code> となるレコードだけ、考慮されます。
+二つ目の文は、<code>"Pat" &lt;= key_col &lt; "Pau"</code> となるレコードだけ、考慮されます。
 
-</P>
-<P>
-以下の <CODE>SELECT</CODE> 文はインデックスを使用しません:
+</p>
+<p>
+以下の <code>SELECT</code> 文はインデックスを使用しません:
 
-<PRE>
-mysql&#62; select * from tbl_name where key_col LIKE "%Patrick%";
-mysql&#62; select * from tbl_name where key_col LIKE other_col;
-</PRE>
+</p><pre>mysql&gt; select * from tbl_name where key_col LIKE "%Patrick%";
+mysql&gt; select * from tbl_name where key_col LIKE other_col;
+</pre>
 
-<P>
-最初の文は、<CODE>LIKE</CODE> がワイルドカード文字で始まっています。
-二つ目の文は、<CODE>LIKE</CODE> が定数ではありません。
+<p>
+最初の文は、<code>LIKE</code> がワイルドカード文字で始まっています。
+二つ目の文は、<code>LIKE</code> が定数ではありません。
 
-</P>
-<P>
-<A NAME="IDX1206"></A>
-<A NAME="IDX1207"></A>
-Searching using <CODE>column_name IS NULL</CODE> will use indexes if column_name
+</p>
+<p>
+<a name="IDX1206"></a>
+<a name="IDX1207"></a>
+Searching using <code>column_name IS NULL</code> will use indexes if column_name
 is an index.
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> は通常、一番少ないレコード数を見つけるインデックスを使用します。
+</p>
+<p>
+<strong>MySQL</strong> は通常、一番少ないレコード数を見つけるインデックスを使用します。
 インデックスは、以下に示す演算子を用いて比較できるフィールドに対して、使用されます：
-<CODE>=</CODE>, <CODE>&#62;</CODE>, <CODE>&#62;=</CODE>, <CODE>&#60;</CODE>, <CODE>&#60;=</CODE>, <CODE>BETWEEN</CODE> そして
-<CODE>'something%'</CODE> の様に頭にワイルドカードがない <CODE>LIKE</CODE>。
+<code>=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>BETWEEN</code> そして
+<code>'something%'</code> の様に頭にワイルドカードがない <code>LIKE</code>。
 
-</P>
-<P>
-<CODE>WHERE</CODE> 節内の全ての <CODE>AND</CODE> にかからないインデックスは、
+</p>
+<p>
+<code>WHERE</code> 節内の全ての <code>AND</code> にかからないインデックスは、
 全くクエリの最適化に使用されません。
 In other words:  To be able to use an
-index, a prefix of the index must be used in every <CODE>AND</CODE> group.
+index, a prefix of the index must be used in every <code>AND</code> group.
 
-</P>
-<P>
-以下の <CODE>WHERE</CODE> 節はインデックスを使用します：
+</p>
+<p>
+以下の <code>WHERE</code> 節はインデックスを使用します：
 
-<PRE>
-... WHERE index_part1=1 AND index_part2=2 AND other_column=3
+</p><pre>... WHERE index_part1=1 AND index_part2=2 AND other_column=3
 ... WHERE index=1 OR A=10 AND index=2      /* index = 1 OR index = 2 */
 ... WHERE index_part1='hello' AND index_part_3=5
           /* optimized like "index_part1='hello'" */
 ... WHERE index1=1 and index2=2 or index1=3 and index3=3;
           /* Can use index on index1 but not on index2 or index 3 */
-</PRE>
+</pre>
 
-<P>
-以下の <CODE>WHERE</CODE> 節はインデックスを<STRONG>使用しません</STRONG>：
+<p>
+以下の <code>WHERE</code> 節はインデックスを<strong>使用しません</strong>：
 
-<PRE>
-... WHERE index_part2=1 AND index_part3=2  /* index_part_1 is not used */
+</p><pre>... WHERE index_part2=1 AND index_part3=2  /* index_part_1 is not used */
 ... WHERE index=1 OR A=10                  /* Index is not used in both AND parts */
 ... WHERE index_part1=1 OR index_part2=10  /* No index spans all rows */
-</PRE>
+</pre>
 
-<P>
-Note that in some cases <STRONG>MySQL</STRONG> will not use an index, even if one
+<p>
+Note that in some cases <strong>MySQL</strong> will not use an index, even if one
 would be available.  Some of the cases where this happens are:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-If the use of the index would require <STRONG>MySQL</STRONG> to access more
+If the use of the index would require <strong>MySQL</strong> to access more
 than 30 % of the rows in the table.  (In this case a table scan is
 probably much faster, as this will require us to do much fewer seeks).
-Note that if such a query uses <CODE>LIMIT</CODE> to only retrieve
-part of the rows, <STRONG>MySQL</STRONG> will use an index anyway, as it can
+Note that if such a query uses <code>LIMIT</code> to only retrieve
+part of the rows, <strong>MySQL</strong> will use an index anyway, as it can
 much more quickly find the few rows to return in the result.
-</UL>
+</li></ul>
 
-<P>
-<A NAME="IDX1208"></A>
-<A NAME="IDX1209"></A>
-<A NAME="IDX1210"></A>
+<p>
+<a name="IDX1208"></a>
+<a name="IDX1209"></a>
+<a name="IDX1210"></a>
 
 
-<H2><A NAME="Query_Speed" HREF="manual.ja_toc.html#Query_Speed">13.5  データをアクセス・更新するクエリの速度</A></H2>
+</p><h2><a name="Query_Speed" href="manual.ja_toc.html#Query_Speed">13.5  データをアクセス・更新するクエリの速度</a></h2>
 
-<P>
+<p>
 最初に、全てのクエリに影響する一つの事柄をのべます：
 より複雑な権限の設定を行うと、オーバーヘッドが多くなります。
 
-</P>
-<P>
-もしあなたがいかなる <CODE>GRANT</CODE> 文も行っていなければ、
-<STRONG>MySQL</STRONG> はパーミッションの検査を少ししか最適化しないでしょう。
+</p>
+<p>
+もしあなたがいかなる <code>GRANT</code> 文も行っていなければ、
+<strong>MySQL</strong> はパーミッションの検査を少ししか最適化しないでしょう。
 So if you have a very high
 volume it may be worth the time to avoid grants. Otherwise more
 permission check results in a larger overhead.
 
-</P>
-<P>
-もし <STRONG>MySQL</STRONG> 関数のあるものが確実に問題を引き起こしているのならば、
-常に <STRONG>MySQL</STRONG> クライアント側は以下のようになります：
+</p>
+<p>
+もし <strong>MySQL</strong> 関数のあるものが確実に問題を引き起こしているのならば、
+常に <strong>MySQL</strong> クライアント側は以下のようになります：
 
-</P>
+</p>
 
-<PRE>
-mysql&#62; select benchmark(1000000,1+1);
+<pre>mysql&gt; select benchmark(1000000,1+1);
 +------------------------+
 | benchmark(1000000,1+1) |
 +------------------------+
 |                      0 |
 +------------------------+
 1 row in set (0.32 sec)
-</PRE>
+</pre>
 
-<P>
-上の例では <STRONG>MySQL</STRONG> は 1,000,000 <CODE>+</CODE> 式を 0.32 秒で実行できています
-(たんなる <CODE>PentiumII 400MHz</CODE> マシンで)。
+<p>
+上の例では <strong>MySQL</strong> は 1,000,000 <code>+</code> 式を 0.32 秒で実行できています
+(たんなる <code>PentiumII 400MHz</code> マシンで)。
 
-</P>
-<P>
-全ての <STRONG>MySQL</STRONG> 関数は最適化されていますが、
+</p>
+<p>
+全ての <strong>MySQL</strong> 関数は最適化されていますが、
 いくつかは例外があるかもしれません。
-<CODE>benchmark(loop_count,expression)</CODE>はあなたのクエリの
+<code>benchmark(loop_count,expression)</code>はあなたのクエリの
 問題を見つけるためのとてもよいツールです。
 
-</P>
+</p>
 
-<P>
-<A NAME="IDX1211"></A>
-<A NAME="IDX1212"></A>
-<A NAME="IDX1213"></A>
+<p>
+<a name="IDX1211"></a>
+<a name="IDX1212"></a>
+<a name="IDX1213"></a>
 
 
-<H3><A NAME="Estimating_performance" HREF="manual.ja_toc.html#Estimating_performance">13.5.1  クエリの性能評価</A></H3>
+</p><h3><a name="Estimating_performance" href="manual.ja_toc.html#Estimating_performance">13.5.1  クエリの性能評価</a></h3>
 
-<P>
+<p>
 ほとんどの場合、ディスク・シークを数えることでだいたいのパフォーマンスを予測できます。
 小さなテーブルでは、通常、1回のディスク・シークでレコードを見つけれるでしょう
 (インデックスがたぶんキャッシュされるので)。 大きなテーブルでは、
 おおよその予測として、(B++ ツリーインデックスを使用している場合)、
-<CODE>log(row_count) /
+<code>log(row_count) /
 log(index_block_length / 3 * 2 / (index_length + data_pointer_length)) +
-1</CODE> シーク、1レコードを見つけるのに必要となるでしょう。
+1</code> シーク、1レコードを見つけるのに必要となるでしょう。
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> では、インデックス・ブロックは通常 1024 バイトで、
+</p>
+<p>
+<strong>MySQL</strong> では、インデックス・ブロックは通常 1024 バイトで、
 データ・ポインターは通常 4 バイトです。 これは、
 インデックス長が 3 (medium integer) 、データが 500,000 レコードあるテーブルでは、 
-<CODE>log(500,000)/log(1024/3*2/(3+4)) + 1</CODE> = 4 シークとなります。
+<code>log(500,000)/log(1024/3*2/(3+4)) + 1</code> = 4 シークとなります。
 
-</P>
-<P>
+</p>
+<p>
 As the above index would require about 500,000 * 7 * 3/2 = 5.2M,
 (assuming that the index buffers are filled to 2/3, which is typical)
 you will probably have much of the index in memory and you will probably
 only need 1-2 calls to read data from the OS to find the row.
 
-</P>
-<P>
+</p>
+<p>
 書き込み時には、上の場合、新しいインデックスを書き込める場所を
 探し出すのに、4 シークかかり、さらに、通常、インデックスを更新し、
 レコードを書くのに 2 シーク必要です。
 
-</P>
-<P>
+</p>
+<p>
 Note that the above doesn't mean that your application will slowly
 degenerate by N log N!  As long as everything is cached by the OS or SQL
 server things will only go marginally slower while the table gets
 bigger. After the data gets too big to be cached, things will start to
 go much slower until your applications is only bound by disk-seeks
 (which increase by N log N). To avoid this, increase the index cache as
-the data grows.  「<A HREF="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</A>」節参照.
+the data grows.  「<a href="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</a>」節参照.
 
-</P>
-<P>
-<A NAME="IDX1214"></A>
-<A NAME="IDX1215"></A>
+</p>
+<p>
+<a name="IDX1214"></a>
+<a name="IDX1215"></a>
 
-</P>
+</p>
 
 
-<H3><A NAME="SELECT_speed" HREF="manual.ja_toc.html#SELECT_speed">13.5.2  <CODE>SELECT</CODE> クエリの速度</A></H3>
+<h3><a name="SELECT_speed" href="manual.ja_toc.html#SELECT_speed">13.5.2  <code>SELECT</code> クエリの速度</a></h3>
 
-<P>
-通常、遅い <CODE>SELECT ... WHERE</CODE> を速くするには、
-まず最初にインデックスがあるかどうかをチェックします。 「<A HREF="manual.ja_Performance.html#MySQL_indexes">13.4  MySQL はどのようにインデックスを使用するか？</A>」節参照. 
+<p>
+通常、遅い <code>SELECT ... WHERE</code> を速くするには、
+まず最初にインデックスがあるかどうかをチェックします。 「<a href="manual.ja_Performance.html#MySQL_indexes">13.4  MySQL はどのようにインデックスを使用するか？</a>」節参照. 
 違うテーブルを参照する場合には、普通はインデックスをともなうべきです。
-<CODE>EXPLAIN</CODE> コマンドを使用すれば、<CODE>SELECT</CODE> でどのインデックスが
+<code>EXPLAIN</code> コマンドを使用すれば、<code>SELECT</code> でどのインデックスが
 使用されているか確認できます。
- 「<A HREF="manual.ja_Reference.html#EXPLAIN">7.29  <CODE>EXPLAIN</CODE> 構文 (<CODE>SELECT</CODE>についての情報を得る)</A>」節参照.
+ 「<a href="manual.ja_Reference.html#EXPLAIN">7.29  <code>EXPLAIN</code> 構文 (<code>SELECT</code>についての情報を得る)</a>」節参照.
 
-</P>
-<P>
+</p>
+<p>
 Some general tips:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-To help <STRONG>MySQL</STRONG> optimize queries better, run <CODE>myisamchk
---analyze</CODE> on a table after it has been loaded with relevant data. This
+To help <strong>MySQL</strong> optimize queries better, run <code>myisamchk
+--analyze</code> on a table after it has been loaded with relevant data. This
 updates a value for each index part that indicates the average number of
 rows that have the same value.  (For unique indexes, this is always 1,
-of course.).  <STRONG>MySQL</STRONG> will use this to decide which index to
+of course.).  <strong>MySQL</strong> will use this to decide which index to
 choose when you connect two tables with 'a non-constant expression'.
-You can check the result from the <CODE>analyze</CODE> run by doing <CODE>SHOW
-INDEX FROM table_name</CODE> and examining the <CODE>Cardinality</CODE> column.
+You can check the result from the <code>analyze</code> run by doing <code>SHOW
+INDEX FROM table_name</code> and examining the <code>Cardinality</code> column.
 
-<LI>
+</li><li>
 
 インデックスとデータをインデックス順に従ってソートするには、
-<CODE>myisamchk --sort-index --sort-records=1</CODE> を使用します
+<code>myisamchk --sort-index --sort-records=1</code> を使用します
 (もし １番目のインデックス順にソートするなら)。 
 If you
 have a unique index from which you want to read all records in order
 according to that index, this is a good way to make that faster. 
 しかし、このソート方法は最適状態では書かれず、また大きなテーブルでは
 多くの時間がかかることに注意してください！
-</UL>
+</li></ul>
 
-<P>
-<A NAME="IDX1216"></A>
-<A NAME="IDX1217"></A>
+<p>
+<a name="IDX1216"></a>
+<a name="IDX1217"></a>
 
 
-<H3><A NAME="Where_optimizations" HREF="manual.ja_toc.html#Where_optimizations">13.5.3  MySQL はどのように <CODE>WHERE</CODE> 節を最適化するか？</A></H3>
+</p><h3><a name="Where_optimizations" href="manual.ja_toc.html#Where_optimizations">13.5.3  MySQL はどのように <code>WHERE</code> 節を最適化するか？</a></h3>
 
-<P>
-<CODE>WHERE</CODE> の最適化は、<CODE>WHERE</CODE> がほとんど <CODE>SELECT</CODE> で使用されるため、
-<CODE>SELECT</CODE> に置かれています。 しかし、同じ最適化は
-<CODE>DELETE</CODE> や <CODE>UPDATE</CODE> 文でも使用されます。
+<p>
+<code>WHERE</code> の最適化は、<code>WHERE</code> がほとんど <code>SELECT</code> で使用されるため、
+<code>SELECT</code> に置かれています。 しかし、同じ最適化は
+<code>DELETE</code> や <code>UPDATE</code> 文でも使用されます。
 
-</P>
-<P>
+</p>
+<p>
 このセクションの最適化の説明はまだ不十分です。
-なぜなら、 <STRONG>MySQL</STRONG> はとても多くの最適化を行っており、
+なぜなら、 <strong>MySQL</strong> はとても多くの最適化を行っており、
 それら全てについての説明を書ける時間が、我々はとれません。
 
-</P>
-<P>
-<STRONG>MySQL</STRONG>による最適化のいくつかを以下に示します:
+</p>
+<p>
+<strong>MySQL</strong>による最適化のいくつかを以下に示します:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 括弧の除去 (全ての不必要な括弧は削除されます):
 
-<PRE>
-   ((a AND b) AND c OR (((a AND b) AND (c AND d))))
--&#62; (a AND b AND c) OR (a AND b AND c AND d)
-</PRE>
+<pre>   ((a AND b) AND c OR (((a AND b) AND (c AND d))))
+-&gt; (a AND b AND c) OR (a AND b AND c AND d)
+</pre>
 
-<LI>
+</li><li>
 
 定数の保持:
 
-<PRE>
-   (a&#60;b AND b=c) AND a=5
--&#62; b&#62;5 AND b=c AND a=5
-</PRE>
+<pre>   (a&lt;b AND b=c) AND a=5
+-&gt; b&gt;5 AND b=c AND a=5
+</pre>
 
-<LI>
+</li><li>
 
 定数条件の除去 (定数保持のために必要とされます):
 
-<PRE>
-   (B&#62;=5 AND B=5) OR (B=6 AND 5=5) OR (B=7 AND 5=6)
--&#62; B=5 OR B=6
-</PRE>
+<pre>   (B&gt;=5 AND B=5) OR (B=6 AND 5=5) OR (B=7 AND 5=6)
+-&gt; B=5 OR B=6
+</pre>
 
-<LI>
+</li><li>
 
 インデックスに使用される全ての表現は一度だけ評価されます。
-<LI>
+</li><li>
 
-一つのテーブル上の <CODE>WHERE</CODE> がない <CODE>CONST(*)</CODE> は、テーブルから
-直接取り出されます。これはまた同じ条件下での任意の <CODE>NOT NULL</CODE> 表現
+一つのテーブル上の <code>WHERE</code> がない <code>CONST(*)</code> は、テーブルから
+直接取り出されます。これはまた同じ条件下での任意の <code>NOT NULL</code> 表現
 のためにも行われます。
-<LI>
+</li><li>
 
 不当な定数表現は早く検出されます。
-<STRONG>MySQL</STRONG> は不可能な  <CODE>SELECT</CODE> 構文を素早く見つけ、0 行を結果として返します。
-<LI>
+<strong>MySQL</strong> は不可能な  <code>SELECT</code> 構文を素早く見つけ、0 行を結果として返します。
+</li><li>
 
-<CODE>GROUP BY</CODE> または group 関数 (<CODE>COUNT()</CODE>, <CODE>MIN()</CODE>...) を使用しない場合は、
-<CODE>HAVING</CODE> は <CODE>WHERE</CODE> とマージされます。
-<LI>
+<code>GROUP BY</code> または group 関数 (<code>COUNT()</code>, <code>MIN()</code>...) を使用しない場合は、
+<code>HAVING</code> は <code>WHERE</code> とマージされます。
+</li><li>
 
-各サブ結合についての速い <CODE>WHERE</CODE> 評価を得るために、また、可能な限り
+各サブ結合についての速い <code>WHERE</code> 評価を得るために、また、可能な限り
 早くレコードをスキップするために、各サブ結合についてより簡単な 
-<CODE>WHERE</CODE> が構築されます。
-<A NAME="IDX1218"></A>
-<A NAME="IDX1219"></A>
-<LI>
+<code>WHERE</code> が構築されます。
+<a name="IDX1218"></a>
+<a name="IDX1219"></a>
+</li><li>
 
 全ての定数テーブルをクエリー中の他のテーブルより先に読みます。
 定数テーブルは次です:
 
-<UL>
-<LI>
+<ul>
+<li>
 
 0 または 1 行のテーブル。
-<LI>
+</li><li>
 
-<CODE>WHERE</CODE> 節で <CODE>UNIQUE</CODE> インデックスや <CODE>PRIMARY KEY</CODE> が使用されたテーブルで、
+<code>WHERE</code> 節で <code>UNIQUE</code> インデックスや <code>PRIMARY KEY</code> が使用されたテーブルで、
 かつ、全てのインデックスが定数式で使用されていて、
-かつ、インデックスのパートが <CODE>NOT NULL</CODE> で定義されているテーブル。
-</UL>
+かつ、インデックスのパートが <code>NOT NULL</code> で定義されているテーブル。
+</li></ul>
 
 以下のテーブルのように定数だけを使用するテーブル:
 
-<PRE>
-mysql&#62; SELECT * FROM t WHERE primary_key=1;
-mysql&#62; SELECT * FROM t1,t2
+<pre>mysql&gt; SELECT * FROM t WHERE primary_key=1;
+mysql&gt; SELECT * FROM t1,t2
            WHERE t1.primary_key=1 AND t2.primary_key=t1.id;
-</PRE>
+</pre>
 
-<LI>
+</li><li>
 
 テーブルを結合するために最良の結合の組合せを見つけます。全ての可能性を試して 。
-<CODE>ORDER BY</CODE> または <CODE>GROUP</CODE> 内の全てのフィールドが同じテーブルの場合は、
+<code>ORDER BY</code> または <code>GROUP</code> 内の全てのフィールドが同じテーブルの場合は、
 このテーブルは結合時に最初に優先されます。
-<LI>
+</li><li>
 
-<CODE>ORDER BY</CODE> 節と <CODE>GROUP BY</CODE> 節がある場合、または <CODE>ORDER BY</CODE> か <CODE>GROUP BY</CODE> が結合キュー
+<code>ORDER BY</code> 節と <code>GROUP BY</code> 節がある場合、または <code>ORDER BY</code> か <code>GROUP BY</code> が結合キュー
 内の最初のテーブルではない他のテーブルからの項目を含む場合、一時テーブルが生成されます。
-<LI>
+</li><li>
 
-もし <CODE>SQL_SMALL_RESULT</CODE> を使用するなら, <STRONG>MySQL</STRONG> はメモリー内の一次テーブルを
+もし <code>SQL_SMALL_RESULT</code> を使用するなら, <strong>MySQL</strong> はメモリー内の一次テーブルを
 使用します
-<LI>
+</li><li>
 
 各テーブルのインデックスはクエリされ、得られる行の 30% 未満の幅しかない最良のインデックスが使用されます。
 そのようなインデックスが見つけられない場合、素早いテーブルの走査(quick table scan)が使用されます。
-<LI>
+</li><li>
 
-同じように、<STRONG>MySQL</STRONG> はデータファイルを等しく調べはしないインデックスから
+同じように、<strong>MySQL</strong> はデータファイルを等しく調べはしないインデックスから
 レコードを読むことが可能です。もし全てのフィールドが数値型のインデックスなら、
 インデックスツリーだけがクエリの解決に使用されます。
-<LI>
+</li><li>
 
-各レコードが出力される前に、<CODE>HAVING</CODE> 節に適合するものをスキップします。
-</UL>
+各レコードが出力される前に、<code>HAVING</code> 節に適合するものをスキップします。
+</li></ul>
 
-<P>
+<p>
 以下はとても速いクエリの例です:
 
-</P>
+</p>
 
-<PRE>
-mysql&#62; SELECT COUNT(*) FROM tbl_name;
-mysql&#62; SELECT MIN(key_part1),MAX(key_part1) FROM tbl_name;
-mysql&#62; SELECT MAX(key_part2) FROM tbl_name
+<pre>mysql&gt; SELECT COUNT(*) FROM tbl_name;
+mysql&gt; SELECT MIN(key_part1),MAX(key_part1) FROM tbl_name;
+mysql&gt; SELECT MAX(key_part2) FROM tbl_name
            WHERE key_part_1=constant;
-mysql&#62; SELECT ... FROM tbl_name
+mysql&gt; SELECT ... FROM tbl_name
            ORDER BY key_part1,key_part2,... LIMIT 10;
-mysql&#62; SELECT ... FROM tbl_name
+mysql&gt; SELECT ... FROM tbl_name
            ORDER BY key_part1 DESC,key_part2 DESC,... LIMIT 10;
-</PRE>
+</pre>
 
-<P>
+<p>
 以下のクエリはインデックスツリーのみを使用します(インデックス化されているフィールドは
 数値型と仮定します)：
 
-</P>
+</p>
 
-<PRE>
-mysql&#62; SELECT key_part1,key_part2 FROM tbl_name WHERE key_part1=val;
-mysql&#62; SELECT COUNT(*) FROM tbl_name
+<pre>mysql&gt; SELECT key_part1,key_part2 FROM tbl_name WHERE key_part1=val;
+mysql&gt; SELECT COUNT(*) FROM tbl_name
            WHERE key_part1=val1 AND key_part2=val2;
-mysql&#62; SELECT key_part2 FROM tbl_name GROUP BY key_part1;
-</PRE>
+mysql&gt; SELECT key_part2 FROM tbl_name GROUP BY key_part1;
+</pre>
 
-<P>
+<p>
 以下のクエリは、ソートされた行の検索にインデックスを使用します：
 
-</P>
+</p>
 
-<PRE>
-mysql&#62; SELECT ... FROM tbl_name ORDER BY key_part1,key_part2,... ;
-mysql&#62; SELECT ... FROM tbl_name ORDER BY key_part1 DESC,key_part2 DESC,... ;
-</PRE>
+<pre>mysql&gt; SELECT ... FROM tbl_name ORDER BY key_part1,key_part2,... ;
+mysql&gt; SELECT ... FROM tbl_name ORDER BY key_part1 DESC,key_part2 DESC,... ;
+</pre>
 
-<P>
-<A NAME="IDX1220"></A>
-<A NAME="IDX1221"></A>
+<p>
+<a name="IDX1220"></a>
+<a name="IDX1221"></a>
 
 
-<H3><A NAME="DISTINCT_optimization" HREF="manual.ja_toc.html#DISTINCT_optimization">13.5.4  How MySQL Optimizes <CODE>DISTINCT</CODE></A></H3>
+</p><h3><a name="DISTINCT_optimization" href="manual.ja_toc.html#DISTINCT_optimization">13.5.4  How MySQL Optimizes <code>DISTINCT</code></a></h3>
 
-<P>
-<CODE>DISTINCT</CODE> is converted to a <CODE>GROUP BY</CODE> on all columns,
-<CODE>DISTINCT</CODE> combined with <CODE>ORDER BY</CODE> will in many cases also
+<p>
+<code>DISTINCT</code> is converted to a <code>GROUP BY</code> on all columns,
+<code>DISTINCT</code> combined with <code>ORDER BY</code> will in many cases also
 need a temporary table.
 
-</P>
-<P>
-When combining <CODE>LIMIT #</CODE> with <CODE>DISTINCT</CODE>, <STRONG>MySQL</STRONG> will stop
-as soon as it finds <CODE>#</CODE> unique rows.
+</p>
+<p>
+When combining <code>LIMIT #</code> with <code>DISTINCT</code>, <strong>MySQL</strong> will stop
+as soon as it finds <code>#</code> unique rows.
 
-</P>
-<P>
-If you don't use columns from all used tables, <STRONG>MySQL</STRONG> will stop
+</p>
+<p>
+If you don't use columns from all used tables, <strong>MySQL</strong> will stop
 the scanning of the not used tables as soon as it has found the first match.
 
-</P>
+</p>
 
-<PRE>
-SELECT DISTINCT t1.a FROM t1,t2 where t1.a=t2.a;
-</PRE>
+<pre>SELECT DISTINCT t1.a FROM t1,t2 where t1.a=t2.a;
+</pre>
 
-<P>
-In the case, assuming t1 is used before t2 (check with <CODE>EXPLAIN</CODE>), then
-<STRONG>MySQL</STRONG> will stop reading from t2 (for that particular row in t1)
+<p>
+In the case, assuming t1 is used before t2 (check with <code>EXPLAIN</code>), then
+<strong>MySQL</strong> will stop reading from t2 (for that particular row in t1)
 when the first row in t2 is found.
 
-</P>
-<P>
-<A NAME="IDX1222"></A>
-<A NAME="IDX1223"></A>
+</p>
+<p>
+<a name="IDX1222"></a>
+<a name="IDX1223"></a>
 
 
-<H3><A NAME="LEFT_JOIN_optimization" HREF="manual.ja_toc.html#LEFT_JOIN_optimization">13.5.5  MySQL はどのように <CODE>LEFT JOIN</CODE> と <CODE>RIGHT JOIN</CODE> を最適化するか？</A></H3>
+</p><h3><a name="LEFT_JOIN_optimization" href="manual.ja_toc.html#LEFT_JOIN_optimization">13.5.5  MySQL はどのように <code>LEFT JOIN</code> と <code>RIGHT JOIN</code> を最適化するか？</a></h3>
 
-<P>
-<STRONG>MySQL</STRONG> の <CODE>A LEFT JOIN B</CODE> は以下のように組みこまれています：
+<p>
+<strong>MySQL</strong> の <code>A LEFT JOIN B</code> は以下のように組みこまれています：
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-The table <CODE>B</CODE> is set to be dependent on table <CODE>A</CODE> and all tables
-that <CODE>A</CODE> is dependent on.
-<LI>
+The table <code>B</code> is set to be dependent on table <code>A</code> and all tables
+that <code>A</code> is dependent on.
+</li><li>
 
-テーブル <CODE>A</CODE> が <CODE>LEFT JOIN</CODE> 条件中に使用される全てのテーブル
-（ただし <CODE>B</CODE> は除く）に依存すると、セットされます。
-<LI>
+テーブル <code>A</code> が <code>LEFT JOIN</code> 条件中に使用される全てのテーブル
+（ただし <code>B</code> は除く）に依存すると、セットされます。
+</li><li>
 
-全ての <CODE>LEFT JOIN</CODE> 条件が <CODE>WHERE</CODE> 節に移動されます。
-<LI>
+全ての <code>LEFT JOIN</code> 条件が <code>WHERE</code> 節に移動されます。
+</li><li>
 
 All standard join optimizations are done, with the exception that a table is
 always read after all tables it is dependent on.  If there is a circular
-dependence then <STRONG>MySQL</STRONG> will issue an error.
-<LI>
+dependence then <strong>MySQL</strong> will issue an error.
+</li><li>
 
-全ての <CODE>WHERE</CODE> 節の最適化が行われます。
-<LI>
+全ての <code>WHERE</code> 節の最適化が行われます。
+</li><li>
 
-<CODE>WHERE</CODE> 節にマッチするレコードが <CODE>A</CODE> にあり、
-<CODE>LEFT JOIN</CODE> 条件にマッチするレコードが <CODE>B</CODE> にない場合、
-全てのフィールドが <CODE>NULL</CODE> にセットされた <CODE>B</CODE> のレコードが
+<code>WHERE</code> 節にマッチするレコードが <code>A</code> にあり、
+<code>LEFT JOIN</code> 条件にマッチするレコードが <code>B</code> にない場合、
+全てのフィールドが <code>NULL</code> にセットされた <code>B</code> のレコードが
 作成されます。 
-<LI>
+</li><li>
 
-If you use <CODE>LEFT JOIN</CODE> to find rows that don't exist in some
-table and you have the following test: <CODE>column_name IS NULL</CODE> in the
-<CODE>WHERE</CODE> part, where column_name is a column that is declared as
-<CODE>NOT NULL</CODE>, then <STRONG>MySQL</STRONG> will stop searching after more rows
+If you use <code>LEFT JOIN</code> to find rows that don't exist in some
+table and you have the following test: <code>column_name IS NULL</code> in the
+<code>WHERE</code> part, where column_name is a column that is declared as
+<code>NOT NULL</code>, then <strong>MySQL</strong> will stop searching after more rows
 (for a particular key combination) after it has found one row that
-matches the <CODE>LEFT JOIN</CODE> condition.
-</UL>
+matches the <code>LEFT JOIN</code> condition.
+</li></ul>
 
-<P>
-<CODE>RIGHT JOIN</CODE> is implemented analogously as <CODE>LEFT JOIN</CODE>.
+<p>
+<code>RIGHT JOIN</code> is implemented analogously as <code>LEFT JOIN</code>.
 
-</P>
-<P>
-The table read order forced by <CODE>LEFT JOIN</CODE> and <CODE>STRAIGHT JOIN</CODE>
+</p>
+<p>
+The table read order forced by <code>LEFT JOIN</code> and <code>STRAIGHT JOIN</code>
 will help the join optimizer (which calculates in which order tables
 should be joined) to do its work much more quickly, as there are fewer
 table permutations to check.
 
-</P>
-<P>
+</p>
+<p>
 Note that the above means that if you do a query of type:
 
-</P>
+</p>
 
-<PRE>
-SELECT * FROM a,b LEFT JOIN c ON (c.key=a.key) LEFT JOIN d (d.key=a.key) WHERE b.key=d.key
-</PRE>
+<pre>SELECT * FROM a,b LEFT JOIN c ON (c.key=a.key) LEFT JOIN d (d.key=a.key) WHERE b.key=d.key
+</pre>
 
-<P>
-<STRONG>MySQL</STRONG> will do a full scan on <CODE>b</CODE> as the <CODE>LEFT
-JOIN</CODE> will force it to be read before <CODE>d</CODE>.
+<p>
+<strong>MySQL</strong> will do a full scan on <code>b</code> as the <code>LEFT
+JOIN</code> will force it to be read before <code>d</code>.
 
-</P>
-<P>
+</p>
+<p>
 The fix in this case is to change the query to:
 
-</P>
+</p>
 
-<PRE>
-SELECT * FROM b,a LEFT JOIN c ON (c.key=a.key) LEFT JOIN d (d.key=a.key) WHERE b.key=d.key
-</PRE>
+<pre>SELECT * FROM b,a LEFT JOIN c ON (c.key=a.key) LEFT JOIN d (d.key=a.key) WHERE b.key=d.key
+</pre>
 
-<P>
-<A NAME="IDX1224"></A>
-<A NAME="IDX1225"></A>
+<p>
+<a name="IDX1224"></a>
+<a name="IDX1225"></a>
 
 
-<H3><A NAME="LIMIT_optimization" HREF="manual.ja_toc.html#LIMIT_optimization">13.5.6  MySQL はどのように <CODE>LIMIT</CODE> を最適化するか？</A></H3>
+</p><h3><a name="LIMIT_optimization" href="manual.ja_toc.html#LIMIT_optimization">13.5.6  MySQL はどのように <code>LIMIT</code> を最適化するか？</a></h3>
 
-<P>
-In some cases <STRONG>MySQL</STRONG> will handle the query differently when you are
-using <CODE>LIMIT #</CODE> and not using <CODE>HAVING</CODE>:
+<p>
+In some cases <strong>MySQL</strong> will handle the query differently when you are
+using <code>LIMIT #</code> and not using <code>HAVING</code>:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-もし <CODE>LIMIT</CODE> を使用して限定した数だけ select を行うなら、 <STRONG>MySQL</STRONG> は、
+もし <code>LIMIT</code> を使用して限定した数だけ select を行うなら、 <strong>MySQL</strong> は、
 ある場合、テーブルを全て走査するよりも、インデックスを使用しようとします。
-<LI>
+</li><li>
 
-もし <CODE>LIMIT #</CODE> を <CODE>ORDER BY</CODE> と共に使用するなら, <STRONG>MySQL</STRONG> は
-最初の <CODE>#</CODE> 行を見つけたらすぐに、全テーブルのソートは行わずに、
+もし <code>LIMIT #</code> を <code>ORDER BY</code> と共に使用するなら, <strong>MySQL</strong> は
+最初の <code>#</code> 行を見つけたらすぐに、全テーブルのソートは行わずに、
 ソートを終わらせます。 
-<LI>
+</li><li>
 
-<CODE>LIMIT #</CODE> を <CODE>DISTINCT</CODE> と共に使用するなら, <STRONG>MySQL</STRONG> は
-<CODE>#</CODE> 個の一意なレコードを見つけた時点で終わります。
-<LI>
+<code>LIMIT #</code> を <code>DISTINCT</code> と共に使用するなら, <strong>MySQL</strong> は
+<code>#</code> 個の一意なレコードを見つけた時点で終わります。
+</li><li>
 
-In some cases a <CODE>GROUP BY</CODE> can be resolved by reading the key in order 
+In some cases a <code>GROUP BY</code> can be resolved by reading the key in order 
 (or do a sort on the key) and then calculate summaries until the
-key value changes.  In this case <CODE>LIMIT #</CODE> will not calculate any
-unnecessary <CODE>GROUP BY</CODE>'s.
-<LI>
+key value changes.  In this case <code>LIMIT #</code> will not calculate any
+unnecessary <code>GROUP BY</code>'s.
+</li><li>
 
-<STRONG>MySQL</STRONG> は、最初の <CODE>#</CODE> 行をクライアントに送ったあと直に、
+<strong>MySQL</strong> は、最初の <code>#</code> 行をクライアントに送ったあと直に、
 クエリを中断します。
-<LI>
+</li><li>
 
-<CODE>LIMIT 0</CODE> は常に素早く空の結果を返します。
+<code>LIMIT 0</code> は常に素早く空の結果を返します。
 これはクエリのチェックや結果として得られるフィールドの型を得るために利用できます。
-<LI>
+</li><li>
 
 一時テーブルの大きさは、クエリを解決するためにどれぐらいのスペースがいるかを
-計算するのに、<CODE>LIMIT #</CODE> を使用します。
-</UL>
+計算するのに、<code>LIMIT #</code> を使用します。
+</li></ul>
 
-<P>
-<A NAME="IDX1226"></A>
-<A NAME="IDX1227"></A>
+<p>
+<a name="IDX1226"></a>
+<a name="IDX1227"></a>
 
 
-<H3><A NAME="Insert_speed" HREF="manual.ja_toc.html#Insert_speed">13.5.7  <CODE>INSERT</CODE> クエリの速度</A></H3>
+</p><h3><a name="Insert_speed" href="manual.ja_toc.html#Insert_speed">13.5.7  <code>INSERT</code> クエリの速度</a></h3>
 
-<P>
+<p>
 レコードを挿入する時間はおおよそ次からなります:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 接続:                    (3)
-<LI>
+</li><li>
 
 クエリをサーバへ送信:    (2)
-<LI>
+</li><li>
 
 クエリの解析:            (2)
-<LI>
+</li><li>
 
 レコードの挿入:          (1 x size of record)
-<LI>
+</li><li>
 
 インデックスの挿入:      (1 x number of indexes)
-<LI>
+</li><li>
 
 クローズ:                (1)
-</UL>
+</li></ul>
 
-<P>
+<p>
 ここで (数字) は比例時間です。これは、テーブルのオープンにかかる初期オーバーヘッ
 ド(これは同時に動作する各クエリ毎に1回行なわれます)は考慮されていません。
 
-</P>
-<P>
+</p>
+<p>
 テーブルのサイズはインデックスの挿入を N log N で遅くします (B-tree)。
 
-</P>
-<P>
+</p>
+<p>
 INSERT を速くするいくつかの方法：
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 もし同じクライアントから多くのレコードを同時にインサートするなら、
-複数の値が書ける <CODE>INSERT</CODE> 文を使用します。 これは個々に <CODE>INSERT</CODE> 文
+複数の値が書ける <code>INSERT</code> 文を使用します。 これは個々に <code>INSERT</code> 文
 を発行する場合に比べて、とても速くなります。
-<LI>
+</li><li>
 
 もし違うクライアントから多くのレコードを同時にインサートするなら、
- <CODE>INSERT DELAYED</CODE> 文の使用で、より速くなるでしょう。  「<A HREF="manual.ja_Reference.html#INSERT">7.21  <CODE>INSERT</CODE>構文</A>」節参照.
-<LI>
+ <code>INSERT DELAYED</code> 文の使用で、より速くなるでしょう。  「<a href="manual.ja_Reference.html#INSERT">7.21  <code>INSERT</code>構文</a>」節参照.
+</li><li>
 
-<CODE>MyISAM</CODE> では、複数の <CODE>SELECT</CODE> が走っているテーブルに対して、
+<code>MyISAM</code> では、複数の <code>SELECT</code> が走っているテーブルに対して、
 同時に、レコードを挿入できます。 ただしそのテーブルに対して
 レコードの削除がない場合に。
-<LI>
+</li><li>
 
-テキストファイルからテーブルにデータをいれる場合は、 <CODE>LOAD DATA INFILE</CODE> を
-使用します。 これはたくさんの <CODE>INSERT</CODE> 文の発行に比べて通常 20倍 程度
+テキストファイルからテーブルにデータをいれる場合は、 <code>LOAD DATA INFILE</code> を
+使用します。 これはたくさんの <code>INSERT</code> 文の発行に比べて通常 20倍 程度
 速くなります
- 「<A HREF="manual.ja_Reference.html#LOAD_DATA">7.23  <CODE>LOAD DATA INFILE</CODE>構文</A>」節参照.
-<LI>
+ 「<a href="manual.ja_Reference.html#LOAD_DATA">7.23  <code>LOAD DATA INFILE</code>構文</a>」節参照.
+</li><li>
 
-テーブルが多くのインデックスを持っている場合、ある方法で、 <CODE>LOAD DATA INFILE</CODE> の
+テーブルが多くのインデックスを持っている場合、ある方法で、 <code>LOAD DATA INFILE</code> の
 実行を速くすることが可能です。
 以下の手順で行います：
 
 
-<OL>
-<LI>
+<ol>
+<li>
 
-Optionally create the table with <CODE>CREATE TABLE</CODE>. For example, using
-<CODE>mysql</CODE> or Perl-DBI.
+Optionally create the table with <code>CREATE TABLE</code>. For example, using
+<code>mysql</code> or Perl-DBI.
 
-<LI>
+</li><li>
 
-<CODE>FLUSH TABLES</CODE> の実行。 あるいは <CODE>mysqladmin flush-tables</CODE> 
+<code>FLUSH TABLES</code> の実行。 あるいは <code>mysqladmin flush-tables</code> 
 コマンドの実行。
 
-<LI>
+</li><li>
 
-<CODE>myisamchk --keys-used=0 -rq /path/to/db/tbl_name</CODE> の使用。
+<code>myisamchk --keys-used=0 -rq /path/to/db/tbl_name</code> の使用。
 これは指定されたテーブルから全てのインデックスを削除します。
 
-<LI>
+</li><li>
 
-そのテーブルに <CODE>LOAD DATA INFILE</CODE> を使用してデータを入れます. 
+そのテーブルに <code>LOAD DATA INFILE</code> を使用してデータを入れます. 
 これはいかなるインデックスも更新しないでしょうし、そのため、速くもなるでしょう。
 
-<LI>
+</li><li>
 
-If you are going to only read the table in the future, run <CODE>myisampack</CODE>
-on it to make it smaller.  「<A HREF="manual.ja_Table_types.html#Compressed_format">8.1.2.3  Compressed Table Characteristics</A>」節参照.
+If you are going to only read the table in the future, run <code>myisampack</code>
+on it to make it smaller.  「<a href="manual.ja_Table_types.html#Compressed_format">8.1.2.3  Compressed Table Characteristics</a>」節参照.
 
-<LI>
+</li><li>
 
-<CODE>myisamchk -r -q /path/to/db/tbl_name</CODE> でインデックスを再構築. 
+<code>myisamchk -r -q /path/to/db/tbl_name</code> でインデックスを再構築. 
 これは disk に書き込む前にインデックスをメモリに作成します。
 これは多くのディスクシークを避けることが出来るのでとても速くなります。
 でき上がったインデックスツリーは、バランスのよいものになります。
 
-<LI>
+</li><li>
 
-<CODE>FLUSH TABLES</CODE> の実行。 あるいは <CODE>mysqladmin flush-tables</CODE> 
+<code>FLUSH TABLES</code> の実行。 あるいは <code>mysqladmin flush-tables</code> 
 コマンドの実行。
-</OL>
+</li></ol>
 
-この手順は、将来の MySQL の <CODE>LOAD DATA INFILE</CODE> に組み込むかもしれません。
-<LI>
+この手順は、将来の MySQL の <code>LOAD DATA INFILE</code> に組み込むかもしれません。
+</li><li>
 
 テーブルをロックすることで、挿入を速くすることも可能です：
 
 
-<PRE>
-mysql&#62; LOCK TABLES a WRITE;
-mysql&#62; INSERT INTO a VALUES (1,23),(2,34),(4,33);
-mysql&#62; INSERT INTO a VALUES (8,26),(6,29);
-mysql&#62; UNLOCK TABLES;
-</PRE>
+<pre>mysql&gt; LOCK TABLES a WRITE;
+mysql&gt; INSERT INTO a VALUES (1,23),(2,34),(4,33);
+mysql&gt; INSERT INTO a VALUES (8,26),(6,29);
+mysql&gt; UNLOCK TABLES;
+</pre>
 
-主な速度差は、全ての <CODE>INSERT</CODE> 構文でインデックスバッファが一度だけディスクにフ
-ラッシュされることです。通常は  <CODE>INSERT</CODE> 構文があるのと同じくらい多くのインデッ
+主な速度差は、全ての <code>INSERT</code> 構文でインデックスバッファが一度だけディスクにフ
+ラッシュされることです。通常は  <code>INSERT</code> 構文があるのと同じくらい多くのインデッ
 クスバッファフラッシュがあります。単一構文の全てのレコードは、ロックなしで挿入できます。
 
 ロックも複数接続テストの合計時間を低くしますが、いくつかのスレッドの最大
@@ -2045,133 +2009,132 @@ mysql&#62; UNLOCK TABLES;
 例えば:
 
 
-<PRE>
-thread 1 does 1000 inserts
+<pre>thread 1 does 1000 inserts
 thread 2, 3, and 4 does 1 insert
 thread 5 does 1000 inserts
-</PRE>
+</pre>
 
 ロックを使用しない場合、2, 3 そして 4 は 1 と 5 の前に終ります。ロックを
 使用する場合、2,3,4 は 1 や 5 の前に終わることはおそらくありませんが、合
 計時間は約 40 % 速くなります。
 
-<CODE>INSERT</CODE>, <CODE>UPDATE</CODE> , <CODE>DELETE</CODE> は、 <STRONG>MySQL</STRONG> ではとても速いので、
+<code>INSERT</code>, <code>UPDATE</code> , <code>DELETE</code> は、 <strong>MySQL</strong> ではとても速いので、
 1 行で約 5 つ以上、値を 挿入・更新 をする操作に対して、
 ロックを追加すれば、全般的により良い性能が得られます。
 とても多い insert を行なう場合、
 他のスレッドにそのロックしたテーブルへのアクセスを与えるために 、
-だいたい 1000 レコードごとに一度、<CODE>UNLOCK TABLES</CODE> した後に
- <CODE>LOCK TABLES</CODE> を行います。 これでもまだ良い性能が得られます。
+だいたい 1000 レコードごとに一度、<code>UNLOCK TABLES</code> した後に
+ <code>LOCK TABLES</code> を行います。 これでもまだ良い性能が得られます。
 
-もちろん <CODE>LOAD DATA INFILE</CODE> はとても速いです。
-</UL>
+もちろん <code>LOAD DATA INFILE</code> はとても速いです。
+</li></ul>
 
-<P>
-<CODE>LOAD DATA INFILE</CODE> と <CODE>INSERT</CODE> を共に速くするためには、
-キーバッファを増やします。  「<A HREF="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</A>」節参照.
+<p>
+<code>LOAD DATA INFILE</code> と <code>INSERT</code> を共に速くするためには、
+キーバッファを増やします。  「<a href="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</a>」節参照.
 
-</P>
+</p>
 
 
-<H3><A NAME="Update_speed" HREF="manual.ja_toc.html#Update_speed">13.5.8  <CODE>UPDATE</CODE> クエリの速度</A></H3>
+<h3><a name="Update_speed" href="manual.ja_toc.html#Update_speed">13.5.8  <code>UPDATE</code> クエリの速度</a></h3>
 
-<P>
-<CODE>UPDATE</CODE> クエリは <CODE>SELECT</CODE> クエリのように最適化されますが、
+<p>
+<code>UPDATE</code> クエリは <code>SELECT</code> クエリのように最適化されますが、
 書き込みのオーバーヘッドが加わります。
 書き込み速度は、更新されるデータの大きさ、更新されるインデックス数に
 依ります。 変更されないインデックスは更新されません。
 
-</P>
-<P>
+</p>
+<p>
 Also, another way to get fast updates is to delay updates and then do
 many updates in a row later. 
 一文で多くの更新を行えば、もしテーブルがロックされていれば、
 一文で一個づつ更新するよりも、とても速くなります。
 
-</P>
-<P>
+</p>
+<p>
 Note that, with dynamic record format, updating a record to
 a longer total length may split the record.  So if you do this often,
-it is very important to <CODE>OPTIMIZE TABLE</CODE> sometimes.
- 「<A HREF="manual.ja_Reference.html#OPTIMIZE_TABLE">7.11  <CODE>OPTIMIZE TABLE</CODE>構文</A>」節参照.
+it is very important to <code>OPTIMIZE TABLE</code> sometimes.
+ 「<a href="manual.ja_Reference.html#OPTIMIZE_TABLE">7.11  <code>OPTIMIZE TABLE</code>構文</a>」節参照.
 
-</P>
+</p>
 
 
-<H3><A NAME="Delete_speed" HREF="manual.ja_toc.html#Delete_speed">13.5.9  <CODE>DELETE</CODE> クエリの速度</A></H3>
+<h3><a name="Delete_speed" href="manual.ja_toc.html#Delete_speed">13.5.9  <code>DELETE</code> クエリの速度</a></h3>
 
-<P>
+<p>
 If you want to delete all rows in the table, you should use
-<CODE>TRUNCATE TABLE table_name</CODE>.  「<A HREF="manual.ja_Reference.html#TRUNCATE">7.18  <CODE>TRUNCATE</CODE> Syntax</A>」節参照.
+<code>TRUNCATE TABLE table_name</code>.  「<a href="manual.ja_Reference.html#TRUNCATE">7.18  <code>TRUNCATE</code> Syntax</a>」節参照.
 
-</P>
-<P>
+</p>
+<p>
 1レコードを削除する時間は、ちょうどインデックスの数に比例します。
 より速くレコードを削除したいなら、インデックス・キャッシュを
-増やします。  「<A HREF="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</A>」節参照.
+増やします。  「<a href="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</a>」節参照.
 
-</P>
-<P>
+</p>
+<p>
 テーブル中からレコードの大きな部分を消すよりも、
 全てのレコードを消すほうが、とても速いです。
 
-</P>
-<P>
-<A NAME="IDX1228"></A>
-<A NAME="IDX1229"></A>
+</p>
+<p>
+<a name="IDX1228"></a>
+<a name="IDX1229"></a>
 
 
-<H2><A NAME="Tips" HREF="manual.ja_toc.html#Tips">13.6  最適化に関するその他の助言</A></H2>
+</p><h2><a name="Tips" href="manual.ja_toc.html#Tips">13.6  最適化に関するその他の助言</a></h2>
 
-<P>
+<p>
 Unsorted tips for faster systems:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 コネクションオーバーヘッドを避けるために、データベースに対して、
 逐次コネクションを落とさないように、常に接続を保ちます。
 If you can't use persistent connections and you are doing a
 lot of new connections to the database, you may want to change the value
-of the <CODE>thread_cache_size</CODE> variable.  「<A HREF="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</A>」節参照.
-<LI>
+of the <code>thread_cache_size</code> variable.  「<a href="manual.ja_Performance.html#Server_parameters">13.2.3  サーバーパラメーターのチューニング</a>」節参照.
+</li><li>
 
 あなたのクエリがテーブルのインデックスを使用しているか、いつもチェックします。
-<STRONG>MySQL</STRONG> では <CODE>EXPLAIN</CODE> コマンドでこれが行えれます。
- 「<A HREF="manual.ja_Reference.html#EXPLAIN">7.29  <CODE>EXPLAIN</CODE> 構文 (<CODE>SELECT</CODE>についての情報を得る)</A>」節参照.
-<LI>
+<strong>MySQL</strong> では <code>EXPLAIN</code> コマンドでこれが行えれます。
+ 「<a href="manual.ja_Reference.html#EXPLAIN">7.29  <code>EXPLAIN</code> 構文 (<code>SELECT</code>についての情報を得る)</a>」節参照.
+</li><li>
 
-たくさん変更されるようなテーブルに対して、複雑な <CODE>SELECT</CODE> クエリを
+たくさん変更されるようなテーブルに対して、複雑な <code>SELECT</code> クエリを
 避けるように試みます。 これはテーブル・ロックの問題を避けるためです。
-<LI>
+</li><li>
 
-新しい <CODE>MyISAM</CODE> テーブルでは、あるテーブルにレコードが挿入(削除は無しで)
+新しい <code>MyISAM</code> テーブルでは、あるテーブルにレコードが挿入(削除は無しで)
 されている最中に、同時に、同じテーブルからデータを読むことが可能です。
 これがあなたにとって重要項目であるなら、
-レコードの削除の必要のない方法や、多くのレコードを削除した後に <CODE>OPTIMIZE TABLE</CODE> を
+レコードの削除の必要のない方法や、多くのレコードを削除した後に <code>OPTIMIZE TABLE</code> を
 実行することを、考慮すべきです。
-<LI>
+</li><li>
 
-Use <CODE>ALTER TABLE ... ORDER BY expr1,expr2...</CODE> if you mostly
+Use <code>ALTER TABLE ... ORDER BY expr1,expr2...</code> if you mostly
 retrieve rows in expr1,expr2.. order.  By using this option after big
 changes to the table, you may be able to get higher performance.
-<LI>
+</li><li>
 
 In some cases it may make sense to introduce a column that is 'hashed'
 based on information from other columns. If this column is short and
 reasonably unique it may be much faster than a big index on many
-columns. In <STRONG>MySQL</STRONG> it's very easy to use this extra column:
-<CODE>SELECT * FROM table_name WHERE hash=MD5(concat(col1,col2))
-AND col_1='constant' AND col_2='constant'</CODE>
-<LI>
+columns. In <strong>MySQL</strong> it's very easy to use this extra column:
+<code>SELECT * FROM table_name WHERE hash=MD5(concat(col1,col2))
+AND col_1='constant' AND col_2='constant'</code>
+</li><li>
 
-多くの変更がなされるテーブルに対しては、全ての <CODE>VARCHAR</CODE> や <CODE>BLOB</CODE> 
+多くの変更がなされるテーブルに対しては、全ての <code>VARCHAR</code> や <code>BLOB</code> 
 フィールドを避けるように試みるべきです。
 You will get dynamic row length as soon as you
-are using a single <CODE>VARCHAR</CODE> or <CODE>BLOB</CODE> columns.  「<A HREF="manual.ja_Table_types.html#Table_types">8  MySQL Table types</A>」節参照.
-<LI>
+are using a single <code>VARCHAR</code> or <code>BLOB</code> columns.  「<a href="manual.ja_Table_types.html#Table_types">8  MySQL Table types</a>」節参照.
+</li><li>
 
 通常、あるテーブルを違うテーブルに分けることは、レコードが大きくなる
 ために役立ちません。
@@ -2182,22 +2145,22 @@ the data most new disks can read the whole row fast enough for most
 applications. The only cases where it really matters to split up a table is if
 it's a dynamic row size table (see above) that you can change to a fixed
 row size, or if you very often need to scan the table and don't need
-most of the columns.  「<A HREF="manual.ja_Table_types.html#Table_types">8  MySQL Table types</A>」節参照.
-<LI>
+most of the columns.  「<a href="manual.ja_Table_types.html#Table_types">8  MySQL Table types</a>」節参照.
+</li><li>
 
 もし、多くのレコードからの情報を元にした計算(あるもののカウントとか)を
 しょっちゅう行う必要があるなら、新しいテーブルを用意し、逐次カウンターを
 更新した方が多分良いでしょう。
-<CODE>UPDATE table set count=count+1 where index_column=constant</CODE> の更新は
+<code>UPDATE table set count=count+1 where index_column=constant</code> の更新は
 とても速いです！
 
-これは、<STRONG>MySQL</STRONG> のようなテーブル・ロッキング
+これは、<strong>MySQL</strong> のようなテーブル・ロッキング
 (multiple readers / single writers)をもつデータベースを
 使う上で、本当に重要なことです。
 This will
 also give better performance with most databases as the row locking
 manager in this case will have less to do.
-<LI>
+</li><li>
 
 もしたくさんの大きなテーブルから統計を収集する必要があるなら、
 全テーブルを走査する代わりに、サマリーテーブルを使用します。
@@ -2206,17 +2169,17 @@ much faster than trying to do statistics 'live'. It's much faster to
 regenerate new summary tables from the logs when things changes
 (depending on business decisions) than to have to change the running
 application!
-<LI>
+</li><li>
 
 If possible, one should classify reports as 'live' or 'statistical',
 where data needed for statistical reports are only generated based on
 summary tables that are generated from the actual data.
-<LI>
+</li><li>
 
 フィールドにはデフォルト値があるという事を利用して下さい。
 値がデフォルトとは違う場合に限り、値を挿入します。
-これは <STRONG>MySQL</STRONG> が必要とする分析を少なくし、インサートの速度が向上します。
-<LI>
+これは <strong>MySQL</strong> が必要とする分析を少なくし、インサートの速度が向上します。
+</li><li>
 
 ある場合では、BLOB にデータをパックして保存するのが便利です。
 この場合、BLOB に入れた値を パック・アンパック するためのコードを
@@ -2224,126 +2187,126 @@ summary tables that are generated from the actual data.
 しかしこれは、多くのアクセスを抑制するでしょう。
 これは、静的(固定長)テーブル構造に適しないデータを持っている場合に
 実用になります。
-<LI>
+</li><li>
 
 通常、あなたは全てのデータを冗長の無いように(データベース理論で
 第３正規形 , 3rd Normal Form , 3NF と呼ばれる)
 しようとするかもしれませんが、しかし、よりスピードを求める場合は、
 重複やサマリーテーブルの作成をおそれてはいけません。
-<LI>
+</li><li>
 
 ストアド・プロシージャ や UDF (ユーザー定義関数) はよりパフォーマンスを得る
 ためにはよい方法かもしれません。
 In this case you should, however, always have a way
 to do this some other (slower) way if you use some database that doesn't
 support this.
-<LI>
+</li><li>
 
 You can always gain something by caching queries/answers in your
 application and trying to do many inserts/updates at the same time.  If
-your database supports lock tables (like <STRONG>MySQL</STRONG> and Oracle),
+your database supports lock tables (like <strong>MySQL</strong> and Oracle),
 this should help to ensure that the index cache is only flushed once
 after all updates.
-<LI>
+</li><li>
 
-データをすぐには書く必要がないとき、<CODE>INSERT /*! DELAYED */</CODE> を使用します。
+データをすぐには書く必要がないとき、<code>INSERT /*! DELAYED */</code> を使用します。
 これは、一回のディスクへの書き込みで、多くのレコードがかかれるので、
 速くなります。
-<LI>
+</li><li>
 
-SELECT がより重要な場合、<CODE>INSERT /*! LOW_PRIORITY */</CODE> を使用します。
-<LI>
+SELECT がより重要な場合、<code>INSERT /*! LOW_PRIORITY */</code> を使用します。
+</li><li>
 
 キューを無視して SELECT を優先的に行いたいときは
-<CODE>SELECT /*! HIGH_PRIORITY */</CODE> を使用します。
+<code>SELECT /*! HIGH_PRIORITY */</code> を使用します。
 これは、たとえ誰かが書き込みを待っていたとしても、その SELECT は
 実行されます。
-<LI>
+</li><li>
 
-複数行 <CODE>INSERT</CODE> 文の使用。 これは多くのレコードを一つの SQL コマンドで
+複数行 <code>INSERT</code> 文の使用。 これは多くのレコードを一つの SQL コマンドで
 挿入することが出来ます。
 (多くの SQL サーバーがこれをサポートしています)
-<LI>
+</li><li>
 
-大きなデータの読み込みには <CODE>LOAD DATA INFILE</CODE> を使用します。
+大きなデータの読み込みには <code>LOAD DATA INFILE</code> を使用します。
 This if
-faster than normal inserts and will be even faster when <CODE>myisamchk</CODE>
-is integrated in <CODE>mysqld</CODE>.
-<LI>
+faster than normal inserts and will be even faster when <code>myisamchk</code>
+is integrated in <code>mysqld</code>.
+</li><li>
 
-一意の値を作るために、 <CODE>AUTO_INCREMENT</CODE> を使用します。
-<LI>
+一意の値を作るために、 <code>AUTO_INCREMENT</code> を使用します。
+</li><li>
 
 動的テーブルフォーマットの使用時には、フラグメンテーションを避けるために、
-<CODE>OPTIMIZE TABLE</CODE> を時々使用します。
- 「<A HREF="manual.ja_Reference.html#OPTIMIZE_TABLE">7.11  <CODE>OPTIMIZE TABLE</CODE>構文</A>」節参照.
+<code>OPTIMIZE TABLE</code> を時々使用します。
+ 「<a href="manual.ja_Reference.html#OPTIMIZE_TABLE">7.11  <code>OPTIMIZE TABLE</code>構文</a>」節参照.
 
-<LI>
+</li><li>
 
-可能ならば <CODE>HEAP</CODE> テーブルをスピードアップのために使用します.  「<A HREF="manual.ja_Table_types.html#Table_types">8  MySQL Table types</A>」節参照.
-<LI>
+可能ならば <code>HEAP</code> テーブルをスピードアップのために使用します.  「<a href="manual.ja_Table_types.html#Table_types">8  MySQL Table types</a>」節参照.
+</li><li>
 
 通常の Web サーバーの設定ならば、イメージはファイルに保存すべきです。
 データベースには、それらファイルの参照(パスとか)のみを入れます。
 この主な理由は、通常の Web サーバーはデータベースよりもコンテンツを
 よりよくキャッシュしてくれるからです。 それでファイルを使用するなら、
 速いシステムをより簡単に得ることができます。
-<LI>
+</li><li>
 
 重要でないデータで、よくアクセスされる物は、メモリテーブルにいれます。
 (like
 information about the last shown banner for users that don't have
 cookies)
-<LI>
+</li><li>
 
 Columns with identical information in different tables should be
 declared identical and have identical names. Before Version 3.23 you
 got slow joins otherwise.
 
-名前は単純にしてください（customer テーブルでは <CODE>customer_name</CODE> の
-かわりに <CODE>name</CODE> を使うとか）。 他の SQL サーバーへの移植を考慮するなら、
+名前は単純にしてください（customer テーブルでは <code>customer_name</code> の
+かわりに <code>name</code> を使うとか）。 他の SQL サーバーへの移植を考慮するなら、
 名前は 18 文字より短くすべきです。
-<LI>
+</li><li>
 
 もし本当にハイ・スピードが必要なら、SQL サーバーがサポートしている物とは
 違う、ローレベルのデータ保存のインターフェースに注目すべきです。
-例えば、 <STRONG>MySQL</STRONG> <CODE>MyISAM</CODE> を直接アクセスすることは、
+例えば、 <strong>MySQL</strong> <code>MyISAM</code> を直接アクセスすることは、
 SQL インターフェースを介してアクセスするよりも、2～5倍速くなるでしょう。
 これを可能にするには、そのデータは、アプリケーションと同じマシン上になくてはならず、
 通常、一つのプロセスだけでアクセスされるべきです。
 (なぜなら、外部ファイルロックは、とても遅いから)。
-上の問題は、<STRONG>MySQL</STRONG> サーバー内の <CODE>MyISAM</CODE> のローレベルのコマンドの
+上の問題は、<strong>MySQL</strong> サーバー内の <code>MyISAM</code> のローレベルのコマンドの
 導入で解決できるでしょう。 (これはよりよいパフォーマンスを得ることの出来る、
 簡単な方法の一つです)。 By carefully designing the database interface
 it should be quite easy to support this types of optimisations.
-<LI>
+</li><li>
 
 多くの場合、データベースからデータをアクセスする方が(接続を維持していれば)、
 テキストファイルからデータをアクセスするよりも速いです。 なぜなら、
 データベースはテキストファイルよりもコンパクトになり（数値データの場合）、
 このため、ディスクアクセスが少なくなるからです。
 また、行や項目を見つけるために、テキストファイルを解析する必要も省けます。
-<LI>
+</li><li>
 
-複製もスピードアップに使用できるでしょう。  「<A HREF="manual.ja_Replication.html#Replication">11  Replication in MySQL</A>」節参照.
-<LI>
+複製もスピードアップに使用できるでしょう。  「<a href="manual.ja_Replication.html#Replication">11  Replication in MySQL</a>」節参照.
+</li><li>
 
-<CODE>DELAY_KEY_WRITE=1</CODE> が定義されたテーブルは、インデックスの更新が速くなります。
+<code>DELAY_KEY_WRITE=1</code> が定義されたテーブルは、インデックスの更新が速くなります。
 これはそのインデックス・ファイルが閉じられるまでディスクに記録されないからです。
-したがって、なにかが途中で <CODE>mysqld</CODE> をキルしてもテーブルが大丈夫なようにするため、
-<CODE>mysqld</CODE> を起動する前には、<CODE>myisamchk</CODE> をそれらのテーブルに対して実行すべきです。
+したがって、なにかが途中で <code>mysqld</code> をキルしてもテーブルが大丈夫なようにするため、
+<code>mysqld</code> を起動する前には、<code>myisamchk</code> をそれらのテーブルに対して実行すべきです。
 As the key information can always be generated
-from the data, you should not lose anything by using <CODE>DELAY_KEY_WRITE</CODE>.
-</UL>
+from the data, you should not lose anything by using <code>DELAY_KEY_WRITE</code>.
+</li></ul>
 
-<P>
-<A NAME="IDX1230"></A>
-<A NAME="IDX1231"></A>
+<p>
+<a name="IDX1230"></a>
+<a name="IDX1231"></a>
 
 
-<H2><A NAME="Benchmarks" HREF="manual.ja_toc.html#Benchmarks">13.7  Using Your Own Benchmarks</A></H2>
+</p><h2><a name="Benchmarks" href="manual.ja_toc.html#Benchmarks">13.7  Using Your Own Benchmarks</a></h2>
 
-<P>
+<p>
 You should definitely benchmark your application and database to find
 out where the bottlenecks are.  By fixing it (or by replacing the
 bottleneck with a 'dummy module') you can then easily identify the next
@@ -2352,169 +2315,169 @@ application is sufficient, you should at least make a plan for each
 bottleneck, and decide how to solve it if someday you really need the
 extra performance.
 
-</P>
-<P>
-For an example of portable benchmark programs, look at the <STRONG>MySQL</STRONG>
-benchmark suite.  「<A HREF="manual.ja_MySQL_Benchmarks.html#MySQL_Benchmarks">14  <STRONG>MySQL</STRONG> ベンチマークスイート</A>」節参照. You
+</p>
+<p>
+For an example of portable benchmark programs, look at the <strong>MySQL</strong>
+benchmark suite.  「<a href="manual.ja_MySQL_Benchmarks.html#MySQL_Benchmarks">14  <strong>MySQL</strong> ベンチマークスイート</a>」節参照. You
 can take any program from this suite and modify it for your needs. By doing this,
 you can try different solutions to your problem and test which is really the
 fastest solution for you.
 
-</P>
-<P>
+</p>
+<p>
 It is very common that some problems only occur when the system is very
 heavily loaded. We have had many customers who contact us when they
 have a (tested) system in production and have encountered load problems. In
 every one of these cases so far, it has been problems with basic design
 (table scans are NOT good at high load) or OS/Library issues. Most of
-this would be a <STRONG>LOT</STRONG> easier to fix if the systems were not
+this would be a <strong>LOT</strong> easier to fix if the systems were not
 already in production.
 
-</P>
-<P>
+</p>
+<p>
 To avoid problems like this, you should put some effort into benchmarking
 your whole application under the worst possible load! You can use Sasha's
 recent hack for this -
-<a HREF="http://www.mysql.com/Downloads/super-smack/super-smack-1.0.tar.gz">
+<a href="http://www.mysql.com/Downloads/super-smack/super-smack-1.0.tar.gz">
 super-smack</a>.
 As the name suggests, it can bring your system down to its knees if you ask it,
 so make sure to use it only on your development systems.
 
-</P>
-<P>
-<A NAME="IDX1232"></A>
-<A NAME="IDX1233"></A>
-<A NAME="IDX1234"></A>
+</p>
+<p>
+<a name="IDX1232"></a>
+<a name="IDX1233"></a>
+<a name="IDX1234"></a>
 
 
-<H2><A NAME="Design" HREF="manual.ja_toc.html#Design">13.8  Design Choices</A></H2>
+</p><h2><a name="Design" href="manual.ja_toc.html#Design">13.8  Design Choices</a></h2>
 
-<P>
-<CODE>MySQL</CODE> は、レコードのデータとインデックスを別のファイルに保存します。
+<p>
+<code>MySQL</code> は、レコードのデータとインデックスを別のファイルに保存します。
 他の多くの(ほとんど全て)データベースでは、同じファイルにデータとインデックスを
-混在させて保存します。 我々は、最近のシステムには、<STRONG>MySQL</STRONG> の選択の方が
+混在させて保存します。 我々は、最近のシステムには、<strong>MySQL</strong> の選択の方が
 良いと信じています。
 
-</P>
-<P>
+</p>
+<p>
 Another way to store the row data is to keep the information for each
 column in a separate area (examples are SDBM and Focus). This will cause a
 performance hit for every query that accesses more than one column. Because
 this degenerates so quickly when more than one column is accessed,
 we believe that this model is not good for general purpose databases.
 
-</P>
-<P>
+</p>
+<p>
 The more common case is that the index and data are stored together
 (like in Oracle/Sybase et al). In this case you will find the row
 information at the leaf page of the index. The good thing with this
 layout is that it, in many cases, depending on how well the index is
 cached, saves a disk read.  The bad things with this layout are:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 Table scanning is much slower because you have to read through the indexes
 to get at the data.
-<LI>
+</li><li>
 
 You can't use only the index table to retrieve data for a query.
-<LI>
+</li><li>
 
 You lose a lot of space, as you must duplicate indexes from the nodes
 (as you can't store the row in the nodes).
-<LI>
+</li><li>
 
 Deletes will degenerate the table over time (as indexes in nodes are
 usually not updated on delete).
-<LI>
+</li><li>
 
 It's harder to cache ONLY the index data.
-</UL>
+</li></ul>
 
-<P>
-<A NAME="IDX1235"></A>
+<p>
+<a name="IDX1235"></a>
 
 
-<H2><A NAME="Design_Limitations" HREF="manual.ja_toc.html#Design_Limitations">13.9  MySQL Design Limitations/Tradeoffs</A></H2>
+</p><h2><a name="Design_Limitations" href="manual.ja_toc.html#Design_Limitations">13.9  MySQL Design Limitations/Tradeoffs</a></h2>
 
-<P>
-Because <STRONG>MySQL</STRONG> uses extremely fast table locking (multiple readers /
+<p>
+Because <strong>MySQL</strong> uses extremely fast table locking (multiple readers /
 single writers) the biggest remaining problem is a mix of a steady stream of
 inserts and slow selects on the same table.
 
-</P>
-<P>
+</p>
+<p>
 We belive that for a huge number of systems the extremely fast
 performance in other cases make this choice a win. This case is usually
 also possible to solve by having multiple copies of the table, but it
 takes more effort and hardware.
 
-</P>
-<P>
+</p>
+<p>
 We are also working on some extensions to solve this problem for some
 common application niches.
 
-</P>
-<P>
-<A NAME="IDX1236"></A>
-<A NAME="IDX1237"></A>
-<A NAME="IDX1238"></A>
+</p>
+<p>
+<a name="IDX1236"></a>
+<a name="IDX1237"></a>
+<a name="IDX1238"></a>
 
 
-<H2><A NAME="Portability" HREF="manual.ja_toc.html#Portability">13.10  Portability</A></H2>
+</p><h2><a name="Portability" href="manual.ja_toc.html#Portability">13.10  Portability</a></h2>
 
-<P>
+<p>
 Because all SQL servers implement different parts of SQL, it takes work to
 write portable SQL applications. For very simple selects/inserts it is
 very easy, but the more you need the harder it gets. If you want an
 application that is fast with many databases it becomes even harder!
 
-</P>
-<P>
+</p>
+<p>
 To make a complex application portable you need to choose a number of
 SQL servers that it should work with.
 
-</P>
-<P>
-You can use the <STRONG>MySQL</STRONG> crash-me program/web-page
-<a HREF="http://www.mysql.com/information/crash-me.php">http://www.mysql.com/information/crash-me.php</a> to find functions,
+</p>
+<p>
+You can use the <strong>MySQL</strong> crash-me program/web-page
+<a href="http://www.mysql.com/information/crash-me.php">http://www.mysql.com/information/crash-me.php</a> to find functions,
 types, and limits you can use with a selection of database
 servers. Crash-me now tests far from everything possible, but it
 is still comprehensive with about 450 things tested.
 
-</P>
-<P>
+</p>
+<p>
 For example, you shouldn't have column names longer than 18 characters
 if you want to be able to use Informix or DB2.
 
-</P>
-<P>
-Both the <STRONG>MySQL</STRONG> benchmarks and crash-me programs are very
+</p>
+<p>
+Both the <strong>MySQL</strong> benchmarks and crash-me programs are very
 database-independent.  By taking a look at how we have handled this, you
 can get a feeling for what you have to do to write your application
 database-independent.  The benchmarks themselves can be found in the
-<TT>`sql-bench'</TT> directory in the <STRONG>MySQL</STRONG> source
+<tt>`sql-bench'</tt> directory in the <strong>MySQL</strong> source
 distribution. They are written in Perl with DBI database interface
 (which solves the access part of the problem).
 
-</P>
-<P>
-See <a HREF="http://www.mysql.com/information/benchmarks.html">http://www.mysql.com/information/benchmarks.html</a> for the results
+</p>
+<p>
+See <a href="http://www.mysql.com/information/benchmarks.html">http://www.mysql.com/information/benchmarks.html</a> for the results
 from this benchmark.
 
-</P>
-<P>
+</p>
+<p>
 As you can see in these results, all databases have some weak points. That
 is, they have different design compromises that lead to different
 behavior.
 
-</P>
-<P>
+</p>
+<p>
 If you strive for database independence, you need to get a good feeling
-for each SQL server's bottlenecks. <STRONG>MySQL</STRONG> is VERY fast in
+for each SQL server's bottlenecks. <strong>MySQL</strong> is VERY fast in
 retrieving and updating things, but will have a problem in mixing slow
 readers/writers on the same table. Oracle, on the other hand, has a big
 problem when you try to access rows that you have recently updated
@@ -2522,25 +2485,25 @@ problem when you try to access rows that you have recently updated
 not very good at generating summary tables from log tables, as in this
 case row locking is almost useless.
 
-</P>
-<P>
-To get your application <EM>really</EM> database-independent, you need to define
+</p>
+<p>
+To get your application <em>really</em> database-independent, you need to define
 an easy extendable interface through which you manipulate your data. As
 C++ is available on most systems, it makes sense to use a C++ classes
 interface to the databases.
 
-</P>
-<P>
+</p>
+<p>
 If you use some specific feature for some database (like the
-<CODE>REPLACE</CODE> command in <STRONG>MySQL</STRONG>), you should code a method for
+<code>REPLACE</code> command in <strong>MySQL</strong>), you should code a method for
 the other SQL servers to implement the same feature (but slower).  With
-<STRONG>MySQL</STRONG> you can use the <CODE>/*!  */</CODE> syntax to add
-<STRONG>MySQL</STRONG>-specific keywords to a query.  The code inside
-<CODE>/**/</CODE> will be treated as a comment (ignored) by most other SQL
+<strong>MySQL</strong> you can use the <code>/*!  */</code> syntax to add
+<strong>MySQL</strong>-specific keywords to a query.  The code inside
+<code>/**/</code> will be treated as a comment (ignored) by most other SQL
 servers.
 
-</P>
-<P>
+</p>
+<p>
 If REAL high performance is more important than exactness, as in some
 Web applications, a possibility is to create an application layer that
 caches all results to give you even higher performance. By letting
@@ -2549,40 +2512,40 @@ fresh.  This is quite nice in case of extremely high load, in which case
 you can dynamically increase the cache and set the expire timeout higher
 until things get back to normal.
 
-</P>
-<P>
+</p>
+<p>
 In this case the table creation information should contain information
 of the initial size of the cache and how often the table should normally
 be refreshed.
 
-</P>
-<P>
-<A NAME="IDX1239"></A>
-<A NAME="IDX1240"></A>
+</p>
+<p>
+<a name="IDX1239"></a>
+<a name="IDX1240"></a>
 
 
-<H2><A NAME="Internal_use" HREF="manual.ja_toc.html#Internal_use">13.11  What have we used MySQL for?</A></H2>
+</p><h2><a name="Internal_use" href="manual.ja_toc.html#Internal_use">13.11  What have we used MySQL for?</a></h2>
 
-<P>
-<STRONG>MySQL</STRONG> の初期の開発期には、<STRONG>MySQL</STRONG> は我々のもっとも大口の顧客に合うように
+<p>
+<strong>MySQL</strong> の初期の開発期には、<strong>MySQL</strong> は我々のもっとも大口の顧客に合うように
 機能が作成されました。 彼らは、いくつかのスウェーデン最大手の小売り業者
 のために、倉庫に入れている（商品）データを取り扱います。
 
-</P>
-<P>
+</p>
+<p>
 我々は、すべての店から、全ボーナス・カード取扱高の、その週間まとめを得ます。
 そして、その店のオーナにとって有益な情報、その店の広告キャンペーンが
 お客にどの程度影響を及ぼすか、を提供することが、我々に求められています。
 
-</P>
-<P>
+</p>
+<p>
 そのデータは、とても大きくて (約700万/月 回の取り扱い)、
 我々はその顧客に提供する必要のあるデータを 4～10年分、持っています。
 我々は、カスタマーから、彼らがこのデータからできる新しいレポートに
 ”即時に”アクセスしたいという、要求を受けました。
 
-</P>
-<P>
+</p>
+<p>
 我々はこれを、全ての月ごとの情報を圧縮した 'transaction' テーブルに
 保存することで解決しました。
 We have a set of simple macros (script) that
@@ -2594,14 +2557,14 @@ customer id, store ...) from the transaction tables.
 We would have used PHP or mod_perl instead but they were
 not available at that time.
 
-</P>
-<P>
-画像データのために、我々は簡単なツールを <CODE>C</CODE> でかきました。
+</p>
+<p>
+画像データのために、我々は簡単なツールを <code>C</code> でかきました。
 これは SQL のクエリの結果を元に(結果にいくつか処理をして) GIF を提供します。
-これも動的に perl スクリプト(<CODE>HTML</CODE> ファイルを分析する)から実行されます。
+これも動的に perl スクリプト(<code>HTML</code> ファイルを分析する)から実行されます。
 
-</P>
-<P>
+</p>
+<p>
 In most cases a new report can simply be done by copying an existing
 script and modifying the SQL query in it.  In some cases, we will need to
 add more fields to an existing summary table or generate a new one, but
@@ -2609,13 +2572,13 @@ this is also quite simple, as we keep all transactions tables on disk.
 (Currently we have at least 50G of transactions tables and 200G of other
 customer data.)
 
-</P>
-<P>
+</p>
+<p>
 We also let our customers access the summary tables directly with ODBC
 so that the advanced users can themselves experiment with the data.
 
-</P>
-<P>
+</p>
+<p>
 我々はこれらを  Sun Ultra SPARCstation (2x200 Mz) で扱っていますが、
 なんの問題もありません。
 We recently upgraded one of our servers to a 2
@@ -2624,14 +2587,14 @@ transactions on the product level, which would mean a ten-fold increase
 of data. We think we can keep up with this by just adding more disk to
 our systems.
 
-</P>
-<P>
+</p>
+<p>
 We are also experimenting with Intel-Linux to be able to get more CPU
 power cheaper.  現在、我々はバイナリ互換のデータベースフォーマットを持っており
 (new in Version 3.23) 、我々はこれをアプリケーションのいくつかの部分に使用しはじめる事でしょう。
 
-</P>
-<P>
+</p>
+<p>
 Our initial feelings are that Linux will perform much better on
 low-to-medium load and Solaris will perform better when you start to get a
 high load because of extreme disk IO, but we don't yet have anything
@@ -2641,11 +2604,12 @@ to the batch job that the interactive performance gets very low. This
 makes the machine feel very slow and unresponsive while big batches are
 going. Hopefully this will be better handled in future Linux Kernels.
 
-</P>
-<P>
-<A NAME="IDX1241"></A>
-<A NAME="IDX1242"></A>
-<P><HR><P>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Fulltext_Search.html">previous</A>, <A HREF="manual.ja_MySQL_Benchmarks.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
- </BODY>
- </HTML>
+</p>
+<p>
+<a name="IDX1241"></a>
+<a name="IDX1242"></a>
+</p><p></p><hr><p>
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Fulltext_Search.html">previous</a>, <a href="manual.ja_MySQL_Benchmarks.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+ 
+ 
+</p></body></html>

@@ -1,29 +1,28 @@
-  <HTML>
-  <HEAD>
+<html><head>
   <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
      from manual.ja.texi on 1 December 1999 -->
 
-  <TITLE>MySQL Reference Manual for version 3.22.21. - 19  Solving some common problems with MySQL</TITLE>
-  </HEAD>
-  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Problems.html">previous</A>, <A HREF="manual.ja_Clients.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
-<P><HR><P>
+  <title>MySQL Reference Manual for version 3.22.21. - 19  Solving some common problems with MySQL</title>
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000" link="#101090" vlink="#7030B0">
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Problems.html">previous</a>, <a href="manual.ja_Clients.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+<p></p><hr><p>
 
 
-<H1><A NAME="Common_problems" HREF="manual.ja_toc.html#Common_problems">19  Solving some common problems with <STRONG>MySQL</STRONG></A></H1>
+</p><h1><a name="Common_problems" href="manual.ja_toc.html#Common_problems">19  Solving some common problems with <strong>MySQL</strong></a></h1>
 
-<P>
-<A NAME="IDX705"></A>
+<p>
+<a name="IDX705"></a>
 
-</P>
-<P>
-<A NAME="IDX706"></A>
-<A NAME="IDX707"></A>
+</p>
+<p>
+<a name="IDX706"></a>
+<a name="IDX707"></a>
 
 
-<H2><A NAME="Replication" HREF="manual.ja_toc.html#Replication">19.1  データベースの複製</A></H2>
+</p><h2><a name="Replication" href="manual.ja_toc.html#Replication">19.1  データベースの複製</a></h2>
 
-<P>
+<p>
 One way replication can be used both to increase robustness and
 speed. For robustness you have two systems and switch to the backup if
 you get problems you witch to the backup. The extra speed is achieved by
@@ -31,276 +30,271 @@ sending a part of the non updating queries to the replica server. Of
 course this only works if non updating queries dominate, but that is the
 normal case.
 
-</P>
-<P>
+</p>
+<p>
 One way replication is planned for the near future. This will be
 implemented so that slave servers will be synchronized with low priority
 updates and delayed inserts up to date (this will give readers higher
 priority than writers).
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> doesn't (yet) have database replication, but here are
+</p>
+<p>
+<strong>MySQL</strong> doesn't (yet) have database replication, but here are
 some info on how do to it.
 
-</P>
-<P>
+</p>
+<p>
 データベースを複製する最も一般的な方法は、更新ログを使用することです。
- 「<A HREF="manual.ja_Server.html#Update_log">9.2  更新ログ</A>」節参照。これは、あるデータベースがマスター(主)として動作して
+ 「<a href="manual.ja_Server.html#Update_log">9.2  更新ログ</a>」節参照。これは、あるデータベースがマスター(主)として動作して
 (全てのデータ変更がここで行われます)、一つ以上の他のものがスレーブ(従)と
 して動作することを要求します。スレーブを更新するには 
-<CODE>mysql &#60; update_log</CODE> を実行します。
+<code>mysql &lt; update_log</code> を実行します。
 スレーブデータベースに適切なホスト、ユーザー、パスワードオプションをあたえ、
 マスターからの更新ログを入力に使用します。
 
-</P>
-<P>
-もし、テーブルからなにも削除することが無い場合、 <CODE>TIMESTAMP</CODE> 項を使用すれば、
+</p>
+<p>
+もし、テーブルからなにも削除することが無い場合、 <code>TIMESTAMP</code> 項を使用すれば、
 最後の複製時以後に、新規に挿入されたものや変更されたものだけを
 ミラーサーバーにコピーできます。(複製時の時間と比較すれば抽出できます)
 
-</P>
-<P>
+</p>
+<p>
 更新ログ(削除のため)とタイムスタンプ(両側で)の両方を使用する2つの方法の
 更新システムを作ることができます。しかしこの場合は、同じデータが両側で変
 更された時に、あなたが衝突を操作できなければなりません。あなたはおそらく
 何が更新されたかを決定するのを助けるために、古いバージョンを保持したいで
 しょう。
 
-</P>
-<P>
+</p>
+<p>
 この場合の複製は SQL ステートメントで行われるため、データベースを更新す
 るステートメント中で次の関数は使ってはいけません。これらは他の 
-<STRONG>MySQL</STRONG> サーバでは異なる値を返すからです:
+<strong>MySQL</strong> サーバでは異なる値を返すからです:
 
-</P>
+</p>
 
-<UL>
-<LI><CODE>DATABASE()</CODE>
+<ul>
+<li><code>DATABASE()</code>
 
-<LI><CODE>GET_LOCK()</CODE> and <CODE>RELEASE_LOCK()</CODE>
+</li><li><code>GET_LOCK()</code> and <code>RELEASE_LOCK()</code>
 
-<LI><CODE>RAND()</CODE>
+</li><li><code>RAND()</code>
 
-<LI><CODE>USER()</CODE>, <CODE>SYSTEM_USER()</CODE> or <CODE>SESSION_USER()</CODE>
+</li><li><code>USER()</code>, <code>SYSTEM_USER()</code> or <code>SESSION_USER()</code>
 
-<LI><CODE>VERSION()</CODE>
+</li><li><code>VERSION()</code>
 
-</UL>
+</li></ul>
 
-<P>
+<p>
 全ての時刻関数は、必要な場合にミラーにタイムスタンプを送るようにして、安
-全に使用できます。<CODE>LAST_INSERT_ID()</CODE> も安全に使用できます。
+全に使用できます。<code>LAST_INSERT_ID()</code> も安全に使用できます。
 
-</P>
+</p>
 
-<P>
-<A NAME="IDX708"></A>
+<p>
+<a name="IDX708"></a>
 
 
-<H2><A NAME="Backup" HREF="manual.ja_toc.html#Backup">19.2  データベースのバックアップ</A></H2>
+</p><h2><a name="Backup" href="manual.ja_toc.html#Backup">19.2  データベースのバックアップ</a></h2>
 
-<P>
-<STRONG>MySQL</STRONG> テーブルはファイルとして格納されるため、バックアップを行
-うのは簡単です。矛盾のないバックアップを得るためには、<CODE>LOCK TABLES</CODE> 
-を関連するテーブルで行ってください。 「<A HREF="manual.ja_Reference.html#LOCK_TABLES">7.24  <CODE>LOCK TABLES/UNLOCK TABLES</CODE> 構文</A>」節参照.
+<p>
+<strong>MySQL</strong> テーブルはファイルとして格納されるため、バックアップを行
+うのは簡単です。矛盾のないバックアップを得るためには、<code>LOCK TABLES</code> 
+を関連するテーブルで行ってください。 「<a href="manual.ja_Reference.html#LOCK_TABLES">7.24  <code>LOCK TABLES/UNLOCK TABLES</code> 構文</a>」節参照.
 読み込みロックだ
 けが必要なので、そのテーブルでデータベースディレクトリのファイルのコピー
 が行われている間も、他のスレッドはクエリを継続できます。もしくは、SQL レ
-ベルのバックアップを行いたいのであれば、<CODE>SELECT INTO OUTFILE</CODE> を使
+ベルのバックアップを行いたいのであれば、<code>SELECT INTO OUTFILE</code> を使
 用できます。
 
-</P>
-<P>
-他の方法は <CODE>mysqldump</CODE> プログラムを使用することです:
+</p>
+<p>
+他の方法は <code>mysqldump</code> プログラムを使用することです:
 
-</P>
+</p>
 
-<OL>
-<LI>
+<ol>
+<li>
 
 フルバックアップをとるには：
 
 
-<PRE>
-shell&#62; mysqldump --tab=/path/to/some/dir --opt --full
-</PRE>
+<pre>shell&gt; mysqldump --tab=/path/to/some/dir --opt --full
+</pre>
 
 若しサーバーがいっさいデータの変更をしないのであれば、
-単に全てのテーブルファイル(<TT>`*.frm'</TT>, <TT>`*.MYD'</TT>, <TT>`*.MYI'</TT> files)を
+単に全てのテーブルファイル(<tt>`*.frm'</tt>, <tt>`*.MYD'</tt>, <tt>`*.MYI'</tt> files)を
 コピーするだけでも構いません。
 
-<LI>
+</li><li>
 
-<A NAME="IDX709"></A>
-<CODE>mysqld</CODE> を止め、そして <CODE>--log-update</CODE> オプションをつけて起動します。
-<TT>`<KBD>hostname</KBD>.n'</TT> という名前でログファイルが作成されます。ここで <CODE>n</CODE> は数字で、
-これは <CODE>mysqladmin refresh</CODE>, <CODE>mysqladmin flush-logs</CODE> を実行する度に増えていきます。
-<CODE>FLUSH LOGS</CODE> 構文を使用したり、サーバーを再起動しても増えます。
-これらログファイルは、 <CODE>mysqldump</CODE> 実行後に行われたデータベースの変更を
+<a name="IDX709"></a>
+<code>mysqld</code> を止め、そして <code>--log-update</code> オプションをつけて起動します。
+<tt>`<kbd>hostname</kbd>.n'</tt> という名前でログファイルが作成されます。ここで <code>n</code> は数字で、
+これは <code>mysqladmin refresh</code>, <code>mysqladmin flush-logs</code> を実行する度に増えていきます。
+<code>FLUSH LOGS</code> 構文を使用したり、サーバーを再起動しても増えます。
+これらログファイルは、 <code>mysqldump</code> 実行後に行われたデータベースの変更を
 複製するための情報を与えてくれます。
-</OL>
+</li></ol>
 
-<P>
-もしリストアをしなければならない場合、まず最初に <CODE>myisamchk -r</CODE> を実行して
+<p>
+もしリストアをしなければならない場合、まず最初に <code>myisamchk -r</code> を実行して
 テーブルの修復を試みてください。
 ほとんどの場合、99.9% 修復はできるはずです。
-もし <CODE>myisamchk</CODE> が失敗した場合、以下のようにします：
+もし <code>myisamchk</code> が失敗した場合、以下のようにします：
 
-</P>
+</p>
 
-<OL>
-<LI>
+<ol>
+<li>
 
-オリジナルの <CODE>mysqldump</CODE> バックアップデータをリストアします。
-<LI>
+オリジナルの <code>mysqldump</code> バックアップデータをリストアします。
+</li><li>
 
 以下のコマンドのようにして、更新ログに記録されている変更を適用します。
 
-<PRE>
-shell&#62; ls -1 -t -r hostname.[0-9]* | xargs cat | mysql
-</PRE>
+<pre>shell&gt; ls -1 -t -r hostname.[0-9]* | xargs cat | mysql
+</pre>
 
-</OL>
+</li></ol>
 
-<P>
-<CODE>ls</CODE> は、全てのログファイルを正しい順で得るために行われます。
+<p>
+<code>ls</code> は、全てのログファイルを正しい順で得るために行われます。
 
-</P>
-<P>
-<CODE>SELECT * INTO OUTFILE 'file_name' FROM tbl_name</CODE> での選択的バックアップと 
-<CODE>LOAD DATA FROM INFILE 'file_name' REPLACE ...</CODE> でのリストアを行う
-こともできます。重複レコードを避けるためには、テーブル内に <CODE>PRIMARY KEY</CODE>
- or a <CODE>UNIQUE</CODE> が必要です。<CODE>REPLACE</CODE> は、'重複インデックス' 衝突があった場合、
+</p>
+<p>
+<code>SELECT * INTO OUTFILE 'file_name' FROM tbl_name</code> での選択的バックアップと 
+<code>LOAD DATA FROM INFILE 'file_name' REPLACE ...</code> でのリストアを行う
+こともできます。重複レコードを避けるためには、テーブル内に <code>PRIMARY KEY</code>
+ or a <code>UNIQUE</code> が必要です。<code>REPLACE</code> は、'重複インデックス' 衝突があった場合、
 新しいレコードを挿入する時に古いレコードが新しいものに置き換えられることを意味します。
 
-</P>
+</p>
 
-<P>
-<A NAME="IDX710"></A>
+<p>
+<a name="IDX710"></a>
 
 
-<H2><A NAME="Multiple_servers" HREF="manual.ja_toc.html#Multiple_servers">19.3  同一マシン上に複数の <STRONG>MySQL</STRONG> サーバーを走らせる</A></H2>
+</p><h2><a name="Multiple_servers" href="manual.ja_toc.html#Multiple_servers">19.3  同一マシン上に複数の <strong>MySQL</strong> サーバーを走らせる</a></h2>
 
-<P>
+<p>
 同じマシン上で複数のサーバーを走らせたい場合があります。
-例えば、すでに存在しているサーバーはそのままにしておいて、新しい <STRONG>MySQL</STRONG> をテストしたい場合や、
-あるいは、インターネットプロバイダーを営んでいて、<STRONG>MySQL</STRONG> をそれぞれの顧客用に提供したい場合など。
+例えば、すでに存在しているサーバーはそのままにしておいて、新しい <strong>MySQL</strong> をテストしたい場合や、
+あるいは、インターネットプロバイダーを営んでいて、<strong>MySQL</strong> をそれぞれの顧客用に提供したい場合など。
 
-</P>
-<P>
+</p>
+<p>
 複数のサーバーをたちあげる場合、簡単な方法として、
 TCP/IP ポート、ソケットファイルを変えて、サーバーをコンパイルする方法があります。
 
-</P>
-<P>
+</p>
+<p>
 そでに走っているサーバーがデフォルトのポート番号とソケットファイルで動作しているとします。
-新しくサーバーを作るには、以下のように <CODE>configure</CODE> します：
+新しくサーバーを作るには、以下のように <code>configure</code> します：
 
-</P>
+</p>
 
-<PRE>
-shell&#62; ./configure  --with-tcp-port=port_number \
+<pre>shell&gt; ./configure  --with-tcp-port=port_number \
              --with-unix-socket=file_name \
              --prefix=/usr/local/mysql-3.22.9
-</PRE>
+</pre>
 
-<P>
-<CODE>port_number</CODE> と <CODE>file_name</CODE> には、デフォルトのポート番号、ソケットファイルとは違うものを指定します。
-そして <CODE>--prefix</CODE> を、すでに走っている <STRONG>MySQL</STRONG> のインストール先とは違うディレクトリーに指定します。
+<p>
+<code>port_number</code> と <code>file_name</code> には、デフォルトのポート番号、ソケットファイルとは違うものを指定します。
+そして <code>--prefix</code> を、すでに走っている <strong>MySQL</strong> のインストール先とは違うディレクトリーに指定します。
 
-</P>
-<P>
-現在走っている <STRONG>MySQL</STRONG> サーバーのソケットとポートを知るには、以下のようにします：
+</p>
+<p>
+現在走っている <strong>MySQL</strong> サーバーのソケットとポートを知るには、以下のようにします：
 
-</P>
+</p>
 
-<PRE>
-shell&#62; mysqladmin -h hostname --port=port_number variables
-</PRE>
+<pre>shell&gt; mysqladmin -h hostname --port=port_number variables
+</pre>
 
-<P>
-あなたが使用しているポートに <STRONG>MySQL</STRONG> サーバーが走っていれば、
-これは変更可能な <STRONG>MySQL</STRONG> 変数を(ソケットファイルの名前も含んで)出力します。
+<p>
+あなたが使用しているポートに <strong>MySQL</strong> サーバーが走っていれば、
+これは変更可能な <strong>MySQL</strong> 変数を(ソケットファイルの名前も含んで)出力します。
 
-</P>
-<P>
-立ち上げスクリプト(おそらく <TT>`mysql.server'</TT> ファイル)を編集して
-複数の <STRONG>MySQL</STRONG> サーバーを立ちあげても構いません。
+</p>
+<p>
+立ち上げスクリプト(おそらく <tt>`mysql.server'</tt> ファイル)を編集して
+複数の <strong>MySQL</strong> サーバーを立ちあげても構いません。
 
-</P>
-<P>
-この場合、 <STRONG>MySQL</STRONG> サーバーを再コンパイルする必要はありません。
-<CODE>safe_mysqld</CODE> のオプションを指定してサーバーを起動すれば、ポートとソケットを変更できます：
+</p>
+<p>
+この場合、 <strong>MySQL</strong> サーバーを再コンパイルする必要はありません。
+<code>safe_mysqld</code> のオプションを指定してサーバーを起動すれば、ポートとソケットを変更できます：
 
-</P>
+</p>
 
-<PRE>
-shell&#62; /path/to/safe_mysqld --socket=file-name --port=port_number
-</PRE>
+<pre>shell&gt; /path/to/safe_mysqld --socket=file-name --port=port_number
+</pre>
 
-<P>
+<p>
 もし、他のサーバーがロギングを行っているディレクトリと同じデータベースディレクトリを、
 新しいサーバーで使用するのであれば、ログファイルの名前を指定すべきです。
-( <CODE>safe_mysqld</CODE> に <CODE>--log</CODE> と <CODE>--log-update</CODE> を指定する)
+( <code>safe_mysqld</code> に <code>--log</code> と <code>--log-update</code> を指定する)
 そうしないと、両方のサーバーが同じログファイルに書き込もうとするからです。
 
-</P>
-<P>
-<STRONG>Warning</STRONG>: 通常、二つサーバーに同じデータベースを操作させてはいけません！
+</p>
+<p>
+<strong>Warning</strong>: 通常、二つサーバーに同じデータベースを操作させてはいけません！
 もし使用している OS が fault-free system locking をサポートしていないと、
 これは悲惨なことになるでしょう！
 
-</P>
-<P>
+</p>
+<p>
 もし二つ目のサーバーに違うデータベースディレクトリを使用させたい場合、
- <CODE>safe_mysqld</CODE> に <CODE>--datadir=path</CODE> オプションを指定します。
+ <code>safe_mysqld</code> に <code>--datadir=path</code> オプションを指定します。
 
-</P>
+</p>
 
-<PRE>
-shell&#62; /path/to/safe_mysqld --datadir=/new/path/to/datadir \
+<pre>shell&gt; /path/to/safe_mysqld --datadir=/new/path/to/datadir \
                 --socket=file-name --port=file-name
-</PRE>
+</pre>
 
-<P>
-もし違うポートで走っている <STRONG>MySQL</STRONG> サーバーに、
+<p>
+もし違うポートで走っている <strong>MySQL</strong> サーバーに、
 これまた違うポートを使用するように作られたクライアントから接続したい場合、
 以下のようにします：
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-クライアントを <CODE>--host 'hostname' --port=port_numer</CODE> か
-<CODE>[--host localhost] --socket=file_name</CODE> オプションで起動します。
+クライアントを <code>--host 'hostname' --port=port_numer</code> か
+<code>[--host localhost] --socket=file_name</code> オプションで起動します。
 
-<LI>
+</li><li>
 
 C あるいは Perl プログラムの場合、ポートとソケットを与えることができます：
 
-<LI>
+</li><li>
 
-<A NAME="IDX711"></A>
-<A NAME="IDX712"></A>
-<A NAME="IDX713"></A>
-<A NAME="IDX714"></A>
-<CODE>MYSQL_UNIX_PORT</CODE> と <CODE>MYSQL_TCP_PORT</CODE> 環境変数に UNIX ソケットファイルと
+<a name="IDX711"></a>
+<a name="IDX712"></a>
+<a name="IDX713"></a>
+<a name="IDX714"></a>
+<code>MYSQL_UNIX_PORT</code> と <code>MYSQL_TCP_PORT</code> 環境変数に UNIX ソケットファイルと
  TCP/IP のポート番号とセットし、クライアントを立ちあげます。
 もし、このポート番号やソケットファイルを常に使用するのであれば、
- <TT>`.login'</TT> ファイルかなにかに環境変数をセットするように書いておけばよいでしょう。
- 「<A HREF="manual.ja_Tools.html#Programs">12.1  様々な <STRONG>MySQL</STRONG> プログラムの概要</A>」節参照.
+ <tt>`.login'</tt> ファイルかなにかに環境変数をセットするように書いておけばよいでしょう。
+ 「<a href="manual.ja_Tools.html#Programs">12.1  様々な <strong>MySQL</strong> プログラムの概要</a>」節参照.
 
-<LI>
+</li><li>
 
-<A NAME="IDX715"></A>
-あなたのホームディレクトリの <TT>`.my.cnf'</TT> ファイルに、
+<a name="IDX715"></a>
+あなたのホームディレクトリの <tt>`.my.cnf'</tt> ファイルに、
 通常使用するポート番号とソケットファイルを書くこともできます。
- 「<A HREF="manual.ja_Installing.html#Option_files">4.15.4  オプションファイル ( <CODE>my.cnf</CODE> )</A>」節参照.
-</UL>
+ 「<a href="manual.ja_Installing.html#Option_files">4.15.4  オプションファイル ( <code>my.cnf</code> )</a>」節参照.
+</li></ul>
 
-<P><HR><P>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Problems.html">previous</A>, <A HREF="manual.ja_Clients.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
- </BODY>
- </HTML>
+<p></p><hr><p>
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Problems.html">previous</a>, <a href="manual.ja_Clients.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+ 
+ 
+</p></body></html>

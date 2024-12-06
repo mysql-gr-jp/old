@@ -1,8 +1,7 @@
-<html>
-<head>
+<html><head>
 <meta http-equiv="Content-Style-Type" context="text/css">
 <title>mysql:3479</title>
-<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
 <p class="button"><a href="3478.html">[前]</a><a href="3480.html">[次]</a><a href="../list/3401-3500.html">[番号順一覧]</a><a href="../thread/3401-3500.html">[スレッド一覧]</a></p>
@@ -18,8 +17,7 @@ Subject: [mysql 03479] Re: MySQL  の漢字設定の続き<br>
 </p>
 </div>
 <div class="body">
-<pre>
-バインシステム平井と申します。
+<pre>バインシステム平井と申します。
 
 漢字設定の返答ありがとうございます。my.cnfを編集しまして
 起動しましたら以下のエラーがでました。
@@ -54,20 +52,20 @@ export PATH
 datadir=/usr/local/plesk/mysql/var
 basedir=
 pid_file=
-if test -z &quot;$basedir&quot;
+if test -z "$basedir"
 then
   basedir=/usr/local/plesk/mysql
   bindir=/usr/local/plesk/mysql/bin
 else
-  bindir=&quot;$basedir/bin&quot;
+  bindir="$basedir/bin"
 fi
-if test -z &quot;$pid_file&quot;
+if test -z "$pid_file"
 then
   pid_file=$datadir/`/bin/hostname`.pid
 else
-  case &quot;$pid_file&quot; in
+  case "$pid_file" in
     /* ) ;;
-    * )  pid_file=&quot;$datadir/$pid_file&quot; ;;
+    * )  pid_file="$datadir/$pid_file" ;;
   esac
 fi
 
@@ -75,10 +73,10 @@ mode=$1    # start or stop
 
 parse_arguments() {
   for arg do
-    case &quot;$arg&quot; in
-      --basedir=*)  basedir=`echo &quot;$arg&quot; | sed -e 's/^[^=]*=//'` ;;
-      --datadir=*)  datadir=`echo &quot;$arg&quot; | sed -e 's/^[^=]*=//'` ;;
-      --pid-file=*) pid_file=`echo &quot;$arg&quot; | sed -e 's/^[^=]*=//'` ;;
+    case "$arg" in
+      --basedir=*)  basedir=`echo "$arg" | sed -e 's/^[^=]*=//'` ;;
+      --datadir=*)  datadir=`echo "$arg" | sed -e 's/^[^=]*=//'` ;;
+      --pid-file=*) pid_file=`echo "$arg" | sed -e 's/^[^=]*=//'` ;;
     esac
   done
 }
@@ -86,13 +84,13 @@ parse_arguments() {
 # Get arguments from the my.cfg file, groups [mysqld] and [mysql_server]
 if test -x ./bin/my_print_defaults
 then
-  print_defaults=&quot;./bin/my_print_defaults&quot;
+  print_defaults="./bin/my_print_defaults"
 elif test -x $bindir/my_print_defaults
 then
-  print_defaults=&quot;$bindir/my_print_defaults&quot;
+  print_defaults="$bindir/my_print_defaults"
 elif test -x $bindir/mysql_print_defaults
 then
-  print_defaults=&quot;$bindir/mysql_print_defaults&quot;
+  print_defaults="$bindir/mysql_print_defaults"
 else
   # Try to find basedir in /etc/my.cnf
   conf=/etc/my.cnf
@@ -100,25 +98,25 @@ else
   if test -r $conf
   then
     subpat='^[^=]*basedir[^=]*=\(.*\)$'
-    dirs=`sed -e &quot;/$subpat/!d&quot; -e 's//\1/' $conf`
+    dirs=`sed -e "/$subpat/!d" -e 's//\1/' $conf`
     for d in $dirs
     do
       d=`echo $d | sed -e 's/[  ]//g'`
-      if test -x &quot;$d/bin/my_print_defaults&quot;
+      if test -x "$d/bin/my_print_defaults"
       then
-        print_defaults=&quot;$d/bin/my_print_defaults&quot;
+        print_defaults="$d/bin/my_print_defaults"
         break
       fi
-      if test -x &quot;$d/bin/mysql_print_defaults&quot;
+      if test -x "$d/bin/mysql_print_defaults"
       then
-        print_defaults=&quot;$d/bin/mysql_print_defaults&quot;
+        print_defaults="$d/bin/mysql_print_defaults"
         break
       fi
     done
   fi
 
   # Hope it's in the PATH ... but I doubt it
-  test -z &quot;$print_defaults&quot; &amp;&amp; print_defaults=&quot;my_print_defaults&quot;
+  test -z "$print_defaults" &amp;&amp; print_defaults="my_print_defaults"
 fi
 
 parse_arguments `$print_defaults $defaults mysqld mysql_server`
@@ -126,7 +124,7 @@ parse_arguments `$print_defaults $defaults mysqld mysql_server`
 # Safeguard (relative paths, core dumps..)
 cd $basedir
 
-case &quot;$mode&quot; in
+case "$mode" in
   'start')
     # Start daemon
 
@@ -141,31 +139,31 @@ case &quot;$mode&quot; in
         touch /var/lock/subsys/mysql
       fi
     else
-      echo &quot;Can't execute $bindir/safe_mysqld&quot;
+      echo "Can't execute $bindir/safe_mysqld"
     fi
     ;;
 
   'stop')
     # Stop daemon. We use a signal here to avoid having to know the
     # root password.
-    if test -f &quot;$pid_file&quot;
+    if test -f "$pid_file"
     then
       mysqld_pid=`cat $pid_file`
-      echo &quot;Killing mysqld with pid $mysqld_pid&quot;
+      echo "Killing mysqld with pid $mysqld_pid"
       kill $mysqld_pid
       # mysqld should remove the pid_file when it exits, so wait for it.
 
       sleep 1
-      while [ -s $pid_file -a &quot;$flags&quot; != aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ]
+      while [ -s $pid_file -a "$flags" != aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ]
       do
-        [ -z &quot;$flags&quot; ] &amp;&amp; echo &quot;Wait for mysqld to exit\c&quot; || echo &quot;.\c&quot;
+        [ -z "$flags" ] &amp;&amp; echo "Wait for mysqld to exit\c" || echo ".\c"
         flags=a$flags
         sleep 1
       done
       if [ -s $pid_file ]
-         then echo &quot; gave up waiting!&quot;
-      elif [ -n &quot;$flags&quot; ]
-         then echo &quot; done&quot;
+         then echo " gave up waiting!"
+      elif [ -n "$flags" ]
+         then echo " done"
       fi
       # delete lock for RedHat / SuSE
       if test -f /var/lock/subsys/mysql
@@ -173,13 +171,13 @@ case &quot;$mode&quot; in
         rm /var/lock/subsys/mysql
       fi
     else
-      echo &quot;No mysqld pid file found. Looked for $pid_file.&quot;
+      echo "No mysqld pid file found. Looked for $pid_file."
     fi
     ;;
 
   *)
     # usage
-    echo &quot;usage: $0 start|stop&quot;
+    echo "usage: $0 start|stop"
     exit 1
     ;;
 esac
@@ -191,10 +189,10 @@ esac
 </pre>
 </div>
 <p class="button"><a href="3478.html">[前]</a><a href="3480.html">[次]</a><a href="../list/3401-3500.html">[番号順一覧]</a><a href="../thread/3401-3500.html">[スレッド一覧]</a></p>
-<pre class="list">
-<span>&nbsp;&nbsp;&nbsp;<a href="3432.html">   3432 2001-03-25 23:31 [Bine平井  &lt;hirai@xxx] MySQL の漢字設定                        </a></span>
+<pre class="list"><span>&nbsp;&nbsp;&nbsp;<a href="3432.html">   3432 2001-03-25 23:31 [Bine平井  &lt;hirai@xxx] MySQL の漢字設定                        </a></span>
 <span>&nbsp;&nbsp;&nbsp;<a href="3434.html">   3434 2001-03-27 01:56 ┗[とみたまさひろ &lt;tomm]                                       </a></span>
 <span class="current">-&gt;&nbsp;<a href="3479.html">   3479 2001-03-29 00:21 　┗[Bine平井  &lt;hirai@xxx] Re: MySQL  の漢字設定の続き         </a></span>
 </pre>
-</body>
-</html>
+
+
+</body></html>

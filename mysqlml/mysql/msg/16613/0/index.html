@@ -1,0 +1,71 @@
+<html><head></head><body><div dir="auto">情報ありがとうございます。<div dir="auto"><br></div><div dir="auto">ところで、俺p_s.host_cacheにデータ入ってるのを見たことがないんですが、どなたか見たことあります…？</div><div dir="auto"><br></div><div dir="auto">（特別な設定は要らないはずなんですが…</div></div><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">2020年11月25日(水) 8:01 SAKAI, Kei &lt;<a href="mailto:sakaik@mysql.gr.jp">sakaik@mysql.gr.jp</a>&gt;:<br></div><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><div dir="auto"><div>坂井です<div dir="auto"><br></div><div dir="auto"><br></div><div dir="auto">　ちょうどタイミング良く 8.0 マニュアルの、8.0.23での変更（予定）点を眺めていたのですが、</div><div dir="auto">この、ホスト情報をクリアする FLUSH HOST文、8.0.23から deplicated になるんですね。代わりに、p_s の　host_cacheテーブルをtruncateしてね、とのことです。</div><div dir="auto"><br></div><div dir="auto"><br></div><br><br><div class="gmail_quote"><div dir="ltr" class="gmail_attr">2020年11月24日(火) 14:28 yoku0825 &lt;<a href="mailto:yoku0825@mysql.gr.jp" target="_blank" rel="noreferrer">yoku0825@mysql.gr.jp</a>&gt;:<br></div><blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">こんにちは、yoku0825といいます。<br>
+<br>
+最近のMariaDBはMySQLと動作が微妙に違ったりするので自信はありませんが、<br>
+症状を聞く限りこれのような気がします。<br>
+<br>
+MySQL :: MySQL 5.6 リファレンスマニュアル :: B.5.2.6 ホスト 'host_name' は拒否されました<br>
+<a href="https://dev.mysql.com/doc/refman/5.6/ja/blocked-host.html" rel="noreferrer noreferrer noreferrer" target="_blank">https://dev.mysql.com/doc/refman/5.6/ja/blocked-host.html</a><br>
+<br>
+("blocked because of many connection errors" でGoogle検索すると他にもいろいろ出てきます)<br>
+<br>
+<br>
+これはエラーパケットの中に埋め込まれているメッセージなので、<br>
+MariaDB側のエラーログなどには吐かない気がします（少なくともMySQLは吐かなさそう）<br>
+<br>
+お使いのアプリケーションの中で、例外を全部出力させると見えるかも知れません。<br>
+（あるいは、再現中にそのPCからmysqlコマンドラインクライアントからアクセスしようとすれば確実に見えると思います）<br>
+<br>
+yoku0825,<br>
+<br>
+2020年11月23日(月) 19:29 Jyoji Irisa &lt;<a href="mailto:ml@kabel.jp" rel="noreferrer noreferrer" target="_blank">ml@kabel.jp</a>&gt;:<br>
+&gt;<br>
+&gt; はじめまして入佐と申します<br>
+&gt;<br>
+&gt; 初めて投稿いたします。<br>
+&gt;<br>
+&gt; ネットを検索しても解決しなかったので、こちらに投稿させてもらいます。<br>
+&gt;<br>
+&gt; 現在サーバーに MariaDB 10.5.6 をインストールしてシステムテストを行っている<br>
+&gt; のですが、複数台の端末で接続しにいっておりまして（現在７台）、１分に１度デ<br>
+&gt; ータベースに繋いで更新処理を行う、などの処理を行っております。<br>
+&gt;<br>
+&gt; その際、何かのきっかけで１台（または２台）以下のメッセージが表示され接続で<br>
+&gt; きなくなります。<br>
+&gt;<br>
+&gt; ReceiveHeader: Net packets out of order: received[1],wxception[0]<br>
+&gt;<br>
+&gt; ※テスト的にケーブルを抜いてサーバーに接続できない状況を作ったりしてます。<br>
+&gt;<br>
+&gt; これ現象以後、その端末からは接続が不可能になり、PCを再起動しても同じ症状<br>
+&gt; がでます。で、最終的にデータベースのサービスを再起動するまでこの症状が出<br>
+&gt; 続けます。<br>
+&gt; ということはサーバー側で何らかの情報を持っていて、この端末からは接続を受け<br>
+&gt; 付けない、ということをしているかと思うのですが、なかなか現象がつかみきれず<br>
+&gt; 困っております。<br>
+&gt;<br>
+&gt; どなたかご存知の方、アドバイスを頂けないでしょうか？<br>
+&gt;<br>
+&gt; 環境は以下の通り<br>
+&gt;<br>
+&gt; サーバー： WindowsServer 2019<br>
+&gt; データベース：MariaDB 10.5.6<br>
+&gt; クライアント：Windows10<br>
+&gt; 接続方法１： ODBC MariaDB ODBC Connecter）を使ってアプリからアクセス<br>
+&gt; 接続方法２： A5M2 というツールを使ってMySQLのネイティブ接続<br>
+&gt;<br>
+&gt; 過去にXAMPPの中に同梱されているMYSQL（MariaDB）は使って、そちらは<br>
+&gt; 特にこのような問題は出ておりません。<br>
+&gt; ちなみに過去のバージョンを調べると MariDB 10.1.xx でした。<br>
+&gt;<br>
+&gt; 以上よろしくお願いします。<br>
+&gt;<br>
+&gt; --<br>
+&gt; --<br>
+&gt; ■■■ カベル株式会社　入佐 城司<br>
+&gt; ■■□ Tel: 06-6263-7237 Mobile: 090-4276-6606<br>
+&gt; ■□□ Mail: <a href="mailto:irisa@kabel.jp" rel="noreferrer noreferrer" target="_blank">irisa@kabel.jp</a> Web: <a href="http://www.kabel.jp/" rel="noreferrer noreferrer noreferrer" target="_blank">http://www.kabel.jp/</a><br>
+&gt; ‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥‥<br>
+<br>
+</blockquote></div></div></div>
+</blockquote></div>
+</body></html>

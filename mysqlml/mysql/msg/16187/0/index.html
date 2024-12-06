@@ -1,26 +1,25 @@
-<html>
-  <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+<html><head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
   </head>
   <body text="#000000" bgcolor="#FFFFFF">
-    yoku0825さん<br>
-    お返事有り難うございました。<br>
+    yoku0825����<br>
+    ����������������������������<br>
     <br>
-    スタックトレースは未だ行なっていませんが、<br>
-    実行しているのは、C#ですがこの様なフローとなります。<br>
-    恐らくは、yoku0825さんのイメージ頂いているフローではないか。と考えます。<br>
+    ������������������������������������������<br>
+    ������������������C#��������������������������������<br>
+    ����������yoku0825������������������������������������������������������<br>
     <br>
-    毎回発生する訳ではない辺り、<br>
-    MySQLではなく、Connectorとファイルシステムとの相関によるものでは。<br>
-    との推察が付いたのですが、手詰まりとなりました、、。<br>
+    ����������������������������<br>
+    MySQL����������Connector������������������������������������������<br>
+    ����������������������������������������������������<br>
     <br>
-    無理やり機能させるなら、<br>
-    while(File.Exists())等で待機させれば出来なくも無いですが、<br>
-    それも違うな。と言う事で引き続き解決策を検討している所です。<br>
-    　→INTO OUTFILEは、対象がなくともファイルを生成するので、<br>
-    　　出現するまでWhileで待ってからFile.Deleteを行う。等<br>
-    　　→しかしながら、.NETのFile.Deleteはスレッドセーフなので、<br>
-    　　　やはりConnector側！？と、堂々巡りに陥ってます。<br>
+    ������������������������<br>
+    while(File.Exists())��������������������������������������<br>
+    ������������������������������������������������������������<br>
+    ����INTO OUTFILE������������������������������������������<br>
+    ����������������While������������File.Delete����������<br>
+    ��������������������.NET��File.Delete������������������������<br>
+    ������������Connector��������������������������������<br>
     <br>
     ------------------------------------<br>
       using System;<br>
@@ -65,58 +64,53 @@
      catch (MySqlException myEx)<br>
      {<br>
      MessageBox.Show(myEx.ToString());
-    //100回に数回レベルでここに到達し、「Already Exists」が発生<br>
+    //100��������������������������������Already Exists��������<br>
      }<br>
      myCommand.Dispose();<br>
      }<br>
      Console.WriteLine(i.ToString());<br>
      }<br>
-     MessageBox.Show("正常終了");<br>
+     MessageBox.Show("��������");<br>
      myConnect.Close();<br>
      myConnect.Dispose();<br>
      }<br>
     <br>
     <div class="moz-cite-prefix">(2014/12/14 23:35), yoku ts. wrote:<br>
     </div>
-    <blockquote
-cite="mid:CAHB5oTMkxNgJpF=B=Hi+bXCBSKfhFuzPrnbLYnC=iphZq0m5SA@mail.gmail.com"
-      type="cite">
-      <div dir="ltr">こんばんは、yoku0825といいます。
+    <blockquote cite="mid:CAHB5oTMkxNgJpF=B=Hi+bXCBSKfhFuzPrnbLYnC=iphZq0m5SA@mail.gmail.com" type="cite">
+      <div dir="ltr">������������yoku0825������������
         <div><br>
         </div>
-        <div>原因ぽいものは全くわからないのですが、</div>
+        <div>��������������������������������������</div>
         <div><br>
         </div>
-        <div>&gt;<span style="font-size:14px">---検証内容---</span><br>
+        <div>&gt;<span style="font-size:14px">---��������---</span><br>
         </div>
-        <span style="font-size:14px">&gt; ・VS2012でのデバッグ時に、ステップ実行でも発生。</span><br
-          style="font-size:14px">
-        <span style="font-size:14px">&gt; ・File.Delete→INTO OUTFILEの間に、</span><span
-          style="font-size:14px">Sleepを5秒挟んだりしても発生する</span><span
-          style="font-size:14px">。</span>
+        <span style="font-size:14px">&gt; ��VS2012����������������������������������������</span><br style="font-size:14px">
+        <span style="font-size:14px">&gt; ��File.Delete��INTO OUTFILE��������</span><span style="font-size:14px">Sleep��5������������������������</span><span style="font-size:14px">��</span>
         <div><br>
         </div>
-        <div>これは ファイルが存在している(?)にも拘わらずFile.ExistsがTRUEで抜けてくるのが問題だと思うので、</div>
-        <div>スリープを挟むとしたらINTO
-          OUTFILEとFile.Delete(File.Exists)の間がいいのでははないでしょうか？</div>
+        <div>������ ����������������������(?)������������File.Exists��TRUE����������������������������������</div>
+        <div>����������������������INTO
+          OUTFILE��File.Delete(File.Exists)����������������������������������</div>
         <div><br>
         </div>
-        <div>1. ファイルの存在チェック</div>
-        <div>2. 存在したら消す<br>
+        <div>1. ����������������������</div>
+        <div>2. ��������������<br>
         </div>
         <div>3. SELECT .. INTO OUTFILE ..</div>
-        <div>-- ここでブレーク --</div>
-        <div>4. ファイルの存在チェック</div>
-        <div>5. 存在したら消す</div>
+        <div>-- �������������� --</div>
+        <div>4. ����������������������</div>
+        <div>5. ��������������</div>
         <div>6. SELECT .. INTO OUTFILE ..</div>
         <div><br>
         </div>
-        <div>ブレークした時に、OSから見てもファイルが存在するのにFile.ExistsがFALSEになるのであれば</div>
-        <div>オブジェクトを使いまわしていないか(File.DeleteしたあとのFileオブジェクトが何を返すのかとか)とか、</div>
-        <div>OSから見てファイルがまだ存在しないのなら、mysqldのスタックなど見てみるといいのかもしれません。</div>
-        <div>5.0も5.6もselect_export::prepareの割と早い段階でcreate_fileを呼んで(ファイルだ
-          け先行して作成される)いるので、</div>
-        <div>そこは変わらないような気がするのですが。。</div>
+        <div>������������������OS��������������������������������File.Exists��FALSE����������������</div>
+        <div>����������������������������������(File.Delete����������File������������������������������)������</div>
+        <div>OS����������������������������������������mysqld����������������������������������������������</div>
+        <div>5.0��5.6��select_export::prepare����������������create_file��������(����������
+          ��������������������)����������</div>
+        <div>������������������������������������������</div>
         <div><br>
         </div>
         <div><br>
@@ -126,52 +120,50 @@ cite="mid:CAHB5oTMkxNgJpF=B=Hi+bXCBSKfhFuzPrnbLYnC=iphZq0m5SA@mail.gmail.com"
         </div>
       </div>
       <div class="gmail_extra"><br>
-        <div class="gmail_quote">2014年12月12日 14:22 志澤 敦 <span dir="ltr">&lt;<a
-              moz-do-not-send="true"
-              href="mailto:atsushi.shizawa@seikodo.co.jp"
-              target="_blank">atsushi.shizawa@seikodo.co.jp</a>&gt;</span>:
+        <div class="gmail_quote">2014��12��12�� 14:22 ���� �� <span dir="ltr">&lt;<a moz-do-not-send="true" href="mailto:atsushi.shizawa@seikodo.co.jp" target="_blank">atsushi.shizawa@seikodo.co.jp</a>&gt;</span>:
           <blockquote class="gmail_quote" style="margin:0 0 0
-            .8ex;border-left:1px #ccc solid;padding-left:1ex">志澤と申します。<br>
-            初めて投稿させて頂きます。<br>
+            .8ex;border-left:1px #ccc solid;padding-left:1ex">����������������<br>
+            ��������������������������<br>
             <br>
-            MySQLWindowsのケースは少ないかとも思いますが、<br>
-            お心あたり御座いましたら、ご頂けると幸いです。<br>
+            MySQLWindows����������������������������������<br>
+            ����������������������������������������������<br>
             <br>
-            ---環境---<br>
-            OS ：Windows2012 Std(Memory24GB)<br>
-            DB ：MySQL 5.6.21<br>
-            Coccector ：Net 6.9.5<br>
-            FrameWork ：.NET FrameWork 4.5<br>
-            IDE ：VS2012 Pro<br>
+            ---����---<br>
+            OS ��Windows2012 Std(Memory24GB)<br>
+            DB ��MySQL 5.6.21<br>
+            Coccector ��Net 6.9.5<br>
+            FrameWork ��.NET FrameWork 4.5<br>
+            IDE ��VS2012 Pro<br>
             <br>
-            ---事象---<br>
-            ・同一ファイルパスにおいて、INTO OUTFILE →File.Deleteを高速に行うと、<br>
-            　IF(File.Exists==TRUE){File.Delete}が機能せず、<br>
-            SQL発行時にMySqlExceptionが発生。<br>
+            ---����---<br>
+            ����������������������������INTO OUTFILE ��File.Delete����������������<br>
+            ��IF(File.Exists==TRUE){File.Delete}������������<br>
+            SQL��������MySqlException��������<br>
             <br>
-            ・エラー内容は、「1086：already exists」<br>
+            ������������������1086��already exists��<br>
             <br>
-            ・その際、OS上にもファイルは残っており、通常のファイルとして読み書きが出 来る状態。<br>
+            ����������OS������������������������������������������������������������ ����������<br>
             <br>
-            ---検証内容---<br>
-            ・VS2012でのデバッグ時に、ステップ実行でも発生。<br>
-            ・File.Delete→INTO OUTFILEの間に、Sleepを5秒挟んだりしても発生する。<br>
-            ・Win2008R2でも同様に発生。<br>
-            ・CentOSでも同様に発生。<br>
-            ・MySQL5.5でも同様に発生。<br>
-            --例外事象--<br>
-            ・MySQL5.0では発生しない。<br>
+            ---��������---<br>
+            ��VS2012����������������������������������������<br>
+            ��File.Delete��INTO OUTFILE��������Sleep��5��������������������������<br>
+            ��Win2008R2����������������<br>
+            ��CentOS����������������<br>
+            ��MySQL5.5����������������<br>
+            --��������--<br>
+            ��MySQL5.0����������������<br>
             <br>
             <br>
-            以上となります。<br>
-            DBというより、ConnectorやOS由来な気もしておりますが、<br>
-            何か情報御座いましたら、ご助言の程を何卒お願い致します。<br>
+            ����������������<br>
+            DB������������Connector��OS��������������������������<br>
+            ��������������������������������������������������������<br>
             <br>
           </blockquote>
         </div>
       </div>
     </blockquote>
     <br>
-  </body>
-</html>
+  
 
+
+</body></html>

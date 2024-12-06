@@ -1,71 +1,69 @@
-<html>
-<head>
+<html><head>
 <meta http-equiv="Content-Style-Type" context="text/css">
 <title>mysql:15873</title>
-<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
-<p class="button"><a href="15872.html">[��]</a><a href="15874.html">[��]</a><a href="../list/15801-15900.html">[�ֹ�����]</a><a href="../thread/15801-15900.html">[����åɰ���]</a></p>
+<p class="button"><a href="15872.html">[前]</a><a href="15874.html">[次]</a><a href="../list/15801-15900.html">[番号順一覧]</a><a href="../thread/15801-15900.html">[スレッド一覧]</a></p>
 <p class="id">
 mysql:15873
 </p>
 <div class="header">
 <p>
-From: ���ݡ����� &lt;���ݡ����� &lt;yukitake@xxxxxxxxxx&gt;&gt;<br>
+From: 雪竹　勝義 &lt;雪竹　勝義 &lt;yukitake@xxxxxxxxxx&gt;&gt;<br>
 Date: Wed, 10 Oct 2012 17:15:31 +0900<br>
-Subject: [mysql 15873] mysql5�Ǥ�INSERT INTO hoge SELECT FROM temp��SELECT¦�Υǡ����������Ǥ��ʤ���<br>
+Subject: [mysql 15873] mysql5でのINSERT INTO hoge SELECT FROM tempでSELECT側のデータが取得できない。<br>
 
 </p>
 </div>
 <div class="body">
-<pre>
-�����åա�����
-�����äˤʤ�ޤ���
+<pre>スタッフ、皆様
+お世話になります。
 
-Yukitake�Ȥ����ޤ���
+Yukitakeといいます。
 
-mysql5�Ǥ�
-INSERT INTO hoge SELECT FROM temp��
-temp�Υǡ�������å����Ƥ������temp�Υǡ����������Ǥ��ޤ���
+mysql5での
+INSERT INTO hoge SELECT FROM tempで
+tempのデータをロックしている場合にtempのデータが取得できません。
 
-����Ū�ˤϰʲ��˵��Ҥ��ޤ���
+具体的には以下に記述します。
 
-�����ʲ��Τ褦�ʥޥ����ե����뤬����ޤ���
-	�ơ��֥�̾ M_������
-	���� �����ɡ�̾
-	�ǡ���
-	1.���澦��
-	2,��¼����
+１．以下のようなマスタファイルがあります。
+	テーブル名 M_得意先
+	項目 コード、名
+	データ
+	1.田中商事
+	2,北村商事
 
-����������ޥ��������Ƥ�WORK�ơ��֥�ذʲ��Υ��ޥ�ɤؤ��ä���ܤ������Ȼפ��ޤ���
+この得意先マスタの内容をWORKテーブルへ以下のコマンドへそっくり移したいと思います。
 
-	��INSERT INTO WORK( �����ɡ�̾ )SELECT �����ɡ�̾ FROM ������ޥ��� WHERE ������ = 1
+	①INSERT INTO WORK( コード、名 )SELECT コード、名 FROM 得意先マスタ WHERE コード = 1
 
-���λ�������ޥ������Խ����뤿��˰ʲ��Υ��ޥ�ɤ�ȯ�Ԥ��Ƥ���Ⱦ嵭���ޥ�ɭ���������ޥ����������
-�����˥����ॢ���Ȥ��ޤ���
+この時得意先マスタを編集するために以下のコマンドを発行していると上記コマンド①で得意先マスタを取得で
+きずにタイムアウトします。
 
-	��SELECT * FROM ������ WHERE ������ = 1 FOR UPDATE
-
-
-������󥳥ޥ�ɭ���ȯ�Ԥ��Ƥ��ʤ����ϥ��ޥ�ɭ����������ޤ���
-�ޤ��ʲ��Τ褦�˥��ޥ�ɭ���ʬ����ȯ�Ԥ��������פǤ�
-
-	��SELECT �����ɡ�̾ FROM ������ޥ��� WHERE ������ = 1
-	��INSERT INTO VALUES ���ޥ�ɭ��η��
-
-	��������ȥ��ޥ�ɭ���¹Ԥ��Ƥ��Ƥ������
-
-�ʾ�Τ褦��mysql�Ǥ�¾�ǹԥ��å����Ƥ������Ƥ�INSERT INTO SELECT FROM�Ǥ��ʤ��ΤǤ��礦����
-�����򤹤��mysql��INSERT INTO SELECT FROM�Ϥ����������󤬤���褦�Ǥ����б���������ФȻפ��ޤ���
-
-���ޥ�ɭ����Τ褦�˼����Ƚ񤭹��ߤ�ʬ����Ȳ�ǽ�ʤΤǤ��������¿���ΤǼ¹Ի��֤������ꤹ���ơʥ롼
-�פ�������ޥ����η��ʬ�󤹾�礬����˻Ȥ��ޤ���
-�����ϥ��ޥ�ɭ��ǰ��ǻ��äƤ������Ǥ���
+	②SELECT * FROM 得意先 WHERE コード = 1 FOR UPDATE
 
 
-�������ɥХ���������Ф���������ꤤ���ޤ���
+もちろんコマンド②を発行していない場合はコマンド①は成功します。
+また以下のようにコマンド①を分けて発行すると大丈夫です
 
-�ʾ� 
+	③SELECT コード、名 FROM 得意先マスタ WHERE コード = 1
+	④INSERT INTO VALUES コマンド③の結果
+
+	↑これだとコマンド②を実行していても大丈夫
+
+以上のようにmysqlでは他で行ロックしている内容はINSERT INTO SELECT FROMできないのでしょうか？
+検索をするとmysqlのINSERT INTO SELECT FROMはいろいろ制約があるようですが対応策があればと思います。
+
+コマンド③④のように取得と書き込みを分けると可能なのですが件数が多いので実行時間がかかりすぎて（ルー
+プで得意先マスタの件数分回す場合がある）使えません。
+本当はコマンド①で一括で持ってきたいです。
+
+
+何かアドバイスがあればよろしくお願いします。
+
+以上 
 
 
 
@@ -73,17 +71,17 @@ temp�Υǡ�������å����Ƥ������temp�Υǡ����������Ǥ��ޤ���
 
 </pre>
 </div>
-<p class="button"><a href="15872.html">[��]</a><a href="15874.html">[��]</a><a href="../list/15801-15900.html">[�ֹ�����]</a><a href="../thread/15801-15900.html">[����åɰ���]</a></p>
-<pre class="list">
-<span class="current">-&gt;&nbsp;<a href="15873.html">  15873 2012-10-10 17:15 [���ݡ����� &lt;yukitake] mysql5�Ǥ�INSERT INTO hoge SELECT FROM temp��SELECT¦�Υǡ����������Ǥ��ʤ���</a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15874.html">  15874 2012-10-10 17:33 ��[&quot;yoku ts.&quot; &lt;yoku0825]                                       </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15875.html">  15875 2012-10-10 17:55 ����[tsyk goto &lt;ngyuki.ts]                                     </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15877.html">  15877 2012-10-10 18:25 ������[&quot;yoku ts.&quot; &lt;yoku0825]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15879.html">  15879 2012-10-10 18:45 ��������[���ݡ����� &lt;yukitake]                                 </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15880.html">  15880 2012-10-10 21:21 ����������[&quot;yoku ts.&quot; &lt;yoku0825]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15882.html">  15882 2012-10-11 13:31 ����������[���� �� &lt;takashi.nak]                               </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15878.html">  15878 2012-10-10 18:39 ������[���ݡ����� &lt;yukitake]                                   </a></span>
-<span>&nbsp;&nbsp;&nbsp;<a href="15876.html">  15876 2012-10-10 18:09 ����[���ݡ����� &lt;yukitake]                                     </a></span>
+<p class="button"><a href="15872.html">[前]</a><a href="15874.html">[次]</a><a href="../list/15801-15900.html">[番号順一覧]</a><a href="../thread/15801-15900.html">[スレッド一覧]</a></p>
+<pre class="list"><span class="current">-&gt;&nbsp;<a href="15873.html">  15873 2012-10-10 17:15 [雪竹　勝義 &lt;yukitake] mysql5でのINSERT INTO hoge SELECT FROM tempでSELECT側のデータが取得できない。</a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15874.html">  15874 2012-10-10 17:33 ┗["yoku ts." &lt;yoku0825]                                       </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15875.html">  15875 2012-10-10 17:55 　┣[tsyk goto &lt;ngyuki.ts]                                     </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15877.html">  15877 2012-10-10 18:25 　┃┣["yoku ts." &lt;yoku0825]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15879.html">  15879 2012-10-10 18:45 　┃┃┗[雪竹　勝義 &lt;yukitake]                                 </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15880.html">  15880 2012-10-10 21:21 　┃┃　┣["yoku ts." &lt;yoku0825]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15882.html">  15882 2012-10-11 13:31 　┃┃　┗[中川 貴 &lt;takashi.nak]                               </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15878.html">  15878 2012-10-10 18:39 　┃┗[雪竹　勝義 &lt;yukitake]                                   </a></span>
+<span>&nbsp;&nbsp;&nbsp;<a href="15876.html">  15876 2012-10-10 18:09 　┗[雪竹　勝義 &lt;yukitake]                                     </a></span>
 </pre>
-</body>
-</html>
+
+
+</body></html>

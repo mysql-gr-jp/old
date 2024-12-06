@@ -1,8 +1,7 @@
-<html>
-<head>
+<html><head>
 <meta http-equiv="Content-Style-Type" context="text/css">
 <title>mysql:15663</title>
-<link rel=stylesheet type="text/css" href="../../../css/w3ml.css">
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
 </head>
 <body>
 <p class="button"><a href="15662.html">[前]</a><a href="15664.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
@@ -18,8 +17,7 @@ Subject: [mysql 15663] [ANN] mroonga 1.20<br>
 </p>
 </div>
 <div class="body">
-<pre>
-須藤です。
+<pre>須藤です。
 
 昨日は今年最初の肉の日なので、MySQL 5.1/5.5/5.6、MariaDB
 5.2/5.3で利用可能な全文検索可能なストレージエンジン、mroonga
@@ -53,13 +51,13 @@ ${MAJOR}.${MINOR}${MICRO}というバージョン付け規則になっていま
 
 このリリースでは、データベースの再作成が必要な変更点が2つあります。
 
-  * ストレージエンジン名を&quot;groonga&quot;から&quot;mroonga&quot;へ改名。
+  * ストレージエンジン名を"groonga"から"mroonga"へ改名。
   * DATE、DATETIME、TIMESTAMP型の値にgroongaが提供する時間の値を使うようにした。
 
 DATE型などの分だけであればmysqldumpでダンプしたものをリスト
 アするだけでよいのですが、ストレージエンジン名も変わっている
 のでダンプしたものを編集する必要があります。具体的には
-&quot;CREATE TABLE&quot; SQL内の&quot;ENGINE=groonga&quot;を&quot;ENGINE=mroonga&quot;に変
+"CREATE TABLE" SQL内の"ENGINE=groonga"を"ENGINE=mroonga"に変
 更する必要があります。
 
 
@@ -73,10 +71,10 @@ DATE型などの分だけであればmysqldumpでダンプしたものをリス�
 
   % sed -e 's/^) ENGINE=groonga/) ENGINE=mroonga/' database-groonga.dump &gt; database-mroonga.dump
 
-&quot;CREATE TABLE&quot;の&quot;ENGINE=groonga&quot;だけが&quot;ENGINE=mroonga&quot;に変更
-されていることを確認します。&quot;@@ ... @@&quot;行に&quot;CREATE TABLE&quot;が含
-まれているかを確認します。この行が&quot;CREATE TABLE&quot;を含んでいた
-ら、その変更はほぼ間違いなく&quot;CREATE TABLE&quot;用の変更です:
+"CREATE TABLE"の"ENGINE=groonga"だけが"ENGINE=mroonga"に変更
+されていることを確認します。"@@ ... @@"行に"CREATE TABLE"が含
+まれているかを確認します。この行が"CREATE TABLE"を含んでいた
+ら、その変更はほぼ間違いなく"CREATE TABLE"用の変更です:
 
   % diff -up database-groonga.dump database-mroonga.dump
   --- database-groonga.dump     2012-01-29 16:53:20.732624670 +0900
@@ -95,7 +93,7 @@ DATE型などの分だけであればmysqldumpでダンプしたものをリス�
 
   % mysql -u root -e 'DROP DATABASE MY_MROONGA_DATABASE'
 
-&quot;mroonga&quot;ストレージエンジンにアップグレードします。Debian
+"mroonga"ストレージエンジンにアップグレードします。Debian
 GNU/LinuxやUbuntuでは apt-get を使います。CentOSやFedoraでは
 yum を使います。
 
@@ -106,16 +104,16 @@ CentOSまたはFedoraの場合:
   % sudo yum remove -y mysql-mroonga
   % sudo yum install -y mysql-mroonga
 
-&quot;yum install&quot;の前に&quot;yum remove&quot;をするのを忘れないでください。
-今のmroongaのRPMの作りがあまりよくなくて&quot;yum remove&quot;を忘れる
+"yum install"の前に"yum remove"をするのを忘れないでください。
+今のmroongaのRPMの作りがあまりよくなくて"yum remove"を忘れる
 とプラグイン管理テーブル（？）が壊れてしまいます。
 
 ソースからインストールする場合（未確認だがこれでいけるはず）:
-  % mysql -u root -e &quot;DROP FUNCTION last_insert_grn_id&quot;
-  % mysql -u root -e &quot;UNINSTALL PLUGIN groonga&quot;
+  % mysql -u root -e "DROP FUNCTION last_insert_grn_id"
+  % mysql -u root -e "UNINSTALL PLUGIN groonga"
   % sudo make install 
-  % mysql -u root -e &quot;INSTALL PLUGIN mroonga SONAME 'ha_mroonga.so'&quot;
-  % mysql -u root -e &quot;CREATE FUNCTION last_insert_grn_id RETURNS INTEGER soname 'ha_mroonga.so'&quot;
+  % mysql -u root -e "INSTALL PLUGIN mroonga SONAME 'ha_mroonga.so'"
+  % mysql -u root -e "CREATE FUNCTION last_insert_grn_id RETURNS INTEGER soname 'ha_mroonga.so'"
 
 データベースを作り直します:
 
@@ -125,8 +123,8 @@ CentOSまたはFedoraの場合:
 
   % mysql -u root MY_MROONGA_DATABASE &lt; database-mroonga.dump
 
-これで1.20を使うことができます。&quot;SHOW CREATE TABLE テーブル
-名&quot;などで&quot;ENGINE=mroonga&quot;になっていることを確認してください。
+これで1.20を使うことができます。"SHOW CREATE TABLE テーブル
+名"などで"ENGINE=mroonga"になっていることを確認してください。
 
 ○ 変更点
 
@@ -142,7 +140,7 @@ CentOSまたはFedoraの場合:
   * MySQL 5.5.20に対応。
   * MySQL 5.1.61に対応。
   * groonga 1.3.0以降を必須にした。
-  * [非互換] ストレージエンジン名を&quot;groonga&quot;から&quot;mroonga&quot;に変更。
+  * [非互換] ストレージエンジン名を"groonga"から"mroonga"に変更。
   * UTF8_BINコレーションに対応。 [#1150]
   * strict-aliasingの警告が出ないようにした。 [@issmさんが報告]
   * DECIMALに対応した。 [#1249] [@Kiskeさんが報告]
@@ -185,5 +183,6 @@ CentOSまたはFedoraの場合:
 </pre>
 </div>
 <p class="button"><a href="15662.html">[前]</a><a href="15664.html">[次]</a><a href="../list/15601-15700.html">[番号順一覧]</a><a href="../thread/15601-15700.html">[スレッド一覧]</a></p>
-</body>
-</html>
+
+
+</body></html>

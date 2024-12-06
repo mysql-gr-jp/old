@@ -1,0 +1,147 @@
+<html><head>
+<meta http-equiv="Content-Style-Type" context="text/css">
+<title>mysql:16648</title>
+<link rel="stylesheet" type="text/css" href="../../../css/w3ml.css">
+</head>
+<body>
+<p class="button"><a href="16647.html">[前]</a><a href="16649.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+<p class="id">
+mysql:16648
+</p>
+<div class="header">
+<p>
+From: Horimoto Yasuhiro &lt;Horimoto Yasuhiro &lt;horimoto@xxxxxxxxxx&gt;&gt;<br>
+Date: Tue, 01 Jun 2021 11:45:48 +0900 (JST)<br>
+Subject: [mysql 16648] [ANN] Mroonga 11.03<br>
+
+</p>
+</div>
+<div class="body">
+<pre>こんにちは。Mroongaプロジェクトの堀本です。
+
+Mroonga 11.03をリリースしました！
+
+リリースアナウンス:
+   <a href="https://mroonga.org/ja/blog/2021/05/31/mroonga-11.03.html">https://mroonga.org/ja/blog/2021/05/31/mroonga-11.03.html</a>
+
+MroongaはMySQLで日本語全文検索を実現するストレージエンジンです。高速で
+あることや位置情報検索をサポートしていることなどが特徴です。詳細につい
+はドキュメントをご覧ください。
+
+  * Mroongaの特徴 ― Mroonga v11.03 documentation
+    <a href="https://mroonga.org/ja/docs/characteristic.html#what-is-mroonga">https://mroonga.org/ja/docs/characteristic.html#what-is-mroonga</a>
+
+変更点:
+   <a href="https://mroonga.org/ja/docs/news.html#release-11.03">https://mroonga.org/ja/docs/news.html#release-11.03</a>
+
+### 重要なお知らせ
+
+1.
+  このリリースから、パッケージ名が変更されます。
+  この変更の影響でこのバージョンにアップグレード後、Mroongaが無効になることがあります。
+  このバージョンにアップグレードする場合、以下の点を必ず確認してください。
+
+    * アップグレード後にMroongaが無効だった場合は、Mroongaを手動でインストールし直す必要があります。
+      Mroongaの手動インストール及び、Mroongaが有効かどうかの確認については、以下のURLを参照してください。
+
+      * <a href="https://mroonga.org/docs/tutorial/installation_check.html">https://mroonga.org/docs/tutorial/installation_check.html</a>
+
+    * また、今後も、Mroonga 11.03をまたいでMroongaをアップグレードする場合は、この現象が発生するので、
+      注意してください。
+
+    * このバージョンにアップグレード後に、Mroongaは有効だがバージョンが古いという場合は、MySQL、MariaDB、
+      PerconaServerを再起動する必要があります。
+      Mroongaのバージョンは以下のコマンドで確認できます。
+
+      * SHOW VARIABLES LIKE 'mroonga_version';
+
+2.
+  このリリースには、非互換の変更が含まれています。
+  GEOMETRY 型を使用しているユーザーは、Mroonga 11.03にアップグレードする前に現在のデータを保存し、
+  アップグレード後に保存したデータをリストアする必要があります。
+  上記の処置を実施せずに、アップグレードするとデータが破損するので注意してください。
+
+  データのダンプ/リストアには、以下の方法が使えます。
+
+    * mysqldump
+    * アップグレード前に ALTER TABLE ENGINE=InnoDB を実行し、
+      アップグレード後に ALTER TABLE ENGINE=Mroonga を実行する。
+
+  この修正を適用しない場合、 INSERT/UPDATE/SELECT/SELECT はうまく動作しますが、
+  データはGroongaが誤った(緯度と経度はGroonga内で逆にされます)保存をします。
+  そのため、 空間データに対する、 mroonga_command('select ...') が動作しません。
+
+さて、今回の主な変更点は次のとおりです。
+
+### 改良
+
+  * 以下のようにパッケージ名を変更しました。
+
+    * mariadb-server-10.x-mroonga -&gt; mariadb-10.x-mroonga
+    * mysql-server-5.x-mroonga -&gt; mysql-community-5.x-mroonga
+    * mysql-server-8.x-mroonga -&gt; mysql-community-8.x-mroonga
+    * percona-server-5x-mroonga -&gt; percona-server-5.x-mroonga
+    * percona-server-8x-mroonga -&gt; percona-server-8.x-mroonga
+
+  * [Debian GNU/Linux] Oracle の MySQL 5.7 と Oracle の MySQL 8.0 をサポートしました。
+
+    このリリースから、新たに Debian GNU/Linux 向けに Oracle の MySQL 5.7 と 8.0 を使用した
+    Mroonga パッケージを提供しました。
+    これにより、MroongaのDockerイメージをDocker公式のMySQLイメージを使って作成できます。
+
+    なお、MySQL8 のパッケージには以下の制限があります。
+
+      * [ラッパーモード] ラッパーモードは未対応です。
+      * [ストレージモード] ストレージモードでは、以下の機能が未対応です。
+
+        * 最適化関連の機能
+
+  * 空間インデックスのSRIDをサポートしました。
+
+    * 今回のリリースから、MySQL8.0で MBRContains 関数を使った検索で、Mroongaのインデックスが使用されます。
+
+  * コンディションプッシュダウンを適用する条件式を増やしました。
+
+    **注意**
+
+      * コンディションプッシュダウンは、MySQLではなく、Mroonga内で条件式を評価します。
+        したがって、多くのクエリーは、高速になりますが、Mroongaが条件式を評価することで、
+        今までと異なる検索結果を返すことがあります。
+
+        もし、Mroongaが意図しない検索結果を返した場合、以下のURLから報告してください。
+        そして、コンディションプッシュダウンを無効にしてください。
+
+          * <a href="https://github.com/mroonga/mroonga/issues/">https://github.com/mroonga/mroonga/issues/</a>
+
+        コンディションプッシュダウンは以下のように無効にできます。
+
+          * SET GLOBAL mroonga_condition_push_down_type = "NONE"
+
+  * [CentOS] Percona Server 8.0.23 をサポートしました。
+
+### 修正
+
+  * 緯度と経度を逆に保存していた問題を修正しました。
+
+    **重要**
+
+      * この修正によって、後方互換性が壊れます。
+        GEOMETRY 型を使用しているユーザーは、Mroonga 11.03にアップグレードする前に現在のデータを保存し、
+        アップグレード後に保存したデータをリストアする必要があります。
+        データのダンプ/リストアには、以下の方法が使えます。
+
+          * mysqldump
+          * アップグレード前に ALTER TABLE ENGINE=InnoDB を実行し、
+            アップグレード後に ALTER TABLE ENGINE=Mroonga を実行する。
+
+      * この修正を適用しない場合、 INSERT/UPDATE/SELECT/SELECT はうまく動作しますが、
+        データはGroongaが誤った(緯度と経度はGroonga内で逆にされます)保存をします。
+        そのため、 空間データに対する、 mroonga_command('select ...') が動作しません。
+
+
+</pre>
+</div>
+<p class="button"><a href="16647.html">[前]</a><a href="16649.html">[次]</a><a href="../list/16601-16700.html">[番号順一覧]</a><a href="../thread/16601-16700.html">[スレッド一覧]</a></p>
+
+
+</body></html>

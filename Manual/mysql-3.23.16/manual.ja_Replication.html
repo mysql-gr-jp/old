@@ -1,23 +1,22 @@
-  <HTML>
-  <HEAD>
+<html><head>
   <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
      from manual.ja.texi on 22 May 2000 -->
 
-  <TITLE>MySQL Reference Manual for version 3.23.16-alpha. - 11  Replication in MySQL</TITLE>
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
-  </HEAD>
-  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Server.html">previous</A>, <A HREF="manual.ja_Performance.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
-<P><HR><P>
+  <title>MySQL Reference Manual for version 3.23.16-alpha. - 11  Replication in MySQL</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000" link="#101090" vlink="#7030B0">
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Server.html">previous</a>, <a href="manual.ja_Performance.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+<p></p><hr><p>
 
 
-<H1><A NAME="Replication" HREF="manual.ja_toc.html#Replication">11  Replication in MySQL</A></H1>
+</p><h1><a name="Replication" href="manual.ja_toc.html#Replication">11  Replication in MySQL</a></h1>
 
 
 
-<H2><A NAME="Replication_Intro" HREF="manual.ja_toc.html#Replication_Intro">11.1  Introduction</A></H2>
+<h2><a name="Replication_Intro" href="manual.ja_toc.html#Replication_Intro">11.1  Introduction</a></h2>
 
-<P>
+<p>
 One way replication can be used both to increase robustness and
 speed. For robustness you have two systems and switch to the backup if
 you get problems you witch to the backup. The extra speed is achieved by
@@ -25,9 +24,9 @@ sending a part of the non updating queries to the replica server. Of
 course this only works if non updating queries dominate, but that is the
 normal case.
 
-</P>
-<P>
-Starting in 3.23.15, <STRONG>MySQL</STRONG> supports one-way replication
+</p>
+<p>
+Starting in 3.23.15, <strong>MySQL</strong> supports one-way replication
 internally. One server acts as the master, while the other acts as the
 slave. Note that one server could play the roles of master in one pair
 and slave in the other. The master server keeps a binary log of updates
@@ -36,221 +35,221 @@ slave upon connecting informs the master where it left off sinse the
 last successfully propogated update, catches up on the updates, and then
 blocks and waits for the master to notify it of the new updates.
 
-</P>
+</p>
 
 
-<H2><A NAME="Replication_Implementation" HREF="manual.ja_toc.html#Replication_Implementation">11.2  Replication Implementation Overview</A></H2>
+<h2><a name="Replication_Implementation" href="manual.ja_toc.html#Replication_Implementation">11.2  Replication Implementation Overview</a></h2>
 
-<P>
+<p>
 MySQL internal replication uses the master-slave approach. One server is designated as the master,
 while the other ( or others) as slave(s). The master keeps a binary log of updates. The slave connects
 to the master, catches up on the missed updates, and then starts receiving updates immediately as they
 come to the master. If the connection is lost, the slave will reconnect. If the master goes down, the
-slave will keep trying to connect every <CODE>master-connect-retry</CODE> seconds until the master comes back
+slave will keep trying to connect every <code>master-connect-retry</code> seconds until the master comes back
 up and the connection can be established. The slave keeps track of where it left off in the replication
 process, so it can use the info in the case it goes down and gets restarted later.
 
-</P>
+</p>
 
 
-<H2><A NAME="Replication_HOWTO" HREF="manual.ja_toc.html#Replication_HOWTO">11.3  HOWTO</A></H2>
-<P>
+<h2><a name="Replication_HOWTO" href="manual.ja_toc.html#Replication_HOWTO">11.3  HOWTO</a></h2>
+<p>
 Below is a quick HOWTO on how to set up replication on your current system:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 Upgrade both slave and master to 3.23.15 or higher.  
-<LI>
+</li><li>
 
-Set up special replication user(s) on the master with the <CODE>FILE</CODE>
+Set up special replication user(s) on the master with the <code>FILE</code>
 privilege and permission to connect from all the slaves
-<LI>
+</li><li>
 
 Take a snapshot of all the tables/databases on the master that could
 possibly be involved in the update queries before taking the next step
-<LI>
+</li><li>
 
-In <CODE>my.cnf</CODE> on the master add <CODE>log-bin</CODE> and restart it. Make
+In <code>my.cnf</code> on the master add <code>log-bin</code> and restart it. Make
 sure there are no important updates to the master between the time you
 have taken the snapshot and the time master is restarted with
-<CODE>log-bin</CODE> option
-<LI>
+<code>log-bin</code> option
+</li><li>
 
 Load the snapshot of the master to all the slaves
-<LI>
+</li><li>
 
-Add the following to <CODE>my.cnf</CODE> on the slave(s):
+Add the following to <code>my.cnf</code> on the slave(s):
 
 
-<PRE>
-master-host=&#60;hostname of the master&#62;
-master-user=&#60;replication user name&#62;
-master-password=&#60;replication user password&#62;
-</PRE>
+<pre>master-host=&lt;hostname of the master&gt;
+master-user=&lt;replication user name&gt;
+master-password=&lt;replication user password&gt;
+</pre>
 
-replacting the values in &#60;&#62; with what is relevant to your system.
+replacting the values in &lt;&gt; with what is relevant to your system.
 
-<LI>Restart the slave(s)
+</li><li>Restart the slave(s)
 
-</UL>
+</li></ul>
 
-<P>
+<p>
 After you have done the above, the master and the slave(s) should be in
 sync.
 
-</P>
+</p>
 
 
-<H2><A NAME="Replication_Features" HREF="manual.ja_toc.html#Replication_Features">11.4  Replication Features</A></H2>
+<h2><a name="Replication_Features" href="manual.ja_toc.html#Replication_Features">11.4  Replication Features</a></h2>
 
-<P>
+<p>
 Below is an explanation of what is supported and what is not:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-Replication will be done correctly with <CODE>AUTO_INCREMENT</CODE>,
-<CODE>LAST_INSERT_ID</CODE>, and <CODE>TIMESTAMP</CODE> values
-<LI>
+Replication will be done correctly with <code>AUTO_INCREMENT</code>,
+<code>LAST_INSERT_ID</code>, and <code>TIMESTAMP</code> values
+</li><li>
 
-<CODE>LOAD DATA INFILE</CODE> will be handled properly as long as the file
+<code>LOAD DATA INFILE</code> will be handled properly as long as the file
 still resides on the master server at the time of update
-propogation. <CODE>LOAD LOCAL DATA INFILE</CODE> will be skipped.
-<LI>
+propogation. <code>LOAD LOCAL DATA INFILE</code> will be skipped.
+</li><li>
 
 Update queries that use user variables are not replication-safe (yet)
-<LI>
+</li><li>
 
 If the query on the slave gets an error, the slave thread will
-terminate, and a message will appear in <CODE>.err</CODE> file. You should
+terminate, and a message will appear in <code>.err</code> file. You should
 then connect to the slave manually, fix the cause of the error
-(eg. non-existent table), and then run <CODE>SLAVE START</CODE> sql command ( available starting in 3.23.16,
+(eg. non-existent table), and then run <code>SLAVE START</code> sql command ( available starting in 3.23.16,
 in 3.23.15 you will have to restart the server).
-<LI>
+</li><li>
 
 If connection to the master is lost, the slave will retry immediately,
-and then in case of failure every <CODE>master-connect-retry</CODE> (default
+and then in case of failure every <code>master-connect-retry</code> (default
 60) seconds. Because of this, it is safe to shut down the master, and
 then restart it after a while. The slave will also be able to deal with
 network connectivity outages.
-<LI>
+</li><li>
 
 Shutting down the slave (cleanly) is also safe, as it keeps track of
 where it left off.  Unclean shutdowns might produce problems, especially
 if disk cache was not synced before the system died. Your system fault
 tolerance will be greatly increased if you have a good UPS.
-<LI>
+</li><li>
 
 If the master is listening on a non-standard port, you will also need to
-specify this with <CODE>master-port</CODE> parameter in <CODE>my.cnf</CODE> .
-<LI>
+specify this with <code>master-port</code> parameter in <code>my.cnf</code> .
+</li><li>
 
 In 3.23.15,all of the tables and databases will be replicated. Starting in 3.23.16, you
-can restrict replication to a set of databases with <CODE>replicate-do-db</CODE> directives in
-<CODE>my.cnf</CODE> or just excluse a set of databases with <CODE>replicate-ignore-db</CODE>.
-<LI>
+can restrict replication to a set of databases with <code>replicate-do-db</code> directives in
+<code>my.cnf</code> or just excluse a set of databases with <code>replicate-ignore-db</code>.
+</li><li>
 
-Starting in 3.23.16, <CODE>SET SQL_LOG_BIN = 0</CODE> will turn off replication (binary) logging on the
-master, and <CODE>SET SQL_LOG_BIN = 1</CODE> will turn in back on - you must have the process privilege to do
+Starting in 3.23.16, <code>SET SQL_LOG_BIN = 0</code> will turn off replication (binary) logging on the
+master, and <code>SET SQL_LOG_BIN = 1</code> will turn in back on - you must have the process privilege to do
 this.
-<LI>The slave thread does not log updates to the binary log of the slave, so it is possible to couple
+</li><li>The slave thread does not log updates to the binary log of the slave, so it is possible to couple
 
 two servers in a mutual master-slave relationship. You can actually set up a load balancing scheme and
 do queries safely on either of the servers. Just do not expect to do LOCK TABLES on one server, then
 connect to the other and still have that lock :-) .
-</UL>
+</li></ul>
 
 
 
-<H2><A NAME="Replication_Options" HREF="manual.ja_toc.html#Replication_Options">11.5  Replication Options in my.cnf</A></H2>
+<h2><a name="Replication_Options" href="manual.ja_toc.html#Replication_Options">11.5  Replication Options in my.cnf</a></h2>
 
-<P>
-The table below explains the replications options in <CODE>my.cnf</CODE> . All of the are available
+<p>
+The table below explains the replications options in <code>my.cnf</code> . All of the are available
 starting in 3.23.15 unless indicated otherwise.
 
-</P>
-<TABLE BORDER WIDTH="100%" NOSAVE >
-<TR><TD><STRONG>Option</STRONG> </TD><TD> <STRONG>Description</STRONG> </TD><TD> <STRONG>Where to set</STRONG> </TD><TD> <STRONG>Example</STRONG>
-</TR NOSAVE>
-<TR><TD><CODE>log-bin</CODE> </TD><TD> Should be set on the master. Tells it to keep a binary update
-log. If a parameter is specified, the log will be written to the specified location. </TD><TD> Master </TD><TD> <CODE>log-bin</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>log-bin-index</CODE> </TD><TD> Because the user could issue <CODE>FLUSH LOGS</CODE> command, we need to
+</p>
+<table border="" width="100%" nosave="">
+<tbody><tr><td><strong>Option</strong> </td><td> <strong>Description</strong> </td><td> <strong>Where to set</strong> </td><td> <strong>Example</strong>
+</td></tr>
+<tr><td><code>log-bin</code> </td><td> Should be set on the master. Tells it to keep a binary update
+log. If a parameter is specified, the log will be written to the specified location. </td><td> Master </td><td> <code>log-bin</code>
+</td></tr>
+<tr><td><code>log-bin-index</code> </td><td> Because the user could issue <code>FLUSH LOGS</code> command, we need to
 know which log is currently active and which ones have been rotated out and it what sequence. This info
 is stored in the binary log index file. The default is `hostname`.index . You can use this option
-if you want to be a rebel. </TD><TD> Master </TD><TD> <CODE>log-bin-index=db.index</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>master-host</CODE> </TD><TD> Master hostname or IP address for replication. If not set,
-the slave thread will not be started </TD><TD> Master </TD><TD> <CODE>master-host=db-master.mycompany.com</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>master-user</CODE> </TD><TD> The user the slave thread will authenticate as when connecting to
-the master. The user must have <CODE>FILE</CODE> privilige. If the master user is not set, user <CODE>test</CODE>
- is assumed. </TD><TD> Slave </TD><TD> <CODE>master-user=scott</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>master-password</CODE> </TD><TD> The password the slave thread will authenticate with when
-connecting to the master. If not set, empty password is assumed </TD><TD> Slave </TD><TD> <CODE>master-password=tiger</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>master-port</CODE> </TD><TD> The port the master is listening on. If not set, the compiled setting of
-<CODE>MYSQL_PORT</CODE> is assumed. If you have not tinkered with <CODE>configure</CODE> options, this should be
-3306. </TD><TD> Slave </TD><TD> <CODE>master-port=3306</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>master-connect-retry</CODE> </TD><TD> The number of seconds the slave thread will sleep before retrying
+if you want to be a rebel. </td><td> Master </td><td> <code>log-bin-index=db.index</code>
+</td></tr>
+<tr><td><code>master-host</code> </td><td> Master hostname or IP address for replication. If not set,
+the slave thread will not be started </td><td> Master </td><td> <code>master-host=db-master.mycompany.com</code>
+</td></tr>
+<tr><td><code>master-user</code> </td><td> The user the slave thread will authenticate as when connecting to
+the master. The user must have <code>FILE</code> privilige. If the master user is not set, user <code>test</code>
+ is assumed. </td><td> Slave </td><td> <code>master-user=scott</code>
+</td></tr>
+<tr><td><code>master-password</code> </td><td> The password the slave thread will authenticate with when
+connecting to the master. If not set, empty password is assumed </td><td> Slave </td><td> <code>master-password=tiger</code>
+</td></tr>
+<tr><td><code>master-port</code> </td><td> The port the master is listening on. If not set, the compiled setting of
+<code>MYSQL_PORT</code> is assumed. If you have not tinkered with <code>configure</code> options, this should be
+3306. </td><td> Slave </td><td> <code>master-port=3306</code>
+</td></tr>
+<tr><td><code>master-connect-retry</code> </td><td> The number of seconds the slave thread will sleep before retrying
 to connect to the master in case the master goes down or the connection is lost.
-Default is 60. </TD><TD> Slave </TD><TD> <CODE>master-connect-retry=60</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>master-info-file</CODE> </TD><TD> The location of the file that remembers where we left off on the
+Default is 60. </td><td> Slave </td><td> <code>master-connect-retry=60</code>
+</td></tr>
+<tr><td><code>master-info-file</code> </td><td> The location of the file that remembers where we left off on the
  master during the replication process. The default is master.info in the data directory.
 Sasha:  The only reason I see for ever changing the default is the desire to
-be rebelious. </TD><TD> Slave </TD><TD> <CODE>master-info-file=master.info</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>replicate-do-db</CODE> </TD><TD> Tells the slave thread to restrict replication to the specified database. To sp
+be rebelious. </td><td> Slave </td><td> <code>master-info-file=master.info</code>
+</td></tr>
+<tr><td><code>replicate-do-db</code> </td><td> Tells the slave thread to restrict replication to the specified database. To sp
 cify more than one database, use the directive multiple times, once for each database.
 Note that this will only work if you do not use cross-database queries such as
-<CODE>UPDATE some_db.some_table SET foo='bar'</CODE> while having selected a different or
-no database. </TD><TD> Slave </TD><TD> <CODE>replicate-do-db=some_db</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>replicate-ignore-db</CODE> </TD><TD> Tells the slave thread to not replicate to the specified
+<code>UPDATE some_db.some_table SET foo='bar'</code> while having selected a different or
+no database. </td><td> Slave </td><td> <code>replicate-do-db=some_db</code>
+</td></tr>
+<tr><td><code>replicate-ignore-db</code> </td><td> Tells the slave thread to not replicate to the specified
 database. To specify more than one database to ignore, use the directive multiple times,
-once for each database. You must not use cross database updates for this option. </TD><TD> Slave </TD><TD> <CODE>replicate-
-o-db=some_db</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>sql-bin-update-same</CODE> </TD><TD> If set, setting  <CODE>SQL_LOG_BIN</CODE> to a value will
-automatically set <CODE>SQL_LOG_UPDATE</CODE> to the same value and vice
-versa. </TD><TD> Master </TD><TD> <CODE>sql-bin-update-same</CODE>
+once for each database. You must not use cross database updates for this option. </td><td> Slave </td><td> <code>replicate-
+o-db=some_db</code>
+</td></tr>
+<tr><td><code>sql-bin-update-same</code> </td><td> If set, setting  <code>SQL_LOG_BIN</code> to a value will
+automatically set <code>SQL_LOG_UPDATE</code> to the same value and vice
+versa. </td><td> Master </td><td> <code>sql-bin-update-same</code>
 
-</TR>
-</TABLE>
+</td></tr>
+</tbody></table>
 
 
 
-<H2><A NAME="Replication_SQL" HREF="manual.ja_toc.html#Replication_SQL">11.6  SQL commands related to replication</A></H2>
+<h2><a name="Replication_SQL" href="manual.ja_toc.html#Replication_SQL">11.6  SQL commands related to replication</a></h2>
 
-<P>
+<p>
 Replication can be controlled through the SQL interface. Below is the summary of commands:
 
-</P>
-<TABLE BORDER WIDTH="100%" NOSAVE >
-<TR><TD><STRONG>Command</STRONG> </TD><TD> <STRONG>Description</STRONG> </TD><TD> <STRONG>Where to run</STRONG>
-</TR NOSAVE>
-<TR><TD><CODE>SLAVE START</CODE> </TD><TD> Starts the slave thread. </TD><TD> Slave
-</TR NOSAVE>
-<TR><TD><CODE>SLAVE STOP</CODE> </TD><TD> Stops the slave thread. </TD><TD> Slave
-</TR NOSAVE>
-<TR><TD><CODE>SET SQL_LOG_BIN=0</CODE> </TD><TD> Disables update logging </TD><TD> Master
-</TR NOSAVE>
-<TR><TD><CODE>SET SQL_LOG_BIN=1</CODE> </TD><TD> Re-enable update logging </TD><TD> Master
-</TR>
-</TABLE>
+</p>
+<table border="" width="100%" nosave="">
+<tbody><tr><td><strong>Command</strong> </td><td> <strong>Description</strong> </td><td> <strong>Where to run</strong>
+</td></tr>
+<tr><td><code>SLAVE START</code> </td><td> Starts the slave thread. </td><td> Slave
+</td></tr>
+<tr><td><code>SLAVE STOP</code> </td><td> Stops the slave thread. </td><td> Slave
+</td></tr>
+<tr><td><code>SET SQL_LOG_BIN=0</code> </td><td> Disables update logging </td><td> Master
+</td></tr>
+<tr><td><code>SET SQL_LOG_BIN=1</code> </td><td> Re-enable update logging </td><td> Master
+</td></tr>
+</tbody></table>
 
-<P>
-<A NAME="IDX620"></A>
-<A NAME="IDX621"></A>
-<P><HR><P>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Server.html">previous</A>, <A HREF="manual.ja_Performance.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
- </BODY>
- </HTML>
+<p>
+<a name="IDX620"></a>
+<a name="IDX621"></a>
+</p><p></p><hr><p>
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Server.html">previous</a>, <a href="manual.ja_Performance.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+ 
+ 
+</p></body></html>

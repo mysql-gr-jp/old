@@ -1,244 +1,232 @@
-  <HTML>
-  <HEAD>
+<html><head>
   <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
      from manual.texi on 20 June 1998 -->
 
-  <TITLE>MySQL Reference Manual for version 3.21.31. - MySQL 正規表現構文の解説</TITLE>
-  </HEAD>
-  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
-Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Porting.html">previous</A>, <A HREF="manual_Unireg.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
-<P><HR><P>
+  <title>MySQL Reference Manual for version 3.21.31. - MySQL 正規表現構文の解説</title>
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000" link="#101090" vlink="#7030B0">
+Go to the <a href="manual_Introduction.html">first</a>, <a href="manual_Porting.html">previous</a>, <a href="manual_Unireg.html">next</a>, <a href="manual_Concept_Index.html">last</a> section, <a href="manual_toc.html">table of contents</a>.
+<p></p><hr><p>
 
 
-<H1><A NAME="Regexp" HREF="manual_toc.html#Regexp"><STRONG>MySQL</STRONG> 正規表現構文の解説</A></H1>
+</p><h1><a name="Regexp" href="manual_toc.html#Regexp"><strong>MySQL</strong> 正規表現構文の解説</a></h1>
 
-<P>
+<p>
 正規表現は、複雑な検索を記述する強力な方法です。
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> は正規表現の regular Henry Spencers 実装を使用します。そ
-してこれは POSIX 1003.2 に一致することが目的です。<STRONG>MySQL</STRONG> は拡張
+</p>
+<p>
+<strong>MySQL</strong> は正規表現の regular Henry Spencers 実装を使用します。そ
+してこれは POSIX 1003.2 に一致することが目的です。<strong>MySQL</strong> は拡張
 バージョンを使用します。
 
-</P>
-<P>
+</p>
+<p>
 さらに正確な情報は Henry Spencers regex.7 マニュアルを見てください。これ
-はソース配布に含まれています。 「<A HREF="manual_Credits.html#Credits">Who has helped to make <STRONG>MySQL</STRONG>.</A>」節参照 。
+はソース配布に含まれています。 「<a href="manual_Credits.html#Credits">Who has helped to make <strong>MySQL</strong>.</a>」節参照 。
 
-</P>
-<P>
+</p>
+<p>
 これは詳細を省いた簡単なリファレンスです。これ以降正規表現は regexp と呼
 びます。
 
-</P>
-<P>
+</p>
+<p>
 正規表現は文字列の組み合わせて記述されます。もっとも簡単な場合は、非特殊
-文字の一文字です。例えば、regexp <CODE>hello</CODE> は <CODE>hello</CODE> と適合し、
+文字の一文字です。例えば、regexp <code>hello</code> は <code>hello</code> と適合し、
 他には適合しません。
 
-</P>
-<P>
+</p>
+<p>
 簡単でない正規表現は、1つの文字列以上に適合できるような、いくつかの特殊
-な構成を使用します。例えば、regexp <CODE>hello|word</CODE> は文字列 
-<CODE>hello</CODE> と文字列 <CODE>word</CODE> に適合します。
+な構成を使用します。例えば、regexp <code>hello|word</code> は文字列 
+<code>hello</code> と文字列 <code>word</code> に適合します。
 
-</P>
-<P>
-そしてさらに複雑な例 regexp <CODE>B[an]*s</CODE> は、文字列 <CODE>Bananas</CODE>,
-<CODE>Baaaaas</CODE>, <CODE>Bs</CODE> のどれか、そして <CODE>B</CODE> で始まり <CODE>a</CODE>
-<CODE>n</CODE> が任意の数続き、<CODE>s</CODE> で終わるような他の文字列に適合します。
+</p>
+<p>
+そしてさらに複雑な例 regexp <code>B[an]*s</code> は、文字列 <code>Bananas</code>,
+<code>Baaaaas</code>, <code>Bs</code> のどれか、そして <code>B</code> で始まり <code>a</code>
+<code>n</code> が任意の数続き、<code>s</code> で終わるような他の文字列に適合します。
 
-</P>
-<P>
+</p>
+<p>
 次の特殊文字/構成が知られています。
-<DL COMPACT>
+</p><dl compact="">
 
-<DT><CODE>^</CODE>
-<DD>
+<dt><code>^</code>
+</dt><dd>
 文字列全体の始まり。
 
-<PRE>
-mysql&#62; select "fo\nfo" regexp "^fo$";           -&#62; 0
-mysql&#62; select "fofo" regexp "^fo";              -&#62; 1
-</PRE>
+<pre>mysql&gt; select "fo\nfo" regexp "^fo$";           -&gt; 0
+mysql&gt; select "fofo" regexp "^fo";              -&gt; 1
+</pre>
 
-<DT><CODE>$</CODE>
-<DD>
+</dd><dt><code>$</code>
+</dt><dd>
 文字列全体の終り。
 
-<PRE>
-mysql&#62; select "fo\no" regexp "^fo\no$";         -&#62; 1
-mysql&#62; select "fo\no" regexp "^fo$";            -&#62; 0
-</PRE>
+<pre>mysql&gt; select "fo\no" regexp "^fo\no$";         -&gt; 1
+mysql&gt; select "fo\no" regexp "^fo$";            -&gt; 0
+</pre>
 
-<DT><CODE>.</CODE>
-<DD>
+</dd><dt><code>.</code>
+</dt><dd>
 任意の文字 (改行含む)。
 
-<PRE>
-mysql&#62; select "fofo" regexp "^f.*";             -&#62; 1
-mysql&#62; select "fo\nfo" regexp "^f.*";           -&#62; 1
-</PRE>
+<pre>mysql&gt; select "fofo" regexp "^f.*";             -&gt; 1
+mysql&gt; select "fo\nfo" regexp "^f.*";           -&gt; 1
+</pre>
 
-<DT><CODE>a*</CODE>
-<DD>
+</dd><dt><code>a*</code>
+</dt><dd>
 0個以上 の a の並び。
 
-<PRE>
-mysql&#62; select "Ban" regexp "^Ba*n";             -&#62; 1
-mysql&#62; select "Baaan" regexp "^Ba*n";           -&#62; 1
-mysql&#62; select "Bn" regexp "^Ba*n";              -&#62; 1
-</PRE>
+<pre>mysql&gt; select "Ban" regexp "^Ba*n";             -&gt; 1
+mysql&gt; select "Baaan" regexp "^Ba*n";           -&gt; 1
+mysql&gt; select "Bn" regexp "^Ba*n";              -&gt; 1
+</pre>
 
-<DT><CODE>a+</CODE>
-<DD>
+</dd><dt><code>a+</code>
+</dt><dd>
 1個以上の a の並び。
 
-<PRE>
-mysql&#62; select "Ban" regexp "^Ba+n";             -&#62; 1
-mysql&#62; select "Bn" regexp "^Ba+n";              -&#62; 0
-</PRE>
+<pre>mysql&gt; select "Ban" regexp "^Ba+n";             -&gt; 1
+mysql&gt; select "Bn" regexp "^Ba+n";              -&gt; 0
+</pre>
 
-<DT><CODE>a?</CODE>
-<DD>
+</dd><dt><code>a?</code>
+</dt><dd>
 0 または 1個の a。
 
-<PRE>
-mysql&#62; select "Bn" regexp "^Ba?n";              -&#62; 1
-mysql&#62; select "Ban" regexp "^Ba?n";             -&#62; 1
-mysql&#62; select "Baan" regexp "^Ba?n";            -&#62; 0
-</PRE>
+<pre>mysql&gt; select "Bn" regexp "^Ba?n";              -&gt; 1
+mysql&gt; select "Ban" regexp "^Ba?n";             -&gt; 1
+mysql&gt; select "Baan" regexp "^Ba?n";            -&gt; 0
+</pre>
 
-<DT><CODE>de|abc</CODE>
-<DD>
-<CODE>de</CODE> または <CODE>abc</CODE>。
+</dd><dt><code>de|abc</code>
+</dt><dd>
+<code>de</code> または <code>abc</code>。
 
-<PRE>
-mysql&#62; select "pi" regexp "pi|apa";             -&#62; 1
-mysql&#62; select "axe" regexp "pi|apa";            -&#62; 0
-mysql&#62; select "apa" regexp "pi|apa";            -&#62; 1
-mysql&#62; select "apa" regexp "^(pi|apa)$";        -&#62; 1
-mysql&#62; select "pi" regexp "^(pi|apa)$";         -&#62; 1
-mysql&#62; select "pix" regexp "^(pi|apa)$";        -&#62; 0
-</PRE>
+<pre>mysql&gt; select "pi" regexp "pi|apa";             -&gt; 1
+mysql&gt; select "axe" regexp "pi|apa";            -&gt; 0
+mysql&gt; select "apa" regexp "pi|apa";            -&gt; 1
+mysql&gt; select "apa" regexp "^(pi|apa)$";        -&gt; 1
+mysql&gt; select "pi" regexp "^(pi|apa)$";         -&gt; 1
+mysql&gt; select "pix" regexp "^(pi|apa)$";        -&gt; 0
+</pre>
 
-<DT><CODE>(abc)*</CODE>
-<DD>
-<CODE>abc</CODE> の0回以上の並び。
+</dd><dt><code>(abc)*</code>
+</dt><dd>
+<code>abc</code> の0回以上の並び。
 
-<PRE>
-mysql&#62; select "pi" regexp "^(pi)+$";            -&#62; 1
-mysql&#62; select "pip" regexp "^(pi)+$";           -&#62; 0
-mysql&#62; select "pipi" regexp "^(pi)+$";          -&#62; 1
-</PRE>
+<pre>mysql&gt; select "pi" regexp "^(pi)+$";            -&gt; 1
+mysql&gt; select "pip" regexp "^(pi)+$";           -&gt; 0
+mysql&gt; select "pipi" regexp "^(pi)+$";          -&gt; 1
+</pre>
 
-<DT><CODE>{1}</CODE>
-<DD>
-<DT><CODE>{2,3}</CODE>
-<DD>
+</dd><dt><code>{1}</code>
+</dt><dd>
+</dd><dt><code>{2,3}</code>
+</dt><dd>
 多くの発生に適合する regexp の記述する一般的な方法。
-<DL COMPACT>
+<dl compact="">
 
-<DT><CODE>a*</CODE>
-<DD>
-Can be written as <CODE>a{0,}</CODE>.
-<DT><CODE>+</CODE>
-<DD>
-Can be written as <CODE>a{1,}</CODE>.
-<DT><CODE>?</CODE>
-<DD>
-Can be written as <CODE>a{0,1}</CODE>.
-</DL>
-さらに正確には、1つの整数 <CODE>i</CODE> とコンマ無しを含む修飾が続くアトムは、
-厳密にアトムに適合する <CODE>i</CODE> 回の並びに適合します。整数 <CODE>i</CODE> とコ
-ンマを含む修飾が続くアトムは、アトムに適合する <CODE>i</CODE> 回以上の並びに適
-合します。整数 <CODE>i</CODE> と <CODE>j</CODE> を含む装飾が続くアトムは、アトムに適
-合する <CODE>i</CODE> 回から <CODE>j</CODE> 回までの並びに適合します。
+<dt><code>a*</code>
+</dt><dd>
+Can be written as <code>a{0,}</code>.
+</dd><dt><code>+</code>
+</dt><dd>
+Can be written as <code>a{1,}</code>.
+</dd><dt><code>?</code>
+</dt><dd>
+Can be written as <code>a{0,1}</code>.
+</dd></dl>
+さらに正確には、1つの整数 <code>i</code> とコンマ無しを含む修飾が続くアトムは、
+厳密にアトムに適合する <code>i</code> 回の並びに適合します。整数 <code>i</code> とコ
+ンマを含む修飾が続くアトムは、アトムに適合する <code>i</code> 回以上の並びに適
+合します。整数 <code>i</code> と <code>j</code> を含む装飾が続くアトムは、アトムに適
+合する <code>i</code> 回から <code>j</code> 回までの並びに適合します。
 
-両方の引数は <CODE>0 &#62;= value &#60;= RE_DUP_MAX (デフォルト 255)</CODE> でないとい
+両方の引数は <code>0 &gt;= value &lt;= RE_DUP_MAX (デフォルト 255)</code> でないとい
 けません。そして、2つある場合、2番目は1番目よりも大きいか同じでないとい
 けません。
-<DT><CODE>[a-dX]</CODE>
-<DD>
-<DT><CODE>[^a-dX]</CODE>
-<DD>
-<CODE>a</CODE>, <CODE>b</CODE>, <CODE>c</CODE>, <CODE>d</CODE>, <CODE>X</CODE> のどれかの文字(^ を使用
-するとどれでもない文字)。<CODE>]</CODE> を含めるには、最初に書く必要があります。
-<CODE>-</CODE> を含めるには最初か最後に書く必要があります。<CODE>[0-9]</CODE> は任意
-の10進数値に適合します。<CODE>[]</CODE> ペア内部の定義された意味を持たない全て
+</dd><dt><code>[a-dX]</code>
+</dt><dd>
+</dd><dt><code>[^a-dX]</code>
+</dt><dd>
+<code>a</code>, <code>b</code>, <code>c</code>, <code>d</code>, <code>X</code> のどれかの文字(^ を使用
+するとどれでもない文字)。<code>]</code> を含めるには、最初に書く必要があります。
+<code>-</code> を含めるには最初か最後に書く必要があります。<code>[0-9]</code> は任意
+の10進数値に適合します。<code>[]</code> ペア内部の定義された意味を持たない全て
 の文字は、特殊な意味を持たず、それ自身にだけ適合します。
 
-<PRE>
-mysql&#62; select "aXbc" regexp "[a-dXYZ]";         -&#62; 1
-mysql&#62; select "aXbc" regexp "^[a-dXYZ]$";       -&#62; 0
-mysql&#62; select "aXbc" regexp "^[a-dXYZ]+$";      -&#62; 1
-mysql&#62; select "aXbc" regexp "^[^a-dXYZ]+$";     -&#62; 0
-mysql&#62; select "gheis" regexp "^[^a-dXYZ]+$";    -&#62; 1
-mysql&#62; select "gheisa" regexp "^[^a-dXYZ]+$";   -&#62; 0
-</PRE>
+<pre>mysql&gt; select "aXbc" regexp "[a-dXYZ]";         -&gt; 1
+mysql&gt; select "aXbc" regexp "^[a-dXYZ]$";       -&gt; 0
+mysql&gt; select "aXbc" regexp "^[a-dXYZ]+$";      -&gt; 1
+mysql&gt; select "aXbc" regexp "^[^a-dXYZ]+$";     -&gt; 0
+mysql&gt; select "gheis" regexp "^[^a-dXYZ]+$";    -&gt; 1
+mysql&gt; select "gheisa" regexp "^[^a-dXYZ]+$";   -&gt; 0
+</pre>
 
-<DT><CODE>[[.characters.]]</CODE>
-<DD>
+</dd><dt><code>[[.characters.]]</code>
+</dt><dd>
 照合要素(collating element)の文字の並び。並びは括弧表現リストの一つの要
 素です。複数文字の照合要素を含む括弧表現は一つ以上の文字に適合します。例
-えば、照合並びが <CODE>ch</CODE> 照合要素を含む場合、RE <CODE>[[.ch.]]*c</CODE> は 
-<CODE>chchcc</CODE> の最初の5文字に適合します。
+えば、照合並びが <code>ch</code> 照合要素を含む場合、RE <code>[[.ch.]]*c</code> は 
+<code>chchcc</code> の最初の5文字に適合します。
 
-<DT><CODE>[=character-class=]</CODE>
-<DD>
+</dd><dt><code>[=character-class=]</code>
+</dt><dd>
 同等のクラス。その一つと等しい全ての照合要素の文字の並びを表します。それ
 自身も含みます。
 
-例えば、<CODE>o</CODE> と <CODE>(+)</CODE> が同等クラスのメンバである場合、
-<CODE>[[=o=]]</CODE>, <CODE>[[=(+)=]]</CODE>, <CODE>[o(+)]</CODE> は全て同義語です。同等ク
+例えば、<code>o</code> と <code>(+)</code> が同等クラスのメンバである場合、
+<code>[[=o=]]</code>, <code>[[=(+)=]]</code>, <code>[o(+)]</code> は全て同義語です。同等ク
 ラスは範囲の終了位置にはなりません。
 
-<DT><CODE>[:character_class:]</CODE>
-<DD>
-括弧表現の内部で、<CODE>[:</CODE> と <CODE>:]</CODE> で括られた文字クラスの名前は、
+</dd><dt><code>[:character_class:]</code>
+</dt><dd>
+括弧表現の内部で、<code>[:</code> と <code>:]</code> で括られた文字クラスの名前は、
 そのクラスに属する全ての文字のリストを表します。標準文字クラス名は:
 
-<TABLE BORDER WIDTH="100%" NOSAVE >
-<TR><TD>alnum </TD><TD> digit </TD><TD> punct
-</TR NOSAVE>
-<TR><TD>alpha </TD><TD> graph </TD><TD> space
-</TR NOSAVE>
-<TR><TD>blank </TD><TD> lower </TD><TD> upper
-</TR NOSAVE>
-<TR><TD>cntrl </TD><TD> print </TD><TD> xdigit
-</TR>
-</TABLE>
+<table border="" width="100%" nosave="">
+<tbody><tr><td>alnum </td><td> digit </td><td> punct
+</td></tr>
+<tr><td>alpha </td><td> graph </td><td> space
+</td></tr>
+<tr><td>blank </td><td> lower </td><td> upper
+</td></tr>
+<tr><td>cntrl </td><td> print </td><td> xdigit
+</td></tr>
+</tbody></table>
 
 これらは ctype(3) で定義されている文字クラスを表します。ロケールが他のを
 提供することもあります。文字クラスは範囲の終了位置としては使えません。
 
-<PRE>
-mysql&#62; select "justalnums" regexp "[[:alnum:]]+";       -&#62; 1
-mysql&#62; select "!!" regexp "[[:alnum:]]+";               -&#62; 0
-</PRE>
+<pre>mysql&gt; select "justalnums" regexp "[[:alnum:]]+";       -&gt; 1
+mysql&gt; select "!!" regexp "[[:alnum:]]+";               -&gt; 0
+</pre>
 
-<LI>[[:&#60;:]]
+<li>[[:&lt;:]]
 
-<LI>[[:&#62;:]]
+</li><li>[[:&gt;:]]
 
 それぞれ、単語の始めと終りの空文字列に適合します。単語は、単語文字が前後
 にない単語文字の並びとして定義されます。単語文字は alnum 文字 (ctype(3) 
 で定義されます) と下線(underscore)です。
 
-<PRE>
-mysql&#62; select "a word a" regexp "[[:&#60;:]]word[[:&#62;:]]";      -&#62; 1
-mysql&#62; select "a xword a" regexp "[[:&#60;:]]word[[:&#62;:]]";     -&#62; 0
-</PRE>
+<pre>mysql&gt; select "a word a" regexp "[[:&lt;:]]word[[:&gt;:]]";      -&gt; 1
+mysql&gt; select "a xword a" regexp "[[:&lt;:]]word[[:&gt;:]]";     -&gt; 0
+</pre>
 
-</DL>
+</li></dd></dl>
 
 
-<PRE>
-mysql&#62; select "weeknights" regexp "^(wee|week)(knights|nights)$"; -&#62; 1
-</PRE>
+<pre>mysql&gt; select "weeknights" regexp "^(wee|week)(knights|nights)$"; -&gt; 1
+</pre>
 
-<P><HR><P>
-Go to the <A HREF="manual_Introduction.html">first</A>, <A HREF="manual_Porting.html">previous</A>, <A HREF="manual_Unireg.html">next</A>, <A HREF="manual_Concept_Index.html">last</A> section, <A HREF="manual_toc.html">table of contents</A>.
- </BODY>
- </HTML>
+<p></p><hr><p>
+Go to the <a href="manual_Introduction.html">first</a>, <a href="manual_Porting.html">previous</a>, <a href="manual_Unireg.html">next</a>, <a href="manual_Concept_Index.html">last</a> section, <a href="manual_toc.html">table of contents</a>.
+ 
+ 
+</p></body></html>

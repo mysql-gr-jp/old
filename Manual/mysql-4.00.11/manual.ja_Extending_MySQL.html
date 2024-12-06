@@ -1,128 +1,127 @@
-  <HTML>
-  <HEAD>
+<html><head>
   <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
      from manual.ja.texi on 20 March 2003 -->
 
-  <TITLE>MySQL Reference Manual for version 4.0.11-gamma. - 9  Extending MySQL</TITLE>
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
-  </HEAD>
-  <BODY BGCOLOR=silver TEXT=#000000 LINK=#101090 VLINK=#7030B0>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Clients.html">previous</A>, <A HREF="manual.ja_Problems.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
-<P><HR><P>
+  <title>MySQL Reference Manual for version 4.0.11-gamma. - 9  Extending MySQL</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  </head>
+  <body bgcolor="silver" text="#000000" link="#101090" vlink="#7030B0">
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Clients.html">previous</a>, <a href="manual.ja_Problems.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+<p></p><hr><p>
 
 
-<H1><A NAME="Extending_MySQL" HREF="manual.ja_toc.html#Extending_MySQL">9  Extending MySQL</A></H1>
+</p><h1><a name="Extending_MySQL" href="manual.ja_toc.html#Extending_MySQL">9  Extending MySQL</a></h1>
 
 
 
-<H2><A NAME="MySQL_internals" HREF="manual.ja_toc.html#MySQL_internals">9.1  MySQL Internals</A></H2>
+<h2><a name="MySQL_internals" href="manual.ja_toc.html#MySQL_internals">9.1  MySQL Internals</a></h2>
 
-<P>
-<A NAME="IDX1721"></A>
-<A NAME="IDX1722"></A>
+<p>
+<a name="IDX1721"></a>
+<a name="IDX1722"></a>
 
-</P>
-<P>
+</p>
+<p>
 This chapter describes a lot of things that you need to know when
 working on the MySQL code. If you plan to contribute to MySQL
 development, want to have access to the bleeding-edge in-between
 versions code, or just want to keep track of development, follow the
-instructions in  「<A HREF="manual.ja_Installing.html#Installing_source_tree">2.3.4  開発ソースツリーからのインストール</A>」節.
+instructions in  「<a href="manual.ja_Installing.html#Installing_source_tree">2.3.4  開発ソースツリーからのインストール</a>」節.
 If you are interested in MySQL internals, you should also subscribe
-to our <CODE>internals</CODE> mailing list. This list is relatively low
+to our <code>internals</code> mailing list. This list is relatively low
 traffic. For details on how to subscribe, please see
- 「<A HREF="manual.ja_Introduction.html#Mailing-list">1.6.1.1  MySQL メーリングリスト</A>」節.
-All developers at MySQL AB are on the <CODE>internals</CODE> list and we
+ 「<a href="manual.ja_Introduction.html#Mailing-list">1.6.1.1  MySQL メーリングリスト</a>」節.
+All developers at MySQL AB are on the <code>internals</code> list and we
 help other people who are working on the MySQL code. Feel free to
 use this list both to ask questions about the code and to send
 patches that you would like to contribute to the MySQL project!
 
-</P>
+</p>
 
 
 
-<H3><A NAME="MySQL_threads" HREF="manual.ja_toc.html#MySQL_threads">9.1.1  MySQL Threads</A></H3>
+<h3><a name="MySQL_threads" href="manual.ja_toc.html#MySQL_threads">9.1.1  MySQL Threads</a></h3>
 
-<P>
+<p>
 The MySQL server creates the following threads:
 
-</P>
+</p>
 
-<UL>
+<ul>
 
-<LI>
+<li>
 
 The TCP/IP connection thread handles all connection requests and
 creates a new dedicated thread to handle the authentication and
 SQL query processing for each connection.
 
-<LI>
+</li><li>
 
 On Windows NT there is a named pipe handler thread that does the same work as
 the TCP/IP connection thread on named pipe connect requests.
 
-<LI>
+</li><li>
 
 The signal thread handles all signals.  This thread also normally handles
-alarms and calls <CODE>process_alarm()</CODE> to force timeouts on connections
+alarms and calls <code>process_alarm()</code> to force timeouts on connections
 that have been idle too long.
 
-<LI>
+</li><li>
 
-If <CODE>mysqld</CODE> is compiled with <CODE>-DUSE_ALARM_THREAD</CODE>, a dedicated
+If <code>mysqld</code> is compiled with <code>-DUSE_ALARM_THREAD</code>, a dedicated
 thread that handles alarms is created.  This is only used on some systems where
-there are problems with <CODE>sigwait()</CODE> or if one wants to use the
-<CODE>thr_alarm()</CODE> code in ones application without a dedicated signal
+there are problems with <code>sigwait()</code> or if one wants to use the
+<code>thr_alarm()</code> code in ones application without a dedicated signal
 handling thread.
 
-<LI>
+</li><li>
 
-If one uses the <CODE>--flush_time=#</CODE> option, a dedicated thread is created
+If one uses the <code>--flush_time=#</code> option, a dedicated thread is created
 to flush all tables at the given interval.
 
-<LI>
+</li><li>
 
 Every connection has its own thread.
 
-<LI>
+</li><li>
 
-Every different table on which one uses <CODE>INSERT DELAYED</CODE> gets its
+Every different table on which one uses <code>INSERT DELAYED</code> gets its
 own thread.
 
-<LI>
+</li><li>
 
-If you use <CODE>--master-host</CODE>, a slave replication thread will be
+If you use <code>--master-host</code>, a slave replication thread will be
 started to read and apply updates from the master.
-</UL>
+</li></ul>
 
-<P>
-<CODE>mysqladmin processlist</CODE> only shows the connection, <CODE>INSERT DELAYED</CODE>,
+<p>
+<code>mysqladmin processlist</code> only shows the connection, <code>INSERT DELAYED</code>,
 and replication threads.
 
-</P>
+</p>
 
 
 
-<H3><A NAME="MySQL_test_suite" HREF="manual.ja_toc.html#MySQL_test_suite">9.1.2  MySQL Test Suite</A></H3>
+<h3><a name="MySQL_test_suite" href="manual.ja_toc.html#MySQL_test_suite">9.1.2  MySQL Test Suite</a></h3>
 
-<P>
-<A NAME="IDX1723"></A>
-<A NAME="IDX1724"></A>
+<p>
+<a name="IDX1723"></a>
+<a name="IDX1724"></a>
 
-</P>
-<P>
+</p>
+<p>
 Until recently, our main full-coverage test suite was based on proprietary
 customer data and for that reason has not been publicly available. The only
-publicly available part of our testing process consisted of the <CODE>crash-me</CODE>
-test, a Perl DBI/DBD benchmark found in the <CODE>sql-bench</CODE> directory, and
-miscellaneous tests located in <CODE>tests</CODE> directory. The lack of a
+publicly available part of our testing process consisted of the <code>crash-me</code>
+test, a Perl DBI/DBD benchmark found in the <code>sql-bench</code> directory, and
+miscellaneous tests located in <code>tests</code> directory. The lack of a
 standardised publicly available test suite has made it difficult for our users,
 as well developers, to do regression tests on the MySQL code. To
 address this problem, we have created a new test system that is included in
 the source and binary distributions starting in Version 3.23.29.
 
-</P>
-<P>
+</p>
+<p>
 The current set of test cases doesn't test everything in MySQL, but it
 should catch most obvious bugs in the SQL processing code, OS/library
 issues, and is quite thorough in testing replication.  Our eventual goal
@@ -132,590 +131,583 @@ examine the functionality critical to your system, as this will ensure
 that all future MySQL releases will work well with your
 applications.
 
-</P>
+</p>
 
 
 
-<H4><A NAME="running_mysqltest" HREF="manual.ja_toc.html#running_mysqltest">9.1.2.1  Running the MySQL Test Suite</A></H4>
+<h4><a name="running_mysqltest" href="manual.ja_toc.html#running_mysqltest">9.1.2.1  Running the MySQL Test Suite</a></h4>
 
-<P>
+<p>
 The test system consist of a test language interpreter
-(<CODE>mysqltest</CODE>), a shell script to run all
-tests(<CODE>mysql-test-run</CODE>), the actual test cases written in a special
+(<code>mysqltest</code>), a shell script to run all
+tests(<code>mysql-test-run</code>), the actual test cases written in a special
 test language, and their expected results.  To run the test suite on
-your system after a build, type <CODE>make test</CODE> or
-<CODE>mysql-test/mysql-test-run</CODE> from the source root.  If you have
-installed a binary distribution, <CODE>cd</CODE> to the install root
-(eg. <CODE>/usr/local/mysql</CODE>), and do <CODE>scripts/mysql-test-run</CODE>.
+your system after a build, type <code>make test</code> or
+<code>mysql-test/mysql-test-run</code> from the source root.  If you have
+installed a binary distribution, <code>cd</code> to the install root
+(eg. <code>/usr/local/mysql</code>), and do <code>scripts/mysql-test-run</code>.
 All tests should succeed.  If not, you should try to find out why and
 report the problem if this is a bug in MySQL.
- 「<A HREF="manual.ja_Extending_MySQL.html#Reporting_mysqltest_bugs">9.1.2.3  Reporting Bugs in the MySQL Test Suite</A>」節参照.
+ 「<a href="manual.ja_Extending_MySQL.html#Reporting_mysqltest_bugs">9.1.2.3  Reporting Bugs in the MySQL Test Suite</a>」節参照.
 
-</P>
-<P>
-If you have a copy of <CODE>mysqld</CODE> running on the machine where you want to
+</p>
+<p>
+If you have a copy of <code>mysqld</code> running on the machine where you want to
 run the test suite you do not have to stop it, as long as it is not using
-ports <CODE>9306</CODE> and <CODE>9307</CODE>.  If one of those ports is taken, you should
-edit <CODE>mysql-test-run</CODE> and change the values of the master and/or slave
+ports <code>9306</code> and <code>9307</code>.  If one of those ports is taken, you should
+edit <code>mysql-test-run</code> and change the values of the master and/or slave
 port to one that is available.
 
-</P>
-<P>
+</p>
+<p>
 You can run one individual test case with
-<CODE>mysql-test/mysql-test-run test_name</CODE>.
+<code>mysql-test/mysql-test-run test_name</code>.
 
-</P>
-<P>
-If one test fails, you should test running <CODE>mysql-test-run</CODE> with
-the <CODE>--force</CODE> option to check if any other tests fails.
+</p>
+<p>
+If one test fails, you should test running <code>mysql-test-run</code> with
+the <code>--force</code> option to check if any other tests fails.
 
-</P>
+</p>
 
 
 
-<H4><A NAME="extending_mysqltest" HREF="manual.ja_toc.html#extending_mysqltest">9.1.2.2  Extending the MySQL Test Suite</A></H4>
+<h4><a name="extending_mysqltest" href="manual.ja_toc.html#extending_mysqltest">9.1.2.2  Extending the MySQL Test Suite</a></h4>
 
-<P>
-You can use the <CODE>mysqltest</CODE> language to write your own test cases.
+<p>
+You can use the <code>mysqltest</code> language to write your own test cases.
 Unfortunately, we have not yet written full documentation for it - we plan to
 do this shortly.  You can, however, look at our current test cases and use
 them as an example.  The following points should help you get started:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-The tests are located in <CODE>mysql-test/t/*.test</CODE>
+The tests are located in <code>mysql-test/t/*.test</code>
 
-<LI>
+</li><li>
 
-A test case consists of <CODE>;</CODE> terminated statements and is similar to the
-input of <CODE>mysql</CODE> command-line client.  A statement by default is a query
+A test case consists of <code>;</code> terminated statements and is similar to the
+input of <code>mysql</code> command-line client.  A statement by default is a query
 to be sent to MySQL server, unless it is recognised as internal
-command (eg. <CODE>sleep</CODE>).
+command (eg. <code>sleep</code>).
 
-<LI>
+</li><li>
 
-All queries that produce results@-e.g., <CODE>SELECT</CODE>, <CODE>SHOW</CODE>,
-<CODE>EXPLAIN</CODE>, etc., must be preceded with <CODE>@/path/to/result/file</CODE>.  The
+All queries that produce results@-e.g., <code>SELECT</code>, <code>SHOW</code>,
+<code>EXPLAIN</code>, etc., must be preceded with <code>@/path/to/result/file</code>.  The
 file must contain the expected results.  An easy way to generate the result
-file is to run <CODE>mysqltest -r &#60; t/test-case-name.test</CODE> from
-<CODE>mysql-test</CODE> directory, and then edit the generated result files, if
+file is to run <code>mysqltest -r &lt; t/test-case-name.test</code> from
+<code>mysql-test</code> directory, and then edit the generated result files, if
 needed, to adjust them to the expected output.  In that case, be very careful
 about not adding or deleting any invisible characters - make sure to only
 change the text and/or delete lines.  If you have to insert a line, make sure
 the fields are separated with a hard tab, and there is a hard tab at the end.
-You may want to use <CODE>od -c</CODE> to make sure your text editor has not messed
+You may want to use <code>od -c</code> to make sure your text editor has not messed
 anything up during edit.  We, of course, hope that you will never have to edit
-the output of <CODE>mysqltest -r</CODE> as you only have to do it when you find a
+the output of <code>mysqltest -r</code> as you only have to do it when you find a
 bug.
 
-<LI>
+</li><li>
 
 To be consistent with our setup, you should put your result files in
-<CODE>mysql-test/r</CODE> directory and name them <CODE>test_name.result</CODE>.  If the
-test produces more than one result, you should use <CODE>test_name.a.result</CODE>,
-<CODE>test_name.b.result</CODE>, etc.
+<code>mysql-test/r</code> directory and name them <code>test_name.result</code>.  If the
+test produces more than one result, you should use <code>test_name.a.result</code>,
+<code>test_name.b.result</code>, etc.
 
-<LI>
+</li><li>
 
 If a statement returns an error, you should on the line before the statement
-specify with the <CODE>--error error-number</CODE>.  The error number can be
-a list of possible error numbers separated with <CODE>','</CODE>.
+specify with the <code>--error error-number</code>.  The error number can be
+a list of possible error numbers separated with <code>','</code>.
 
-<LI>
+</li><li>
 
 If you are writing a replication test case, you should on the first line of
-the test file, put <CODE>source include/master-slave.inc;</CODE>.  To switch between
-master and slave, use <CODE>connection master;</CODE> and <CODE>connection slave;</CODE>.
+the test file, put <code>source include/master-slave.inc;</code>.  To switch between
+master and slave, use <code>connection master;</code> and <code>connection slave;</code>.
 If you need to do something on an alternate connection, you can do
-<CODE>connection master1;</CODE> for the master, and <CODE>connection slave1;</CODE> for
+<code>connection master1;</code> for the master, and <code>connection slave1;</code> for
 the slave.
 
-<LI>
+</li><li>
 
 If you need to do something in a loop, you can use something like this:
 
-<PRE>
-let $1=1000;
+<pre>let $1=1000;
 while ($1)
 {
  # do your queries here
  dec $1;
 }
-</PRE>
+</pre>
 
-<LI>
+</li><li>
 
-To sleep between queries, use the <CODE>sleep</CODE> command. It supports fractions
-of a second, so you can do <CODE>sleep 1.3;</CODE>, for example, to sleep 1.3
+To sleep between queries, use the <code>sleep</code> command. It supports fractions
+of a second, so you can do <code>sleep 1.3;</code>, for example, to sleep 1.3
 seconds.
 
-<LI>
+</li><li>
 
 To run the slave with additional options for your test case, put them
-in the command-line format in <CODE>mysql-test/t/test_name-slave.opt</CODE>. For
-the master, put them in <CODE>mysql-test/t/test_name-master.opt</CODE>.
+in the command-line format in <code>mysql-test/t/test_name-slave.opt</code>. For
+the master, put them in <code>mysql-test/t/test_name-master.opt</code>.
 
-<LI>
+</li><li>
 
 If you have a question about the test suite, or have a test case to contribute,
-e-mail to <a HREF="mailto:internals@lists.mysql.com">internals@lists.mysql.com</a>. As the list does not accept
+e-mail to <a href="mailto:internals@lists.mysql.com">internals@lists.mysql.com</a>. As the list does not accept
 attachments, you should ftp all the relevant files to:
-<a HREF="ftp://support.mysql.com/pub/mysql/Incoming/">ftp://support.mysql.com/pub/mysql/Incoming/</a>
+<a href="ftp://support.mysql.com/pub/mysql/Incoming/">ftp://support.mysql.com/pub/mysql/Incoming/</a>
 
-</UL>
+</li></ul>
 
 
 
-<H4><A NAME="Reporting_mysqltest_bugs" HREF="manual.ja_toc.html#Reporting_mysqltest_bugs">9.1.2.3  Reporting Bugs in the MySQL Test Suite</A></H4>
+<h4><a name="Reporting_mysqltest_bugs" href="manual.ja_toc.html#Reporting_mysqltest_bugs">9.1.2.3  Reporting Bugs in the MySQL Test Suite</a></h4>
 
-<P>
+<p>
 If your MySQL version doesn't pass the test suite you should
 do the following:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 Don't send a bug report before you have found out as much as possible of
-what when wrong!  When you do it, please use the <CODE>mysqlbug</CODE> script
-so that we can get information about your system and <CODE>MySQL</CODE>
-version.  「<A HREF="manual.ja_Introduction.html#Bug_reports">1.6.1.3  バグや問題を報告する方法</A>」節参照.
-<LI>
+what when wrong!  When you do it, please use the <code>mysqlbug</code> script
+so that we can get information about your system and <code>MySQL</code>
+version.  「<a href="manual.ja_Introduction.html#Bug_reports">1.6.1.3  バグや問題を報告する方法</a>」節参照.
+</li><li>
 
-Make sure to include the output of <CODE>mysql-test-run</CODE>, as well as
-contents of all <CODE>.reject</CODE> files in <CODE>mysql-test/r</CODE> directory.
-<LI>
+Make sure to include the output of <code>mysql-test-run</code>, as well as
+contents of all <code>.reject</code> files in <code>mysql-test/r</code> directory.
+</li><li>
 
 If a test in the test suite fails, check if the test fails also when run
 by its own:
 
 
-<PRE>
-cd mysql-test
+<pre>cd mysql-test
 mysql-test-run --local test-name
-</PRE>
+</pre>
 
 If this fails, then you should configure MySQL with
-<CODE>--with-debug</CODE> and run <CODE>mysql-test-run</CODE> with the
-<CODE>--debug</CODE> option. If this also fails send the trace file
-<TT>`var/tmp/master.trace'</TT> to ftp://support.mysql.com/pub/mysql/secret
+<code>--with-debug</code> and run <code>mysql-test-run</code> with the
+<code>--debug</code> option. If this also fails send the trace file
+<tt>`var/tmp/master.trace'</tt> to ftp://support.mysql.com/pub/mysql/secret
 so that we can examine it. Please remember to also include a full
 description of your system, the version of the mysqld binary and how you
 compiled it.
 
-<LI>
+</li><li>
 
-Try also to run <CODE>mysql-test-run</CODE> with the <CODE>--force</CODE> option to
+Try also to run <code>mysql-test-run</code> with the <code>--force</code> option to
 see if there is any other test that fails.
 
-<LI>
+</li><li>
 
 If you have compiled MySQL yourself, check our manual for how
 to compile MySQL on your platform or, preferable, use one of
 the binaries we have compiled for you at
-<a HREF="http://www.mysql.com/downloads/">http://www.mysql.com/downloads/</a>.  All our standard binaries should
+<a href="http://www.mysql.com/downloads/">http://www.mysql.com/downloads/</a>.  All our standard binaries should
 pass the test suite !
 
-<LI>
+</li><li>
 
-If you get an error, like <CODE>Result length mismatch</CODE> or <CODE>Result
-content mismatch</CODE> it means that the output of the test didn't match
+If you get an error, like <code>Result length mismatch</code> or <code>Result
+content mismatch</code> it means that the output of the test didn't match
 exactly the expected output. This could be a bug in MySQL or
 that your mysqld version produces slight different results under some
 circumstances.
 
 Failed test results are put in a file with the same base name as the
-result file with the <CODE>.reject</CODE> extension.  If your test case is
+result file with the <code>.reject</code> extension.  If your test case is
 failing, you should do a diff on the two files.  If you cannot see how
-they are different, examine both with <CODE>od -c</CODE> and also check their
+they are different, examine both with <code>od -c</code> and also check their
 lengths.
 
-<LI>
+</li><li>
 
 If a test fails totally, you should check the logs file in the
-<CODE>mysql-test/var/log</CODE> directory for hints of what went wrong.
+<code>mysql-test/var/log</code> directory for hints of what went wrong.
 
-<LI>
+</li><li>
 
 If you have compiled MySQL with debugging you can try to debug this
-by running <CODE>mysql-test-run</CODE> with the <CODE>--gdb</CODE> and/or <CODE>--debug</CODE>
+by running <code>mysql-test-run</code> with the <code>--gdb</code> and/or <code>--debug</code>
 options.
- 「<A HREF="manual.ja_Porting.html#Making_trace_files">E.1.2  Creating Trace Files</A>」節参照.
+ 「<a href="manual.ja_Porting.html#Making_trace_files">E.1.2  Creating Trace Files</a>」節参照.
 
 If you have not compiled MySQL for debugging you should probably
-do that.  Just specify the <CODE>--with-debug</CODE> options to <CODE>configure</CODE>!
- 「<A HREF="manual.ja_Installing.html#Installing_source">2.3  MySQL ソースディストリビューションのインストール</A>」節参照.
-</UL>
+do that.  Just specify the <code>--with-debug</code> options to <code>configure</code>!
+ 「<a href="manual.ja_Installing.html#Installing_source">2.3  MySQL ソースディストリビューションのインストール</a>」節参照.
+</li></ul>
 
 
 
-<H2><A NAME="Adding_functions" HREF="manual.ja_toc.html#Adding_functions">9.2  MySQL への新しい関数の追加</A></H2>
+<h2><a name="Adding_functions" href="manual.ja_toc.html#Adding_functions">9.2  MySQL への新しい関数の追加</a></h2>
 
-<P>
-<A NAME="IDX1725"></A>
-<A NAME="IDX1726"></A>
-<A NAME="IDX1727"></A>
-<A NAME="IDX1728"></A>
-<A NAME="IDX1729"></A>
+<p>
+<a name="IDX1725"></a>
+<a name="IDX1726"></a>
+<a name="IDX1727"></a>
+<a name="IDX1728"></a>
+<a name="IDX1729"></a>
 
-</P>
-<P>
+</p>
+<p>
 There are two ways to add new functions to MySQL:
 
-</P>
+</p>
 
-<UL>
-<LI>ユーザ定義関数(UDF:user-definable function)インタフェースを通して関数を追
+<ul>
+<li>ユーザ定義関数(UDF:user-definable function)インタフェースを通して関数を追
 
 加できます。
-ユーザ定義関数は、<CODE>CREATE FUNCTION</CODE> と <CODE>DROP FUNCTION</CODE> ステー
+ユーザ定義関数は、<code>CREATE FUNCTION</code> と <code>DROP FUNCTION</code> ステー
 トメントを使用して、動的に追加、削除されます。
- 「<A HREF="manual.ja_Extending_MySQL.html#CREATE_FUNCTION">9.2.1  <CODE>CREATE FUNCTION/DROP FUNCTION</CODE> Syntax</A>」節参照.
+ 「<a href="manual.ja_Extending_MySQL.html#CREATE_FUNCTION">9.2.1  <code>CREATE FUNCTION/DROP FUNCTION</code> Syntax</a>」節参照.
 
-<LI>ネイティブ(ビルトイン) <STRONG>MySQL</STRONG> 関数として関数を追加できます。
+</li><li>ネイティブ(ビルトイン) <strong>MySQL</strong> 関数として関数を追加できます。
 
-ネイティブ関数は <CODE>mysqld</CODE> サーバに統合され、恒久的に有効になります。
-</UL>
+ネイティブ関数は <code>mysqld</code> サーバに統合され、恒久的に有効になります。
+</li></ul>
 
-<P>
+<p>
 それぞれの方法には、有利な点と不利な点があります:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
 ユーザ定義関数を書く場合、サーバ自身に追加するオブジェクトファイルをイン
 ストールする必要があります。関数をサーバに統合する場合あそれを行なう必要
 はありません。
-<LI>
+</li><li>
 
-UDF をバイナリ <STRONG>MySQL</STRONG> 配布に追加することができます。ネイティブ関
+UDF をバイナリ <strong>MySQL</strong> 配布に追加することができます。ネイティブ関
 数はソース配布の変更が必要です。
-<LI>
+</li><li>
 
-<STRONG>MySQL</STRONG> 配布をアップグレードする場合、前にインストールされた UDF 
+<strong>MySQL</strong> 配布をアップグレードする場合、前にインストールされた UDF 
 の使用を継続できます。ネイティブ関数では、アップグレードの度に変更を繰り
 返す必要があります。
-</UL>
+</li></ul>
 
-<P>
-新しい関数を追加するためにどちらの方法を使用しても、<CODE>ABS()</CODE> や 
-<CODE>SOUNDEX()</CODE> のようなネイティブ関数と同じように使用することができま
+<p>
+新しい関数を追加するためにどちらの方法を使用しても、<code>ABS()</code> や 
+<code>SOUNDEX()</code> のようなネイティブ関数と同じように使用することができま
 す。
 
-</P>
+</p>
 
 
 
-<H3><A NAME="CREATE_FUNCTION" HREF="manual.ja_toc.html#CREATE_FUNCTION">9.2.1  <CODE>CREATE FUNCTION/DROP FUNCTION</CODE> Syntax</A></H3>
+<h3><a name="CREATE_FUNCTION" href="manual.ja_toc.html#CREATE_FUNCTION">9.2.1  <code>CREATE FUNCTION/DROP FUNCTION</code> Syntax</a></h3>
 
-<P>
-<A NAME="IDX1730"></A>
-<A NAME="IDX1731"></A>
-<A NAME="IDX1732"></A>
-<A NAME="IDX1733"></A>
-<A NAME="IDX1734"></A>
-<A NAME="IDX1735"></A>
-<A NAME="IDX1736"></A>
+<p>
+<a name="IDX1730"></a>
+<a name="IDX1731"></a>
+<a name="IDX1732"></a>
+<a name="IDX1733"></a>
+<a name="IDX1734"></a>
+<a name="IDX1735"></a>
+<a name="IDX1736"></a>
 
-</P>
+</p>
 
-<PRE>
-CREATE [AGGREGATE] FUNCTION function_name RETURNS {STRING|REAL|INTEGER}
+<pre>CREATE [AGGREGATE] FUNCTION function_name RETURNS {STRING|REAL|INTEGER}
        SONAME shared_library_name
 
 DROP FUNCTION function_name
-</PRE>
+</pre>
 
-<P>
+<p>
 A user-definable function (UDF) is a way to extend MySQL with a new
 function that works like native (built in) MySQL functions such as
-<CODE>ABS()</CODE> and <CODE>CONCAT()</CODE>.
+<code>ABS()</code> and <code>CONCAT()</code>.
 
-</P>
-<P>
-<CODE>AGGREGATE</CODE> is a new option for MySQL Version 3.23.  An
-<CODE>AGGREGATE</CODE> function works exactly like a native MySQL
-<CODE>GROUP</CODE> function like <CODE>SUM</CODE> or <CODE>COUNT()</CODE>.
+</p>
+<p>
+<code>AGGREGATE</code> is a new option for MySQL Version 3.23.  An
+<code>AGGREGATE</code> function works exactly like a native MySQL
+<code>GROUP</code> function like <code>SUM</code> or <code>COUNT()</code>.
 
-</P>
-<P>
-<CODE>CREATE FUNCTION</CODE> saves the function's name, type, and shared library
-name in the <CODE>mysql.func</CODE> system table.  You must have the
-<CODE>INSERT</CODE> and <CODE>DELETE</CODE> privileges for the <CODE>mysql</CODE> database
+</p>
+<p>
+<code>CREATE FUNCTION</code> saves the function's name, type, and shared library
+name in the <code>mysql.func</code> system table.  You must have the
+<code>INSERT</code> and <code>DELETE</code> privileges for the <code>mysql</code> database
 to create and drop functions.
 
-</P>
-<P>
+</p>
+<p>
 All active functions are reloaded each time the server starts, unless
-you start <CODE>mysqld</CODE> with the <CODE>--skip-grant-tables</CODE> option.  In
+you start <code>mysqld</code> with the <code>--skip-grant-tables</code> option.  In
 this case, UDF initialisation is skipped and UDFs are unavailable.
-(An active function is one that has been loaded with <CODE>CREATE FUNCTION</CODE>
-and not removed with <CODE>DROP FUNCTION</CODE>.)
+(An active function is one that has been loaded with <code>CREATE FUNCTION</code>
+and not removed with <code>DROP FUNCTION</code>.)
 
-</P>
-<P>
-For instructions on writing user-definable functions, see  「<A HREF="manual.ja_Extending_MySQL.html#Adding_functions">9.2  MySQL への新しい関数の追加</A>」節.  For the UDF mechanism to work, functions must be written in C or
+</p>
+<p>
+For instructions on writing user-definable functions, see  「<a href="manual.ja_Extending_MySQL.html#Adding_functions">9.2  MySQL への新しい関数の追加</a>」節.  For the UDF mechanism to work, functions must be written in C or
 C++, your operating system must support dynamic loading and you must have
-compiled <CODE>mysqld</CODE> dynamically (not statically).
+compiled <code>mysqld</code> dynamically (not statically).
 
-</P>
-<P>
-Note that to make <CODE>AGGREGATE</CODE> work, you must have a
-<CODE>mysql.func</CODE> table that contains the column <CODE>type</CODE>.  If this
+</p>
+<p>
+Note that to make <code>AGGREGATE</code> work, you must have a
+<code>mysql.func</code> table that contains the column <code>type</code>.  If this
 is not the case, you should run the script
-<CODE>mysql_fix_privilege_tables</CODE> to get this fixed.
+<code>mysql_fix_privilege_tables</code> to get this fixed.
 
-</P>
+</p>
 
 
 
-<H3><A NAME="Adding_UDF" HREF="manual.ja_toc.html#Adding_UDF">9.2.2  新しいユーザ定義関数の追加</A></H3>
+<h3><a name="Adding_UDF" href="manual.ja_toc.html#Adding_UDF">9.2.2  新しいユーザ定義関数の追加</a></h3>
 
-<P>
-<A NAME="IDX1737"></A>
-<A NAME="IDX1738"></A>
-<A NAME="IDX1739"></A>
+<p>
+<a name="IDX1737"></a>
+<a name="IDX1738"></a>
+<a name="IDX1739"></a>
 
-</P>
+</p>
 
-<P>
+<p>
 UDF 機構が動作するためには、関数は C か C++ で書かれる必要があり、OS が
-動的ローディングをサポートする必要があります。<STRONG>MySQL</STRONG> ソース配布
-は <TT>`sql/udf_example.cc'</TT> を含んでいて、これは５つの新しい関数を定義
+動的ローディングをサポートする必要があります。<strong>MySQL</strong> ソース配布
+は <tt>`sql/udf_example.cc'</tt> を含んでいて、これは５つの新しい関数を定義
 しています。UDF の呼び出し方法がどのように働くかはこのファイルを参考にし
 てください。
 
-</P>
-<P>
-For <CODE>mysqld</CODE> to be able to use UDF functions, you should configure MySQL
-with <CODE>--with-mysqld-ldflags=-rdynamic</CODE> The reason is that to on
+</p>
+<p>
+For <code>mysqld</code> to be able to use UDF functions, you should configure MySQL
+with <code>--with-mysqld-ldflags=-rdynamic</code> The reason is that to on
 many platforms (including Linux) you can load a dynamic library (with
-<CODE>dlopen()</CODE>) from a static linked program, which you would get if
-you are using <CODE>--with-mysqld-ldflags=-all-static</CODE> If you want to
-use an UDF that needs to access symbols from <CODE>mysqld</CODE> (like the
-<CODE>methaphone</CODE> example in <TT>`sql/udf_example.cc'</TT> that uses
-<CODE>default_charset_info</CODE>), you must link the program with
-<CODE>-rdynamic</CODE> (see <CODE>man dlopen</CODE>).
+<code>dlopen()</code>) from a static linked program, which you would get if
+you are using <code>--with-mysqld-ldflags=-all-static</code> If you want to
+use an UDF that needs to access symbols from <code>mysqld</code> (like the
+<code>methaphone</code> example in <tt>`sql/udf_example.cc'</tt> that uses
+<code>default_charset_info</code>), you must link the program with
+<code>-rdynamic</code> (see <code>man dlopen</code>).
 
-</P>
-<P>
+</p>
+<p>
 SQL ステートメントで使用したいそれぞれの関数について、対応する C (または 
 C++) 関数を定義すべきです。下の説明では、名前 ``xxx'' がサンプル関数名と
 して使用されています。SQL と C/C++ 使用法を distinquish するために、
-<CODE>XXX()</CODE> (大文字) は SQL 関数呼び出しを表わし、<CODE>xxx()</CODE> (小文字) 
+<code>XXX()</code> (大文字) は SQL 関数呼び出しを表わし、<code>xxx()</code> (小文字) 
 は C/C++ 関数呼び出しを表わします。
 
-</P>
-<P>
-<CODE>XXX()</CODE> のインタフェースを実装するために書く C/C++ 関数は:
+</p>
+<p>
+<code>XXX()</code> のインタフェースを実装するために書く C/C++ 関数は:
 
-</P>
-<DL COMPACT>
+</p>
+<dl compact="">
 
-<DT><CODE>xxx()</CODE> (必要)
-<DD>
+<dt><code>xxx()</code> (必要)
+</dt><dd>
 メイン関数。これは関数結果が計算されるところです。SQL 型と C/C++ 関数の
 戻り値型の対応は次に示します:
 
-<TABLE BORDER WIDTH="100%" NOSAVE >
-<TR><TD><STRONG>SQL type</STRONG> </TD><TD> <STRONG>C/C++ type</STRONG>
-</TR NOSAVE>
-<TR><TD><CODE>STRING</CODE> </TD><TD> <CODE>char *</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>INTEGER</CODE> </TD><TD> <CODE>long long</CODE>
-</TR NOSAVE>
-<TR><TD><CODE>REAL</CODE> </TD><TD> <CODE>double</CODE>
-</TR>
-</TABLE>
+<table border="" width="100%" nosave="">
+<tbody><tr><td><strong>SQL type</strong> </td><td> <strong>C/C++ type</strong>
+</td></tr>
+<tr><td><code>STRING</code> </td><td> <code>char *</code>
+</td></tr>
+<tr><td><code>INTEGER</code> </td><td> <code>long long</code>
+</td></tr>
+<tr><td><code>REAL</code> </td><td> <code>double</code>
+</td></tr>
+</tbody></table>
 
-<DT><CODE>xxx_init()</CODE> (オプション)
-<DD>
-<CODE>xxx()</CODE> の初期化関数。これは次のように使用されます:
+</dd><dt><code>xxx_init()</code> (オプション)
+</dt><dd>
+<code>xxx()</code> の初期化関数。これは次のように使用されます:
 
 
-<UL>
-<LI>
+<ul>
+<li>
 
-<CODE>XXX()</CODE> の引数の数のチェック
-<LI>
+<code>XXX()</code> の引数の数のチェック
+</li><li>
 
 引数が要求される型かどうかのチェック、また、メイン関数が呼ばれる時に望む
-型に引数を強制するように <STRONG>MySQL</STRONG> に伝える
-<LI>
+型に引数を強制するように <strong>MySQL</strong> に伝える
+</li><li>
 
 メイン関数が必要とするメモリの割り当て
-<LI>
+</li><li>
 
 結果の最大長の指定
-<LI>
+</li><li>
 
-(<CODE>REAL</CODE> 関数では) 小数部の最大桁数の指定
-<LI>
+(<code>REAL</code> 関数では) 小数部の最大桁数の指定
+</li><li>
 
-結果が <CODE>NULL</CODE> になり得るかどうかの指定
-</UL>
+結果が <code>NULL</code> になり得るかどうかの指定
+</li></ul>
 
-<DT><CODE>xxx_deinit()</CODE> (オプション)
-<DD>
-<CODE>xxx()</CODE> の終了関数(deinitialization function)。これは初期化関数によっ
+</dd><dt><code>xxx_deinit()</code> (オプション)
+</dt><dd>
+<code>xxx()</code> の終了関数(deinitialization function)。これは初期化関数によっ
 て割り当てられたメモリを解放すべきです。
-</DL>
+</dd></dl>
 
-<P>
-SQL ステートメントが <CODE>XXX()</CODE> を呼び出すとき、<STRONG>MySQL</STRONG> は引数
+<p>
+SQL ステートメントが <code>XXX()</code> を呼び出すとき、<strong>MySQL</strong> は引数
 チェックやメモリ割り当てのように、必要なセットアップを行なわせるために、
-初期化関数 <CODE>xxx_init()</CODE> を呼び出します。<CODE>xxx_init()</CODE> がエラー
+初期化関数 <code>xxx_init()</code> を呼び出します。<code>xxx_init()</code> がエラー
 を返す場合、SQL ステートメントはエラーメッセージと共に異常終了し、メイン
 関数と終了関数は呼び出されません。そうでなければ、メイン関数 
-<CODE>xxx()</CODE> が各行毎に呼び出されます。全ての行が処理された後、終了関数 
-<CODE>xxx_deinit()</CODE> が、必要な掃除を行なうために、呼び出されます。
+<code>xxx()</code> が各行毎に呼び出されます。全ての行が処理された後、終了関数 
+<code>xxx_deinit()</code> が、必要な掃除を行なうために、呼び出されます。
 
-</P>
-<P>
-For aggregate functions (like <CODE>SUM()</CODE>), you must also provide the
+</p>
+<p>
+For aggregate functions (like <code>SUM()</code>), you must also provide the
 llowing functions:
 
-</P>
-<DL COMPACT>
+</p>
+<dl compact="">
 
-<DT><CODE>xxx_reset()</CODE> (required)
-<DD>
+<dt><code>xxx_reset()</code> (required)
+</dt><dd>
 Reset sum and insert the argument as the initial value for a new group.
-<DT><CODE>xxx_add()</CODE> (required)
-<DD>
+</dd><dt><code>xxx_add()</code> (required)
+</dt><dd>
 Add the argument to the old sum.
-</DL>
+</dd></dl>
 
-<P>
+<p>
 When using aggregate UDF functions MySQL works the following way:
 
-</P>
+</p>
 
-<OL>
-<LI>
+<ol>
+<li>
 
-Call <CODE>xxx_init()</CODE> to let the aggregate function allocate the memory it
+Call <code>xxx_init()</code> to let the aggregate function allocate the memory it
 will need to store results.
-<LI>
+</li><li>
 
-Sort the table according to the <CODE>GROUP BY</CODE> expression.
-<LI>
+Sort the table according to the <code>GROUP BY</code> expression.
+</li><li>
 
-For the first row in a new group, call the <CODE>xxx_reset()</CODE> function.
-<LI>
+For the first row in a new group, call the <code>xxx_reset()</code> function.
+</li><li>
 
 For each new row that belongs in the same group, call the
-<CODE>xxx_add()</CODE> function.
-<LI>
+<code>xxx_add()</code> function.
+</li><li>
 
 When the group changes or after the last row has been processed,
-call <CODE>xxx()</CODE> to get the result for the aggregate.
-<LI>
+call <code>xxx()</code> to get the result for the aggregate.
+</li><li>
 
 Repeat 3-5 until all rows has been processed
-<LI>
+</li><li>
 
-Call <CODE>xxx_deinit()</CODE> to let the UDF free any memory it has allocated.
-</OL>
+Call <code>xxx_deinit()</code> to let the UDF free any memory it has allocated.
+</li></ol>
 
-<P>
+<p>
 全ての関数はスレッド安全でなくてはいけません(メイン関数だけでなく、初期
 化関数と終了関数も同様です)。これは変更されうるグローバル変数や静的変数
 を割り当てることは許されないことを意味します！ メモリが必要な場合は、
-<CODE>xxx_init()</CODE> で割り当て、<CODE>xxx_deinit()</CODE> でそれを解放すべきです。
+<code>xxx_init()</code> で割り当て、<code>xxx_deinit()</code> でそれを解放すべきです。
 
-</P>
+</p>
 
 
 
-<H4><A NAME="UDF_calling" HREF="manual.ja_toc.html#UDF_calling">9.2.2.1  UDF Calling Sequences</A></H4>
+<h4><a name="UDF_calling" href="manual.ja_toc.html#UDF_calling">9.2.2.1  UDF Calling Sequences</a></h4>
 
-<P>
-<A NAME="IDX1740"></A>
+<p>
+<a name="IDX1740"></a>
 
-</P>
-<P>
+</p>
+<p>
 メイン関数は下に示すように宣言されるべきです。戻り値型と引数は、
-<CODE>CREATE FUNCTION</CODE> ステートメントで、SQL 関数 <CODE>XXX()</CODE> の戻り値
-を<CODE>STRING</CODE>, <CODE>INTEGER</CODE>, <CODE>REAL</CODE> のどれに宣言するかに依存し
+<code>CREATE FUNCTION</code> ステートメントで、SQL 関数 <code>XXX()</code> の戻り値
+を<code>STRING</code>, <code>INTEGER</code>, <code>REAL</code> のどれに宣言するかに依存し
 て異なることに注意してください:
 
-</P>
-<P>
-<CODE>STRING</CODE> 関数では:
+</p>
+<p>
+<code>STRING</code> 関数では:
 
-</P>
+</p>
 
-<PRE>
-char *xxx(UDF_INIT *initid, UDF_ARGS *args,
+<pre>char *xxx(UDF_INIT *initid, UDF_ARGS *args,
           char *result, unsigned long *length,
           char *is_null, char *error);
-</PRE>
+</pre>
 
-<P>
-<CODE>INTEGER</CODE> 関数では:
+<p>
+<code>INTEGER</code> 関数では:
 
-</P>
+</p>
 
-<PRE>
-long long xxx(UDF_INIT *initid, UDF_ARGS *args,
+<pre>long long xxx(UDF_INIT *initid, UDF_ARGS *args,
               char *is_null, char *error);
-</PRE>
+</pre>
 
-<P>
-<CODE>REAL</CODE> 関数では:
+<p>
+<code>REAL</code> 関数では:
 
-</P>
+</p>
 
-<PRE>
-double xxx(UDF_INIT *initid, UDF_ARGS *args,
+<pre>double xxx(UDF_INIT *initid, UDF_ARGS *args,
               char *is_null, char *error);
-</PRE>
+</pre>
 
-<P>
+<p>
 初期化と終了関数は次のように宣言します
 
-</P>
+</p>
 
-<PRE>
-my_bool xxx_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
+<pre>my_bool xxx_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
 
 void xxx_deinit(UDF_INIT *initid);
-</PRE>
+</pre>
 
-<P>
-<CODE>initid</CODE> 引数は３つの関数全てに渡されます。これは <CODE>UDF_INIT</CODE> 
-構造体を示し、関数間で情報を伝達するために使用されます。<CODE>UDF_INIT</CODE> 
+<p>
+<code>initid</code> 引数は３つの関数全てに渡されます。これは <code>UDF_INIT</code> 
+構造体を示し、関数間で情報を伝達するために使用されます。<code>UDF_INIT</code> 
 構造体のメンバは下に一覧します。初期化関数は変更したい全てのメンバを埋め
 るべきです。(メンバにデフォルトを使用するには、未変更のままにしてくださ
 い。)
 
-</P>
-<DL COMPACT>
+</p>
+<dl compact="">
 
-<DT><CODE>my_bool maybe_null</CODE>
-<DD>
-<CODE>xxx()</CODE> が <CODE>NULL</CODE> を返す場合、<CODE>xxx_init()</CODE> は 
-<CODE>maybe_null</CODE> を <CODE>1</CODE> に設定すべきです。デフォルト値は、引数のい
-ずれかが <CODE>maybe_null</CODE> として宣言された場合、<CODE>1</CODE> です。
+<dt><code>my_bool maybe_null</code>
+</dt><dd>
+<code>xxx()</code> が <code>NULL</code> を返す場合、<code>xxx_init()</code> は 
+<code>maybe_null</code> を <code>1</code> に設定すべきです。デフォルト値は、引数のい
+ずれかが <code>maybe_null</code> として宣言された場合、<code>1</code> です。
 
-<DT><CODE>unsigned int decimals</CODE>
-<DD>
+</dd><dt><code>unsigned int decimals</code>
+</dt><dd>
 小数部の桁数。デフォルト値はメイン関数に渡される引数の小数部の最大桁数で
-す。(例えば、関数に <CODE>1.34</CODE>, <CODE>1.345</CODE>, <CODE>1.3</CODE> が渡された場合、
-デフォルトは 3 です。<CODE>1.345</CODE> が 3 桁の小数部を持つためです。)
+す。(例えば、関数に <code>1.34</code>, <code>1.345</code>, <code>1.3</code> が渡された場合、
+デフォルトは 3 です。<code>1.345</code> が 3 桁の小数部を持つためです。)
 
-<DT><CODE>unsigned int max_length</CODE>
-<DD>
+</dd><dt><code>unsigned int max_length</code>
+</dt><dd>
 文字列結果の最大長。デフォルト値は関数の戻り値型に依存して異なります。文
 字列関数では、デフォルトは最も長い引数の長さです。整数関数では、デフォル
-トは 21 桁です。実数関数では、デフォルトは 13 に <CODE>initid-&#62;decimals</CODE> 
+トは 21 桁です。実数関数では、デフォルトは 13 に <code>initid-&gt;decimals</code> 
 で示される小数部の桁数を加えたものです。(数値関数では、長さは符号と小数
 点文字を含みます。)
 
@@ -723,662 +715,644 @@ If you want to return a blob, you can set this to 65K or 16M; this
 memory is not allocated but used to decide which column type to use if
 there is a need to temporary store the data.
 
-<DT><CODE>char *ptr</CODE>
-<DD>
+</dd><dt><code>char *ptr</code>
+</dt><dd>
 それ自身の目的のために関数が使用できるポインタです。例えば、関数は割り当
-てたメモリを関数間で伝達するために、<CODE>initid-&#62;ptr</CODE> を使用できます。
-<CODE>xxx_init()</CODE> では、メモリを獲得し、このポインタに割り当てます:
+てたメモリを関数間で伝達するために、<code>initid-&gt;ptr</code> を使用できます。
+<code>xxx_init()</code> では、メモリを獲得し、このポインタに割り当てます:
 
 
-<PRE>
-initid-&#62;ptr = allocated_memory;
-</PRE>
+<pre>initid-&gt;ptr = allocated_memory;
+</pre>
 
-<CODE>xxx()</CODE> と <CODE>xxx_deinit()</CODE> では、<CODE>initid-&#62;ptr</CODE> を参照して、
+<code>xxx()</code> と <code>xxx_deinit()</code> では、<code>initid-&gt;ptr</code> を参照して、
 メモリを使用または解放します。
-</DL>
+</dd></dl>
 
 
 
-<H4><A NAME="UDF_aggr._calling" HREF="manual.ja_toc.html#UDF_aggr._calling">9.2.2.2  UDF Calling Sequences for aggregate functions</A></H4>
+<h4><a name="UDF_aggr._calling" href="manual.ja_toc.html#UDF_aggr._calling">9.2.2.2  UDF Calling Sequences for aggregate functions</a></h4>
 
-<P>
-<A NAME="IDX1741"></A>
+<p>
+<a name="IDX1741"></a>
 
-</P>
-<P>
+</p>
+<p>
 Here follows a description of the different functions you need to define
 when you want to create an aggregate UDF function.
 
-</P>
+</p>
 
-<PRE>
-char *xxx_reset(UDF_INIT *initid, UDF_ARGS *args,
+<pre>char *xxx_reset(UDF_INIT *initid, UDF_ARGS *args,
                 char *is_null, char *error);
-</PRE>
+</pre>
 
-<P>
+<p>
 This function is called when MySQL finds the first row in a new group.
 In the function you should reset any internal summary variables and then set
 the given argument as the first argument in the group.
 
-</P>
-<P>
+</p>
+<p>
 In many cases this is implemented internally by reseting all variables
-and then calling <CODE>xxx_add()</CODE>.
+and then calling <code>xxx_add()</code>.
 
-</P>
+</p>
 
-<PRE>
-char *xxx_add(UDF_INIT *initid, UDF_ARGS *args,
+<pre>char *xxx_add(UDF_INIT *initid, UDF_ARGS *args,
               char *is_null, char *error);
-</PRE>
+</pre>
 
-<P>
+<p>
 This function is called for all rows that belongs to the same group,
 except for the first row. In this you should add the value in UDF_ARGS
 to your internal summary variable.
 
-</P>
-<P>
-The <CODE>xxx()</CODE> function should be declared identical as when you
-define a simple UDF function.  「<A HREF="manual.ja_Extending_MySQL.html#UDF_calling">9.2.2.1  UDF Calling Sequences</A>」節参照.
+</p>
+<p>
+The <code>xxx()</code> function should be declared identical as when you
+define a simple UDF function.  「<a href="manual.ja_Extending_MySQL.html#UDF_calling">9.2.2.1  UDF Calling Sequences</a>」節参照.
 
-</P>
-<P>
+</p>
+<p>
 This function is called when all rows in the group has been processed.
-You should normally never access the <CODE>args</CODE> variable here but
+You should normally never access the <code>args</code> variable here but
 return your value based on your internal summary variables.
 
-</P>
-<P>
-All argument processing in <CODE>xxx_reset()</CODE> and <CODE>xxx_add()</CODE>
-should be done identically as for normal UDF functions.  「<A HREF="manual.ja_Extending_MySQL.html#UDF_arguments">9.2.2.3  引数処理</A>」節参照.
+</p>
+<p>
+All argument processing in <code>xxx_reset()</code> and <code>xxx_add()</code>
+should be done identically as for normal UDF functions.  「<a href="manual.ja_Extending_MySQL.html#UDF_arguments">9.2.2.3  引数処理</a>」節参照.
 
-</P>
-<P>
-The return value handling in <CODE>xxx()</CODE> should be done identically as
-for a normal UDF.  「<A HREF="manual.ja_Extending_MySQL.html#UDF_return_values">9.2.2.4  戻り値とエラー処理</A>」節参照.
+</p>
+<p>
+The return value handling in <code>xxx()</code> should be done identically as
+for a normal UDF.  「<a href="manual.ja_Extending_MySQL.html#UDF_return_values">9.2.2.4  戻り値とエラー処理</a>」節参照.
 
-</P>
-<P>
-The pointer argument to <CODE>is_null</CODE> and <CODE>error</CODE> is the same for
-all calls to <CODE>xxx_reset()</CODE>, <CODE>xxx_add()</CODE> and <CODE>xxx()</CODE>.
-You can use this to remember that you got an error or if the <CODE>xxx()</CODE>
-function should return <CODE>NULL</CODE>. Note that you should not store a string
-into <CODE>*error</CODE>!  This is just a 1 byte flag!
+</p>
+<p>
+The pointer argument to <code>is_null</code> and <code>error</code> is the same for
+all calls to <code>xxx_reset()</code>, <code>xxx_add()</code> and <code>xxx()</code>.
+You can use this to remember that you got an error or if the <code>xxx()</code>
+function should return <code>NULL</code>. Note that you should not store a string
+into <code>*error</code>!  This is just a 1 byte flag!
 
-</P>
-<P>
-<CODE>is_null</CODE> is reset for each group (before calling <CODE>xxx_reset()</CODE>.
-<CODE>error</CODE> is never reset.
+</p>
+<p>
+<code>is_null</code> is reset for each group (before calling <code>xxx_reset()</code>.
+<code>error</code> is never reset.
 
-</P>
-<P>
-If <CODE>isnull</CODE> or <CODE>error</CODE> are set after <CODE>xxx()</CODE> then MySQL
-will return <CODE>NULL</CODE> as the result for the group function.
+</p>
+<p>
+If <code>isnull</code> or <code>error</code> are set after <code>xxx()</code> then MySQL
+will return <code>NULL</code> as the result for the group function.
 
-</P>
+</p>
 
 
 
-<H4><A NAME="UDF_arguments" HREF="manual.ja_toc.html#UDF_arguments">9.2.2.3  引数処理</A></H4>
+<h4><a name="UDF_arguments" href="manual.ja_toc.html#UDF_arguments">9.2.2.3  引数処理</a></h4>
 
-<P>
-<A NAME="IDX1742"></A>
-<A NAME="IDX1743"></A>
+<p>
+<a name="IDX1742"></a>
+<a name="IDX1743"></a>
 
-</P>
-<P>
-<CODE>args</CODE> 引数は次に示すメンバを持つ <CODE>UDF_ARGS</CODE> 構造体へのポイン
+</p>
+<p>
+<code>args</code> 引数は次に示すメンバを持つ <code>UDF_ARGS</code> 構造体へのポイン
 タです:
 
-</P>
-<DL COMPACT>
+</p>
+<dl compact="">
 
-<DT><CODE>unsigned int arg_count</CODE>
-<DD>
+<dt><code>unsigned int arg_count</code>
+</dt><dd>
 引数の数。関数が特定の引数の数で呼び出されることを期待する場合は、初期化
 関数でこの値をチェックしてください。例えば:
 
 
-<PRE>
-if (args-&#62;arg_count != 2)
+<pre>if (args-&gt;arg_count != 2)
 {
     strcpy(message,"XXX() requires two arguments");
     return 1;
 }
-</PRE>
+</pre>
 
-<DT><CODE>enum Item_result *arg_type</CODE>
-<DD>
-引数の型。可能な型の値は <CODE>STRING_RESULT</CODE>, <CODE>INT_RESULT</CODE>,
-<CODE>REAL_RESULT</CODE> です。
+</dd><dt><code>enum Item_result *arg_type</code>
+</dt><dd>
+引数の型。可能な型の値は <code>STRING_RESULT</code>, <code>INT_RESULT</code>,
+<code>REAL_RESULT</code> です。
 
 引数が与えられた型であることと、そうでない場合エラーを返すことを確実にす
-るために、初期化関数で <CODE>arg_type</CODE> 配列をチェックしてください。例えば:
+るために、初期化関数で <code>arg_type</code> 配列をチェックしてください。例えば:
 
 
-<PRE>
-if (args-&#62;arg_type[0] != STRING_RESULT ||
-    args-&#62;arg_type[1] != INT_RESULT)
+<pre>if (args-&gt;arg_type[0] != STRING_RESULT ||
+    args-&gt;arg_type[1] != INT_RESULT)
 {
     strcpy(message,"XXX() requires a string and an integer");
     return 1;
 }
-</PRE>
+</pre>
 
 関数の引数が特定の型を要求するための代案として、初期化関数を使用して、
-<CODE>arg_type</CODE> 要素を求める型に設定できます。これは <STRONG>MySQL</STRONG> に
-<CODE>xxx()</CODE> の各呼び出しにこれらの型を引数に強制するようにさせます。例
+<code>arg_type</code> 要素を求める型に設定できます。これは <strong>MySQL</strong> に
+<code>xxx()</code> の各呼び出しにこれらの型を引数に強制するようにさせます。例
 えば、最初の２つの引数に文字列と整数を強制するように指定するには、
-<CODE>xxx_init()</CODE> で次を行なってください:
+<code>xxx_init()</code> で次を行なってください:
 
 
-<PRE>
-args-&#62;arg_type[0] = STRING_RESULT;
-args-&#62;arg_type[1] = INT_RESULT;
-</PRE>
+<pre>args-&gt;arg_type[0] = STRING_RESULT;
+args-&gt;arg_type[1] = INT_RESULT;
+</pre>
 
-<DT><CODE>char **args</CODE>
-<DD>
-<CODE>args-&#62;args</CODE> は、関数が呼ばれる時の引数の一般的な特性について、情報
-を初期化関数に伝達します。定数引数 <CODE>i</CODE> について、
-<CODE>args-&#62;args[i]</CODE> は引数値のをポイントします。(値への正しいアクセス方
-法については後述。)非定数引数について、<CODE>args-&#62;args[i]</CODE> は <CODE>0</CODE> 
-です。定数引数は定数だけを使用する表現で、<CODE>3</CODE>, <CODE>4*7-2</CODE>,
-<CODE>SIN(3.14)</CODE> などです。非定数引数は行から行に変更される値を参照する
+</dd><dt><code>char **args</code>
+</dt><dd>
+<code>args-&gt;args</code> は、関数が呼ばれる時の引数の一般的な特性について、情報
+を初期化関数に伝達します。定数引数 <code>i</code> について、
+<code>args-&gt;args[i]</code> は引数値のをポイントします。(値への正しいアクセス方
+法については後述。)非定数引数について、<code>args-&gt;args[i]</code> は <code>0</code> 
+です。定数引数は定数だけを使用する表現で、<code>3</code>, <code>4*7-2</code>,
+<code>SIN(3.14)</code> などです。非定数引数は行から行に変更される値を参照する
 表現で、項目名や非定数引数で呼び出される関数などです。
 
-メイン関数のそれぞれの呼び出しについて、<CODE>args-&#62;args</CODE> は現在処理され
+メイン関数のそれぞれの呼び出しについて、<code>args-&gt;args</code> は現在処理され
 ている行に渡される実際の引数を含んでいます。
 
-関数は次のように引数 <CODE>i</CODE> を参照できます:
+関数は次のように引数 <code>i</code> を参照できます:
 
 
-<UL>
-<LI>
+<ul>
+<li>
 
-<CODE>STRING_RESULT</CODE> 型の引数は、バイナリデータまたは任意の長さのデータ
+<code>STRING_RESULT</code> 型の引数は、バイナリデータまたは任意の長さのデータ
 の処理を許すため、文字列ポインタ＋長さとして与えられます。文字列内容は 
-<CODE>args-&#62;args[i]</CODE> として有効で、文字列長は <CODE>args-&#62;lengths[i]</CODE> で
+<code>args-&gt;args[i]</code> として有効で、文字列長は <code>args-&gt;lengths[i]</code> で
 す。文字列は NULL 終端とみなすべきではありません。
 
-<LI>
+</li><li>
 
-<CODE>INT_RESULT</CODE> 型の引数について、<CODE>args-&#62;args[i]</CODE> を 
-<CODE>long long</CODE> 値にキャストする必要があります:
-
-
-<PRE>
-long long int_val;
-int_val = *((long long*) args-&#62;args[i]);
-</PRE>
-
-<LI>
-
-For an argument of type <CODE>REAL_RESULT</CODE>, you must cast
-<CODE>args-&#62;args[i]</CODE> to a <CODE>double</CODE> value:
+<code>INT_RESULT</code> 型の引数について、<code>args-&gt;args[i]</code> を 
+<code>long long</code> 値にキャストする必要があります:
 
 
-<PRE>
-double    real_val;
-real_val = *((double*) args-&#62;args[i]);
-</PRE>
+<pre>long long int_val;
+int_val = *((long long*) args-&gt;args[i]);
+</pre>
 
-</UL>
+</li><li>
 
-<DT><CODE>unsigned long *lengths</CODE>
-<DD>
-初期化関数では、<CODE>lengths</CODE> 配列は各引数についての最大文字列長を示し
-ます。メイン関数の各呼び出しについては、<CODE>lengths</CODE> は、現在処理され
+For an argument of type <code>REAL_RESULT</code>, you must cast
+<code>args-&gt;args[i]</code> to a <code>double</code> value:
+
+
+<pre>double    real_val;
+real_val = *((double*) args-&gt;args[i]);
+</pre>
+
+</li></ul>
+
+</dd><dt><code>unsigned long *lengths</code>
+</dt><dd>
+初期化関数では、<code>lengths</code> 配列は各引数についての最大文字列長を示し
+ます。メイン関数の各呼び出しについては、<code>lengths</code> は、現在処理され
 ている行に渡される任意の文字列引数の実際の長さを含んでいます。
-<CODE>INT_RESULT</CODE>, <CODE>REAL_RESULT</CODE> 型の引数については、<CODE>lengths</CODE> 
+<code>INT_RESULT</code>, <code>REAL_RESULT</code> 型の引数については、<code>lengths</code> 
 はまだ引数の最大長を含んでいます(初期化関数については)。
-</DL>
+</dd></dl>
 
 
 
-<H4><A NAME="UDF_return_values" HREF="manual.ja_toc.html#UDF_return_values">9.2.2.4  戻り値とエラー処理</A></H4>
+<h4><a name="UDF_return_values" href="manual.ja_toc.html#UDF_return_values">9.2.2.4  戻り値とエラー処理</a></h4>
 
-<P>
-<A NAME="IDX1744"></A>
-<A NAME="IDX1745"></A>
-<A NAME="IDX1746"></A>
-<A NAME="IDX1747"></A>
+<p>
+<a name="IDX1744"></a>
+<a name="IDX1745"></a>
+<a name="IDX1746"></a>
+<a name="IDX1747"></a>
 
-</P>
-<P>
-初期化関数は、エラーが無い場合は <CODE>0</CODE> を、そうでなければ <CODE>1</CODE> を
-返すべきです。エラーが発生する場合は、<CODE>xxx_init()</CODE> は NULL 終端エラー
-メッセージを <CODE>message</CODE> パラメータに格納すべきです。このメッセージは
-クライアントに返されます。メッセージバッファは <CODE>MYSQL_ERRMSG_SIZE</CODE> 
+</p>
+<p>
+初期化関数は、エラーが無い場合は <code>0</code> を、そうでなければ <code>1</code> を
+返すべきです。エラーが発生する場合は、<code>xxx_init()</code> は NULL 終端エラー
+メッセージを <code>message</code> パラメータに格納すべきです。このメッセージは
+クライアントに返されます。メッセージバッファは <code>MYSQL_ERRMSG_SIZE</code> 
 文字長ですが、80 文字より小さく保つように試みるべきです。標準的な端末画
 面の幅にフィットするようにです。
 
-</P>
-<P>
-メイン関数 <CODE>xxx()</CODE> の返す値は <CODE>long long</CODE> と <CODE>double</CODE> 関
-数については関数値です。文字列関数については、<CODE>result</CODE> と 
-<CODE>length</CODE> 引数で文字列が返されます。<CODE>result</CODE> は少なくとも 255 
+</p>
+<p>
+メイン関数 <code>xxx()</code> の返す値は <code>long long</code> と <code>double</code> 関
+数については関数値です。文字列関数については、<code>result</code> と 
+<code>length</code> 引数で文字列が返されます。<code>result</code> は少なくとも 255 
 バイト長のバッファです。これらに内容と戻り値の長さを設定してください。例
 えば:
 
-</P>
+</p>
 
-<PRE>
-memcpy(result, "result string", 13);
+<pre>memcpy(result, "result string", 13);
 *length = 13;
-</PRE>
+</pre>
 
-<P>
-The <CODE>result</CODE> buffer that is passed to the calc function is 255 byte
+<p>
+The <code>result</code> buffer that is passed to the calc function is 255 byte
 big. If your result fits in this, you don't have to worry about memory
 allocation for results.
 
-</P>
-<P>
+</p>
+<p>
 あなたの文字列関数が 255 バイトよりも長い文字列を返す必要がある場合、
-<CODE>xxx_init()</CODE> 関数または <CODE>xxx()</CODE> 関数内で <CODE>malloc()</CODE> で領域
-を割り当て、<CODE>xxx_deinit()</CODE> 関数でそれを解放する必要があります。将来の 
-<CODE>xxx()</CODE> 呼び出しによって再利用されるように、割り当てたメモリを 
-<CODE>UDF_INIT</CODE> 構造体の <CODE>ptr</CODE> スロットに格納できます。
- 「<A HREF="manual.ja_Extending_MySQL.html#UDF_calling">9.2.2.1  UDF Calling Sequences</A>」節参照.
+<code>xxx_init()</code> 関数または <code>xxx()</code> 関数内で <code>malloc()</code> で領域
+を割り当て、<code>xxx_deinit()</code> 関数でそれを解放する必要があります。将来の 
+<code>xxx()</code> 呼び出しによって再利用されるように、割り当てたメモリを 
+<code>UDF_INIT</code> 構造体の <code>ptr</code> スロットに格納できます。
+ 「<a href="manual.ja_Extending_MySQL.html#UDF_calling">9.2.2.1  UDF Calling Sequences</a>」節参照.
 
-</P>
-<P>
-メイン関数で <CODE>NULL</CODE> 値の戻り値を示すには、<CODE>is_null</CODE> を 
-<CODE>1</CODE> に設定してください:
+</p>
+<p>
+メイン関数で <code>NULL</code> 値の戻り値を示すには、<code>is_null</code> を 
+<code>1</code> に設定してください:
 
-</P>
+</p>
 
-<PRE>
-*is_null = 1;
-</PRE>
+<pre>*is_null = 1;
+</pre>
 
-<P>
-To indicate an error return in the main function, set the <CODE>error</CODE>
-parameter to <CODE>1</CODE>:
+<p>
+To indicate an error return in the main function, set the <code>error</code>
+parameter to <code>1</code>:
 
-</P>
+</p>
 
-<PRE>
-*error = 1;
-</PRE>
+<pre>*error = 1;
+</pre>
 
-<P>
-<CODE>xxx()</CODE> が任意の行について <CODE>*error</CODE> に <CODE>1</CODE> を設定する場合、
-関数値は現在の行についてと、その後の <CODE>XXX()</CODE> が呼び出されるステート
-メントによって処理される任意の行について <CODE>NULL</CODE> です。(<CODE>xxx()</CODE> 
-は続く行については呼び出しさえされません。) <STRONG>注意</STRONG>: 3.22.10 より
-前の <STRONG>MySQL</STRONG> バージョンでは、<CODE>*error</CODE> と <CODE>*is_null</CODE> の
+<p>
+<code>xxx()</code> が任意の行について <code>*error</code> に <code>1</code> を設定する場合、
+関数値は現在の行についてと、その後の <code>XXX()</code> が呼び出されるステート
+メントによって処理される任意の行について <code>NULL</code> です。(<code>xxx()</code> 
+は続く行については呼び出しさえされません。) <strong>注意</strong>: 3.22.10 より
+前の <strong>MySQL</strong> バージョンでは、<code>*error</code> と <code>*is_null</code> の
 両方に設定すべきです:
 
-</P>
+</p>
 
-<PRE>
-*error = 1;
+<pre>*error = 1;
 *is_null = 1;
-</PRE>
+</pre>
 
 
 
-<H4><A NAME="UDF_compiling" HREF="manual.ja_toc.html#UDF_compiling">9.2.2.5  ユーザ定義関数のコンパイルとインストール</A></H4>
+<h4><a name="UDF_compiling" href="manual.ja_toc.html#UDF_compiling">9.2.2.5  ユーザ定義関数のコンパイルとインストール</a></h4>
 
-<P>
-<A NAME="IDX1748"></A>
-<A NAME="IDX1749"></A>
-<A NAME="IDX1750"></A>
+<p>
+<a name="IDX1748"></a>
+<a name="IDX1749"></a>
+<a name="IDX1750"></a>
 
-</P>
-<P>
+</p>
+<p>
 UDF を実装するファイルはサーバが動作するホスト上でコンパイルされインストー
 ルされないければなりません。この処理はサンプル UDF ファイル 
-<TT>`udf_example.cc'</TT> について次に説明します。これは <STRONG>MySQL</STRONG> ソー
+<tt>`udf_example.cc'</tt> について次に説明します。これは <strong>MySQL</strong> ソー
 ス配布に含まれています。このファイルは次の関数を含みます:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-<CODE>metaphon()</CODE> は文字列引数の metaphon 文字列を返します。これは時には 
+<code>metaphon()</code> は文字列引数の metaphon 文字列を返します。これは時には 
 soundex 文字列ですが、さらに英語用に調整されています。
-<LI>
+</li><li>
 
-<CODE>myfunc_double()</CODE> は引数の文字の ASCII 値の合計を引数の長さの合計で
+<code>myfunc_double()</code> は引数の文字の ASCII 値の合計を引数の長さの合計で
 割った値を返します。
-<LI>
+</li><li>
 
-<CODE>myfunc_int()</CODE> は引数の長さの合計を返します。
-<LI>
+<code>myfunc_int()</code> は引数の長さの合計を返します。
+</li><li>
 
-<CODE>sequence([const int])</CODE> returns an sequence starting from the given
+<code>sequence([const int])</code> returns an sequence starting from the given
 number or 1 if no number has been given.
-<LI>
+</li><li>
 
-<CODE>lookup()</CODE> はホスト名の IP 番号を返します。
-<LI>
+<code>lookup()</code> はホスト名の IP 番号を返します。
+</li><li>
 
-<CODE>reverse_lookup()</CODE> は IP 番号のホスト名を返します。この関数は文字列 
-<CODE>"xxx.xxx.xxx.xxx"</CODE> または４つの数値とともに呼ばれます。
-</UL>
+<code>reverse_lookup()</code> は IP 番号のホスト名を返します。この関数は文字列 
+<code>"xxx.xxx.xxx.xxx"</code> または４つの数値とともに呼ばれます。
+</li></ul>
 
-<P>
+<p>
 動的ロード可能ファイルは、次のような何らかのコマンドを使用して、共有オブ
 ジェクトファイルとしてコンパイルされるべきです:
 
-</P>
+</p>
 
-<PRE>
-shell&#62; gcc -shared -o udf_example.so myfunc.cc
-</PRE>
+<pre>shell&gt; gcc -shared -o udf_example.so myfunc.cc
+</pre>
 
-<P>
-<STRONG>MySQL</STRONG> ソースツリーの <TT>`sql'</TT> ディレクトリ内で次のコマンドを
+<p>
+<strong>MySQL</strong> ソースツリーの <tt>`sql'</tt> ディレクトリ内で次のコマンドを
 実行することにより、システムのコンパイラオプションを簡単に正しく見つけ出
 すことができます:
 
-</P>
+</p>
 
-<PRE>
-shell&#62; make udf_example.o
-</PRE>
+<pre>shell&gt; make udf_example.o
+</pre>
 
-<P>
-<CODE>make</CODE> が表示するものに似たコンパイルコマンドを実行すべきですが、行
-末近くの <CODE>-c</CODE> オプションを取り除いて、<CODE>-o udf_example.so</CODE> を行
-末につけてください。(いくつかのシステムでは、コマンドに <CODE>-c</CODE> を残す
+<p>
+<code>make</code> が表示するものに似たコンパイルコマンドを実行すべきですが、行
+末近くの <code>-c</code> オプションを取り除いて、<code>-o udf_example.so</code> を行
+末につけてください。(いくつかのシステムでは、コマンドに <code>-c</code> を残す
 必要があります。)
 
-</P>
-<P>
+</p>
+<p>
 UDF を含む共有オブジェクトをコンパイルすると、それをインストールしてその
-ことを <STRONG>MySQL</STRONG> に知らせる必要があります。<TT>`udf_example.cc'</TT> か
-らの共有オブジェクトのコンパイルは、<TT>`udf_example.so'</TT> のような何かの
+ことを <strong>MySQL</strong> に知らせる必要があります。<tt>`udf_example.cc'</tt> か
+らの共有オブジェクトのコンパイルは、<tt>`udf_example.so'</tt> のような何かの
 ファイル名を提供します(実際の名前はプラットフォームによって変わります)。
-このファイルを <TT>`/usr/lib'</TT> のような <CODE>ld</CODE> が探すどこかのディレク
-トリにコピーしてください。多くのシステムでは、<CODE>LD_LIBRARY</CODE> または 
-<CODE>LD_LIBRARY_PATH</CODE> 環境変数を設定して、UDF 関数ファイルがあるディレ
-クトリを示すことができます。<CODE>dlopen</CODE> マニュアルページはシステム上で
-使用すべき変数を教えてくれます。これを <CODE>mysql.server</CODE> または 
-<CODE>safe_mysqld</CODE> スタートアップスクリプトに設定し、
-<CODE>mysqld</CODE> を再起動すべきです。
+このファイルを <tt>`/usr/lib'</tt> のような <code>ld</code> が探すどこかのディレク
+トリにコピーしてください。多くのシステムでは、<code>LD_LIBRARY</code> または 
+<code>LD_LIBRARY_PATH</code> 環境変数を設定して、UDF 関数ファイルがあるディレ
+クトリを示すことができます。<code>dlopen</code> マニュアルページはシステム上で
+使用すべき変数を教えてくれます。これを <code>mysql.server</code> または 
+<code>safe_mysqld</code> スタートアップスクリプトに設定し、
+<code>mysqld</code> を再起動すべきです。
 
-</P>
-<P>
-ライブラリがインストールされた後、<CODE>mysqld</CODE> に新しい関数について次の
+</p>
+<p>
+ライブラリがインストールされた後、<code>mysqld</code> に新しい関数について次の
 コマンドで通知すべきです:
 
-</P>
+</p>
 
-<PRE>
-mysql&#62; CREATE FUNCTION metaphon RETURNS STRING SONAME "udf_example.so";
-mysql&#62; CREATE FUNCTION myfunc_double RETURNS REAL SONAME "udf_example.so";
-mysql&#62; CREATE FUNCTION myfunc_int RETURNS INTEGER SONAME "udf_example.so";
-mysql&#62; CREATE FUNCTION lookup RETURNS STRING SONAME "udf_example.so";
-mysql&#62; CREATE FUNCTION reverse_lookup
-    -&#62;        RETURNS STRING SONAME "udf_example.so";
-mysql&#62; CREATE AGGREGATE FUNCTION avgcost
-    -&#62;        RETURNS REAL SONAME "udf_example.so";
-</PRE>
+<pre>mysql&gt; CREATE FUNCTION metaphon RETURNS STRING SONAME "udf_example.so";
+mysql&gt; CREATE FUNCTION myfunc_double RETURNS REAL SONAME "udf_example.so";
+mysql&gt; CREATE FUNCTION myfunc_int RETURNS INTEGER SONAME "udf_example.so";
+mysql&gt; CREATE FUNCTION lookup RETURNS STRING SONAME "udf_example.so";
+mysql&gt; CREATE FUNCTION reverse_lookup
+    -&gt;        RETURNS STRING SONAME "udf_example.so";
+mysql&gt; CREATE AGGREGATE FUNCTION avgcost
+    -&gt;        RETURNS REAL SONAME "udf_example.so";
+</pre>
 
-<P>
-関数は <CODE>DROP FUNCTION</CODE> を使用して削除できます:
+<p>
+関数は <code>DROP FUNCTION</code> を使用して削除できます:
 
-</P>
+</p>
 
-<PRE>
-mysql&#62; DROP FUNCTION metaphon;
-mysql&#62; DROP FUNCTION myfunc_double;
-mysql&#62; DROP FUNCTION myfunc_int;
-mysql&#62; DROP FUNCTION lookup;
-mysql&#62; DROP FUNCTION reverse_lookup;
-mysql&#62; DROP FUNCTION avgcost;
-</PRE>
+<pre>mysql&gt; DROP FUNCTION metaphon;
+mysql&gt; DROP FUNCTION myfunc_double;
+mysql&gt; DROP FUNCTION myfunc_int;
+mysql&gt; DROP FUNCTION lookup;
+mysql&gt; DROP FUNCTION reverse_lookup;
+mysql&gt; DROP FUNCTION avgcost;
+</pre>
 
-<P>
-<CODE>CREATE FUNCTION</CODE> と <CODE>DROP FUNCTION</CODE> ステートメントは 
-<CODE>mysql</CODE> データベース内のシステムテーブル <CODE>func</CODE> を更新します。
+<p>
+<code>CREATE FUNCTION</code> と <code>DROP FUNCTION</code> ステートメントは 
+<code>mysql</code> データベース内のシステムテーブル <code>func</code> を更新します。
 関数の名前、型、共有ライブラリ名はテーブルに保存されます。作成と破棄機能
-のためには、<CODE>mysql</CODE> データベースに <CODE>INSERT</CODE> と 
-<CODE>DELETE</CODE> 権限を持つ必要があります。
+のためには、<code>mysql</code> データベースに <code>INSERT</code> と 
+<code>DELETE</code> 権限を持つ必要があります。
 
-</P>
-<P>
-既に生成してある関数を追加するために <CODE>CREATE FUNCTION</CODE> を使用すべき
-ではありません。関数の再インストールが必要な場合は、<CODE>DROP FUNCTION</CODE> 
-でそれを削除し、それから <CODE>CREATE FUNCTION</CODE> で再インストールすべきで
+</p>
+<p>
+既に生成してある関数を追加するために <code>CREATE FUNCTION</code> を使用すべき
+ではありません。関数の再インストールが必要な場合は、<code>DROP FUNCTION</code> 
+でそれを削除し、それから <code>CREATE FUNCTION</code> で再インストールすべきで
 す。例えば、関数の新しいバージョンの再コンパイルをした場合、
-<CODE>mysqld</CODE> が新しいバージョンを得るために、これを行なう必要があるでしょ
+<code>mysqld</code> が新しいバージョンを得るために、これを行なう必要があるでしょ
 う。そうでなければ、サーバは古いバージョンの使用を継続します。
 
-</P>
-<P>
-<CODE>mysqld</CODE> を <CODE>--skip-grant-tables</CODE> オプションで起動しなくても、
+</p>
+<p>
+<code>mysqld</code> を <code>--skip-grant-tables</code> オプションで起動しなくても、
 有効な関数はサーバの開始毎に再読み込みされます。この場合、UDF 初期化は飛
-ばされ、UDF が無効になります。(有効な関数は <CODE>CREATE FUNCTION</CODE> でロー
-ドされているもので、<CODE>DROP FUNCTION</CODE> で削除されていないものです。)
+ばされ、UDF が無効になります。(有効な関数は <code>CREATE FUNCTION</code> でロー
+ドされているもので、<code>DROP FUNCTION</code> で削除されていないものです。)
 
-</P>
+</p>
 
 
 
-<H3><A NAME="Adding_native_function" HREF="manual.ja_toc.html#Adding_native_function">9.2.3  新しいネイティブ関数の追加</A></H3>
+<h3><a name="Adding_native_function" href="manual.ja_toc.html#Adding_native_function">9.2.3  新しいネイティブ関数の追加</a></h3>
 
-<P>
-<A NAME="IDX1751"></A>
-<A NAME="IDX1752"></A>
-<A NAME="IDX1753"></A>
+<p>
+<a name="IDX1751"></a>
+<a name="IDX1752"></a>
+<a name="IDX1753"></a>
 
-</P>
-<P>
+</p>
+<p>
 ネイティブ関数を追加するためのプロシジャを以下に示します。バイナリ配布に
 はネイティブ関数を追加できないことに注意してください。プロシジャは 
-<STRONG>MySQL</STRONG> ソースコードの変更を必要とするためです。<STRONG>MySQL</STRONG> を
-ソース配布から自分でコンパイルする必要があります。また、<STRONG>MySQL</STRONG> 
+<strong>MySQL</strong> ソースコードの変更を必要とするためです。<strong>MySQL</strong> を
+ソース配布から自分でコンパイルする必要があります。また、<strong>MySQL</strong> 
 の他のバージョンに移行する場合(例えば、新しいバージョンがリリースされた
 時)、新しいバージョンでこのプロシジャを繰り返す必要があります。
 
-</P>
-<P>
-新しいネイティブ <STRONG>MySQL</STRONG> 関数を追加するためには、次のステップに従っ
+</p>
+<p>
+新しいネイティブ <strong>MySQL</strong> 関数を追加するためには、次のステップに従っ
 てください:
 
-</P>
+</p>
 
-<OL>
-<LI>
+<ol>
+<li>
 
-<CODE>sql_functions[]</CODE> 配列内で関数名を定義している <TT>`lex.h'</TT> に１行
+<code>sql_functions[]</code> 配列内で関数名を定義している <tt>`lex.h'</tt> に１行
 追加してください。
-<LI>
+</li><li>
 
 If the function prototype is simple (just takes zero, one, two or three
 arguments), you should in lex.h specify SYM(FUNC_ARG#) (where # is the
 number of arguments) as the second argument in the
-<CODE>sql_functions[]</CODE> array and add a function that creates a function
-object in <TT>`item_create.cc'</TT>.  Take a look at <CODE>"ABS"</CODE> and
-<CODE>create_funcs_abs()</CODE> for an example of this.
+<code>sql_functions[]</code> array and add a function that creates a function
+object in <tt>`item_create.cc'</tt>.  Take a look at <code>"ABS"</code> and
+<code>create_funcs_abs()</code> for an example of this.
 
 If the function prototype is complicated (for example takes a variable number
-of arguments), you should add two lines to <TT>`sql_yacc.yy'</TT>. 
-一つは、<CODE>yacc</CODE> が定義す
+of arguments), you should add two lines to <tt>`sql_yacc.yy'</tt>. 
+一つは、<code>yacc</code> が定義す
 べきプリプロセッサシンボルを指示します(これはファイルの先頭に追加すべき
 です)。それから関数パラメータを定義し、これらのパラメータとともに 
-``item'' を <CODE>simple_expr</CODE> パース規則に追加します。例えば、これがど
-のように動作するかを見るには、<TT>`sql_yacc.yy'</TT> 内の <CODE>ATAN</CODE> の
+``item'' を <code>simple_expr</code> パース規則に追加します。例えば、これがど
+のように動作するかを見るには、<tt>`sql_yacc.yy'</tt> 内の <code>ATAN</code> の
 全ての出来事をチェックしてください。
-<LI>
+</li><li>
 
-<TT>`item_func.h'</TT> 内で、関数が数値または文字列のどちらを返すかに依存し
-て、<CODE>Item_num_func</CODE> または <CODE>Item_str_func</CODE> から継承するクラス
+<tt>`item_func.h'</tt> 内で、関数が数値または文字列のどちらを返すかに依存し
+て、<code>Item_num_func</code> または <code>Item_str_func</code> から継承するクラス
 を宣言してください。
-<LI>
+</li><li>
 
-<TT>`item_func.cc'</TT> 内で、数値または文字列のどちらの関数を定義するかに依
+<tt>`item_func.cc'</tt> 内で、数値または文字列のどちらの関数を定義するかに依
 存して、次の宣言の一つを追加してください:
 
-<PRE>
-double   Item_func_newname::val()
+<pre>double   Item_func_newname::val()
 longlong Item_func_newname::val_int()
 String  *Item_func_newname::Str(String *str)
-</PRE>
+</pre>
 
 If you inherit your object from any of the standard items (like
-<CODE>Item_num_func</CODE> you probably only have to define one of the above
+<code>Item_num_func</code> you probably only have to define one of the above
 functions and let the parent object take care of the other functions.
-For example, the <CODE>Item_str_func</CODE> class defines a <CODE>val()</CODE> function
-that executes <CODE>atof()</CODE> on the value returned by <CODE>::str()</CODE>.
+For example, the <code>Item_str_func</code> class defines a <code>val()</code> function
+that executes <code>atof()</code> on the value returned by <code>::str()</code>.
 
-<LI>
+</li><li>
 
 おそらく次のオブジェクト関数も定義すべきです
 
-<PRE>
-void Item_func_newname::fix_length_and_dec()
-</PRE>
+<pre>void Item_func_newname::fix_length_and_dec()
+</pre>
 
-この関数は与えられた引数に基づいて少なくとも <CODE>max_length</CODE> を計算す
-べきです。<CODE>max_length</CODE> は関数が返し得る文字の最大数です。この関数は、
-メイン関数が <CODE>NULL</CODE> 値を返すことがない場合は、<CODE>maybe_null = 0</CODE> 
-も設定すべきです。関数は、引数の <CODE>maybe_null</CODE> 変数をチェックするこ
-とで、関数の任意の引数が <CODE>NULL</CODE> を返しうるかどうかをチェックできま
+この関数は与えられた引数に基づいて少なくとも <code>max_length</code> を計算す
+べきです。<code>max_length</code> は関数が返し得る文字の最大数です。この関数は、
+メイン関数が <code>NULL</code> 値を返すことがない場合は、<code>maybe_null = 0</code> 
+も設定すべきです。関数は、引数の <code>maybe_null</code> 変数をチェックするこ
+とで、関数の任意の引数が <code>NULL</code> を返しうるかどうかをチェックできま
 す。
 You
-can take a look at <CODE>Item_func_mod::fix_length_and_dec</CODE> for a
+can take a look at <code>Item_func_mod::fix_length_and_dec</code> for a
 typical example of how to do this.
-</OL>
+</li></ol>
 
-<P>
+<p>
 全ての関数はスレッド安全である必要があります (In other words, don't use any global or
 static variables in the functions without protecting them with mutexes).
 
-</P>
-<P>
-If you want to return <CODE>NULL</CODE>, from <CODE>::val()</CODE>, <CODE>::val_int()</CODE>
-or <CODE>::str()</CODE> you should set <CODE>null_value</CODE> to 1 and return 0.
+</p>
+<p>
+If you want to return <code>NULL</code>, from <code>::val()</code>, <code>::val_int()</code>
+or <code>::str()</code> you should set <code>null_value</code> to 1 and return 0.
 
-</P>
-<P>
-<CODE>::str()</CODE> オブジェクト関数については、次のいくつかの追加検討事項があ
+</p>
+<p>
+<code>::str()</code> オブジェクト関数については、次のいくつかの追加検討事項があ
 ります:
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-<CODE>String *str</CODE> 引数は、結果を保持するために使用される文字列バッファ
+<code>String *str</code> 引数は、結果を保持するために使用される文字列バッファ
 を提供します。
- (For more information about the <CODE>String</CODE> type,
-take a look at the <TT>`sql_string.h'</TT> file.)
-<LI>
+ (For more information about the <code>String</code> type,
+take a look at the <tt>`sql_string.h'</tt> file.)
+</li><li>
 
-The <CODE>::str()</CODE> function should return the string that holds the result or
-<CODE>(char*) 0</CODE> if the result is <CODE>NULL</CODE>.
-<LI>
+The <code>::str()</code> function should return the string that holds the result or
+<code>(char*) 0</code> if the result is <code>NULL</code>.
+</li><li>
 
 全ての現在の文字列関数は、絶対に必要でない限り、メモリ割り当てを避けるよ
 うに試みてください！
-</UL>
+</li></ul>
 
 
 
-<H2><A NAME="Adding_procedures" HREF="manual.ja_toc.html#Adding_procedures">9.3  MySQLにプロシージャを追加する</A></H2>
+<h2><a name="Adding_procedures" href="manual.ja_toc.html#Adding_procedures">9.3  MySQLにプロシージャを追加する</a></h2>
 
-<P>
-<A NAME="IDX1754"></A>
-<A NAME="IDX1755"></A>
-<A NAME="IDX1756"></A>
+<p>
+<a name="IDX1754"></a>
+<a name="IDX1755"></a>
+<a name="IDX1756"></a>
 
-</P>
-<P>
-<STRONG>MySQL</STRONG> ではC++で書かれたプロシージャを定義することが
+</p>
+<p>
+<strong>MySQL</strong> ではC++で書かれたプロシージャを定義することが
 できます。 これらのプロシージャを使うとデータが
 クライアントに送信される前にクエリー内でデータにアクセス、
 修正することが可能です。 データの修正は列単位、あるいは
-グループ単位(<CODE>GROUP BY</CODE>)で行えます。
+グループ単位(<code>GROUP BY</code>)で行えます。
 
-</P>
-<P>
+</p>
+<p>
 プロシージャを使って何ができるかをご覧いただくために、
-<STRONG>MySQL</STRONG> バージョン3.23を使ったサンプルを用意しました。
+<strong>MySQL</strong> バージョン3.23を使ったサンプルを用意しました。
 
-</P>
-<P>
+</p>
+<p>
 さらに Contrib ディレクトリにある 'mylua'
-を参考にされることをお薦めします。  「<A HREF="manual.ja_Contrib.html#Contrib">B  Contributed Programs</A>」節参照。
+を参考にされることをお薦めします。  「<a href="manual.ja_Contrib.html#Contrib">B  Contributed Programs</a>」節参照。
 myluaではLUA言語を使って、
-ランタイム時にプロシージャを <CODE>mysqld</CODE> にロードすることができます。
+ランタイム時にプロシージャを <code>mysqld</code> にロードすることができます。
 
-</P>
-<P>
-Additionally we recommend you to take a look at <CODE>mylua</CODE>.
+</p>
+<p>
+Additionally we recommend you to take a look at <code>mylua</code>.
 With this you can use the LUA language to load a procedure at
-runtime into <CODE>mysqld</CODE>.
+runtime into <code>mysqld</code>.
 
-</P>
+</p>
 
 
 
-<H3><A NAME="procedure_analyse" HREF="manual.ja_toc.html#procedure_analyse">9.3.1  プロシージャ分析</A></H3>
+<h3><a name="procedure_analyse" href="manual.ja_toc.html#procedure_analyse">9.3.1  プロシージャ分析</a></h3>
 
-<P>
-<CODE>analyse([max elements,[max memory]])</CODE>
+<p>
+<code>analyse([max elements,[max memory]])</code>
 
-</P>
-<P>
-このプロシージャは <TT>`sql/sql_analyse.cc'</TT> によって定義されています。
+</p>
+<p>
+このプロシージャは <tt>`sql/sql_analyse.cc'</tt> によって定義されています。
 クエリーの結果を調べ、 分析結果を返します：
 
-</P>
+</p>
 
-<UL>
-<LI>
+<ul>
+<li>
 
-<CODE>max elements</CODE> (デフォルト値は256)とは、 一つの行において
-<CODE>analyse</CODE> プロシージャが認識する値の数(重複するものは除く)の
-最大値です。 最大エレメント数は <CODE>analyse</CODE> プロシージャがその行に
-最適なデータ型が <CODE>ENUM</CODE> 型であるかどうかを判別するために使
+<code>max elements</code> (デフォルト値は256)とは、 一つの行において
+<code>analyse</code> プロシージャが認識する値の数(重複するものは除く)の
+最大値です。 最大エレメント数は <code>analyse</code> プロシージャがその行に
+最適なデータ型が <code>ENUM</code> 型であるかどうかを判別するために使
 われます。
-<LI>
+</li><li>
 
-<CODE>max memory</CODE>(デフォルト値は8192)とは、 <CODE>analyse</CODE> プロシージャが
+<code>max memory</code>(デフォルト値は8192)とは、 <code>analyse</code> プロシージャが
 1つの行に含まれる重複しない全ての値を探し出す際に、 1つの行に
 割り当てるメモリーの最大サイズです。
-</UL>
+</li></ul>
 
 
-<PRE>
-SELECT ... FROM ... WHERE ... PROCEDURE ANALYSE([max elements,[max memory]])
-</PRE>
+<pre>SELECT ... FROM ... WHERE ... PROCEDURE ANALYSE([max elements,[max memory]])
+</pre>
 
 
 
-<H3><A NAME="Writing_a_procedure" HREF="manual.ja_toc.html#Writing_a_procedure">9.3.2  プロシージャの記述</A></H3>
+<h3><a name="Writing_a_procedure" href="manual.ja_toc.html#Writing_a_procedure">9.3.2  プロシージャの記述</a></h3>
 
-<P>
+<p>
 今のところ、 この項目にはソースコードしかありません。
 
-</P>
-<P>
+</p>
+<p>
 プロシージャに関する全ての情報は以下のファイルにありますのでご覧下さい：
 
-</P>
+</p>
 
-<UL>
-<LI><TT>`sql/sql_analyse.cc'</TT>
+<ul>
+<li><tt>`sql/sql_analyse.cc'</tt>
 
-<LI><TT>`sql/procedure.h'</TT>
+</li><li><tt>`sql/procedure.h'</tt>
 
-<LI><TT>`sql/procedure.cc'</TT>
+</li><li><tt>`sql/procedure.cc'</tt>
 
-<LI><TT>`sql/sql_select.cc'</TT>
+</li><li><tt>`sql/sql_select.cc'</tt>
 
-</UL>
+</li></ul>
 
-<P><HR><P>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Clients.html">previous</A>, <A HREF="manual.ja_Problems.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
- </BODY>
- </HTML>
+<p></p><hr><p>
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Clients.html">previous</a>, <a href="manual.ja_Problems.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+ 
+ 
+</p></body></html>

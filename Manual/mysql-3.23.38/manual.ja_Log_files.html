@@ -1,345 +1,342 @@
-  <HTML>
-  <HEAD>
+<html><head>
   <!-- This HTML file has been created by texi2html 1.52 (hacked by david@detron.se)
      from manual.ja.texi on 20 July 2001 -->
 
-  <TITLE>MySQL Reference Manual for version 3.23.38. - 23  The MySQL log files</TITLE>
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp">
-  </HEAD>
-  <BODY BGCOLOR=#FFFFFF TEXT=#000000 LINK=#101090 VLINK=#7030B0>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Common_problems.html">previous</A>, <A HREF="manual.ja_Clients.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
-<P><HR><P>
+  <title>MySQL Reference Manual for version 3.23.38. - 23  The MySQL log files</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  </head>
+  <body bgcolor="#FFFFFF" text="#000000" link="#101090" vlink="#7030B0">
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Common_problems.html">previous</a>, <a href="manual.ja_Clients.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+<p></p><hr><p>
 
 
-<H1><A NAME="Log_files" HREF="manual.ja_toc.html#Log_files">23  The MySQL log files</A></H1>
+</p><h1><a name="Log_files" href="manual.ja_toc.html#Log_files">23  The MySQL log files</a></h1>
 
-<P>
-<STRONG>MySQL</STRONG> has a lot of different log files which can help you find
-out what's going on inside <CODE>mysqld</CODE>:
+<p>
+<strong>MySQL</strong> has a lot of different log files which can help you find
+out what's going on inside <code>mysqld</code>:
 
-</P>
-<TABLE BORDER WIDTH="100%" NOSAVE >
-<TR><TD>The error log </TD><TD> Problems encountering starting, running or stopping mysqld.
-</TR NOSAVE>
-<TR><TD>The isam log </TD><TD> Logs all changes to the ISAM tables. Used only for debugging the isam code.
-</TR NOSAVE>
-<TR><TD>The query log </TD><TD> Established connections and executed queries.
-</TR NOSAVE>
-<TR><TD>The update log </TD><TD> Depricated: Stores all statements that changes data
-</TR NOSAVE>
-<TR><TD>The binary log </TD><TD> Stores all statements that changes something. Used also for replication
-</TR NOSAVE>
-<TR><TD>The slow log </TD><TD> Stores all queries that took more than <CODE>long_query_time</CODE> to execute or didn't use indexes.
-</TR>
-</TABLE>
+</p>
+<table border="" width="100%" nosave="">
+<tbody><tr><td>The error log </td><td> Problems encountering starting, running or stopping mysqld.
+</td></tr>
+<tr><td>The isam log </td><td> Logs all changes to the ISAM tables. Used only for debugging the isam code.
+</td></tr>
+<tr><td>The query log </td><td> Established connections and executed queries.
+</td></tr>
+<tr><td>The update log </td><td> Depricated: Stores all statements that changes data
+</td></tr>
+<tr><td>The binary log </td><td> Stores all statements that changes something. Used also for replication
+</td></tr>
+<tr><td>The slow log </td><td> Stores all queries that took more than <code>long_query_time</code> to execute or didn't use indexes.
+</td></tr>
+</tbody></table>
 
-<P>
-All logs can be found in the <CODE>mysqld</CODE> database directory.  You can
+<p>
+All logs can be found in the <code>mysqld</code> database directory.  You can
 tell force mysqld to switch to reopen the log files (or in some cases
-switch to a new log) by executing <CODE>FLUSH LOGS</CODE>.  「<A HREF="manual.ja_Reference.html#FLUSH">7.26  <CODE>FLUSH</CODE> 構文 (キャッシュのクリア)</A>」節参照.
+switch to a new log) by executing <code>FLUSH LOGS</code>.  「<a href="manual.ja_Reference.html#FLUSH">7.26  <code>FLUSH</code> 構文 (キャッシュのクリア)</a>」節参照.
 
-</P>
-<P>
-<A NAME="IDX1544"></A>
-<A NAME="IDX1545"></A>
+</p>
+<p>
+<a name="IDX1544"></a>
+<a name="IDX1545"></a>
 
-</P>
+</p>
 
 
-<H2><A NAME="Error_log" HREF="manual.ja_toc.html#Error_log">23.1  The Error Log</A></H2>
+<h2><a name="Error_log" href="manual.ja_toc.html#Error_log">23.1  The Error Log</a></h2>
 
-<P>
-<CODE>mysqld</CODE> writes all errors to the stderr, which the
-<CODE>safe_mysqld</CODE> script redirects to a file called
-<CODE>'hostname'.err</CODE>.  (On windows <CODE>mysqld</CODE> writes this directly
-to <TT>`mysql.err'</TT>).
+<p>
+<code>mysqld</code> writes all errors to the stderr, which the
+<code>safe_mysqld</code> script redirects to a file called
+<code>'hostname'.err</code>.  (On windows <code>mysqld</code> writes this directly
+to <tt>`mysql.err'</tt>).
 
-</P>
-<P>
+</p>
+<p>
 This contains information on when mysqld was started and stopped and
-also any critical errors found when running.  If <CODE>mysqld</CODE> dies
-unexpectedly and <CODE>safe_mysqld</CODE> needs to restart <CODE>mysqld</CODE>,
-<CODE>safe_mysqld</CODE> will write a <CODE>restarted mysqld</CODE> row in this
-file.  This log also holds a warning if <CODE>mysqld</CODE> notices a table
+also any critical errors found when running.  If <code>mysqld</code> dies
+unexpectedly and <code>safe_mysqld</code> needs to restart <code>mysqld</code>,
+<code>safe_mysqld</code> will write a <code>restarted mysqld</code> row in this
+file.  This log also holds a warning if <code>mysqld</code> notices a table
 that needs to be automatically checked or repaired.
 
-</P>
-<P>
+</p>
+<p>
 On some operating systems, the error log will contain a stack trace
 for where mysqld died. This can be used to find out where mysqld died.
- 「<A HREF="manual.ja_Porting.html#Using_stack_trace">I.1.3  Using a stack trace</A>」節参照.
+ 「<a href="manual.ja_Porting.html#Using_stack_trace">I.1.3  Using a stack trace</a>」節参照.
 
-</P>
-<P>
-<A NAME="IDX1546"></A>
-<A NAME="IDX1547"></A>
+</p>
+<p>
+<a name="IDX1546"></a>
+<a name="IDX1547"></a>
 
 
-<H2><A NAME="Query_log" HREF="manual.ja_toc.html#Query_log">23.2  The Query Log</A></H2>
+</p><h2><a name="Query_log" href="manual.ja_toc.html#Query_log">23.2  The Query Log</a></h2>
 
-<P>
-If you want to know what happens within <CODE>mysqld</CODE>, you should start
-it with <CODE>--log[=file]</CODE>.  This will log all connections and queries
+<p>
+If you want to know what happens within <code>mysqld</code>, you should start
+it with <code>--log[=file]</code>.  This will log all connections and queries
 to the log file (by default named 'hostname.log').  This log can
 be very useful when you suspect an error in a client and want to know
-exactly what <CODE>mysqld</CODE> thought the client send to it.
+exactly what <code>mysqld</code> thought the client send to it.
 
-</P>
-<P>
-By default, the <CODE>mysql.server</CODE> script starts the <STRONG>MySQL</STRONG>
-server with the <CODE>-l</CODE> option.  If you need better performance when
-you start using <STRONG>MySQL</STRONG> in a production environment, you can
-remove the <CODE>-l</CODE> option from <CODE>mysql.server</CODE> or change it to
-<CODE>--log-binary</CODE>.
+</p>
+<p>
+By default, the <code>mysql.server</code> script starts the <strong>MySQL</strong>
+server with the <code>-l</code> option.  If you need better performance when
+you start using <strong>MySQL</strong> in a production environment, you can
+remove the <code>-l</code> option from <code>mysql.server</code> or change it to
+<code>--log-binary</code>.
 
-</P>
-<P>
-The entries in this log are written as <CODE>mysqld</CODE> receives the questions.
+</p>
+<p>
+The entries in this log are written as <code>mysqld</code> receives the questions.
 This may be different than the order in which the statements are executed.
 This is in contrast to the update log and the binary log which is written
 after the query is executed, but before any locks are released.
 
-</P>
-<P>
-<A NAME="IDX1548"></A>
-<A NAME="IDX1549"></A>
+</p>
+<p>
+<a name="IDX1548"></a>
+<a name="IDX1549"></a>
 
 
-<H2><A NAME="Update_log" HREF="manual.ja_toc.html#Update_log">23.3  更新ログ</A></H2>
+</p><h2><a name="Update_log" href="manual.ja_toc.html#Update_log">23.3  更新ログ</a></h2>
 
-<P>
-<STRONG>NOTE</STRONG>: The update log is replaced by the binary
-log.  「<A HREF="manual.ja_Log_files.html#Binary_log">23.4  The Binary Log</A>」節参照.  With this you can do anything that you can do
+<p>
+<strong>NOTE</strong>: The update log is replaced by the binary
+log.  「<a href="manual.ja_Log_files.html#Binary_log">23.4  The Binary Log</a>」節参照.  With this you can do anything that you can do
 with the update log.
 
-</P>
-<P>
-<CODE>--log-update=file_name</CODE>オプションを使用して<CODE>mysqld</CODE>を起動すると、
+</p>
+<p>
+<code>--log-update=file_name</code>オプションを使用して<code>mysqld</code>を起動すると、
 データを更新した全てのSQLコマンドをログファイルに書きます。
 もし file_name が与えられなかった場合は、ホスト名がデフォルトで使用されます。
 もし file_name にディレクトリパスが含まれなかった場合は、
 このファイルはデータディレクトリに書かれます。
-もし file_name が拡張を持たなかったなら、<CODE>mysqld</CODE> は
-<CODE>file_name.###</CODE> という形でログファイルを作成します。
+もし file_name が拡張を持たなかったなら、<code>mysqld</code> は
+<code>file_name.###</code> という形でログファイルを作成します。
 このログファイルはデータディレクトリにかかれ、
-その名前は <CODE>file_name.###</CODE> という形式の名前になっています。
+その名前は <code>file_name.###</code> という形式の名前になっています。
 
-</P>
-<P>
-<CODE>###</CODE> は <CODE>mysqladmin refresh</CODE> か <CODE>mysqladmin flush-logs</CODE> を実行する度に、
-あるいは <CODE>FLUSH LOGS</CODE> 構文を実行したり、サーバーをリスタートする度に
+</p>
+<p>
+<code>###</code> は <code>mysqladmin refresh</code> か <code>mysqladmin flush-logs</code> を実行する度に、
+あるいは <code>FLUSH LOGS</code> 構文を実行したり、サーバーをリスタートする度に
 自動的に増える数字です。
 
-</P>
-<P>
-もし <CODE>--log</CODE> か <CODE>-l</CODE> オプションを使用した場合、ログファイルの名前は
-<CODE>mysqld</CODE> は全部のログを <TT>`hostname.log'</TT> に書き出します。
+</p>
+<p>
+もし <code>--log</code> か <code>-l</code> オプションを使用した場合、ログファイルの名前は
+<code>mysqld</code> は全部のログを <tt>`hostname.log'</tt> に書き出します。
 この場合、リスタートやりフレッシュを行っても新しくログファイルを作りません。
 (一度クローズして再度オープンします。)
 In this case you can copy it (on Unix) by doing:
 
-</P>
+</p>
 
-<PRE>
-mv hostname.log hostname-old.log
+<pre>mv hostname.log hostname-old.log
 mysqladmin flush-logs
 cp hostname-old.log to-backup-directory
 rm hostname-old.log
-</PRE>
+</pre>
 
-<P>
+<p>
 更新ログは、実際に更新されたデータのステートメントだけを書くため、きびきびと動作します。
-<CODE>WHERE</CODE> を使用した <CODE>UPDATE</CODE> か <CODE>DELETE</CODE> で結果が得られなかった場合、
+<code>WHERE</code> を使用した <code>UPDATE</code> か <code>DELETE</code> で結果が得られなかった場合、
 ログは書き出されません。
-すでにセットされている値に、もう一度項目を更新するような <CODE>UPDATE</CODE> もスキップされます。
+すでにセットされている値に、もう一度項目を更新するような <code>UPDATE</code> もスキップされます。
 
-</P>
-<P>
+</p>
+<p>
 The update logging is done immediately after a query completes but before
 any locks are released or any commit is done. This ensures that the log
 will be logged in the execution order.
 
-</P>
-<P>
+</p>
+<p>
 ログファイルの更新に従ってデータベースを更新したい場合は、次を行います
-(更新ログファイル名を <TT>`file_name.###'</TT> と仮定します):
+(更新ログファイル名を <tt>`file_name.###'</tt> と仮定します):
 
-</P>
+</p>
 
-<PRE>
-shell&#62; ls -1 -t -r file_name.[0-9]* | xargs cat | mysql
-</PRE>
+<pre>shell&gt; ls -1 -t -r file_name.[0-9]* | xargs cat | mysql
+</pre>
 
-<P>
-<CODE>ls</CODE> は全てのログファイルを正しく並べるために使用しています。
+<p>
+<code>ls</code> は全てのログファイルを正しく並べるために使用しています。
 
-</P>
-<P>
+</p>
+<p>
 これは、クラッシュ後にバックアップした状態まで戻りたい、あるいは、
 バックアップした後からクラッシュするまでの間のデータの更新を行いたい、
 そんな場合に使えます。
 
-</P>
-<P>
-<A NAME="IDX1550"></A>
-<A NAME="IDX1551"></A>
+</p>
+<p>
+<a name="IDX1550"></a>
+<a name="IDX1551"></a>
 
 
-<H2><A NAME="Binary_log" HREF="manual.ja_toc.html#Binary_log">23.4  The Binary Log</A></H2>
+</p><h2><a name="Binary_log" href="manual.ja_toc.html#Binary_log">23.4  The Binary Log</a></h2>
 
-<P>
+<p>
 In the future the binary log will replace the update log, so we
 recommend you to switch to this log format as soon as possible!
 
-</P>
-<P>
+</p>
+<p>
 The binary log contains all information that is available in the update
 log in a more efficient format. It also contains information about how long
 every query that updated the database took.
 
-</P>
-<P>
+</p>
+<p>
 The binary log is also used when you are replicating a slave from a master.
- 「<A HREF="manual.ja_Replication.html#Replication">11  Replication in MySQL</A>」節参照.
+ 「<a href="manual.ja_Replication.html#Replication">11  Replication in MySQL</a>」節参照.
 
-</P>
-<P>
-When started with the <CODE>--log-bin[=file_name]</CODE> option, <CODE>mysqld</CODE>
+</p>
+<p>
+When started with the <code>--log-bin[=file_name]</code> option, <code>mysqld</code>
 writes a log file containing all SQL commands that update data. If no
 file name is given, it defaults to the name of the host machine followed
-by <CODE>-bin</CODE>. If file name is given, but it doesn't contain a path, the
+by <code>-bin</code>. If file name is given, but it doesn't contain a path, the
 file is written in the data directory.
 
-</P>
-<P>
-To the binary log filename <CODE>mysqld</CODE> will append an extension that is a
-number that is incremented each time you execute <CODE>mysqladmin
-refresh</CODE>, execute <CODE>mysqladmin flush-logs</CODE>, execute the <CODE>FLUSH LOGS</CODE>
+</p>
+<p>
+To the binary log filename <code>mysqld</code> will append an extension that is a
+number that is incremented each time you execute <code>mysqladmin
+refresh</code>, execute <code>mysqladmin flush-logs</code>, execute the <code>FLUSH LOGS</code>
 statement or restart the server.
 
-</P>
-<P>
+</p>
+<p>
 To be able to know which different binary log files have been used,
-<CODE>mysqld</CODE> will also create a binary log index file that
+<code>mysqld</code> will also create a binary log index file that
 contains the name of all used binary log files. By default this has the
-same name as the binary log file, with the extension <CODE>'.index'</CODE>.
+same name as the binary log file, with the extension <code>'.index'</code>.
 You can change the name of the binary log index file with the
-<CODE>--log-bin-index=[filename]</CODE> option.
+<code>--log-bin-index=[filename]</code> option.
 
-</P>
-<P>
+</p>
+<p>
 If you are using replication, you should not delete old binary log
 files until you are sure that no slave will ever need to use them.
-One way to do this is to do <CODE>mysqladmin flush-logs</CODE> once a day and then
+One way to do this is to do <code>mysqladmin flush-logs</code> once a day and then
 remove any logs that are more than 3 days old.
 
-</P>
-<P>
-You can examine the binary log file with the <CODE>mysqlbinlog</CODE> command.
-For example, you can update a <STRONG>MySQL</STRONG> server from the binary log
+</p>
+<p>
+You can examine the binary log file with the <code>mysqlbinlog</code> command.
+For example, you can update a <strong>MySQL</strong> server from the binary log
 as follows:
 
-</P>
+</p>
 
-<PRE>
-mysqlbinlog log-file | mysql -h server_name
-</PRE>
+<pre>mysqlbinlog log-file | mysql -h server_name
+</pre>
 
-<P>
-You can also use the <CODE>mysqlbinlog</CODE> program to read the binary log
-directly from a remote <STRONG>MySQL</STRONG> server!
+<p>
+You can also use the <code>mysqlbinlog</code> program to read the binary log
+directly from a remote <strong>MySQL</strong> server!
 
-</P>
-<P>
-<CODE>mysqlbinlog --help</CODE> will give you more information of how to use
+</p>
+<p>
+<code>mysqlbinlog --help</code> will give you more information of how to use
 this program!
 
-</P>
-<P>
-If you are using <CODE>BEGIN [WORK]</CODE> or <CODE>SET AUTOCOMMIT=0</CODE>, you must
-use the <STRONG>MySQL</STRONG> binary log for backups instead of the old update log.
+</p>
+<p>
+If you are using <code>BEGIN [WORK]</code> or <code>SET AUTOCOMMIT=0</code>, you must
+use the <strong>MySQL</strong> binary log for backups instead of the old update log.
 
-</P>
-<P>
+</p>
+<p>
 The binary logging is done immediately after a query completes but before
 any locks are released or any commit is done. This ensures that the log
 will be logged in the execution order.
 
-</P>
-<P>
-All updates (<CODE>UPDATE</CODE>, <CODE>DELETE</CODE> or <CODE>INSERT</CODE>) that change
-a transactional table (like BDB tables) are cached until a <CODE>COMMIT</CODE>.
+</p>
+<p>
+All updates (<code>UPDATE</code>, <code>DELETE</code> or <code>INSERT</code>) that change
+a transactional table (like BDB tables) are cached until a <code>COMMIT</code>.
 Any updates to a non-transactional table are stored in the binary log at
 once.  Every thread will, on start, allocate a buffer of
-<CODE>binlog_cache_size</CODE> to buffer queries.  If a query is bigger than
+<code>binlog_cache_size</code> to buffer queries.  If a query is bigger than
 this, the thread will open a temporary file to handle the bigger cache.
 The temporary file will be deleted when the thread ends.
 
-</P>
-<P>
-The <CODE>max_binlog_cache_size</CODE> can be used to restrict the total size used
+</p>
+<p>
+The <code>max_binlog_cache_size</code> can be used to restrict the total size used
 to cache a multi-transaction query.
 
-</P>
-<P>
+</p>
+<p>
 If you are using the update or binary log, concurrent inserts will
-not work together with <CODE>CREATE ... INSERT</CODE> and <CODE>INSERT ... SELECT</CODE>.
+not work together with <code>CREATE ... INSERT</code> and <code>INSERT ... SELECT</code>.
 This is to ensure that you can recreate an exact copy of your tables by
 applying the log on a backup.
 
-</P>
-<P>
-<A NAME="IDX1552"></A>
-<A NAME="IDX1553"></A>
+</p>
+<p>
+<a name="IDX1552"></a>
+<a name="IDX1553"></a>
 
 
-<H2><A NAME="Slow_query_log" HREF="manual.ja_toc.html#Slow_query_log">23.5  The Slow Query Log</A></H2>
+</p><h2><a name="Slow_query_log" href="manual.ja_toc.html#Slow_query_log">23.5  The Slow Query Log</a></h2>
 
-<P>
-When started with the <CODE>--log-slow-queries[=file_name]</CODE> option,
-<CODE>mysqld</CODE> writes a log file containing all SQL commands that took
-more than <CODE>long_query_time</CODE> to execute. The time to get the initial
+<p>
+When started with the <code>--log-slow-queries[=file_name]</code> option,
+<code>mysqld</code> writes a log file containing all SQL commands that took
+more than <code>long_query_time</code> to execute. The time to get the initial
 table locks are not counted as execution time.
 
-</P>
-<P>
+</p>
+<p>
 The slow query log is logged after the query is executed and after all
 locks has been released. This may be different than the order in which
 the statements are executed.
 
-</P>
-<P>
+</p>
+<p>
 If no file name is given, it defaults to the name of the host machine
-suffixed with <CODE>-slow.log</CODE>. If a filename is given, but doesn't
+suffixed with <code>-slow.log</code>. If a filename is given, but doesn't
 contain a path, the file is written in the data directory.
 
-</P>
-<P>
+</p>
+<p>
 The slow query log can be used to find queries that take a long time to
 execute and are thus candidates for optimization.
 
-</P>
-<P>
-You are using <CODE>--log-long-format</CODE> then also queries that are not
-using indexes are printed.  「<A HREF="manual.ja_Installing.html#Command-line_options">4.16.4  mysqld コマンド行オプション</A>」節参照.
+</p>
+<p>
+You are using <code>--log-long-format</code> then also queries that are not
+using indexes are printed.  「<a href="manual.ja_Installing.html#Command-line_options">4.16.4  mysqld コマンド行オプション</a>」節参照.
 
-</P>
-<P>
-<A NAME="IDX1554"></A>
-<A NAME="IDX1555"></A>
-<A NAME="IDX1556"></A>
-<A NAME="IDX1557"></A>
+</p>
+<p>
+<a name="IDX1554"></a>
+<a name="IDX1555"></a>
+<a name="IDX1556"></a>
+<a name="IDX1557"></a>
 ログは違うホストのデータベースのミラーやマスターデータベースの複製を作る場合にも利用できます。
- 「<A HREF="manual.ja_Replication.html#Replication">11  Replication in MySQL</A>」節参照.
+ 「<a href="manual.ja_Replication.html#Replication">11  Replication in MySQL</a>」節参照.
 
-</P>
-<P>
-<A NAME="IDX1558"></A>
-<A NAME="IDX1559"></A>
-<A NAME="IDX1560"></A>
-<A NAME="IDX1561"></A>
-<A NAME="IDX1562"></A>
-<P><HR><P>
-Go to the <A HREF="manual.ja_Introduction.html">first</A>, <A HREF="manual.ja_Common_problems.html">previous</A>, <A HREF="manual.ja_Clients.html">next</A>, <A HREF="manual.ja_Concept_Index.html">last</A> section, <A HREF="manual.ja_toc.html">table of contents</A>.
- </BODY>
- </HTML>
+</p>
+<p>
+<a name="IDX1558"></a>
+<a name="IDX1559"></a>
+<a name="IDX1560"></a>
+<a name="IDX1561"></a>
+<a name="IDX1562"></a>
+</p><p></p><hr><p>
+Go to the <a href="manual.ja_Introduction.html">first</a>, <a href="manual.ja_Common_problems.html">previous</a>, <a href="manual.ja_Clients.html">next</a>, <a href="manual.ja_Concept_Index.html">last</a> section, <a href="manual.ja_toc.html">table of contents</a>.
+ 
+ 
+</p></body></html>
