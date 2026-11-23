@@ -2,16 +2,351 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8">
-    <title>日本MySQLユーザ会</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本MySQLユーザ会 (MyNA)</title>
+    <meta name="description" content="日本MySQLユーザ会 (MyNA: MySQL Users Group Nippon Association) の公式ポータルサイトです。X、Bluesky、Slack、Discordなどのコミュニティリンクをご案内しています。">
+    <link rel="icon" href="frame/favicon.ico">
+    <style>
+      :root {
+        --mysql-blue: #00758f;
+        --mysql-dark: #005b70;
+        --mysql-navy: #092532;
+        --mysql-orange: #f29111;
+        --mysql-orange-hover: #e08000;
+        --bg-color: #f4f7f9;
+        --card-bg: #ffffff;
+        --text-main: #2c3e50;
+        --text-sub: #607274;
+        --border-color: #e2e8f0;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --shadow-hover: 0 8px 24px rgba(0, 117, 143, 0.12);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #0d1b2a;
+          --card-bg: #1b263b;
+          --text-main: #e0e1dd;
+          --text-sub: #94a3b8;
+          --border-color: #2e3e55;
+          --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          --shadow-hover: 0 8px 24px rgba(0, 117, 143, 0.25);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 16px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 580px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* ヘッダー */
+      header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .logo-wrapper {
+        display: inline-block;
+        margin-bottom: 16px;
+        transition: transform 0.2s ease;
+      }
+
+      .logo-wrapper:hover {
+        transform: scale(1.04);
+      }
+
+      .logo {
+        width: 150px;
+        height: auto;
+        max-height: 120px;
+        object-fit: contain;
+      }
+
+      h1 {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-main);
+        letter-spacing: 0.02em;
+        margin-bottom: 6px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--mysql-blue);
+        letter-spacing: 0.05em;
+        margin-bottom: 12px;
+      }
+
+      .lead {
+        font-size: 14px;
+        color: var(--text-sub);
+        max-width: 440px;
+        margin: 0 auto;
+      }
+
+      /* リンクカード一覧 */
+      .links {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .card {
+        display: flex;
+        align-items: center;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px 20px;
+        text-decoration: none;
+        color: var(--text-main);
+        box-shadow: var(--shadow);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background-color: transparent;
+        transition: background-color 0.2s;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+        border-color: var(--mysql-blue);
+      }
+
+      .card-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-right: 16px;
+        background-color: rgba(0, 117, 143, 0.08);
+      }
+
+      .card-icon svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      .card-content {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .card-title {
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 2px;
+      }
+
+      .card-desc {
+        font-size: 13px;
+        color: var(--text-sub);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .card-arrow {
+        color: var(--text-sub);
+        opacity: 0.6;
+        transition: opacity 0.2s, transform 0.2s;
+        margin-left: 12px;
+      }
+
+      .card:hover .card-arrow {
+        opacity: 1;
+        transform: translateX(3px);
+      }
+
+      /* サービス別アクセントカラー */
+      .card-x:hover::before { background-color: #000000; }
+      .card-x .card-icon { background-color: rgba(0, 0, 0, 0.06); color: #000000; }
+      @media (prefers-color-scheme: dark) {
+        .card-x:hover::before { background-color: #ffffff; }
+        .card-x .card-icon { background-color: rgba(255, 255, 255, 0.1); color: #ffffff; }
+      }
+
+      .card-bsky:hover::before { background-color: #1185fe; }
+      .card-bsky .card-icon { background-color: rgba(17, 133, 254, 0.1); color: #1185fe; }
+
+      .card-slack:hover::before { background-color: #e01e5a; }
+      .card-slack .card-icon { background-color: rgba(224, 30, 90, 0.1); color: #e01e5a; }
+
+      .card-discord:hover::before { background-color: #5865f2; }
+      .card-discord .card-icon { background-color: rgba(88, 101, 242, 0.1); color: #5865f2; }
+
+      .card-archive:hover::before { background-color: var(--mysql-orange); }
+      .card-archive .card-icon { background-color: rgba(242, 145, 17, 0.12); color: var(--mysql-orange); }
+
+      /* フッター */
+      footer {
+        margin-top: 40px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-sub);
+      }
+
+      footer p {
+        margin-bottom: 4px;
+      }
+
+      footer a {
+        color: var(--text-sub);
+        text-decoration: underline;
+      }
+
+      footer a:hover {
+        color: var(--mysql-blue);
+      }
+    </style>
   </head>
 
   <body>
-    <ul>
-      <li><a href="https://x.com/MySQL_MyNA">X(旧Twitter) @MySQL_MyNA</a>
-      <li><a href="https://bsky.app/profile/mysqlmyna.bsky.social">Bluesky @mysqlmyna.bsky.social</a>
-      <li><a href="https://myna-talk.slack.com/">Slack</a>
-      <li><a href="https://discord.gg/598Q4Xez8g">Discord</a>
-      <li><a href="index-old.html">旧ホームページ</a>
-    </ul>
+    <div class="container">
+      <header>
+        <div class="logo-wrapper">
+          <img src="myna_logo2016.svg" alt="日本MySQLユーザ会 ロゴ" class="logo">
+        </div>
+        <h1>日本MySQLユーザ会</h1>
+        <div class="subtitle">MyNA (MySQL Users Group Nippon Association)</div>
+        <p class="lead">日本におけるMySQLユーザーのためのコミュニティです。イベント情報や最新ニュース、日々の交流は各公式チャンネルをご覧ください。</p>
+      </header>
+
+      <main class="links">
+        <!-- X (旧Twitter) -->
+        <a href="https://x.com/MySQL_MyNA" class="card card-x" target="_blank" rel="noopener noreferrer">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </div>
+          <div class="card-content">
+            <div class="card-title">X (旧Twitter)</div>
+            <div class="card-desc">@MySQL_MyNA・勉強会やリリース情報などの発信</div>
+          </div>
+          <div class="card-arrow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </a>
+
+        <!-- Bluesky -->
+        <a href="https://bsky.app/profile/mysqlmyna.bsky.social" class="card card-bsky" target="_blank" rel="noopener noreferrer">
+          <div class="card-icon">
+            <svg viewBox="0 0 568 501" fill="currentColor">
+              <path d="M123.12 35.85C190.87 86.85 249.2 189.5 284 248.85C318.8 189.5 377.13 86.85 444.88 35.85C493.63 -0.85 558.12 -7.85 566.88 47.15C570.63 70.15 561.12 165.85 548.88 206.85C522.63 294.85 417.88 322.85 330.12 309.85C445.88 329.85 487.63 416.85 391.88 475.85C294.12 536.85 284 397.85 284 397.85C284 397.85 273.88 536.85 176.12 475.85C80.37 416.85 122.12 329.85 237.88 309.85C150.12 322.85 45.37 294.85 19.12 206.85C6.88 165.85 -2.63 70.15 1.12 47.15C9.88 -7.85 74.37 -0.85 123.12 35.85Z"/>
+            </svg>
+          </div>
+          <div class="card-content">
+            <div class="card-title">Bluesky</div>
+            <div class="card-desc">@mysqlmyna.bsky.social・公式アナウンス</div>
+          </div>
+          <div class="card-arrow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </a>
+
+        <!-- Slack -->
+        <a href="https://myna-talk.slack.com/" class="card card-slack" target="_blank" rel="noopener noreferrer">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
+            </svg>
+          </div>
+          <div class="card-content">
+            <div class="card-title">Slack</div>
+            <div class="card-desc">myna-talk.slack.com・コミュニティチャット</div>
+          </div>
+          <div class="card-arrow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </a>
+
+        <!-- Discord -->
+        <a href="https://discord.gg/598Q4Xez8g" class="card card-discord" target="_blank" rel="noopener noreferrer">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+            </svg>
+          </div>
+          <div class="card-content">
+            <div class="card-title">Discord</div>
+            <div class="card-desc">discord.gg/598Q4Xez8g・音声＆チャット</div>
+          </div>
+          <div class="card-arrow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </a>
+
+        <!-- 旧ホームページ -->
+        <a href="index-old.html" class="card card-archive">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <div class="card-content">
+            <div class="card-title">旧ホームページ</div>
+            <div class="card-desc">過去の蓄積記事・Wiki・勉強会資料アーカイブ</div>
+          </div>
+          <div class="card-arrow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </a>
+      </main>
+
+      <footer>
+        <p>© 日本MySQLユーザ会 (MyNA)</p>
+      </footer>
+    </div>
   </body>
 </html>
