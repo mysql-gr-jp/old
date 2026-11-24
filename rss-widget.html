@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RSS News Widget</title>
+<style>
+#rss-widget {
+  max-width: 720px;
+  margin: 20px auto;
+  padding: 20px;
+  font-family: sans-serif;
+  color: #222;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+.rss-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 14px;
+}
+.rss-heading h2 { margin: 0; font-size: 20px; }
+.rss-status { font-size: 12px; color: #16a34a; }
+.rss-item {
+  padding: 16px 0;
+  border-bottom: 1px solid #eee;
+}
+.rss-item:last-child { border: 0; }
+.rss-item a {
+  color: #222;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: 16px;
+}
+.rss-item a:hover { color: #2563eb; }
+.rss-date {
+  color: #888;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+.rss-desc {
+  color: #666;
+  font-size: 13px;
+  line-height: 1.7;
+  margin-top: 7px;
+}
+#rss-message { color: #888; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div id="rss-widget">
+  <div class="rss-heading">
+    <h2>NEWS & TOPICS</h2>
+    <span class="rss-status">● RSS FEED</span>
+  </div>
+  <div id="rss-list">読み込み中...</div>
+</div>
+
+<script>
+// RSSフィードを登録（複数指定可能）
+const RSS_FEEDS = [
+  "https://bsky.app/profile/did:plc:vuh6phslh7mayc523xghtv3m/rss",
+];
+
+// 表示設定
+const MAX_ITEMS = 10;
+const UPDATE_INTERVAL = 10 * 60 * 1000;
+
+// 無料の公開RSS変換サービスを利用
+const PROXY = "https://api.rss2json.com/v1/api.json?rss_url=";
+
+async function loadRSS() {
+  const list = document.getElementById("rss-list");
+  list.innerHTML = "<p id='rss-message'>記事を取得しています...</p>";
+
+  try {
+    const results = await Promise.all(
+      RSS_FEEDS.map(async url => {
+        const response = await fetch(
+          PROXY + encodeURIComponent(url)
+        );
+        if (!response.ok) throw new Error("取得失敗");
+        const data = await response.json();
+        if (data.status !== "ok") throw new Error("RSSエラー");
+        return data.items || [];
+      })
+    );
+
+    const items = results.flat()
+      .sort((a, b) =>
+        new Date(b.pubDate) - new Date(a.pubDate)
+      )
+      .slice(0, MAX_ITEMS);
+
+    if (!items.length) throw new Error("記事がありません");
+
+    list.innerHTML = "";
+
+    items.forEach(item => {
+      const article = document.createElement("article");
+      article.className = "rss-item";
+
+      const date = new Date(item.pubDate);
+      const dateText = isNaN(date)
+        ? ""
+        : date.toLocaleDateString("ja-JP");
+
+      const dateEl = document.createElement("div");
+      dateEl.className = "rss-date";
+      dateEl.textContent = dateText;
+
+      const link = document.createElement("a");
+      link.href = item.link;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = item.title || "タイトルなし";
+
+      const desc = document.createElement("div");
+      desc.className = "rss-desc";
+      desc.textContent = (item.description || "")
+        .replace(/<[^>]*>/g, " ")
+        .replace(/&nbsp;/g, " ")
+        .trim()
+        .slice(0, 120);
+
+      article.append(dateEl, link, desc);
+      list.appendChild(article);
+    });
+
+  } catch (error) {
+    list.textContent =
+      "RSSを取得できませんでした。時間をおいて再度お試しください。";
+    console.error(error);
+  }
+}
+
+loadRSS();
+setInterval(loadRSS, UPDATE_INTERVAL);
+</script>
+
+</body>
+</html>
